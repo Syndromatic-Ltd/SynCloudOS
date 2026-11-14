@@ -7,8 +7,8 @@ export { NSEWindowController, validateNSEWindowControllerClass, nseWindowInterna
 export type { NSEAnyWindowController, NSEWindowControllerClass, NSEWindowControllerContext, NSEWindowMount } from "./Application/NSEWindowController";
 export { validateNSEViewControllerClass, nseAttachView, nseUpdateTraits, nseUpdateViewActivity, nsePopoverPositioning, nsePresentationStyle, nseUpdateSafeArea } from "./Application/NSEViewController";
 // Safe areas and window chrome obstructions, measured by the framework host.
-export { NSEViewSafeAreaContext, useNSEViewSafeArea } from "./Layout/useNSESafeArea";
-export { NSEWindowLayoutContext, useNSEWindowChromeElement } from "./Layout/windowChromeObstructions";
+export { ViewSafeAreaContext, useNSEViewSafeArea } from "./Layout/useNSESafeArea";
+export { WindowLayoutContext, useNSEWindowChromeElement } from "./Layout/windowChromeObstructions";
 export { useNSEScreenSafeAreaProperties } from "./Layout/screenSafeAreaProperties";
 export type { NSEViewController, NSEViewControllerClass } from "./Application/NSEViewController";
 export { nseAnimatePresentation, nseIsDismissing } from "./Application/NSEViewController";

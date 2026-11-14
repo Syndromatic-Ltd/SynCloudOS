@@ -54,7 +54,7 @@ export interface NSEGridRowProps extends Omit<HTMLAttributes<HTMLDivElement>, "c
 }
 
 /** Each column's placement, when the grid is not a two-column form. */
-const NSEGridPlacements = createContext<readonly CSSProperties["justifySelf"][] | null>(null);
+const GridPlacements = createContext<readonly CSSProperties["justifySelf"][] | null>(null);
 
 const xPlacementCSS: Record<NSEGridXPlacement, CSSProperties["justifySelf"]> = { leading: "start", centre: "center", trailing: "end", fill: "stretch" };
 
@@ -83,7 +83,7 @@ export function NSEGridView({ columns = [], columnSpacing, rowSpacing, className
   return (
     <div {...props} className={["nse-form", className].filter(Boolean).join(" ")} data-nse-control="grid-view" data-nse-part="background" data-label-alignment={columns[0]?.xPlacement === "leading" ? "leading" : "trailing"} style={gridStyle}>
       <div data-nse-part="content" className="nse-form-grid" style={template ? { gridTemplateColumns: template } : undefined}>
-        <NSEGridPlacements.Provider value={form ? null : placements}>{children}</NSEGridPlacements.Provider>
+        <GridPlacements.Provider value={form ? null : placements}>{children}</GridPlacements.Provider>
       </div>
     </div>
   );
@@ -91,7 +91,7 @@ export function NSEGridView({ columns = [], columnSpacing, rowSpacing, className
 
 /** NSGridRow. */
 export function NSEGridRow({ yPlacement = "firstBaseline", mergesCells = false, className = "", children, ...props }: NSEGridRowProps) {
-  const placements = useContext(NSEGridPlacements);
+  const placements = useContext(GridPlacements);
   const rowId = useId();
   const cells = Children.toArray(children);
   const labelId = typeof cells[0] === "string" && !mergesCells ? `${rowId}-label` : undefined;

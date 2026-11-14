@@ -22,13 +22,13 @@ import {
   NSEFeedbackProvider,
   NSEMaterialLighting,
   NSEMaterialLightingProvider,
-  NSESafeAreaMeasurementProvider,
+  SafeAreaMeasurementProvider,
 } from "../NSE/hostComposition";
 import { AnimationEnvironmentProvider, type Animator } from "../NSE/Animation";
 import { NSEViewControllerRendererProvider } from "../NSE/applicationHostInterop";
 import { NSEViewControllerView } from "../SynCloudOS/AppHosting/runtimeEntry";
 import { registerNSEHapticFeedbackEngine } from "../NSE/hostComposition";
-import { NSEViewDrawingEnvironmentContext, type NSEViewDrawingEnvironment } from "../NSE/hostComposition";
+import { ViewDrawingEnvironmentContext, type ViewDrawingEnvironment } from "../NSE/hostComposition";
 import {
   useInsertionEffect,
   useLayoutEffect,
@@ -86,7 +86,7 @@ export function SynCloudOSProvider({
   }, [runtime, animationState]);
   // NSEHapticFeedbackManager.defaultPerformer performs through this runtime's engine while it is mounted.
   useLayoutEffect(() => (runtime.haptics ? registerNSEHapticFeedbackEngine(runtime.haptics) : undefined), [runtime.haptics]);
-  const drawingEnvironment = useMemo<NSEViewDrawingEnvironment>(() => ({
+  const drawingEnvironment = useMemo<ViewDrawingEnvironment>(() => ({
     createGraphicsIdentifierIssuer: () => runtime.images.createGraphicsIdentifierIssuer(),
     // The kernel owns the same geometry exposed to mounted apps as images.geometry.
     geometry: runtime.environment.imageGeometry,
@@ -110,11 +110,11 @@ export function SynCloudOSProvider({
         >
           <NSEFeedbackProvider value={runtime.haptics}>
             <NSEMaterialLightingProvider value={lighting}>
-              <NSEViewDrawingEnvironmentContext.Provider value={drawingEnvironment}>
+              <ViewDrawingEnvironmentContext.Provider value={drawingEnvironment}>
                 <NSEViewControllerRendererProvider value={NSEViewControllerView}>
-                  <NSESafeAreaMeasurementProvider>{children}</NSESafeAreaMeasurementProvider>
+                  <SafeAreaMeasurementProvider>{children}</SafeAreaMeasurementProvider>
                 </NSEViewControllerRendererProvider>
-              </NSEViewDrawingEnvironmentContext.Provider>
+              </ViewDrawingEnvironmentContext.Provider>
             </NSEMaterialLightingProvider>
           </NSEFeedbackProvider>
         </ResponderHierarchyContext.Provider>

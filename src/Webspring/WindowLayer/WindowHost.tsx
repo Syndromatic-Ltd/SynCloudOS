@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEWindowLayoutContext, NSEWindowLayoutModel } from "../../NSE/hostComposition";
+import { WindowLayoutContext, WindowLayoutModel } from "../../NSE/hostComposition";
 
 import React, { useCallback, useLayoutEffect, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useNSEPresenceExiting, useNSEPresentation, type PresentationSpec } from "../../NSE/Animation";
@@ -216,7 +216,7 @@ export function WindowHost({
     });
   }, [controller.id, geometryIsValid, invalidBounds, onDiagnostic]);
   const hostRef = useRef<HTMLDivElement>(null);
-  const layout = useMemo(() => new NSEWindowLayoutModel(), [controller.id]);
+  const layout = useMemo(() => new WindowLayoutModel(), [controller.id]);
   useNSEDeferredDisposal(layout);
   // A host with invalid geometry is omitted and reported, so it has no bounds to lay out against.
   useLayoutEffect(() => { layout.setLogicalScreenInsets(screen.safeAreaInsets, screen.layoutViewport); if (geometryIsValid) layout.setBounds(presentation.bounds); }, [layout, screen.safeAreaInsets, screen.layoutViewport, presentation.bounds, geometryIsValid]);
@@ -297,7 +297,7 @@ export function WindowHost({
     // The same provider as the open frame keeps the tree's shape, so the exit
     // keeps the mounted contents rather than remounting them empty.
     return (
-      <NSEWindowLayoutContext.Provider value={layout}>
+      <WindowLayoutContext.Provider value={layout}>
       <div
         ref={hostRef}
         className="webspring-window-host"
@@ -315,7 +315,7 @@ export function WindowHost({
           externallyManagedScope externallyManagedInert
         >{lastFrame.contents}</FocusScope> : lastFrame.contents}
       </div>
-      </NSEWindowLayoutContext.Provider>
+      </WindowLayoutContext.Provider>
     );
   }
 
@@ -414,7 +414,7 @@ export function WindowHost({
     ...(ownsPopoverFocus ? { popoverScope: { parentScopeId, parentResponderId: popoverSurface?.request.parentResponderId ?? parentResponderId } } : {}),
   };
   return (
-    <NSEWindowLayoutContext.Provider value={layout}>
+    <WindowLayoutContext.Provider value={layout}>
     {/* Exit fade only (no enter animation): a closing window dissolves instead
      * of cutting, so Quit-with-windows reads as one continuous exit rather
      * than a flash. NSEPresence in WindowLayer owns the unmount. */}
@@ -447,6 +447,6 @@ export function WindowHost({
         </FocusScope>
       ) : windowContents}
     </div>
-    </NSEWindowLayoutContext.Provider>
+    </WindowLayoutContext.Provider>
   );
 }

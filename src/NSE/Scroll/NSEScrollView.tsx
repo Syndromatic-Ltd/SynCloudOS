@@ -23,7 +23,7 @@ import { useNSERubberBandScroll } from "./index";
 import { NSEScroller } from "./NSEScroller";
 import { NSEScrollViewController, type NSEScrollerPolicy } from "./scrollTypes";
 import { NSEEdgeInsetsZero, type NSEEdgeInsets } from "../Layout/NSEEdgeInsets";
-import { NSEViewSafeAreaContext, useNSEViewSafeArea } from "../Layout/useNSESafeArea";
+import { ViewSafeAreaContext, useNSEViewSafeArea } from "../Layout/useNSESafeArea";
 import { nseUnowned } from "../Controllers/ownership";
 import { NSEClipView } from "./NSEClipView";
 import type { NSEClipViewHandle, NSEScrollRect } from "./scrollTypes";
@@ -132,7 +132,7 @@ export const NSEScrollView = forwardRef<NSEScrollViewHandle, NSEScrollViewProps>
 
   const maximumLeft = Math.max(0, geometry.content.width - geometry.viewport.width);
   const maximumTop = Math.max(0, geometry.content.height - geometry.viewport.height);
-  return <NSEViewSafeAreaContext.Provider value={safeArea.value}><div className="nse-scroll-view-frame" data-nse-control="scroll-view" data-nse-part="background">
+  return <ViewSafeAreaContext.Provider value={safeArea.value}><div className="nse-scroll-view-frame" data-nse-control="scroll-view" data-nse-part="background">
   <NSEClipView mode="scroll" {...props} ref={scrollRef} className={["nse-scroll-view", className].filter(Boolean).join(" ")} data-axis={axis} data-horizontal-scroller-policy={horizontalScrollerPolicy} data-vertical-scroller-policy={verticalScrollerPolicy} style={hostStyle} tabIndex={tabIndex ?? 0} onKeyDown={(event) => {
     onKeyDown?.(event);
     if (event.defaultPrevented) return;
@@ -152,5 +152,5 @@ export const NSEScrollView = forwardRef<NSEScrollViewHandle, NSEScrollViewProps>
   {axis !== "y" ? <NSEScroller orientation="horizontal" style={trackInsets.left || trackInsets.right ? { marginLeft: trackInsets.left, marginRight: trackInsets.right, width: `calc(100% - ${trackInsets.left + trackInsets.right}px)` } : undefined} policy={horizontalScrollerPolicy} value={geometry.position.left} maximum={maximumLeft} onValueChange={(left) => scrollRef.current?.scrollTo({ left, top: scrollRef.current.scrollTop, behavior: "auto" })} /> : null}
   {axis !== "x" ? <NSEScroller orientation="vertical" style={trackInsets.top || trackInsets.bottom ? { marginTop: trackInsets.top, marginBottom: trackInsets.bottom, height: `calc(100% - ${trackInsets.top + trackInsets.bottom}px)` } : undefined} policy={verticalScrollerPolicy} value={geometry.position.top} maximum={maximumTop} onValueChange={(top) => scrollRef.current?.scrollTo({ left: scrollRef.current.scrollLeft, top, behavior: "auto" })} /> : null}
   {axis === "both" && horizontalScrollerPolicy !== "hidden" && verticalScrollerPolicy !== "hidden" ? <span aria-hidden="true" data-nse-part="scroller-corner" /> : null}
-  </div></NSEViewSafeAreaContext.Provider>;
+  </div></ViewSafeAreaContext.Provider>;
 });

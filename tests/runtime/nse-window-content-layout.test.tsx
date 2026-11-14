@@ -3,12 +3,12 @@ import React from "react";
 import { act, cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEWindowController, nseWindowInternals, type NSEWindowMount } from "../../src/NSE/Application/NSEWindowController";
-import { NSEWindowLayoutContext, NSEWindowLayoutModel, useNSEContentLayoutProperties, useNSEWindowChromeObstruction } from "../../src/NSE/Layout/windowChromeObstructions";
+import { WindowLayoutContext, WindowLayoutModel, useNSEContentLayoutProperties, useNSEWindowChromeObstruction } from "../../src/NSE/Layout/windowChromeObstructions";
 
 afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 function setup() {
   const callbacks = new Map<number, FrameRequestCallback>(); let sequence = 0;
-  const model = new NSEWindowLayoutModel({ bounds: { x: 0, y: 0, width: 800, height: 600 }, requestFrame: callback => { callbacks.set(++sequence, callback); return sequence; }, cancelFrame: id => { callbacks.delete(id); } });
+  const model = new WindowLayoutModel({ bounds: { x: 0, y: 0, width: 800, height: 600 }, requestFrame: callback => { callbacks.set(++sequence, callback); return sequence; }, cancelFrame: id => { callbacks.delete(id); } });
   const flush = () => { const pending = [...callbacks.values()]; callbacks.clear(); act(() => { for (const callback of pending) callback(0); }); };
   const controller = new NSEWindowController();
   const detach = controller[nseWindowInternals].attach({ windowId: "layout-window", contentLayoutGuide: model,
@@ -20,8 +20,8 @@ function setup() {
 }
 function Bar({ height }: { height: number }) { useNSEWindowChromeObstruction("top", height, false); return <header style={{ height }} />; }
 function Content() { return <div data-testid="content" style={useNSEContentLayoutProperties()} />; }
-function Window({ model, toolbar = true }: { model: NSEWindowLayoutModel; toolbar?: boolean }) {
-  return <NSEWindowLayoutContext.Provider value={model}><Bar height={44} />{toolbar ? <Bar height={38} /> : null}<Content /></NSEWindowLayoutContext.Provider>;
+function Window({ model, toolbar = true }: { model: WindowLayoutModel; toolbar?: boolean }) {
+  return <WindowLayoutContext.Provider value={model}><Bar height={44} />{toolbar ? <Bar height={38} /> : null}<Content /></WindowLayoutContext.Provider>;
 }
 
 describe("window content layout", () => {

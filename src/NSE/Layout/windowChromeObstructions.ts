@@ -1,7 +1,7 @@
 /* SynCloudOS â€” Copyright Â© 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
 import { createContext, useContext, useLayoutEffect, useSyncExternalStore, type CSSProperties, type RefObject } from "react";
 import { NSEEdgeInsetsMake, NSEEdgeInsetsZero, type NSEEdgeInsets } from "./NSEEdgeInsets";
-import { NSELayoutGuideStore, nseEmptyLayoutRect, nseEqualRects } from "./NSELayoutGuide";
+import { LayoutGuideStore, nseEmptyLayoutRect, nseEqualRects } from "./NSELayoutGuide";
 import { physicalSafeAreaInsets, resolveSafeAreaInsets, type ChromeObstruction } from "./safeAreaModel";
 import type { NSEScrollRect } from "../Scroll/scrollTypes";
 
@@ -14,7 +14,7 @@ const emptySnapshot: LayoutSnapshot = Object.freeze({ bounds: nseEmptyLayoutRect
 const equalInsets = (a: NSEEdgeInsets, b: NSEEdgeInsets) => a.top === b.top && a.left === b.left && a.bottom === b.bottom && a.right === b.right;
 
 /** @internal One geometry authority and ResizeObserver for a physical window. */
-export class NSEWindowLayoutModel extends NSELayoutGuideStore {
+export class WindowLayoutModel extends LayoutGuideStore {
   #bounds: NSEScrollRect;
   #screen: NSEEdgeInsets = NSEEdgeInsetsZero;
   #screenBounds: NSEScrollRect | null = null;
@@ -142,23 +142,23 @@ export class NSEWindowLayoutModel extends NSELayoutGuideStore {
   }
 }
 
-export const NSEWindowLayoutContext = createContext<NSEWindowLayoutModel | null>(null);
+export const WindowLayoutContext = createContext<WindowLayoutModel | null>(null);
 const emptySubscribe = () => () => {};
 const getEmptySnapshot = () => emptySnapshot;
 
-export function useNSEWindowLayoutSnapshot(model?: NSEWindowLayoutModel | null): LayoutSnapshot {
-  const inherited = useContext(NSEWindowLayoutContext), selected = model === undefined ? inherited : model;
+export function useNSEWindowLayoutSnapshot(model?: WindowLayoutModel | null): LayoutSnapshot {
+  const inherited = useContext(WindowLayoutContext), selected = model === undefined ? inherited : model;
   return useSyncExternalStore(selected?.subscribe ?? emptySubscribe, selected?.getSnapshot ?? getEmptySnapshot, selected?.getSnapshot ?? getEmptySnapshot);
 }
-export function useNSEContentLayoutProperties(model?: NSEWindowLayoutModel | null): CSSProperties {
+export function useNSEContentLayoutProperties(model?: WindowLayoutModel | null): CSSProperties {
   const { insets } = useNSEWindowLayoutSnapshot(model);
   return { "--nse-content-layout-inset-top": `${insets.top}px`, "--nse-content-layout-inset-left": `${insets.left}px`, "--nse-content-layout-inset-bottom": `${insets.bottom}px`, "--nse-content-layout-inset-right": `${insets.right}px` } as CSSProperties;
 }
 export function useNSEWindowChromeObstruction(edge: ChromeObstruction["edge"], thickness: number, translucent: boolean): void {
-  const model = useContext(NSEWindowLayoutContext);
+  const model = useContext(WindowLayoutContext);
   useLayoutEffect(() => model?.registerChrome({ edge, thickness, translucent }), [model, edge, thickness, translucent]);
 }
 export function useNSEWindowChromeElement(ref: RefObject<HTMLElement | null>, edge: ChromeObstruction["edge"] | "leading", translucent: boolean, enabled = true): void {
-  const model = useContext(NSEWindowLayoutContext);
+  const model = useContext(WindowLayoutContext);
   useLayoutEffect(() => model && enabled && ref.current ? model.observeChrome(ref.current, edge, translucent) : undefined, [model, ref, edge, translucent, enabled]);
 }

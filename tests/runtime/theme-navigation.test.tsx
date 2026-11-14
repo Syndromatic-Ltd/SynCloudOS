@@ -9,7 +9,7 @@ import { NSEViewController, nseUpdateTraits } from "../../src/NSE/Application/NS
 import { NSEViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
 import { NSETabViewController, NSETabViewItem } from "../../src/NSE/Navigation/NSETabViewController";
 import { NSEScrollView } from "../../src/NSE/Scroll/NSEScrollView";
-import { NSEWindowLayoutContext, NSEWindowLayoutModel } from "../../src/NSE/Layout/windowChromeObstructions";
+import { WindowLayoutContext, WindowLayoutModel } from "../../src/NSE/Layout/windowChromeObstructions";
 import { createStaticPresentationTraits } from "../fixtures/presentationTraits";
 afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 class Page extends NSEViewController { static override view = () => <NSEScrollView><p>Document content</p></NSEScrollView>; }
@@ -18,7 +18,7 @@ describe("theme navigation placement and chrome registration", () => {
     const width = widthClass === "compact" ? 390 : 1000;
     const theme = freezeNSETheme({ ...atmoTheme, bundleIdentifier: "com.example.navigation", navigation: { compact: { ...atmoTheme.navigation.compact, ...(widthClass === "compact" ? { placement: placement as "block-start" | "block-end", flow } : {}) }, regular: { ...atmoTheme.navigation.regular, ...(widthClass === "regular" ? { placement: placement as "source-list" | "block-start", flow } : {}) } } });
     const callbacks = new Map<number, FrameRequestCallback>(); let sequence = 0;
-    const model = new NSEWindowLayoutModel({ bounds: { x: 0, y: 0, width, height: 844 }, requestFrame: cb => { callbacks.set(++sequence, cb); return sequence; }, cancelFrame: id => { callbacks.delete(id); } });
+    const model = new WindowLayoutModel({ bounds: { x: 0, y: 0, width, height: 844 }, requestFrame: cb => { callbacks.set(++sequence, cb); return sequence; }, cancelFrame: id => { callbacks.delete(id); } });
     vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) {
       if (this.classList.contains("nse-adaptive-tab-chrome")) return new DOMRect(0, placement === "block-end" ? 752 : 0, width, 92);
       if (this.classList.contains("nse-adaptive-tab-sidebar")) return new DOMRect(0, 0, 264, 844);
@@ -29,7 +29,7 @@ describe("theme navigation placement and chrome registration", () => {
     tabs[nseUpdateTraits]({ reducedMotion: true, presentation: createStaticPresentationTraits({ width, height: 844 }) });
     for (const id of ["first", "second"]) tabs.addTabViewItem(new NSETabViewItem({ identifier: id, viewController: tabs.addChild(Page, { title: id }) }));
     try {
-      const view = render(<NSEAppearanceProvider theme={theme}><NSEWindowLayoutContext.Provider value={model}><NSEViewControllerView controller={tabs} /></NSEWindowLayoutContext.Provider></NSEAppearanceProvider>);
+      const view = render(<NSEAppearanceProvider theme={theme}><WindowLayoutContext.Provider value={model}><NSEViewControllerView controller={tabs} /></WindowLayoutContext.Provider></NSEAppearanceProvider>);
       act(() => { const work = [...callbacks.values()]; callbacks.clear(); work.forEach(cb => cb(0)); });
       const element = view.container.querySelector<HTMLElement>(".nse-adaptive-tab-controller")!;
       expect(element.dataset.nseNavigationPlacement).toBe(placement); expect(element.dataset.nseNavigationFlow).toBe(flow);

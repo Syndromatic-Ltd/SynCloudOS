@@ -56,16 +56,16 @@ export { WindowSurfaceBridgeProvider } from "./Overlays/NSEWindowSurfaceBridge";
 export type { WindowSurfaceRequest } from "./Overlays/NSEWindowSurfaceBridge";
 export { logicalPlacementToFloatingPlacement } from "./Overlays/computeOverlayPosition";
 export { registerNSEHapticFeedbackEngine } from "./Feedback/NSEHapticFeedbackManager";
-export { NSEViewDrawingEnvironmentContext } from "./Views/NSEViewDrawingEnvironment";
+export { ViewDrawingEnvironmentContext } from "./Views/NSEViewDrawingEnvironment";
 // Window layout and safe areas for framework chrome, and the theme hooks system surfaces publish.
-export { NSEWindowLayoutContext, NSEWindowLayoutModel, useNSEContentLayoutProperties } from "./Layout/windowChromeObstructions";
-export { NSESafeAreaMeasurementProvider, useNSEViewSafeArea } from "./Layout/useNSESafeArea";
+export { WindowLayoutContext, WindowLayoutModel, useNSEContentLayoutProperties } from "./Layout/windowChromeObstructions";
+export { SafeAreaMeasurementProvider, useNSEViewSafeArea } from "./Layout/useNSESafeArea";
 export { useNSEDeferredDisposal } from "./interactionLifecycle";
 export { createReactOwnedNSEMenu } from "./Menus/NSEMenu";
 export { useMenuLifetime } from "./Menus/useMenuLifetime";
 export { nseStateHooks } from "./Theme/contract/hooks";
 export { useNSEThemeInteraction } from "./Theme/contract/useThemeInteraction";
 export type { NSETheme } from "./Theme/NSETheme";
-export type { NSEViewDrawingEnvironment } from "./Views/NSEViewDrawingEnvironment";
+export type { ViewDrawingEnvironment } from "./Views/NSEViewDrawingEnvironment";
 
 export { WindowTitleBar } from "./Windows/WindowTitleBar";

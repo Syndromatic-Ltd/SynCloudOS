@@ -6,7 +6,7 @@
  */
 
 import { useNSEAppearance } from "../Appearance/NSEAppearanceProvider";
-import { NSEWindowLayoutContext, useNSEWindowChromeElement } from "../Layout/windowChromeObstructions";
+import { WindowLayoutContext, useNSEWindowChromeElement } from "../Layout/windowChromeObstructions";
 import { useNSEViewSafeArea } from "../Layout/useNSESafeArea";
 import { useContext, useCallback, useLayoutEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
 import { NSEOutlineView } from "../DataViews/Outline/NSEOutlineView";
@@ -47,7 +47,7 @@ export function AdaptiveTabView({ controller, scope }: { readonly controller: NS
   const root = useRef<HTMLDivElement>(null);
   const chrome = useRef<HTMLDivElement>(null);
   const sidebar = useRef<HTMLDivElement>(null);
-  const layout = useContext(NSEWindowLayoutContext);
+  const layout = useContext(WindowLayoutContext);
   const safeArea = useNSEViewSafeArea(root);
   const [allocation, setAllocation] = useState<Bounds | null>(null);
   const traits = controller.traitCollection.presentation;
