@@ -530,8 +530,8 @@ An `NSE`-prefixed declaration anywhere in `src/` must be one of:
 
 ### Task 23: Apply the dispositions, one family per commit
 
-- [ ] For each family in the inventory: rename with the TypeScript language service (not text replace), update tests, docs under `docs/framework/` and the site only where a name was reachable from it, lower the test's ceiling to the new count, run typecheck and the family's tests, commit `NSE: <family> internals take AppKit names or lose the prefix`. Start with `NSEGroupedList`/`NSEListItem`. Atmo CSS that mentions a renamed component in a comment is updated; selectors are not touched.
-- [ ] Final commit sets the assertion to `toEqual([])`.
+- [x] For each family in the inventory: rename with the TypeScript language service (not text replace), update tests, docs under `docs/framework/` and the site only where a name was reachable from it, lower the test's ceiling to the new count, run typecheck and the family's tests, commit `NSE: <family> internals take AppKit names or lose the prefix`. Start with `NSEGroupedList`/`NSEListItem`. Atmo CSS that mentions a renamed component in a comment is updated; selectors are not touched.
+- [x] Final commit sets the assertion to `toEqual([])`.
 
 ---
 
@@ -720,3 +720,11 @@ Add one line per stop: date, last commit, next unchecked box, anything a success
 - Framework typecheck, contracts, architecture, packaging, direct SDK build and six SDK consumer checks passed. Full Vitest passed 9,965 of 9,967 with the two timeouts recorded on the base. The frozen rerun passed 111 of 177, with the 66 expected metal-thumb differences and zero retries. All 2,648 reference hashes matched. Both installed-FX modes stop at the manifest family check. The developer MCP consumer still reports undrawn theme parts.
 - The ten-cycle dev heap grew 2.58 MiB with flat DOM and listener counts. The three gallery style targets passed in the plain dev trace. About and QuickSwitch still miss. MotionFX and login-plate proposals await review.
 - The report carries the commands, measurements and follow-up requirements. [Performance report](../evidence/2026-11-11-performance/REPORT.md)
+
+### 2026-11-14 — Sol installed FX and naming handoff
+
+- The SDK source verified in both installed modes is `a366c561`. Gemini's `41bd1af9` and `b2bd45fd` landed as `d59dc580` and `c8ff5c5b`. `a366c561` fixes the browser harness's process-exit cleanup and adds two regressions. Both installed modes passed 22 of 22 families across 16 commands each. The new consumers passed at root and nested paths in Chromium, Firefox and WebKit. Physical-native checks remain open.
+- Task 23 reached zero unmapped declarations out of 583 at `164f97ce`. The archive retained all 53 package entries and 3,244 declaration names. `4dc09f8e` restored the public colour preferences factory after the packed comparison, and `b189c668` and `478f1bd1` corrected three fixtures that referenced renamed internals.
+- The final full suite at `478f1bd1` passed 9,968 of 9,969. The existing Chromium document-asset timeout was the only failure. The frozen baseline returned 111 of 177 with the same 66 metal-thumb differences as the base, zero retries and all 2,648 hashes intact. The installed developer MCP still fails on existing Atmo undrawn-part warnings. All other requested packaging and installed SDK consumer commands passed.
+- Site commit `0472a7c` vendors the tested archive without `--allow-dirty`, all 2,619 resources verified. Site checks and 438 tests passed with the existing caller edits. Those edits are still needed to use this SDK from a clean site checkout. The local preview is live at 5387. The 5377 fixture listener has exited.
+- Task 21 remains a proposal. The installed probes prove the app dispatch path, and the system queue still needs a framework-owned worker entry and transport ownership before the migration can be measured. MotionFX API proposals and the login plate are pending review. The About dev heap remains +2.59 MiB with DOM and listeners flat, and the remaining About and QuickSwitch timing gates are open. [Performance report](../evidence/2026-11-11-performance/REPORT.md#integrated-verification-on-14-november)
