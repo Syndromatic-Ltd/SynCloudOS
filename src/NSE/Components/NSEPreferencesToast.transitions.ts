@@ -20,7 +20,7 @@
 
 import type { AFXAnimationTiming } from "../../FX/AnimationFX/animationTypes";
 import {
-  NSEAnimationDefaults,
+  AnimationDefaults,
   type LayoutTransitionTiming,
   type PresentationSpec,
   type TransformComponents,
@@ -58,7 +58,7 @@ const bezier = (x1: number, y1: number, x2: number, y2: number): AFXAnimationTim
   Object.freeze({ kind: "cubic-bezier", x1, y1, x2, y2 });
 const glideOut = bezier(0.215, 0.61, 0.355, 1);
 const glideIn = bezier(0.55, 0.055, 0.675, 0.19);
-const emphasized = NSEAnimationDefaults.easing.emphasized;
+const emphasized = AnimationDefaults.easing.emphasized;
 // Framer tweens given only a duration ease with easeInOut.
 const framerTween = "ease-in-out";
 

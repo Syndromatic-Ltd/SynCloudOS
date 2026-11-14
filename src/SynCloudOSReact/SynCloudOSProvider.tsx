@@ -20,8 +20,8 @@
 
 import {
   NSEFeedbackProvider,
-  NSEMaterialLighting,
-  NSEMaterialLightingProvider,
+  MaterialLighting,
+  MaterialLightingProvider,
   SafeAreaMeasurementProvider,
 } from "../NSE/hostComposition";
 import { AnimationEnvironmentProvider, type Animator } from "../NSE/Animation";
@@ -93,7 +93,7 @@ export function SynCloudOSProvider({
   }), [runtime]);
   const lighting = useMemo(() => {
     if (!shellFrames) return null;
-    return new NSEMaterialLighting(
+    return new MaterialLighting(
       () =>
         runtime.motion.createManager({
           signal: runtime.signal,
@@ -109,13 +109,13 @@ export function SynCloudOSProvider({
           value={{ runtimeId: runtime.runtimeId, responderId: null }}
         >
           <NSEFeedbackProvider value={runtime.haptics}>
-            <NSEMaterialLightingProvider value={lighting}>
+            <MaterialLightingProvider value={lighting}>
               <ViewDrawingEnvironmentContext.Provider value={drawingEnvironment}>
                 <ViewControllerRendererProvider value={ViewControllerView}>
                   <SafeAreaMeasurementProvider>{children}</SafeAreaMeasurementProvider>
                 </ViewControllerRendererProvider>
               </ViewDrawingEnvironmentContext.Provider>
-            </NSEMaterialLightingProvider>
+            </MaterialLightingProvider>
           </NSEFeedbackProvider>
         </ResponderHierarchyContext.Provider>
       </AnimationEnvironmentProvider>

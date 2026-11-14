@@ -18,13 +18,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEAnimationDefaults, type PresentationSpec } from "../NSE/Animation";
+import { AnimationDefaults, type PresentationSpec } from "../NSE/Animation";
 
-const { emphasized } = NSEAnimationDefaults.easing;
+const { emphasized } = AnimationDefaults.easing;
 
 const details = (from: { y: number; scale: number }, to: { y: number; scale: number }, opacity: [number, number]): PresentationSpec =>
   Object.freeze({
-    duration: NSEAnimationDefaults.durationSeconds.standard,
+    duration: AnimationDefaults.durationSeconds.standard,
     timing: emphasized,
     tracks: Object.freeze([
       Object.freeze({ keyPath: "opacity" as const, values: Object.freeze(opacity) }),

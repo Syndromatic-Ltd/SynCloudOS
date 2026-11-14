@@ -43,22 +43,22 @@ function settle(from: Quaternion, to: Quaternion, amount: number): Quaternion {
   const length = Math.hypot(x, y, z, w) || 1;
   return { x: x / length, y: y / length, z: z / length, w: w / length };
 }
-export interface NSEMaterialLight {
+export interface MaterialLight {
   readonly offset: GFXPoint;
   readonly angle: number;
   readonly active: boolean;
 }
-export const staticNSEMaterialLight: NSEMaterialLight = Object.freeze({
+export const staticNSEMaterialLight: MaterialLight = Object.freeze({
   offset: normalisePoint({ x: 0, y: 0 }),
   angle: 0,
   active: false,
 });
-export interface NSEMaterialLightingPort {
-  getSnapshot(): NSEMaterialLight;
+export interface MaterialLightingPort {
+  getSnapshot(): MaterialLight;
   subscribe(listener: () => void): () => void;
 }
 /** One passive device subscription and frame loop for every visible metal thumb in a provider. */
-export class NSEMaterialLighting implements NSEMaterialLightingPort {
+export class MaterialLighting implements MaterialLightingPort {
   readonly #listeners = new Set<() => void>();
   readonly #createManager: () => MFXMotionManager;
   readonly #scheduler: AFXFrameScheduler;
@@ -100,7 +100,7 @@ export class NSEMaterialLighting implements NSEMaterialLightingPort {
       }
     };
   };
-  #publish(value: NSEMaterialLight) {
+  #publish(value: MaterialLight) {
     this.#value = value;
     for (const listener of this.#listeners) {
       try {

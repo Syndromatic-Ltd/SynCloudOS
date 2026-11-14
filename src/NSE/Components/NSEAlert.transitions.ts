@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEAnimationDefaults, type PresentationSpec } from "../Animation";
+import { AnimationDefaults, type PresentationSpec } from "../Animation";
 
 /** Enter and exit presentations, played through AnimationFX. */
 export interface NSEAlertMotion {
@@ -26,7 +26,7 @@ export interface NSEAlertMotion {
   readonly exit: PresentationSpec;
 }
 
-const { decelerate } = NSEAnimationDefaults.easing;
+const { decelerate } = AnimationDefaults.easing;
 // Framer tweens given only a duration eased with easeInOut (CSS ease-in-out).
 const fade = (from: number, to: number, duration: number, timing: PresentationSpec["timing"] = "ease-in-out"): PresentationSpec =>
   Object.freeze({ duration, timing, tracks: Object.freeze([Object.freeze({ keyPath: "opacity" as const, values: Object.freeze([from, to]) })]) });
@@ -53,13 +53,13 @@ const alertStandard: NSEAlertMotion = Object.freeze({
 });
 
 const alertReduced: NSEAlertMotion = Object.freeze({
-  enter: fade(0, 1, NSEAnimationDefaults.durationSeconds.quick),
-  exit: fade(1, 0, NSEAnimationDefaults.durationSeconds.quick),
+  enter: fade(0, 1, AnimationDefaults.durationSeconds.quick),
+  exit: fade(1, 0, AnimationDefaults.durationSeconds.quick),
 });
 
 const backdropStandard: NSEAlertMotion = Object.freeze({
-  enter: fade(0, 1, NSEAnimationDefaults.durationSeconds.standard),
-  exit: fade(1, 0, NSEAnimationDefaults.durationSeconds.standard),
+  enter: fade(0, 1, AnimationDefaults.durationSeconds.standard),
+  exit: fade(1, 0, AnimationDefaults.durationSeconds.standard),
 });
 
 const backdropReduced: NSEAlertMotion = Object.freeze({

@@ -21,7 +21,7 @@
 import { useMemo, type CSSProperties } from "react";
 import type { AFXAnimationTiming } from "../FX/AnimationFX/animationTypes";
 import {
-  NSEAnimationDefaults,
+  AnimationDefaults,
   nseTransformStyle,
   useNSETraitCollection,
   type PresentationEnter,
@@ -46,8 +46,8 @@ const opacityFade = (from: number, to: number, duration: number, timing: Present
   });
 const loginBackdropDim = Object.freeze({
   standard: Object.freeze({
-    enter: opacityFade(0, 1, 0.55, NSEAnimationDefaults.easing.emphasized, 0.35),
-    exit: opacityFade(1, 0, 0.28, NSEAnimationDefaults.easing.emphasized),
+    enter: opacityFade(0, 1, 0.55, AnimationDefaults.easing.emphasized, 0.35),
+    exit: opacityFade(1, 0, 0.28, AnimationDefaults.easing.emphasized),
   }),
   // Framer tweens given only a duration ease with easeInOut.
   reduced: Object.freeze({ enter: opacityFade(0, 1, 0.1, "ease-in-out"), exit: opacityFade(1, 0, 0.1, "ease-in-out") }),
@@ -167,7 +167,7 @@ const ICON_REVEAL_DELAY = 0.1;
 const ICON_REVEAL_STAGGER = 0.075;
 const ICON_REVEAL_MAX_DELAY = 0.2;
 const LAUNCH_EXIT_STAGGER = 0.045;
-const reducedFade = NSEAnimationDefaults.durationSeconds.reducedFade;
+const reducedFade = AnimationDefaults.durationSeconds.reducedFade;
 
 interface IconPose {
   readonly opacity: number;
@@ -250,7 +250,7 @@ export function resolveWebspringIconPresentation({
       case "launching":
         return reducedMotion
           ? move(from, target, reducedFade, framerTween, launchDelay)
-          : move(from, target, exitDuration, NSEAnimationDefaults.easing.decelerate, launchDelay);
+          : move(from, target, exitDuration, AnimationDefaults.easing.decelerate, launchDelay);
       case "covered":
         // The launch exit carries on to the same pose; from anywhere else the
         // icon is already covered, so it goes at once.

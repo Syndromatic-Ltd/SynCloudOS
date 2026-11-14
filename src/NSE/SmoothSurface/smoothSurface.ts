@@ -45,7 +45,7 @@ import type {
   SmoothSurfaceShadow,
   SmoothSurfaceShadowConfig,
   SmoothSurfaceStyle,
-  NSEOptionalSmoothSurfaceProps
+  OptionalSmoothSurfaceProps
 } from "./smoothSurfaceTypes";
 
 export const nseSmoothSurfaceClassNames = {
@@ -299,7 +299,7 @@ export function getOptionalSmoothSurfaceProps(
   options: SmoothSurfaceRequest,
   className?: string,
   style?: SmoothSurfaceStyle
-): NSEOptionalSmoothSurfaceProps {
+): OptionalSmoothSurfaceProps {
   const normalized = normalizeRequest(options);
   if (!normalized) {
     return {

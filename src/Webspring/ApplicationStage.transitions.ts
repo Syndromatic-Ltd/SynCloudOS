@@ -20,7 +20,7 @@
 
 import { useMemo, type CSSProperties } from "react";
 import {
-  NSEAnimationDefaults,
+  AnimationDefaults,
   nseFilterStyle,
   nseTransformStyle,
   useNSEAnimationEnvironment,
@@ -61,12 +61,12 @@ export interface ApplicationStageMotionInput {
   /** The app launches from Webspring: the zoom waits for the launch choreography. */
   readonly launching: boolean;
   /** How a launch zoom follows the launcher's own choreography. */
-  readonly launchZoom?: Readonly<{ delay: number; duration: number; easing: keyof typeof NSEAnimationDefaults.easing }>;
+  readonly launchZoom?: Readonly<{ delay: number; duration: number; easing: keyof typeof AnimationDefaults.easing }>;
   readonly presentationMotion?: "host" | "content";
 }
 
-const { standard: material, accelerate } = NSEAnimationDefaults.easing;
-const reducedFade = NSEAnimationDefaults.durationSeconds.reducedFade;
+const { standard: material, accelerate } = AnimationDefaults.easing;
+const reducedFade = AnimationDefaults.durationSeconds.reducedFade;
 const bezier = (x1: number, y1: number, x2: number, y2: number): AFXAnimationTiming =>
   Object.freeze({ kind: "cubic-bezier", x1, y1, x2, y2 });
 const multiSwitchEase = bezier(0.55, 0.06, 0.18, 1);
@@ -162,7 +162,7 @@ export function resolveApplicationStageMotion({ reducedMotion, role, staged, lau
     // A launch from Webspring waits for the launch choreography before zooming.
     const delay = launching ? launchZoom.delay : 0;
     const duration = launching ? launchZoom.duration : defaultLaunchZoom.duration;
-    const easing = launching ? NSEAnimationDefaults.easing[launchZoom.easing] : accelerate;
+    const easing = launching ? AnimationDefaults.easing[launchZoom.easing] : accelerate;
     return {
       state: "presented", style: {},
       enter: onPresentation(reducedMotion

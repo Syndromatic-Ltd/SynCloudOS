@@ -18,9 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEAnimationDefaults, type PresentationSpec, type PresentationTrack } from "../../Animation";
+import { AnimationDefaults, type PresentationSpec, type PresentationTrack } from "../../Animation";
 
-const { emphasized } = NSEAnimationDefaults.easing;
+const { emphasized } = AnimationDefaults.easing;
 // Framer tweens given only a duration ease with easeInOut (CSS ease-in-out).
 const framerTween = "ease-in-out";
 

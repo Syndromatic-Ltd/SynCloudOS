@@ -19,7 +19,7 @@
  */
 
 import type { AFXAnimationTiming } from "../../FX/AnimationFX/public";
-import { NSEAnimationDefaults } from "../Appearance/NSEAnimationDefaults";
+import { AnimationDefaults } from "../Appearance/NSEAnimationDefaults";
 import { AFXTransaction } from "../../FX/AnimationFX/AFXTransaction";
 import { afxAnimationTiming } from "../../FX/AnimationFX/animationValues";
 
@@ -32,7 +32,7 @@ type NSEAnimationTimingFunction = Extract<AFXAnimationTiming, { readonly kind: "
  * animation so it moves as the system's do. Motion is framework-owned: themes do not change it.
  */
 export class NSEAnimationContext {
-  static readonly #default = new NSEAnimationContext(NSEAnimationDefaults.durationSeconds.standard, NSEAnimationDefaults.easing.standard, false);
+  static readonly #default = new NSEAnimationContext(AnimationDefaults.durationSeconds.standard, AnimationDefaults.easing.standard, false);
   static readonly #groups: NSEAnimationContext[] = [];
 
   /** NSAnimationContext.duration, in seconds. */

@@ -29,7 +29,7 @@ import {
   useNSEAnimationEnvironment,
 } from "../../src/NSE/Animation/NSEAnimationEnvironment";
 // The framework's curves and durations, published as NSEAnimationContext.current.
-import { NSEAnimationDefaults } from "../../src/NSE/Appearance/NSEAnimationDefaults";
+import { AnimationDefaults } from "../../src/NSE/Appearance/NSEAnimationDefaults";
 import { useNSETraitCollection } from "../../src/NSE/Animation/useNSETraitCollection";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
 import {
@@ -251,11 +251,11 @@ describe("NSE animation environment", () => {
       durationSeconds: { instant: 0.01, reducedFade: 0.12, quick: 0.16, standard: 0.18 },
     };
 
-    expect(NSEAnimationDefaults).toEqual(expected);
-    expect(Object.isFrozen(NSEAnimationDefaults)).toBe(true);
-    expect(Object.isFrozen(NSEAnimationDefaults.easing)).toBe(true);
-    expect(Object.isFrozen(NSEAnimationDefaults.durationSeconds)).toBe(true);
-    for (const easing of Object.values(NSEAnimationDefaults.easing)) {
+    expect(AnimationDefaults).toEqual(expected);
+    expect(Object.isFrozen(AnimationDefaults)).toBe(true);
+    expect(Object.isFrozen(AnimationDefaults.easing)).toBe(true);
+    expect(Object.isFrozen(AnimationDefaults.durationSeconds)).toBe(true);
+    for (const easing of Object.values(AnimationDefaults.easing)) {
       expect(Object.isFrozen(easing)).toBe(true);
       expect(() => new AFXTimingFunction(easing)).not.toThrow();
     }

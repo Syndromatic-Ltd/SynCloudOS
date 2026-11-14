@@ -27,7 +27,7 @@ export type {
   AnimationEnvironmentProviderProps,
   Animator,
 } from "./NSEAnimationEnvironment";
-export { NSEAnimationDefaults } from "../Appearance/NSEAnimationDefaults";
+export { AnimationDefaults } from "../Appearance/NSEAnimationDefaults";
 export { NSEAnimationContext } from "./NSEAnimationContext";
 export { useNSETraitCollection } from "./useNSETraitCollection";
 export type { NSEViewAnimator } from "./NSEViewAnimator";

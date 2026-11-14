@@ -20,14 +20,14 @@
 
 /** SynCloudOS shell composition surface. This is not a SynWare package entry. */
 export {
-  NSEMaterialLighting,
+  MaterialLighting,
   staticNSEMaterialLight,
 } from "./Appearance/NSEMaterialLighting";
 export type {
-  NSEMaterialLight,
-  NSEMaterialLightingPort,
+  MaterialLight,
+  MaterialLightingPort,
 } from "./Appearance/NSEMaterialLighting";
-export { NSEMaterialLightingProvider } from "./Appearance/MetalThumb";
+export { MaterialLightingProvider } from "./Appearance/MetalThumb";
 export {
   NSEFeedbackProvider,
   useNSEFeedback,
