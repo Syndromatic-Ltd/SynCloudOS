@@ -71,8 +71,7 @@ describe("NSE names are AppKit names", () => {
     const declared = [...new Set(collectSrcNSEDeclarations().map((entry) => entry.name))].sort();
     expect(declared).toEqual(expect.arrayContaining(["NSEView", "NSEViewController", "NSEWindow"]));
     const missing = declared.filter((name) => internalAppkitCounterpartFor(name, map) === undefined);
-    // Ceiling pinned at Task 22; Task 23 lowers this per family until missing.length === 0.
-    expect(missing.length).toBeLessThanOrEqual(0);
+    expect(missing).toEqual([]);
   });
 
   it("records the NSImage named lookup and both template name constants", () => {
