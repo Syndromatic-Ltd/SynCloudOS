@@ -103,7 +103,7 @@ export function WindowTitlebarView({ document, isKeyWindow, titleId, material = 
     {presentation === "floating" ? <div data-nse-part="floating-titlebar" className="nse-window-titlebar-view__floating-surface" aria-hidden="true" />
       : material === "cumulus" ? <div className="nse-app-topbar-base" aria-hidden="true"><span className="nse-app-topbar-base-glass" /></div> : null}
     <div ref={setMenu} data-nse-part="menu" data-window-menu-slot="" className="nse-window-titlebar-view__menu" data-window-no-drag="">{menuBar}</div>
-    <div className={`nse-window-titlebar-view__row${material === "metal" && !metalRail ? " nse-app-topbar-metal-main" : ""}`} data-window-titlebar-row="">
+    <div data-nse-part="content" className={`nse-window-titlebar-view__row${material === "metal" && !metalRail ? " nse-app-topbar-metal-main" : ""}`} data-window-titlebar-row="">
       {metalRail ? <span data-nse-part="sidebar" className="nse-window-titlebar-view__metal-rail nse-app-topbar-metal-rail" aria-hidden="true"><span className="nse-app-topbar-metal-grain" /></span> : null}
       {metalRail ? <span className="nse-window-titlebar-view__metal-body nse-app-topbar-metal-main" aria-hidden="true" /> : null}
       {material === "metal" ? <span className="nse-app-topbar-metal-grain" aria-hidden="true" /> : null}

@@ -91,7 +91,10 @@
   white-space: nowrap;
   text-overflow: ellipsis;
   text-align: center;
-  font: 600 13px/18px system-ui, sans-serif;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
 }
 .nse-window-titlebar-view__title[hidden] { display: none; }
 .nse-window-titlebar-view[data-titlebar-material="standard"][data-has-toolbar="false"] > .nse-window-titlebar-view__row:not(:has(.nse-window-titlebar-view__accessory:not(:empty), .nse-window-titlebar-view__sidebar)) > .nse-window-titlebar-view__title { position: absolute; inset: 0; padding: 6px 108px 0; pointer-events: none; }
