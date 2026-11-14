@@ -45,7 +45,7 @@ import type { SynCloudOSAppInfo } from "../SynCloudOS/SynCloudOS";
 import { AppViewChrome, type AppViewPresentation } from "./AppViewChrome";
 import { AppViewContent } from "./AppViewContent";
 import { SynWareEntryRenderer } from "./SynWareEntryRenderer";
-import { NSEWindowTitlebarHostContext, type NSEWindowTitlebarDocument, type NSEWindowTitlebarHost } from "../NSE/hostComposition";
+import { WindowTitlebarHostContext, type WindowTitlebarDocument, type WindowTitlebarHost } from "../NSE/hostComposition";
 import { createApplicationMenuStore, useApplicationMenuSnapshot, type ApplicationMenuStore } from "../SynCloudOSReact";
 import { applicationDeclaresAbout, applicationMenuLabels, ApplicationMenuOverlayHost, ApplicationMenuTriggerBridge, menuOpensSystemPreferencesDirectly } from "./applicationMenuPresentation";
 import { createWebspringAppMenuModel } from "./webspringAppMenu";
@@ -143,10 +143,10 @@ export function ApplicationStageView({
   const railLabel = sourceList?.railLabel ?? app.shortName;
   const [railWidth, setRailWidthState] = useState(railDefault);
   // The window shown on the stage puts its document (title, subtitle, titlebar accessories) in the standard bar.
-  const [titlebarDocument, setTitlebarDocument] = useState<NSEWindowTitlebarDocument | null>(null);
+  const [titlebarDocument, setTitlebarDocument] = useState<WindowTitlebarDocument | null>(null);
   const [leadingAccessories, setLeadingAccessories] = useState<HTMLSpanElement | null>(null);
   const [trailingAccessories, setTrailingAccessories] = useState<HTMLSpanElement | null>(null);
-  const titlebarHost = useMemo<NSEWindowTitlebarHost | null>(() => (usesStandardTopBar ? Object.freeze({
+  const titlebarHost = useMemo<WindowTitlebarHost | null>(() => (usesStandardTopBar ? Object.freeze({
     setDocument: setTitlebarDocument,
     leadingAccessories,
     trailingAccessories,
@@ -456,7 +456,7 @@ export function ApplicationStageView({
               className="webspring-app-view-fullbleed-content"
               aria-label={appName}
             >
-              <NSEWindowTitlebarHostContext.Provider value={titlebarHost}>
+              <WindowTitlebarHostContext.Provider value={titlebarHost}>
               <SynWareEntryRenderer
                 runtime={runtime}
                 app={app}
@@ -467,7 +467,7 @@ export function ApplicationStageView({
                 loadingPackageLabel={loadingPackageLabel}
                 missingComponentLabel={missingComponentLabel}
               />
-              </NSEWindowTitlebarHostContext.Provider>
+              </WindowTitlebarHostContext.Provider>
             </div>
           </AppViewContent.Surface>
           </QuickSwitchTriggerProvider>

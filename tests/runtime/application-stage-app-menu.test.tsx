@@ -38,7 +38,7 @@ import { ApplicationStageView } from "../../src/Webspring/ApplicationStageView";
 import { tabViewController } from "../fixtures/tabViewController";
 import { nseUpdateTraits } from "../../src/NSE/Application/NSEViewController";
 import { NSEViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
-import { NSEWindowTitlebarHostContext } from "../../src/SynCloudOS/AppHosting/windowChrome";
+import { WindowTitlebarHostContext } from "../../src/SynCloudOS/AppHosting/windowChrome";
 import { authoriseTestRuntime, createTestBundle, createTestRuntime, createTestRuntimeEnvironment, mountTestSynWareRuntime } from "./helpers";
 import { HostSiteBrandingProvider } from "../../src/SynCloudOSReact";
 
@@ -201,7 +201,7 @@ describe("ApplicationStageView app menu", () => {
       useNSEDeferredDisposal(controller, fixtureDisposalScheduler);
       React.useLayoutEffect(() => { controller[nseUpdateTraits]({ presentation: traits, reducedMotion: traits.reducedMotion }); }, [controller, traits]);
       // Stands in for a window titled "Buttons" (NSWindow.title), as the window controller's mount does.
-      const titlebar = React.useContext(NSEWindowTitlebarHostContext);
+      const titlebar = React.useContext(WindowTitlebarHostContext);
       React.useLayoutEffect(() => {
         titlebar?.setDocument({ title: "Buttons", subtitle: "", documentEdited: false });
         return () => titlebar?.setDocument(null);

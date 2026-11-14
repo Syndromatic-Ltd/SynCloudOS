@@ -21,7 +21,7 @@
 import { useContext, useLayoutEffect, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import type { NSEWindowAlertRequest } from "../../NSE/applicationHostInterop";
-import { NSEWindowAlertContent } from "../../NSE/applicationHostInterop";
+import { WindowAlertContent } from "../../NSE/applicationHostInterop";
 import { NSEWindowSheetFrame, NSEWindowSheetHostContext } from "./windowChrome";
 import { useNSEAnimationEnvironment } from "../../NSE/Animation";
 
@@ -94,5 +94,5 @@ export function NSEWindowAlertSheet({ queue }: { readonly queue: NSEWindowAlertQ
 function WindowAlert({ alert, queue }: { readonly alert: PendingAlert; readonly queue: NSEWindowAlertQueue }) {
   const host = useContext(NSEWindowSheetHostContext);
   useLayoutEffect(() => host?.attach(), [host]);
-  return <NSEWindowAlertContent request={alert.request} scopeId={`nse-alert-sheet:${alert.id}`} onChoose={buttonId => queue.choose(alert.id, buttonId)} />;
+  return <WindowAlertContent request={alert.request} scopeId={`nse-alert-sheet:${alert.id}`} onChoose={buttonId => queue.choose(alert.id, buttonId)} />;
 }

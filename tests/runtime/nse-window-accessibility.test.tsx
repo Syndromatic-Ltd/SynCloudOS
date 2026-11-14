@@ -26,11 +26,11 @@ import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { WindowPresentation, WindowRecord, WindowRole } from "../../src/SynCloudOS/Windows";
 import {
-  NSEHUDWindowView,
-  NSEModalWindowView,
-  NSEPanelView,
-  NSEPopoverWindowView,
-  NSESheetView,
+  HUDWindowView,
+  ModalWindowView,
+  PanelView,
+  PopoverWindowView,
+  SheetView,
 } from "../../src/NSE/Windows";
 import { standardWindow } from "../fixtures/windowTestDependencies";
 
@@ -83,10 +83,10 @@ function accessibleProps(role: WindowRole, overrides: Partial<WindowRecord> = {}
 
 describe("NSE window accessibility", () => {
   it.each([
-    ["panel", NSEPanelView],
-    ["hud", NSEHUDWindowView],
-    ["sheet", NSESheetView],
-    ["popover", NSEPopoverWindowView],
+    ["panel", PanelView],
+    ["hud", HUDWindowView],
+    ["sheet", SheetView],
+    ["popover", PopoverWindowView],
   ] as const)("routes Escape through the command system for a closable unpinned %s", (role, View) => {
     const props = accessibleProps(role);
     render(<View {...props}><button type="button">Inside</button></View>);
@@ -96,24 +96,24 @@ describe("NSE window accessibility", () => {
 
   it("does not locally dismiss modals, non-closable panels or pinned popovers", () => {
     const modal = accessibleProps("modal");
-    const { rerender } = render(<NSEModalWindowView {...modal}><p>Modal</p></NSEModalWindowView>);
+    const { rerender } = render(<ModalWindowView {...modal}><p>Modal</p></ModalWindowView>);
     fireEvent.keyDown(screen.getByRole("dialog", { name: "modal accessible" }), { key: "Escape" });
     expect(modal.dispatchCommand).not.toHaveBeenCalled();
 
     const panel = accessibleProps("panel", { style: ["titled"] });
-    rerender(<NSEPanelView {...panel}><p>Panel</p></NSEPanelView>);
+    rerender(<PanelView {...panel}><p>Panel</p></PanelView>);
     fireEvent.keyDown(screen.getByRole("dialog", { name: "panel accessible" }), { key: "Escape" });
     expect(panel.dispatchCommand).not.toHaveBeenCalled();
 
     const popover = accessibleProps("popover", { pinned: true });
-    rerender(<NSEPopoverWindowView {...popover}><p>Popover</p></NSEPopoverWindowView>);
+    rerender(<PopoverWindowView {...popover}><p>Popover</p></PopoverWindowView>);
     fireEvent.keyDown(screen.getByRole("dialog", { name: "popover accessible" }), { key: "Escape" });
     expect(popover.dispatchCommand).not.toHaveBeenCalled();
   });
 
   it("keeps blocked windows native-inert while retaining modal labelling", () => {
     const props = accessibleProps("sheet");
-    render(<NSESheetView {...props} blocked><p>Sheet</p></NSESheetView>);
+    render(<SheetView {...props} blocked><p>Sheet</p></SheetView>);
     const sheet = screen.getByRole("dialog", { name: "sheet accessible", hidden: true });
     expect(sheet.hasAttribute("inert")).toBe(true);
     expect(sheet.getAttribute("aria-modal")).toBe("true");
@@ -123,14 +123,14 @@ describe("NSE window accessibility", () => {
   it("omits hidden and minimised roles from the accessibility tree", () => {
     const hidden = accessibleProps("panel");
     const { rerender } = render(
-      <NSEPanelView {...hidden} presentation={{ ...hidden.presentation, kind: "hidden", visible: false }}>
+      <PanelView {...hidden} presentation={{ ...hidden.presentation, kind: "hidden", visible: false }}>
         <p>Hidden panel</p>
-      </NSEPanelView>,
+      </PanelView>,
     );
     expect(screen.queryByText("Hidden panel")).toBeNull();
 
     const minimised = accessibleProps("hud", { state: "minimised" });
-    rerender(<NSEHUDWindowView {...minimised}><p>Minimised HUD</p></NSEHUDWindowView>);
+    rerender(<HUDWindowView {...minimised}><p>Minimised HUD</p></HUDWindowView>);
     expect(screen.queryByText("Minimised HUD")).toBeNull();
   });
 

@@ -31,7 +31,7 @@ import { GroupedRow } from "../Controls/Selection/GroupedRow";
 import { NSEFocusScope, resolveNSEFocusReturnTarget } from "../Focus";
 import { NSEWindowController } from "../Application/NSEWindowController";
 import { NSETitlebarAccessoryViewController } from "../Application/NSETitlebarAccessoryViewController";
-import { NSEWindowTitlebarContent } from "../Windows/windowTitlebarContext";
+import { WindowTitlebarContent } from "../Windows/windowTitlebarContext";
 import { NSEImage } from "../Controls/Images/NSEImageResource";
 import { NSEControlImage } from "../Controls/Images/NSEControlImage";
 import { NSEButton } from "../Controls/Buttons/NSEButton";
@@ -167,7 +167,7 @@ function PreferencesTitlebar({ title, titleView, leading }: { title: ReactNode; 
   if (!panel || panel.isDisposed) return null;
   const back = panel.window.titlebarAccessoryViewControllers[0] as PreferencesBackAccessory;
   back.content = leading;
-  return <NSEWindowTitlebarContent toolbarStyle={panel.window.toolbarStyle} title={titleView}
+  return <WindowTitlebarContent toolbarStyle={panel.window.toolbarStyle} title={titleView}
     leading={<PreferencesBackAccessory.view controller={back} />} className="nse-prefs-header" />;
 }
 

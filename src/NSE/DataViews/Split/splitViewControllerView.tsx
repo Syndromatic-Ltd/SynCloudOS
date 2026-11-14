@@ -42,7 +42,7 @@ import type { NSESplitViewItem } from "./NSESplitViewItem";
 import { useSourceListFrame } from "../../Navigation/SourceList/sourceListFrameContext";
 import { NSEControllerNavigationChromeBoundary, useNSEControllerNavigationChrome } from "../../Navigation/NSEApplicationNavigationChrome";
 import "./splitViewController.css";
-import { NSEWindowTitleSlotContext } from "../../Windows/windowTitlebarContext";
+import { WindowTitleSlotContext } from "../../Windows/windowTitlebarContext";
 
 /**
  * Places an item's persistent host element in whichever layout slot currently shows the item. Moving
@@ -65,7 +65,7 @@ const labelOf = (item: NSESplitViewItem) => item.viewController.title ?? item.id
 /** @internal The view an `NSESplitViewController` renders. */
 export function NSESplitViewControllerView({ controller }: { readonly controller: NSESplitViewController }) {
   const snapshot = useSyncExternalStore(controller.subscribe, controller.getSnapshot, controller.getSnapshot);
-  const titleSlot = useContext(NSEWindowTitleSlotContext);
+  const titleSlot = useContext(WindowTitleSlotContext);
   const ownsTitleSlot = titleSlot?.root === controller && controller.splitViewItems[0]?.behavior === "sidebar";
   const titleSlotView = ownsTitleSlot ? <div ref={titleSlot.setSlot} className="nse-window-title-slot" /> : null;
   const layout = controller[nseSplitViewLayout];

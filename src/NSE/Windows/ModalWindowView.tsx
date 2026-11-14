@@ -19,27 +19,31 @@
  */
 
 import React from "react";
-import { NSEWindowView } from "./NSEWindowView";
+import { WindowTitleBar } from "./WindowTitleBar";
+import { WindowView } from "./WindowView";
 import { assertNSEWindowViewRole } from "./windowRoleViewHelpers";
-import type { NSEWindowViewProps } from "./windowViewTypes";
+import type { WindowViewProps } from "./windowViewTypes";
 
-export interface NSEBorderlessWindowViewProps extends NSEWindowViewProps {
-  readonly interactive?: boolean;
-  readonly accessibleName?: string;
-}
-
-export function NSEBorderlessWindowView({ interactive = false, accessibleName, ...props }: NSEBorderlessWindowViewProps) {
-  assertNSEWindowViewRole("NSEBorderlessWindowView", props.record, "borderless");
-  if (interactive && !accessibleName?.trim()) {
-    throw new TypeError("Interactive NSEBorderlessWindowView content requires an accessible name.");
-  }
+export function ModalWindowView(props: WindowViewProps) {
+  assertNSEWindowViewRole("NSEModalWindowView", props.record, "modal");
+  const titleBar = props.presentation.titleBarVisible && props.record.style.includes("titled") ? (
+    <WindowTitleBar
+      record={props.record}
+      dirty={props.dirty}
+      dispatchCommand={props.dispatchCommand}
+      moveHandleProps={props.presentation.movable ? props.moveHandleProps : undefined}
+      controls={["close"]}
+    />
+  ) : null;
   return (
-    <NSEWindowView
+    <WindowView
       {...props}
-      className="nse-window-view--borderless"
+      hasShadow
+      className="nse-window-view--modal"
 
-      semanticRole={interactive ? "dialog" : "presentation"}
-      accessibleName={interactive ? accessibleName : undefined}
+
+      titleBar={titleBar}
+      focusScope="modal"
     />
   );
 }

@@ -33,8 +33,8 @@ export { NSEViewControllerRendererProvider } from "./Application/viewControllerR
 export { NSELocalisationProvider } from "./Navigation/compactMoreTitle";
 
 // Private window drawing and lifecycle protocols supplied to the application host.
-export { NSEWindowTitleSlotContext, NSEWindowTitlebarContent, NSEWindowTitlebarHostContext } from "./Windows/windowTitlebarContext";
-export type { NSEWindowTitlebarDocument, NSEWindowTitlebarHost } from "./Windows/windowTitlebarContext";
+export { WindowTitleSlotContext, WindowTitlebarContent, WindowTitlebarHostContext } from "./Windows/windowTitlebarContext";
+export type { WindowTitlebarDocument, WindowTitlebarHost } from "./Windows/windowTitlebarContext";
 export { nseWindowPresentedTitle } from "./Application/NSEWindowController";
 export type { NSEWindowAlertRequest } from "./Application/NSEWindowController";
 export { registerNSEStandaloneViewControllerRenderer } from "./Application/viewControllerRenderer";
@@ -46,6 +46,6 @@ export { registerNSEOpenPanelHost } from "./FilePanels/openPanelHost";
 export type { NSEOpenPanelHost } from "./FilePanels/openPanelHost";
 export { NSEPresentedContentProvider } from "./Overlays/useNSEPresentedContent";
 export { NSEMenuRuntimeProvider } from "./Menus/menuRuntimeContext";
-export { NSEControllerSheetSurface, NSEWindowAlertContent, NSEOpenPanelSheetSurface } from "./Windows/windowSheetSurfaces";
+export { ControllerSheetSurface, WindowAlertContent, OpenPanelSheetSurface } from "./Windows/windowSheetSurfaces";
 
 export { nativePresentations } from "./Application/nativePresentation";

@@ -34,11 +34,11 @@ import * as AppSDKBarrel from "../../src/SynCloudOS/AppSDK";
 import * as WindowLayerBarrel from "../../src/Webspring/WindowLayer";
 import { createSynWareTestHost } from "../../src/SynCloudOS/AppSDK/testing";
 import {
-  NSEHUDWindowView,
-  NSEModalWindowView,
-  NSEPanelView,
-  NSEPopoverWindowView,
-  NSESheetView,
+  HUDWindowView,
+  ModalWindowView,
+  PanelView,
+  PopoverWindowView,
+  SheetView,
 } from "../../src/NSE/Windows";
 import { render } from "@testing-library/react";
 import type { WindowPresentation, WindowRecord } from "../../src/SynCloudOS/Windows";
@@ -377,11 +377,11 @@ describe("non-standard window role paint", () => {
   it("keeps panel, HUD, sheet, popover and modal visibly painted by the active theme", () => {
     const dispatchCommand = () => Promise.resolve({ handled: true });
     const cases = [
-      { role: "panel" as const, view: NSEPanelView, bar: ".nse-window__titlebar" },
-      { role: "hud" as const, view: NSEHUDWindowView, bar: ".nse-window__hud-titlebar" },
-      { role: "sheet" as const, view: NSESheetView, bar: ".nse-window__titlebar" },
-      { role: "popover" as const, view: NSEPopoverWindowView, bar: null },
-      { role: "modal" as const, view: NSEModalWindowView, bar: ".nse-window__titlebar" },
+      { role: "panel" as const, view: PanelView, bar: ".nse-window__titlebar" },
+      { role: "hud" as const, view: HUDWindowView, bar: ".nse-window__hud-titlebar" },
+      { role: "sheet" as const, view: SheetView, bar: ".nse-window__titlebar" },
+      { role: "popover" as const, view: PopoverWindowView, bar: null },
+      { role: "modal" as const, view: ModalWindowView, bar: ".nse-window__titlebar" },
     ] as const;
     for (const { role, view: View, bar } of cases) {
       const { record, presentation } = roleRecord(role);

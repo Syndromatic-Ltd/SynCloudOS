@@ -4,9 +4,9 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, expect, it } from "vitest";
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
 import { NSEPreferencesToast } from "../../src/NSE/Components/NSEPreferencesToast";
-import { NSEWindowTitlebarContent } from "../../src/NSE/Windows/windowTitlebarContext";
-import { useNSEWindowTitlebarDocument, NSEWindowTitlebarHostContext } from "../../src/SynCloudOS/AppHosting/windowChrome";
-import { NSEStandardWindowView } from "../../src/NSE/Windows/NSEStandardWindowView";
+import { WindowTitlebarContent } from "../../src/NSE/Windows/windowTitlebarContext";
+import { useNSEWindowTitlebarDocument, WindowTitlebarHostContext } from "../../src/SynCloudOS/AppHosting/windowChrome";
+import { StandardWindowView } from "../../src/NSE/Windows/StandardWindowView";
 import { standardWindow } from "../fixtures/windowTestDependencies";
 import type { WindowRecord } from "../../src/SynCloudOS/Windows";
 import { NSEApplication } from "../../src/NSE/Application/NSEApplication";
@@ -45,7 +45,7 @@ it("owns the Preferences panel and Back accessory while a class application is r
 });
 
 function PublishWindow({ controller }: { controller: NSEWindowController }) {
-  useNSEWindowTitlebarDocument(controller, React.useContext(NSEWindowTitlebarHostContext));
+  useNSEWindowTitlebarDocument(controller, React.useContext(WindowTitlebarHostContext));
   return <p>Window content</p>;
 }
 
@@ -55,10 +55,10 @@ it.each(["automatic", "expanded", "preference", "unified", "unifiedCompact"] as 
   controller.window.subtitle = "Work in progress";
   controller.window.toolbarStyle = toolbarStyle;
   const record = { ...standardWindow("reference-window"), id: "reference-window", runtimeId: "test", state: "open", isKey: true, isMain: true, zIndex: 1 } as WindowRecord;
-  const view = render(<NSEStandardWindowView record={record} dirty={false} blocked={false} dispatchCommand={async () => ({ handled: true })}
+  const view = render(<StandardWindowView record={record} dirty={false} blocked={false} dispatchCommand={async () => ({ handled: true })}
     presentation={{ kind: "desktop-window", visible: true, bounds: record.bounds, safeAreaInsets: { blockStart: 0, inlineEnd: 0, blockEnd: 0, inlineStart: 0 }, movable: false, resizable: false, titleBarVisible: true }}>
     <PublishWindow controller={controller} />
-  </NSEStandardWindowView>);
+  </StandardWindowView>);
   const bar = view.container.querySelector('[data-window-titlebar]')!;
   expect(bar.getAttribute("data-toolbar-style")).toBe(toolbarStyle);
   expect(bar.querySelector('[data-window-title]')?.textContent).toBe("Reference documentWork in progress");
@@ -68,7 +68,7 @@ it.each(["automatic", "expanded", "preference", "unified", "unifiedCompact"] as 
 });
 
 it.each(["automatic", "expanded", "preference", "unified", "unifiedCompact"] as const)("renders the %s title and subtitle without a parent-section label", toolbarStyle => {
-  const view = render(<NSEWindowTitlebarContent toolbarStyle={toolbarStyle} title="Buttons" subtitle="Work in progress" />);
+  const view = render(<WindowTitlebarContent toolbarStyle={toolbarStyle} title="Buttons" subtitle="Work in progress" />);
   expect(view.getByRole("heading", { name: "Buttons" })).toBeTruthy();
   expect(view.getByText("Work in progress")).toBeTruthy();
   expect(view.container.querySelector("header")?.getAttribute("data-toolbar-style")).toBe(toolbarStyle);

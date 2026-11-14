@@ -19,15 +19,15 @@
  */
 
 import React from "react";
-import { NSEWindowTitleBar } from "./NSEWindowTitleBar";
-import { NSEWindowView } from "./NSEWindowView";
+import { WindowTitleBar } from "./WindowTitleBar";
+import { WindowView } from "./WindowView";
 import { assertNSEWindowViewRole, windowEscapeCloseHandler } from "./windowRoleViewHelpers";
-import type { NSEWindowViewProps } from "./windowViewTypes";
+import type { WindowViewProps } from "./windowViewTypes";
 
-export function NSESheetView(props: NSEWindowViewProps) {
+export function SheetView(props: WindowViewProps) {
   assertNSEWindowViewRole("NSESheetView", props.record, "sheet");
   const titleBar = props.presentation.titleBarVisible && props.record.style.includes("titled") ? (
-    <NSEWindowTitleBar
+    <WindowTitleBar
       record={props.record}
       dirty={props.dirty}
       dispatchCommand={props.dispatchCommand}
@@ -36,7 +36,7 @@ export function NSESheetView(props: NSEWindowViewProps) {
     />
   ) : null;
   return (
-    <NSEWindowView
+    <WindowView
       {...props}
       hasShadow
       className="nse-window-view--sheet"

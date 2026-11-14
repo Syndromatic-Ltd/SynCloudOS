@@ -27,11 +27,11 @@ import { getOptionalSmoothSurfaceProps, useSmoothSurface } from "../SmoothSurfac
 
 import type { SmoothSurfaceRequest } from "../SmoothSurface";
 import type { SynCloudOSAppFrameSmoothSurfaceManifest } from "../../SynCloudOS/SynCloudOS";
-import type { NSEWindowViewProps } from "./windowViewTypes";
+import type { WindowViewProps } from "./windowViewTypes";
 import "./nse-windows.css";
-import { NSEWindowTitlebarHostContext, NSEWindowTitlebarDocumentContext, type NSEWindowTitlebarDocument } from "./windowTitlebarContext";
+import { WindowTitlebarHostContext, WindowTitlebarDocumentContext, type WindowTitlebarDocument } from "./windowTitlebarContext";
 
-export interface NSEWindowFrameProps extends NSEWindowViewProps {
+export interface WindowFrameProps extends WindowViewProps {
   readonly hasShadow?: boolean;
 
   readonly className?: string;
@@ -62,7 +62,7 @@ const windowSmoothSurfaceRequest = (value: SynCloudOSAppFrameSmoothSurfaceManife
   return value;
 };
 
-export function NSEWindowView({
+export function WindowView({
   record,
   presentation,
   zoomed = false,
@@ -82,7 +82,7 @@ export function NSEWindowView({
   customChromeActive,
   customTitleBarSlotRef,
   children,
-}: NSEWindowFrameProps) {
+}: WindowFrameProps) {
   // Hooks precede the closed/hidden early return. The clip-path hook writes
   // real squircle geometry onto the surface element; the className/style
   // props carry the radius paint underneath. Shadow and resize handles are
@@ -90,7 +90,7 @@ export function NSEWindowView({
   // inside the clipped surface exactly like mounted app views.
   const appearance = useNSEAppearance();
   const contentLayoutProperties = useNSEContentLayoutProperties();
-  const [titlebarDocument, setTitlebarDocument] = React.useState<NSEWindowTitlebarDocument | null>(null);
+  const [titlebarDocument, setTitlebarDocument] = React.useState<WindowTitlebarDocument | null>(null);
   const titlebarHost = React.useMemo(() => ({ setDocument: setTitlebarDocument, leadingAccessories: null, trailingAccessories: null }), []);
   const [surfaceNode, setSurfaceNode] = React.useState<HTMLDivElement | null>(null);
   const smoothSurfaceRequest = windowSmoothSurfaceRequest(record.smoothSurface ?? null);
@@ -105,7 +105,7 @@ export function NSEWindowView({
 
   const smoothSurfaceProps = getOptionalSmoothSurfaceProps(smoothSurfaceRequest);
   return (
-    <NSEWindowTitlebarHostContext.Provider value={titlebarHost}>
+    <WindowTitlebarHostContext.Provider value={titlebarHost}>
     <section
       data-nse-control="window" data-nse-part="background" data-nse-role={record.role} data-nse-type={record.chromeMode} data-nse-style={customChromeActive ? "custom" : undefined} data-nse-edge={arrowEdge} data-nse-alignment={arrowAlignment} data-nse-chrome={record.role === "hud" ? "hud" : appearance.chrome} data-nse-key-window={record.isKey ? undefined : "false"} data-nse-toolbar-style={titlebarDocument?.toolbarStyle ?? "automatic"}
       className={["nse-window-view", className].filter(Boolean).join(" ")}
@@ -159,7 +159,7 @@ export function NSEWindowView({
         style={smoothSurfaceProps.style}
         data-window-surface=""
       >
-        <NSEWindowTitlebarDocumentContext.Provider value={titlebarDocument}>{titleBar}</NSEWindowTitlebarDocumentContext.Provider>
+        <WindowTitlebarDocumentContext.Provider value={titlebarDocument}>{titleBar}</WindowTitlebarDocumentContext.Provider>
         {customTitleBarSlotRef ? (
           <div
             ref={customTitleBarSlotRef}
@@ -172,6 +172,6 @@ export function NSEWindowView({
       </div>
       {resizeHandles}
     </section>
-    </NSEWindowTitlebarHostContext.Provider>
+    </WindowTitlebarHostContext.Provider>
   );
 }

@@ -21,11 +21,11 @@
 import { useNSEWindowChromeElement } from "../Layout/windowChromeObstructions";
 
 import React, { useState } from "react";
-import { NSEWindowView } from "./NSEWindowView";
+import { WindowView } from "./WindowView";
 import { assertNSEWindowViewRole, windowEscapeCloseHandler } from "./windowRoleViewHelpers";
-import type { NSEWindowViewProps } from "./windowViewTypes";
+import type { WindowViewProps } from "./windowViewTypes";
 
-function HUDTitleBar({ record, dispatchCommand, moveHandleProps }: Pick<NSEWindowViewProps, "record" | "dispatchCommand" | "moveHandleProps">) {
+function HUDTitleBar({ record, dispatchCommand, moveHandleProps }: Pick<WindowViewProps, "record" | "dispatchCommand" | "moveHandleProps">) {
   const header = React.useRef<HTMLElement>(null);
   useNSEWindowChromeElement(header, "top", true);
   const [highlighted, setHighlighted] = useState(false);
@@ -61,7 +61,7 @@ function HUDTitleBar({ record, dispatchCommand, moveHandleProps }: Pick<NSEWindo
   );
 }
 
-export function NSEHUDWindowView(props: NSEWindowViewProps) {
+export function HUDWindowView(props: WindowViewProps) {
   assertNSEWindowViewRole("NSEHUDWindowView", props.record, "hud");
   if (props.record.level === "normal") throw new TypeError("NSEHUDWindowView requires a floating HUD level.");
   const titleBar = props.presentation.titleBarVisible && props.record.style.includes("titled") ? (
@@ -72,7 +72,7 @@ export function NSEHUDWindowView(props: NSEWindowViewProps) {
     />
   ) : null;
   return (
-    <NSEWindowView
+    <WindowView
       {...props}
       className="nse-window-view--hud"
 
