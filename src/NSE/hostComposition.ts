@@ -33,6 +33,8 @@ export {
   useNSEFeedback,
 } from "./Feedback";
 export { resolveNSEFocusReturnTarget, isWithinNSEFocusOrigin } from "./Focus/focusOrigin";
+export { isNSEDOMNode, isNSEDOMElement, isNSEHTMLElement } from "./Focus/domRealm";
+export { PresentingDocumentContext } from "./Overlays/presentingDocument";
 
 export { AlertSurface } from "./Components/NSEAlertSurface";
 export { SourceListFrameProvider } from "./Navigation/SourceList/sourceListFrameContext";

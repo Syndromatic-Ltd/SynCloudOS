@@ -42,7 +42,7 @@ export interface WindowControllerDependencies {
   readonly webspringResponderId: string;
   readonly runtimeResponderId: string;
   readonly delegate?: WindowControllerDelegate;
-  readonly observeError?: (error: unknown, phase: "did-open" | "did-close" | "close-commit" | "close-rollback" | "listener" | "unload" | "dispose" | "responder-dispose") => void;
+  readonly observeError?: (error: unknown, phase: "did-open" | "did-close" | "full-screen" | "close-commit" | "close-rollback" | "listener" | "unload" | "dispose" | "responder-dispose") => void;
 }
 
 export class WindowController {
@@ -302,6 +302,10 @@ export class WindowController {
     }
     this.#contentController = null;
     this.#setContentState({ status: "unloaded" });
+  }
+
+  notifyFullScreen(event: Extract<keyof WindowControllerDelegate, `window${string}FullScreen`>): void {
+    try { this.dependencies.delegate?.[event]?.(this.#record); } catch (error) { this.#reportError(error, "full-screen"); }
   }
 
   notifyDidOpen(): void {

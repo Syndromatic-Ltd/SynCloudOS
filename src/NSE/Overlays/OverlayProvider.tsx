@@ -25,6 +25,7 @@ import { createOverlayManager } from "./overlayManager";
 import { belongsToNearestNSEOverlayProvider, isWithinNSEOverlay, markNSEOverlayDocumentProviderActive, nseOverlayEventPath, retainNSEOverlayDocumentProvider } from "./overlayEventOwnership";
 import type { OverlayDismissReason, OverlayManager, OverlayRegistration, OverlayRuntimePort } from "./overlayTypes";
 import { useNSEAppearanceProjection } from "../Appearance";
+import { PresentingDocumentContext } from "./presentingDocument";
 import "./nse-overlays.css";
 
 export interface OverlayProviderContextValue {
@@ -68,11 +69,22 @@ export interface OverlayProviderProps extends PropsWithChildren {
 
 export function OverlayProvider({
   manager: providedManager,
-  runtimePort: runtime,
+  runtimePort,
   defaultParentResponderId,
   portalContainer,
   children,
 }: OverlayProviderProps) {
+  const presentingDocument = useContext(PresentingDocumentContext);
+  const runtime = useMemo<OverlayRuntimePort>(() => presentingDocument ? {
+    ...runtimePort,
+    environment: {
+      ...runtimePort.environment,
+      browser: {
+        getDocument: () => presentingDocument,
+        getWindow: () => presentingDocument.defaultView,
+      },
+    },
+  } : runtimePort, [presentingDocument, runtimePort]);
   const presentation = runtime.environment.presentation;
   const traits = useSyncExternalStore(presentation.subscribe, presentation.getSnapshot, presentation.getSnapshot);
   const screenSafeArea = useNSEScreenSafeAreaProperties(traits.safeAreaInsets);

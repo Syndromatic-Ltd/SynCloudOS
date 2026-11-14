@@ -27,7 +27,6 @@ import {
   canonicalWindowSerializableValue,
   canonicalWindowChromeMode,
   chromeModes,
-  defaultWindowSmoothSurface,
   isWindowSerializableValue,
   normaliseWindowSmoothSurface,
   type WindowAnchor,
@@ -102,6 +101,8 @@ export interface RestorableWindowRecord {
   readonly pinned: boolean;
   readonly wasMinimised: boolean;
   readonly wasZoomed: boolean;
+  readonly fullScreen: "off" | "on";
+  readonly collectionBehavior: NonNullable<WindowRecord["collectionBehavior"]>;
   readonly zOrder: number;
   readonly mobilePolicy: WindowRecord["mobilePolicy"];
   readonly restorationKey: string;
@@ -112,7 +113,7 @@ export interface RestorableWindowRecord {
 }
 
 export interface WindowRestorationSnapshot {
-  readonly schemaVersion: 1;
+  readonly schemaVersion: 2;
   readonly namespace: ResolvedWindowPersistenceNamespace;
   readonly installationId: string;
   readonly capturedAtEpochMs: number;
@@ -143,7 +144,7 @@ export interface WindowRestorationReport {
 }
 
 export interface WindowPresentation {
-  readonly kind: "desktop-window" | "mobile-fullscreen" | "mobile-sheet" | "hidden";
+  readonly kind: "desktop-window" | "full-screen" | "mobile-fullscreen" | "mobile-sheet" | "hidden";
   readonly visible: boolean;
   readonly bounds: WindowBounds;
   readonly safeAreaInsets: ScreenSnapshot["safeAreaInsets"];
@@ -153,11 +154,12 @@ export interface WindowPresentation {
 }
 
 const roles = new Set<WindowRole>(["standard", "panel", "hud", "modal", "sheet", "popover", "borderless"]);
-const styles = new Set<WindowStyle>(["titled", "closable", "minimisable", "resizable", "zoomable"]);
+const styles = new Set<WindowStyle>(["titled", "closable", "minimisable", "resizable", "zoomable", "fullScreen", "fullSizeContentView", "texturedBackground"]);
 const levels = new Set<WindowRecord["level"]>(["normal", "floating", "modal", "status"]);
 const mobilePolicies = new Set<WindowRecord["mobilePolicy"]>(["fullscreen", "sheet", "popover-to-sheet", "hidden"]);
 const associationRoles = new Set<DocumentWindowAssociation["role"]>(["primary", "secondary", "inspector"]);
 const documentKinds = new Set<DocumentKind>(["standard", "projection"]);
+const collectionBehaviors = new Set(["fullScreenPrimary", "fullScreenAuxiliary", "fullScreenNone"]);
 
 export class InvalidWindowRestorationSnapshotError extends TypeError {
   constructor(message: string) {
@@ -206,7 +208,7 @@ export function validateWindowRestorationSnapshot(
   }
   value = canonical;
   if (!isPlainObject(value)) invalid("Window restoration snapshots must be plain objects.");
-  if (value.schemaVersion !== 1) invalid("Unsupported window restoration schema version.");
+  if (value.schemaVersion !== 1 && value.schemaVersion !== 2) invalid("Unsupported window restoration schema version.");
   if (value.namespace !== expected.namespace) invalid("Window restoration namespace does not match this runtime.");
   if (value.installationId !== expected.installationId) invalid("Window restoration installation identity does not match this runtime.");
   if (!Number.isFinite(value.capturedAtEpochMs)) invalid("Window restoration capture time must be finite.");
@@ -218,7 +220,7 @@ export function validateWindowRestorationSnapshot(
   const ids = new Set<string>();
   const restorationKeys = new Set<string>();
   for (const candidate of value.windows) {
-    assertRestorableWindowRecord(candidate, expected.runtimeId);
+    assertRestorableWindowRecord(candidate, expected.runtimeId, value.schemaVersion);
     if (ids.has(candidate.windowControllerId)) invalid(`Duplicate restored window ID "${candidate.windowControllerId}".`);
     if (restorationKeys.has(candidate.restorationKey)) invalid(`Duplicate window restoration key "${candidate.restorationKey}".`);
     ids.add(candidate.windowControllerId);
@@ -248,7 +250,15 @@ export function validateWindowRestorationSnapshot(
   }
   assertAcyclicRelationships(value.windows);
   if (!isWindowSerializableValue(value)) invalid("Window restoration snapshots must contain only serialisable values.");
-  return value as unknown as WindowRestorationSnapshot;
+  const snapshot = value as unknown as WindowRestorationSnapshot;
+  if (value.schemaVersion === 1) {
+    return freezeWindowRestorationSnapshot({
+      ...snapshot,
+      schemaVersion: 2,
+      windows: snapshot.windows.map(record => ({ ...record, fullScreen: "off", collectionBehavior: "fullScreenNone" })),
+    });
+  }
+  return snapshot;
 }
 
 export function freezeWindowRestorationSnapshot(snapshot: WindowRestorationSnapshot): WindowRestorationSnapshot {
@@ -302,6 +312,12 @@ export function resolveWindowPresentation(record: WindowRecord, screen: ScreenSn
       width: Math.min(screen.workArea.x + screen.workArea.width, screen.visualViewport.x + screen.visualViewport.width) - x,
       height: Math.min(screen.workArea.y + screen.workArea.height, screen.visualViewport.y + screen.visualViewport.height) - y,
     };
+    if (record.role === "standard" && (record.fullScreen === "on" || record.fullScreen === "exiting")) {
+      return Object.freeze({
+        kind: "full-screen", visible: true, bounds: Object.freeze(workArea), safeAreaInsets,
+        movable: false, resizable: false, titleBarVisible,
+      });
+    }
     const bounds = geometry?.zoomed ? Object.freeze(workArea) : constrainDesktopPresentation(record, workArea);
     return Object.freeze({
       kind: "desktop-window",
@@ -365,7 +381,7 @@ function constrainDesktopPresentation(record: WindowRecord, workArea: WindowBoun
   return Object.freeze({ x, y, width, height });
 }
 
-function assertRestorableWindowRecord(value: unknown, runtimeId: WindowRecord["runtimeId"]): asserts value is RestorableWindowRecord {
+function assertRestorableWindowRecord(value: unknown, runtimeId: WindowRecord["runtimeId"], schemaVersion: 1 | 2): asserts value is RestorableWindowRecord {
   if (!isPlainObject(value)) invalid("Every restored window must be a plain object.");
   const requiredStrings = ["windowControllerId", "workspaceId", "title", "restorationKey"] as const;
   for (const field of requiredStrings) {
@@ -394,6 +410,15 @@ function assertRestorableWindowRecord(value: unknown, runtimeId: WindowRecord["r
   catch { invalid("Restored window smoothSurface is invalid."); }
   if (typeof value.pinned !== "boolean" || typeof value.wasMinimised !== "boolean" || typeof value.wasZoomed !== "boolean") {
     invalid("Restored window state flags must be boolean.");
+  }
+  if (schemaVersion === 2) {
+    if (value.fullScreen !== "off" && value.fullScreen !== "on") invalid("Restored full-screen state must be stable.");
+    if (typeof value.collectionBehavior !== "string" || !collectionBehaviors.has(value.collectionBehavior)) {
+      invalid("Restored window collection behavior is invalid.");
+    }
+    if (value.fullScreen === "on" && (value.role !== "standard" || value.collectionBehavior !== "fullScreenPrimary")) {
+      invalid("Only a primary standard window can restore full screen.");
+    }
   }
   if (!Number.isSafeInteger(value.zOrder) || (value.zOrder as number) < 0) invalid("Restored z-order must be a non-negative safe integer.");
   if (!isWindowSerializableValue(value.contentRestorationState)) invalid("Restored content state must be serialisable.");
@@ -429,6 +454,8 @@ function assertRestorableWindowRecord(value: unknown, runtimeId: WindowRecord["r
       restorationKey: value.restorationKey as string,
       chromeMode: canonicalWindowChromeMode(value.role as WindowRole, value.chromeMode as WindowChromeMode | undefined),
       smoothSurface: normaliseWindowSmoothSurface(value.smoothSurface),
+      fullScreen: schemaVersion === 1 ? "off" : value.fullScreen as RestorableWindowRecord["fullScreen"],
+      collectionBehavior: schemaVersion === 1 ? "fullScreenNone" : value.collectionBehavior as RestorableWindowRecord["collectionBehavior"],
     });
   } catch (error) {
     invalid(error instanceof Error ? error.message : "Restored window record is invalid.");

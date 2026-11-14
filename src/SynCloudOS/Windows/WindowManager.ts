@@ -37,6 +37,7 @@ import type { UndoManagerRegistry } from "../Undo";
 import type { ScreenService } from "./ScreenService";
 import { WindowBoundsScheduler } from "./WindowBoundsScheduler";
 import { WindowController } from "./WindowController";
+import { createStageWindowHost, type WindowHostEnvironment, type WindowHostEvent } from "./WindowHostEnvironment";
 import { WindowContentFactoryUnavailableError, type WindowContentRegistry } from "./WindowContentRegistry";
 import { WindowDocumentPresentationCloseCoordinator } from "./WindowDocumentPresentationCloseCoordinator";
 import {
@@ -55,6 +56,10 @@ import {
   canonicalWindowChromeMode,
   createCanonicalWindowRecord,
   defaultWindowSmoothSurface,
+  effectiveWindowStyle,
+  type WindowCollectionBehavior,
+  type WindowFullScreenState,
+  type WindowStyle,
   freezeWindowRecord,
   normaliseWindowSmoothSurface,
   type CreateWindowRequest,
@@ -96,6 +101,7 @@ export interface WindowManagerDependencies {
   readonly content: WindowContentRegistry;
   readonly ids: WindowIdPort;
   readonly restoration: WindowRestorationDependencies;
+  readonly host?: WindowHostEnvironment;
   readonly resolveApplicationWindow?: (applicationId: string) => CreateWindowRequest | null;
   /** Host-owned bridge to an app's narrow exact-document rematerialiser.
    * WindowManager never hands application code raw runtime authority. */
@@ -195,6 +201,9 @@ export class WindowManager {
   #runtimeDisposalGeneration = 0;
   #authorityGeneration = 0;
   #disposed = false;
+  readonly host: WindowHostEnvironment;
+  readonly #unsubscribeHost: () => void;
+  readonly #fullScreenIntents = new Map<string, boolean>();
 
   constructor(readonly dependencies: WindowManagerDependencies) {
     this.runtimeId = dependencies.runtimeId;
@@ -243,6 +252,8 @@ export class WindowManager {
       },
       observeError: (error) => this.#reportError(error, "window-bounds-frame-cancel"),
     });
+    this.host = dependencies.host ?? createStageWindowHost();
+    this.#unsubscribeHost = this.host.subscribe(event => this.#handleHostEvent(event));
   }
 
   snapshot = (): WindowManagerSnapshot => this.#snapshot;
@@ -996,6 +1007,91 @@ export class WindowManager {
     this.#publish(true);
   }
 
+  setStyle(windowId: string, style: readonly WindowStyle[]): void {
+    this.#assertMutable();
+    this.#assertControllerTransitionAvailable(windowId);
+    const controller = this.select(windowId);
+    controller.replaceRecord({ ...controller.record, style: effectiveWindowStyle(style, controller.record.fullScreen ?? "off") });
+    this.#publish(false);
+  }
+
+  setCollectionBehavior(windowId: string, collectionBehavior: WindowCollectionBehavior): void {
+    this.#assertMutable();
+    this.#assertControllerTransitionAvailable(windowId);
+    const controller = this.select(windowId);
+    if (collectionBehavior !== "fullScreenPrimary" && (controller.record.fullScreen ?? "off") !== "off") return;
+    controller.replaceRecord({ ...controller.record, collectionBehavior });
+    this.#publish(false);
+  }
+
+  toggleFullScreen(windowId: string): void {
+    this.#assertMutable();
+    this.#assertControllerTransitionAvailable(windowId);
+    const controller = this.select(windowId);
+    const { record } = controller;
+    if (record.state !== "open" || record.role !== "standard" ||
+        record.collectionBehavior !== "fullScreenPrimary" || this.#blockedWindowIds().has(windowId)) return;
+    const proposed = this.#fullScreenIntents.get(windowId) ?? (record.fullScreen === "entering" || record.fullScreen === "on");
+    this.#fullScreenIntents.set(windowId, !proposed);
+    this.#drainFullScreenIntent(controller);
+  }
+
+  #drainFullScreenIntent(controller: WindowController): void {
+    const { id, record } = controller;
+    if (record.fullScreen === "entering" || record.fullScreen === "exiting") return;
+    const desired = this.#fullScreenIntents.get(id);
+    if (desired === undefined) return;
+    this.#fullScreenIntents.delete(id);
+    if (this.#controllers.get(id) !== controller || record.state !== "open" || desired === (record.fullScreen === "on")) return;
+    this.#setFullScreenState(controller, desired ? "entering" : "exiting");
+    if (this.#controllers.get(id) !== controller) return;
+    try {
+      this.host.requestFullScreen(id, desired);
+    } catch (error) {
+      this.#reportError(error, "window-host-full-screen");
+      this.#handleHostEvent({ kind: "fullScreenChanged", windowId: id, state: "refused" });
+    }
+  }
+
+  #setFullScreenState(controller: WindowController, state: WindowFullScreenState, refused = false): void {
+    const previous = controller.record.fullScreen ?? "off";
+    if (state === previous) return;
+    controller.replaceRecord({ ...controller.record, fullScreen: state, style: effectiveWindowStyle(controller.record.style, state) });
+    this.#boundsScheduler.cancel(controller.id);
+    if (state === "entering") controller.notifyFullScreen("windowWillEnterFullScreen");
+    if (state === "exiting") controller.notifyFullScreen("windowWillExitFullScreen");
+    if (state === "on") controller.notifyFullScreen(refused ? "windowDidFailToExitFullScreen" : "windowDidEnterFullScreen");
+    if (state === "off") controller.notifyFullScreen(refused ? "windowDidFailToEnterFullScreen" : "windowDidExitFullScreen");
+    this.#publish(false);
+  }
+
+  #handleHostEvent(event: WindowHostEvent): void {
+    if (this.#disposed) return;
+    const controller = this.#controllers.get(event.windowId);
+    if (!controller || controller.record.state !== "open") return;
+    if (event.kind === "activated") {
+      this.makeKey(controller.id);
+    } else if (event.kind === "deactivated") {
+      if (controller.record.isKey) this.resignKey();
+    } else if (event.kind === "closeRequested") {
+      void this.requestClose(controller.id, { reason: "control" }).catch(error => this.#reportError(error, "window-host-close"));
+    } else if (event.kind === "fullScreenChanged" && controller.record.collectionBehavior === "fullScreenPrimary" &&
+        controller.record.role === "standard") {
+      const previous = controller.record.fullScreen ?? "off";
+      if (event.state === "refused") {
+        if (previous === "entering" || previous === "exiting") {
+          this.#setFullScreenState(controller, previous === "entering" ? "off" : "on", true);
+        }
+      } else {
+        if (event.state === "on" && previous === "off") this.#setFullScreenState(controller, "entering");
+        if (event.state === "off" && previous === "on") this.#setFullScreenState(controller, "exiting");
+        if (this.#controllers.get(controller.id) !== controller) return;
+        this.#setFullScreenState(controller, event.state);
+      }
+      this.#drainFullScreenIntent(controller);
+    }
+  }
+
   zoom(windowControllerId: string): void {
     this.#assertMutable();
     this.#assertControllerTransitionAvailable(windowControllerId);
@@ -1005,6 +1101,7 @@ export class WindowManager {
       controller.record.state !== "open" ||
       this.#blockedWindowIds().has(windowControllerId) ||
       !controller.record.style.includes("zoomable") ||
+      (controller.record.fullScreen ?? "off") !== "off" ||
       this.isCompactPresentation(windowControllerId)
     ) return;
     this.#boundsScheduler.cancel(windowControllerId);
@@ -1097,7 +1194,9 @@ export class WindowManager {
         representedDocument: record.representedDocument,
         toolbar: record.toolbar,
         role: record.role,
-        style: record.style,
+        style: effectiveWindowStyle(record.style, record.fullScreen === "on" || record.fullScreen === "exiting" ? "on" : "off"),
+        fullScreen: record.fullScreen === "on" || record.fullScreen === "exiting" ? "on" : "off",
+        collectionBehavior: record.collectionBehavior ?? "fullScreenNone",
         title: record.title,
         content: record.content,
         contentRestorationState: controller.contentRestorationState,
@@ -1119,7 +1218,7 @@ export class WindowManager {
     }
     const durableIds = new Set(windows.map(({ windowControllerId }) => windowControllerId));
     const raw = {
-      schemaVersion: 1,
+      schemaVersion: 2,
       namespace: this.#restorationIdentity.namespace,
       installationId: this.#restorationIdentity.installationId,
       capturedAtEpochMs,
@@ -1152,7 +1251,7 @@ export class WindowManager {
     this.#assertLive();
     const persisted = this.dependencies.restoration.persistence.read("windows.workspace-v1");
     if (persisted === null) return emptyRestorationReport();
-    return this.restoreWorkspace(persisted as WindowRestorationSnapshot, signal);
+    return this.restoreWorkspace(persisted, signal);
   }
 
   /**
@@ -1206,7 +1305,7 @@ export class WindowManager {
     return documentId;
   }
 
-  async restoreWorkspace(snapshot: WindowRestorationSnapshot, signal?: AbortSignal): Promise<WindowRestorationReport> {
+  async restoreWorkspace(snapshot: unknown, signal?: AbortSignal): Promise<WindowRestorationReport> {
     this.#assertMutable();
     this.#assertLive();
     const validated = freezeWindowRestorationSnapshot(validateWindowRestorationSnapshot(snapshot, {
@@ -1343,6 +1442,8 @@ export class WindowManager {
           toolbar: source.toolbar,
           role: source.role,
           style: source.style,
+          fullScreen: source.fullScreen,
+          collectionBehavior: source.collectionBehavior,
           title: source.title,
           content: restoredContent.descriptor,
           bounds: source.normalBounds,
@@ -1559,6 +1660,8 @@ export class WindowManager {
   dispose(): void {
     if (this.#disposed) return;
     this.#disposed = true;
+    this.#tryCleanup("window-host-unsubscribe", this.#unsubscribeHost);
+    this.#fullScreenIntents.clear();
     for (const live of [...this.#liveCloseTokens.values()]) {
       this.#tryCleanup("window-close-rollback", () => this.#rollbackPreparations(live.preparations));
     }
@@ -1655,6 +1758,7 @@ export class WindowManager {
     const controller = this.#controllers.get(id);
     if (!controller) return;
     const record = controller.record;
+    this.#fullScreenIntents.delete(id);
     const orderIndex = this.#order.indexOf(id);
     const wasOpen = orderIndex >= 0;
     const ownedOpenResources = wasOpen || record.state === "opening" || this.#openingWindowControllerIds.has(id);
@@ -1773,7 +1877,8 @@ export class WindowManager {
       if (this.#ownedWindowUndoIds.delete(controller.id)) {
         this.#tryCleanup("window-undo-dispose", () => this.dependencies.undo.remove({ kind: "window", id: controller.id }));
       }
-      controller.replaceRecord({ ...record, state: "closed", isKey: false, isMain: false, zIndex: 0 });
+      this.#fullScreenIntents.delete(controller.id);
+      controller.replaceRecord({ ...record, state: "closed", isKey: false, isMain: false, zIndex: 0, fullScreen: "off", style: effectiveWindowStyle(record.style, "off") });
       if (record.role === "sheet") {
         const hasData = this.#sheetEndData.has(controller.id);
         controller.completeSheet({
@@ -2129,7 +2234,10 @@ export class WindowManager {
   #restoreKeyAndMain(): void {
     this.#rememberCurrentWindowFocus();
     const blocked = this.#blockedWindowIds();
-    const eligible = [...this.#orderedControllers()].reverse().find(({ record, id }) => record.state === "open" && !blocked.has(id)) ?? null;
+    const eligible = [...this.#orderedControllers()].reverse().find(controller =>
+      controller.record.state === "open" && !blocked.has(controller.id) &&
+      this.dependencies.focus.requestFocus(this.#focusTarget(controller)).status === "focused"
+    ) ?? null;
     const main = [...this.#orderedControllers()].reverse().find(({ record, id }) => record.state === "open" && record.role === "standard" && !blocked.has(id)) ?? null;
     for (const controller of this.#orderedControllers()) {
       const isKey = controller.id === eligible?.id;
@@ -2146,7 +2254,6 @@ export class WindowManager {
       webspringResponderId: "webspring",
       runtimeResponderId: "runtime",
     });
-    if (eligible) this.dependencies.focus.requestFocus(this.#focusTarget(eligible));
   }
 
   #retainApplicationResponder(sessionId: string, applicationId: string): void {

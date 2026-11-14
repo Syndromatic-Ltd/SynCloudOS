@@ -23,7 +23,7 @@ import { cloneElement, isValidElement, useCallback, useContext, useInsertionEffe
 import type { FocusScopeKind } from "../SynCloudOS/SynCloudOS";
 import { SynWareRuntimeContext } from "./runtimeContext";
 import type { SynWareRuntime } from "./appRuntimeTypes";
-import { isWithinNSEFocusOrigin } from "../NSE/hostComposition";
+import { isWithinNSEFocusOrigin, isNSEDOMNode, isNSEDOMElement, isNSEHTMLElement, PresentingDocumentContext } from "../NSE/hostComposition";
 import { useResponderHierarchy } from "./responderHierarchy";
 import { FocusScopeIdContext } from "./focusScopeContext";
 
@@ -44,6 +44,7 @@ const focusableSelector = "button:not([disabled]), [href], input:not([disabled])
  * focus/trap semantics while all logical scope operations use the mounted
  * app focus lease. */
 export function AppFocusScope({ runtime, runtimeId, options, children }: { readonly runtime: SynWareRuntime; readonly runtimeId: string; readonly options: AppFocusScopeOptions; readonly children: ReactNode }) {
+  const presentingDocument = useContext(PresentingDocumentContext);
   const rootRef = useRef<HTMLDivElement>(null);
   const child = isValidElement(children) ? children as ReactElement<{ ref?: Ref<HTMLDivElement> }> : null;
   const childRef = child?.props.ref;
@@ -59,7 +60,7 @@ export function AppFocusScope({ runtime, runtimeId, options, children }: { reado
     ?? (hierarchy.runtimeId === `app:${runtime.app.bundleIdentifier}` ? hierarchy.responderId : null)
     ?? `application:${runtime.app.bundleIdentifier}`;
   const scopeLease = useRef<ReturnType<typeof runtime.focus.openScope> | null>(null);
-  const configuration = useMemo(() => ({ runtime, scopeId: options.scopeId, parentScopeId: options.parentScopeId, parentResponderId }), [modal, options.kind, options.parentScopeId, options.restoreFocus, options.scopeId, parentResponderId, runtime, runtimeId, trapFocus]);
+  const configuration = useMemo(() => ({ runtime, scopeId: options.scopeId, parentScopeId: options.parentScopeId, parentResponderId }), [modal, options.kind, options.parentScopeId, options.restoreFocus, options.scopeId, parentResponderId, presentingDocument, runtime, runtimeId, trapFocus]);
   const latestConfiguration = useRef(configuration);
   useInsertionEffect(() => { latestConfiguration.current = configuration; }, [configuration]);
   useLayoutEffect(() => {
@@ -80,15 +81,15 @@ export function AppFocusScope({ runtime, runtimeId, options, children }: { reado
     handle.updatePresentation({ kind: options.kind, modal, trapFocus });
     if (newlyOpened) runtime.focus.requestFocus(parentResponderId);
     const root = rootRef.current;
-    const doc = root?.ownerDocument ?? (typeof document === "undefined" ? null : document);
+    const doc = presentingDocument ?? root?.ownerDocument ?? (typeof document === "undefined" ? null : document);
     const focusables = () => Array.from(root?.querySelectorAll<HTMLElement>(focusableSelector) ?? [])
       .filter((element) => !element.hasAttribute("disabled") && !element.closest("[inert], [aria-hidden='true']"));
     let redirectingFocus = false;
     const onFocus = (event: FocusEvent) => {
-      if (runtime.signal.aborted || redirectingFocus || !trapFocus || !root || !(event.target instanceof Node) || isWithinNSEFocusOrigin(root, event.target)) return;
+      if (runtime.signal.aborted || redirectingFocus || !trapFocus || !root || !isNSEDOMNode(event.target) || isWithinNSEFocusOrigin(root, event.target)) return;
       // A surface opened from inside this one (a listbox or popover portalled
       // out of the sheet) nests its scope here; focus entering it stays in.
-      const targetScope = event.target instanceof Element
+      const targetScope = isNSEDOMElement(event.target)
         ? event.target.closest<HTMLElement>("[data-syncloudos-focus-scope]")
         : null;
       const targetScopeId = targetScope?.dataset.syncloudosFocusScope;
@@ -112,7 +113,7 @@ export function AppFocusScope({ runtime, runtimeId, options, children }: { reado
       if (runtime.signal.aborted || !trapFocus || event.key !== "Tab" || event.altKey || event.ctrlKey || event.metaKey || !root) return;
       const targets = focusables();
       if (targets.length === 0) return;
-      const current = doc?.activeElement instanceof HTMLElement ? targets.indexOf(doc.activeElement) : -1;
+      const current = isNSEHTMLElement(doc?.activeElement) ? targets.indexOf(doc.activeElement) : -1;
       if (current < 0 || (!event.shiftKey && current === targets.length - 1) || (event.shiftKey && current === 0)) {
         event.preventDefault();
         const target = targets[event.shiftKey ? targets.length - 1 : 0];
@@ -149,7 +150,7 @@ export function AppFocusScope({ runtime, runtimeId, options, children }: { reado
         if (!runtime.signal.aborted) handle.close({ restore: options.restoreFocus });
       }
     };
-  }, [modal, options.kind, options.parentScopeId, options.restoreFocus, options.scopeId, parentResponderId, runtime, runtimeId, trapFocus]);
+  }, [modal, options.kind, options.parentScopeId, options.restoreFocus, options.scopeId, parentResponderId, presentingDocument, runtime, runtimeId, trapFocus]);
 
   const host = <div ref={rootRef} data-syncloudos-runtime-owner={runtimeId} data-syncloudos-focus-scope={options.scopeId}>{children}</div>;
   if (!options.asChild) return <FocusScopeIdContext value={options.scopeId}>{host}</FocusScopeIdContext>;

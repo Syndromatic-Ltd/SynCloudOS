@@ -191,7 +191,10 @@ export type WindowRole =
   | "popover"
   | "borderless";
 
-export type WindowStyle = "titled" | "closable" | "minimisable" | "resizable" | "zoomable";
+export type WindowStyle = "titled" | "closable" | "minimisable" | "resizable" | "zoomable" | "fullScreen" | "fullSizeContentView" | "texturedBackground";
+
+export type WindowFullScreenState = "off" | "entering" | "on" | "exiting";
+export type WindowCollectionBehavior = "fullScreenPrimary" | "fullScreenAuxiliary" | "fullScreenNone";
 
 export interface WindowBounds {
   readonly x: number;
@@ -279,6 +282,8 @@ export interface WindowRecord {
   readonly toolbar: WindowToolbarState | null;
   readonly role: WindowRole;
   readonly style: readonly WindowStyle[];
+  readonly fullScreen?: WindowFullScreenState;
+  readonly collectionBehavior?: WindowCollectionBehavior;
   readonly title: string;
   readonly content: WindowContentDescriptor;
   readonly bounds: WindowBounds;
@@ -324,9 +329,17 @@ export function createCanonicalWindowRecord(
     isKey: false,
     isMain: false,
     zIndex: 0,
+    fullScreen: request.fullScreen ?? "off",
+    collectionBehavior: request.collectionBehavior ?? "fullScreenNone",
+    style: effectiveWindowStyle(request.style, request.fullScreen ?? "off"),
     chromeMode: canonicalWindowChromeMode(request.role, request.chromeMode),
     smoothSurface: normaliseWindowSmoothSurface(request.smoothSurface),
   });
+}
+
+export function effectiveWindowStyle(style: readonly WindowStyle[], state: WindowFullScreenState): readonly WindowStyle[] {
+  const base = style.filter(bit => bit !== "fullScreen");
+  return state === "on" ? [...base, "fullScreen"] : base;
 }
 
 export interface WindowCloseRequest {
@@ -393,6 +406,12 @@ export interface WindowControllerDelegate {
   willClose?(request: WindowCloseRequest): void;
   didOpen?(record: WindowRecord): void;
   didClose?(record: WindowRecord): void;
+  windowWillEnterFullScreen?(record: WindowRecord): void;
+  windowDidEnterFullScreen?(record: WindowRecord): void;
+  windowWillExitFullScreen?(record: WindowRecord): void;
+  windowDidExitFullScreen?(record: WindowRecord): void;
+  windowDidFailToEnterFullScreen?(record: WindowRecord): void;
+  windowDidFailToExitFullScreen?(record: WindowRecord): void;
 }
 
 /** What the owner of a window's content registers to veto its close and to learn it is closing. */
@@ -662,6 +681,24 @@ function assertCanonicalWindowRecord(record: WindowRecord): void {
     record.representedDocument.associationRole !== record.documentAssociationRole
   )) throw new InvalidWindowRecordError("Represented document identity must match the window association.");
   if (new Set(record.style).size !== record.style.length) throw new InvalidWindowRecordError("Window styles must not contain duplicates.");
+  if (record.collectionBehavior !== undefined &&
+      record.collectionBehavior !== "fullScreenPrimary" &&
+      record.collectionBehavior !== "fullScreenAuxiliary" &&
+      record.collectionBehavior !== "fullScreenNone") {
+    throw new InvalidWindowRecordError("Window full-screen collection behavior is invalid.");
+  }
+  if (record.fullScreen !== undefined &&
+      record.fullScreen !== "off" && record.fullScreen !== "on" &&
+      record.fullScreen !== "entering" && record.fullScreen !== "exiting") {
+    throw new InvalidWindowRecordError("Window full-screen state is invalid.");
+  }
+  if (record.fullScreen && record.fullScreen !== "off" &&
+      (record.role !== "standard" || record.collectionBehavior !== "fullScreenPrimary")) {
+    throw new InvalidWindowRecordError("Full screen requires a primary standard window.");
+  }
+  if (record.style.includes("fullScreen") !== (record.fullScreen === "on")) {
+    throw new InvalidWindowRecordError("Window full-screen style must reflect confirmed state.");
+  }
   assertFiniteWindowBounds(record.bounds);
   requireFinite(record.minimumSize.width, "minimumSize.width", true);
   requireFinite(record.minimumSize.height, "minimumSize.height", true);
