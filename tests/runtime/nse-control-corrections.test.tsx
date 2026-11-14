@@ -29,7 +29,7 @@ import { MenuView } from "../../src/NSE/Menus/MenuView";
 import {
   NSEImageView,
 } from "../../src/NSE/public/controls";
-import { NSEToolbarView as NSEToolbar } from "../../src/NSE/Toolbars/NSEToolbarView";
+import { ToolbarView as NSEToolbar } from "../../src/NSE/Toolbars/ToolbarView";
 import { NSEStandaloneControlHost } from "../../src/NSE/Overlays";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 

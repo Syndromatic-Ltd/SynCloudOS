@@ -23,7 +23,7 @@ import { NSEUserDefaultsController } from "../Controllers/NSEUserDefaultsControl
 import { NSEUserDefaults } from "../../Foundation/NSEUserDefaults";
 import type { NSEOwner } from "../Controllers/ownership";
 import { NSEToolbarController } from "./NSEToolbarController";
-import type { NSEToolbarItemInput, NSEToolbarPreferences, NSEToolbarRuntimePort } from "./toolbarTypes";
+import type { NSEToolbarItemInput, ToolbarPreferences, ToolbarRuntimePort } from "./toolbarTypes";
 import type { ReactNode } from "react";
 
 /** NSToolbar.DisplayMode. `default` follows the toolbar's own default, icon and label. */
@@ -49,10 +49,10 @@ export interface NSEToolbarOptions<Items extends readonly NSEToolbarItemInput[] 
 }
 
 /** @internal What the window a toolbar is drawn in gives it: the application's command and preference authority. */
-export interface NSEToolbarServices {
+export interface ToolbarServices {
   readonly owner: NSEOwner;
   readonly applicationId: string;
-  readonly runtime: NSEToolbarRuntimePort;
+  readonly runtime: ToolbarRuntimePort;
   /** The application's defaults; the toolbar keeps its configuration under `toolbar.<identifier>`. */
   readonly preferences: NSEUserDefaults;
 }
@@ -68,8 +68,8 @@ export const nseRegisterToolbarTabView: unique symbol = Symbol("nse.registerTool
 /** @internal The tab-controller contributions the window draws beside the toolbar's own items. */
 export const nseToolbarTabViews: unique symbol = Symbol("nse.toolbarTabViews");
 
-type StoredDisplayMode = NSEToolbarPreferences["displayMode"];
-type StoredSizeMode = NSEToolbarPreferences["sizeMode"];
+type StoredDisplayMode = ToolbarPreferences["displayMode"];
+type StoredSizeMode = ToolbarPreferences["sizeMode"];
 
 const storedDisplayModes: Readonly<Record<NSEToolbarDisplayMode, StoredDisplayMode>> = {
   default: "icon-and-label", iconAndLabel: "icon-and-label", iconOnly: "icon-only", labelOnly: "label-only",
@@ -104,11 +104,11 @@ export class NSEToolbar<const Items extends readonly NSEToolbarItemInput[] = rea
   readonly #items: Items;
   readonly #defaultItemIdentifiers: readonly string[];
   readonly #allowedItemIdentifiers: readonly string[];
-  #state: NSEToolbarPreferences;
+  #state: ToolbarPreferences;
   #isVisible = true;
   #customizing = false;
   #engine: NSEToolbarController | null = null;
-  #preferences: NSEUserDefaultsController<NSEToolbarPreferences> | null = null;
+  #preferences: NSEUserDefaultsController<ToolbarPreferences> | null = null;
   readonly #tabViews = new Map<object, { readonly token: symbol; readonly view: ReactNode }>();
 
   constructor(options: NSEToolbarOptions<Items>) {
@@ -137,7 +137,7 @@ export class NSEToolbar<const Items extends readonly NSEToolbarItemInput[] = rea
     });
   }
 
-  get #configuration(): NSEToolbarPreferences {
+  get #configuration(): ToolbarPreferences {
     return this.#preferences?.getSnapshot().value ?? this.#state;
   }
 
@@ -219,10 +219,10 @@ export class NSEToolbar<const Items extends readonly NSEToolbarItemInput[] = rea
   }
 
   /** @internal The window drawing this toolbar binds it to the application. Returns the function that unbinds it. */
-  [nseAttachToolbar](services: NSEToolbarServices): () => void {
+  [nseAttachToolbar](services: ToolbarServices): () => void {
     if (this.#engine) throw new TypeError(`Toolbar "${this.identifier}" is already in a window.`);
     const allowed = this.#allowedItemIdentifiers;
-    const defaults: NSEToolbarPreferences = this.#state;
+    const defaults: ToolbarPreferences = this.#state;
     const stored = services.preferences;
     const userDefaults = this.autosavesConfiguration
       ? new NSEUserDefaults({
@@ -231,7 +231,7 @@ export class NSEToolbar<const Items extends readonly NSEToolbarItemInput[] = rea
         remove: (key) => stored.removeObject(`toolbar.${key}`),
       })
       : new NSEUserDefaults();
-    const preferences = new NSEUserDefaultsController<NSEToolbarPreferences>({
+    const preferences = new NSEUserDefaultsController<ToolbarPreferences>({
       owner: services.owner,
       namespace: this.identifier,
       schema: {
@@ -314,7 +314,7 @@ export class NSEToolbar<const Items extends readonly NSEToolbarItemInput[] = rea
     if (!this.#allowedItemIdentifiers.includes(itemIdentifier)) throw new TypeError(`Toolbar "${this.identifier}" does not allow "${itemIdentifier}".`);
   }
 
-  #setState(change: Partial<NSEToolbarPreferences>): void {
+  #setState(change: Partial<ToolbarPreferences>): void {
     this.#state = Object.freeze({ ...this.#state, ...change });
     this.notifyObservers();
   }

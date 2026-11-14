@@ -44,8 +44,8 @@ import {
   type ChromeVisualState,
 } from "../Appearance/chromePrimitives";
 import { NSEActionResponderContext } from "../Controls/Core/useNSEControlAction";
-import { allocateNSEToolbarItems } from "./toolbarLayout";
-import { NSEToolbarOverflowMenu } from "./NSEToolbarOverflowMenu";
+import { allocateToolbarItems } from "./toolbarLayout";
+import { ToolbarOverflowMenu } from "./ToolbarOverflowMenu";
 import type { NSEToolbarController } from "./NSEToolbarController";
 import "./nse-toolbars.css";
 
@@ -57,13 +57,13 @@ import "./nse-toolbars.css";
  * responder elsewhere; the mount (SCOS.responderId) sits above every view
  * controller and cannot reach their actions.
  */
-export interface NSEToolbarInteraction {
+export interface ToolbarInteraction {
   readonly overflowOverlayId?: string;
   readonly parentResponderId?: string;
   readonly parentScopeId?: string;
 }
 
-type NSEToolbarChildrenProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
+type ToolbarChildrenProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
   readonly composition: "children";
   readonly position?: "top" | "bottom" | "inline";
   readonly grouped?: boolean;
@@ -76,12 +76,12 @@ type NSEToolbarChildrenProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> 
   readonly direction?: never;
 };
 
-type NSEToolbarConfiguredProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "role"> & {
+type ToolbarConfiguredProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "role"> & {
   readonly composition: "configured";
   readonly controller: NSEToolbarController;
   /** Layout geometry is supplied by the host/runtime measurement boundary. */
   readonly width: number;
-  readonly interaction?: NSEToolbarInteraction;
+  readonly interaction?: ToolbarInteraction;
   readonly direction?: "ltr" | "rtl";
   readonly children?: never;
   readonly position?: never;
@@ -90,7 +90,7 @@ type NSEToolbarConfiguredProps = Omit<HTMLAttributes<HTMLDivElement>, "children"
   readonly smoothSurface?: never;
 };
 
-export type NSEToolbarViewProps = NSEToolbarChildrenProps | NSEToolbarConfiguredProps;
+export type ToolbarViewProps = ToolbarChildrenProps | ToolbarConfiguredProps;
 
 function classNames(...values: readonly (string | false | null | undefined)[]): string {
   return values.filter(Boolean).join(" ");
@@ -101,7 +101,7 @@ function classNames(...values: readonly (string | false | null | undefined)[]): 
  * controller. Child-composed toolbars use the same public component with an
  * explicit composition discriminant and keep their standalone surface behaviour here.
  */
-function NSEConfiguredToolbar({
+function ConfiguredToolbar({
   controller,
   width,
   interaction: requestedInteraction,
@@ -109,7 +109,7 @@ function NSEConfiguredToolbar({
   className,
   onKeyDown,
   ...htmlAttributes
-}: NSEToolbarConfiguredProps) {
+}: ToolbarConfiguredProps) {
   const nearestResponderId = useContext(NSEActionResponderContext);
   const generatedOverlayId = `nse-toolbar-overflow:${useId()}`;
   const interaction = {
@@ -130,7 +130,7 @@ function NSEConfiguredToolbar({
     initialRefreshController.current = controller;
     initialRefreshStarted.current = false;
   }
-  const layout = useMemo(() => allocateNSEToolbarItems(snapshot.items, width, {
+  const layout = useMemo(() => allocateToolbarItems(snapshot.items, width, {
     displayMode: snapshot.displayMode,
     sizeMode: snapshot.sizeMode,
     direction,
@@ -332,7 +332,7 @@ function NSEConfiguredToolbar({
         );
       })}
       {layout.overflowRequired ? (
-        <NSEToolbarOverflowMenu
+        <ToolbarOverflowMenu
           controller={controller}
           entries={layout.overflowEntries}
           overlayId={interaction.overflowOverlayId}
@@ -349,7 +349,7 @@ function NSEConfiguredToolbar({
     </div>
   );
 }
-function NSEChildrenToolbar({
+function ChildrenToolbar({
   composition: _composition,
   position = "bottom",
   grouped = false,
@@ -359,7 +359,7 @@ function NSEChildrenToolbar({
   children,
   style,
   ...props
-}: NSEToolbarChildrenProps) {
+}: ToolbarChildrenProps) {
   const [keyboardUp, setKeyboardUp] = useState(false);
 
   useEffect(() => {
@@ -427,7 +427,7 @@ function isKeyboardField(node: Element | null): boolean {
  * receive command authority props that it could accidentally ignore.
  */
 /** @internal Draws a toolbar: a window's configured toolbar, or a row of joined tool controls. */
-export function NSEToolbarView(props: NSEToolbarViewProps) {
+export function ToolbarView(props: ToolbarViewProps) {
   const rawProps = props as Record<string, unknown>;
   if (rawProps.composition !== "children" && rawProps.composition !== "configured") {
     throw new TypeError("NSE toolbar composition must be 'children' or 'configured'.");
@@ -436,7 +436,7 @@ export function NSEToolbarView(props: NSEToolbarViewProps) {
     if (rawProps.controller !== undefined || rawProps.width !== undefined || rawProps.interaction !== undefined || rawProps.direction !== undefined) {
       throw new TypeError("NSE child toolbars cannot receive configured toolbar props.");
     }
-    return <NSEChildrenToolbar {...props} />;
+    return <ChildrenToolbar {...props} />;
   }
   if (rawProps.children !== undefined && rawProps.children !== null) {
     throw new TypeError("NSE configured toolbars cannot receive children.");
@@ -444,5 +444,5 @@ export function NSEToolbarView(props: NSEToolbarViewProps) {
   if (rawProps.position !== undefined || rawProps.grouped !== undefined || rawProps.fadeOnKeyboard !== undefined || rawProps.smoothSurface !== undefined) {
     throw new TypeError("NSE configured toolbars cannot receive child-composition props.");
   }
-  return <NSEConfiguredToolbar {...props} />;
+  return <ConfiguredToolbar {...props} />;
 }

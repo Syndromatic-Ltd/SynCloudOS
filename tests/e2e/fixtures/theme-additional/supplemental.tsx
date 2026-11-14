@@ -14,11 +14,11 @@ import { ColourSwatches } from "../../../../src/NSE/Colour/Pickers/ColourSwatche
 import { GFXColour } from "../../../../src/FX/GraphicsFX/GFXColour";
 import { Tooltip } from "../../../../src/NSE/Tooltips/Tooltip";
 import { VirtualViewport, useVirtualiser } from "../../../../src/NSE/DataViews/Virtualisation";
-import { NSEToolbarView } from "../../../../src/NSE/Toolbars/NSEToolbarView";
-import { NSEToolbarConfigurationSheet } from "../../../../src/NSE/Toolbars/NSEToolbarConfigurationSheet";
+import { ToolbarView } from "../../../../src/NSE/Toolbars/ToolbarView";
+import { ToolbarConfigurationSheet } from "../../../../src/NSE/Toolbars/ToolbarConfigurationSheet";
 import { NSEToolbarController } from "../../../../src/NSE/Toolbars/NSEToolbarController";
 import { NSEUserDefaultsController } from "../../../../src/NSE/Controllers";
-import type { NSEToolbarPreferences, NSEToolbarRuntimePort } from "../../../../src/NSE/Toolbars/toolbarTypes";
+import type { ToolbarPreferences, ToolbarRuntimePort } from "../../../../src/NSE/Toolbars/toolbarTypes";
 import { defaultsFrom } from "../../../fixtures/userDefaults";
 const noop = () => undefined;
 interface DrawingRow { readonly id: string; readonly children: readonly DrawingRow[] }
@@ -44,12 +44,12 @@ function Tooltip() {
 function Toolbar({ width, customising, borderless = false, labelled = false, sizeMode = "regular" }: { width: number; customising: boolean; borderless?: boolean; labelled?: boolean; sizeMode?: "regular" | "small" }) {
   const [controller] = useState(() => {
     const values = new Map<string, unknown>();
-    const preferences = new NSEUserDefaultsController<NSEToolbarPreferences>({ namespace: "contract-toolbar", schema: { version: 1, defaults: { itemIds: ["save", "custom", "space", "flex", "separator"], displayMode: "icon-and-label", sizeMode }, fields: { itemIds: { validate: (v: unknown): v is readonly string[] => Array.isArray(v) }, displayMode: { validate: (v: unknown): v is NSEToolbarPreferences["displayMode"] => typeof v === "string" }, sizeMode: { validate: (v: unknown): v is NSEToolbarPreferences["sizeMode"] => typeof v === "string" } }, migrations: [] }, defaults: defaultsFrom({ read: key => values.get(key) ?? null, write: (key, value) => { values.set(key, value); }, remove: key => { values.delete(key); } }) });
-    const runtime: NSEToolbarRuntimePort = { signal: new AbortController().signal, commands: { getPresentationGeneration: () => ({ registryGeneration: 0, responderGeneration: 0 }), validateMany: async requests => new Map(requests.map(request => [request.key, { commandId: request.commandId, responderId: "contract", title: "Save", enabled: true, denied: false, hidden: false, state: "off" as const, stale: false }])), prepareDispatch: async () => ({ status: "cancelled", reason: "specimen" }), dispatch: async commandId => ({ status: "cancelled", commandId, operationId: "contract", reason: "specimen" }) } };
+    const preferences = new NSEUserDefaultsController<ToolbarPreferences>({ namespace: "contract-toolbar", schema: { version: 1, defaults: { itemIds: ["save", "custom", "space", "flex", "separator"], displayMode: "icon-and-label", sizeMode }, fields: { itemIds: { validate: (v: unknown): v is readonly string[] => Array.isArray(v) }, displayMode: { validate: (v: unknown): v is ToolbarPreferences["displayMode"] => typeof v === "string" }, sizeMode: { validate: (v: unknown): v is ToolbarPreferences["sizeMode"] => typeof v === "string" } }, migrations: [] }, defaults: defaultsFrom({ read: key => values.get(key) ?? null, write: (key, value) => { values.set(key, value); }, remove: key => { values.delete(key); } }) });
+    const runtime: ToolbarRuntimePort = { signal: new AbortController().signal, commands: { getPresentationGeneration: () => ({ registryGeneration: 0, responderGeneration: 0 }), validateMany: async requests => new Map(requests.map(request => [request.key, { commandId: request.commandId, responderId: "contract", title: "Save", enabled: true, denied: false, hidden: false, state: "off" as const, stale: false }])), prepareDispatch: async () => ({ status: "cancelled", reason: "specimen" }), dispatch: async commandId => ({ status: "cancelled", commandId, operationId: "contract", reason: "specimen" }) } };
     return new NSEToolbarController({ configuration: { identifier: "contract-toolbar", owner: { kind: "window", windowControllerId: "contract" }, allowedItemIds: ["save", "custom", "space", "flex", "separator"], defaultItemIds: ["save", "custom", "space", "flex", "separator"], displayMode: "icon-and-label", sizeMode }, items: [{ kind: "command", id: "save", label: "Save", paletteLabel: "Save document", commandId: "save", icon: <span>S</span>, minimumWidth: 40, idealWidth: 54, ...(borderless ? { bordered: false } : {}) }, { kind: "custom", id: "custom", label: "Custom", minimumWidth: 40, idealWidth: 62, render: () => <span>Custom</span>, ...(labelled ? { showsLabel: true } : {}) }, { kind: "space", id: "space", width: 8 }, { kind: "flexible-space", id: "flex", minimumWidth: 12 }, { kind: "separator", id: "separator" }], preferences, runtime });
   });
   useEffect(() => () => controller.dispose(), [controller]);
-  return <><NSEToolbarView composition="configured" controller={controller} width={width} interaction={{ parentResponderId: "contract" }} />{customising ? <NSEToolbarConfigurationSheet id="contract-toolbar-palette" open anchor={null} parentResponderId="contract" parentWindowControllerId={null} controller={controller} onOpenChange={noop} /> : null}</>;
+  return <><ToolbarView composition="configured" controller={controller} width={width} interaction={{ parentResponderId: "contract" }} />{customising ? <ToolbarConfigurationSheet id="contract-toolbar-palette" open anchor={null} parentResponderId="contract" parentWindowControllerId={null} controller={controller} onOpenChange={noop} /> : null}</>;
 }
 import { NSEAppearanceProvider } from "../../../../src/NSE/Appearance/NSEAppearanceProvider";
 import { atmoTheme } from "../../../../src/NSE/Appearance/atmo";

@@ -10,7 +10,7 @@ import { NSEColourPanelController } from "../../src/NSE/Colour/ColourPanel/NSECo
 import { NSEApplicationNavigationChromeController } from "../../src/NSE/Navigation/NSEApplicationNavigationChrome";
 import { NSEScrollViewController } from "../../src/NSE/Scroll/scrollTypes";
 import { NSEToolbarController } from "../../src/NSE/Toolbars/NSEToolbarController";
-import type { NSEToolbarPreferences } from "../../src/NSE/Toolbars/toolbarTypes";
+import type { ToolbarPreferences } from "../../src/NSE/Toolbars/toolbarTypes";
 import { createInMemoryNSETextOwner } from "../../src/NSE/Text";
 import { TextEditingSession } from "../../src/NSE/TextEditing/TextEditingSession";
 import { createTestRuntime } from "./helpers";
@@ -39,13 +39,13 @@ function commandPort(host: SynCloudOSRuntime) {
   };
 }
 function preferences() {
-  const result = new NSEUserDefaultsController<NSEToolbarPreferences>({
+  const result = new NSEUserDefaultsController<ToolbarPreferences>({
     owner: nseUnowned, namespace: "ownership.toolbar", schema: {
       version: 1, defaults: { itemIds: [], displayMode: "icon-only", sizeMode: "regular" }, migrations: [],
       fields: {
         itemIds: { validate: (value: unknown): value is readonly string[] => Array.isArray(value) && value.every((item) => typeof item === "string") },
-        displayMode: { validate: (value: unknown): value is NSEToolbarPreferences["displayMode"] => value === "icon-only" || value === "icon-and-label" || value === "label-only" },
-        sizeMode: { validate: (value: unknown): value is NSEToolbarPreferences["sizeMode"] => value === "small" || value === "regular" },
+        displayMode: { validate: (value: unknown): value is ToolbarPreferences["displayMode"] => value === "icon-only" || value === "icon-and-label" || value === "label-only" },
+        sizeMode: { validate: (value: unknown): value is ToolbarPreferences["sizeMode"] => value === "small" || value === "regular" },
       },
     }, defaults: defaultsFrom({ read: () => null, write: () => undefined, remove: () => undefined }),
   });
