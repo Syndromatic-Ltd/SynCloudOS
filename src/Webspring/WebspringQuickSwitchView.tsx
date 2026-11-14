@@ -180,7 +180,7 @@ export function WebspringQuickSwitchView({
     if (!app || app.isDisabled || lifecycle[normalizeBundleIdentifier(app.bundleIdentifier)] === "disabled") return;
     feedback?.trigger("medium");
     onClose();
-    void runtime.commands.dispatch("workspace.openApp", { appId: app.bundleIdentifier }, { source: "keyboard" });
+    void runtime.commands.dispatch("workspace.openApp", { appId: app.bundleIdentifier }, { responderId: "workspace", source: "keyboard" });
   }, [apps, lifecycle, onClose, runtime]);
 
   const handleKeyDown = useCallback((event: ReactKeyboardEvent<HTMLDivElement>) => {
@@ -245,7 +245,7 @@ export function WebspringQuickSwitchView({
     if (!app || app.isDisabled || lifecycle[normalizeBundleIdentifier(app.bundleIdentifier)] === "disabled") return;
     feedback?.trigger("medium");
     onClose();
-    void runtime.commands.dispatch("workspace.openApp", { appId: app.bundleIdentifier }, { source: "menu" });
+    void runtime.commands.dispatch("workspace.openApp", { appId: app.bundleIdentifier }, { responderId: "workspace", source: "menu" });
   }
 
   return (

@@ -69,7 +69,7 @@ describe("runtime lifecycle invariants", () => {
     expect(snapshot.application.activeAppId).toBe("com.example.beta");
     expect(Object.entries(snapshot.lifecycle).filter(([, state]) => state === "active")).toEqual([["com.example.beta", "active"]]);
     expect(snapshot.lifecycle["com.example.alpha"]).toBe("suspended");
-    expect(runtime.windows.list()).toEqual([]);
+    expect(runtime.windows.list().map(({ record }) => record.fullScreen)).toEqual(["on","on"]);
     expect(snapshot.application.routePath).toBe("/beta");
   });
 

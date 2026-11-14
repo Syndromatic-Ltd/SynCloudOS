@@ -214,7 +214,8 @@ export function registerStandardCommands(runtime: SynCloudOSRuntime): { dispose(
       // when its application deactivates. Only standalone windows ask.
       const ownedOpenWindows = activeAppId
         ? runtime.windows.list({ applicationId: activeAppId }).filter(({ record }) => (
-          record.state === "open" && (record.role === "standard" || record.role === "borderless")
+          record.state === "open" && record.fullScreen !== "on" && record.fullScreen !== "exiting" &&
+          (record.role === "standard" || record.role === "borderless")
         ))
         : [];
       if (activeAppId && ownedOpenWindows.length > 0) {

@@ -400,7 +400,7 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
 
     await flushLaunchTimers();
 
-    expect(WindowManager.list()).toEqual([]);
+    expect(WindowManager.list().map(({ record }) => record.fullScreen)).toEqual(["on"]);
     expect(LaunchServices.getHistory().map((record) => record.action)).toEqual(
       expect.arrayContaining(["queued", "started", "complete"])
     );
@@ -470,7 +470,7 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
     await flushLaunchTimers();
 
     expect(manager?.getState()).toBe("active");
-    expect(WindowManager.list()).toEqual([]);
+    expect(WindowManager.list().map(({ record }) => record.fullScreen)).toEqual(["on"]);
     expect(LaunchServices.getHistory().map((record) => record.action)).toEqual(
       expect.arrayContaining(["retry.requested", "complete"])
     );
@@ -503,7 +503,7 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
       source: "route"
     });
     expect(switchingSnapshot.application.activeAppId).toBe("com.example.studio");
-    expect(WindowManager.list()).toEqual([]);
+    expect(WindowManager.list().map(({ record }) => record.fullScreen)).toEqual(["on","on"]);
     expect(LaunchServices.getHistory().map((record) => record.action)).toContain("multiswitch.begin");
     expect(
       switchingSnapshot.statechart.history
@@ -517,7 +517,7 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
       fromAppId: "com.example.journal",
       toAppId: "com.example.studio"
     });
-    expect(WindowManager.list()).toEqual([]);
+    expect(WindowManager.list().map(({ record }) => record.fullScreen)).toEqual(["on", "on"]);
     expect(AppRegistry.getApp("com.example.journal")).toBeTruthy();
     expect(LaunchServices.getHistory().map((record) => record.action)).toContain("multiswitch.complete");
   });
@@ -661,7 +661,7 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
       fromAppId: "com.example.journal",
       toAppId: "com.example.studio"
     });
-    expect(WindowManager.list()).toEqual([]);
+    expect(WindowManager.list().map(({ record }) => record.fullScreen)).toEqual(["on","on"]);
   });
 
   it("settles return only after every required role and ignores stale or duplicate callbacks", async () => {
@@ -700,7 +700,7 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
 
     RouteManager.openRoute("/journal");
     await flushLaunchTimers();
-    expect(WindowManager.list()).toEqual([]);
+    expect(WindowManager.list().map(({ record }) => record.fullScreen)).toEqual(["on"]);
 
     await Statechart.gotoState("active.webspring", { source: "test.return" });
     const returnTransitionId = RuntimeController.getSnapshot().webspring.returnTransitionId;
@@ -857,7 +857,7 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
       "com.example.journal": "suspended",
       "com.example.publisher": "suspended"
     });
-    expect(WindowManager.list()).toEqual([]);
+    expect(WindowManager.list().map(({ record }) => record.fullScreen)).toEqual(["on","on"]);
 
     await vi.advanceTimersByTimeAsync(900);
 
@@ -867,7 +867,7 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
       fromAppId: null,
       toAppId: null
     });
-    expect(WindowManager.list()).toEqual([]);
+    expect(WindowManager.list().map(({ record }) => record.fullScreen)).toEqual(["on", "on"]);
   });
 
   it("switches from About to hidden MemoJournal routes without replaying the Webspring launch", async () => {
@@ -899,7 +899,7 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
     expect(switchingSnapshot.application.activeAppId).toBe("com.example.memo-journal");
     expect(switchingSnapshot.webspring.launchPhase).toBe("covered");
     expect(switchingSnapshot.webspring.launchingAppId).toBeNull();
-    expect(WindowManager.list()).toEqual([]);
+    expect(WindowManager.list().map(({ record }) => record.fullScreen)).toEqual(["on","on"]);
     expect(
       switchingSnapshot.statechart.history
         .slice(historyBeforeSwitch)
@@ -912,6 +912,6 @@ describe("RouteManager and LaunchServices route/launch contracts", () => {
       fromAppId: "com.example.about",
       toAppId: "com.example.memo-journal"
     });
-    expect(WindowManager.list()).toEqual([]);
+    expect(WindowManager.list().map(({ record }) => record.fullScreen)).toEqual(["on", "on"]);
   });
 });

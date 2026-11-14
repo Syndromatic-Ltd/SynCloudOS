@@ -290,7 +290,7 @@ describe("createSynCloudOS", () => {
         fromRoute: "/journal",
         toRoute: "/studio",
       });
-      expect(runtime.windows.list()).toEqual([]);
+      expect(runtime.windows.list().map(({ record }) => record.fullScreen)).toEqual(["on","on"]);
 
       expect(runtime.launchServices.runtimeId).toBe(runtime.runtimeId);
       expect(runtime.launchServices.completeMultiSwitch(switching.id ?? "")).toBe(true);
@@ -298,7 +298,7 @@ describe("createSynCloudOS", () => {
         id: switching.id,
         status: "idle",
       });
-      expect(runtime.windows.list()).toEqual([]);
+      expect(runtime.windows.list().map(({ record }) => record.fullScreen)).toEqual(["on", "on"]);
     } finally {
       await runtime.dispose("MultiSwitch test");
       vi.useRealTimers();
@@ -330,7 +330,7 @@ describe("createSynCloudOS", () => {
         returnTransitionId: expect.any(String),
         isAnimating: true,
       });
-      expect(runtime.windows.list()).toEqual([]);
+      expect(runtime.windows.list().map(({ record }) => record.fullScreen)).toEqual(["on"]);
       const returnTransitionId = returning.returnTransitionId ?? "";
       expect(runtime.webspring.completeReturnRole(returnTransitionId, "applicationExit")).toBe(true);
       expect(runtime.webspring.completeReturnRole(returnTransitionId, "shellReturn")).toBe(true);
