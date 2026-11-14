@@ -49,7 +49,7 @@ export function ApplicationStageHost({
   presentationSettlementId = null,
   quickSwitchOpen = false,
   onQuickSwitchRequest,
-  onApplicationMenuToggleRegister,
+  standalone = false,
   onMultiSwitchAnimationComplete
 }: {
   windowContentRegistry: WindowContentRendererRegistry;
@@ -62,8 +62,8 @@ export function ApplicationStageHost({
   launchTransitionId?: string | null;
   presentationSettlementId?: string | null;
   quickSwitchOpen?: boolean;
+  standalone?: boolean;
   onQuickSwitchRequest?: () => void;
-  onApplicationMenuToggleRegister?: (appId: string, toggle: () => void, ready: boolean) => () => void;
   onMultiSwitchAnimationComplete?: (switchId: string, role: "incoming" | "outgoing") => void;
 }) {
   const runtime = useKernelSynCloudOS();
@@ -113,8 +113,8 @@ export function ApplicationStageHost({
           presentationRootRef={presentationRootRef}
           presentationSettlementId={presentationSettlementId}
           quickSwitchOpen={quickSwitchOpen}
+          standalone={standalone}
           onQuickSwitchRequest={onQuickSwitchRequest}
-          onApplicationMenuToggleRegister={onApplicationMenuToggleRegister}
           onMultiSwitchAnimationComplete={onMultiSwitchAnimationComplete}
         />
     </SynCloudOSWatchdog>

@@ -27,6 +27,7 @@ export { WEBSPRING_STAGE };
 export interface ApplicationStagePresentation {
   readonly id: string;
   readonly appId: string;
+  readonly windowId?: string;
   readonly title: string;
   readonly isFocused: boolean;
   readonly zIndex: number;

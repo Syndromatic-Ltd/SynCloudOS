@@ -158,13 +158,19 @@ Paths are under `src/` unless noted.
    see it. Apps cannot add or remove it.
 4. Settings and user info become **standard toolbar items** an app opts into. Apps without settings, or with
    Preferences in the menu bar, leave them out.
-5. The app menu comes from `NSEApplication.mainMenu`, not the manifest. This overturns the 2026-11-06 "right
-   slot stays system chrome" decision.
+5. The File / Edit / View menu bar and the application-menu toolbar button are independent opt-ins.
+   `NSEApplication.mainMenu` supplies the menu bar, and the system prepends the standard application menu.
+   `NSEToolbarItem.applicationMenu` opens the same menu using the app's gear or person glyph.
+   Apps may set either, both, or neither. The app icon is not a menu trigger.
 6. When an app has a menu bar, the system draws it **above** the title bar/toolbar, with the metal app colours
    and the same noise texture.
 7. Full screen is a window state apps can enter and leave. In a browser it becomes the full-screen stage
    presentation (as SynWare on the Syndromatic site is today); in Electron it becomes real OS full screen.
 8. Delete dead code, dead fields and duplicates outright.
+9. `NSEWindow.titlebarPresentation` is an NSE extension with `"attached"` (default) and `"floating"`.
+   Floating works with every toolbar style. Atmo detaches only Cumulus and caps its width on wide windows.
+   Textured Metal stays attached. Inset toolbar groups use the same appearance and behavior in both
+   Cumulus presentations. Floating art is pending design; ship semantic parts and existing-token paint.
 
 ## Target architecture
 
@@ -297,9 +303,9 @@ until Atmo's circular group art lands (Phase 7).
   app declares about), Preferences… (`showPreferences`, enabled by validation), dock-menu and shortcut items
   (`installedApplicationMenuSections`), Sign In/Log Out, Quit. Apps add their own items to it through
   `mainMenu`'s first item, as AppKit apps do.
-- **Without a `mainMenu`** the application menu is still reachable (owner decision pending, see below). Plan
-  default: from the app icon at the leading edge of the title bar (the stage and single-app host already show
-  the icon there). The QuickSwitch action stays on the title.
+- `NSEToolbarItem.applicationMenu` opts into the same application menu independently of
+  `mainMenu`. Migrate the site's existing settings and identity slots to this item. No toolbar item or
+  menu bar is added automatically. The QuickSwitch action stays on the title.
 - Delete manifest `applicationMenu`, `commands`, `menus`, `frame.rightSlot`, `menuOpensSystemPreferencesDirectly`
   special-casing that only existed for the right slot, and the second app-menu construction in `ApplicationHost`.
 - Electron later maps `mainMenu` to the native menu (`Menu.setApplicationMenu`) and the system stops drawing it.
@@ -447,15 +453,16 @@ ID, load counts, toolbar and accessory. Selection and window undo survived the s
 attached sheet dismissal via Escape, child close recovery, a destination closed before attachment, and an
 application quit veto also passed in the child-window test.
 
-The two slots in this fixture are test surfaces, not the production Webspring stage and floating layer.
-Shared authority is the candidate for the production browser host. The prototype did not exercise
-stale activation, competing transfers, general menu behavior or all document-local focus subscriptions.
-A third test reproduced Escape failing for a child-document popover. Providing the presenting document
-through the portal context, rebinding the overlay provider and using realm-safe node checks passed all
-three tests, including focus return. Keep the host interface provisional until the remaining checks are complete.
-A production binding
-needs the logical window ID, a surface generation, a readiness acknowledgement, and a place to return
-the editor if the destination closes. Electron remains a separate phase.
+The prototype selected shared authority. Four Chromium tests exercised the portal, same-origin child
+document, rollback, and stale activation. Document-local focus and overlay tests subsequently covered
+Escape, focus return and nested overlay leases.
+
+The production Webspring integration test, `tests/runtime/application-stage-transfer.test.tsx`, launches a
+class app through LaunchServices and moves its full-screen window to the floating presentation and back.
+It verifies one window ID, one controller, one load, the same mounted input, the unsaved draft and DOM focus.
+The browser stage binding follows committed destination slots and retains the portal when its slot moves.
+The host port currently handles full-screen intent and host events. Separate-surface binding and browser
+launch/return choreography still require their own end-to-end receipts. Electron remains a separate phase.
 
 ### Phase 1: dead code and dead fields (Codex)
 
@@ -544,11 +551,14 @@ the editor if the destination closes. Electron remains a separate phase.
 - Sidebar and inspector collapse **animation** in `splitViewControllerView.tsx` (reduced motion: instant), wired
   to the `toggleSidebar`/`toggleInspector` items.
 - `NSEToolbarItemGroup` with Atmo's circular grouped buttons.
-- Floating, grouped title bar with a maximum width on desktop: an Atmo rendering of `unified` on wide windows
-  (owner to approve the look before it becomes an API option).
+- `NSEWindow.titlebarPresentation` selects attached or floating independently of toolbar style.
+  Float Cumulus with a desktop maximum width, while Metal stays attached. Use the same inset groups
+  for attached and floating Cumulus. Floating paint is pending design.
 - Bottom-bar accessories checked on every host and presentation.
 
-### Phase 8: Electron host (separate plan after a spike)
+### Phase 8: Electron host (written plan only)
+
+See [Electron window host](2026-11-14-electron-window-host.md).
 
 - Electron adapter implementing `WindowHostEnvironment`: native traffic lights/caption buttons with the title bar
   reserving their rect, real OS full screen, native menu from `mainMenu`.
@@ -578,13 +588,9 @@ in the same commits as the API they use.
 
 ## Decisions still open
 
-1. **(Owner, before Phase 5)** How the application menu is reached when an app has no `mainMenu`. Plan default:
-   the app icon at the leading edge of the title bar opens it.
-2. **(Owner, Phase 7)** Whether the floating grouped bar is purely Atmo's rendering of `unified` or a new
-   toolbar style value.
-3. **(Builder)** Drag regions for `fullSizeContentView` content (not frame views, which the system drags):
+1. **(Builder)** Drag regions for `fullSizeContentView` content (not frame views, which the system drags):
    `isMovableByWindowBackground` plus the existing chrome-element registration, or a documented drag-region view.
-4. **(Builder)** Whether `appView` vs `windowedView` should remain separate manifest values or become one
+2. **(Builder)** Whether `appView` vs `windowedView` should remain separate manifest values or become one
    `initialWindowState` field. Keep the current values unless the change is free.
 
 ## Acceptance

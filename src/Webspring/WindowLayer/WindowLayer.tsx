@@ -22,6 +22,7 @@ import React, { useEffect, useRef, useSyncExternalStore } from "react";
 import { Presence } from "../../NSE/Animation";
 import { useNSEAppearanceProjection } from "../../NSE/Appearance";
 import { useKernelSynCloudOS } from "../../SynCloudOSReact";
+import { useWindowPresentationContent } from "../WindowPresentationContent";
 import { WindowHost, type WindowLayerDiagnostic } from "./WindowHost";
 import type { WindowContentRendererRegistry } from "./WindowContentRendererRegistry";
 import "./window-layer.css";
@@ -59,6 +60,7 @@ function PopoverModalBackdrop({ zIndex }: { readonly zIndex: number }) {
 
 export function WindowLayer({ contentRegistry, onDiagnostic }: WindowLayerProps) {
   const runtime = useKernelSynCloudOS();
+  const sharedPresentation = useWindowPresentationContent();
   const layerRef = useRef<HTMLDivElement>(null);
   const managerSnapshot = useSyncExternalStore(
     runtime.windows.subscribe,
@@ -147,7 +149,7 @@ export function WindowLayer({ contentRegistry, onDiagnostic }: WindowLayerProps)
       data-window-layer=""
       data-window-modal-active={topModalZ !== null || managerSnapshot.blockedWindowControllerIds.length > 0 ? "true" : "false"}
     >
-      {topModalZ !== null && topModal?.record.role === "popover" ? <PopoverModalBackdrop zIndex={Math.max(0, topModalZ - 0.5)} /> : topModalZ !== null ? (
+      {topModalZ !== null && topModal?.record.role === "popover" ? <PopoverModalBackdrop zIndex={Math.max(0, topModalZ - 0.5)} /> : topModalZ !== null && !topModal?.record.applicationId && !topModal?.record.parentWindowControllerId ? (
         <div
           className="webspring-window-modal-backdrop"
           data-window-modal-backdrop=""
@@ -157,7 +159,13 @@ export function WindowLayer({ contentRegistry, onDiagnostic }: WindowLayerProps)
         />
       ) : null}
       <Presence>
-        {managerSnapshot.windowControllerIds.map((windowControllerId) => (
+        {managerSnapshot.windowControllerIds.filter(id => {
+          if (!sharedPresentation) return true;
+          const { record } = runtime.windows.select(id);
+          if (record.role !== "standard" || (record.fullScreen !== "on" && record.fullScreen !== "exiting")) return true;
+          const app = record.applicationId ? runtime.apps.getApp(record.applicationId) : null;
+          return app?.presentation !== "appView";
+        }).map((windowControllerId) => (
           <WindowHost
             key={windowControllerId}
             controller={runtime.windows.select(windowControllerId)}

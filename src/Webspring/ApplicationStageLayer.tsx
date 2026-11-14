@@ -100,7 +100,6 @@ export function ApplicationStageLayer({
   presentationSettlementId = null,
   quickSwitchOpen = false,
   onQuickSwitchRequest,
-  onApplicationMenuToggleRegister,
 }: {
   readonly windowContentRegistry: WindowContentRendererRegistry;
   apps: Record<string, SynCloudOSAppInfo>;
@@ -113,7 +112,6 @@ export function ApplicationStageLayer({
   presentationSettlementId?: string | null;
   quickSwitchOpen?: boolean;
   onQuickSwitchRequest?: () => void;
-  readonly onApplicationMenuToggleRegister?: (appId: string, toggle: () => void, ready: boolean) => () => void;
 }) {
   const hasMultiSwitch = multiSwitch?.status === "switching";
   const runtime = useKernelSynCloudOS();
@@ -131,11 +129,15 @@ export function ApplicationStageLayer({
   const presentations = useMemo<readonly ApplicationStagePresentation[]>(() => {
     const appIds = selectApplicationStageAppIds({ activeAppId, multiSwitch, returnTransitionId });
     return appIds
-      .map((appId, index) => {
+      .map((appId, index): ApplicationStagePresentation | null => {
         const app = apps[normalizeBundleIdentifier(appId)];
         if (!app || app.presentation !== "appView") return null;
+        const main = runtime.windows.list({ applicationId: app.bundleIdentifier }).find(({ record }) =>
+          record.role === "standard" && record.documentId === null && record.state === "open");
+        if (main && main.record.fullScreen !== "on" && main.record.fullScreen !== "exiting") return null;
         return {
-          id: `application-stage:${app.bundleIdentifier}`,
+          id: main?.id ?? `application-stage:${app.bundleIdentifier}`,
+          windowId: main?.id,
           appId: app.bundleIdentifier,
           title: app.window.title,
           isFocused: normalizeBundleIdentifier(appId) === normalizeBundleIdentifier(activeAppId),
@@ -143,7 +145,7 @@ export function ApplicationStageLayer({
         } satisfies ApplicationStagePresentation;
       })
       .filter((entry): entry is ApplicationStagePresentation => entry !== null);
-  }, [activeAppId, apps, multiSwitch, returnTransitionId]);
+  }, [activeAppId, apps, multiSwitch, returnTransitionId, runtime, windowSnapshot]);
   const completedMultiSwitchRolesRef = useRef<{
     switchId: string | null;
     roles: Set<WebspringMultiSwitchRole>;
@@ -160,7 +162,7 @@ export function ApplicationStageLayer({
     );
   }, [hasMultiSwitch, multiSwitch, presentations]);
   const applicationStageBlocked = windowSnapshot.applicationStageBlocked ||
-    presentations.some(({ appId }) => windowSnapshot.blockedApplicationIds.some(
+    presentations.some(({ appId, windowId }) => (windowId && windowSnapshot.blockedWindowControllerIds.includes(windowId)) || windowSnapshot.blockedApplicationIds.some(
       blockedAppId => normalizeBundleIdentifier(blockedAppId) === normalizeBundleIdentifier(appId),
     ));
 
@@ -226,7 +228,11 @@ export function ApplicationStageLayer({
         pointerEvents: applicationStageBlocked ? "none" : undefined }}
       // Clicking the application behind the windows makes it the active
       // surface: every window, floating panels included, goes inactive.
-      onPointerDownCapture={() => runtime.windows.resignKey()}
+      onPointerDownCapture={() => {
+        const active = presentations.find(presentation => presentation.isFocused);
+        if (active?.windowId) runtime.windows.makeKey(active.windowId);
+        else runtime.windows.resignKey();
+      }}
     >
       <Presence>{hasMultiSwitch ? <MultiSwitchBackdrop /> : null}</Presence>
       <Presence onExitComplete={handleWindowExitComplete}>
@@ -247,7 +253,6 @@ export function ApplicationStageLayer({
               presentationSettlementId={presentationSettlementId}
               quickSwitchOpen={quickSwitchOpen}
               onQuickSwitchRequest={onQuickSwitchRequest}
-              onApplicationMenuToggleRegister={onApplicationMenuToggleRegister}
               onMultiSwitchAnimationComplete={handleMultiSwitchAnimationComplete}
             />
           );

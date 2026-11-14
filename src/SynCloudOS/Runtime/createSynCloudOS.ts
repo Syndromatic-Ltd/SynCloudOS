@@ -485,7 +485,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
   });
   const resolveApplicationWindow = (appId: string): CreateWindowRequest | null => {
     const app = apps.getApp(appId);
-    if (!app || app.presentation === "appView" || app.presentation === "backgroundService") return null;
+    if (!app || app.presentation === "backgroundService") return null;
     const keyWindowControllerId = windows.snapshot().keyWindowControllerId;
     const parentWindowControllerId = app.presentation === "systemSheet" ? keyWindowControllerId : null;
     const role = app.presentation === "systemSheet"
@@ -500,8 +500,8 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
       representedDocument: null,
       toolbar: null,
       role,
+      ...(app.presentation === "appView" && role === "standard" ? { fullScreen: "on", collectionBehavior: "fullScreenPrimary" } as const : {}),
       style: app.presentation === "systemSheet" ? ["titled", "closable"] : app.window.style,
-      chromeMode: app.presentation === "systemSheet" ? "system" : app.window.chrome,
       smoothSurface: app.window.smoothSurface,
       title: app.window.title,
       content: { rendererId: "application", parameters: { appId: app.bundleIdentifier } },
@@ -968,6 +968,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
       ids: windowIds,
     },
     resolveApplicationWindow,
+    host: config.environment.windowHost,
     rematerialiseOwnedDocument: async ({ applicationId, documentId, restorationKey, signal }) => {
       const lifetime = new AbortController();
       const restorationSignal = AbortSignal.any([signal, lifetime.signal, runtime.signal]);
