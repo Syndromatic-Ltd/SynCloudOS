@@ -21,7 +21,7 @@
 import { useId, useLayoutEffect, useRef } from "react";
 import type { NSEViewController } from "./NSEViewController";
 import { useNSEAnimationEnvironment } from "../Animation/NSEAnimationEnvironment";
-import { compileNSEPresentation, useNSEPresentation, type NSEPresentationSpec } from "../Animation/NSEPresentation";
+import { compileNSEPresentation, useNSEPresentation, type PresentationSpec } from "../Animation/NSEPresentation";
 import type { AFXAnimationTiming } from "../../FX/AnimationFX/animationTypes";
 
 /** NSViewController.TransitionOptions. Combine an effect with allowUserInteraction. */
@@ -38,7 +38,7 @@ export enum NSEViewControllerTransitionOptions {
 }
 
 /** @internal One retained child-view slot, including its replacement in flight. */
-export interface NSEChildTransition {
+export interface ChildTransition {
   readonly backend?: "afx" | "viewTransition";
   readonly from: NSEViewController<unknown> | null;
   readonly to: NSEViewController<unknown>;
@@ -61,9 +61,9 @@ function childViewKey(controller: NSEViewController<unknown>): string {
 }
 
 /** @internal The slot outlives each swap, as the views' AppKit superview does. */
-export function NSETransitionSlot({ transition, Renderer, className }: {
-  readonly transition: NSEChildTransition;
-  readonly Renderer: import("./viewControllerRenderer").NSEViewControllerRenderer;
+export function TransitionSlot({ transition, Renderer, className }: {
+  readonly transition: ChildTransition;
+  readonly Renderer: import("./viewControllerRenderer").ViewControllerRenderer;
   readonly className?: string;
 }) {
   const { animator, reducedMotion } = useNSEAnimationEnvironment();
@@ -86,7 +86,7 @@ export function NSETransitionSlot({ transition, Renderer, className }: {
     const x = effect === 8 || effect === (rtl ? 64 : 32) ? 100 : effect === 16 || effect === (rtl ? 32 : 64) ? -100 : 0;
     const y = effect === 2 ? 100 : effect === 4 ? -100 : 0;
     const fade = reducedMotion || effect === 1;
-    const spec = (enter: boolean): NSEPresentationSpec => ({
+    const spec = (enter: boolean): PresentationSpec => ({
       duration: effect === 0 ? transition.duration : reducedMotion ? Math.min(0.12, transition.duration) : transition.duration,
       timing: transition.timing,
       tracks: effect === 0 ? [{ keyPath: "opacity", values: [1, 1] }] : fade

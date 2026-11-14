@@ -20,7 +20,7 @@
 
 import { useContext, useLayoutEffect, useSyncExternalStore, type ComponentType } from "react";
 import { SynCloudOSRuntimeContext, SynWareRuntimeContext } from "../../SynCloudOSReact";
-import { NSEControllerResponder, NSEWindowControllerView } from "./applicationHosting";
+import { ControllerResponder, WindowControllerView } from "./applicationHosting";
 import { ensureApplicationSession, type ApplicationSessionSource } from "./applicationSession";
 
 /**
@@ -30,7 +30,7 @@ import { ensureApplicationSession, type ApplicationSessionSource } from "./appli
  * own responder so its `@action`s reach every window.
  */
 export function createApplicationRoot(source: ApplicationSessionSource): ComponentType {
-  function NSEApplicationRoot() {
+  function ApplicationRoot() {
     const appRuntime = useContext(SynWareRuntimeContext);
     const kernel = useContext(SynCloudOSRuntimeContext);
     if (!appRuntime) throw new Error(`${source.appName} must render inside a mounted application.`);
@@ -44,11 +44,11 @@ export function createApplicationRoot(source: ApplicationSessionSource): Compone
     const controller = session?.controllerFor(snapshot.surface === "window" ? snapshot.current : null) ?? null;
     if (!session || !controller) return null;
     return (
-      <NSEControllerResponder target={session.app} kind="controller">
-        <NSEWindowControllerView controller={controller} />
-      </NSEControllerResponder>
+      <ControllerResponder target={session.app} kind="controller">
+        <WindowControllerView controller={controller} />
+      </ControllerResponder>
     );
   }
-  NSEApplicationRoot.displayName = `NSEApplicationRoot(${source.appName})`;
-  return NSEApplicationRoot;
+  ApplicationRoot.displayName = `NSEApplicationRoot(${source.appName})`;
+  return ApplicationRoot;
 }

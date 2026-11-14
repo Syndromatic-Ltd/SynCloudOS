@@ -21,12 +21,12 @@
 import type { ReactNode } from "react";
 
 import type { NSETabViewProps } from "./navigationTypes";
-import { NSETabStrip } from "./tabStrip";
+import { TabStrip } from "./tabStrip";
 
 export function NSETabView(props: NSETabViewProps) {
   return (
     <section data-nse-control="tab-view" data-nse-part="background"  data-tab-style={props.presentation?.tabStyle ?? "capsule"}>
-      <NSETabStrip
+      <TabStrip
         aria-label={props["aria-label"]}
         items={props.items}
         tone={props.tone}
@@ -60,7 +60,7 @@ export function NSETabView(props: NSETabViewProps) {
             </div>
           ));
         }}
-      </NSETabStrip>
+      </TabStrip>
     </section>
   );
 }

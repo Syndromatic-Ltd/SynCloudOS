@@ -21,7 +21,7 @@
 import { createContext, useContext, type ReactNode } from "react";
 import type { NSEMenuRuntimePort } from "./menuTypes";
 
-const NSEMenuRuntimeContext = createContext<NSEMenuRuntimePort | null>(null);
+const MenuRuntimeContext = createContext<NSEMenuRuntimePort | null>(null);
 
 /**
  * The menu port of the mounted window. The application's main menu is defined
@@ -30,11 +30,11 @@ const NSEMenuRuntimeContext = createContext<NSEMenuRuntimePort | null>(null);
  *
  * @internal
  */
-export function NSEMenuRuntimeProvider({ port, children }: { readonly port: NSEMenuRuntimePort; readonly children: ReactNode }) {
-  return <NSEMenuRuntimeContext.Provider value={port}>{children}</NSEMenuRuntimeContext.Provider>;
+export function MenuRuntimeProvider({ port, children }: { readonly port: NSEMenuRuntimePort; readonly children: ReactNode }) {
+  return <MenuRuntimeContext.Provider value={port}>{children}</MenuRuntimeContext.Provider>;
 }
 
 /** @internal */
 export function useOptionalNSEMenuRuntimePort(): NSEMenuRuntimePort | null {
-  return useContext(NSEMenuRuntimeContext);
+  return useContext(MenuRuntimeContext);
 }

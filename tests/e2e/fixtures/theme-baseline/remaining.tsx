@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import * as NSE from "../../../../src/NSE/sdkPackageEntry";
 import { ContainerPane } from "../../../../src/NSE/Containers/NSEContainers";
-import { NSEInputBox } from "../../../../src/NSE/Controls/Fields/NSEFields";
+import { InputBox } from "../../../../src/NSE/Controls/Fields/NSEFields";
 import { NSERoutePickerView } from "../../../../src/NSE/Controls/Media/NSERoutePickerView";
 import type { VFXRouteDetector } from "../../../../src/FX/VideoFX/VFXRouteDetector";
 import { NSEPageController } from "../../../../src/NSE/Page/NSEPageController";
@@ -46,7 +46,7 @@ export function remainingThemeBaselineCatalogue(): ThemeBaselineSurface[] {
     { id: "web-view", render: () => <WebSurface />, ready: '[data-nse-web-content-state="ready"]' },
     ...["stackHistory", "horizontalStrip", "pageCurl"].map(transitionStyle => ({ id: `page-controller-${transitionStyle}`, render: () => <PageSurface transitionStyle={transitionStyle as "stackHistory" | "horizontalStrip" | "pageCurl"} /> })),
     ...["plain", "surface", "sidebar", "inspector", "floating"].map(variant => ({ id: `container-pane-${variant}`, render: () => <ContainerPane title="Options" variant={variant as "plain" | "surface" | "sidebar" | "inspector" | "floating"}><p>Pane content</p></ContainerPane> })),
-    { id: "input-box", render: () => <NSEInputBox label="Export"><input aria-label="Export text" defaultValue="SynCloudOS" /></NSEInputBox> },
+    { id: "input-box", render: () => <InputBox label="Export"><input aria-label="Export text" defaultValue="SynCloudOS" /></InputBox> },
     { id: "stack-item", render: () => <NSE.NSEStackView><NSE.NSEStackItem id="baseline-item"><NSE.NSEButton title="Stack item" /></NSE.NSEStackItem></NSE.NSEStackView> },
   ];
 }

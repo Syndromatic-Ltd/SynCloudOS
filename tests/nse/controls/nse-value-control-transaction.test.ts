@@ -20,8 +20,8 @@
 
 import { describe, expect, it, vi } from "vitest";
 import {
-  NSEValueControlCompensationError,
-  NSEValueControlUnknownStateError,
+  ValueControlCompensationError,
+  ValueControlUnknownStateError,
   commitUndoableValue,
 } from "../../../src/NSE/Controls/Values/valueControlTransaction";
 import type { NSEUndoManagerPort } from "../../../src/NSE/Controls/Values/valueControlTypes";
@@ -53,7 +53,7 @@ describe("commitUndoableValue", () => {
         if (mutates) value = next;
         throw new Error("setter rejected without acknowledging publication");
       },
-    })).toThrow(NSEValueControlUnknownStateError);
+    })).toThrow(ValueControlUnknownStateError);
     expect(calls).toEqual([2]);
     expect(value).toBe(mutates ? 2 : 1);
     expect(undo.cancel).toHaveBeenCalledOnce();
@@ -94,7 +94,7 @@ describe("commitUndoableValue", () => {
       publish: (value) => {
         if (value === 1) throw new Error("setter rollback rejected");
       },
-    })).toThrow(NSEValueControlCompensationError);
+    })).toThrow(ValueControlCompensationError);
     expect(cancel).toHaveBeenCalledOnce();
   });
 });

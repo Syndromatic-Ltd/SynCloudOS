@@ -18,12 +18,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEViewSafeAreaContext, useNSEViewSafeArea } from "../../NSE/applicationHostInterop";
+import { ViewSafeAreaContext, useNSEViewSafeArea } from "../../NSE/applicationHostInterop";
 import { nseUpdateSafeArea } from "../../NSE/applicationHostInterop";
-import { NSEWindowLayoutContext } from "../../NSE/applicationHostInterop";
+import { WindowLayoutContext } from "../../NSE/applicationHostInterop";
 import { nativePresentations } from "../../NSE/applicationHostInterop";
 
-import { NSEWindowTitleSlotContext, NSEWindowTitlebarContent } from "../../NSE/applicationHostInterop";
+import { WindowTitleSlotContext, WindowTitlebarContent } from "../../NSE/applicationHostInterop";
 import { nseWindowPresentedTitle } from "../../NSE/applicationHostInterop";
 import {
   useContext,
@@ -39,17 +39,17 @@ import {
   type ReactElement,
   type ReactNode,
 } from "react";
-import { NSEOpenPanelWindowHost } from "./openPanelHosting";
+import { OpenPanelWindowHost } from "./openPanelHosting";
 import { createPortal } from "react-dom";
 import { useEnclosingFocusScopeId } from "../../SynCloudOSReact";
-import { NSEControllerSheetSurface } from "../../NSE/applicationHostInterop";
-import type { NSEAnyWindowController, NSEWindowMount } from "../../NSE/applicationHostInterop";
+import { ControllerSheetSurface } from "../../NSE/applicationHostInterop";
+import type { NSEAnyWindowController, WindowMount } from "../../NSE/applicationHostInterop";
 import { nseSetKeyWindowModalPresenter, nseWindowInternals } from "../../NSE/applicationHostInterop";
 import { nseAttachView, nsePopoverPositioning, nsePresentationStyle, nseUpdateTraits, nseUpdateViewActivity, validateNSEViewControllerClass, type NSEViewController, type NSEViewControllerClass } from "../../NSE/applicationHostInterop";
 import { useObserve } from "../../NSE/applicationHostInterop";
 import { observableVersion, type NSEObservable } from "../../NSE/applicationHostInterop";
 import { nseDisposeFor } from "../../NSE/applicationHostInterop";
-import { NSEActionResponderContext, NSEActionScopeProvider } from "../../NSE/applicationHostInterop";
+import { ActionResponderContext, ActionScopeProvider } from "../../NSE/applicationHostInterop";
 import { ResponderScope } from "../../SynCloudOSReact";
 import { useResponderHierarchy } from "../../SynCloudOSReact";
 import { SynCloudOSRuntimeContext, SynWareRuntimeContext } from "../../SynCloudOSReact";
@@ -60,16 +60,16 @@ import { NSEPopup } from "../../NSE/NSE";
 import type { SynWareContextValue } from "../AppSDK/appContextTypes";
 import { bindActionResponder, hasActions } from "../AppSDK/actions";
 import { trackLiveApplicationObject } from "./applicationHotReload";
-import { NSEWindowContentBorder, NSEWindowSheetFrame, NSEWindowSheetHostContext, NSEWindowTitlebarAccessories, nseContentBorderSize, NSEWindowTitlebarHostContext, useNSEWindowSheetHost, NSEWindowToolbar, useNSEWindowTitlebarDocument } from "./windowChrome";
+import { WindowContentBorder, WindowSheetFrame, WindowSheetHostContext, WindowTitlebarAccessories, nseContentBorderSize, WindowTitlebarHostContext, useNSEWindowSheetHost, WindowToolbar, useNSEWindowTitlebarDocument } from "./windowChrome";
 import { applicationSessionFor } from "./applicationSession";
-import { createNSEWindowAlertQueue, NSEWindowAlertSheet, type NSEWindowAlertQueue } from "./windowAlertSheet";
+import { createNSEWindowAlertQueue, WindowAlertSheet, type WindowAlertQueue } from "./windowAlertSheet";
 import { useNSEAnimationEnvironment, useNSEViewActivitySource } from "../../NSE/applicationHostInterop";
 import { useNSEOverlayFocusScope } from "../../NSE/applicationHostInterop";
-import { NSEViewControllerRendererProvider } from "../../NSE/applicationHostInterop";
+import { ViewControllerRendererProvider } from "../../NSE/applicationHostInterop";
 import { nseAnimatePresentation, nseIsDismissing } from "../../NSE/applicationHostInterop";
 import { registerNSEStandaloneViewControllerRenderer } from "../../NSE/applicationHostInterop";
 
-registerNSEStandaloneViewControllerRenderer(NSEViewControllerView);
+registerNSEStandaloneViewControllerRenderer(ViewControllerView);
 
 const FRAME_STYLE: CSSProperties = Object.freeze({ display: "block", width: "100%", height: "100%", minWidth: 0, minHeight: 0 });
 const CONTENTS_STYLE: CSSProperties = Object.freeze({ display: "contents" });
@@ -139,7 +139,7 @@ interface ControllerResponderProps {
   readonly children: ReactElement | ReactNode;
 }
 
-function ControllerResponder({ appRuntime, target, kind, host, children }: ControllerResponderProps) {
+function BoundControllerResponder({ appRuntime, target, kind, host, children }: ControllerResponderProps) {
   const hierarchy = useResponderHierarchy();
   const bindingId = useId();
   const kernel = useContext(SynCloudOSRuntimeContext);
@@ -155,11 +155,11 @@ function ControllerResponder({ appRuntime, target, kind, host, children }: Contr
     return () => { binding.dispose(); };
   }, [appId, appRuntime.commands, responderId, target]);
   return (
-    <NSEActionResponderContext.Provider value={responderId}>
+    <ActionResponderContext.Provider value={responderId}>
       <ResponderScope responderId={responderId} kind={kind} parentResponderId={parentId} scopeId={scopeId} asChild>
         {host === "element" ? (children as ReactElement) : <div style={CONTENTS_STYLE}>{children}</div>}
       </ResponderScope>
-    </NSEActionResponderContext.Provider>
+    </ActionResponderContext.Provider>
   );
 }
 
@@ -168,16 +168,16 @@ function ControllerResponder({ appRuntime, target, kind, host, children }: Contr
  * application when it declares `@action` methods; otherwise renders
  * `children` untouched, with no extra DOM.
  */
-export function NSEControllerResponder({ target, kind, host = "contents", children }: Omit<ControllerResponderProps, "appRuntime" | "host"> & { readonly host?: ControllerResponderProps["host"] }) {
+export function ControllerResponder({ target, kind, host = "contents", children }: Omit<ControllerResponderProps, "appRuntime" | "host"> & { readonly host?: ControllerResponderProps["host"] }) {
   const appRuntime = useContext(SynWareRuntimeContext);
   // A presented view controller (a sheet's, a popover's) roots its own responder chain, as a sheet's
   // window does, so its controls sit in its modal focus scope even when it declares no actions.
   const presented = kind === "view" && ((target as Partial<NSEViewController<unknown>>).presentingViewController ?? null) !== null;
   if (!appRuntime || (!hasActions(target) && !presented)) return <>{children}</>;
-  return <ControllerResponder appRuntime={appRuntime} target={target} kind={kind} host={host}>{children}</ControllerResponder>;
+  return <BoundControllerResponder appRuntime={appRuntime} target={target} kind={kind} host={host}>{children}</BoundControllerResponder>;
 }
 
-export interface NSEViewControllerViewProps {
+export interface ViewControllerViewProps {
   readonly controller: NSEViewController<unknown>;
   /** Parent-owned layout styling on this controller's existing managed outlet. */
   readonly className?: string;
@@ -189,7 +189,7 @@ export interface NSEViewControllerViewProps {
  * disappears as the frame mounts and unmounts. Render child view controllers
  * with it from a parent's view.
  */
-export function NSEViewControllerView({ controller, className }: NSEViewControllerViewProps) {
+export function ViewControllerView({ controller, className }: ViewControllerViewProps) {
   validateNSEViewControllerClass(controller.constructor as NSEViewControllerClass);
   const observation = useMemo(() => createViewObservation(controller), [controller]);
   useSyncExternalStore(observation.subscribe, observation.getSnapshot, observation.getSnapshot);
@@ -282,32 +282,32 @@ export function NSEViewControllerView({ controller, className }: NSEViewControll
   if (!View) throw new TypeError(`${controller.constructor.name} has no static view or renderView; declare one rendering form.`);
   const frame = (
     <div ref={frameRef} tabIndex={-1} className={className} data-nse-view-controller="" style={{ ...safeArea.properties, ...(controller.parent ? {} : FRAME_STYLE), ...(controller.presentedViewControllers.some(presented => presented[nsePresentationStyle] === "custom") ? { position: "relative" as const } : {}) }}>
-      <NSEViewSafeAreaContext.Provider value={safeArea.value}>
-      <NSEViewControllerRendererProvider value={NSEViewControllerView}>
+      <ViewSafeAreaContext.Provider value={safeArea.value}>
+      <ViewControllerRendererProvider value={ViewControllerView}>
         <View controller={controller} />
-      </NSEViewControllerRendererProvider>
-      </NSEViewSafeAreaContext.Provider>
+      </ViewControllerRendererProvider>
+      </ViewSafeAreaContext.Provider>
       {controller.presentedViewControllers.map(presented => {
         if (nativePresentations.has(presented)) return null;
         const style = presented[nsePresentationStyle];
-        if (style === "custom") return <NSECustomPresentation key={sheetKey(presented)} controller={presented} />;
-        if (style === "popover") return <NSEPresentedPopover key={sheetKey(presented)} controller={presented} />;
-        if (style === "modalWindow") return <NSEPresentedModalWindow key={sheetKey(presented)} controller={presented} />;
-        return <NSEPresentedSheet key={sheetKey(presented)} controller={presented} />;
+        if (style === "custom") return <CustomPresentation key={sheetKey(presented)} controller={presented} />;
+        if (style === "popover") return <PresentedPopover key={sheetKey(presented)} controller={presented} />;
+        if (style === "modalWindow") return <PresentedModalWindow key={sheetKey(presented)} controller={presented} />;
+        return <PresentedSheet key={sheetKey(presented)} controller={presented} />;
       })}
     </div>
   );
-  return <NSEControllerResponder target={controller} kind="view" host="element">{frame}</NSEControllerResponder>;
+  return <ControllerResponder target={controller} kind="view" host="element">{frame}</ControllerResponder>;
 }
 
 /** Custom presentations stay in the presenter's coordinate space; their
  * animator owns movement, while the host owns mounting and lifetime. */
-function NSECustomPresentation({ controller }: { readonly controller: NSEViewController<unknown> }) {
+function CustomPresentation({ controller }: { readonly controller: NSEViewController<unknown> }) {
   useObserve(controller);
   const dismissing = controller[nseIsDismissing];
   useLayoutEffect(() => { controller[nseAnimatePresentation](); }, [controller, dismissing]);
   return <div data-nse-custom-presentation="" inert={dismissing || undefined} style={{ position: "absolute", inset: 0, zIndex: 1 }}>
-    <NSEViewControllerView controller={controller} />
+    <ViewControllerView controller={controller} />
   </div>;
 }
 
@@ -323,7 +323,7 @@ function firstContentFrame(root: HTMLElement): Element | null {
  * A view controller presented in a popover (presentAsPopover): anchored to its positioning element and
  * closed, by its behaviour, on Escape or a click elsewhere, which dismisses it.
  */
-function NSEPresentedPopover({ controller }: { readonly controller: NSEViewController<unknown> }) {
+function PresentedPopover({ controller }: { readonly controller: NSEViewController<unknown> }) {
   useObserve(controller);
   const positioning = controller[nsePopoverPositioning]!;
   const size = controller.preferredContentSize;
@@ -341,7 +341,7 @@ function NSEPresentedPopover({ controller }: { readonly controller: NSEViewContr
         || (behavior === "transient");
       if (closes) controller.dismiss();
     }}>
-    <NSEViewControllerView controller={controller} />
+    <ViewControllerView controller={controller} />
   </NSEPopover>;
 }
 
@@ -350,7 +350,7 @@ function NSEPresentedPopover({ controller }: { readonly controller: NSEViewContr
  * Atmo's modal plate, with its title above it. Escape sends it `cancelOperation()` when it has one;
  * otherwise it is dismissed.
  */
-function NSEPresentedModalWindow({ controller }: { readonly controller: NSEViewController<unknown> }) {
+function PresentedModalWindow({ controller }: { readonly controller: NSEViewController<unknown> }) {
   useObserve(controller);
   const size = controller.preferredContentSize;
   const cancel = () => {
@@ -362,7 +362,7 @@ function NSEPresentedModalWindow({ controller }: { readonly controller: NSEViewC
     {...(controller.title ? { title: controller.title } : {})}
     style={size ? { width: `min(${size.width}px, calc(100vw - 24px))`, maxHeight: "calc(100vh - 40px)" } : undefined}
     onOpenChange={(open) => { if (!open) cancel(); }}>
-    <NSEViewControllerView controller={controller} />
+    <ViewControllerView controller={controller} />
   </NSEPopup>;
 }
 
@@ -379,10 +379,10 @@ function sheetKey(controller: object): string {
  * surface over its presenter's view, which stays the next responder. Escape and the backdrop send the
  * sheet `cancelOperation()` when it has one; otherwise they dismiss it.
  */
-function NSEPresentedSheet({ controller }: { readonly controller: NSEViewController<unknown> }) {
+function PresentedSheet({ controller }: { readonly controller: NSEViewController<unknown> }) {
   useObserve(controller);
   const titleId = useId();
-  const sheetHost = useContext(NSEWindowSheetHostContext);
+  const sheetHost = useContext(WindowSheetHostContext);
   const { reducedMotion } = useNSEAnimationEnvironment();
   useLayoutEffect(() => sheetHost?.attach(), [sheetHost]);
   const size = controller.preferredContentSize;
@@ -391,15 +391,15 @@ function NSEPresentedSheet({ controller }: { readonly controller: NSEViewControl
     if (typeof operation === "function") void operation.call(controller);
     else controller.dismiss();
   };
-  const sheet = <NSEControllerSheetSurface scopeId={`nse-sheet:${sheetKey(controller)}`} attached={Boolean(sheetHost)} title={controller.title} titleId={titleId} width={size?.width} onCancel={cancel}>
-    <NSEViewControllerView controller={controller} />
-  </NSEControllerSheetSurface>;
+  const sheet = <ControllerSheetSurface scopeId={`nse-sheet:${sheetKey(controller)}`} attached={Boolean(sheetHost)} title={controller.title} titleId={titleId} width={size?.width} fullSizeContentView={controller.sheetHasFullSizeContentView} onCancel={cancel}>
+    <ViewControllerView controller={controller} />
+  </ControllerSheetSurface>;
   // A window attaches the sheet under its title bar and toolbar; outside a window it covers the page.
   if (!sheetHost) return sheet;
-  return sheetHost.layer ? createPortal(<NSEWindowSheetFrame reducedMotion={reducedMotion} frozen={controller.isDisposed} holdsController>{sheet}</NSEWindowSheetFrame>, sheetHost.layer) : null;
+  return sheetHost.layer ? createPortal(<WindowSheetFrame reducedMotion={reducedMotion} frozen={controller.isDisposed} holdsController>{sheet}</WindowSheetFrame>, sheetHost.layer) : null;
 }
 
-function createWindowMount(appRuntime: SynWareRuntime, alerts: NSEWindowAlertQueue, appAlerts: SynWareContextValue["alerts"] | null): NSEWindowMount {
+function createWindowMount(appRuntime: SynWareRuntime, alerts: WindowAlertQueue, appAlerts: SynWareContextValue["alerts"] | null): WindowMount {
   const windows = appRuntime.windows;
   const current = () => {
     const snapshot = windows.getSnapshot();
@@ -437,7 +437,7 @@ function createWindowMount(appRuntime: SynWareRuntime, alerts: NSEWindowAlertQue
   };
 }
 
-export interface NSEWindowControllerViewProps {
+export interface WindowControllerViewProps {
   readonly controller: NSEAnyWindowController;
 }
 
@@ -446,12 +446,12 @@ export interface NSEWindowControllerViewProps {
  * its `static view`) and binds the controller to the mounted window: the
  * window loads before any view does, and key-window changes reach it.
  */
-export function NSEWindowControllerView({ controller }: NSEWindowControllerViewProps) {
+export function WindowControllerView({ controller }: WindowControllerViewProps) {
   useObserve(controller);
   const appRuntime = useContext(SynWareRuntimeContext);
   const alerts = useMemo(() => createNSEWindowAlertQueue(), []);
   const appAlerts = useSynWareContext()?.alerts ?? null;
-  const layout = useContext(NSEWindowLayoutContext);
+  const layout = useContext(WindowLayoutContext);
   const mount = useMemo(() => {
     const mount = appRuntime ? createWindowMount(appRuntime, alerts, appAlerts) : null;
     return mount && layout ? { ...mount, get windowId() { return mount.windowId; }, contentLayoutGuide: layout } : mount;
@@ -459,7 +459,7 @@ export function NSEWindowControllerView({ controller }: NSEWindowControllerViewP
   const [loaded, setLoaded] = useState(false);
   const [titleSlot, setTitleSlot] = useState<HTMLDivElement | null>(null);
   const titleSlotHost = useMemo(() => ({ root: controller.contentViewController, setSlot: setTitleSlot }), [controller, controller.contentViewController]);
-  const titlebarHost = useContext(NSEWindowTitlebarHostContext);
+  const titlebarHost = useContext(WindowTitlebarHostContext);
   // Both standalone windows and stage hosts project the same window-owned chrome.
   const stageTitlebar = titlebarHost;
   const accessoryHost = mount?.windowId === null ? titlebarHost : null;
@@ -509,36 +509,36 @@ export function NSEWindowControllerView({ controller }: NSEWindowControllerViewP
   if (controller.isDisposed || !loaded) return null;
   const root = controller.contentViewController;
   const View = viewComponentOf(controller);
-  const content = <NSEWindowSheetHostContext.Provider value={sheets.host}><NSEOpenPanelWindowHost window={controller.window}>{root
-    ? <NSEViewControllerView controller={root} />
-    : View ? <View controller={controller} /> : null}<NSEWindowAlertSheet queue={alerts} /></NSEOpenPanelWindowHost></NSEWindowSheetHostContext.Provider>;
+  const content = <WindowSheetHostContext.Provider value={sheets.host}><OpenPanelWindowHost window={controller.window}>{root
+    ? <ViewControllerView controller={root} />
+    : View ? <View controller={controller} /> : null}<WindowAlertSheet queue={alerts} /></OpenPanelWindowHost></WindowSheetHostContext.Provider>;
   const sheetLayer = <div ref={sheets.layerRef} className="nse-window-sheet-layer" data-sheet-attached={sheets.attached ? "true" : undefined} />;
   const { toolbar, bottomBarAccessory, titlebarAccessoryViewControllers: accessories } = controller.window;
-  const renderAccessory = (accessory: NSEViewController<unknown>) => <NSEViewControllerView controller={accessory} className="nse-window-titlebar-accessory" />;
+  const renderAccessory = (accessory: NSEViewController<unknown>) => <ViewControllerView controller={accessory} className="nse-window-titlebar-accessory" />;
   const bottomBorder = controller.window.contentBorderThickness("minY");
   const { toolbarStyle, subtitle } = controller.window;
   const title = nseWindowPresentedTitle(controller.window);
-  const ownTitle = toolbarStyle === "expanded" ? <NSEWindowTitlebarContent toolbarStyle={toolbarStyle} title={title} subtitle={subtitle} /> : null;
+  const ownTitle = toolbarStyle === "expanded" ? <WindowTitlebarContent toolbarStyle={toolbarStyle} title={title} subtitle={subtitle} /> : null;
   // Keep the content host permanent: showing chrome must not remount an editor or its draft.
   const hasBottomAccessory = bottomBorder > 0 && bottomBarAccessory != null;
   return (
-    <NSEWindowTitleSlotContext.Provider value={titleSlotHost}>
-    <NSEActionScopeProvider appId={appRuntime.app.bundleIdentifier}>
-      <NSEControllerResponder target={controller} kind="controller">
-        {accessories.length ? <NSEWindowTitlebarAccessories accessories={accessories} renderController={renderAccessory} host={accessoryHost} placement="titlebar" /> : null}
+    <WindowTitleSlotContext.Provider value={titleSlotHost}>
+    <ActionScopeProvider appId={appRuntime.app.bundleIdentifier}>
+      <ControllerResponder target={controller} kind="controller">
+        {accessories.length ? <WindowTitlebarAccessories accessories={accessories} renderController={renderAccessory} host={accessoryHost} placement="titlebar" /> : null}
           <div className="nse-window-chrome-frame">
-            {toolbar ? <NSEWindowToolbar controller={controller} toolbar={toolbar} /> : null}
-            <NSEWindowTitlebarAccessories accessories={accessories} renderController={renderAccessory} host={accessoryHost} placement="row" />
+            {toolbar ? <WindowToolbar controller={controller} toolbar={toolbar} /> : null}
+            <WindowTitlebarAccessories accessories={accessories} renderController={renderAccessory} host={accessoryHost} placement="row" />
             {titleSlot ? createPortal(ownTitle, titleSlot) : ownTitle}
             <div data-nse-part="content-view" data-nse-content-border={bottomBorder > 0 ? nseContentBorderSize(bottomBorder) : undefined} className="nse-window-chrome-content" data-content-border={bottomBorder > 0 ? nseContentBorderSize(bottomBorder) : undefined}>
               <div className="nse-window-content-above-bottom-bar" style={{ bottom: hasBottomAccessory ? bottomBorder : 0 }}>{content}</div>
               {hasBottomAccessory ? <div className="nse-window-bottom-bar-accessory" data-nse-part="bottom-bar-accessory" style={{ height: bottomBorder }}>{bottomBarAccessory}</div> : null}
-              {bottomBorder > 0 ? <NSEWindowContentBorder thickness={bottomBorder} /> : null}
+              {bottomBorder > 0 ? <WindowContentBorder thickness={bottomBorder} /> : null}
               {sheetLayer}
             </div>
           </div>
-      </NSEControllerResponder>
-    </NSEActionScopeProvider>
-    </NSEWindowTitleSlotContext.Provider>
+      </ControllerResponder>
+    </ActionScopeProvider>
+    </WindowTitleSlotContext.Provider>
   );
 }

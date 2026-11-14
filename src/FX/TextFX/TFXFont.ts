@@ -38,6 +38,12 @@ export interface TFXFontShapeOptions {
 }
 const disposalOwners = new WeakMap<TFXFont, () => void>();
 const fontGraphemes = new Intl.Segmenter(undefined, { granularity: "grapheme" });
+let measureSafePrefixes: (font: TFXFont, text: string, options: TFXFontShapeOptions) => ReadonlyMap<number, number>;
+
+/** @internal Widths at HarfBuzz cluster boundaries that are safe to shape independently. */
+export function measureTFXSafePrefixes(font: TFXFont, text: string, options: TFXFontShapeOptions): ReadonlyMap<number, number> {
+  return measureSafePrefixes(font, text, options);
+}
 
 let backendPromise: Promise<Backend> | null = null;
 // Node loads the native package at runtime. The computed specifier keeps it out
@@ -91,6 +97,10 @@ export function bindTFXFontDisposalOwner(font: TFXFont, owner: () => void): () =
 }
 
 export class TFXFont {
+  static {
+    measureSafePrefixes = (font, text, options) => font.#measureSafePrefixes(text, options);
+  }
+
   readonly #lifecycle = new SynCloudOSLifecycleRecord({ kind: "TFXFont" });
   readonly descriptor: TFXFontDescriptor;
   readonly familyName: string;
@@ -220,24 +230,7 @@ export class TFXFont {
 
   shape(text: string, options: Readonly<TFXFontShapeOptions> = {}): TFXGlyphRun {
     const font = this.#requireFont("shape");
-    if (typeof text !== "string" || text.length > 65536) throw new RangeError("A shaping run must contain at most 65536 UTF-16 units.");
-    const hb = this.#backend!;
-    const buffer = this.#buffer!;
-    buffer.clearContents();
-    buffer.addText(text);
-    buffer.guessSegmentProperties();
-    const direction = options.direction ?? "ltr";
-    const directions = { ltr: hb.Direction.LTR, rtl: hb.Direction.RTL, ttb: hb.Direction.TTB, btt: hb.Direction.BTT };
-    if (!(direction in directions)) throw new TypeError("Invalid text direction.");
-    buffer.setDirection(directions[direction]);
-    if (options.language) buffer.setLanguage(options.language);
-    if (options.script) buffer.setScript(options.script);
-    const features = Object.entries(options.features ?? {}).map(([tag, value]) => {
-      if (!/^[\x20-\x7e]{4}$/.test(tag) || !Number.isSafeInteger(value) || value < 0 || value > 0xffffffff) throw new TypeError("OpenType features require four-character tags and unsigned integer values.");
-      return new hb.Feature(tag, value);
-    });
-    if (features.length > 128) throw new RangeError("A shaping run accepts at most 128 OpenType feature settings.");
-    hb.shape(font, buffer, features);
+    const { buffer, direction, directions } = this.#shapeBuffer(font, text, options);
     const infos = buffer.getGlyphInfos();
     const positions = buffer.getGlyphPositions();
     const scale = this.descriptor.size / this.unitsPerEm;
@@ -276,6 +269,51 @@ export class TFXFont {
     });
     buffer.clearContents();
     return Object.freeze({ text, direction, glyphs: Object.freeze(glyphs), advance: Object.freeze({ width: Math.abs(x), height: Math.abs(y) }) });
+  }
+
+  #shapeBuffer(font: HarfBuzz.Font, text: string, options: Readonly<TFXFontShapeOptions>) {
+    if (typeof text !== "string" || text.length > 65536) throw new RangeError("A shaping run must contain at most 65536 UTF-16 units.");
+    const hb = this.#backend!;
+    const buffer = this.#buffer!;
+    buffer.clearContents();
+    buffer.addText(text);
+    buffer.guessSegmentProperties();
+    const direction = options.direction ?? "ltr";
+    const directions = { ltr: hb.Direction.LTR, rtl: hb.Direction.RTL, ttb: hb.Direction.TTB, btt: hb.Direction.BTT };
+    if (!(direction in directions)) throw new TypeError("Invalid text direction.");
+    buffer.setDirection(directions[direction]);
+    if (options.language) buffer.setLanguage(options.language);
+    if (options.script) buffer.setScript(options.script);
+    const features = Object.entries(options.features ?? {}).map(([tag, value]) => {
+      if (!/^[\x20-\x7e]{4}$/.test(tag) || !Number.isSafeInteger(value) || value < 0 || value > 0xffffffff) throw new TypeError("OpenType features require four-character tags and unsigned integer values.");
+      return new hb.Feature(tag, value);
+    });
+    if (features.length > 128) throw new RangeError("A shaping run accepts at most 128 OpenType feature settings.");
+    hb.shape(font, buffer, features);
+    return { buffer, direction, directions, hb };
+  }
+
+  #measureSafePrefixes(text: string, options: TFXFontShapeOptions): ReadonlyMap<number, number> {
+    const { buffer, hb } = this.#shapeBuffer(this.#requireFont("shape"), text, options);
+    const infos = buffer.getGlyphInfos();
+    const positions = buffer.getGlyphPositions();
+    const scale = this.descriptor.size / this.unitsPerEm;
+    const widths = new Map<number, number>();
+    let x = 0;
+    for (let index = 0; index < infos.length;) {
+      const { cluster } = infos[index]!;
+      const before = x;
+      let unsafe = false;
+      do {
+        unsafe ||= Boolean(infos[index]!.flags & hb.GlyphFlag.UNSAFE_TO_BREAK);
+        x += positions[index]!.xAdvance * scale;
+        index++;
+      } while (infos[index]?.cluster === cluster);
+      if (!unsafe) widths.set(cluster, Math.abs(before));
+    }
+    widths.set(text.length, Math.abs(x));
+    buffer.clearContents();
+    return widths;
   }
 
   dispose(): void {

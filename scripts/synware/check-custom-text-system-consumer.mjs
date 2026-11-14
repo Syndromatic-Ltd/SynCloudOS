@@ -96,8 +96,8 @@ export function createCustomTextSystemFixtureSource(source) {
   source = replaceFixtureContract(source, "../../fixtures/fx/fonts/" + fontFile + "?url", "./assets/ExampleFont.ttf?url");
   source = replaceFixtureContract(source, "const output = await prepared.output.exportPDF();",
     'if (window.customInstalledCaptureRace) value.insertText("caption", "Later captured edit ");\n        const output = await prepared.output.exportPDF();');
-  source = replaceFixtureContract(source, "pdf = { revision: output.receipt.revision!, byteLength: output.bytes.length }; return pdf;",
-    "window.customInstalledPDF = { bytes: Array.from(output.bytes), revision: output.receipt.revision!, pages: output.receipt.pages.length };\n        pdf = { revision: output.receipt.revision!, byteLength: output.bytes.length }; return pdf;");
+  source = replaceFixtureContract(source, "pdf = { revision: output.receipt.revision!, byteLength: output.bytes.count }; return pdf;",
+    "window.customInstalledPDF = { bytes: Array.from(output.bytes.bytes), revision: output.receipt.revision!, pages: output.receipt.pages.length };\n        pdf = { revision: output.receipt.revision!, byteLength: output.bytes.count }; return pdf;");
   return source + "\ndeclare global { interface Window { customInstalledCaptureRace?: boolean; customInstalledPDF?: { bytes: number[]; revision: number; pages: number } } }\n";
 }
 
@@ -210,9 +210,11 @@ async function browserContract(page, errors) {
   assert.equal(edited.revision, initial.revision + 5, "Each native edit must be one canonical document transaction.");
   assert.equal(edited.captionText, initial.captionText); assert.deepEqual(edited.selections.bodyMirror, { location: 8, length: 0 });
   assert.equal(await page.getByRole("textbox", { name: "Body mirror", exact: true }).inputValue(), edited.bodyText);
-  for (let i = 0; i < 5; i++) await page.getByTestId("undo").click();
+  // Typing coalesces as NSTextView does: replacing the selection with H is one action, the contiguous ello another.
+  for (let i = 0; i < 2; i++) await page.getByTestId("undo").click();
   await page.waitForFunction(expected => window.customTextSurface.getSnapshot().bodyText === expected, initial.bodyText);
-  for (let i = 0; i < 5; i++) await page.getByTestId("redo").click();
+  assert.equal(await page.getByTestId("undo").isDisabled(), true);
+  for (let i = 0; i < 2; i++) await page.getByTestId("redo").click();
   await page.waitForFunction(expected => window.customTextSurface.getSnapshot().bodyText === expected, edited.bodyText);
   assert.equal((await snapshot()).captionText, initial.captionText);
 
@@ -344,7 +346,7 @@ async function freshHostContract(page, errors) {
   await page.evaluate(() => { window.customTextSurface.select("body", 0, 5); });
   const freshBody = page.getByRole("textbox", { name: "Body", exact: true }); await freshBody.focus(); await freshBody.pressSequentially("Fresh");
   await page.waitForFunction(() => window.customTextSurface.getSnapshot().bodyText.startsWith("Fresh engines"));
-  for (let i = 0; i < 5; i++) await page.getByTestId("undo").click(); assert.deepEqual((await native()).model, reopened.model); await ready();
+  for (let i = 0; i < 2; i++) await page.getByTestId("undo").click(); assert.deepEqual((await native()).model, reopened.model); await ready();
   // Return to the clean saved revision before disposing the real host; no close-dialog automation.
   await page.evaluate(() => window.customTextSurface.saveNative());
   const finalAsset = await page.evaluate(() => window.customTextSurface.assetReceipt());

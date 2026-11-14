@@ -1487,7 +1487,7 @@
 }
 
 /* --- Metal source-list surface (sits under the atmoMetal chrome) -------------
-   NSEMetalSurface is the layout-neutral surface projection. It shares this
+   MetalSurface is the layout-neutral surface projection. It shares this
    exact material rule with source-list outlines, but deliberately does not inherit their
    desktop-only border/seam geometry. */
 :is(.nse-sidebar[data-surface="metal"],.nse-metal-surface),

@@ -25,7 +25,7 @@
  * classic crayon set.
  */
 
-export interface NSENamedColour {
+export interface NamedColour {
   readonly name: string;
   readonly hex: string;
 }
@@ -33,10 +33,10 @@ export interface NSENamedColour {
 export interface NSEColourList {
   readonly id: string;
   readonly name: string;
-  readonly colours: readonly NSENamedColour[];
+  readonly colours: readonly NamedColour[];
 }
 
-const named = (entries: readonly (readonly [string, string])[]): readonly NSENamedColour[] =>
+const named = (entries: readonly (readonly [string, string])[]): readonly NamedColour[] =>
   Object.freeze(entries.map(([name, hex]) => Object.freeze({ name, hex })));
 
 /** The system's named colours. */
@@ -70,7 +70,7 @@ export const webSafeColourList: NSEColourList = Object.freeze({
  * The crayon box, front row first. Each row runs from warm to cool and ends in
  * two greys; the rows darken towards the back of the box.
  */
-export const crayonRows: readonly (readonly NSENamedColour[])[] = Object.freeze([
+export const crayonRows: readonly (readonly NamedColour[])[] = Object.freeze([
   named([["Cantaloupe", "#FFCC66"], ["Honeydew", "#CCFF66"], ["Spindrift", "#66FFCC"], ["Sky", "#66CCFF"], ["Lavender", "#CC66FF"], ["Carnation", "#FF6FCF"], ["Licorice", "#000000"], ["Snow", "#FFFFFF"]]),
   named([["Salmon", "#FF6666"], ["Banana", "#FFFF66"], ["Flora", "#66FF66"], ["Ice", "#66FFFF"], ["Orchid", "#6666FF"], ["Bubblegum", "#FF66FF"], ["Lead", "#191919"], ["Mercury", "#E6E6E6"]]),
   named([["Tangerine", "#FF8000"], ["Lime", "#80FF00"], ["Sea Foam", "#00FF80"], ["Aqua", "#0080FF"], ["Grape", "#8000FF"], ["Strawberry", "#FF0080"], ["Tungsten", "#333333"], ["Silver", "#CCCCCC"]]),

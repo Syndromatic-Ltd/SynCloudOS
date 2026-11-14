@@ -18,8 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { NSEVirtualIndexRange } from "./virtualisationTypes";
-import type { NSEVirtualRange, NSEVirtualRangeOptions, NSEVirtualSizeEstimate } from "./virtualisationTypes";
+import type { VirtualIndexRange } from "./virtualisationTypes";
+import type { VirtualRange, VirtualRangeOptions, VirtualSizeEstimate } from "./virtualisationTypes";
 
 const MAX_VIRTUAL_COUNT = 10_000_000;
 
@@ -48,13 +48,13 @@ export function validateNSEVirtualSize(value: number): number {
   return value;
 }
 
-export class NSEVirtualSizeIndex {
+export class VirtualSizeIndex {
   readonly count: number;
   readonly #defaultSize: number;
   readonly #sizes = new Map<number, number>();
   readonly #tree = new Map<number, number>();
 
-  constructor(count: number, estimateSize: NSEVirtualSizeEstimate) {
+  constructor(count: number, estimateSize: VirtualSizeEstimate) {
     this.count = validateNSEVirtualCount(count);
     this.#defaultSize = this.count === 0 || typeof estimateSize === "function" ? 0 : validateNSEVirtualSize(estimateSize);
     if (typeof estimateSize === "function") {
@@ -124,9 +124,9 @@ export class NSEVirtualSizeIndex {
   }
 }
 
-export function coalesceNSEVirtualRanges(ranges: readonly NSEVirtualIndexRange[]): readonly NSEVirtualIndexRange[] {
+export function coalesceNSEVirtualRanges(ranges: readonly VirtualIndexRange[]): readonly VirtualIndexRange[] {
   const ordered = ranges.filter(({ length }) => length > 0).map(({ start, length }) => ({ start, length })).sort((left, right) => left.start - right.start);
-  const coalesced: NSEVirtualIndexRange[] = [];
+  const coalesced: VirtualIndexRange[] = [];
   for (const range of ordered) {
     const previous = coalesced.at(-1);
     if (!previous || range.start > previous.start + previous.length) { coalesced.push(range); continue; }
@@ -136,7 +136,7 @@ export function coalesceNSEVirtualRanges(ranges: readonly NSEVirtualIndexRange[]
   return coalesced;
 }
 
-export function computeNSEVirtualRangeFromIndex(options: Omit<NSEVirtualRangeOptions, "count" | "estimateSize">, index: NSEVirtualSizeIndex): NSEVirtualRange {
+export function computeVirtualRangeFromIndex(options: Omit<VirtualRangeOptions, "count" | "estimateSize">, index: VirtualSizeIndex): VirtualRange {
   const viewportStartInput = finiteNonNegative(options.viewportStart, "Virtual viewport start");
   const viewportSize = finiteNonNegative(options.viewportSize, "Virtual viewport size");
   if (!Number.isSafeInteger(options.overscan) || options.overscan < 0) throw new RangeError("Virtual overscan must be a non-negative safe integer.");
@@ -148,11 +148,11 @@ export function computeNSEVirtualRangeFromIndex(options: Omit<NSEVirtualRangeOpt
   const visibleEnd = Math.min(index.count, Math.max(visibleStart + 1, index.lowerBound(viewportEnd)));
   const renderedStart = Math.max(0, visibleStart - options.overscan);
   const renderedEnd = Math.min(index.count, visibleEnd + options.overscan);
-  const ranges: NSEVirtualIndexRange[] = [{ start: renderedStart, length: renderedEnd - renderedStart }];
+  const ranges: VirtualIndexRange[] = [{ start: renderedStart, length: renderedEnd - renderedStart }];
   for (const retained of options.retainedIndices ?? []) if (Number.isSafeInteger(retained) && retained >= 0 && retained < index.count) ranges.push({ start: retained, length: 1 });
   return { visible: { start: visibleStart, length: visibleEnd - visibleStart }, rendered: coalesceNSEVirtualRanges(ranges), totalSize };
 }
 
-export function computeNSEVirtualRange(options: NSEVirtualRangeOptions): NSEVirtualRange {
-  return computeNSEVirtualRangeFromIndex(options, new NSEVirtualSizeIndex(options.count, options.estimateSize));
+export function computeVirtualRange(options: VirtualRangeOptions): VirtualRange {
+  return computeVirtualRangeFromIndex(options, new VirtualSizeIndex(options.count, options.estimateSize));
 }

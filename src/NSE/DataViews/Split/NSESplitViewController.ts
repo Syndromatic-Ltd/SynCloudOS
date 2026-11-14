@@ -23,14 +23,14 @@ import { resolveNSEBookRegions } from "../../Navigation/bookRegions";
 import type { SynCloudOSPresentationTraits } from "../../../SynCloudOS/SynCloudOS";
 import type { NSEUserDefaultsController } from "../../Controllers";
 import type { NSEDataViewState } from "../Core";
-import { nseSplitViewItemHost, type NSESplitViewItem, type NSESplitViewItemHost } from "./NSESplitViewItem";
+import { nseSplitViewItemHost, type NSESplitViewItem, type SplitViewItemHost } from "./NSESplitViewItem";
 import type {
   NSESplitViewControllerOptions,
   NSESplitViewItemSnapshot,
   NSESplitViewPreferences,
   NSESplitViewSnapshot,
 } from "./splitViewTypes";
-import { NSESplitViewControllerView } from "./splitViewControllerView";
+import { SplitViewControllerView } from "./splitViewControllerView";
 
 /** The solver's view of an item. `collapsePriority` is the item's holding priority. */
 interface SplitPane {
@@ -147,7 +147,7 @@ function distributeSplitSizes(
 export const nseSplitViewLayout: unique symbol = Symbol("nse.splitViewLayout");
 
 /** @internal */
-export interface NSESplitViewLayout {
+export interface SplitViewLayout {
   /** The mounted default renderer, including one embedded by a custom view, owns its allocation. */
   claimBoundsAuthority(): () => void;
   resize(availableSize: number): void;
@@ -168,7 +168,7 @@ export class NSESplitViewController extends NSEViewController<NSESplitViewSnapsh
   readonly #items: NSESplitViewItem[] = [];
   readonly #preferences?: NSEUserDefaultsController<NSESplitViewPreferences>;
   readonly #restored: NSESplitViewPreferences | undefined;
-  readonly #host: NSESplitViewItemHost;
+  readonly #host: SplitViewItemHost;
   #requestedSizes = new Map<string, number>();
   #explicitlyCollapsed = new Set<string>();
   #presentation: "split" | "single-pane" = "split";
@@ -358,7 +358,7 @@ export class NSESplitViewController extends NSEViewController<NSESplitViewSnapsh
   }
 
   /** @internal */
-  get [nseSplitViewLayout](): NSESplitViewLayout {
+  get [nseSplitViewLayout](): SplitViewLayout {
     return {
       claimBoundsAuthority: () => {
         const token = Symbol("split-bounds-authority");
@@ -556,7 +556,7 @@ export class NSESplitViewController extends NSEViewController<NSESplitViewSnapsh
     preferences.set("activePaneId", this.#preferredActiveId || null);
   }
 
-  static override view: NSEViewComponent = NSESplitViewControllerView;
+  static override view: NSEViewComponent = SplitViewControllerView;
 }
 
 function paneFor(item: NSESplitViewItem): SplitPane {

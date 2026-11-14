@@ -21,7 +21,7 @@ import type { NSEMenu } from "../../Menus/NSEMenu";
  */
 
 import type { NSEActionReference } from "../Core/actionReference";
-import type { NSEThumbMaterial } from "../../Appearance/NSEMetalThumb";
+import type { NSEThumbMaterial } from "../../Appearance/MetalThumb";
 import type { InputHTMLAttributes, ReactNode } from "react";
 import type { NSEUndoRegistrationCapability } from "../../../Foundation/NSEUndoRegistrationCapability";
 import type { UndoAction, UndoReservation, AutomaticUndoGroup } from "../../../SynCloudOS/SynCloudOS";

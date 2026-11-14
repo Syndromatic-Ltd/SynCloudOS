@@ -18,17 +18,18 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEWindowLayoutContext, useNSEWindowChromeElement } from "../../NSE/applicationHostInterop";
+import { WindowLayoutContext, useNSEWindowChromeElement } from "../../NSE/applicationHostInterop";
+import { contentInlineSize } from "./contentInlineSize";
 import { useNSEWindowChromeObstruction } from "../../NSE/NSE";
 
 import { Fragment, createContext, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import type { NSEAnyWindowController } from "../../NSE/applicationHostInterop";
-import { useObserve, NSEActionResponderContext } from "../../NSE/applicationHostInterop";
+import { useObserve, ActionResponderContext } from "../../NSE/applicationHostInterop";
 import { nseAttachToolbar, nseEndToolbarCustomization, nseToolbarEngine, nseToolbarTabViews } from "../../NSE/applicationHostInterop";
 import type { NSEToolbar } from "../../NSE/NSE";
-import { NSEToolbarView } from "../../NSE/applicationHostInterop";
-import { NSEToolbarConfigurationSheet } from "../../NSE/applicationHostInterop";
+import { ToolbarView } from "../../NSE/applicationHostInterop";
+import { ToolbarConfigurationSheet } from "../../NSE/applicationHostInterop";
 import type { NSETitlebarAccessoryViewController } from "../../NSE/NSE";
 import { SynWareRuntimeContext } from "../../SynCloudOSReact";
 import { useSynWareContext } from "../AppSDK/SynWareContext";
@@ -38,13 +39,13 @@ import { NSEUserDefaults } from "../../Foundation/NSEUserDefaults";
 
 const noSubscription = () => () => {};
 
-export { NSEWindowTitlebarHostContext } from "../../NSE/applicationHostInterop";
-export type { NSEWindowTitlebarDocument, NSEWindowTitlebarHost } from "../../NSE/applicationHostInterop";
-import { NSEWindowTitlebarHostContext, type NSEWindowTitlebarHost } from "../../NSE/applicationHostInterop";
+export { WindowTitlebarHostContext } from "../../NSE/applicationHostInterop";
+export type { WindowTitlebarDocument, WindowTitlebarHost } from "../../NSE/applicationHostInterop";
+import { WindowTitlebarHostContext, type WindowTitlebarHost } from "../../NSE/applicationHostInterop";
 import { nseWindowPresentedTitle } from "../../NSE/applicationHostInterop";
 
 /** Publishes the window's title, subtitle and edited state to the stage's title bar. */
-export function useNSEWindowTitlebarDocument(controller: NSEAnyWindowController, host: NSEWindowTitlebarHost | null): void {
+export function useNSEWindowTitlebarDocument(controller: NSEAnyWindowController, host: WindowTitlebarHost | null): void {
   useObserve(controller);
   const window = controller.isDisposed ? null : controller.window;
   const title = window ? nseWindowPresentedTitle(window) : "";
@@ -78,8 +79,8 @@ function AccessoryObserver({ accessory, children }: { readonly accessory: NSETit
  * stage title bar (Atmo draws them either side of the title); bottom accessories, and in a window of
  * its own every accessory, draw in the accessory row at the top of the window's content, under the toolbar.
  */
-export function NSEWindowTitlebarAccessories({ accessories, renderController, host, placement }: AccessoryProps & {
-  readonly host: NSEWindowTitlebarHost | null;
+export function WindowTitlebarAccessories({ accessories, renderController, host, placement }: AccessoryProps & {
+  readonly host: WindowTitlebarHost | null;
   readonly placement: "titlebar" | "row";
 }) {
   const shown = accessories.filter((accessory) => {
@@ -119,7 +120,7 @@ export function nseContentBorderSize(thickness: number): "large" | "small" {
  * It lies behind the content, so the content's own controls sit over it; only its edge, which casts a
  * shadow up onto the content, is drawn above.
  */
-export function NSEWindowContentBorder({ thickness }: { readonly thickness: number }) {
+export function WindowContentBorder({ thickness }: { readonly thickness: number }) {
   useNSEWindowChromeObstruction("bottom", thickness, false);
   const mode = useWindowChromeMode();
   const style = { "--nse-window-content-border-thickness": `${thickness}px` } as CSSProperties;
@@ -142,7 +143,7 @@ function useWindowChromeMode(): "light" | "dark" {
  * Draws `window.toolbar`: its items validated and dispatched along the window's responder chain,
  * laid out to the width it is given, and the customisation sheet while it runs.
  */
-export function NSEWindowToolbar({ controller, toolbar }: { readonly controller: NSEAnyWindowController; readonly toolbar: NSEToolbar }) {
+export function WindowToolbar({ controller, toolbar }: { readonly controller: NSEAnyWindowController; readonly toolbar: NSEToolbar }) {
   useObserve(toolbar);
   const tabViews = toolbar[nseToolbarTabViews];
   const tabItems = useRef<HTMLDivElement | null>(null);
@@ -150,11 +151,11 @@ export function NSEWindowToolbar({ controller, toolbar }: { readonly controller:
   const appRuntime = useContext(SynWareRuntimeContext);
   const context = useSynWareContext();
   // The window controller's responder when it has actions; otherwise the application's mount.
-  const responderId = useContext(NSEActionResponderContext) ?? appRuntime?.responderId ?? null;
+  const responderId = useContext(ActionResponderContext) ?? appRuntime?.responderId ?? null;
   const overlayId = `nse-window-toolbar:${useId()}`;
   const mode = useWindowChromeMode();
   const element = useRef<HTMLDivElement | null>(null);
-  const layout = useContext(NSEWindowLayoutContext);
+  const layout = useContext(WindowLayoutContext);
   useNSEWindowChromeElement(element, "top", false, toolbar.isVisible);
   const [width, setWidth] = useState(0);
   const [attached, setAttached] = useState(false);
@@ -182,9 +183,11 @@ export function NSEWindowToolbar({ controller, toolbar }: { readonly controller:
     if (!node) return undefined;
     // Before layout reports a size (or where there is no layout), the toolbar spans the window.
     const view = node.ownerDocument.defaultView;
+    // Items are laid out inside the bar's padding, so the width they share is its content box, not its frame.
     const measure = (width: number) => Math.floor(width || view?.innerWidth || 0);
-    setWidth(measure(node.getBoundingClientRect().width));
-    if (layout) return layout.observeElement(node, rect => setWidth(measure(rect.width)));
+    const measureFrame = (width: number) => width ? Math.floor(contentInlineSize(node, width)) : measure(width);
+    setWidth(measureFrame(node.getBoundingClientRect().width));
+    if (layout) return layout.observeElement(node, rect => setWidth(measureFrame(rect.width)));
     const Observer = view?.ResizeObserver;
     if (!view || !Observer) return undefined;
     let frame: number | null = null;
@@ -222,7 +225,7 @@ export function NSEWindowToolbar({ controller, toolbar }: { readonly controller:
     <>
       <div ref={element} className="nse-window-toolbar" data-nse-part="toolbar" data-mode={mode} data-nse-colour-scheme-resolved={mode} data-toolbar-identifier={toolbar.identifier} data-has-tab-items={tabViews.length ? "true" : undefined}>
         {engine && width > 0 && (!tabViews.length || toolbar.items.length > 0) ? (
-          <NSEToolbarView
+          <ToolbarView
             composition="configured"
             controller={engine}
             width={Math.max(0, width - tabItemsWidth)}
@@ -234,7 +237,7 @@ export function NSEWindowToolbar({ controller, toolbar }: { readonly controller:
         </div> : null}
       </div>
       {engine && toolbar.customizationPaletteIsRunning ? (
-        <NSEToolbarConfigurationSheet
+        <ToolbarConfigurationSheet
           id={`${overlayId}:customize`}
           open
           anchor={element.current}
@@ -254,13 +257,13 @@ export function NSEWindowToolbar({ controller, toolbar }: { readonly controller:
  * a portal, so it keeps its presenter's React context and responder chain, and reports itself attached
  * while it is shown, which blocks the rest of the window.
  */
-export interface NSEWindowSheetHost {
+export interface WindowSheetHost {
   readonly layer: HTMLElement | null;
   /** Marks a sheet attached; returns the function that detaches it. */
   attach(): () => void;
 }
 
-export const NSEWindowSheetHostContext = createContext<NSEWindowSheetHost | null>(null);
+export const WindowSheetHostContext = createContext<WindowSheetHost | null>(null);
 
 type InertElement = HTMLElement & { inert: boolean };
 
@@ -270,13 +273,13 @@ type InertElement = HTMLElement & { inert: boolean };
  * and `onAttachedChange` reports it so the window can refuse its close button.
  */
 export function useNSEWindowSheetHost(onAttachedChange: (attached: boolean) => void): {
-  readonly host: NSEWindowSheetHost;
+  readonly host: WindowSheetHost;
   readonly layerRef: (element: HTMLDivElement | null) => void;
   readonly attached: boolean;
 } {
   const [layer, setLayer] = useState<HTMLDivElement | null>(null);
   const [count, setCount] = useState(0);
-  const host = useMemo<NSEWindowSheetHost>(() => Object.freeze({
+  const host = useMemo<WindowSheetHost>(() => Object.freeze({
     layer,
     attach: () => {
       let attachedNow = true;
@@ -337,7 +340,7 @@ function copySheet(frame: HTMLElement): HTMLElement {
  * `frozen` reports the content gone), and when the sheet detaches that inert copy slides back up under the
  * title bar and toolbar, the enter in reverse, and is removed. With reduced motion the copy fades instead.
  */
-export function NSEWindowSheetFrame({ reducedMotion, frozen = false, holdsController = false, children }: {
+export function WindowSheetFrame({ reducedMotion, frozen = false, holdsController = false, children }: {
   readonly reducedMotion: boolean;
   /** The sheet draws a view controller's view, which leaves when the controller is disposed. */
   readonly holdsController?: boolean;
@@ -345,7 +348,7 @@ export function NSEWindowSheetFrame({ reducedMotion, frozen = false, holdsContro
   readonly frozen?: boolean;
   readonly children: ReactNode;
 }) {
-  const host = useContext(NSEWindowSheetHostContext);
+  const host = useContext(WindowSheetHostContext);
   const frameRef = useRef<HTMLDivElement | null>(null);
   const motion = useRef(reducedMotion);
   motion.current = reducedMotion;

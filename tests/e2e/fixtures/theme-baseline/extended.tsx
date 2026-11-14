@@ -1,19 +1,19 @@
 import { useEffect, useState, type ReactNode } from "react";
 import * as NSE from "../../../../src/NSE/sdkPackageEntry";
 import { NSEPathControl } from "../../../../src/NSE/Controls/Values/NSEPathControl";
-import { NSEMenuView } from "../../../../src/NSE/Menus/NSEMenuView";
+import { MenuView } from "../../../../src/NSE/Menus/MenuView";
 import { NSEPopup } from "../../../../src/NSE/Overlays/NSEPopup";
 import { NSEPopover } from "../../../../src/NSE/Overlays/NSEPopover";
-import { NSETabBarController } from "../../../../src/NSE/Navigation/NSETabBarController";
-import { NSETabBar } from "../../../../src/NSE/Navigation/NSETabBar";
-import { NSEWindowTitlebarContent } from "../../../../src/NSE/Windows/windowTitlebarContext";
+import { TabBarController } from "../../../../src/NSE/Navigation/TabBarController";
+import { TabBar } from "../../../../src/NSE/Navigation/TabBar";
+import { WindowTitlebarContent } from "../../../../src/NSE/Windows/windowTitlebarContext";
 import { GFXColour } from "../../../../src/FX/GraphicsFX/GFXColour";
 import { NSEArrayController } from "../../../../src/NSE/Controllers/NSEArrayController";
 import { NSETreeController } from "../../../../src/NSE/Controllers/NSETreeController";
 import { nseUnowned } from "../../../../src/NSE/Controllers/ownership";
 import type { ThemeBaselineSurface } from "./catalogue";
 import { NSEImageView } from "../../../../src/NSE/Controls/Images/NSEImage";
-import { NSEToolbarView } from "../../../../src/NSE/Toolbars/NSEToolbarView";
+import { ToolbarView } from "../../../../src/NSE/Toolbars/ToolbarView";
 import { LoadingSpinner } from "../../../../src/NSE/Components/LoadingSpinner";
 import { Badge } from "../../../../src/NSE/Components/Badge";
 import { ColourWellSurface } from "./panels";
@@ -36,9 +36,9 @@ function DataView({ kind, selected, sourceList = false, state = { kind: "ready" 
     : <NSE.NSECollectionView aria-label="Files" adapter={adapter} layout={NSE.createListCollectionLayout(48)} renderItem={({ item }) => <span>{item.label}</span>} viewportBlockSize={200} state={state} />;
 }
 function Tabs({ orientation }: { orientation: "horizontal" | "vertical" }) {
-  const [controller] = useState(() => new NSETabBarController<ReactNode>({ owner: nseUnowned, id: "baseline-tabs", destinations: ["Documents", "Pictures", "Music", "Movies", "Downloads", "Settings"].map((label, index) => ({ id: `tab-${index}`, label, icon: { kind: "vector" as const, path: "/src/NSE/Navigation/nse-tab-bar-more.svg" }, render: () => <p>{label}</p> })) }));
+  const [controller] = useState(() => new TabBarController<ReactNode>({ owner: nseUnowned, id: "baseline-tabs", destinations: ["Documents", "Pictures", "Music", "Movies", "Downloads", "Settings"].map((label, index) => ({ id: `tab-${index}`, label, icon: { kind: "vector" as const, path: "/src/NSE/Navigation/nse-tab-bar-more.svg" }, render: () => <p>{label}</p> })) }));
   useEffect(() => () => controller.dispose(), [controller]);
-  return <NSETabBar controller={controller} aria-label="Workspace" orientation={orientation} />;
+  return <TabBar controller={controller} aria-label="Workspace" orientation={orientation} />;
 }
 function Overlay({ popover }: { popover: boolean }) {
   const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null);
@@ -71,16 +71,16 @@ export function extendedThemeBaselineCatalogue(): ThemeBaselineSurface[] {
   for (const imageScaling of ["proportionallyUpOrDown", "none"] as const) add(`image-view-${imageScaling}`, () => <NSEImageView src="/assets/webspring/Panel.png" alt="Panel artwork" imageScaling={imageScaling} style={{ height: 240 }} />);
   for (const editable of [false, true]) for (const selected of [false, true]) add(`text-view-${editable ? "editable" : "read-only"}-${selected ? "selected" : "normal"}`, () => <TextSurface editable={editable} selected={selected} />);
   add("ruler-view", () => <NSE.NSERulerView value={{ alignment: "start", firstLineIndent: 12, headIndent: 24, tailIndent: 0, lineHeight: "normal", tabStops: [48, 96, 144] }} onChange={noop} />);
-  for (const position of ["top", "bottom", "inline"] as const) add(`toolbar-${position}`, () => <NSEToolbarView composition="children" position={position}><NSE.NSEButton title="Add" bezelStyle="texturedRounded" /><NSE.NSEButton title="Remove" bezelStyle="texturedRounded" /></NSEToolbarView>);
+  for (const position of ["top", "bottom", "inline"] as const) add(`toolbar-${position}`, () => <ToolbarView composition="children" position={position}><NSE.NSEButton title="Add" bezelStyle="texturedRounded" /><NSE.NSEButton title="Remove" bezelStyle="texturedRounded" /></ToolbarView>);
   for (const mode of ["clip", "scroll"] as const) add(`clip-view-${mode}`, () => <NSE.NSEClipView mode={mode} style={{ height: 120 }}><p>Visible content</p><div style={{ height: 300 }}>Document content</div></NSE.NSEClipView>);
   add("badge", () => <Badge count={12} />);
   add("loading-spinner", () => <LoadingSpinner />);
   add("tab-view", () => <NSE.NSETabView aria-label="Documents" items={[{ id: "one", label: "First", render: () => <p>First document</p> }, { id: "two", label: "Second", render: () => <p>Second document</p> }]} />);
   add("tab-bar-more", () => <Tabs orientation="horizontal" />);
   add("tab-bar-rail", () => <Tabs orientation="vertical" />);
-  add("menu", () => <NSEMenuView label="File" items={[{ value: "new", label: "New document" }, { value: "open", label: "Open…" }, { value: "close", label: "Close", disabled: true }]} />, { interaction: "open", fullPage: true });
+  add("menu", () => <MenuView label="File" items={[{ value: "new", label: "New document" }, { value: "open", label: "Open…" }, { value: "close", label: "Close", disabled: true }]} />, { interaction: "open", fullPage: true });
   add("popover", () => <Overlay popover />, { fullPage: true });
   add("sheet", () => <Overlay popover={false} />, { fullPage: true });
-  for (const toolbarStyle of ["automatic", "expanded", "preference", "unified", "unifiedCompact"] as const) for (const mode of ["light", "dark"] as const) add(`titlebar-${toolbarStyle}-${mode}`, () => <NSEWindowTitlebarContent title="Documents" subtitle="3 items" toolbarStyle={toolbarStyle} mode={mode} leading={<NSE.NSEButton title="Back" />} trailing={<NSE.NSEButton title="Add" />} />);
+  for (const toolbarStyle of ["automatic", "expanded", "preference", "unified", "unifiedCompact"] as const) for (const mode of ["light", "dark"] as const) add(`titlebar-${toolbarStyle}-${mode}`, () => <WindowTitlebarContent title="Documents" subtitle="3 items" toolbarStyle={toolbarStyle} mode={mode} leading={<NSE.NSEButton title="Back" />} trailing={<NSE.NSEButton title="Add" />} />);
   return entries;
 }

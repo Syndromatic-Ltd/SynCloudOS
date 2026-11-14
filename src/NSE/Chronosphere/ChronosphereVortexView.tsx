@@ -21,7 +21,7 @@
 import { useMemo, type PropsWithChildren } from "react";
 import { useNSEAnimationEnvironment } from "../Animation/NSEAnimationEnvironment";
 import { NSEButton } from "../Controls/Buttons/NSEButton";
-import { NSEFocusScope } from "../Focus/NSEFocusPort";
+import { FocusScope } from "../Focus/NSEFocusPort";
 import type { ChronosphereDisposable } from "./chronosphereEnvironment";
 import { useChronosphereEnvironment } from "./chronosphereEnvironment";
 import { ChronosphereStage, type ChronospherePlatformPort } from "./ChronosphereStage";
@@ -29,7 +29,7 @@ import type { ChronosphereViewComponent, ChronosphereViewProps } from "./chronos
 import { loadVortexImages, type VortexImages } from "./Vortex/loadVortexImages";
 
 function DetailScope({ scopeId, children }: PropsWithChildren<{ scopeId: string }>) {
-  return <NSEFocusScope options={{ scopeId, kind: "modal", modal: true, trapFocus: true, asChild: true }}>{children}</NSEFocusScope>;
+  return <FocusScope options={{ scopeId, kind: "modal", modal: true, trapFocus: true, asChild: true }}>{children}</FocusScope>;
 }
 
 /**

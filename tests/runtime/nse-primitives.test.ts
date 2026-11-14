@@ -21,29 +21,29 @@
 import { describe, expect, it, vi } from "vitest";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { NSEMenuView } from "../../src/NSE/Menus";
+import { MenuView } from "../../src/NSE/Menus";
 import { NSESwitch, NSEButton, NSEBox, NSEPopUpButton, NSESegmentedControl, useNSEControlFeedback } from "../../src/NSE/public/controls";
-import { NSETopBar } from "../../src/NSE/Windows/Chrome";
-import { NSEListItem } from "../../src/NSE/Controls/Selection/NSEListItem";
-import { NSEGlassPanel } from "../../src/NSE/Components/NSEGlassPanel";
+import { TopBar } from "../../src/NSE/Windows/Chrome";
+import { GroupedRow } from "../../src/NSE/Controls/Selection/GroupedRow";
+import { GlassPanel } from "../../src/NSE/Components/GlassPanel";
 import { BrowserHapticsAdapter, createHFXVibratePattern, normalizeHFXFeedbackInput } from "../../src/SynCloudOS/PlatformAdapters/BrowserHapticsAdapter";
 import { defaultHFXFeedbackPatterns, HFX_FEEDBACK_PRESET_NAMES } from "../../src/SynCloudOS/HapticsFX/feedbackPatterns";
 import type { HFXFeedbackInput, HFXFeedbackPresetName, HFXFeedbackOptions } from "../../src/SynCloudOS/HapticsFX/feedbackTypes";
 import { AUFXSystemFeedbackBus } from "../../src/SynCloudOS/AudioFX/AUFXSystemFeedbackBus";
 import { createRuntimeHapticsService } from "../../src/SynCloudOS/HapticsFX/HapticsService";
-import { NSEStandaloneControlHost } from "../../src/NSE/Overlays";
+import { StandaloneControlHost } from "../../src/NSE/Overlays";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
-import { NSEFeedbackProvider, useNSEFeedback } from "../../src/NSE/Feedback";
+import { FeedbackProvider, useNSEFeedback } from "../../src/NSE/Feedback";
 function createFeedbackAdapter(options: HFXFeedbackOptions = {}) {
   return new BrowserHapticsAdapter(new AUFXSystemFeedbackBus(options.audioContextFactory ?? (() => null)), options);
 }
 import {
-  getNSESmoothSurfaceClassName,
-  getNSESmoothSurfaceProps,
-  getNSESmoothSurfaceRadiusValue,
-  getNSESmoothSurfaceStyle,
-  getOptionalNSESmoothSurfaceProps,
-  resolveNSESmoothSurface
+  getSmoothSurfaceClassName,
+  getSmoothSurfaceProps,
+  getSmoothSurfaceRadiusValue,
+  getSmoothSurfaceStyle,
+  getOptionalSmoothSurfaceProps,
+  resolveSmoothSurface
 } from "../../src/NSE/SmoothSurface";
 import { attributedContent, paragraph, textRun, serializeAttributedContent, parseAttributedContent, attributedContentText } from "../../src/NSE/Text";
 
@@ -283,7 +283,7 @@ describe("HapticsFX feedback preservation", () => {
     let trigger!: ReturnType<typeof useNSEControlFeedback>["triggerNSEControlHapticForEvent"];
     function Harness() { trigger = useNSEControlFeedback().triggerNSEControlHapticForEvent; return null; }
     try {
-      render(createElement(NSEFeedbackProvider, { value: engine }, createElement(Harness)));
+      render(createElement(FeedbackProvider, { value: engine }, createElement(Harness)));
       await trigger("medium", { defaultPrevented: false });
       expect(vibrate).toHaveBeenCalledWith(expectedHapticPattern("medium"));
       await trigger("error", { defaultPrevented: true });
@@ -296,7 +296,7 @@ describe("HapticsFX feedback preservation", () => {
     const { vibrate, cleanupDom } = await installDom();
     const { render: baseRender, fireEvent, cleanup } = await import("@testing-library/react");
     const engine = createRuntimeHapticsService(new AUFXSystemFeedbackBus(() => null), { navigator: { vibrate }, audio: "off" });
-    const render = (element: Parameters<typeof baseRender>[0]) => baseRender(createElement(NSEFeedbackProvider, { value: engine }, element));
+    const render = (element: Parameters<typeof baseRender>[0]) => baseRender(createElement(FeedbackProvider, { value: engine }, element));
 
     try {
       const onClick = vi.fn();
@@ -316,8 +316,8 @@ describe("HapticsFX feedback preservation", () => {
           selection: { mode: "select-one", selectedIds: new Set(["a"]), allowsEmpty: false },
           onSelectionChange: vi.fn()
         }),
-        createElement(NSEListItem, { role: "button", onClick: vi.fn() }, "List item"),
-        createElement(NSETopBar, {
+        createElement(GroupedRow, { role: "button", onClick: vi.fn() }, "List item"),
+        createElement(TopBar, {
           title: "Journal",
           leadingItems: [{ kind: "webspring", label: "Return", onClick: vi.fn() }]
         })
@@ -355,11 +355,11 @@ describe("HapticsFX feedback preservation", () => {
     const { vibrate, cleanupDom } = await installDom();
     const { render: baseRender, fireEvent, cleanup, waitFor } = await import("@testing-library/react");
     const engine = createRuntimeHapticsService(new AUFXSystemFeedbackBus(() => null), { navigator: { vibrate }, audio: "off" });
-    const render = (element: Parameters<typeof baseRender>[0]) => baseRender(createElement(NSEFeedbackProvider, { value: engine }, createElement(NSEStandaloneControlHost, { document, window, presentation: createStaticPresentationPort({ width: 1024, height: 768 }) }, element)));
+    const render = (element: Parameters<typeof baseRender>[0]) => baseRender(createElement(FeedbackProvider, { value: engine }, createElement(StandaloneControlHost, { document, window, presentation: createStaticPresentationPort({ width: 1024, height: 768 }) }, element)));
 
     try {
       const rendered = render(createElement("div", null,
-        createElement(NSEMenuView, {
+        createElement(MenuView, {
           label: "Actions",
           items: [{ value: "open", label: "Open" }],
           onSelect: vi.fn()
@@ -400,7 +400,7 @@ describe("HapticsFX feedback preservation", () => {
 
     try {
       const engine = createRuntimeHapticsService(new AUFXSystemFeedbackBus(() => null), { navigator: { vibrate }, audio: "off" });
-      const rendered = render(createElement(NSEFeedbackProvider, { value: engine }, createElement(Harness)));
+      const rendered = render(createElement(FeedbackProvider, { value: engine }, createElement(Harness)));
       expect(hook.current?.isSupported).toBe(true);
       await hook.current?.trigger("medium");
       expect(vibrate).toHaveBeenLastCalledWith(expectedHapticPattern("medium"));
@@ -423,9 +423,9 @@ describe("HapticsFX feedback preservation", () => {
   });
 });
 
-describe("NSESmoothSurface", () => {
+describe("SmoothSurface", () => {
   it("resolves stable classes and styles for smooth surface options", () => {
-    const resolved = resolveNSESmoothSurface({
+    const resolved = resolveSmoothSurface({
       radius: "lg",
       focus: "within",
       overflow: "clip",
@@ -460,14 +460,14 @@ describe("NSESmoothSurface", () => {
   });
 
   it("keeps radius, class, style, and prop helpers explicit and composable", () => {
-    expect(getNSESmoothSurfaceRadiusValue(18)).toBe("18px");
-    expect(getNSESmoothSurfaceRadiusValue("pill")).toBe("999px");
+    expect(getSmoothSurfaceRadiusValue(18)).toBe("18px");
+    expect(getSmoothSurfaceRadiusValue("pill")).toBe("999px");
 
-    expect(getNSESmoothSurfaceClassName({ radius: 18, className: "local" }, "external").split(" ")).toEqual(
+    expect(getSmoothSurfaceClassName({ radius: 18, className: "local" }, "external").split(" ")).toEqual(
       expect.arrayContaining(["nse-smooth-surface-radius-custom", "local", "external"])
     );
 
-    expect(getNSESmoothSurfaceStyle(
+    expect(getSmoothSurfaceStyle(
       {
         radius: 18,
         shadow: "none",
@@ -487,7 +487,7 @@ describe("NSESmoothSurface", () => {
       boxShadow: "none"
     });
 
-    expect(getNSESmoothSurfaceProps({ radius: "sm" })).toMatchObject({
+    expect(getSmoothSurfaceProps({ radius: "sm" })).toMatchObject({
       className: expect.stringContaining("nse-smooth-surface-radius-sm"),
       style: {
         "--nse-smooth-surface-radius": "6px"
@@ -496,7 +496,7 @@ describe("NSESmoothSurface", () => {
   });
 
   it("keeps smooth surface wiring opt-in for panels and app bars", () => {
-    expect(getOptionalNSESmoothSurfaceProps(false, "plain-surface")).toEqual({
+    expect(getOptionalSmoothSurfaceProps(false, "plain-surface")).toEqual({
       className: "plain-surface",
       style: undefined
     });
@@ -515,7 +515,7 @@ describe("NSESmoothSurface", () => {
     expect(groupBoxMarkup).toContain('data-corner-curve="continuous"');
     expect(groupBoxMarkup).toContain("--nse-corner-radius:18px");
 
-    const appTopBarMarkup = renderToStaticMarkup(createElement(NSETopBar, {
+    const appTopBarMarkup = renderToStaticMarkup(createElement(TopBar, {
       title: "Journal",
       smoothSurface: {
         radius: "lg",
@@ -528,7 +528,7 @@ describe("NSESmoothSurface", () => {
     expect(appTopBarMarkup).toContain("nse-smooth-surface-radius-lg");
     expect(appTopBarMarkup).toContain("--nse-smooth-surface-shadow:0 0 0 1px rgba(255, 255, 255, 0.18)");
 
-    const appTopBarWithTitleActionMarkup = renderToStaticMarkup(createElement(NSETopBar, {
+    const appTopBarWithTitleActionMarkup = renderToStaticMarkup(createElement(TopBar, {
       title: "Journal",
       titleAction: {
         label: "Open QuickSwitch",
@@ -543,7 +543,7 @@ describe("NSESmoothSurface", () => {
     expect(appTopBarWithTitleActionMarkup).toContain("nse-app-topbar-title-arrow-down");
 
     const glassPanelMarkup = renderToStaticMarkup(createElement(
-      NSEGlassPanel,
+      GlassPanel,
       {
         children: "Panel",
         smoothSurface: {

@@ -8,8 +8,8 @@ import { NSEWindowController } from "../../src/NSE/Application/NSEWindowControll
 import { AFXLayer } from "../../src/FX/AnimationFX/AFXLayer";
 import { AFXTransform3D } from "../../src/FX/AnimationFX/AFXTransform3D";
 import { GFXColour } from "../../src/FX/GraphicsFX/GFXColour";
-import { NSEViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
-import { NSEAnimationEnvironmentProvider } from "../../src/NSE/Animation";
+import { ViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
+import { AnimationEnvironmentProvider } from "../../src/NSE/Animation";
 import { render } from "@testing-library/react";
 import { createClassApplicationHost, type ClassApplicationHost } from "./fixtures/classApplicationHost";
 
@@ -294,7 +294,7 @@ describe("child view controllers", () => {
     }
     const controller = new Measured({ owner: nseTestOwner() });
     try {
-      const view = render(<NSEViewControllerView controller={controller} />);
+      const view = render(<ViewControllerView controller={controller} />);
       expect(events).toEqual(["will:Measured content", "did:Measured content"]);
       act(() => { resized!([], {} as ResizeObserver); });
       expect(events).toHaveLength(4);
@@ -312,7 +312,7 @@ describe("child view controllers", () => {
     }
     const parent = new NSEViewController({ owner: nseTestOwner() });
     const child = parent.addChild(Chapter);
-    const view = render(<div style={{ overflow: "auto", height: 320 }}><NSEViewControllerView controller={child} /></div>);
+    const view = render(<div style={{ overflow: "auto", height: 320 }}><ViewControllerView controller={child} /></div>);
     const frame = screen.getByText("Chapter").parentElement!;
     expect(frame.style.height).toBe("");
     expect(frame.style.width).toBe("");
@@ -328,9 +328,9 @@ describe("child view controllers", () => {
       override traitCollectionDidChange() { changes.push(this.traitCollection.reducedMotion); }
     }
     const controller = new Animated({ owner: nseTestOwner() });
-    const view = render(<NSEAnimationEnvironmentProvider reducedMotion={false}><NSEViewControllerView controller={controller} /></NSEAnimationEnvironmentProvider>);
+    const view = render(<AnimationEnvironmentProvider reducedMotion={false}><ViewControllerView controller={controller} /></AnimationEnvironmentProvider>);
     expect(screen.getByText("false")).toBeTruthy();
-    view.rerender(<NSEAnimationEnvironmentProvider reducedMotion><NSEViewControllerView controller={controller} /></NSEAnimationEnvironmentProvider>);
+    view.rerender(<AnimationEnvironmentProvider reducedMotion><ViewControllerView controller={controller} /></AnimationEnvironmentProvider>);
     expect(screen.getByText("true")).toBeTruthy();
     expect(changes).toEqual([true]);
     view.unmount();

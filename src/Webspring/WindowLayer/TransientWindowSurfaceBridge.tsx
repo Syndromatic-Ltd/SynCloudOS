@@ -29,12 +29,12 @@ import type {
   WindowContentFactoryRegistration,
   WindowContentRegistration,
 } from "../../SynCloudOS/SynCloudOS";
-import type { NSEWindowSurfaceRequest } from "../../NSE/hostComposition";
+import type { WindowSurfaceRequest } from "../../NSE/hostComposition";
 import { computeNSEPopoverPosition, nsePopoverEdgePlacement, nsePopoverReference, type NSEPopoverPosition } from "../../NSE/hostComposition";
 import { logicalPlacementToFloatingPlacement } from "../../NSE/hostComposition";
 import type { WindowContentRendererRegistry } from "./WindowContentRendererRegistry";
 
-export type TransientWindowSurfaceRequest = NSEWindowSurfaceRequest;
+export type TransientWindowSurfaceRequest = WindowSurfaceRequest;
 
 export type TransientWindowSurfaceDismissResult =
   | WindowCloseResult
@@ -281,7 +281,10 @@ export function createTransientWindowSurfaceBridge({
       return;
     }
     if (geometryDisposers.length === 0) {
+      // Held only while a surface is observed. A bridge made by a render React discards is never disposed, so it must hold nothing.
+      runtime.signal.addEventListener("abort", stopGeometryObservation, { once: true });
       geometryDisposers.push(
+        () => runtime.signal.removeEventListener("abort", stopGeometryObservation),
         runtime.screen.subscribe(scheduleGeometry),
         runtime.windows.subscribe(scheduleGeometry),
         runtime.environment.addWindowListener("scroll", scheduleGeometry, { capture: true, passive: true }),
@@ -295,8 +298,6 @@ export function createTransientWindowSurfaceBridge({
       observedAnchors = anchors;
     }
   }
-
-  runtime.signal.addEventListener("abort", stopGeometryObservation, { once: true });
 
   const maybeDisposeFactory = () => {
     if (!disposed || entries.size > 0 || !contentRegistration) return;
@@ -623,7 +624,6 @@ export function createTransientWindowSurfaceBridge({
     dispose() {
       if (disposed) return;
       disposed = true;
-      runtime.signal.removeEventListener("abort", stopGeometryObservation);
       stopGeometryObservation();
       for (const entry of [...entries.values()]) {
         entry.closeRequested = true;

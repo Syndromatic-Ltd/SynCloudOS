@@ -1,4 +1,4 @@
-import { useNSEValueBinding, type NSEValueBindingControlProps } from "../Core/useNSEValueBinding";
+import { useNSEValueBinding, type ValueBindingControlProps } from "../Core/useNSEValueBinding";
 import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
 /*
  * SynCloudOS
@@ -22,13 +22,13 @@ import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
 
 import { nseControlHooks, nseMinimumControlProperties } from "../../Theme/contract/hooks";
 import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction";
-import { NSEMetalThumb } from "../../Appearance/NSEMetalThumb";
+import { MetalThumb } from "../../Appearance/MetalThumb";
 import { cloneElement, useEffect, useRef, useState, type CSSProperties, type InputHTMLAttributes, type ReactElement, type ReactNode } from "react";
 import { useNSEFeedback } from "../../Feedback";
-import { useNSETooltip, useOptionalNSETooltipProvider } from "../../Tooltips";
+import { useNSETooltip, useOptionalTooltipProvider } from "../../Tooltips";
 import type { NSESliderProps } from "./valueControlTypes";
 import { commitUndoableValue } from "./valueControlTransaction";
-import { NSECircularSlider } from "./circularSlider";
+import { CircularSlider } from "./circularSlider";
 
 const snap = (value: number, minimum: number, maximum: number, step: number) =>
   Math.max(minimum, Math.min(maximum, Math.round((value - minimum) / step) * step + minimum));
@@ -54,19 +54,19 @@ function SliderTooltipAnchor({ input, content }: { readonly input: ReactElement<
  * or circular (a knob turned to an angle).
  */
 export function NSESlider(props: NSEBoundValueProps<number, NSESliderProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>) {
-  if (props.sliderType === "circular") return <NSECircularSlider {...props} />;
-  return <NSELinearSlider {...props} />;
+  if (props.sliderType === "circular") return <CircularSlider {...props} />;
+  return <LinearSlider {...props} />;
 }
 
-function NSELinearSlider(props: NSEBoundValueProps<number, NSESliderProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>) {
-  return <NSESliderControl {...useNSEValueBinding<number, NSESliderProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>(props, {fallback:0,cancellable:true})} />;
+function LinearSlider(props: NSEBoundValueProps<number, NSESliderProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>) {
+  return <SliderControl {...useNSEValueBinding<number, NSESliderProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>(props, {fallback:0,cancellable:true})} />;
 }
 
-function NSESliderControl({ __nseBindingEditor, sliderType: _sliderType, valueText, controlSize = "regular", length, thumbMaterial = "standard", wraps: _wraps, value, defaultValue, minimum: suppliedMinimum, maximum: suppliedMaximum, step = 1, orientation = "horizontal", dir, isEnabled = true, readOnly, ticks, detents, detentThreshold = step * 2, name, id, className, label, tooltip, undoManager, onValueChange, style, ...props }: NSESliderProps & NSEValueBindingControlProps<number>) {
+function SliderControl({ __nseBindingEditor, sliderType: _sliderType, valueText, controlSize = "regular", length, thumbMaterial = "standard", wraps: _wraps, value, defaultValue, minimum: suppliedMinimum, maximum: suppliedMaximum, step = 1, orientation = "horizontal", dir, isEnabled = true, readOnly, ticks, detents, detentThreshold = step * 2, name, id, className, label, tooltip, undoManager, onValueChange, style, ...props }: NSESliderProps & ValueBindingControlProps<number>) {
   const feedback = useNSEFeedback();
   // The value tooltip needs the app's tooltip host; without one the slider
   // still works, its value spoken by the input alone.
-  const tooltips = useOptionalNSETooltipProvider();
+  const tooltips = useOptionalTooltipProvider();
 
   const disabled = !isEnabled;
   const theme = useNSEThemeInteraction<HTMLLabelElement>(isEnabled);
@@ -190,7 +190,7 @@ function NSESliderControl({ __nseBindingEditor, sliderType: _sliderType, valueTe
     <label className={["nse-control-slider", className].filter(Boolean).join(" ")} data-nse-part="content" {...theme.events} {...nseControlHooks({ control: "slider", tracking: dragging, enabled: isEnabled, highlighted: dragging, hovered: theme.hovered, focused: theme.focused, variants: { "slider-type": "linear", "control-size": controlSize, orientation } })} data-orientation={orientation} data-size={controlSize} data-thumb-material={thumbMaterial} data-state={disabled ? "disabled" : readOnly ? "read-only" : "ready"} data-dragging={dragging ? "true" : "false"} style={nseMinimumControlProperties(sliderStyle)}>{label ? <span data-nse-part="title" className="nse-control-slider-label">{label}</span> : null}
     <span data-nse-part="bezel" className="nse-control-slider-control">
       <span data-nse-part="track" className="nse-control-slider-track" aria-hidden="true"><span data-nse-part="fill" className="nse-control-slider-fill" /></span>
-      <span data-nse-part="accessory" className="nse-control-slider-thumb-rail" aria-hidden="true"><span data-nse-part="knob" className="nse-control-slider-thumb-visual">{thumbMaterial === "metal" ? <NSEMetalThumb disabled={disabled} /> : null}</span></span>
+      <span data-nse-part="accessory" className="nse-control-slider-thumb-rail" aria-hidden="true"><span data-nse-part="knob" className="nse-control-slider-thumb-visual">{thumbMaterial === "metal" ? <MetalThumb disabled={disabled} /> : null}</span></span>
       {tooltip === undefined || !tooltips ? sliderInput : <SliderTooltipAnchor input={sliderInput} content={typeof tooltip === "function" ? tooltip(resolvedValue) : tooltip} />}
     </span>
     {ticks?.map((tick) => <i aria-hidden="true" data-nse-part="tick" key={tick} data-value={tick} />)}

@@ -19,17 +19,17 @@
  */
 
 export * from "./navigationTypes";
-export * from "./NSETabBarController";
+export * from "./TabBarController";
 export * from "./NSETabViewController";
 export * from "./NSENavigationStackController";
 export { createNSETabSelectionRestoration } from "./navigationRestoration";
 export type { NSENavigationRestorationDescriptor } from "./navigationRestoration";
-export * from "./NSETabBar";
+export * from "./TabBar";
 export * from "./NSENavigationDestinationHost";
 export * from "./NSEHierarchyStack";
 export * from "./NSEApplicationNavigationChrome";
 export * from "./NSETabView";
-export type { NSETabStripPresentation, NSETabStyle } from "./tabStrip";
+export type { TabStripPresentation, TabStyle } from "./tabStrip";
 export * from "./SourceList";
 import "./SourceList/nse-sourcelist.css";
 import "./SourceList/nse-source-list-scene.css";

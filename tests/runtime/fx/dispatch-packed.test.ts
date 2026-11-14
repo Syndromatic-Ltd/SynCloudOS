@@ -1,5 +1,5 @@
-import { cpSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
 import { expect, it } from "vitest";
 import { createInstalledConsumer, runNode, verifyInstalledSdkResources } from "../../../scripts/synware/installed-consumer.mjs";
 
@@ -57,11 +57,17 @@ import { systemDispatch } from "@syndromatic/syncloudos/fx/dispatch";
   writeFileSync(join(consumer.root, "tsconfig.json"), JSON.stringify({compilerOptions:{target:"ES2022",module:"ESNext",moduleResolution:"Bundler",jsx:"react-jsx",strict:true,skipLibCheck:false,noEmit:true,lib:["ES2022","DOM","DOM.Iterable"],types:["vite/client"]},files:["types.ts"]}));
   runNode(["node_modules/typescript/bin/tsc", "-p", "tsconfig.json"], consumer.root);
   verifyInstalledSdkResources(consumer.installed, consumer.manifest);
-  writeFileSync(resolve("docs/superpowers/evidence/2026-11-08-dispatchfx/task-6-installed.json"), JSON.stringify({
+  const trackedEvidencePath = resolve("docs/superpowers/evidence/2026-11-08-dispatchfx/task-6-installed.json");
+  const trackedEvidenceBefore = existsSync(trackedEvidencePath) ? readFileSync(trackedEvidencePath) : null;
+  const receiptPath = resolve(".artifacts/dispatchfx/task-6-installed.json");
+  mkdirSync(dirname(receiptPath), { recursive: true });
+  writeFileSync(receiptPath, JSON.stringify({
     archiveSha256: consumer.archiveSha256, integrity: consumer.integrity, sourceSha256: consumer.sourceSha256,
     resourcesSha256: consumer.resourcesSha256, dispatch: consumer.manifest.entries["@syndromatic/syncloudos/fx/dispatch"],
     installedOutsideRepository: true, linked: false, compiledAppTests: 2, authoring6eTests: 1,
     productionBuild: true, productionImports: true, declarationGraph: true, strictInstalledTypes: true,
     sharedSDKGraph: true, separateCopyRegistryIsolation: true, resourceIntegrityAfterProof: true,
   }, null, 2) + "\n");
+  expect(existsSync(receiptPath)).toBe(true);
+  expect(existsSync(trackedEvidencePath) ? readFileSync(trackedEvidencePath) : null).toEqual(trackedEvidenceBefore);
 }, 180_000);

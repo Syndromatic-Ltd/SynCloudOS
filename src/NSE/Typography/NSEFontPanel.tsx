@@ -19,9 +19,9 @@
  */
 
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
-import { GFXColour } from "../../FX/GraphicsFX/public";
+import { GFXColour } from "../../FX/GraphicsFX/GFXColour";
 import { useNSEColourPanelContextCarrier, useOptionalNSEColourPanelController, useOptionalNSEColourPanelResponderId } from "../Colour/ColourPanel/NSEColourPanelProvider";
-import { NSEToolButtonGroup } from "../Controls/Buttons/NSEButtonFamilies";
+import { ToolButtonGroup } from "../Controls/Buttons/NSEButtonFamilies";
 import { NSEButton } from "../Controls/Buttons/NSEButton";
 import { NSETextField } from "../Controls/Fields/NSEFields";
 import { NSESearchField } from "../Controls/Fields/NSESearchField";
@@ -30,37 +30,37 @@ import { useNSEArrayController } from "../Controllers";
 import { NSETableView, type NSEDataViewAdapter, type NSETableColumn } from "../DataViews";
 import type { NSEFontFamily, NSEFontPreset } from "../Text/fontDescriptors";
 import { useNSEDeferredDisposal, type NSEDisposalScheduler } from "../interactionLifecycle";
-import { NSEMenuView } from "../Menus/NSEMenuView";
-import type { NSEMenuItemDefinition } from "../Menus/menuTypes";
-import { useNSEOverlayProvider } from "../Overlays/NSEOverlayProvider";
-import { NSEUtilityPanel } from "../Overlays/NSEUtilityPanel";
+import { MenuView } from "../Menus/MenuView";
+import type { MenuItemDefinition } from "../Menus/menuTypes";
+import { useNSEOverlayProvider } from "../Overlays/OverlayProvider";
+import { UtilityPanel } from "../Overlays/NSEUtilityPanel";
 import { NSESegmentedControl } from "../Controls/Values/NSESegmentedControl";
 import { DocumentColourGlyph, GearGlyph, MinusGlyph, PlusGlyph, ShadowGlyph, StrikethroughGlyph, TextColourGlyph, UnderlineGlyph } from "./fontPanelIcons";
-import type { NSEFontLibrary, NSEFontLibrarySnapshot } from "./NSEFontLibrary";
+import type { FontLibrary, FontLibrarySnapshot } from "./NSEFontLibrary";
 import { NSEFontManager } from "./NSEFontManager";
 import { NSERulerView } from "./NSERulerView";
 import {
   cssForTextShadow,
   normaliseParagraphStyle,
   normaliseParagraphStyleMutation,
-  type NSEFontCommandPayload,
-  type NSEParagraphAlignment,
+  type FontCommandPayload,
+  type ParagraphAlignment,
   type NSEParagraphStyle,
-  type NSETextAttributesMutation,
+  type TextAttributesMutation,
   type NSETextShadow,
 } from "./typographyTypes";
 
-export type NSEFontPanelCommandId = "format.font" | "format.paragraph" | "format.attributes";
-export interface NSEFontPanelCommandResult { readonly status: "executed" | "cancelled" | "disabled" | "denied" | "unhandled" | "invalid-payload" | "failed" | "unknown" }
-export interface NSEFontPanelCommandPort {
-  execute(commandId: NSEFontPanelCommandId, payload: NSEFontCommandPayload | NSEParagraphStyle | NSETextAttributesMutation, signal: AbortSignal): Promise<NSEFontPanelCommandResult>;
+export type FontPanelCommandId = "format.font" | "format.paragraph" | "format.attributes";
+export interface FontPanelCommandResult { readonly status: "executed" | "cancelled" | "disabled" | "denied" | "unhandled" | "invalid-payload" | "failed" | "unknown" }
+export interface FontPanelCommandPort {
+  execute(commandId: FontPanelCommandId, payload: FontCommandPayload | NSEParagraphStyle | TextAttributesMutation, signal: AbortSignal): Promise<FontPanelCommandResult>;
 }
 
 export interface NSEFontPanelProps {
   readonly open: boolean;
   readonly anchor: HTMLElement | null;
   readonly manager: NSEFontManager;
-  readonly commandPort: NSEFontPanelCommandPort;
+  readonly commandPort: FontPanelCommandPort;
   /** Fallback responder for the action menu when its overlay has no default. */
   readonly parentResponderId?: string;
   readonly parentWindowControllerId?: string;
@@ -78,15 +78,15 @@ export interface NSEFontPanelProps {
 }
 
 /* Alignment glyphs: four rules, ragged to the aligned edge (logical, so they mirror in RTL). */
-const alignmentRules: Readonly<Record<NSEParagraphAlignment, readonly (readonly [number, number])[]>> = {
+const alignmentRules: Readonly<Record<ParagraphAlignment, readonly (readonly [number, number])[]>> = {
   start: [[2, 14], [2, 10], [2, 13], [2, 8]],
   centre: [[2, 14], [4, 12], [3, 13], [5, 11]],
   end: [[2, 14], [6, 14], [3, 14], [8, 14]],
   justify: [[2, 14], [2, 14], [2, 14], [2, 10]],
 };
-const alignmentLabels: ReadonlyArray<readonly [NSEParagraphAlignment, string]> = [["start", "Start paragraph"], ["centre", "Centre paragraph"], ["end", "End paragraph"], ["justify", "Justify paragraph"]];
+const alignmentLabels: ReadonlyArray<readonly [ParagraphAlignment, string]> = [["start", "Start paragraph"], ["centre", "Centre paragraph"], ["end", "End paragraph"], ["justify", "Justify paragraph"]];
 
-function AlignmentGlyph({ alignment }: { readonly alignment: NSEParagraphAlignment }): ReactNode {
+function AlignmentGlyph({ alignment }: { readonly alignment: ParagraphAlignment }): ReactNode {
   return <svg aria-hidden="true" viewBox="0 0 16 16" width="16" height="16" data-nse-part="alignment-glyph">
     {alignmentRules[alignment].map(([from, to], index) => <path key={index} d={`M${from} ${3.5 + index * 3}H${to}`} />)}
   </svg>;
@@ -285,9 +285,9 @@ function EffectColourButton({ id, label, glyph, value, automatic, disabled, onPr
  * panel, whose overlay host names it; outside a window host it falls back to
  * the panel's own parent responder.
  */
-function FontActionsMenu({ fallbackParentResponderId, items, onSelect }: { readonly fallbackParentResponderId?: string; readonly items: readonly NSEMenuItemDefinition[]; onSelect(value: string): void }) {
+function FontActionsMenu({ fallbackParentResponderId, items, onSelect }: { readonly fallbackParentResponderId?: string; readonly items: readonly MenuItemDefinition[]; onSelect(value: string): void }) {
   const overlays = useNSEOverlayProvider();
-  return <NSEMenuView label={<GearGlyph />} trigger="tool" triggerLabel="Font actions" controlSize="small" parentResponderId={overlays.defaultParentResponderId ?? fallbackParentResponderId} items={items} data-nse-part="action-menu" onSelect={onSelect} />;
+  return <MenuView label={<GearGlyph />} trigger="tool" triggerLabel="Font actions" controlSize="small" parentResponderId={overlays.defaultParentResponderId ?? fallbackParentResponderId} items={items} data-nse-part="action-menu" onSelect={onSelect} />;
 }
 
 function familyMatchesQuery(family: NSEFontFamily, query: string): boolean {
@@ -295,10 +295,10 @@ function familyMatchesQuery(family: NSEFontFamily, query: string): boolean {
   return needle.length === 0 || family.label.toLocaleLowerCase().includes(needle) || family.presets.some((preset) => `${family.label} ${preset.label}`.toLocaleLowerCase().includes(needle));
 }
 
-const emptyLibrarySnapshot: NSEFontLibrarySnapshot = Object.freeze({ userFamilies: Object.freeze([]), favourites: Object.freeze([]), recents: Object.freeze([]) });
+const emptyLibrarySnapshot: FontLibrarySnapshot = Object.freeze({ userFamilies: Object.freeze([]), favourites: Object.freeze([]), recents: Object.freeze([]) });
 const noSubscription = () => () => undefined;
 
-function useLibrarySnapshot(library: NSEFontLibrary | null): NSEFontLibrarySnapshot {
+function useLibrarySnapshot(library: FontLibrary | null): FontLibrarySnapshot {
   return useSyncExternalStore(library?.subscribe ?? noSubscription, library?.getSnapshot ?? (() => emptyLibrarySnapshot), library?.getSnapshot ?? (() => emptyLibrarySnapshot));
 }
 
@@ -347,7 +347,7 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
   const [showsEffects, setShowsEffects] = useState(true);
   const [showsRuler, setShowsRuler] = useState(initiallyShowsRuler);
   const [style, setStyle] = useState(() => normaliseParagraphStyle(paragraphStyle ?? { alignment: "start" }));
-  const [status, setStatus] = useState<NSEFontPanelCommandResult["status"] | "idle">("idle");
+  const [status, setStatus] = useState<FontPanelCommandResult["status"] | "idle">("idle");
   const [notice, setNotice] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const carryColourPanel = useNSEColourPanelContextCarrier();
@@ -355,8 +355,8 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
     active: false,
     sessionOpen: false,
     sessionGeneration: 0,
-    intentGenerations: new Map<NSEFontPanelCommandId, number>(),
-    operations: new Map<NSEFontPanelCommandId, AbortController>(),
+    intentGenerations: new Map<FontPanelCommandId, number>(),
+    operations: new Map<FontPanelCommandId, AbortController>(),
   });
   const instanceId = useId().replace(/:/g, "");
   // The anchor only places the panel as it opens: Show Fonts from a menu has
@@ -389,7 +389,7 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
     endSession(fontPanelAbort("Font panel session was closed."));
   }, [effectiveOpen]);
 
-  const execute = (commandId: NSEFontPanelCommandId, payload: NSEFontCommandPayload | NSEParagraphStyle | NSETextAttributesMutation) => {
+  const execute = (commandId: FontPanelCommandId, payload: FontCommandPayload | NSEParagraphStyle | TextAttributesMutation) => {
     const current = lifecycle.current;
     if (readOnly || !current.active || !current.sessionOpen || !effectiveOpen) return;
     current.operations.get(commandId)?.abort(fontPanelAbort(`A newer ${commandId} intent superseded this operation.`));
@@ -420,7 +420,7 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
       setStatus("invalid-payload");
     }
   };
-  const applyAttributes = (mutation: NSETextAttributesMutation) => execute("format.attributes", mutation);
+  const applyAttributes = (mutation: TextAttributesMutation) => execute("format.attributes", mutation);
   const updateParagraph = (next: NSEParagraphStyle) => {
     if (readOnly) return;
     const mutation = normaliseParagraphStyleMutation(next);
@@ -462,7 +462,7 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
     applyFont(fontId, bounded);
   };
 
-  const shadowPayload = (settings: ShadowSettings): NSETextAttributesMutation => ({ shadow: settings.enabled ? textShadowFor(settings) : null });
+  const shadowPayload = (settings: ShadowSettings): TextAttributesMutation => ({ shadow: settings.enabled ? textShadowFor(settings) : null });
   const changeShadow = (patch: Partial<ShadowSettings>, phase: "preview" | "commit") => {
     const next = { ...shadow, ...patch };
     setShadow(next);
@@ -540,7 +540,7 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
 
   // An inspector (NSFontPanel): it floats beside the document and stays open
   // while the user keeps typing; its close control ends the session.
-  return <NSEUtilityPanel id={`font-panel-${instanceId}`} open={effectiveOpen} title={title} anchor={anchor} parentWindowControllerId={parentWindowControllerId} contentInset="none" onClose={() => {
+  return <UtilityPanel id={`font-panel-${instanceId}`} open={effectiveOpen} title={title} anchor={anchor} parentWindowControllerId={parentWindowControllerId} contentInset="none" onClose={() => {
     endSession(fontPanelAbort("Font panel session was closed."));
     onOpenChange(false);
   }} onDismissRefused={() => onOpenChange(true)}>
@@ -551,7 +551,7 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
       </div> : null}
 
       {showsEffects ? <div role="toolbar" aria-label="Text effects" data-nse-part="effects">
-        <NSEToolButtonGroup controlSize="small" label="Lines">
+        <ToolButtonGroup controlSize="small" label="Lines">
           <NSEButton
             bezelStyle="texturedRounded"
             buttonType="pushOnPushOff"
@@ -574,12 +574,12 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
             aria-pressed={strike}
             onClick={() => { const next = !strike; setStrike(next); applyAttributes({ strike: next }); }}
           />
-        </NSEToolButtonGroup>
-        <NSEToolButtonGroup controlSize="small" label="Colours">
+        </ToolButtonGroup>
+        <ToolButtonGroup controlSize="small" label="Colours">
           <EffectColourButton id={`font-panel-${instanceId}-text-colour`} label="Text colour" glyph={<TextColourGlyph />} value={textColour} automatic="ink" disabled={effectsDisabled} onPreview={(colour) => setColourPreview((current) => ({ ...current, text: colour }))} onCommit={(colour) => { setTextColour(colour); applyAttributes({ foregroundColour: colour.toHex({ includeAlpha: colour.components.a < 1 }) }); }} />
           <EffectColourButton id={`font-panel-${instanceId}-document-colour`} label="Document colour" glyph={<DocumentColourGlyph />} value={documentColour} automatic="ground" disabled={effectsDisabled} onPreview={(colour) => setColourPreview((current) => ({ ...current, document: colour }))} onCommit={(colour) => { setDocumentColour(colour); applyAttributes({ documentColour: colour.toHex({ includeAlpha: colour.components.a < 1 }) }); }} />
-        </NSEToolButtonGroup>
-        <NSEToolButtonGroup controlSize="small" label="Shadow">
+        </ToolButtonGroup>
+        <ToolButtonGroup controlSize="small" label="Shadow">
           <NSEButton
             bezelStyle="texturedRounded"
             buttonType="pushOnPushOff"
@@ -595,7 +595,7 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
             applyAttributes(shadowPayload(next));
           }}
           />
-        </NSEToolButtonGroup>
+        </ToolButtonGroup>
         <NSESlider controlSize="mini" length={36} aria-label="Shadow opacity" value={shadow.opacity} minimum={0} maximum={100} step={1} isEnabled={!(effectsDisabled || !shadow.enabled)} tooltip={(value) => `Opacity ${value}%`} onValueChange={(value, phase) => changeShadow({ opacity: value }, phase)} />
         <NSESlider controlSize="mini" length={36} aria-label="Shadow blur" value={shadow.blur} minimum={0} maximum={20} step={1} isEnabled={!(effectsDisabled || !shadow.enabled)} tooltip={(value) => `Blur ${value}`} onValueChange={(value, phase) => changeShadow({ blur: value }, phase)} />
         <NSESlider controlSize="mini" length={36} aria-label="Shadow offset" value={shadow.offset} minimum={0} maximum={20} step={1} isEnabled={!(effectsDisabled || !shadow.enabled)} tooltip={(value) => `Offset ${value}`} onValueChange={(value, phase) => changeShadow({ offset: value }, phase)} />
@@ -627,7 +627,7 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
       </div>
 
       <div data-nse-part="footer">
-        <NSEToolButtonGroup controlSize="small" label="Add or remove fonts">
+        <ToolButtonGroup controlSize="small" label="Add or remove fonts">
           <NSEButton
             bezelStyle="texturedRounded"
             title="Add fonts"
@@ -644,7 +644,7 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
             isEnabled={!(removable === null)}
             onClick={() => { void remove(); }}
           />
-        </NSEToolButtonGroup>
+        </ToolButtonGroup>
         <FontActionsMenu fallbackParentResponderId={parentResponderId} items={menuItems} onSelect={(value) => {
           if (value === "favourite" && library) { if (isFavourite) library.removeFavourite(fontId); else library.addFavourite(fontId); }
           else if (value === "preview") setShowsPreview((shown) => !shown);
@@ -675,5 +675,5 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
       <p role="status" data-nse-part="notice">{!preset ? "No fonts available." : notice}</p>
       {status !== "idle" && status !== "executed" ? <p role="alert" data-nse-part="error">Typography command {status}.</p> : null}
     </section>)}
-  </NSEUtilityPanel>;
+  </UtilityPanel>;
 }

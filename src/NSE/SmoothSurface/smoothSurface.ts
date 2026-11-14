@@ -29,23 +29,23 @@ import {
   nseSmoothSurfaceTokens
 } from "./smoothSurfaceTokens";
 import {
-  getNSESmoothSurfaceRadiusNumber,
-  resolveNSESmoothSurfaceCorners
+  getSmoothSurfaceRadiusNumber,
+  resolveSmoothSurfaceCorners
 } from "./smoothSurfacePath";
 import type {
-  NSESmoothSurfaceOptions,
-  NSESmoothSurfacePhysicality,
-  NSESmoothSurfacePhysicalityConfig,
-  NSESmoothSurfacePhysicalityStop,
-  NSESmoothSurfaceProps,
-  NSESmoothSurfaceRadius,
-  NSESmoothSurfaceRequest,
-  NSESmoothSurfaceResolution,
-  NSESmoothSurfaceResolvedOptions,
-  NSESmoothSurfaceShadow,
-  NSESmoothSurfaceShadowConfig,
-  NSESmoothSurfaceStyle,
-  NSEOptionalSmoothSurfaceProps
+  SmoothSurfaceOptions,
+  SmoothSurfacePhysicality,
+  SmoothSurfacePhysicalityConfig,
+  SmoothSurfacePhysicalityStop,
+  SmoothSurfaceProps,
+  SmoothSurfaceRadius,
+  SmoothSurfaceRequest,
+  SmoothSurfaceResolution,
+  SmoothSurfaceResolvedOptions,
+  SmoothSurfaceShadow,
+  SmoothSurfaceShadowConfig,
+  SmoothSurfaceStyle,
+  OptionalSmoothSurfaceProps
 } from "./smoothSurfaceTypes";
 
 export const nseSmoothSurfaceClassNames = {
@@ -72,7 +72,7 @@ export const nseSmoothSurfaceDefaultOptions = {
   physicality: "off",
   performance: "auto",
   autoEffects: true
-} as const satisfies Omit<NSESmoothSurfaceResolvedOptions, "corners">;
+} as const satisfies Omit<SmoothSurfaceResolvedOptions, "corners">;
 
 export const nseAppSmoothSurfaceDefaultOptions = {
   radius: 31,
@@ -87,7 +87,7 @@ export const nseAppSmoothSurfaceDefaultOptions = {
   physicality: nseSmoothSurfaceDefaultPhysicality,
   performance: "paint",
   autoEffects: false
-} as const satisfies Omit<NSESmoothSurfaceResolvedOptions, "corners">;
+} as const satisfies Omit<SmoothSurfaceResolvedOptions, "corners">;
 
 export const nseSmoothSurfaceMobileQuery = "(max-width: 760px)";
 const nseSmoothSurfaceMobileRadiusCap = 28;
@@ -103,23 +103,23 @@ function compactClassName(parts: Array<string | false | null | undefined>) {
   return parts.filter((part): part is string => typeof part === "string" && part.trim().length > 0).join(" ");
 }
 
-function capRadiusForMobile(radius: NSESmoothSurfaceRadius): NSESmoothSurfaceRadius {
+function capRadiusForMobile(radius: SmoothSurfaceRadius): SmoothSurfaceRadius {
   if (radius === "pill" || radius === "none") return radius;
-  return Math.min(getNSESmoothSurfaceRadiusNumber(radius), nseSmoothSurfaceMobileRadiusCap);
+  return Math.min(getSmoothSurfaceRadiusNumber(radius), nseSmoothSurfaceMobileRadiusCap);
 }
 
-export function getMobileNSESmoothSurfaceOptions<T extends NSESmoothSurfaceResolvedOptions | NSESmoothSurfaceOptions>(options: T): T {
+export function getMobileSmoothSurfaceOptions<T extends SmoothSurfaceResolvedOptions | SmoothSurfaceOptions>(options: T): T {
   return {
     ...options,
     radius: capRadiusForMobile(options.radius ?? nseSmoothSurfaceDefaultOptions.radius)
   };
 }
 
-export function getMobileNSESmoothSurfaceRadiusValue(radius: NSESmoothSurfaceRadius): string {
-  return getNSESmoothSurfaceRadiusValue(capRadiusForMobile(radius));
+export function getMobileSmoothSurfaceRadiusValue(radius: SmoothSurfaceRadius): string {
+  return getSmoothSurfaceRadiusValue(capRadiusForMobile(radius));
 }
 
-function normalizeRequest(options: NSESmoothSurfaceRequest): NSESmoothSurfaceOptions | false {
+function normalizeRequest(options: SmoothSurfaceRequest): SmoothSurfaceOptions | false {
   if (options === false || options === null || options === undefined || options === "off") return false;
   if (typeof options === "number" || typeof options === "string") return { radius: options };
   return options;
@@ -129,7 +129,7 @@ function clampUnit(value: number) {
   return Math.min(1, Math.max(0, value));
 }
 
-function normalisePhysicality(physicality: NSESmoothSurfacePhysicality | undefined): NSESmoothSurfacePhysicality {
+function normalisePhysicality(physicality: SmoothSurfacePhysicality | undefined): SmoothSurfacePhysicality {
   if (physicality === undefined) return nseSmoothSurfaceDefaultOptions.physicality;
   if (physicality === false || physicality === "off") return "off";
   return {
@@ -138,9 +138,9 @@ function normalisePhysicality(physicality: NSESmoothSurfacePhysicality | undefin
   };
 }
 
-export function normaliseNSESmoothSurfaceOptions(
-  options: NSESmoothSurfaceOptions = {}
-): NSESmoothSurfaceResolvedOptions {
+export function normaliseSmoothSurfaceOptions(
+  options: SmoothSurfaceOptions = {}
+): SmoothSurfaceResolvedOptions {
   const radius = options.radius ?? nseSmoothSurfaceDefaultOptions.radius;
   const curve = options.curve ?? nseSmoothSurfaceDefaultOptions.curve;
   const smoothing = clampUnit(options.smoothing ?? nseSmoothSurfaceDefaultOptions.smoothing);
@@ -161,7 +161,7 @@ export function normaliseNSESmoothSurfaceOptions(
     physicality: normalisePhysicality(options.physicality),
     performance: options.performance ?? nseSmoothSurfaceDefaultOptions.performance,
     autoEffects: options.autoEffects ?? nseSmoothSurfaceDefaultOptions.autoEffects,
-    corners: resolveNSESmoothSurfaceCorners({
+    corners: resolveSmoothSurfaceCorners({
       ...options,
       radius,
       curve,
@@ -177,16 +177,16 @@ export function normaliseNSESmoothSurfaceOptions(
   };
 }
 
-export function normaliseNSESmoothSurfaceRequest(options: NSESmoothSurfaceRequest): NSESmoothSurfaceResolvedOptions | false {
+export function normaliseSmoothSurfaceRequest(options: SmoothSurfaceRequest): SmoothSurfaceResolvedOptions | false {
   const normalized = normalizeRequest(options);
-  return normalized === false ? false : normaliseNSESmoothSurfaceOptions(normalized);
+  return normalized === false ? false : normaliseSmoothSurfaceOptions(normalized);
 }
 
-export function getNSESmoothSurfaceRadiusValue(radius: NSESmoothSurfaceRadius): string {
+export function getSmoothSurfaceRadiusValue(radius: SmoothSurfaceRadius): string {
   return typeof radius === "number" ? `${Math.max(0, radius)}px` : nseSmoothSurfaceRadiusTokens[radius];
 }
 
-function physicalityStopToShadow(stop: NSESmoothSurfacePhysicalityStop) {
+function physicalityStopToShadow(stop: SmoothSurfacePhysicalityStop) {
   const offsetX = stop.offsetX ?? 0;
   const blur = stop.blur ?? 0;
   const spread = stop.spread ?? 0;
@@ -203,16 +203,16 @@ function hexOrRgbToRgba(color: string, opacity: number) {
   return `rgba(${r},${g},${b},${opacity})`;
 }
 
-function shadowConfigToCss(shadow: NSESmoothSurfaceShadowConfig) {
+function shadowConfigToCss(shadow: SmoothSurfaceShadowConfig) {
   return `${shadow.offsetX}px ${shadow.offsetY}px ${shadow.blur}px ${shadow.spread}px ${hexOrRgbToRgba(shadow.color, shadow.opacity)}`;
 }
 
-function insetShadowConfigToCss(shadow: NSESmoothSurfaceShadowConfig) {
+function insetShadowConfigToCss(shadow: SmoothSurfaceShadowConfig) {
   return `inset ${shadowConfigToCss(shadow)}`;
 }
 
 function listShadowConfigToCss(
-  shadow: NSESmoothSurfaceShadowConfig | NSESmoothSurfaceShadowConfig[] | undefined,
+  shadow: SmoothSurfaceShadowConfig | SmoothSurfaceShadowConfig[] | undefined,
   inset = false
 ) {
   if (!shadow) return "";
@@ -220,17 +220,17 @@ function listShadowConfigToCss(
   return shadows.map((item) => inset ? insetShadowConfigToCss(item) : shadowConfigToCss(item)).join(", ");
 }
 
-export function getNSESmoothSurfacePhysicalityShadow(physicality: NSESmoothSurfacePhysicality) {
+export function getSmoothSurfacePhysicalityShadow(physicality: SmoothSurfacePhysicality) {
   if (!physicality || physicality === "off") return "";
-  const config = physicality as NSESmoothSurfacePhysicalityConfig;
-  return [config.top, config.bottom].filter(Boolean).map((stop) => physicalityStopToShadow(stop as NSESmoothSurfacePhysicalityStop)).join(", ");
+  const config = physicality as SmoothSurfacePhysicalityConfig;
+  return [config.top, config.bottom].filter(Boolean).map((stop) => physicalityStopToShadow(stop as SmoothSurfacePhysicalityStop)).join(", ");
 }
 
-export function getNSESmoothSurfaceClassName(
-  options: NSESmoothSurfaceOptions = {},
+export function getSmoothSurfaceClassName(
+  options: SmoothSurfaceOptions = {},
   className?: string
 ) {
-  const resolved = normaliseNSESmoothSurfaceOptions(options);
+  const resolved = normaliseSmoothSurfaceOptions(options);
 
   return compactClassName([
     nseSmoothSurfaceClassNames.root,
@@ -238,7 +238,7 @@ export function getNSESmoothSurfaceClassName(
     `${nseSmoothSurfaceClassNames.focus}-${toClassSegment(resolved.focus)}`,
     `${nseSmoothSurfaceClassNames.overflow}-${toClassSegment(resolved.overflow)}`,
     `${nseSmoothSurfaceClassNames.scroll}-${toClassSegment(resolved.scroll)}`,
-    `${nseSmoothSurfaceClassNames.shadow}-${typeof resolved.shadow === "string" ? toClassSegment(resolved.shadow as NSESmoothSurfaceShadow) : "custom"}`,
+    `${nseSmoothSurfaceClassNames.shadow}-${typeof resolved.shadow === "string" ? toClassSegment(resolved.shadow as SmoothSurfaceShadow) : "custom"}`,
     `${nseSmoothSurfaceClassNames.physicality}-${resolved.physicality === "off" ? "off" : "custom"}`,
     `${nseSmoothSurfaceClassNames.performance}-${toClassSegment(resolved.performance)}`,
     options.className,
@@ -246,22 +246,22 @@ export function getNSESmoothSurfaceClassName(
   ]);
 }
 
-export function getNSESmoothSurfaceStyle(
-  options: NSESmoothSurfaceOptions = {},
-  style?: NSESmoothSurfaceStyle
-): NSESmoothSurfaceStyle {
-  const resolved = normaliseNSESmoothSurfaceOptions(options);
-  const radius = getNSESmoothSurfaceRadiusValue(resolved.radius);
-  const mobileRadius = getMobileNSESmoothSurfaceRadiusValue(resolved.radius);
+export function getSmoothSurfaceStyle(
+  options: SmoothSurfaceOptions = {},
+  style?: SmoothSurfaceStyle
+): SmoothSurfaceStyle {
+  const resolved = normaliseSmoothSurfaceOptions(options);
+  const radius = getSmoothSurfaceRadiusValue(resolved.radius);
+  const mobileRadius = getMobileSmoothSurfaceRadiusValue(resolved.radius);
   const tokenShadow = typeof resolved.shadow === "string" ? nseSmoothSurfaceShadowTokens[resolved.shadow] : "";
   const configuredInnerShadow = listShadowConfigToCss(resolved.innerShadow, true);
-  const physicalityShadow = getNSESmoothSurfacePhysicalityShadow(resolved.physicality);
+  const physicalityShadow = getSmoothSurfacePhysicalityShadow(resolved.physicality);
   const boxShadow = [tokenShadow, configuredInnerShadow, physicalityShadow].filter(Boolean).join(", ") || "none";
 
   return {
     "--nse-smooth-surface-radius": radius,
     "--nse-smooth-surface-mobile-radius": mobileRadius,
-    "--nse-smooth-surface-radius-number": getNSESmoothSurfaceRadiusNumber(resolved.radius),
+    "--nse-smooth-surface-radius-number": getSmoothSurfaceRadiusNumber(resolved.radius),
     "--nse-smooth-surface-shadow": boxShadow,
     "--nse-smooth-surface-curve": resolved.curve,
     "--nse-smooth-surface-smoothing": resolved.smoothing,
@@ -276,18 +276,18 @@ export function getNSESmoothSurfaceStyle(
   };
 }
 
-export function resolveNSESmoothSurface(
-  options: NSESmoothSurfaceOptions = {}
-): NSESmoothSurfaceResolution {
+export function resolveSmoothSurface(
+  options: SmoothSurfaceOptions = {}
+): SmoothSurfaceResolution {
   return {
-    className: getNSESmoothSurfaceClassName(options),
-    style: getNSESmoothSurfaceStyle(options),
-    options: normaliseNSESmoothSurfaceOptions(options)
+    className: getSmoothSurfaceClassName(options),
+    style: getSmoothSurfaceStyle(options),
+    options: normaliseSmoothSurfaceOptions(options)
   };
 }
 
-export function getNSESmoothSurfaceProps(options: NSESmoothSurfaceOptions = {}): NSESmoothSurfaceProps {
-  const resolved = resolveNSESmoothSurface(options);
+export function getSmoothSurfaceProps(options: SmoothSurfaceOptions = {}): SmoothSurfaceProps {
+  const resolved = resolveSmoothSurface(options);
 
   return {
     className: resolved.className,
@@ -295,11 +295,11 @@ export function getNSESmoothSurfaceProps(options: NSESmoothSurfaceOptions = {}):
   };
 }
 
-export function getOptionalNSESmoothSurfaceProps(
-  options: NSESmoothSurfaceRequest,
+export function getOptionalSmoothSurfaceProps(
+  options: SmoothSurfaceRequest,
   className?: string,
-  style?: NSESmoothSurfaceStyle
-): NSEOptionalSmoothSurfaceProps {
+  style?: SmoothSurfaceStyle
+): OptionalSmoothSurfaceProps {
   const normalized = normalizeRequest(options);
   if (!normalized) {
     return {
@@ -309,23 +309,23 @@ export function getOptionalNSESmoothSurfaceProps(
   }
 
   return {
-    className: getNSESmoothSurfaceClassName(normalized, className),
-    style: getNSESmoothSurfaceStyle(normalized, style)
+    className: getSmoothSurfaceClassName(normalized, className),
+    style: getSmoothSurfaceStyle(normalized, style)
   };
 }
 
-export const NSESmoothSurfaceAPI = {
+export const SmoothSurfaceAPI = {
   tokens: nseSmoothSurfaceTokens,
   classNames: nseSmoothSurfaceClassNames,
   defaults: nseSmoothSurfaceDefaultOptions,
   appDefaults: nseAppSmoothSurfaceDefaultOptions,
-  normalise: normaliseNSESmoothSurfaceOptions,
-  normaliseRequest: normaliseNSESmoothSurfaceRequest,
-  radiusValue: getNSESmoothSurfaceRadiusValue,
-  className: getNSESmoothSurfaceClassName,
-  style: getNSESmoothSurfaceStyle,
-  props: getNSESmoothSurfaceProps,
-  optionalProps: getOptionalNSESmoothSurfaceProps,
-  physicalityShadow: getNSESmoothSurfacePhysicalityShadow,
-  resolve: resolveNSESmoothSurface
+  normalise: normaliseSmoothSurfaceOptions,
+  normaliseRequest: normaliseSmoothSurfaceRequest,
+  radiusValue: getSmoothSurfaceRadiusValue,
+  className: getSmoothSurfaceClassName,
+  style: getSmoothSurfaceStyle,
+  props: getSmoothSurfaceProps,
+  optionalProps: getOptionalSmoothSurfaceProps,
+  physicalityShadow: getSmoothSurfacePhysicalityShadow,
+  resolve: resolveSmoothSurface
 } as const;

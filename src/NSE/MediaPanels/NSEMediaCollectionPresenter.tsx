@@ -40,7 +40,7 @@ export function mediaCollectionItemId(item: MediaPanelItem): string {
   return encodeOpaqueIdentity([item.providerId, item.id]);
 }
 
-export function NSEMediaCollectionPresenter({ items, selectedIds, selection, direction, onSelectionChange, onActivate }: MediaCollectionPresenterProps) {
+export function MediaCollectionPresenter({ items, selectedIds, selection, direction, onSelectionChange, onActivate }: MediaCollectionPresenterProps) {
   const instanceId = useId().replace(/:/g, "");
   const controller = useNSEArrayController<MediaPanelItem, string>({
     id: `media-collection-${instanceId}`,

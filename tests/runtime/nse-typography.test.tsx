@@ -31,11 +31,11 @@ import {
   NSERulerView,
   normaliseFontDescriptor,
   normaliseParagraphStyle,
-  type NSEFontPanelCommandPort,
+  type FontPanelCommandPort,
   type NSEParagraphStyle,
 } from "../../src/NSE/Typography";
-import { NSEOverlayProvider } from "../../src/NSE/Overlays/NSEOverlayProvider";
-import { NSEWindowSurfaceBridgeProvider } from "../../src/NSE/Overlays/NSEWindowSurfaceBridge";
+import { OverlayProvider } from "../../src/NSE/Overlays/OverlayProvider";
+import { WindowSurfaceBridgeProvider } from "../../src/NSE/Overlays/NSEWindowSurfaceBridge";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact/SynCloudOSProvider";
 import { useRuntimeNSEOverlayPort } from "../../src/SynCloudOSReact/nseFocusPort";
 import { SynCloudOSNSEFontPanel } from "../../src/SynCloudOSReact/SynCloudOSNSEFontPanel";
@@ -69,7 +69,7 @@ function sizeField(): HTMLElement {
 
 function OverlayHarness({ runtime, children }: { readonly runtime: ReturnType<typeof createTestRuntime>; readonly children: React.ReactNode }) {
   const port = useRuntimeNSEOverlayPort("workspace");
-  return <NSEOverlayProvider runtimePort={port}>{children}</NSEOverlayProvider>;
+  return <OverlayProvider runtimePort={port}>{children}</OverlayProvider>;
 }
 
 describe("NSE typography values and manager", () => {
@@ -172,9 +172,9 @@ describe("hosted font panel and focused commands", () => {
     document.body.append(anchor);
     const present = vi.fn(async () => "font-panel-window");
     const dismiss = vi.fn(async () => ({ outcome: "closed" as const }));
-    const commandPort: NSEFontPanelCommandPort = { execute: vi.fn(async () => ({ status: "executed" as const })) };
+    const commandPort: FontPanelCommandPort = { execute: vi.fn(async () => ({ status: "executed" as const })) };
 
-    render(<SynCloudOSProvider runtime={runtime}><OverlayHarness runtime={runtime}><NSEWindowSurfaceBridgeProvider bridge={{ present, dismiss }}><NSEFontPanel open anchor={anchor} manager={manager} commandPort={commandPort} parentResponderId="workspace" onOpenChange={() => undefined} /></NSEWindowSurfaceBridgeProvider></OverlayHarness></SynCloudOSProvider>);
+    render(<SynCloudOSProvider runtime={runtime}><OverlayHarness runtime={runtime}><WindowSurfaceBridgeProvider bridge={{ present, dismiss }}><NSEFontPanel open anchor={anchor} manager={manager} commandPort={commandPort} parentResponderId="workspace" onOpenChange={() => undefined} /></WindowSurfaceBridgeProvider></OverlayHarness></SynCloudOSProvider>);
 
     await waitFor(() => expect(present).toHaveBeenCalledOnce());
     expect(document.querySelector("[data-nse-control='font-panel']")).toBeNull();
@@ -190,7 +190,7 @@ describe("hosted font panel and focused commands", () => {
       return "font-panel-window";
     });
     const dismiss = vi.fn(async () => ({ outcome: "closed" as const }));
-    const panel = render(<SynCloudOSProvider runtime={runtime}><OverlayHarness runtime={runtime}><NSEWindowSurfaceBridgeProvider bridge={{ present, dismiss }}><SynCloudOSNSEFontPanel open showsRuler direction="rtl" anchor={anchor} manager={fixtureManager()} parentResponderId="workspace" onOpenChange={() => undefined} /></NSEWindowSurfaceBridgeProvider></OverlayHarness></SynCloudOSProvider>);
+    const panel = render(<SynCloudOSProvider runtime={runtime}><OverlayHarness runtime={runtime}><WindowSurfaceBridgeProvider bridge={{ present, dismiss }}><SynCloudOSNSEFontPanel open showsRuler direction="rtl" anchor={anchor} manager={fixtureManager()} parentResponderId="workspace" onOpenChange={() => undefined} /></WindowSurfaceBridgeProvider></OverlayHarness></SynCloudOSProvider>);
     await waitFor(() => expect(hosted).not.toBeNull());
     // A window host presents the content under its own overlay host.
     const hostedView = render(<SynCloudOSProvider runtime={runtime}><OverlayHarness runtime={runtime}>{hosted}</OverlayHarness></SynCloudOSProvider>);
@@ -308,8 +308,8 @@ describe("hosted font panel and focused commands", () => {
     const anchor = document.createElement("button");
     document.body.append(anchor);
     const pending: Array<{ commandId: string; signal: AbortSignal; resolve: (value: { status: "executed" }) => void }> = [];
-    const commandPort: NSEFontPanelCommandPort = {
-      execute: vi.fn<NSEFontPanelCommandPort["execute"]>((commandId, _payload, signal) => new Promise((resolve) => pending.push({ commandId, signal, resolve }))),
+    const commandPort: FontPanelCommandPort = {
+      execute: vi.fn<FontPanelCommandPort["execute"]>((commandId, _payload, signal) => new Promise((resolve) => pending.push({ commandId, signal, resolve }))),
     };
     const manager = fixtureManager();
     const panel = (open: boolean) => <SynCloudOSProvider runtime={runtime}><OverlayHarness runtime={runtime}><NSEFontPanel open={open} showsRuler anchor={anchor} manager={manager} commandPort={commandPort} parentResponderId="workspace" onOpenChange={() => undefined} /></OverlayHarness></SynCloudOSProvider>;
@@ -338,8 +338,8 @@ describe("hosted font panel and focused commands", () => {
     const anchor = document.createElement("button");
     document.body.append(anchor);
     const signals: AbortSignal[] = [];
-    const commandPort: NSEFontPanelCommandPort = {
-      execute: vi.fn<NSEFontPanelCommandPort["execute"]>((_commandId, _payload, signal) => {
+    const commandPort: FontPanelCommandPort = {
+      execute: vi.fn<FontPanelCommandPort["execute"]>((_commandId, _payload, signal) => {
         signals.push(signal);
         return new Promise(() => undefined);
       }),
@@ -357,7 +357,7 @@ describe("hosted font panel and focused commands", () => {
         },
         dismiss,
       }), []);
-      return <NSEWindowSurfaceBridgeProvider bridge={bridge}><NSEFontPanel open={open} anchor={anchor} manager={fixtureManager()} commandPort={commandPort} parentResponderId="workspace" onOpenChange={setOpen} />{hosted}</NSEWindowSurfaceBridgeProvider>;
+      return <WindowSurfaceBridgeProvider bridge={bridge}><NSEFontPanel open={open} anchor={anchor} manager={fixtureManager()} commandPort={commandPort} parentResponderId="workspace" onOpenChange={setOpen} />{hosted}</WindowSurfaceBridgeProvider>;
     }
     render(<SynCloudOSProvider runtime={runtime}><OverlayHarness runtime={runtime}><Fixture /></OverlayHarness></SynCloudOSProvider>);
     await waitFor(() => expect(physicalClose).toBeTypeOf("function"));

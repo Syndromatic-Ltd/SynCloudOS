@@ -24,7 +24,7 @@ import { createTestTheme } from "../fixtures/themes";
 import React from "react";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
-import { NSEAppearanceProvider, NSEChromeBevel, NSEChromeCap, NSEChromeGloss, NSEChromeInnerShadow, NSEChromeSeparator, NSEChromeSplice, NSEChromeSurface, type NSETheme } from "../../src/NSE/Appearance";
+import { NSEAppearanceProvider, ChromeBevel, ChromeCap, ChromeGloss, ChromeInnerShadow, ChromeSeparator, ChromeSplice, ChromeSurface, type NSETheme } from "../../src/NSE/Appearance";
 import { atmoTheme } from "@syndromatic/syncloudos/nse/themes/atmo";
 
 const customAppearance = createTestTheme("com.example.custom-test", "Custom test");
@@ -32,13 +32,13 @@ const customAppearance = createTestTheme("com.example.custom-test", "Custom test
 afterEach(cleanup);
 function Layers() {
   return <>
-    <NSEChromeSurface data-testid="surface" state="selected" />
-    <NSEChromeBevel data-testid="bevel" state="focused" />
-    <NSEChromeCap data-testid="cap" state="normal" />
-    <NSEChromeSplice data-testid="splice" state="normal" />
-    <NSEChromeSeparator data-testid="separator" state="disabled" />
-    <NSEChromeGloss data-testid="gloss" state="pressed" />
-    <NSEChromeInnerShadow data-testid="inner-shadow" state="selected" />
+    <ChromeSurface data-testid="surface" state="selected" />
+    <ChromeBevel data-testid="bevel" state="focused" />
+    <ChromeCap data-testid="cap" state="normal" />
+    <ChromeSplice data-testid="splice" state="normal" />
+    <ChromeSeparator data-testid="separator" state="disabled" />
+    <ChromeGloss data-testid="gloss" state="pressed" />
+    <ChromeInnerShadow data-testid="inner-shadow" state="selected" />
   </>;
 }
 

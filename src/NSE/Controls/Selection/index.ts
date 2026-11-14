@@ -18,9 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { NSEDivider } from "./NSEDivider";
+export { Divider } from "./NSEDivider";
 
-export { NSEGroupedList } from "./NSEGroupedList";
-export type { NSEGroupedListEdge, NSEGroupedListProps } from "./NSEGroupedList";
-export { NSEListItem } from "./NSEListItem";
-export type { NSEListItemProps } from "./NSEListItem";
+export { GroupedRows } from "./GroupedRows";
+export type { GroupedRowsEdge, GroupedRowsProps } from "./GroupedRows";
+export { GroupedRow } from "./GroupedRow";
+export type { GroupedRowProps } from "./GroupedRow";

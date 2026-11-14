@@ -23,10 +23,10 @@ import React, { useRef, useSyncExternalStore, type PropsWithChildren } from "rea
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import {
-  NSEAnimationEnvironmentProvider,
-  NSEPresence,
+  AnimationEnvironmentProvider,
+  Presence,
   useNSEPresentation,
-  type NSEAnimator,
+  type Animator,
 } from "../../src/NSE/Animation";
 import { LoginWindow } from "../../src/NSE/SystemUI/LoginWindow";
 import { LoginGatePresenter, type LoginGatePresenterProps } from "../../src/SynCloudOS/RootRuntime";
@@ -40,7 +40,7 @@ afterEach(cleanup);
 
 function controlledAnimator() {
   const played: Array<{ target: Element; definition: AFXAnimationDefinition; settle(): Promise<void> }> = [];
-  const animator: NSEAnimator = {
+  const animator: Animator = {
     ownerAppId: "syncloudos.system",
     animations: {
       acquireOwner: (owner) => Object.freeze({ ...owner, epoch: 1, release() {} }),
@@ -54,7 +54,7 @@ function controlledAnimator() {
         return { id: "a", finished, progress: 0, state: "running", cancel: () => resolve({ state: "cancelled", reduced: false }),
           seek() {}, pause() {}, resume() {} };
       },
-    } as NSEAnimator["animations"],
+    } as Animator["animations"],
   };
   return { animator, played };
 }
@@ -81,11 +81,11 @@ it("keeps the gate until the backdrop, window and placard exits settle, then rep
       LoginWindowComponent: LoginWindow,
       ModalFocusScopeComponent: PlainScope,
       BackdropComponent: Backdrop,
-      PresenceComponent: NSEPresence,
+      PresenceComponent: Presence,
       authentication: "required" as LoginGatePresenterProps["authentication"],
       onExitComplete,
     };
-    return <NSEAnimationEnvironmentProvider animator={animator}><LoginGatePresenter {...props} /></NSEAnimationEnvironmentProvider>;
+    return <AnimationEnvironmentProvider animator={animator}><LoginGatePresenter {...props} /></AnimationEnvironmentProvider>;
   };
   const rendered = render(gate(true));
   const backdropEnter = played.find(({ target }) => target.classList.contains("syncloudos-login-backdrop"))!;
@@ -146,7 +146,7 @@ it("keeps optional authentication locked until the login modal finishes its canc
       completions.push({ state: snapshot.statechart.currentState, modal: runtime.focus.inspect().scopes.some(({ id }) => id === "system-ui:login") });
     }} />;
   }
-  const view = render(<SynCloudOSProvider runtime={runtime}><NSEAnimationEnvironmentProvider animator={animator}><Gate /></NSEAnimationEnvironmentProvider></SynCloudOSProvider>);
+  const view = render(<SynCloudOSProvider runtime={runtime}><AnimationEnvironmentProvider animator={animator}><Gate /></AnimationEnvironmentProvider></SynCloudOSProvider>);
   try {
     const cancel = await screen.findByRole("button", { name: "Cancel" }) as HTMLButtonElement;
     expect(cancel.disabled).toBe(false);

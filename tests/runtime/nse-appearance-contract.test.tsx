@@ -29,15 +29,15 @@ import React, { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { NSEAppearanceProvider, useNSEAppearance, type NSEAppearanceServicePort } from "../../src/NSE/Appearance";
-import { NSEAboutDialog } from "../../src/NSE/Components/NSESystemDialogs";
-import { NSEPreferencesToast } from "../../src/NSE/Components/NSEPreferencesToast";
-import { NSERadioGroup, NSETextField } from "../../src/NSE/Controls/Fields/NSEFields";
+import { AboutDialog } from "../../src/NSE/Components/NSESystemDialogs";
+import { PreferencesToast } from "../../src/NSE/Components/NSEPreferencesToast";
+import { RadioGroup, NSETextField } from "../../src/NSE/Controls/Fields/NSEFields";
 import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
 import { NSEPopUpButton } from "../../src/NSE/Menus";
-import { NSEOverlayProvider, NSEPopup as NSECanonicalPopup } from "../../src/NSE/Overlays";
-import type { NSEOverlayRuntimePort } from "../../src/NSE/Overlays/overlayTypes";
+import { OverlayProvider, NSEPopup as NSECanonicalPopup } from "../../src/NSE/Overlays";
+import type { OverlayRuntimePort } from "../../src/NSE/Overlays/overlayTypes";
 import { atmoTheme } from "../../src/NSE/Appearance/atmo";
-import { NSETooltip } from "../../src/NSE/Tooltips";
+import { Tooltip } from "../../src/NSE/Tooltips";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 
 const customAppearance = createTestTheme("com.example.custom-test", "Custom test");
@@ -66,7 +66,7 @@ function Probe({ id }: { readonly id: string }) {
 }
 
 
-function overlayRuntime(runtimeId = "runtime:p11"): NSEOverlayRuntimePort {
+function overlayRuntime(runtimeId = "runtime:p11"): OverlayRuntimePort {
   const controller = new AbortController();
   const workArea = { width: 1024, height: 768, safeArea: { top: 0, right: 0, bottom: 0, left: 0 } } as const;
   const visualViewport = { width: 1024, height: 768, offsetLeft: 0, offsetTop: 0 } as const;
@@ -124,7 +124,7 @@ function CanonicalPortalSpecimens() {
       >
         Canonical portal
       </NSECanonicalPopup>
-      <NSETooltip id="p11-tooltip" open anchor={anchor} content="Projected tooltip" />
+      <Tooltip id="p11-tooltip" open anchor={anchor} content="Projected tooltip" />
       <NSEPopUpButton
         label="Canonical picker"
         items={[{ value: "one", title: "One" }]}
@@ -249,10 +249,10 @@ describe("NSE appearance composition", () => {
         contrast="high"
         transparency="reduced"
       >
-        <NSEOverlayProvider runtimePort={overlayRuntime()}>
+        <OverlayProvider runtimePort={overlayRuntime()}>
           <span>Canonical owner</span>
           <CanonicalPortalSpecimens />
-        </NSEOverlayProvider>
+        </OverlayProvider>
       </NSEAppearanceProvider>,
     );
 
@@ -274,12 +274,12 @@ describe("NSE appearance composition", () => {
         contrast="high"
         transparency="reduced"
       >
-        <NSEAboutDialog
+        <AboutDialog
           open
           info={{ name: "Notes", version: "1", copyright: "Copyright", trademark: "Trademark" }}
           onDismiss={() => undefined}
         />
-        <NSEPreferencesToast
+        <PreferencesToast
           open
           title="Preferences"
           backLabel="Back"
@@ -310,7 +310,7 @@ describe("NSE appearance composition", () => {
 
   it("keeps native radio focus and exposes reachable disabled paint state", () => {
     render(
-      <NSERadioGroup
+      <RadioGroup
         label="Mode"
         value="standard"
         options={[

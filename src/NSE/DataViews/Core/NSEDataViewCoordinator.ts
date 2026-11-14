@@ -62,12 +62,26 @@ export function createSelectionChange<TId extends NSEDataViewKey>(
   });
 }
 
-export class NSEDataViewCoordinator<T, TId extends NSEDataViewKey> {
+const deferDataViewObservation = Symbol("nse.deferDataViewObservation");
+const dataViewObservers = new WeakMap<object, () => () => void>();
+
+export function createReactOwnedDataViewCoordinator<T, TId extends NSEDataViewKey>(
+  adapter: NSEDataViewAdapter<T, TId>,
+  options: NSEDataViewCoordinatorOptions<T, TId>,
+): DataViewCoordinator<T, TId> {
+  const deferred = { ...options, [deferDataViewObservation]: true };
+  return new DataViewCoordinator(adapter, deferred);
+}
+
+export function observeReactOwnedDataViewCoordinator(coordinator: object): (() => void) | undefined {
+  return dataViewObservers.get(coordinator)?.();
+}
+
+export class DataViewCoordinator<T, TId extends NSEDataViewKey> {
   #adapter: NSEDataViewAdapter<T, TId>;
   #options: NSEDataViewCoordinatorOptions<T, TId>;
   readonly #listeners = new Set<() => void>();
-  readonly #unsubscribe: () => boolean;
-  readonly #unsubscribeDispose: () => boolean;
+  #stopObserving: (() => void) | undefined;
   #controllerDisposed: boolean;
   #warnedControllerDisposed = false;
   #activeId: TId | null;
@@ -96,14 +110,26 @@ export class NSEDataViewCoordinator<T, TId extends NSEDataViewKey> {
       ? controllerFocus
       : this.#enabledIdsCache[0] ?? null;
     this.#snapshot = this.#project();
-    this.#unsubscribeDispose = adapter.controller.onDispose(() => {
+    if (deferDataViewObservation in options) {
+      dataViewObservers.set(this, () => this.#observeController());
+    } else {
+      this.#observeController();
+    }
+  }
+
+  #observeController(): () => void {
+    const { controller } = this.#adapter;
+    this.#controllerDisposed = controller.isDisposed;
+    this.#reconcileActive();
+    this.#snapshot = this.#project();
+    const unsubscribeDispose = controller.onDispose(() => {
       this.#controllerDisposed = true;
       const failures: unknown[] = [];
       try { this.cancelEditing(); } catch (error) { failures.push(error); }
       try { this.#publish(); } catch (error) { failures.push(error); }
       this.#throwFailures(failures, "Data-view controller disposal failed.");
     });
-    this.#unsubscribe = adapter.controller.subscribeChanges((change) => {
+    const unsubscribe = controller.subscribeChanges((change) => {
       const failures: unknown[] = [];
       const beforeSelection = this.#snapshot.selection;
       if ((change.kind === "content" || change.kind === "arrangement" || change.kind === "selection") && this.#editingId !== null) {
@@ -123,6 +149,13 @@ export class NSEDataViewCoordinator<T, TId extends NSEDataViewKey> {
       }
       this.#throwFailures(failures, "Data-view controller reconciliation failed.");
     });
+    const stop = () => {
+      unsubscribe();
+      unsubscribeDispose();
+      if (this.#stopObserving === stop) this.#stopObserving = undefined;
+    };
+    this.#stopObserving = stop;
+    return stop;
   }
 
   getSnapshot = (): NSEDataViewSnapshot<T, TId> => this.#snapshot;
@@ -288,8 +321,7 @@ export class NSEDataViewCoordinator<T, TId extends NSEDataViewKey> {
   dispose(): void {
     let failure: unknown;
     try { this.cancelEditing(); } catch (error) { failure = error; }
-    this.#unsubscribe();
-    this.#unsubscribeDispose();
+    this.#stopObserving?.();
     this.#listeners.clear();
     if (failure !== undefined) throw failure;
   }

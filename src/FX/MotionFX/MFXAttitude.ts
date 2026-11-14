@@ -26,8 +26,12 @@ export interface MFXVector3 {
 export interface MFXQuaternion extends MFXVector3 {
   readonly w: number;
 }
+/** After CMAttitudeReferenceFrame. The browser backs xArbitraryZVertical: z is vertical, heading is arbitrary. */
 export type MFXAttitudeReferenceFrame =
-  "relative" | "gravity-aligned" | "magnetic-north" | "true-north";
+  | "xArbitraryZVertical"
+  | "xArbitraryCorrectedZVertical"
+  | "xMagneticNorthZVertical"
+  | "xTrueNorthZVertical";
 export type MFXRotationMatrix = readonly [
   number,
   number,
@@ -162,8 +166,9 @@ export class MFXAttitude {
     const q = this.quaternion;
     return new MFXAttitude({ x: -q.x, y: -q.y, z: -q.z, w: q.w });
   }
+  /** The change in attitude since `other`, in the device's own axes, as CMAttitude.multiply(byInverseOf:). */
   multiplyByInverseOf(other: MFXAttitude): MFXAttitude {
-    return this.multiply(other.inverse());
+    return other.inverse().multiply(this);
   }
   /** Keep quaternion signs continuous without changing the represented rotation. */
   continuousWith(previous: MFXAttitude | null): MFXAttitude {

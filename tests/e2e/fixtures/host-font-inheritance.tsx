@@ -21,7 +21,7 @@
 import { useState } from "react";
 import { createRoot } from "react-dom/client";
 import { NSEButton } from "../../../src/NSE/Controls/Buttons/NSEButton";
-import { NSETopBar } from "../../../src/NSE/Windows/Chrome/NSETopBar";
+import { TopBar } from "../../../src/NSE/Windows/Chrome/TopBar";
 import "../../../src/NSE/public/styles.css";
 import "../../../src/NSE/Appearance/atmo-theme.css";
 import "../../../src/SynCloudOS/styles/runtime.css";
@@ -31,7 +31,7 @@ function HostTypography() {
   const [clicks, setClicks] = useState(0);
   const inheritedRole = new URLSearchParams(window.location.search).has("root-role");
   return <main data-nse-theme="com.syndromatic.atmo" style={{ fontFamily: inheritedRole ? undefined : family, maxWidth: 640 }}>
-    <NSETopBar title="Host title" variant="atmoMetal" />
+    <TopBar title="Host title" variant="atmoMetal" />
     <NSEButton title="Host button" onClick={() => setClicks(value => value + 1)} />
     <button onClick={() => setFamily("serif")}>Change host font</button>
     <output aria-label="Clicks">{clicks}</output>

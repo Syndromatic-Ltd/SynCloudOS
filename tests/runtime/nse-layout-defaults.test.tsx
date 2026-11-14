@@ -138,7 +138,8 @@ describe("NSE default layout", () => {
     const text = screen.getByRole("status");
     expect(text.textContent).toBe("1,572,864 bytes");
     expect(text.tagName).toBe("SPAN");
-    expect(text.className).toBe("nse-control-label-field");
+    // Mirror classes sit beside the control's own class; they are private to the theme engine.
+    expect([...text.classList].filter(token => !token.startsWith("nse:"))).toEqual(["nse-control-label-field"]);
     expect(text.getAttribute("data-font")).toBe("footnote");
     expect(text.getAttribute("data-text-colour")).toBe("secondary");
     expect(text.getAttribute("data-monospaced-digits")).toBe("true");

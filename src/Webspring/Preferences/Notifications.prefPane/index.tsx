@@ -20,7 +20,7 @@
 
 import { useMemo } from "react";
 import { NSESwitch, NSEBox } from "../../../NSE/public/controls";
-import { NSEListItem } from "../../../NSE/Controls/Selection/NSEListItem";
+import { GroupedRow } from "../../../NSE/Controls/Selection/GroupedRow";
 import type { RuntimeSnapshot } from "../../../SynCloudOS/SynCloudOS";
 import { definePreferencePane, type PreferencePaneViewProps } from "../../../SynCloudOS/Preferences";
 import { useKernelSynCloudOS, useRuntimeSelector } from "../../../SynCloudOSReact";
@@ -99,7 +99,7 @@ function NotificationsPane({ settings }: PreferencePaneViewProps) {
           </p>
           <NSEBox>
             {apps.map((app) => (
-              <NSEListItem
+              <GroupedRow
                 key={app.bundleIdentifier}
                 tapHighlight={false}
                 leading={<img className="nse-prefs-app-icon" src={app.icon.src} alt="" aria-hidden="true" />}
@@ -113,7 +113,7 @@ function NotificationsPane({ settings }: PreferencePaneViewProps) {
                 )}
               >
                 {app.displayName}
-              </NSEListItem>
+              </GroupedRow>
             ))}
           </NSEBox>
           {settings.notificationsEnabled ? null : (

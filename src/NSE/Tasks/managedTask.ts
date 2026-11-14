@@ -1,9 +1,9 @@
 import { NSEObject } from '../Objects/NSEObject';
-import { NSEOwnershipScope, bindNSEOwnedResource, constructNSEOwnedResource, isNSEOwnedResource } from '../Controllers/ownership';
+import { OwnershipScope, bindNSEOwnedResource, constructNSEOwnedResource, isNSEOwnedResource } from '../Controllers/ownership';
 import { getNSEObjectLifetime } from '../Application/objectLifetime';
 import { ownNSEFactory } from '../Application/ownedFactory';
 import { getNSEAuthoringContext } from '../Application/authoringContext';
-import { getNSETaskLifetime, type NSEActivitySnapshot } from '../Application/viewActivity';
+import { getNSETaskLifetime, type ActivitySnapshot } from '../Application/viewActivity';
 import type { NSEApplication } from '../Application/NSEApplication';
 import type { NSEAnyWindowController } from '../Application/NSEWindowController';
 import type { NSEViewController } from '../Application/NSEViewController';
@@ -12,9 +12,9 @@ import { NSETaskQueueFullError, type NSEManagedTask, type NSETaskOptions, type N
 type Owner = NSEApplication|NSEAnyWindowController|NSEViewController<unknown>;
 type CancelReason = Extract<NSETaskSettlement<unknown>,{status:'cancelled'}>['reason'];
 interface Work<A,T> {
-  readonly argument:A;readonly generation:number;readonly epoch:NSEActivitySnapshot;
+  readonly argument:A;readonly generation:number;readonly epoch:ActivitySnapshot;
   readonly abort:AbortController;readonly handle:NSETaskRun<T>;readonly resolve:(result:NSETaskSettlement<T>)=>void;
-  scope?:NSEOwnershipScope;invocationPending?:boolean;releaseObservation?:()=>void;settled:boolean;started:boolean;cancelling?:boolean;stopEpoch:()=>void;timer?:{dispose():void};
+  scope?:OwnershipScope;invocationPending?:boolean;releaseObservation?:()=>void;settled:boolean;started:boolean;cancelling?:boolean;stopEpoch:()=>void;timer?:{dispose():void};
 }
 function assertSynchronous(result:unknown,operation:string):void {
   if(result && typeof (result as {then?:unknown}).then==='function') {
@@ -100,7 +100,7 @@ class ManagedTask<A,T> extends NSEObject<NSETaskSnapshot<T>> implements NSEManag
   #start(work:Work<A,T>):void {
     if(work.settled||work.started)return;
     if(!this.#live(work)) {this.#cancel(work,this.#options.policy==='latest'&&work.generation!==this.#generation?'superseded':'lifetime-ended');return;}
-    this.#current=work;work.started=true;work.scope=new NSEOwnershipScope('NSETask',String(work.generation));
+    this.#current=work;work.started=true;work.scope=new OwnershipScope('NSETask',String(work.generation));
     const context:NSETaskContext={
       signal:work.abort.signal,generation:work.generation,
       throwIfCancelled:()=>{if(!this.#live(work)) throw new DOMException('The task run was cancelled.','AbortError');},

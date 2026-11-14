@@ -18,8 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { GFXColour } from "../../../FX/GraphicsFX/public";
-import { classifyEyeDropperError, type NSEEyeDropperAdapter, type NSEEyeDropperResult } from "./NSEEyeDropperAdapter";
+import { GFXColour } from "../../../FX/GraphicsFX/GFXColour";
+import { setNSEHook } from "../../Theme/contract/hookMirrorDOM";
+import { classifyEyeDropperError, type EyeDropperAdapter, type EyeDropperResult } from "./eyeDropperAdapter";
 
 interface NativeEyeDropper {
   open(options?: { signal?: AbortSignal }): Promise<{ sRGBHex: string }>;
@@ -63,7 +64,7 @@ const LOUPE_GLASS = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 10
  * is captured once and a loupe drawn over it samples the capture: the pixel
  * under the pointer at the moment of the click is the colour picked.
  */
-export function createNSEBrowserEyeDropper(view: Window): NSEEyeDropperAdapter {
+export function createNSEBrowserEyeDropper(view: Window): EyeDropperAdapter {
   return {
     availability: () => view.document ? "available" : "unavailable",
     async pick(signal) {
@@ -146,12 +147,12 @@ async function capturePage(view: Window): Promise<HTMLCanvasElement> {
   return canvas;
 }
 
-function pickFromCapture(view: Window, signal: AbortSignal | undefined): Promise<NSEEyeDropperResult> {
+function pickFromCapture(view: Window, signal: AbortSignal | undefined): Promise<EyeDropperResult> {
   const document = view.document;
   const root = document.documentElement;
   const previousCursor = root.style.cursor;
   root.style.cursor = "progress";
-  return capturePage(view).then((capture) => new Promise<NSEEyeDropperResult>((resolve) => {
+  return capturePage(view).then((capture) => new Promise<EyeDropperResult>((resolve) => {
     root.style.cursor = previousCursor;
     if (signal?.aborted) {
       resolve(cancelled);
@@ -181,7 +182,7 @@ function pickFromCapture(view: Window, signal: AbortSignal | undefined): Promise
     // The loupe stands in for the pointer, as the system eyedropper's does.
     Object.assign(shield.style, { position: "fixed", inset: "0", zIndex: "2147483647", cursor: "none", outline: "none" });
     const loupe = document.createElement("div");
-    loupe.setAttribute("data-nse-part", "loupe");
+    setNSEHook(loupe, "part", "loupe");
     Object.assign(loupe.style, {
       position: "fixed", width: `${LOUPE_SIZE}px`, height: `${LOUPE_SIZE}px`, borderRadius: "50%", overflow: "hidden", pointerEvents: "none",
       boxShadow: "0 6px 16px rgba(0, 0, 0, 0.32)", visibility: "hidden",
@@ -231,7 +232,7 @@ function pickFromCapture(view: Window, signal: AbortSignal | undefined): Promise
     };
 
     let settled = false;
-    const finish = (result: NSEEyeDropperResult) => {
+    const finish = (result: EyeDropperResult) => {
       if (settled) return;
       settled = true;
       signal?.removeEventListener("abort", onAbort);

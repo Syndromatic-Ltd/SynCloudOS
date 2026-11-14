@@ -32,13 +32,13 @@ const sliceParts = Object.freeze([
   "block-end-inline-end",
 ] as const);
 
-interface NSEAppearanceNineSliceProps extends Omit<ComponentPropsWithoutRef<"span">, "children"> {
+interface AppearanceNineSliceProps extends Omit<ComponentPropsWithoutRef<"span">, "children"> {
   readonly kind: "menu-surface" | "window-shadow";
 }
 
 /** Structural nine-slice paint plane. Appearance providers decide whether and
  * how its non-overlapping source regions are painted. */
-export function NSEAppearanceNineSlice({ kind, className = "", ...props }: NSEAppearanceNineSliceProps) {
+export function AppearanceNineSlice({ kind, className = "", ...props }: AppearanceNineSliceProps) {
   return (
     <span
       {...props}

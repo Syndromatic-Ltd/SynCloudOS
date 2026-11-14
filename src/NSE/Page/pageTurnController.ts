@@ -18,29 +18,31 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEControllerLifetime } from "../Controllers/controllerLifetime";
+import { ControllerLifetime } from "../Controllers/controllerLifetime";
 import {
-  clampNSEPageProgress,
-  createNSEPageSnapshot
-} from "./nsePageGeometry";
+  clampPageProgress,
+  createPageSnapshot
+} from "./pageGeometry";
 import type {
-  NSEPageCompletionReason,
-  NSEPageTurnControllerOptions,
-  NSEPageTurnSnapshot,
-  NSEPageTurnOptions
-} from "./nsePageTypes";
+  PageCompletionReason,
+  PageTurnControllerOptions,
+  PageTurnSnapshot,
+  PageTurnOptions
+} from "./pageTypes";
 
-type PageTurnListener = (snapshot: NSEPageTurnSnapshot) => void;
+import { pageTurnPhaseAfter } from "./pageTurnPhaseMachine";
+
+type PageTurnListener = (snapshot: PageTurnSnapshot) => void;
 
 export class PageTurnController {
-  private snapshot: NSEPageTurnSnapshot;
+  private snapshot: PageTurnSnapshot;
   private listeners = new Set<PageTurnListener>();
   private nextTurnId = 1;
-  readonly #lifetime: NSEControllerLifetime;
+  readonly #lifetime: ControllerLifetime;
 
-  constructor(options: NSEPageTurnControllerOptions = {}) {
-    this.#lifetime = new NSEControllerLifetime(options, { kind: "NSEPage", id: "page" });
-    this.snapshot = createNSEPageSnapshot({
+  constructor(options: PageTurnControllerOptions = {}) {
+    this.#lifetime = new ControllerLifetime(options, { kind: "NSEPage", id: "page" });
+    this.snapshot = createPageSnapshot({
       progress: options.progress,
       phase: options.phase,
       mode: options.mode ?? "turn",
@@ -69,18 +71,18 @@ export class PageTurnController {
     return this.snapshot;
   }
 
-  setProgress(progress: number, reason: NSEPageCompletionReason = "programmatic") {
+  setProgress(progress: number, reason: PageCompletionReason = "programmatic") {
     return this.commit({
-      progress: clampNSEPageProgress(progress),
+      progress: clampPageProgress(progress),
       reason
     });
   }
 
-  startTurn(options: NSEPageTurnOptions = {}) {
+  startTurn(options: PageTurnOptions = {}) {
     return this.commit({
       progress: options.progress,
       targetProgress: options.targetProgress ?? 1,
-      phase: "turning",
+      phase: pageTurnPhaseAfter(this.snapshot.phase, "startTurn"),
       mode: options.mode,
       edge: options.edge,
       direction: options.direction,
@@ -89,11 +91,11 @@ export class PageTurnController {
     });
   }
 
-  startDrag(options: NSEPageTurnOptions = {}) {
+  startDrag(options: PageTurnOptions = {}) {
     return this.commit({
       progress: options.progress,
       targetProgress: options.targetProgress,
-      phase: "dragging",
+      phase: pageTurnPhaseAfter(this.snapshot.phase, "startDrag"),
       mode: options.mode,
       edge: options.edge,
       direction: options.direction,
@@ -102,37 +104,37 @@ export class PageTurnController {
     });
   }
 
-  settle(options: NSEPageTurnOptions = {}) {
+  settle(options: PageTurnOptions = {}) {
     return this.commit({
       progress: options.progress,
       targetProgress: options.targetProgress ?? options.progress,
-      phase: "settling",
+      phase: pageTurnPhaseAfter(this.snapshot.phase, "settle"),
       reason: options.reason ?? "programmatic"
     });
   }
 
-  complete(progress = this.snapshot.targetProgress, reason: NSEPageCompletionReason = "programmatic") {
+  complete(progress = this.snapshot.targetProgress, reason: PageCompletionReason = "programmatic") {
     return this.commit({
       progress,
       targetProgress: progress,
-      phase: "idle",
+      phase: pageTurnPhaseAfter(this.snapshot.phase, "complete"),
       reason
     });
   }
 
-  cancel(reason: Extract<NSEPageCompletionReason, "cancel" | "superseded"> = "cancel") {
+  cancel(reason: Extract<PageCompletionReason, "cancel" | "superseded"> = "cancel") {
     return this.commit({
       targetProgress: 0,
-      phase: "canceling",
+      phase: pageTurnPhaseAfter(this.snapshot.phase, "cancel"),
       reason
     });
   }
 
-  tear(options: NSEPageTurnOptions = {}) {
+  tear(options: PageTurnOptions = {}) {
     return this.commit({
       progress: options.progress ?? 1,
       targetProgress: 1,
-      phase: "torn",
+      phase: pageTurnPhaseAfter(this.snapshot.phase, "tear"),
       mode: "tear",
       edge: options.edge,
       direction: options.direction,
@@ -142,11 +144,11 @@ export class PageTurnController {
     });
   }
 
-  reset(options: NSEPageTurnOptions = {}) {
+  reset(options: PageTurnOptions = {}) {
     return this.commit({
       progress: options.progress ?? 0,
       targetProgress: options.targetProgress ?? 0,
-      phase: "idle",
+      phase: pageTurnPhaseAfter(this.snapshot.phase, "reset"),
       mode: options.mode,
       edge: options.edge,
       direction: options.direction,
@@ -156,13 +158,13 @@ export class PageTurnController {
     });
   }
 
-  private commit(partial: Partial<NSEPageTurnSnapshot>) {
+  private commit(partial: Partial<PageTurnSnapshot>) {
     this.#lifetime.assertLive("commit");
     this.snapshot = {
       ...this.snapshot,
       ...partial,
-      progress: clampNSEPageProgress(partial.progress ?? this.snapshot.progress),
-      targetProgress: clampNSEPageProgress(partial.targetProgress ?? this.snapshot.targetProgress),
+      progress: clampPageProgress(partial.progress ?? this.snapshot.progress),
+      targetProgress: clampPageProgress(partial.targetProgress ?? this.snapshot.targetProgress),
       updatedAt: Date.now()
     };
 

@@ -92,7 +92,6 @@ export function useMotion(): MFXMotionManager {
       stopDeviceMotionUpdates: () => current?.stopDeviceMotionUpdates(),
       stopAccelerometerUpdates: () => current?.stopAccelerometerUpdates(),
       stopGyroUpdates: () => current?.stopGyroUpdates(),
-      resetReferenceFrame: () => requireManager().resetReferenceFrame(),
       createRecorder: (options) => requireManager().createRecorder(options),
       requestAuthorization: () => requireManager().requestAuthorization(),
       dispose: () => current?.dispose(),

@@ -1,4 +1,4 @@
-import { NSEControlImage } from "../Images/NSEControlImage";
+import { ControlImage } from "../Images/NSEControlImage";
 import { useNSEValueBinding } from "../Core/useNSEValueBinding";
 import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
 /*
@@ -24,13 +24,13 @@ import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
 import { nseControlHooks, nseStateHooks } from "../../Theme/contract/hooks";
 import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction";
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type MutableRefObject } from "react";
-import { NSEListboxPopup, useOptionalNSEOverlayProvider } from "../../Overlays";
+import { ListboxPopup, useOptionalOverlayProvider } from "../../Overlays";
 import { useNSEControlCommand } from "../Core";
 import { useNSEActionBinding } from "../Core/useNSEControlAction";
 import { useNSEControlFeedback } from "../Core/nseControlsShared";
 import type { HFXFeedbackRequest } from "../../../FX/HapticsFX/HFXHapticEvent";
 import type { NSESegmentedControlProps, NSESegmentedItem, NSESegmentedSelection } from "./valueControlTypes";
-import { NSETexturedSegmentCells, useSegmentActions } from "./NSESegmentStyles";
+import { TexturedSegmentCells, useSegmentActions } from "./NSESegmentStyles";
 
 interface SegmentButtonProps {
   readonly item: NSESegmentedItem;
@@ -89,19 +89,19 @@ function SegmentButton({ item, selected, tabIndex, disabled, readOnly, refs, hap
     if (!binding) { onActivate(); return; }
     void command.dispatch().then((result) => { if (result?.status === "executed") onActivate(); });
   };
-  return <button type="button" data-nse-part="bezel" {...theme.events} {...nseStateHooks({ selected: selected || command.presentation?.state === "on", enabled: !disabled && item.isEnabled !== false && commandEnabled, highlighted: theme.highlighted, hovered: theme.hovered, focused: theme.focused })} ref={(node) => { if (node) refs.current.set(item.id, node); else refs.current.delete(item.id); }} tabIndex={tabIndex} aria-label={item.accessibleLabel ?? (typeof item.label === "string" ? item.label : item.id)} title={item.toolTip ?? (item.image !== undefined ? item.accessibleLabel ?? (typeof item.label === "string" ? item.label : undefined) : typeof item.label === "string" ? undefined : item.accessibleLabel)} aria-pressed={selected || command.presentation?.state === "on"} aria-readonly={readOnly || undefined} disabled={disabled || (item.isEnabled === false) || !commandEnabled} hidden={command.presentation?.hidden} data-command-id={binding?.id} style={item.width === undefined ? undefined : { flex: "none", boxSizing: "border-box", inlineSize: item.width, minInlineSize: item.width }} onKeyDown={onKeyDown} onClick={activate}>{item.image === undefined ? <span data-nse-part="title">{item.label}</span> : <span aria-hidden="true" data-nse-part="segment-image"><NSEControlImage image={item.image} /></span>}</button>;
+  return <button type="button" data-nse-part="bezel" {...theme.events} {...nseStateHooks({ selected: selected || command.presentation?.state === "on", enabled: !disabled && item.isEnabled !== false && commandEnabled, highlighted: theme.highlighted, hovered: theme.hovered, focused: theme.focused })} ref={(node) => { if (node) refs.current.set(item.id, node); else refs.current.delete(item.id); }} tabIndex={tabIndex} aria-label={item.accessibleLabel ?? (typeof item.label === "string" ? item.label : item.id)} title={item.toolTip ?? (item.image !== undefined ? item.accessibleLabel ?? (typeof item.label === "string" ? item.label : undefined) : typeof item.label === "string" ? undefined : item.accessibleLabel)} aria-pressed={selected || command.presentation?.state === "on"} aria-readonly={readOnly || undefined} disabled={disabled || (item.isEnabled === false) || !commandEnabled} hidden={command.presentation?.hidden} data-command-id={binding?.id} style={item.width === undefined ? undefined : { flex: "none", boxSizing: "border-box", inlineSize: item.width, minInlineSize: item.width }} onKeyDown={onKeyDown} onClick={activate}>{item.image === undefined ? <span data-nse-part="title">{item.label}</span> : <span aria-hidden="true" data-nse-part="segment-image"><ControlImage image={item.image} /></span>}</button>;
 }
 
 export function NSESegmentedControl<Payload = unknown>(props: NSEBoundValueProps<NSESegmentedSelection,NSESegmentedControlProps<Payload>,'value'|'defaultValue'|'onValueChange'|'undoManager'|'selection'|'onSelectionChange'>) {
-  return <NSESegmentedControlControl {...useNSEValueBinding<NSESegmentedSelection,NSESegmentedControlProps<Payload>,'value'|'defaultValue'|'onValueChange'|'undoManager'|'selection'|'onSelectionChange'>(props,{value:'selection',change:'onSelectionChange',fallback:{mode:'select-one',selectedIds:new Set<string>(),allowsEmpty:true}})} />;
+  return <SegmentedControlControl {...useNSEValueBinding<NSESegmentedSelection,NSESegmentedControlProps<Payload>,'value'|'defaultValue'|'onValueChange'|'undoManager'|'selection'|'onSelectionChange'>(props,{value:'selection',change:'onSelectionChange',fallback:{mode:'select-one',selectedIds:new Set<string>(),allowsEmpty:true}})} />;
 }
 
-function NSESegmentedControlControl(props: NSESegmentedControlProps) {
-  if (props.segmentStyle === "texturedRounded") return <NSETexturedSegmentCells {...props} />;
-  return <NSERoundedSegments {...props} />;
+function SegmentedControlControl(props: NSESegmentedControlProps) {
+  if (props.segmentStyle === "texturedRounded") return <TexturedSegmentCells {...props} />;
+  return <RoundedSegments {...props} />;
 }
 
-function NSERoundedSegments(props: NSESegmentedControlProps) {
+function RoundedSegments(props: NSESegmentedControlProps) {
   const theme = useNSEThemeInteraction<HTMLDivElement>(props.isEnabled !== false, true);
   const instanceId = useId().replace(/:/g, "");
   const refs = useRef(new Map<string, HTMLButtonElement>());
@@ -118,7 +118,7 @@ function NSERoundedSegments(props: NSESegmentedControlProps) {
       return next;
     });
   }, []);
-  const overlay = useOptionalNSEOverlayProvider();
+  const overlay = useOptionalOverlayProvider();
   const selected = items.find((item) => props.selection.selectedIds.has(item.id) && item.isEnabled !== false)?.id ?? items.find((item) => item.isEnabled !== false)?.id;
   const maximumVisible = Math.max(1, Math.floor(props.maximumVisibleSegments ?? items.length));
   const initialVisible = items.slice(0, maximumVisible);
@@ -156,9 +156,9 @@ function NSERoundedSegments(props: NSESegmentedControlProps) {
       {(Array.isArray(item.menu) && item.menu.length) ? <button ref={(node) => { if (node) menuRefs.current.set(item.id, node); else menuRefs.current.delete(item.id); }} type="button" aria-label={`More options for ${typeof item.label === "string" ? item.label : item.id}`} data-nse-part="disclosure" data-nse-expanded={String(menuId === item.id)} aria-expanded={menuId === item.id} disabled={(props.isEnabled === false) || props.readOnly || (item.isEnabled === false)} onClick={() => setMenuId((current) => current === item.id ? null : item.id)}>▾</button> : null}
     </span>)}
     {overflow.length ? <button ref={overflowRef} type="button" aria-label={`More ${props["aria-label"]}`} data-nse-part="overflow" data-nse-expanded={String(overflowOpen)} aria-expanded={overflowOpen} disabled={(props.isEnabled === false) || props.readOnly} onClick={() => setOverflowOpen((open) => !open)}>…</button> : null}
-    {(activeMenu && Array.isArray(activeMenu.menu) && activeMenu.menu.length) ? <NSEListboxPopup id={`segment-menu-${instanceId}-${activeMenu.id}`} open anchor={menuRefs.current.get(activeMenu.id) ?? null} parentResponderId={props.parentResponderId} options={activeMenu.menu.map((item) => ({ id: item.id, label: item.label, value: item.id, disabled: (item.isEnabled === false) }))} onOpenChange={(open) => { if (!open) setMenuId(null); }} onSelect={(option) => { if (option.value && !props.readOnly && !(props.isEnabled === false)) props.onMenuAction?.(activeMenu.id, option.value); }} /> : null}
+    {(activeMenu && Array.isArray(activeMenu.menu) && activeMenu.menu.length) ? <ListboxPopup id={`segment-menu-${instanceId}-${activeMenu.id}`} open anchor={menuRefs.current.get(activeMenu.id) ?? null} parentResponderId={props.parentResponderId} options={activeMenu.menu.map((item) => ({ id: item.id, label: item.label, value: item.id, disabled: (item.isEnabled === false) }))} onOpenChange={(open) => { if (!open) setMenuId(null); }} onSelect={(option) => { if (option.value && !props.readOnly && !(props.isEnabled === false)) props.onMenuAction?.(activeMenu.id, option.value); }} /> : null}
     {overflow.map((item) => <OverflowSegmentBinding key={item.id} item={item} onSelect={select} register={registerOverflow} />)}
-    {overflow.length ? <NSEListboxPopup id={`segment-overflow-${instanceId}`} open={overflowOpen} anchor={overflowRef.current} parentResponderId={props.parentResponderId} options={overflow.map((item) => ({ id: item.id, label: item.label, value: item.id, disabled: (props.isEnabled === false) || props.readOnly || !overflowBindings.get(item.id)?.enabled }))} selectedId={selected} onOpenChange={setOverflowOpen} onSelect={(option) => { if (option.value && !(props.isEnabled === false) && !props.readOnly) overflowBindings.get(option.value)?.activate(); }} /> : null}
+    {overflow.length ? <ListboxPopup id={`segment-overflow-${instanceId}`} open={overflowOpen} anchor={overflowRef.current} parentResponderId={props.parentResponderId} options={overflow.map((item) => ({ id: item.id, label: item.label, value: item.id, disabled: (props.isEnabled === false) || props.readOnly || !overflowBindings.get(item.id)?.enabled }))} selectedId={selected} onOpenChange={setOverflowOpen} onSelect={(option) => { if (option.value && !(props.isEnabled === false) && !props.readOnly) overflowBindings.get(option.value)?.activate(); }} /> : null}
     {props.name ? <input data-nse-part="field" type="hidden" name={props.name} value={[...props.selection.selectedIds].join(",")} /> : null}
   </div>;
 }

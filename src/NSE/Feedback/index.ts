@@ -22,7 +22,7 @@ import { createContext, useContext } from "react";
 import type { HFXHapticEngine } from "../../FX/HapticsFX/HFXHapticEngine";
 const FeedbackContext = createContext<HFXHapticEngine | null>(null);
 /** Standalone NSE embeds provide a focused engine; SynCloudOS supplies its runtime-owned engine. */
-export const NSEFeedbackProvider = FeedbackContext.Provider;
+export const FeedbackProvider = FeedbackContext.Provider;
 export function useNSEFeedback() { return useContext(FeedbackContext); }
 export type { HFXFeedbackRequest, HFXFeedbackPresetName } from "../../FX/HapticsFX/HFXHapticEvent";
 export { NSEHapticFeedbackManager, registerNSEHapticFeedbackEngine } from "./NSEHapticFeedbackManager";

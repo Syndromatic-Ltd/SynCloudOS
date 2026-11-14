@@ -25,7 +25,7 @@ import type {
   RuntimeTrackingOption,
 } from "../../SynCloudOS/SynCloudOS";
 
-export type NSESystemCursor = RuntimeSystemCursor;
-export type NSECursorDescriptor = RuntimeCursorDescriptor;
+export type SystemCursor = RuntimeSystemCursor;
+export type CursorDescriptor = RuntimeCursorDescriptor;
 export type NSETrackingOption = RuntimeTrackingOption;
 export type NSETrackingEvent = RuntimeTrackingEvent;

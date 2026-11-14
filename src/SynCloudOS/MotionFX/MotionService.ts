@@ -95,7 +95,6 @@ export class MotionService {
       "stopDeviceMotionUpdates",
       "stopAccelerometerUpdates",
       "stopGyroUpdates",
-      "resetReferenceFrame",
       "createRecorder",
       "requestAuthorization",
       "dispose",

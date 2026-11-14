@@ -20,20 +20,20 @@
 
 import { createContext, useContext, useMemo, type ReactNode } from "react";
 import { nseActionCommandId } from "./actionCommandId";
-import type { NSEControlCommandBinding } from "./controlTypes";
+import type { ControlCommandBinding } from "./controlTypes";
 import { nseActionReferenceName, type NSEActionReference } from "./actionReference";
 
 /** The application an `action` prop or menu item belongs to. */
-export interface NSEActionScope {
+export interface ActionScope {
   readonly appId: string;
 }
 
-const NSEActionScopeContext = createContext<NSEActionScope | null>(null);
+const ActionScopeContext = createContext<ActionScope | null>(null);
 
 /** Internal responder ancestry for portal controls; it carries no runtime authority. */
-export const NSEActionResponderContext = createContext<string | undefined>(undefined);
+export const ActionResponderContext = createContext<string | undefined>(undefined);
 
-export interface NSEActionScopeProviderProps {
+export interface ActionScopeProviderProps {
   readonly appId: string;
   readonly children: ReactNode;
 }
@@ -43,13 +43,13 @@ export interface NSEActionScopeProviderProps {
  * The framework supplies it around every class-based application's views;
  * function-component apps that want `action` props can supply it themselves.
  */
-export function NSEActionScopeProvider({ appId, children }: NSEActionScopeProviderProps) {
-  const scope = useMemo<NSEActionScope>(() => ({ appId }), [appId]);
-  return <NSEActionScopeContext.Provider value={scope}>{children}</NSEActionScopeContext.Provider>;
+export function ActionScopeProvider({ appId, children }: ActionScopeProviderProps) {
+  const scope = useMemo<ActionScope>(() => ({ appId }), [appId]);
+  return <ActionScopeContext.Provider value={scope}>{children}</ActionScopeContext.Provider>;
 }
 
-export function useOptionalNSEActionScope(): NSEActionScope | null {
-  return useContext(NSEActionScopeContext);
+export function useOptionalNSEActionScope(): ActionScope | null {
+  return useContext(ActionScopeContext);
 }
 
 /**
@@ -59,8 +59,8 @@ export function useOptionalNSEActionScope(): NSEActionScope | null {
  * focused view's controller answers first, then its window controller, then
  * the application.
  */
-export function useNSEActionBinding<P = undefined>(action: string | NSEActionReference | undefined, payload?: P): NSEControlCommandBinding<P | undefined> | undefined {
-  const scope = useContext(NSEActionScopeContext);
+export function useNSEActionBinding<P = undefined>(action: string | NSEActionReference | undefined, payload?: P): ControlCommandBinding<P | undefined> | undefined {
+  const scope = useContext(ActionScopeContext);
   return useMemo(() => {
     if (action === undefined) return undefined;
     const name = typeof action === "string" ? action : nseActionReferenceName(action);

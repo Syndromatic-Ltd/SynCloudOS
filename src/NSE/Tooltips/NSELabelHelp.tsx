@@ -20,13 +20,13 @@
 
 import { cloneElement, useLayoutEffect, type HTMLAttributes, type ReactElement, type ReactNode, type SyntheticEvent } from "react";
 import { useNSETooltip } from "./useNSETooltip";
-import { useOptionalNSETooltipProvider } from "./NSETooltipProvider";
+import { useOptionalTooltipProvider } from "./TooltipProvider";
 
 type AnchorProps = HTMLAttributes<HTMLElement>;
 interface LabelHelpProps { readonly label: ReactNode; readonly children: ReactElement<AnchorProps> }
 /** Keeps the control/ref/owner intact; help uses the existing overlay provider. */
-export function NSELabelHelp(props: LabelHelpProps) {
-  const provider = useOptionalNSETooltipProvider();
+export function LabelHelp(props: LabelHelpProps) {
+  const provider = useOptionalTooltipProvider();
   return provider && props.label ? <BoundLabelHelp {...props} /> : props.children;
 }
 function BoundLabelHelp({ label, children }: LabelHelpProps) {

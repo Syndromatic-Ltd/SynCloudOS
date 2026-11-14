@@ -7,7 +7,7 @@ import { NSEApplication, type NSEApplicationClass } from "../../src/NSE/Applicat
 import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
 import { NSEArrayController, nseUnowned, type NSEControllerOwnershipOptions } from "../../src/NSE/Controllers";
-import { NSENavigationStackController, NSETabBarController } from "../../src/NSE/Navigation";
+import { NavigationStackController, TabBarController } from "../../src/NSE/Navigation";
 import { NSETabViewController } from "../../src/NSE/Navigation/NSETabViewController";
 import { NSEPageController } from "../../src/NSE/Page/NSEPageController";
 import { NSESplitViewController } from "../../src/NSE/DataViews/Split/NSESplitViewController";
@@ -261,8 +261,8 @@ describe("navigation controllers as view controllers", () => {
   it("dispose with the owner that constructs them", async () => {
     let app!: NavigationApp;
     class NavigationApp extends NSEApplication {
-      readonly tabs = new NSETabBarController({ id: "tabs", destinations });
-      readonly stack = new NSENavigationStackController({ id: "stack", destinationIds: ["detail"] });
+      readonly tabs = new TabBarController({ id: "tabs", destinations });
+      readonly stack = new NavigationStackController({ id: "stack", destinationIds: ["detail"] });
       readonly split = new NSESplitViewController({ id: "split" });
       readonly tabView = new NSETabViewController({ tabStyle: "sidebarAdaptable" });
       readonly pages = new NSEPageController();
@@ -283,8 +283,8 @@ describe("navigation controllers as view controllers", () => {
     let app!: LateNavigationApp;
     class LateNavigationApp extends NSEApplication {
       constructor() { super(); app = this; }
-      unowned() { return new NSENavigationStackController({ id: "late-stack", destinationIds: ["detail"] }); }
-      owned() { return new NSENavigationStackController({ id: "owned-stack", destinationIds: ["detail"], owner: this }); }
+      unowned() { return new NavigationStackController({ id: "late-stack", destinationIds: ["detail"] }); }
+      owned() { return new NavigationStackController({ id: "owned-stack", destinationIds: ["detail"], owner: this }); }
     }
     const host = await launched(LateNavigationApp);
 

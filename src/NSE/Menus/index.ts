@@ -19,34 +19,34 @@
  */
 
 export { NSEMenu, orderMenuEntries } from "./NSEMenu";
-export { NSEMenuView } from "./NSEMenuView";
+export { MenuView } from "./MenuView";
 export { nseMenuModel } from "./menuTypes";
 export { NSEPopUpButton } from "./NSEPopUpButton";
-export { NSEApplicationMenu } from "./NSEApplicationMenu";
-export { createNSEApplicationMenuModel } from "./createApplicationMenuModel";
-export type { NSEApplicationMenuLabels, NSEApplicationMenuModelOptions } from "./createApplicationMenuModel";
+export { ApplicationMenu } from "./ApplicationMenu";
+export { createApplicationMenuModel } from "./createApplicationMenuModel";
+export type { ApplicationMenuLabels, ApplicationMenuModelOptions } from "./createApplicationMenuModel";
 export { NSEMenuBar } from "./NSEMenuBar";
-export { NSEMenuOverlay } from "./NSEMenuOverlay";
+export { MenuOverlay } from "./MenuOverlay";
 export type {
-  NSEMenuDismissReason,
-  NSEMenuEntry,
+  MenuDismissReason,
+  MenuEntry,
   NSEMenuItem,
-  NSEMenuItemDefinition,
-  NSEMenuKeyEquivalent,
-  NSEMenuKeyEquivalentClaim,
-  NSEMenuKeyEquivalentResult,
-  NSEMenuModel,
-  NSEMenuModelOptions,
+  MenuItemDefinition,
+  MenuKeyEquivalent,
+  MenuKeyEquivalentClaim,
+  MenuKeyEquivalentResult,
+  MenuModel,
+  MenuModelOptions,
   NSEMenuOptions,
-  NSEMenuOverlayOptions,
-  NSEMenuPresentedEntry,
+  MenuOverlayOptions,
+  MenuPresentedEntry,
   NSEMenuRuntimePort,
-  NSEMenuSection,
+  MenuSection,
   NSEMenuSnapshot,
 } from "./menuTypes";
-export type { NSECommandMenuProps, NSEItemMenuProps, NSEMenuProps } from "./NSEMenuView";
+export type { CommandMenuProps, ItemMenuProps, NSEMenuProps } from "./MenuView";
 export type { NSEPopUpButtonItem, NSEPopUpButtonProps } from "./NSEPopUpButton";
-export type { NSEApplicationMenuProps } from "./NSEApplicationMenu";
+export type { ApplicationMenuProps } from "./ApplicationMenu";
 export type { NSEMenuBarOverlayOptions, NSEMenuBarProps } from "./NSEMenuBar";
-export { NSEAppMenuSurface } from "./NSEAppMenuSurface";
-export type { NSEAppMenuSurfaceProps } from "./NSEAppMenuSurface";
+export { AppMenuSurface } from "./AppMenuSurface";
+export type { AppMenuSurfaceProps } from "./AppMenuSurface";

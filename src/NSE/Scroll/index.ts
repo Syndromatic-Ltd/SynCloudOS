@@ -269,7 +269,7 @@ export function useNSERubberBandScroll(
 }
 
 export { NSEScrollView, type NSEScrollViewProps } from "./NSEScrollView";
-export { NSERubberBandProvider, type NSERubberBandProviderProps } from "./NSERubberBandProvider";
+export { RubberBandProvider, type RubberBandProviderProps } from "./NSERubberBandProvider";
 export { NSEClipView, type NSEClipViewProps } from "./NSEClipView";
 export * from "./scrollTypes";
 export * from "./NSEScroller";

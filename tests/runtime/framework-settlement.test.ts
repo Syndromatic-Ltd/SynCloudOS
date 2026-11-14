@@ -45,8 +45,8 @@ import { getRuntimeSettlement, trackRuntimeSettlement } from "../../src/SynCloud
 import { AUFXAudioFormat } from "../../src/FX/AudioFX/AUFXAudioFormat";
 import { AUFXAudioSession } from "../../src/FX/AudioFX/AUFXAudioSession";
 import { createHostAUFXAudioRecorder } from "../../src/FX/AudioFX/AUFXAudioRecorder";
-import { NSEOverlayProvider, NSEPopup } from "../../src/NSE/Overlays";
-import type { NSEOverlayRuntimePort } from "../../src/NSE/Overlays/overlayTypes";
+import { OverlayProvider, NSEPopup } from "../../src/NSE/Overlays";
+import type { OverlayRuntimePort } from "../../src/NSE/Overlays/overlayTypes";
 import { HostSiteBrandingProvider, ResponderScope, SynCloudOSProvider } from "../../src/SynCloudOSReact";
 import { SynWareRuntimeMount } from "../../src/SynCloudOS/AppSDK/SynWareRuntimeMount";
 import { RouteOutlet } from "../../src/SynCloudOS/AppSDK/RouteOutlet";
@@ -192,7 +192,7 @@ describe("framework finite-work settlement", () => {
     const workArea = Object.freeze({ width: 1024, height: 768, safeArea: Object.freeze({ top: 0, right: 0, bottom: 0, left: 0 }) });
     const presentation = Object.freeze({
       contentBounds: Object.freeze({ x: 0, y: 0, width: 1024, height: 768 }),
-      safeAreaInsets: Object.freeze({ top: 0, right: 0, bottom: 0, left: 0 }),
+      safeAreaInsets: Object.freeze({ blockStart: 0, inlineEnd: 0, blockEnd: 0, inlineStart: 0 }),
       virtualKeyboardInset: 0,
       horizontalSizeClass: "regular" as const,
       verticalSizeClass: "regular" as const,
@@ -225,14 +225,14 @@ describe("framework finite-work settlement", () => {
       observeFiniteWork(receipt: Promise<void>, input: { readonly kind: string; readonly label: string }) {
         trackRuntimeSettlement(runtime, receipt, { owner: "overlay", kind: input.kind, label: input.label });
       },
-    } as NSEOverlayRuntimePort & {
+    } as OverlayRuntimePort & {
       observeFiniteWork(receipt: Promise<void>, input: { readonly kind: string; readonly label: string }): void;
     };
     const container = document.createElement("div");
     document.body.appendChild(container);
     const root = createRoot(container);
     const renderPopup = (open: boolean) => createElement(
-      NSEOverlayProvider,
+      OverlayProvider,
       { runtimePort },
       createElement(NSEPopup, {
         id: "settlement-overlay",

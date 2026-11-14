@@ -21,7 +21,7 @@
 import type { PasteboardRepresentation } from "../../SynCloudOS/SynCloudOS";
 import { normalisePasteboardRepresentations } from "../../SynCloudOS/nseRuntimeContracts";
 
-export interface NSEDataTransferReadPort {
+export interface DataTransferReadPort {
   readonly types: readonly string[];
   readonly files: {
     readonly length: number;
@@ -30,19 +30,19 @@ export interface NSEDataTransferReadPort {
   getData(type: string): string;
 }
 
-export interface NSEDataTransferWritePort {
+export interface DataTransferWritePort {
   effectAllowed: DataTransfer["effectAllowed"];
   setData(type: string, value: string): void;
 }
 
-export interface NSEClipboardEventPort {
+export interface ClipboardEventPort {
   readonly clipboardData: {
     getData(type: string): string;
     setData(type: string, value: string): void;
   };
 }
 
-export class NSEBrowserDragSnapshotError extends TypeError {
+export class BrowserDragSnapshotError extends TypeError {
   readonly name = "NSEBrowserDragSnapshotError";
 }
 
@@ -50,46 +50,46 @@ const textTypes = new Set(["text/plain", "text/html", "text/uri-list", "text/rtf
 const MAX_NATIVE_FILE_BYTES = 16 * 1024 * 1024;
 
 function denseTypes(input: readonly string[]): readonly string[] {
-  if (!Array.isArray(input)) throw new NSEBrowserDragSnapshotError("The native drag MIME list must be a dense data array.");
+  if (!Array.isArray(input)) throw new BrowserDragSnapshotError("The native drag MIME list must be a dense data array.");
   const descriptors = Object.getOwnPropertyDescriptors(input) as unknown as PropertyDescriptorMap;
   const length = descriptors.length;
   if (!length || !("value" in length) || !Number.isSafeInteger(length.value) || length.value > 64) {
-    throw new NSEBrowserDragSnapshotError("The native drag MIME list is invalid or exceeds the bounded limit.");
+    throw new BrowserDragSnapshotError("The native drag MIME list is invalid or exceeds the bounded limit.");
   }
   const allowed = new Set<PropertyKey>(["length", ...Array.from({ length: length.value }, (_, index) => String(index))]);
   if (Reflect.ownKeys(descriptors).some((key) => !allowed.has(key))) {
-    throw new NSEBrowserDragSnapshotError("The native drag MIME list must be a dense data array.");
+    throw new BrowserDragSnapshotError("The native drag MIME list must be a dense data array.");
   }
   const result: string[] = [];
   for (let index = 0; index < length.value; index += 1) {
     const descriptor = descriptors[String(index)];
     if (!descriptor || !("value" in descriptor) || descriptor.get || descriptor.set || !descriptor.enumerable || typeof descriptor.value !== "string") {
-      throw new NSEBrowserDragSnapshotError("The native drag MIME list must be a dense data array.");
+      throw new BrowserDragSnapshotError("The native drag MIME list must be a dense data array.");
     }
     result.push(descriptor.value);
   }
   return result;
 }
 
-function validateNativeFiles(files: NSEDataTransferReadPort["files"]): void {
+function validateNativeFiles(files: DataTransferReadPort["files"]): void {
   if (!Number.isSafeInteger(files.length) || files.length < 0 || files.length > 64) {
-    throw new NSEBrowserDragSnapshotError("The native drag file list exceeds the bounded limit.");
+    throw new BrowserDragSnapshotError("The native drag file list exceeds the bounded limit.");
   }
   if (files.length === 0) return;
-  if (typeof files.item !== "function") throw new NSEBrowserDragSnapshotError("Native drag files require bounded file metadata.");
+  if (typeof files.item !== "function") throw new BrowserDragSnapshotError("Native drag files require bounded file metadata.");
   for (let index = 0; index < files.length; index += 1) {
     const file = files.item(index);
     if (!file || typeof file.type !== "string" || file.type.length < 3 || file.type.length > 255 || !file.type.includes("/")) {
-      throw new NSEBrowserDragSnapshotError("Native drag file type metadata is invalid.");
+      throw new BrowserDragSnapshotError("Native drag file type metadata is invalid.");
     }
     if (!Number.isSafeInteger(file.size) || file.size < 0 || file.size > MAX_NATIVE_FILE_BYTES) {
-      throw new NSEBrowserDragSnapshotError("Native drag file size metadata is invalid or exceeds the bounded limit.");
+      throw new BrowserDragSnapshotError("Native drag file size metadata is invalid or exceeds the bounded limit.");
     }
   }
-  throw new NSEBrowserDragSnapshotError("File drops require a document-resource lease and are not accepted by the string bridge.");
+  throw new BrowserDragSnapshotError("File drops require a document-resource lease and are not accepted by the string bridge.");
 }
 
-export function snapshotNSEDataTransfer(port: NSEDataTransferReadPort): readonly PasteboardRepresentation[] {
+export function snapshotNSEDataTransfer(port: DataTransferReadPort): readonly PasteboardRepresentation[] {
   validateNativeFiles(port.files);
   const types = denseTypes(port.types);
   const values: PasteboardRepresentation[] = [];
@@ -99,12 +99,12 @@ export function snapshotNSEDataTransfer(port: NSEDataTransferReadPort): readonly
       continue;
     }
     if (!type.startsWith("application/x-syncloudos-")) {
-      throw new NSEBrowserDragSnapshotError(`Unsupported native drag MIME type ${type}.`);
+      throw new BrowserDragSnapshotError(`Unsupported native drag MIME type ${type}.`);
     }
     try {
       values.push({ type: type as `application/x-syncloudos-${string}`, value: JSON.parse(port.getData(type)) });
     } catch (cause) {
-      const error = new NSEBrowserDragSnapshotError(`Native drag data for ${type} is not valid canonical JSON.`);
+      const error = new BrowserDragSnapshotError(`Native drag data for ${type} is not valid canonical JSON.`);
       (error as Error & { cause?: unknown }).cause = cause;
       throw error;
     }
@@ -113,7 +113,7 @@ export function snapshotNSEDataTransfer(port: NSEDataTransferReadPort): readonly
 }
 
 export function writeNSEDataTransfer(
-  port: NSEDataTransferWritePort,
+  port: DataTransferWritePort,
   input: readonly PasteboardRepresentation[],
   effectAllowed: DataTransfer["effectAllowed"] = "copyMove",
 ): void {
@@ -121,7 +121,7 @@ export function writeNSEDataTransfer(
   let fallback: string | null = null;
   for (const representation of values) {
     if (representation.value instanceof Blob) {
-      throw new NSEBrowserDragSnapshotError("Native drag files require a document-resource lease.");
+      throw new BrowserDragSnapshotError("Native drag files require a document-resource lease.");
     }
     const encoded = typeof representation.value === "string" ? representation.value : JSON.stringify(representation.value);
     port.setData(representation.type, encoded);
@@ -132,10 +132,10 @@ export function writeNSEDataTransfer(
   port.effectAllowed = effectAllowed;
 }
 
-export function readNSEClipboardText(event: NSEClipboardEventPort): string {
+export function readNSEClipboardText(event: ClipboardEventPort): string {
   return event.clipboardData.getData("text/plain");
 }
 
-export function writeNSEClipboardText(event: NSEClipboardEventPort, value: string): void {
+export function writeNSEClipboardText(event: ClipboardEventPort, value: string): void {
   event.clipboardData.setData("text/plain", value);
 }

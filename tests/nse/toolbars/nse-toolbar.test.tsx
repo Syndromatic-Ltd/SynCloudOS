@@ -23,12 +23,12 @@ import React, { useMemo, useRef, useState } from "react";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEUserDefaultsController } from "../../../src/NSE/Controllers";
-import { NSEOverlayProvider, type NSEWindowSurfaceDismissResult, type NSEWindowSurfaceRequest } from "../../../src/NSE/Overlays";
-import { allocateNSEToolbarItems } from "../../../src/NSE/Toolbars/toolbarLayout";
-import { NSEToolbarView as NSEToolbar } from "../../../src/NSE/Toolbars/NSEToolbarView";
-import { NSEToolbarConfigurationSheet } from "../../../src/NSE/Toolbars/NSEToolbarConfigurationSheet";
+import { OverlayProvider, type WindowSurfaceDismissResult, type WindowSurfaceRequest } from "../../../src/NSE/Overlays";
+import { allocateToolbarItems } from "../../../src/NSE/Toolbars/toolbarLayout";
+import { ToolbarView as NSEToolbar } from "../../../src/NSE/Toolbars/ToolbarView";
+import { ToolbarConfigurationSheet } from "../../../src/NSE/Toolbars/ToolbarConfigurationSheet";
 import { NSEToolbarController } from "../../../src/NSE/Toolbars/NSEToolbarController";
-import type { NSEToolbarConfiguration, NSEToolbarItem, NSEToolbarPreferences, NSEToolbarRuntimePort } from "../../../src/NSE/Toolbars/toolbarTypes";
+import type { NSEToolbarConfiguration, NSEToolbarItem, ToolbarPreferences, ToolbarRuntimePort } from "../../../src/NSE/Toolbars/toolbarTypes";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
 import { declareSynCloudOSLifecycleSignal, SynCloudOSLifecycleError } from "../../../src/SynCloudOS/nseRuntimeContracts";
 import { defaultsFrom, type TestDefaultsStore } from "../../fixtures/userDefaults";
@@ -57,7 +57,7 @@ function commandPresentation(commandId: string, overrides: Partial<{
   };
 }
 
-function runtime(validateMany = vi.fn(), additions: Partial<NSEToolbarRuntimePort> = {}) {
+function runtime(validateMany = vi.fn(), additions: Partial<ToolbarRuntimePort> = {}) {
   return {
     signal: new AbortController().signal,
     commands: {
@@ -74,7 +74,7 @@ function runtime(validateMany = vi.fn(), additions: Partial<NSEToolbarRuntimePor
       })),
     },
     ...additions,
-  } satisfies NSEToolbarRuntimePort;
+  } satisfies ToolbarRuntimePort;
 }
 
 const configuration = {
@@ -132,7 +132,7 @@ function preferenceController(
     write: (key: string, value: unknown) => void values.set(key, value),
     remove: (key: string) => void values.delete(key),
   } satisfies TestDefaultsStore;
-  return new NSEUserDefaultsController<NSEToolbarPreferences>({
+  return new NSEUserDefaultsController<ToolbarPreferences>({
     namespace,
     schema: {
       version: 1,
@@ -143,8 +143,8 @@ function preferenceController(
       },
       fields: {
         itemIds: { validate: (value: unknown): value is readonly string[] => Array.isArray(value) && value.every((id) => typeof id === "string") },
-        displayMode: { validate: (value: unknown): value is NSEToolbarPreferences["displayMode"] => value === "icon-and-label" || value === "icon-only" || value === "label-only" },
-        sizeMode: { validate: (value: unknown): value is NSEToolbarPreferences["sizeMode"] => value === "regular" || value === "small" },
+        displayMode: { validate: (value: unknown): value is ToolbarPreferences["displayMode"] => value === "icon-and-label" || value === "icon-only" || value === "label-only" },
+        sizeMode: { validate: (value: unknown): value is ToolbarPreferences["sizeMode"] => value === "regular" || value === "small" },
       },
       migrations: [],
     },
@@ -153,8 +153,8 @@ function preferenceController(
 }
 
 function createController(options: Partial<{
-  readonly preferences: NSEUserDefaultsController<NSEToolbarPreferences>;
-  readonly runtime: NSEToolbarRuntimePort;
+  readonly preferences: NSEUserDefaultsController<ToolbarPreferences>;
+  readonly runtime: ToolbarRuntimePort;
 }> = {}) {
   return new NSEToolbarController({
     configuration,
@@ -187,12 +187,12 @@ function OverlayHarness({ children }: { readonly children: React.ReactNode }) {
     reportPlacementFailure: vi.fn(),
     wrapFocusScope: (_options: unknown, node: React.ReactNode) => node,
   }), []);
-  return <NSEOverlayProvider runtimePort={runtimePort}>{children}</NSEOverlayProvider>;
+  return <OverlayProvider runtimePort={runtimePort}>{children}</OverlayProvider>;
 }
 
-function hostedConfiguration(outcome: NSEWindowSurfaceDismissResult["outcome"] = "closed") {
+function hostedConfiguration(outcome: WindowSurfaceDismissResult["outcome"] = "closed") {
   const controller = createController();
-  let request: NSEWindowSurfaceRequest | undefined;
+  let request: WindowSurfaceRequest | undefined;
   let setContent!: React.Dispatch<React.SetStateAction<React.ReactNode>>;
   let dismissOutcome = outcome;
   const closeWindow = () => {
@@ -201,7 +201,7 @@ function hostedConfiguration(outcome: NSEWindowSurfaceDismissResult["outcome"] =
     setContent(null);
   };
   const bridge = {
-    present: vi.fn(async (nextRequest: NSEWindowSurfaceRequest, content: React.ReactNode) => {
+    present: vi.fn(async (nextRequest: WindowSurfaceRequest, content: React.ReactNode) => {
       request = nextRequest;
       setContent(content);
       return "window:hosted-toolbar-configuration";
@@ -219,7 +219,7 @@ function hostedConfiguration(outcome: NSEWindowSurfaceDismissResult["outcome"] =
     setContent = updateContent;
     return <OverlayHarness>
       <output aria-label="hosted configuration source">{open ? "open" : "closed"}</output>
-      <NSEToolbarConfigurationSheet id="hosted-configuration" open={open} anchor={null} parentResponderId="window:editor" parentWindowControllerId="window:editor" controller={controller} windowBridge={bridge} onOpenChange={(nextOpen, reason) => { changed(nextOpen, reason); setOpen(nextOpen); }} />
+      <ToolbarConfigurationSheet id="hosted-configuration" open={open} anchor={null} parentResponderId="window:editor" parentWindowControllerId="window:editor" controller={controller} windowBridge={bridge} onOpenChange={(nextOpen, reason) => { changed(nextOpen, reason); setOpen(nextOpen); }} />
       {content}
     </OverlayHarness>;
   }
@@ -348,7 +348,7 @@ describe("NSEToolbarController", () => {
   });
 
   it("allocates flexible space, keeps exact-width items visible, and moves only trailing actions into stable overflow", () => {
-    const layout = allocateNSEToolbarItems(items.filter((item) => item.id !== "custom"), 188, {
+    const layout = allocateToolbarItems(items.filter((item) => item.id !== "custom"), 188, {
       displayMode: "icon-and-label",
       sizeMode: "regular",
       direction: "ltr",
@@ -358,7 +358,7 @@ describe("NSEToolbarController", () => {
     expect(layout.entries.find((entry) => entry.id === "flex")).toMatchObject({ allocatedWidth: expect.any(Number) });
 
     const compactItems = items.filter((item) => item.kind === "command");
-    const exactBoundary = allocateNSEToolbarItems(compactItems, 108, {
+    const exactBoundary = allocateToolbarItems(compactItems, 108, {
       displayMode: "icon-and-label",
       sizeMode: "regular",
       direction: "ltr",
@@ -366,7 +366,7 @@ describe("NSEToolbarController", () => {
     expect(exactBoundary.visibleItemIds).toEqual(["save", "print"]);
     expect(exactBoundary.overflowItemIds).toEqual([]);
 
-    const overflow = allocateNSEToolbarItems([...compactItems, items[1]], 119, {
+    const overflow = allocateToolbarItems([...compactItems, items[1]], 119, {
       displayMode: "icon-and-label",
       sizeMode: "regular",
       direction: "rtl",
@@ -375,7 +375,7 @@ describe("NSEToolbarController", () => {
     expect(overflow.visibleItemIds).toEqual(["save"]);
     expect(overflow.overflowItemIds).toEqual(["print", "custom"]);
 
-    const structurallyClipped = allocateNSEToolbarItems([items[2], items[4]], 1, {
+    const structurallyClipped = allocateToolbarItems([items[2], items[4]], 1, {
       displayMode: "icon-and-label",
       sizeMode: "regular",
       direction: "ltr",
@@ -851,7 +851,7 @@ describe("NSEToolbar presentation", () => {
   });
 
   it("parents its overflow to the nearest responder when the toolbar does not name one", async () => {
-    const { NSEActionResponderContext } = await import("../../../src/NSE/Controls/Core/useNSEControlAction");
+    const { ActionResponderContext } = await import("../../../src/NSE/Controls/Core/useNSEControlAction");
     const validateMany = vi.fn(async (requests: readonly { readonly key: string; readonly commandId: string }[]) => new Map(
       requests.map((request) => [request.key, commandPresentation(request.commandId)]),
     ));
@@ -862,9 +862,9 @@ describe("NSEToolbar presentation", () => {
     });
     render(
       <OverlayHarness>
-        <NSEActionResponderContext.Provider value="view:editor">
+        <ActionResponderContext.Provider value="view:editor">
           <NSEToolbar composition="configured" controller={controller} width={150} aria-label="Document actions" />
-        </NSEActionResponderContext.Provider>
+        </ActionResponderContext.Provider>
       </OverlayHarness>,
     );
     fireEvent.click(await screen.findByRole("button", { name: "More toolbar items" }));
@@ -933,7 +933,7 @@ describe("NSEToolbar presentation", () => {
       return (
         <OverlayHarness>
           <button ref={trigger} type="button" onClick={() => setOpen(true)}>Configure toolbar</button>
-          <NSEToolbarConfigurationSheet
+          <ToolbarConfigurationSheet
             id="configure-editor-toolbar"
             open={open}
             anchor={trigger.current}
@@ -971,7 +971,7 @@ describe("NSEToolbar presentation", () => {
       return (
         <OverlayHarness>
           <button type="button" onClick={() => setOpen(false)}>Host closes configuration</button>
-          <NSEToolbarConfigurationSheet
+          <ToolbarConfigurationSheet
             id="controlled-close-editor-toolbar"
             open={open}
             anchor={null}
@@ -1009,7 +1009,7 @@ describe("NSEToolbar presentation", () => {
       return <OverlayHarness>
         <button type="button" onClick={() => setOpen(false)}>Close canonical configuration</button>
         <output aria-label="configuration source">{open ? "open" : "closed"}</output>
-        <NSEToolbarConfigurationSheet id="refused-configuration" open={open} anchor={null} parentResponderId="window:editor" parentWindowControllerId="window:editor" controller={controller} windowBridge={bridge} onOpenChange={setOpen} />
+        <ToolbarConfigurationSheet id="refused-configuration" open={open} anchor={null} parentResponderId="window:editor" parentWindowControllerId="window:editor" controller={controller} windowBridge={bridge} onOpenChange={setOpen} />
       </OverlayHarness>;
     }
     render(<Fixture />);
@@ -1037,7 +1037,7 @@ describe("NSEToolbar presentation", () => {
       return <OverlayHarness>
         <button type="button" onClick={() => setOpen(false)}>Reject canonical configuration close</button>
         <output aria-label="rejected configuration source">{open ? "open" : "closed"}</output>
-        <NSEToolbarConfigurationSheet id="rejected-configuration" open={open} anchor={null} parentResponderId="window:editor" parentWindowControllerId="window:editor" controller={controller} windowBridge={bridge} onOpenChange={setOpen} />
+        <ToolbarConfigurationSheet id="rejected-configuration" open={open} anchor={null} parentResponderId="window:editor" parentWindowControllerId="window:editor" controller={controller} windowBridge={bridge} onOpenChange={setOpen} />
       </OverlayHarness>;
     }
     render(<Fixture />);

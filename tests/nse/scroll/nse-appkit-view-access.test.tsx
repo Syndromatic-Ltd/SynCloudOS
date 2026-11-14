@@ -25,7 +25,7 @@ import { act, fireEvent, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { NSEScrollView, type NSEScrollViewHandle } from "../../../src/NSE/Scroll/NSEScrollView";
 import { NSEImageView, type NSEImageViewHandle } from "../../../src/NSE/Controls/Images/NSEImage";
-import { NSEAnimationEnvironmentProvider } from "../../../src/NSE/Animation/NSEAnimationEnvironment";
+import { AnimationEnvironmentProvider } from "../../../src/NSE/Animation/NSEAnimationEnvironment";
 import { AFXLayer } from "../../../src/FX/AnimationFX/AFXLayer";
 
 describe("AppKit view access", () => {
@@ -37,7 +37,7 @@ describe("AppKit view access", () => {
    useLayoutEffect(()=>{seen.push(ref.current!.layer!);},[]);
    return <NSEImageView ref={ref} wantsLayer src="/art.svg" controls={false}/>;
   }
-  const view=render(<React.StrictMode><NSEAnimationEnvironmentProvider layers={{bindLayer,createRenderer:vi.fn()}}><Owner/></NSEAnimationEnvironmentProvider></React.StrictMode>);
+  const view=render(<React.StrictMode><AnimationEnvironmentProvider layers={{bindLayer,createRenderer:vi.fn()}}><Owner/></AnimationEnvironmentProvider></React.StrictMode>);
   await act(async()=>{});
   expect(seen).toHaveLength(2);
   expect(seen[1]).toBe(seen[0]);
@@ -72,10 +72,10 @@ describe("AppKit view access", () => {
  it("exposes a layer only when the image view is layer backed and releases it", async () => {
   const ref=createRef<NSEImageViewHandle>(); const bindLayer=vi.fn(()=>new AFXLayer());
   const layers={bindLayer,createRenderer:vi.fn()};
-  const view=render(<NSEAnimationEnvironmentProvider layers={layers}><NSEImageView ref={ref} src="/art.svg" controls={false}/></NSEAnimationEnvironmentProvider>);
+  const view=render(<AnimationEnvironmentProvider layers={layers}><NSEImageView ref={ref} src="/art.svg" controls={false}/></AnimationEnvironmentProvider>);
   expect(ref.current?.element).toBe(view.container.querySelector('.nse-control-image-view'));
   expect(ref.current?.layer).toBeNull(); expect(bindLayer).not.toHaveBeenCalled();
-  view.rerender(<NSEAnimationEnvironmentProvider layers={layers}><NSEImageView ref={ref} wantsLayer src="/art.svg" controls={false}/></NSEAnimationEnvironmentProvider>);
+  view.rerender(<AnimationEnvironmentProvider layers={layers}><NSEImageView ref={ref} wantsLayer src="/art.svg" controls={false}/></AnimationEnvironmentProvider>);
   const layer=ref.current!.layer;
   expect(layer).toBeInstanceOf(AFXLayer); expect(ref.current!.layer).toBe(layer);
   expect(bindLayer.mock.calls[0]?.[0]).toBe(ref.current!.element);

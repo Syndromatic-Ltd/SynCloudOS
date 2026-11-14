@@ -1,18 +1,18 @@
 import { getNSEObjectLifetime } from "./objectLifetime";
 
 export type NSETaskLifetime = "owner" | "mounted" | "visible";
-export interface NSEActivityEpoch {
+export interface ActivityEpoch {
   readonly signal: AbortSignal;
   readonly generation: number;
 }
-export interface NSEActivitySnapshot extends NSEActivityEpoch { readonly active: boolean; }
+export interface ActivitySnapshot extends ActivityEpoch { readonly active: boolean; }
 
-const views = new WeakMap<object, NSEViewActivity>();
-const ownerEpochs = new WeakMap<object, NSEActivitySnapshot>();
-const ended: NSEActivitySnapshot = Object.freeze({ signal: AbortSignal.abort(new DOMException("The lifetime is inactive.", "AbortError")), active: false, generation: 0 });
+const views = new WeakMap<object, ViewActivity>();
+const ownerEpochs = new WeakMap<object, ActivitySnapshot>();
+const ended: ActivitySnapshot = Object.freeze({ signal: AbortSignal.abort(new DOMException("The lifetime is inactive.", "AbortError")), active: false, generation: 0 });
 
 /** @internal Capture a stable current lifetime. Inactive work must not start. */
-export function getNSETaskLifetime(owner: object, lifetime: NSETaskLifetime): NSEActivitySnapshot {
+export function getNSETaskLifetime(owner: object, lifetime: NSETaskLifetime): ActivitySnapshot {
   const record = getNSEObjectLifetime(owner);
   if (!record) throw new TypeError("Task lifetimes require an NSE application, window or view controller.");
   if (lifetime === "owner") {
@@ -27,7 +27,7 @@ export function getNSETaskLifetime(owner: object, lifetime: NSETaskLifetime): NS
 }
 
 /** @internal Active epoch projection for integrations that do not admit inactive work. */
-export function getNSEActivityEpoch(owner: object, lifetime: NSETaskLifetime): NSEActivityEpoch | null {
+export function getNSEActivityEpoch(owner: object, lifetime: NSETaskLifetime): ActivityEpoch | null {
   const snapshot = getNSETaskLifetime(owner, lifetime);
   return snapshot.active ? snapshot : null;
 }
@@ -43,11 +43,11 @@ export function subscribeNSEActivity(owner: object, listener: () => void): () =>
 }
 
 /** @internal One registry entry per view, with mount replay normalized by its controller. */
-export class NSEViewActivity {
+export class ViewActivity {
   readonly #listeners = new Set<() => void>();
   readonly #authority: AbortSignal;
-  #mounted: NSEActivitySnapshot = ended;
-  #visible: NSEActivitySnapshot = ended;
+  #mounted: ActivitySnapshot = ended;
+  #visible: ActivitySnapshot = ended;
   #mountAbort: AbortController | null = null;
   #visibleAbort: AbortController | null = null;
   #generation = 0;
@@ -60,7 +60,7 @@ export class NSEViewActivity {
     this.#authority.addEventListener("abort", () => { this.unmount(); this.#listeners.clear(); }, { once: true });
   }
 
-  snapshot(lifetime: "mounted" | "visible"): NSEActivitySnapshot { return lifetime === "mounted" ? this.#mounted : this.#visible; }
+  snapshot(lifetime: "mounted" | "visible"): ActivitySnapshot { return lifetime === "mounted" ? this.#mounted : this.#visible; }
   subscribe(listener: () => void): () => void { this.#listeners.add(listener); return () => { this.#listeners.delete(listener); }; }
 
   mount(): void {

@@ -10,7 +10,7 @@ export const nseEmptyLayoutRect: NSEScrollRect = Object.freeze({ x: 0, y: 0, wid
 export const nseEqualRects = (a: NSEScrollRect, b: NSEScrollRect) => a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height;
 
 /** @internal A guide retains its identity for its owning window's lifetime. */
-export class NSELayoutGuideStore implements NSELayoutGuide {
+export class LayoutGuideStore implements NSELayoutGuide {
   #frame: NSEScrollRect;
   readonly #observers = new Set<(frame: NSEScrollRect) => void>();
   constructor(frame: NSEScrollRect = nseEmptyLayoutRect) { this.#frame = Object.freeze({ ...frame }); }

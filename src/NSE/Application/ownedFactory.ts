@@ -1,12 +1,12 @@
 import { bindNSEOwnedResource, constructNSEOwnedResource, isNSEOwnedResource } from "../Controllers/ownership";
 import { getNSEObjectLifetime } from "./objectLifetime";
 
-export type NSEDisposable = { dispose(): void };
+export type Disposable = { dispose(): void };
 /** A thenable disposable is still asynchronous and cannot be an owned factory result. */
-export type NSESynchronousDisposable<T extends NSEDisposable> = T & { readonly then?: never };
+export type SynchronousDisposable<T extends Disposable> = T & { readonly then?: never };
 
 /** @internal Shared implementation of application/window/view own(factory). */
-export function ownNSEFactory<T extends NSEDisposable>(owner: object, factory: (signal: AbortSignal) => NSESynchronousDisposable<T>): T {
+export function ownNSEFactory<T extends Disposable>(owner: object, factory: (signal: AbortSignal) => SynchronousDisposable<T>): T {
   const lifetime = getNSEObjectLifetime(owner);
   if (!lifetime) throw new TypeError("Owned construction requires an NSE application, window or view controller.");
   const assertLive = () => {

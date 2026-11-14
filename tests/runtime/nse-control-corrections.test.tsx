@@ -25,17 +25,17 @@ installNSEScrollIntoViewFixture();
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { NSEMenuView } from "../../src/NSE/Menus/NSEMenuView";
+import { MenuView } from "../../src/NSE/Menus/MenuView";
 import {
   NSEImageView,
 } from "../../src/NSE/public/controls";
-import { NSEToolbarView as NSEToolbar } from "../../src/NSE/Toolbars/NSEToolbarView";
-import { NSEStandaloneControlHost } from "../../src/NSE/Overlays";
+import { ToolbarView as NSEToolbar } from "../../src/NSE/Toolbars/ToolbarView";
+import { StandaloneControlHost } from "../../src/NSE/Overlays";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 
 const presentation = createStaticPresentationPort({ width: 1024, height: 768 });
 function Host({ children }: React.PropsWithChildren) {
-  return <NSEStandaloneControlHost document={document} window={window} presentation={presentation}>{children}</NSEStandaloneControlHost>;
+  return <StandaloneControlHost document={document} window={window} presentation={presentation}>{children}</StandaloneControlHost>;
 }
 
 afterEach(() => {
@@ -45,7 +45,7 @@ afterEach(() => {
 describe("NSEMenu sub-item disclosure", () => {
   it("renders a semantic submenu indicator without literal chevron text", async () => {
     render(
-      <Host><NSEMenuView
+      <Host><MenuView
         label="File"
         defaultOpen
         items={[{ value: "recent", label: "Open recent", children: [{ value: "a", label: "A.txt" }] }]}

@@ -18,29 +18,29 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { NSESmoothSurface } from "./NSESmoothSurface";
-export { useNSESmoothSurface } from "./useNSESmoothSurface";
-export type { NSESmoothSurfaceGeometry } from "./useNSESmoothSurface";
+export { SmoothSurface } from "./SmoothSurfaceView";
+export { useSmoothSurface } from "./useSmoothSurface";
+export type { SmoothSurfaceGeometry } from "./useSmoothSurface";
 export {
-  generateNSESmoothSurfaceClipPath,
-  generateNSESmoothSurfacePath,
-  getNSESmoothSurfaceRadiusNumber,
-  resolveNSESmoothSurfaceCorners
+  generateSmoothSurfaceClipPath,
+  generateSmoothSurfacePath,
+  getSmoothSurfaceRadiusNumber,
+  resolveSmoothSurfaceCorners
 } from "./smoothSurfacePath";
 export {
-  NSESmoothSurfaceAPI,
-  getNSESmoothSurfaceClassName,
-  getNSESmoothSurfacePhysicalityShadow,
-  getNSESmoothSurfaceProps,
-  getNSESmoothSurfaceRadiusValue,
-  getNSESmoothSurfaceStyle,
-  getOptionalNSESmoothSurfaceProps,
-  normaliseNSESmoothSurfaceOptions,
-  normaliseNSESmoothSurfaceRequest,
+  SmoothSurfaceAPI,
+  getSmoothSurfaceClassName,
+  getSmoothSurfacePhysicalityShadow,
+  getSmoothSurfaceProps,
+  getSmoothSurfaceRadiusValue,
+  getSmoothSurfaceStyle,
+  getOptionalSmoothSurfaceProps,
+  normaliseSmoothSurfaceOptions,
+  normaliseSmoothSurfaceRequest,
   nseAppSmoothSurfaceDefaultOptions,
   nseSmoothSurfaceClassNames,
   nseSmoothSurfaceDefaultOptions,
-  resolveNSESmoothSurface
+  resolveSmoothSurface
 } from "./smoothSurface";
 export {
   nseSmoothSurfaceDefaultPhysicality,
@@ -53,32 +53,32 @@ export {
   nseSmoothSurfaceTokens
 } from "./smoothSurfaceTokens";
 export type {
-  NSESmoothSurfaceBorderConfig,
-  NSESmoothSurfaceBorderStyle,
-  NSESmoothSurfaceComponentProps,
-  NSESmoothSurfaceCorner,
-  NSESmoothSurfaceCornerConfig,
-  NSESmoothSurfaceCurve,
-  NSESmoothSurfaceEffectsConfig,
-  NSESmoothSurfaceFocus,
-  NSESmoothSurfaceOptions,
-  NSESmoothSurfaceOverflow,
-  NSESmoothSurfacePerCornerConfig,
-  NSESmoothSurfacePerformance,
-  NSESmoothSurfacePhysicality,
-  NSESmoothSurfacePhysicalityConfig,
-  NSESmoothSurfacePhysicalityStop,
-  NSESmoothSurfaceProps,
-  NSESmoothSurfaceRadius,
-  NSESmoothSurfaceRequest,
-  NSESmoothSurfaceResolution,
-  NSESmoothSurfaceResolvedCorner,
-  NSESmoothSurfaceResolvedCorners,
-  NSESmoothSurfaceResolvedOptions,
-  NSESmoothSurfaceScroll,
-  NSESmoothSurfaceShadow,
-  NSESmoothSurfaceShadowConfig,
-  NSESmoothSurfaceStyle,
-  NSESmoothSurfaceStyleValue,
-  NSEOptionalSmoothSurfaceProps
+  SmoothSurfaceBorderConfig,
+  SmoothSurfaceBorderStyle,
+  SmoothSurfaceComponentProps,
+  SmoothSurfaceCorner,
+  SmoothSurfaceCornerConfig,
+  SmoothSurfaceCurve,
+  SmoothSurfaceEffectsConfig,
+  SmoothSurfaceFocus,
+  SmoothSurfaceOptions,
+  SmoothSurfaceOverflow,
+  SmoothSurfacePerCornerConfig,
+  SmoothSurfacePerformance,
+  SmoothSurfacePhysicality,
+  SmoothSurfacePhysicalityConfig,
+  SmoothSurfacePhysicalityStop,
+  SmoothSurfaceProps,
+  SmoothSurfaceRadius,
+  SmoothSurfaceRequest,
+  SmoothSurfaceResolution,
+  SmoothSurfaceResolvedCorner,
+  SmoothSurfaceResolvedCorners,
+  SmoothSurfaceResolvedOptions,
+  SmoothSurfaceScroll,
+  SmoothSurfaceShadow,
+  SmoothSurfaceShadowConfig,
+  SmoothSurfaceStyle,
+  SmoothSurfaceStyleValue,
+  OptionalSmoothSurfaceProps
 } from "./smoothSurfaceTypes";

@@ -23,7 +23,7 @@ import React from "react";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { AFXAnimationSettlement } from "../../src/FX/AnimationFX/animationTypes";
-import { NSEAnimationEnvironmentProvider, type NSEAnimator } from "../../src/NSE/Animation";
+import { AnimationEnvironmentProvider, type Animator } from "../../src/NSE/Animation";
 import { NSEPopUpButton } from "../../src/NSE/Menus";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
 import { createTransientWindowSurfaceBridge, WindowContentRendererRegistry } from "../../src/Webspring/WindowLayer";
@@ -95,6 +95,15 @@ describe("window-hosted transient surface bridge", () => {
     } finally { view.unmount(); bridge.dispose(); anchor.remove(); await runtime.dispose("test"); }
   });
 
+  it("holds nothing of the runtime until it presents a surface", async () => {
+    // React may discard the render that made a bridge; nothing then disposes it.
+    const runtime = createTestRuntime();
+    const listen = vi.spyOn(runtime.signal, "addEventListener");
+    try {
+      createTransientWindowSurfaceBridge({ runtime, renderers: new WindowContentRendererRegistry(), physicalHostId: "discarded", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
+      expect(listen).not.toHaveBeenCalled();
+    } finally { listen.mockRestore(); await runtime.dispose("test"); }
+  });
   it("finishes the initial focus handoff when a popover's command controls become available", async () => {
     const runtime = createTestRuntime();
     const renderers = new WindowContentRendererRegistry();
@@ -115,18 +124,18 @@ describe("window-hosted transient surface bridge", () => {
     const runtime = createTestRuntime();
     const renderers = new WindowContentRendererRegistry();
     const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "popover-reopen", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
-    const animator: NSEAnimator = { ownerAppId: "syncloudos.system", animations: {
+    const animator: Animator = { ownerAppId: "syncloudos.system", animations: {
       acquireOwner: owner => ({ ...owner, epoch: 1, release() {} }),
       animate() {
         let resolve!: (settlement: AFXAnimationSettlement) => void;
         const finished = new Promise<AFXAnimationSettlement>(done => { resolve = done; });
         return { id: "held-exit", finished, progress: 0, cancel: () => resolve({ state: "cancelled", reduced: false }), seek() {}, pause() {}, resume() {} };
       },
-    } as NSEAnimator["animations"] };
+    } as Animator["animations"] };
     const anchor = document.createElement("button"); document.body.append(anchor);
     const request = { id: "reopen", role: "popover" as const, title: "Reopened", parentWindowControllerId: null, anchor, drawsBackground: true, bounds: { x: 20, y: 20, width: 240, height: 140 } };
     await bridge.present(request, <button>First generation</button>);
-    const view = render(<SynCloudOSProvider runtime={runtime}><NSEAnimationEnvironmentProvider animator={animator}><WindowLayer contentRegistry={renderers} /></NSEAnimationEnvironmentProvider></SynCloudOSProvider>);
+    const view = render(<SynCloudOSProvider runtime={runtime}><AnimationEnvironmentProvider animator={animator}><WindowLayer contentRegistry={renderers} /></AnimationEnvironmentProvider></SynCloudOSProvider>);
     try {
       await screen.findByRole("button", { name: "First generation" });
       await act(async () => { await bridge.dismiss(request.id); });
@@ -506,7 +515,7 @@ describe("window-hosted transient surface bridge", () => {
       owner: { workspaceId: "workspace:default", applicationId: null, applicationSessionId: null },
     });
     const exits = new Map<Element, () => Promise<void>>();
-    const animator: NSEAnimator = {
+    const animator: Animator = {
       ownerAppId: "syncloudos.system",
       animations: {
         acquireOwner: (owner) => Object.freeze({ ...owner, epoch: 1, release() {} }),
@@ -518,12 +527,12 @@ describe("window-hosted transient surface bridge", () => {
           }
           return { id: "exit", finished, progress: 0, cancel: () => resolve({ state: "cancelled", reduced: false }), seek() {}, pause() {}, resume() {} };
         },
-      } as NSEAnimator["animations"],
+      } as Animator["animations"],
     };
     await bridge.present({ id: "fonts", role: "panel", title: "Font", parentWindowControllerId: null, anchor: null, bounds: { x: 40, y: 40, width: 400, height: 320 } }, <p>Font panel content</p>);
     render(
       <SynCloudOSProvider runtime={runtime}>
-        <NSEAnimationEnvironmentProvider animator={animator}><WindowLayer contentRegistry={renderers} /></NSEAnimationEnvironmentProvider>
+        <AnimationEnvironmentProvider animator={animator}><WindowLayer contentRegistry={renderers} /></AnimationEnvironmentProvider>
       </SynCloudOSProvider>,
     );
     await screen.findByText("Font panel content");

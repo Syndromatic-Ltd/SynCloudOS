@@ -25,18 +25,18 @@ import React, { useRef, useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
-  NSEVirtualViewport,
-  computeNSEVirtualRange,
-  useNSEVirtualiser,
+  VirtualViewport,
+  computeVirtualRange,
+  useVirtualiser,
 } from "../../../src/NSE/DataViews/Virtualisation";
-import { NSEVirtualSizeIndex } from "../../../src/NSE/DataViews/Virtualisation/computeVirtualRange";
+import { VirtualSizeIndex } from "../../../src/NSE/DataViews/Virtualisation/computeVirtualRange";
 
 afterEach(cleanup);
 
 function VirtualGridFixture({ rows, columns, estimate = 23 }: { rows: number; columns: number; estimate?: number | ((index: number) => number) }) {
   const [active, setActive] = useState({ row: 0, column: 0 });
   const viewportRef = useRef<HTMLDivElement>(null);
-  const virtualiser = useNSEVirtualiser({
+  const virtualiser = useVirtualiser({
     count: rows,
     axis: "block",
     overscan: 2,
@@ -48,7 +48,7 @@ function VirtualGridFixture({ rows, columns, estimate = 23 }: { rows: number; co
   });
 
   return (
-    <NSEVirtualViewport
+    <VirtualViewport
       aria-label="Virtual grid"
       role="grid"
       virtualiser={virtualiser}
@@ -81,7 +81,7 @@ function VirtualGridFixture({ rows, columns, estimate = 23 }: { rows: number; co
 
 describe("data-view virtualisation", () => {
   it("keeps the active descendant mounted outside the overscan range", () => {
-    expect(computeNSEVirtualRange({
+    expect(computeVirtualRange({
       count: 10_000,
       viewportStart: 2_000,
       viewportSize: 230,
@@ -96,7 +96,7 @@ describe("data-view virtualisation", () => {
   });
 
   it("coalesces adjacent retained and overscan ranges", () => {
-    expect(computeNSEVirtualRange({
+    expect(computeVirtualRange({
       count: 100,
       viewportStart: 230,
       viewportSize: 46,
@@ -135,7 +135,7 @@ describe("data-view virtualisation", () => {
 
   it("invalidates constant-count sizing when the semantic estimator changes", () => {
     function Fixture({ size }: { size: number }) {
-      const virtualiser = useNSEVirtualiser({ count: 100, axis: "block", overscan: 1, estimateSize: size, getKey: String, viewportSize: 100, sizingGeneration: size });
+      const virtualiser = useVirtualiser({ count: 100, axis: "block", overscan: 1, estimateSize: size, getKey: String, viewportSize: 100, sizingGeneration: size });
       return <output data-testid="total">{virtualiser.snapshot.range.totalSize}</output>;
     }
     const view = render(<Fixture size={10} />);
@@ -146,7 +146,7 @@ describe("data-view virtualisation", () => {
 
   it("preserves heterogeneous per-index estimates before any item is measured", () => {
     const estimate = vi.fn((index: number) => [10, 100, 10][index]!);
-    const range = computeNSEVirtualRange({ count: 3, viewportStart: 50, viewportSize: 10, estimateSize: estimate, overscan: 0 });
+    const range = computeVirtualRange({ count: 3, viewportStart: 50, viewportSize: 10, estimateSize: estimate, overscan: 0 });
     expect(range.totalSize).toBe(120);
     expect(range.visible).toEqual({ start: 1, length: 1 });
     expect(estimate).toHaveBeenCalledWith(1);
@@ -180,26 +180,26 @@ describe("data-view virtualisation", () => {
   it.each([
     { count: Number.NaN }, { count: Number.POSITIVE_INFINITY }, { count: -1 }, { count: Number.MAX_SAFE_INTEGER + 1 },
   ])("rejects an invalid count $count", ({ count }) => {
-    expect(() => computeNSEVirtualRange({ count, viewportStart: 0, viewportSize: 10, estimateSize: () => 1, overscan: 0 })).toThrow(/count/i);
+    expect(() => computeVirtualRange({ count, viewportStart: 0, viewportSize: 10, estimateSize: () => 1, overscan: 0 })).toThrow(/count/i);
   });
 
   it("rejects invalid viewport, overscan and item sizes", () => {
-    expect(() => computeNSEVirtualRange({ count: 1, viewportStart: Number.NaN, viewportSize: 10, estimateSize: () => 1, overscan: 0 })).toThrow(/viewport/i);
-    expect(() => computeNSEVirtualRange({ count: 1, viewportStart: 0, viewportSize: -1, estimateSize: () => 1, overscan: 0 })).toThrow(/viewport/i);
-    expect(() => computeNSEVirtualRange({ count: 1, viewportStart: 0, viewportSize: 10, estimateSize: () => Number.POSITIVE_INFINITY, overscan: 0 })).toThrow(/size/i);
-    expect(() => computeNSEVirtualRange({ count: 1, viewportStart: 0, viewportSize: 10, estimateSize: () => 1, overscan: -1 })).toThrow(/overscan/i);
+    expect(() => computeVirtualRange({ count: 1, viewportStart: Number.NaN, viewportSize: 10, estimateSize: () => 1, overscan: 0 })).toThrow(/viewport/i);
+    expect(() => computeVirtualRange({ count: 1, viewportStart: 0, viewportSize: -1, estimateSize: () => 1, overscan: 0 })).toThrow(/viewport/i);
+    expect(() => computeVirtualRange({ count: 1, viewportStart: 0, viewportSize: 10, estimateSize: () => Number.POSITIVE_INFINITY, overscan: 0 })).toThrow(/size/i);
+    expect(() => computeVirtualRange({ count: 1, viewportStart: 0, viewportSize: 10, estimateSize: () => 1, overscan: -1 })).toThrow(/overscan/i);
   });
 
   it("rejects finite inputs whose derived total geometry overflows", () => {
-    expect(() => new NSEVirtualSizeIndex(2, Number.MAX_VALUE)).toThrow(/total|geometry|overflow/i);
-    expect(() => new NSEVirtualSizeIndex(2, () => Number.MAX_VALUE)).toThrow(/total|geometry|overflow/i);
-    expect(() => computeNSEVirtualRange({ count: 2, viewportStart: 0, viewportSize: 10, estimateSize: Number.MAX_VALUE, overscan: 0 })).toThrow(/total|geometry|overflow/i);
-    expect(new NSEVirtualSizeIndex(2, (index) => index === 0 ? Number.MAX_VALUE : 1).totalSize).toBe(Number.MAX_VALUE);
+    expect(() => new VirtualSizeIndex(2, Number.MAX_VALUE)).toThrow(/total|geometry|overflow/i);
+    expect(() => new VirtualSizeIndex(2, () => Number.MAX_VALUE)).toThrow(/total|geometry|overflow/i);
+    expect(() => computeVirtualRange({ count: 2, viewportStart: 0, viewportSize: 10, estimateSize: Number.MAX_VALUE, overscan: 0 })).toThrow(/total|geometry|overflow/i);
+    expect(new VirtualSizeIndex(2, (index) => index === 0 ? Number.MAX_VALUE : 1).totalSize).toBe(Number.MAX_VALUE);
   });
 
   it("reports busy state and a stable live status", () => {
     render(
-      <NSEVirtualViewport
+      <VirtualViewport
         aria-label="Rows"
         busy
         status="Loading rows"

@@ -34,7 +34,7 @@ import type { NSEDataViewAdapter } from "../../../src/NSE/DataViews/Core";
 import {
   NSECollectionView,
   createListCollectionLayout,
-  type NSECollectionViewItemProps,
+  type CollectionViewItemProps,
 } from "../../../src/NSE/DataViews/Collection";
 import { NSEOutlineView } from "../../../src/NSE/DataViews/Outline";
 import { SynCloudOSLifecycleError } from "../../../src/SynCloudOS/ErrorManager/lifecycleError";
@@ -48,7 +48,7 @@ const accounts: readonly Account[] = [
 ];
 
 const layout = createListCollectionLayout(40);
-const renderItem = ({ item }: NSECollectionViewItemProps<Account, string>) => <span>{item.name}</span>;
+const renderItem = ({ item }: CollectionViewItemProps<Account, string>) => <span>{item.name}</span>;
 const accountId = (account: Account) => account.id;
 const accountName = (account: Account) => account.name;
 const selection = { mode: "multiple", allowsEmpty: true } as const;

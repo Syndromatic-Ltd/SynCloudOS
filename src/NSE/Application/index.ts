@@ -38,7 +38,7 @@ export type {
 export { NSEViewController } from "./NSEViewController";
 export { NSEViewControllerTransitionOptions } from "./viewControllerTransition";
 export { NSETitlebarAccessoryViewController } from "./NSETitlebarAccessoryViewController";
-export type { NSETitlebarAccessoryLayoutAttribute } from "./NSETitlebarAccessoryViewController";
+export type { TitlebarAccessoryLayoutAttribute } from "./NSETitlebarAccessoryViewController";
 export type {
   NSEControllerView,
   NSEViewComponent,

@@ -28,7 +28,7 @@ export type NSETextLayoutInvalidation =
   | { readonly kind: "graphemes"; readonly range: NSERange }
   | { readonly kind: "layout"; readonly fromCharacter: number };
 
-type NSETextLayoutService = Pick<TFXTextLayoutService, "layout" | "segment"> &
+type TextLayoutService = Pick<TFXTextLayoutService, "layout" | "segment"> &
   Partial<Pick<TFXTextLayoutService, "subscribeFontReadiness" | "fontReadinessGeneration">> & {
     subscribeAttachmentReadiness?(listener: (change: { readonly state?: "ready" | "released" }) => void): () => void;
   };
@@ -117,7 +117,7 @@ function replaceInCanonicalTextRun(
 }
 
 export class NSELayoutManager {
-  readonly #service: NSETextLayoutService;
+  readonly #service: TextLayoutService;
   readonly #unsubscribeFontReadiness: () => void;
   readonly #unsubscribeAttachmentReadiness: () => void;
   #invalidatedRange: NSERange | null = null;
@@ -136,10 +136,10 @@ export class NSELayoutManager {
   #layoutController: AbortController | null = null;
   #disposed = false;
 
-  constructor(options: { readonly service: NSETextLayoutService }) {
+  constructor(options: { readonly service: TextLayoutService }) {
     const data = normaliseTFXTextLayoutRecord(options, "Layout-manager options", ["service"]);
     if (!data.service || typeof data.service !== "object") throw new TypeError("Layout-manager service is required.");
-    this.#service = data.service as NSETextLayoutService;
+    this.#service = data.service as TextLayoutService;
     this.#unsubscribeFontReadiness = this.#service.subscribeFontReadiness?.(() => this.#invalidateForReadiness("Text font readiness changed.")) ?? (() => {});
     this.#unsubscribeAttachmentReadiness = this.#service.subscribeAttachmentReadiness?.((change) => {
       // A ready result is already awaited by the layout that requested it.

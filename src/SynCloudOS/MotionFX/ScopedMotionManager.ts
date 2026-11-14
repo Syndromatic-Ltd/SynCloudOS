@@ -69,7 +69,6 @@ export class ScopedMotionManager {
   #recorders = new Set<ScopedMotionRecorder>();
   #detach: (() => void) | null = null;
   #attaching = false;
-  #reference: MFXAttitude | null = null;
   #rawAttitude: MFXAttitude | null = null;
   #latest: MFXDeviceMotion | null = null;
   #previousTimestamp: number | null = null;
@@ -192,7 +191,6 @@ export class ScopedMotionManager {
         if (![...this.#consumers].some((item) => item.stream === "deviceMotion")) {
           this.#latest = null;
           this.#rawAttitude = null;
-          this.#reference = null;
           this.#previousTimestamp = null;
           this.#cadence = null;
         }
@@ -201,7 +199,6 @@ export class ScopedMotionManager {
           this.#detach = null;
           this.#latest = null;
           this.#rawAttitude = null;
-          this.#reference = null;
           this.#previousTimestamp = null;
           this.#cadence = null;
           this.#lastRawTimestamp = null;
@@ -266,7 +263,7 @@ export class ScopedMotionManager {
     handler: (sample: MFXDeviceMotion) => void,
   ): MFXMotionSubscription {
     this.#assertLive("startDeviceMotionUpdates");
-    if (options.referenceFrame !== "relative")
+    if (options.referenceFrame !== "xArbitraryZVertical")
       throw new Error(
         `Unsupported attitude reference frame: ${options.referenceFrame}.`,
       );
@@ -284,10 +281,7 @@ export class ScopedMotionManager {
         const attitudeDue = hasAttitude && (lastAttitude === null || raw.timestamp - lastAttitude >= this.#interval - 1e-9);
         const motionDue = hasMotion && (lastMotion === null || raw.timestamp - lastMotion >= this.#interval - 1e-9);
         if (!attitudeDue && !motionDue) return;
-        let attitude = raw.attitude;
-        if (attitude && this.#reference)
-          attitude = this.#reference.inverse().multiply(attitude);
-        attitude = attitude?.continuousWith(prior) ?? null;
+        const attitude = raw.attitude?.continuousWith(prior) ?? null;
         prior = attitude;
         const sample: MFXDeviceMotion = Object.freeze({
           timestamp: raw.timestamp,
@@ -384,11 +378,6 @@ export class ScopedMotionManager {
     this.#stop("gyroscope");
     this.#gyroData = null;
   }
-  resetReferenceFrame(): void {
-    this.#assertLive("resetReferenceFrame");
-    this.#reference = this.#rawAttitude;
-    this.#latest = null;
-  }
   createRecorder(
     options: Readonly<{
       maximumSamples?: number;
@@ -406,7 +395,7 @@ export class ScopedMotionManager {
     let subscription: MFXMotionSubscription;
     try {
       subscription = this.startDeviceMotionUpdates(
-        { referenceFrame: "relative", signal: options.signal },
+        { referenceFrame: "xArbitraryZVertical", signal: options.signal },
         (sample) => recorder.record(sample),
       );
     } catch (error) {
@@ -458,7 +447,6 @@ export class ScopedMotionManager {
     this.#detach?.();
     this.#detach = null;
     this.#latest = null;
-    this.#reference = null;
     this.#rawAttitude = null;
     this.#accelerometerData = null;
     this.#gyroData = null;

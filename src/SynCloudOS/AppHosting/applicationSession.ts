@@ -37,7 +37,7 @@ import {
   enterClassApplication,
   instantiateInOwnerScope,
   nseDisposeFor,
-  NSEOwnershipScope,
+  OwnershipScope,
 } from "../../NSE/applicationHostInterop";
 import type { SynWareOwnedWindowSnapshot, SynWareWindowPort } from "../../SynCloudOSReact";
 import type { SynCloudOSRuntime } from "../Runtime/runtimeInstanceTypes";
@@ -74,7 +74,7 @@ export interface ApplicationSessionSource {
 
 interface ConstructedApplication {
   readonly app: NSEApplication;
-  readonly scope: NSEOwnershipScope;
+  readonly scope: OwnershipScope;
   readonly leave: () => void;
 }
 
@@ -85,7 +85,7 @@ interface ControllerDocumentOwner {
 }
 
 function constructApplication(source: ApplicationSessionSource, appId: string, context: NSEApplicationContext): ConstructedApplication {
-  const scope = new NSEOwnershipScope("NSEApplication", appId);
+  const scope = new OwnershipScope("NSEApplication", appId);
   const leave = source.strictOwnership ? enterClassApplication() : () => {};
   try {
     const app = instantiateInOwnerScope(scope, () => new (currentClass(source.AppClass))(), context);
@@ -136,7 +136,7 @@ export class ApplicationSession {
   readonly app: NSEApplication;
   readonly #identity: ApplicationSessionIdentity;
   readonly #source: ApplicationSessionSource;
-  readonly #scope: NSEOwnershipScope;
+  readonly #scope: OwnershipScope;
   readonly #leaveClassApplication: () => void;
   readonly #untrackApp: () => void;
   readonly #controllers: NSEAnyWindowController[] = [];
@@ -268,7 +268,7 @@ export class ApplicationSession {
   #construct(Controller: NSEWindowControllerClass, options: NSEOpenWindowOptions = {}): NSEAnyWindowController {
     Controller = currentClass(Controller);
     validateNSEWindowControllerClass(Controller);
-    const scope = new NSEOwnershipScope("NSEWindowController", Controller.name);
+    const scope = new OwnershipScope("NSEWindowController", Controller.name);
     const context: NSEWindowControllerContext = { app: this.app, openingOptions: Object.freeze({ ...options }) };
     const controller = instantiateInOwnerScope(scope, () => {
       const result = new Controller(options);
@@ -277,7 +277,7 @@ export class ApplicationSession {
         const assigned = result.contentViewController;
         if (assigned && !(assigned instanceof Content)) throw new TypeError("The window constructor assigned a root conflicting with contentViewControllerClass.");
         if (!assigned) result.contentViewController = instantiateInOwnerScope(
-          new NSEOwnershipScope("NSEViewController", Content.name), () => new Content(result as never),
+          new OwnershipScope("NSEViewController", Content.name), () => new Content(result as never),
         );
       }
       if (this.#disposed || this.app.isDisposed) throw new DOMException("The application closed during window construction.", "InvalidStateError");

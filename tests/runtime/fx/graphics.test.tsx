@@ -37,7 +37,7 @@ import { GFXStateUnderflowError, GFXPath, GFXGradient, GFXContext } from "../../
 import { NSEShadow } from "../../../src/NSE/Graphics";
 import { NSEAppearance } from "../../../src/NSE/Appearance/NSEAppearance";
 import { NSEView } from "../../../src/NSE/Views/NSEView";
-import { NSEImageView, NSESizeableImage } from "../../../src/NSE/Controls/Images";
+import { NSEImageView, SizeableImage } from "../../../src/NSE/Controls/Images";
 import type { IFXImageGeometryPort, IFXImageStringSourcePort } from "../../../src/FX/ImageFX/IFXImageViewport";
 import type { RuntimeImageAdapter, RuntimeImageAdapterFactory } from "../../../src/SynCloudOS/Images";
 import { createTestRuntime, createTestRuntimeEnvironment } from "../helpers";
@@ -519,7 +519,7 @@ describe("closed NSE graphics", () => {
       release() {},
     };
     try {
-      const { container } = render(<NSESizeableImage src={resource} />);
+      const { container } = render(<SizeableImage src={resource} />);
       const image = container.querySelector(".nse-control-sizeable-image-media") as HTMLImageElement | null;
       expect(image?.getAttribute("src")).toBe("blob:resource-lease");
       expect(image?.style.width).toBe("80px");
@@ -559,7 +559,7 @@ describe("closed NSE graphics", () => {
       release() {},
     };
     try {
-      const view = render(<NSESizeableImage src={resource} geometry={geometry} />);
+      const view = render(<SizeableImage src={resource} geometry={geometry} />);
       expect(geometry.measure).toHaveBeenCalled();
       expect(geometry.observe).toHaveBeenCalled();
       view.unmount();
@@ -589,7 +589,7 @@ describe("closed NSE graphics", () => {
     // @ts-expect-error — geometry must be provided by the injected authority
     delete (globalThis as { ResizeObserver?: unknown }).ResizeObserver;
     try {
-      const view = render(<NSESizeableImage src="/string-source.png" imageSource={sourcePort} />);
+      const view = render(<SizeableImage src="/string-source.png" imageSource={sourcePort} />);
       await act(async () => undefined);
       expect(sourcePort.load).toHaveBeenCalledWith("/string-source.png", expect.any(AbortSignal));
       expect(geometry.measure).toHaveBeenCalled();

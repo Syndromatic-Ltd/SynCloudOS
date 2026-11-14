@@ -20,23 +20,23 @@
 
 import { describe, expect, it } from "vitest";
 import {
-  getNSEPageTearDragProgress,
-  getNSEPageTearLine,
-  getNSEPageTearMargin,
-  isNSEPageTearGrab,
+  getPageTearDragProgress,
+  getPageTearLine,
+  getPageTearMargin,
+  isPageTearGrab,
   NSE_PAGE_TEAR_FREE_AT,
-  projectNSEPageCurlPoint,
-  resolveNSEPageGeometry
-} from "../../src/NSE/Page/nsePageGeometry";
-import { getNSEPagePreset } from "../../src/NSE/Page/nsePagePresets";
-import type { NSEPageCorner, NSEPageEdge, NSEPagePoint } from "../../src/NSE/Page/nsePageTypes";
+  projectPageCurlPoint,
+  resolvePageGeometry
+} from "../../src/NSE/Page/pageGeometry";
+import { getPagePreset } from "../../src/NSE/Page/pagePresets";
+import type { PageCorner, PageEdge, PagePoint } from "../../src/NSE/Page/pageTypes";
 
-const preset = getNSEPagePreset("tearAway");
+const preset = getPagePreset("tearAway");
 const size = { width: 400, height: 600 };
 const SEED = 7;
 
 /** Every binding, torn from either far corner, and from either end of the binding itself. */
-const cases: ReadonlyArray<{ binding: NSEPageEdge; corner: NSEPageCorner }> = [
+const cases: ReadonlyArray<{ binding: PageEdge; corner: PageCorner }> = [
   { binding: "top", corner: "bottom-right" },
   { binding: "top", corner: "bottom-left" },
   { binding: "bottom", corner: "top-right" },
@@ -55,8 +55,8 @@ const cases: ReadonlyArray<{ binding: NSEPageEdge; corner: NSEPageCorner }> = [
   { binding: "right", corner: "bottom-right" }
 ];
 
-function tear(binding: NSEPageEdge, corner: NSEPageCorner, progress: number, pointer?: NSEPagePoint) {
-  return resolveNSEPageGeometry({
+function tear(binding: PageEdge, corner: PageCorner, progress: number, pointer?: PagePoint) {
+  return resolvePageGeometry({
     progress,
     mode: "tear",
     edge: binding,
@@ -72,27 +72,27 @@ function tear(binding: NSEPageEdge, corner: NSEPageCorner, progress: number, poi
 }
 
 /** Page px along the binding from its start (left or top), and in from it. */
-function local(binding: NSEPageEdge, point: NSEPagePoint) {
+function local(binding: PageEdge, point: PagePoint) {
   if (binding === "top") return { s: point.x, n: point.y };
   if (binding === "bottom") return { s: point.x, n: size.height - point.y };
   if (binding === "left") return { s: point.y, n: point.x };
   return { s: point.y, n: size.width - point.x };
 }
 
-function page(binding: NSEPageEdge, s: number, n: number): NSEPagePoint {
+function page(binding: PageEdge, s: number, n: number): PagePoint {
   if (binding === "top") return { x: s, y: n };
   if (binding === "bottom") return { x: s, y: size.height - n };
   if (binding === "left") return { x: n, y: s };
   return { x: size.width - n, y: s };
 }
 
-const bindingLength = (binding: NSEPageEdge) => binding === "top" || binding === "bottom" ? size.width : size.height;
+const bindingLength = (binding: PageEdge) => binding === "top" || binding === "bottom" ? size.width : size.height;
 
 /** Fingers pulling from the torn corner along and across the page, and beyond it. */
-function fingers(binding: NSEPageEdge, corner: NSEPageCorner) {
+function fingers(binding: PageEdge, corner: PageCorner) {
   const length = bindingLength(binding);
   const nearStart = local(binding, { x: corner.endsWith("left") ? 0 : size.width, y: corner.startsWith("top") ? 0 : size.height }).s < length / 2;
-  const points: NSEPagePoint[] = [];
+  const points: PagePoint[] = [];
   for (let along = 0; along <= length * 1.6; along += 25) {
     for (let down = -60; down <= 500; down += 40) {
       points.push(page(binding, nearStart ? along : length - along, down));
@@ -104,13 +104,13 @@ function fingers(binding: NSEPageEdge, corner: NSEPageCorner) {
 describe("NSEPage tear", () => {
   it("draws the same ragged line every time, within its roughness", () => {
     for (let s = 0; s < 600; s += 0.7) {
-      const line = getNSEPageTearLine(s, 10, 3.4, SEED);
-      expect(line).toBe(getNSEPageTearLine(s, 10, 3.4, SEED));
+      const line = getPageTearLine(s, 10, 3.4, SEED);
+      expect(line).toBe(getPageTearLine(s, 10, 3.4, SEED));
       expect(line).toBeGreaterThanOrEqual(10 - 3.4);
       expect(line).toBeLessThanOrEqual(10 + 3.4);
     }
     // Ragged, not a straight cut.
-    const samples = Array.from({ length: 60 }, (_, index) => getNSEPageTearLine(index * 10, 10, 3.4, SEED));
+    const samples = Array.from({ length: 60 }, (_, index) => getPageTearLine(index * 10, 10, 3.4, SEED));
     expect(Math.max(...samples) - Math.min(...samples)).toBeGreaterThan(2);
   });
 
@@ -156,9 +156,9 @@ describe("NSEPage tear", () => {
         // drawn flat in its own right.)
         for (let s = 0; s <= length; s += 2) {
           if (s >= pose.tornFrom - 0.5 && s <= pose.tornTo + 0.5) continue;
-          const line = getNSEPageTearLine(s, pose.depth, pose.roughness, pose.seed);
+          const line = getPageTearLine(s, pose.depth, pose.roughness, pose.seed);
           for (const n of [line, line + 0.5, pose.depth + pose.roughness]) {
-            const projected = projectNSEPageCurlPoint(page(binding, s, n), curlCylinder);
+            const projected = projectPageCurlPoint(page(binding, s, n), curlCylinder);
             expect(projected.z, `${binding} ${corner} s=${s} n=${n}`).toBe(0);
           }
         }
@@ -178,9 +178,9 @@ describe("NSEPage tear", () => {
         const step = 10;
         for (let x = 0; x < size.width; x += step) {
           for (let y = 0; y < size.height; y += step) {
-            const a = projectNSEPageCurlPoint({ x, y }, curlCylinder);
+            const a = projectPageCurlPoint({ x, y }, curlCylinder);
             for (const [dx, dy] of [[step, 0], [0, step]]) {
-              const b = projectNSEPageCurlPoint({ x: x + dx, y: y + dy }, curlCylinder);
+              const b = projectPageCurlPoint({ x: x + dx, y: y + dy }, curlCylinder);
               const stretch = Math.abs(Math.hypot(b.x - a.x, b.y - a.y, b.z - a.z) - step) / step;
               worst = Math.max(worst, stretch);
             }
@@ -201,7 +201,7 @@ describe("NSEPage tear", () => {
       const opposite = { x: size.width - held.x, y: size.height - held.y };
       for (let share = 0.05; share <= 0.6; share += 0.05) {
         const finger = { x: held.x + (opposite.x - held.x) * share, y: held.y + (opposite.y - held.y) * share };
-        const progress = getNSEPageTearDragProgress(finger, corner, size, binding, preset.motion);
+        const progress = getPageTearDragProgress(finger, corner, size, binding, preset.motion);
         const geometry = tear(binding, corner, progress, finger);
         const offset = Math.hypot(geometry.curledCorner.x - finger.x, geometry.curledCorner.y - finger.y);
         expect(offset, `${binding} ${corner} ${share.toFixed(2)}`).toBeLessThan(0.15 * Math.hypot(size.width, size.height) * share + 1);
@@ -225,26 +225,26 @@ describe("NSEPage tear", () => {
     for (const { binding, corner } of cases) {
       const held = { x: corner.endsWith("left") ? 0 : size.width, y: corner.startsWith("top") ? 0 : size.height };
       const beyond = { x: size.width / 2 + (size.width / 2 - held.x) * 6, y: size.height / 2 + (size.height / 2 - held.y) * 6 };
-      expect(getNSEPageTearDragProgress(beyond, corner, size, binding, preset.motion), `${binding} ${corner}`).toBeCloseTo(NSE_PAGE_TEAR_FREE_AT);
-      expect(getNSEPageTearDragProgress(held, corner, size, binding, preset.motion)).toBeLessThan(0.02);
+      expect(getPageTearDragProgress(beyond, corner, size, binding, preset.motion), `${binding} ${corner}`).toBeCloseTo(NSE_PAGE_TEAR_FREE_AT);
+      expect(getPageTearDragProgress(held, corner, size, binding, preset.motion)).toBeLessThan(0.02);
     }
   });
 
   it("takes hold only near the corner the sheet tears from", () => {
     const reach = preset.interaction.edgeActivationSize;
-    expect(isNSEPageTearGrab({ x: 390, y: 590 }, "bottom-right", size, "top", reach)).toBe(true);
-    expect(isNSEPageTearGrab({ x: 260, y: 585 }, "bottom-right", size, "top", reach)).toBe(true);
-    expect(isNSEPageTearGrab({ x: 385, y: 400 }, "bottom-right", size, "top", reach)).toBe(true);
-    expect(isNSEPageTearGrab({ x: 20, y: 590 }, "bottom-right", size, "top", reach)).toBe(false);
-    expect(isNSEPageTearGrab({ x: 200, y: 300 }, "bottom-right", size, "top", reach)).toBe(false);
-    expect(isNSEPageTearGrab({ x: 390, y: 20 }, "bottom-right", size, "top", reach)).toBe(false);
-    expect(isNSEPageTearGrab({ x: 10, y: 590 }, "bottom-left", size, "top", reach)).toBe(true);
+    expect(isPageTearGrab({ x: 390, y: 590 }, "bottom-right", size, "top", reach)).toBe(true);
+    expect(isPageTearGrab({ x: 260, y: 585 }, "bottom-right", size, "top", reach)).toBe(true);
+    expect(isPageTearGrab({ x: 385, y: 400 }, "bottom-right", size, "top", reach)).toBe(true);
+    expect(isPageTearGrab({ x: 20, y: 590 }, "bottom-right", size, "top", reach)).toBe(false);
+    expect(isPageTearGrab({ x: 200, y: 300 }, "bottom-right", size, "top", reach)).toBe(false);
+    expect(isPageTearGrab({ x: 390, y: 20 }, "bottom-right", size, "top", reach)).toBe(false);
+    expect(isPageTearGrab({ x: 10, y: 590 }, "bottom-left", size, "top", reach)).toBe(true);
   });
 
   it("carries the free sheet off the page and out of sight inside its canvas", () => {
     const focal = Math.max(preset.motion.perspective, Math.max(size.width, size.height) * 2.6);
     for (const { binding, corner } of cases) {
-      const margin = getNSEPageTearMargin(binding, corner, size);
+      const margin = getPageTearMargin(binding, corner, size);
       let seenFading = false;
       for (let progress = NSE_PAGE_TEAR_FREE_AT; progress <= 1.0001; progress += 0.01) {
         const geometry = tear(binding, corner, Math.min(1, progress));
@@ -255,7 +255,7 @@ describe("NSEPage tear", () => {
         let overPage = 0, samples = 0;
         for (let x = 0; x <= size.width; x += 20) {
           for (let y = 0; y <= size.height; y += 20) {
-            const curled = projectNSEPageCurlPoint({ x, y }, geometry.curlCylinder!);
+            const curled = projectPageCurlPoint({ x, y }, geometry.curlCylinder!);
             const rx = curled.x - flight.pivotX, ry = curled.y - flight.pivotY;
             const carried = {
               x: flight.pivotX + cos * rx - sin * ry + flight.x,
@@ -285,7 +285,7 @@ describe("NSEPage tear", () => {
   }, 60_000);
 
   it("leaves only the stub once torn", () => {
-    const geometry = resolveNSEPageGeometry({
+    const geometry = resolvePageGeometry({
       progress: 0.3, torn: true, mode: "tear", edge: "top", corner: "top-right", direction: "forward",
       phase: "torn", motion: preset.motion, material: preset.material, size, tearSeed: SEED
     });
@@ -313,7 +313,7 @@ describe("NSEPage tear", () => {
   });
 
   it("crossfades instead when motion is reduced", () => {
-    const geometry = resolveNSEPageGeometry({
+    const geometry = resolvePageGeometry({
       progress: 0.5, mode: "tear", edge: "top", direction: "forward", motion: preset.motion,
       material: preset.material, size, reducedMotion: true
     });

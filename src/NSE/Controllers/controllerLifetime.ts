@@ -8,7 +8,7 @@ import { SynCloudOSLifecycleRecord, synCloudOSLifecycleSignalReason, type SynClo
 import { resolveOwnership, type NSEControllerOwnershipOptions } from "./ownership";
 
 /** Ownership for presentation controllers that do not hold an NSEController model. */
-export class NSEControllerLifetime {
+export class ControllerLifetime {
   readonly record: SynCloudOSLifecycleRecord;
   readonly #signal: AbortSignal | undefined;
   #release: (() => void) | undefined;
@@ -25,7 +25,7 @@ export class NSEControllerLifetime {
   /** Attach only once construction has acquired every resource disposal releases. */
   bind(dispose: (reason: SynCloudOSLifecycleDisposalReason) => void): void {
     if (this.#disposed) return;
-    if (!this.#signal) return;
+    if (!this.#signal || this.#release) return;
     const signal = this.#signal;
     const abort = () => {
       const reason = synCloudOSLifecycleSignalReason(signal);
@@ -44,9 +44,13 @@ export class NSEControllerLifetime {
     if (this.#disposed) return false;
     this.#disposed = true;
     this.record.markDisposed("explicit");
+    this.unbind();
+    return true;
+  }
+
+  unbind(): void {
     this.#release?.();
     this.#release = undefined;
-    return true;
   }
 
   assertLive(operation: string): void {

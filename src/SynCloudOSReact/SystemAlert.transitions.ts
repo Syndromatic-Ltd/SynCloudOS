@@ -18,13 +18,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEAnimationDefaults, type NSEPresentationSpec } from "../NSE/Animation";
+import { AnimationDefaults, type PresentationSpec } from "../NSE/Animation";
 
-const { emphasized } = NSEAnimationDefaults.easing;
+const { emphasized } = AnimationDefaults.easing;
 
-const details = (from: { y: number; scale: number }, to: { y: number; scale: number }, opacity: [number, number]): NSEPresentationSpec =>
+const details = (from: { y: number; scale: number }, to: { y: number; scale: number }, opacity: [number, number]): PresentationSpec =>
   Object.freeze({
-    duration: NSEAnimationDefaults.durationSeconds.standard,
+    duration: AnimationDefaults.durationSeconds.standard,
     timing: emphasized,
     tracks: Object.freeze([
       Object.freeze({ keyPath: "opacity" as const, values: Object.freeze(opacity) }),
@@ -32,7 +32,7 @@ const details = (from: { y: number; scale: number }, to: { y: number; scale: num
     ]),
   });
 
-const reducedFade = (from: number, to: number): NSEPresentationSpec => Object.freeze({
+const reducedFade = (from: number, to: number): PresentationSpec => Object.freeze({
   duration: 0.08,
   timing: "ease-in-out",
   tracks: Object.freeze([Object.freeze({ keyPath: "opacity" as const, values: Object.freeze([from, to]) })]),
@@ -45,6 +45,6 @@ const standard = Object.freeze({
 
 const reduced = Object.freeze({ enter: reducedFade(0, 1), exit: reducedFade(1, 0) });
 
-export function resolveSystemAlertDetailsMotion(reducedMotion: boolean): { readonly enter: NSEPresentationSpec; readonly exit: NSEPresentationSpec } {
+export function resolveSystemAlertDetailsMotion(reducedMotion: boolean): { readonly enter: PresentationSpec; readonly exit: PresentationSpec } {
   return reducedMotion ? reduced : standard;
 }

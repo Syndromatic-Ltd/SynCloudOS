@@ -525,6 +525,49 @@ describe("Routing II React outlets", () => {
     window.history.replaceState({}, "", priorHref);
   });
 
+  it("leaves no authority subscription behind when React discards a render of the mount", async () => {
+    const runtime = createTestRuntime({ id: "runtime:routing-ii-discarded-render" });
+    const priorHref = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    const graph = defineSynWareRoutes({ id: "routing.mounted.discarded", routes: [{
+      name: "com.example.music",
+      path: "",
+      component: () => <div data-testid="discarded-render-route">Mounted route</div>,
+    }] });
+    const definition = createSynWare({
+      manifest: { schemaVersion: 1, bundleIdentifier: "com.example.music", version: "1.0.0", displayName: "Music",
+        routes: [{ path: "/music", match: "prefix", primary: true }] },
+      root: () => <RouteOutlet />,
+      routes: graph,
+    });
+    const app = registerTestSynWare(runtime, definition);
+    window.history.replaceState({}, "", "/music");
+    runtime.store.mutate(draft => { draft.loginServices.isAuthorised = true; });
+    await expect(runtime.routes.openRoute("/music").result).resolves.toMatchObject({ status: "completed", committed: true });
+    // Count this mount's identity subscriptions that are still held.
+    let held = 0; let made = 0;
+    const subscribe = runtime.identity.session.subscribe.bind(runtime.identity.session);
+    vi.spyOn(runtime.identity.session, "subscribe").mockImplementation((listener) => {
+      const release = subscribe(listener);
+      let released = false; held += 1; made += 1;
+      return () => { if (!released) { released = true; held -= 1; } release(); };
+    });
+    const before = held;
+    // StrictMode renders twice and keeps one: the other render's session is never cleaned up.
+    const view = render(
+      <StrictMode>
+        <HostSiteBrandingProvider value={{ name: "Routing test host", logoAlt: "", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null }}>
+          <SynWareRuntimeMount runtime={runtime} app={app} responderId="application:com.example.music"><RouteOutlet /></SynWareRuntimeMount>
+        </HostSiteBrandingProvider>
+      </StrictMode>,
+    );
+    expect(await screen.findByTestId("discarded-render-route")).not.toBeNull();
+    expect(made).toBeGreaterThan(0);
+    view.unmount();
+    expect(held).toBe(before);
+    await runtime.dispose("routing-ii-discarded-render-complete");
+    window.history.replaceState({}, "", priorHref);
+  });
+
   it("keeps runtime settlement pending for real mounted route cleanup after unmount", async () => {
     const runtime = createTestRuntime({ id: "runtime:routing-ii-mounted-cleanup" });
     const priorHref = `${window.location.pathname}${window.location.search}${window.location.hash}`;

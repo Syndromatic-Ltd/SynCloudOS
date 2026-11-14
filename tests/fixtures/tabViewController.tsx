@@ -2,7 +2,7 @@ import React, { type ReactNode } from "react";
 import { act, render } from "@testing-library/react";
 import { NSEViewController, nseUpdateTraits } from "../../src/NSE/Application/NSEViewController";
 import { NSETabViewController, NSETabViewItem, type NSETabViewControllerTabStyle } from "../../src/NSE/Navigation/NSETabViewController";
-import { NSEViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
+import { ViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
 import type { SynCloudOSPresentationTraits } from "../../src/SynCloudOS/SynCloudOS";
 
 export class TestContentViewController extends NSEViewController {
@@ -31,7 +31,7 @@ export function updateTraits(controller: NSEViewController<unknown>, traits: Syn
 }
 
 export function renderTabController(controller: NSETabViewController, traits: SynCloudOSPresentationTraits) {
-  const view = render(<NSEViewControllerView controller={controller} />);
+  const view = render(<ViewControllerView controller={controller} />);
   updateTraits(controller, traits);
   return view;
 }

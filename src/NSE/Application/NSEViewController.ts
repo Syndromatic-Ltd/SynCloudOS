@@ -31,16 +31,16 @@ import {
   instantiateInOwnerScope,
   hasNSEConstructionOwner,
   nseDisposeFor,
-  NSEOwnershipScope,
+  OwnershipScope,
   type NSEControllerOwnershipOptions,
-  type NSEOwnedObject,
+  type OwnedObject,
   type NSEOwner,
 } from "../Controllers/ownership";
 import { NSEObject } from "../Objects/NSEObject";
-import { NSEObjectLifetime } from "./objectLifetime";
-import { ownNSEFactory, type NSEDisposable, type NSESynchronousDisposable } from "./ownedFactory";
-import { NSEViewActivity } from "./viewActivity";
-import { NSEChildViewControllerView } from "./viewControllerRenderer";
+import { ObjectLifetime } from "./objectLifetime";
+import { ownNSEFactory, type Disposable, type SynchronousDisposable } from "./ownedFactory";
+import { ViewActivity } from "./viewActivity";
+import { ChildViewControllerView } from "./viewControllerRenderer";
 import { bindNSEViewOutlets } from "./viewOutlet";
 import { finalizeNSEAuthoringOwner } from "./authoringLifecycle";
 import { getNSEAuthoringContext } from "./authoringContext";
@@ -50,7 +50,7 @@ import type { NSEWindow } from "./NSEWindowController";
 import { NSEAnimationContext } from "../Animation/NSEAnimationContext";
 import { flushSync } from "react-dom";
 import { startBrowserViewTransition } from "../../SynCloudOS/nseRuntimeContracts";
-import { nseChildTransition, nseReleaseChildViewSlot, NSEViewControllerTransitionOptions, type NSEChildTransition } from "./viewControllerTransition";
+import { nseChildTransition, nseReleaseChildViewSlot, NSEViewControllerTransitionOptions, type ChildTransition } from "./viewControllerTransition";
 import { createNSEViewAnimator, type NSEViewAnimator } from "../Animation/NSEViewAnimator";
 import { captureAFXTransactionAnimationStart } from "../../FX/AnimationFX/AFXTransaction";
 
@@ -81,7 +81,7 @@ export const nsePopoverPositioning: unique symbol = Symbol("nse.popoverPositioni
 /** @internal How a presented view controller is shown: as a sheet, in a popover, or as a modal window. */
 export const nsePresentationStyle: unique symbol = Symbol("nse.presentationStyle");
 /** @internal */
-export type NSEPresentationStyle = "sheet" | "popover" | "modalWindow" | "custom";
+export type PresentationStyle = "sheet" | "popover" | "modalWindow" | "custom";
 
 /** NSViewControllerPresentationAnimator. The host mounts the presented view
  * above the presenter's retained view before invoking the animator. Returning
@@ -161,7 +161,7 @@ export const nseUpdateTraits: unique symbol = Symbol("nse.updateTraits");
 export const nseUpdateViewActivity: unique symbol = Symbol("nse.updateViewActivity");
 
 /** What the React host gives a view controller when its view mounts. */
-export interface NSEViewControllerBinding {
+export interface ViewControllerBinding {
   readonly element: HTMLElement;
   readonly traits?: NSETraitCollection;
   readonly active?: boolean;
@@ -203,7 +203,7 @@ let viewControllerSequence = 0;
  * controller fields should pass `owner: this`: the ambient scope still belongs
  * to the outer constructor, including after the nested constructor returns.
  */
-export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> implements NSEOwner, NSEOwnedObject {
+export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> implements NSEOwner, OwnedObject {
   static readonly TransitionOptions = NSEViewControllerTransitionOptions;
   /** The component that renders this controller's view. */
   static view?: NSEViewComponent;
@@ -212,23 +212,23 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
   /** Optional inline TSX. Compose function components for local React hooks. */
   renderView?(): ReactNode;
 
-  readonly #lifetime: NSEObjectLifetime;
+  readonly #lifetime: ObjectLifetime;
   readonly #children: NSEViewController<unknown>[] = [];
   readonly #view: NSEControllerView;
   #parent: NSEViewController<unknown> | null = null;
-  #windowScope: NSEOwnershipScope | null = null;
+  #windowScope: OwnershipScope | null = null;
   #window: NSEWindow | null = null;
   #presenting: NSEViewController<unknown> | null = null;
   #popover: NSEPopoverPositioning | null = null;
-  #presentationStyle: NSEPresentationStyle | null = null;
+  #presentationStyle: PresentationStyle | null = null;
   #presentationAnimator: NSEViewControllerPresentationAnimator | null = null;
   #dismissing = false;
   #animationPhase: "presentation" | "dismissal" | null = null;
   readonly #presented: NSEViewController<unknown>[] = [];
   #preferredContentSize: Readonly<{ width: number; height: number }> | null = null;
   #loaded = false;
-  #binding: NSEViewControllerBinding | null = null;
-  readonly #activity: NSEViewActivity;
+  #binding: ViewControllerBinding | null = null;
+  readonly #activity: ViewActivity;
   #active = true;
   #layer: AFXLayer | null = null;
   #appeared = false;
@@ -239,7 +239,7 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
   #safeArea: NSESafeArea = Object.freeze({ safeAreaInsets: NSEEdgeInsetsZero, safeAreaRect: nseEmptyLayoutRect });
   #additionalSafeArea = NSEEdgeInsetsZero;
   #title: string | undefined;
-  readonly #transitionSlots = new Map<string, NSEChildTransition>();
+  readonly #transitionSlots = new Map<string, ChildTransition>();
   readonly #childViewSlots = new Map<string, NSEViewController<unknown>>();
   readonly #retiredViewSlots = new Set<string>();
   #transitionHandoff: string | null = null;
@@ -248,16 +248,16 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
   constructor(options: NSEViewControllerOptions = {}) {
     super();
     this.#title = options.title;
-    this.#lifetime = new NSEObjectLifetime(
+    this.#lifetime = new ObjectLifetime(
       this,
       "NSEViewController",
       `${new.target.name || "NSEViewController"}#${++viewControllerSequence}`,
       options,
     );
-    this.#activity = new NSEViewActivity(this);
+    this.#activity = new ViewActivity(this);
     const controller = this as NSEViewController<unknown>;
     // One stable component per controller, so React keeps the child's view mounted across renders.
-    const view = ({ className }: { readonly className?: string }) => createElement(NSEChildViewControllerView, { controller, className });
+    const view = ({ className }: { readonly className?: string }) => createElement(ChildViewControllerView, { controller, className });
     Object.defineProperties(view, {
       displayName: { value: `${new.target.name || "NSEViewController"}.view` },
       isLoaded: { get: () => controller.#loaded },
@@ -343,7 +343,7 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
   }
 
   /** Constructs and owns a disposable synchronously, including after await. */
-  own<T extends NSEDisposable>(factory: (signal: AbortSignal) => NSESynchronousDisposable<T>): T {
+  own<T extends Disposable>(factory: (signal: AbortSignal) => SynchronousDisposable<T>): T {
     return ownNSEFactory(this, factory);
   }
 
@@ -394,7 +394,7 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
     this.#transitioning = true;
     this.#transitionHandoff = null;
     let native = false;
-    const transition: NSEChildTransition = Object.freeze({ get backend() { return native ? "viewTransition" as const : "afx" as const; }, from, to, options, duration: context.duration, timing: context.timingFunction, finish: () => {
+    const transition: ChildTransition = Object.freeze({ get backend() { return native ? "viewTransition" as const : "afx" as const; }, from, to, options, duration: context.duration, timing: context.timingFunction, finish: () => {
       if (this.isDisposed || this.#transitionSlots.get(slot) !== transition) return;
       this.#transitioning = false;
       const destination = this.#transitionHandoff ?? slot;
@@ -424,7 +424,7 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
   }
 
   /** @internal The host resolves replacements in their original child slot. */
-  [nseChildTransition](child: NSEViewController<unknown>, slot: string): NSEChildTransition | false | undefined {
+  [nseChildTransition](child: NSEViewController<unknown>, slot: string): ChildTransition | false | undefined {
     this.#childViewSlots.set(slot, child);
     if (this.#retiredViewSlots.has(slot)) return false;
     const existing = this.#transitionSlots.get(slot);
@@ -480,7 +480,7 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
   addChild<TChild extends NSEViewController<unknown>, TArgs extends unknown[]>(child: TChild | (new (...args: TArgs) => TChild), ...args: TArgs): TChild {
     this.#assertLive("addChild", "call");
     const instance = typeof child === "function"
-      ? instantiateInOwnerScope(new NSEOwnershipScope("NSEViewController", child.name), () => {
+      ? instantiateInOwnerScope(new OwnershipScope("NSEViewController", child.name), () => {
         const result = new child(...args);
         try { this.#assertLive("addChild", "call"); }
         catch (error) { try { result[nseDisposeFor](this.disposalReason ?? "explicit"); } finally { throw error; } }
@@ -513,6 +513,13 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
   }
 
   /**
+   * Whether this controller's view fills its sheet edge to edge and draws its own background
+   * (NSWindow.StyleMask.fullSizeContentView on the sheet's window). The sheet keeps its attachment,
+   * shadow and motion; the system panel, its margins and its title heading are not drawn. Set it before presenting.
+   */
+  sheetHasFullSizeContentView = false;
+
+  /**
    * The size the view prefers when it is presented (NSViewController.preferredContentSize): a sheet is
    * this wide, up to the window's width. `null` lets the content decide.
    */
@@ -531,7 +538,7 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
   get [nsePopoverPositioning](): NSEPopoverPositioning | null { return this.#popover; }
 
   /** @internal How this controller is presented, or `null` when it is not presented. */
-  get [nsePresentationStyle](): NSEPresentationStyle | null { return this.#presentationStyle; }
+  get [nsePresentationStyle](): PresentationStyle | null { return this.#presentationStyle; }
 
   /** The view controller presenting this one (NSViewController.presentingViewController), or `null`. */
   get presentingViewController(): NSEViewController<unknown> | null { return this.#presenting; }
@@ -621,10 +628,10 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
     return this.#present("presentAsPopover", "popover", Object.freeze({ of: positioning.of, preferredEdge: edge, behavior, drawsBackground, ...(relativeTo ? { relativeTo } : {}) }), viewController, args);
   }
 
-  #present<TSheet extends NSEViewController<unknown>, TArgs extends unknown[]>(operation: string, style: NSEPresentationStyle, popover: NSEPopoverPositioning | null, viewController: TSheet | (new (...args: TArgs) => TSheet), args: TArgs): TSheet {
+  #present<TSheet extends NSEViewController<unknown>, TArgs extends unknown[]>(operation: string, style: PresentationStyle, popover: NSEPopoverPositioning | null, viewController: TSheet | (new (...args: TArgs) => TSheet), args: TArgs): TSheet {
     this.#assertLive(operation, "call");
     const instance = typeof viewController === "function"
-      ? instantiateInOwnerScope(new NSEOwnershipScope("NSEViewController", viewController.name), () => {
+      ? instantiateInOwnerScope(new OwnershipScope("NSEViewController", viewController.name), () => {
         const result = new viewController(...args);
         try { this.#assertLive(operation, "call"); }
         catch (error) { try { result[nseDisposeFor](this.disposalReason ?? "explicit"); } finally { throw error; } }
@@ -706,7 +713,7 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
   }
 
   /** @internal Makes `scope` (a window controller's) own this root view controller. */
-  [nseAdoptViewController](scope: NSEOwnershipScope, window: NSEWindow): void {
+  [nseAdoptViewController](scope: OwnershipScope, window: NSEWindow): void {
     this.#assertLive("contentViewController", "set");
     if (this.#parent) throw new TypeError("A child view controller cannot be a window's content view controller; call removeFromParent() first.");
     if (this.#windowScope && this.#windowScope !== scope) throw new TypeError("The view controller is already another window's content view controller.");
@@ -725,7 +732,7 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
   }
 
   /** @internal Called by the React host when the view mounts. Returns the unmount function. */
-  [nseAttachView](binding: NSEViewControllerBinding): () => void {
+  [nseAttachView](binding: ViewControllerBinding): () => void {
     this.#assertLive("view", "get");
     finalizeNSEAuthoringOwner(this);
     if (this.#pendingDetach) {
@@ -754,7 +761,7 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
     };
   }
 
-  #rebind(binding: NSEViewControllerBinding): void {
+  #rebind(binding: ViewControllerBinding): void {
     if (this.#binding && this.#binding.element !== binding.element) this.#releaseLayer();
     this.#binding = binding;
     bindNSEViewOutlets(this, binding);
@@ -779,7 +786,7 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
     this.#layer = null;
   }
 
-  #requireMounted(member: string): NSEViewControllerBinding {
+  #requireMounted(member: string): ViewControllerBinding {
     if (this.#binding) return this.#binding;
     throw this.#lifetime.record.error({
       code: "NSE_VIEW_NOT_LOADED",

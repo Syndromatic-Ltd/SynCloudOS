@@ -19,7 +19,7 @@
  */
 
 import { createContext, useContext, type PropsWithChildren } from "react";
-import { generateNSESmoothSurfaceClipPath, generateNSESmoothSurfacePath, getNSESmoothSurfaceRadiusNumber } from "../NSE/SmoothSurface";
+import { generateSmoothSurfaceClipPath, generateSmoothSurfacePath, getSmoothSurfaceRadiusNumber } from "../NSE/SmoothSurface";
 import type { WebspringFolderAppearance, WebspringFolderCornerRadius, WebspringFolderSmoothSurface } from "./webspringTypes";
 
 /** Squircle corners spanning the same extent as a continuous-corner app icon's. */
@@ -72,12 +72,12 @@ export function resolveWebspringFolderTileGeometry(
     // A percentage is of the tile's shorter side; pixels and tokens are absolute.
     radius: typeof radius === "string" && radius.endsWith("%")
       ? Number.parseFloat(radius) / 100 * Math.min(width, height)
-      : getNSESmoothSurfaceRadiusNumber(radius as Exclude<WebspringFolderCornerRadius, `${number}%`>),
+      : getSmoothSurfaceRadiusNumber(radius as Exclude<WebspringFolderCornerRadius, `${number}%`>),
     curve,
     smoothing,
   };
   return {
-    path: generateNSESmoothSurfacePath(width, height, options),
-    clipPath: generateNSESmoothSurfaceClipPath(width, height, options),
+    path: generateSmoothSurfacePath(width, height, options),
+    clipPath: generateSmoothSurfaceClipPath(width, height, options),
   };
 }

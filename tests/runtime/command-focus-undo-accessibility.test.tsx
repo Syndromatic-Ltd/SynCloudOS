@@ -23,9 +23,9 @@ import React, { useState, useSyncExternalStore } from "react";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { SynCloudOSAppInfo } from "../../src/SynCloudOS/AppInfo/appInfoTypes";
-import { NSEAlertBackdrop } from "../../src/NSE/Components/NSEAlertBackdrop";
-import { NSEMenuView } from "../../src/NSE/Menus";
-import { NSEStandaloneControlHost } from "../../src/NSE/Overlays";
+import { AlertBackdrop } from "../../src/NSE/Components/NSEAlertBackdrop";
+import { MenuView } from "../../src/NSE/Menus";
+import { StandaloneControlHost } from "../../src/NSE/Overlays";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
 import { WebspringQuickSwitchView } from "../../src/Webspring/WebspringQuickSwitchView";
 import { createTestRuntime } from "./helpers";
@@ -53,8 +53,8 @@ describe("command, focus, undo, and overlay accessibility", () => {
   it("navigates a menu, skips disabled items, enters a submenu, dispatches, and restores its trigger", async () => {
     const onSelect = vi.fn();
     render(
-      <NSEStandaloneControlHost document={document} window={window} presentation={createStaticPresentationPort({ width: 1024, height: 768 })}>
-        <NSEMenuView
+      <StandaloneControlHost document={document} window={window} presentation={createStaticPresentationPort({ width: 1024, height: 768 })}>
+        <MenuView
           label="Actions"
           items={[
             { value: "disabled", label: "Disabled", disabled: true },
@@ -62,7 +62,7 @@ describe("command, focus, undo, and overlay accessibility", () => {
           ]}
           onSelect={onSelect}
         />
-      </NSEStandaloneControlHost>,
+      </StandaloneControlHost>,
     );
     const trigger = screen.getByRole("button", { name: "Actions" });
     fireEvent.click(trigger);
@@ -82,11 +82,11 @@ describe("command, focus, undo, and overlay accessibility", () => {
       const [open, setOpen] = useState(false);
       return <>
         <button onClick={() => setOpen(true)}>Open alert</button>
-        {open ? <NSEAlertBackdrop onSafeDismiss={() => setOpen(false)}>
+        {open ? <AlertBackdrop onSafeDismiss={() => setOpen(false)}>
           <div role="dialog" aria-modal="true" aria-label="Confirm action">
             <button>Cancel</button><button>Continue</button>
           </div>
-        </NSEAlertBackdrop> : null}
+        </AlertBackdrop> : null}
       </>;
     }
     render(<Harness />);

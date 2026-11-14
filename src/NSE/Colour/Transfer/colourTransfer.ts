@@ -19,7 +19,7 @@
  */
 
 import type { PasteboardRepresentation } from "../../../SynCloudOS/SynCloudOS";
-import { GFXColour } from "../../../FX/GraphicsFX/public";
+import { GFXColour } from "../../../FX/GraphicsFX/GFXColour";
 
 export function serialiseNSEColourTransfer(colour: GFXColour): readonly PasteboardRepresentation[] {
   const value = colour.toCSS();

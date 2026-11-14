@@ -27,7 +27,7 @@ import {
 import { nseListLevelOperations, nseParagraphSpansInRange } from "./textStructureCommands";
 import type { NSETextEditingSessionOptions, NSETextSelectionTarget, NSETextSessionSnapshot, NSETextSessionSettlement } from "./textSessionTypes";
 import { declareSynCloudOSLifecycleSignal, SynCloudOSLifecycleRecord, synCloudOSLifecycleSignalReason } from "../../SynCloudOS/nseRuntimeContracts";
-import { NSEControllerLifetime } from "../Controllers/controllerLifetime";
+import { ControllerLifetime } from "../Controllers/controllerLifetime";
 
 /** Per-view transient editing state. The supplied text owner is the only content authority. */
 export class TextEditingSession {
@@ -36,7 +36,7 @@ export class TextEditingSession {
   readonly #changes = new Map<number, NSETextChangeReceipt>();
   readonly #lifetime = new AbortController();
   readonly #lifecycle: SynCloudOSLifecycleRecord;
-  readonly #ownership: NSEControllerLifetime;
+  readonly #ownership: ControllerLifetime;
   readonly #ownerAbort = (event: Event): void => {
     const reason = synCloudOSLifecycleSignalReason(event.target as AbortSignal);
     this.#lifecycle.markDisposed(reason);
@@ -54,7 +54,7 @@ export class TextEditingSession {
   constructor(options: NSETextEditingSessionOptions) {
     if (!options.id.trim()) throw new TypeError("A text session requires a stable identity.");
     this.#options = options;
-    this.#ownership = new NSEControllerLifetime(options, { kind: "TextEditingSession", id: options.id });
+    this.#ownership = new ControllerLifetime(options, { kind: "TextEditingSession", id: options.id });
     this.#lifecycle = this.#ownership.record;
     const model = options.textOwner.getSnapshot();
     const selection = Object.freeze({ sessionId: options.id, ...(options.documentId ? { documentId: options.documentId } : {}), flowId: model.flowId, ownerGeneration: model.ownerGeneration, modelRevision: model.revision, selectionGeneration: 0, range: Object.freeze({ location: 0, length: 0 }), anchor: 0, focus: 0, affinity: "downstream" as const });

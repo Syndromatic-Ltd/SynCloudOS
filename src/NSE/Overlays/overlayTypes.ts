@@ -18,9 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export type NSEOverlayId = string;
+export type OverlayId = string;
 
-export type NSEOverlayKind =
+export type OverlayKind =
   | "menu"
   | "submenu"
   | "context-menu"
@@ -29,7 +29,7 @@ export type NSEOverlayKind =
   | "tooltip"
   | "action-sheet";
 
-export type NSELogicalPlacement =
+export type LogicalPlacement =
   | "block-start"
   | "block-end"
   | "inline-start"
@@ -39,7 +39,7 @@ export type NSELogicalPlacement =
   | "block-end-inline-start"
   | "block-end-inline-end";
 
-export type NSEOverlayDismissReason =
+export type OverlayDismissReason =
   | "escape"
   | "outside-pointer"
   | "focus-left"
@@ -48,35 +48,35 @@ export type NSEOverlayDismissReason =
   | "parent-dismissed"
   | "programmatic";
 
-export interface NSEOverlayRegistration {
-  readonly id: NSEOverlayId;
-  readonly kind: NSEOverlayKind;
-  readonly parentId: NSEOverlayId | null;
+export interface OverlayRegistration {
+  readonly id: OverlayId;
+  readonly kind: OverlayKind;
+  readonly parentId: OverlayId | null;
   readonly anchor: HTMLElement | null;
   readonly surface: HTMLElement;
-  readonly dismissOn: ReadonlySet<NSEOverlayDismissReason>;
+  readonly dismissOn: ReadonlySet<OverlayDismissReason>;
   readonly restoreFocus: boolean;
-  onDismiss(reason: NSEOverlayDismissReason): void;
+  onDismiss(reason: OverlayDismissReason): void;
 }
 
-export interface NSEOverlaySnapshot {
-  readonly orderedIds: readonly NSEOverlayId[];
-  readonly topmostId: NSEOverlayId | null;
-  readonly parentById: ReadonlyMap<NSEOverlayId, NSEOverlayId | null>;
+export interface OverlaySnapshot {
+  readonly orderedIds: readonly OverlayId[];
+  readonly topmostId: OverlayId | null;
+  readonly parentById: ReadonlyMap<OverlayId, OverlayId | null>;
 }
 
-export interface NSEOverlayManager {
-  readonly getSnapshot: () => NSEOverlaySnapshot;
-  getRegistration(id: NSEOverlayId): NSEOverlayRegistration | null;
+export interface OverlayManager {
+  readonly getSnapshot: () => OverlaySnapshot;
+  getRegistration(id: OverlayId): OverlayRegistration | null;
   subscribe(listener: () => void): () => void;
-  register(registration: NSEOverlayRegistration): () => void;
-  update(registration: NSEOverlayRegistration): void;
-  dismiss(id: NSEOverlayId, reason: NSEOverlayDismissReason): boolean;
-  dismissBranch(id: NSEOverlayId, reason: NSEOverlayDismissReason): readonly NSEOverlayId[];
+  register(registration: OverlayRegistration): () => void;
+  update(registration: OverlayRegistration): void;
+  dismiss(id: OverlayId, reason: OverlayDismissReason): boolean;
+  dismissBranch(id: OverlayId, reason: OverlayDismissReason): readonly OverlayId[];
   dispose(): void;
 }
 
-export interface NSEOverlayFocusScopeOptions {
+export interface OverlayFocusScopeOptions {
   readonly scopeId: string;
   readonly kind: "menu" | "popover" | "sheet";
   readonly parentScopeId?: string;
@@ -87,7 +87,7 @@ export interface NSEOverlayFocusScopeOptions {
   readonly asChild?: boolean;
 }
 
-export interface NSEOverlayRuntimePort {
+export interface OverlayRuntimePort {
   readonly runtimeId: string;
   readonly signal: AbortSignal;
   readonly environment: {
@@ -122,7 +122,7 @@ export interface NSEOverlayRuntimePort {
     receipt: Promise<void>,
     input: Readonly<{ kind: "focus-restore"; label: string }>,
   ): void;
-  reportPlacementFailure(input: { readonly overlayId: NSEOverlayId; readonly overlayKind: NSEOverlayKind }): void;
-  wrapFocusScope(options: NSEOverlayFocusScopeOptions, children: ReactNode): ReactNode;
+  reportPlacementFailure(input: { readonly overlayId: OverlayId; readonly overlayKind: OverlayKind }): void;
+  wrapFocusScope(options: OverlayFocusScopeOptions, children: ReactNode): ReactNode;
 }
 import type { ReactNode } from "react";

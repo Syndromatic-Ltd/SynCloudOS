@@ -22,10 +22,10 @@
 import React, { StrictMode, useEffect, useRef, useState } from "react";
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { NSEStandaloneControlHost, NSEPopup, NSEListboxPopup, createStandaloneNSEControlRuntime } from "../../../src/NSE/Overlays";
-import { NSEOverlayProvider, useNSEOverlayProvider, type NSEOverlayProviderContextValue } from "../../../src/NSE/Overlays/NSEOverlayProvider";
-import { NSEMenuView, NSEPopUpButton } from "../../../src/NSE/Menus";
-import { NSEFeedbackProvider } from "../../../src/NSE/Feedback";
+import { StandaloneControlHost, NSEPopup, ListboxPopup, createStandaloneNSEControlRuntime } from "../../../src/NSE/Overlays";
+import { OverlayProvider, useNSEOverlayProvider, type OverlayProviderContextValue } from "../../../src/NSE/Overlays/OverlayProvider";
+import { MenuView, NSEPopUpButton } from "../../../src/NSE/Menus";
+import { FeedbackProvider } from "../../../src/NSE/Feedback";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
 import { installNSEScrollIntoViewFixture } from "../fixtures/browser";
 
@@ -34,10 +34,10 @@ afterEach(async () => { cleanup(); await act(async () => {}); vi.restoreAllMocks
 const presentation = createStaticPresentationPort({ width: 1024, height: 768 });
 
 function Host({ children }: React.PropsWithChildren) {
-  return <NSEStandaloneControlHost document={document} window={window} presentation={presentation}>{children}</NSEStandaloneControlHost>;
+  return <StandaloneControlHost document={document} window={window} presentation={presentation}>{children}</StandaloneControlHost>;
 }
 
-function Probe({ publish }: { publish(context: NSEOverlayProviderContextValue): void }) {
+function Probe({ publish }: { publish(context: OverlayProviderContextValue): void }) {
   const context = useNSEOverlayProvider();
   useEffect(() => publish(context), [context, publish]);
   return null;
@@ -71,8 +71,8 @@ describe("standalone NSE host lifetime", () => {
   });
 
   it("keeps nested overlays and their authority across parent rerenders and Strict Mode replay", async () => {
-    let authority: NSEOverlayProviderContextValue | undefined;
-    const publish = (value: NSEOverlayProviderContextValue) => { authority = value; };
+    let authority: OverlayProviderContextValue | undefined;
+    const publish = (value: OverlayProviderContextValue) => { authority = value; };
     const fixture = (revision: number) => <StrictMode><Host>
       <output>{revision}</output><Probe publish={publish} />
       <NSEPopup id="outer" defaultOpen title="Outer"><button>Outer action</button>
@@ -96,9 +96,9 @@ describe("standalone NSE host lifetime", () => {
   });
 
   it("isolates simultaneous hosts even when their overlay ids are identical", async () => {
-    const managers: NSEOverlayProviderContextValue[] = [];
-    const first = (context: NSEOverlayProviderContextValue) => { managers[0] = context; };
-    const second = (context: NSEOverlayProviderContextValue) => { managers[1] = context; };
+    const managers: OverlayProviderContextValue[] = [];
+    const first = (context: OverlayProviderContextValue) => { managers[0] = context; };
+    const second = (context: OverlayProviderContextValue) => { managers[1] = context; };
     render(<>
       <Host><Probe publish={first} /><NSEPopup id="shared" defaultOpen><button>First host action</button></NSEPopup></Host>
       <Host><Probe publish={second} /><NSEPopup id="shared" defaultOpen><button>Second host action</button></NSEPopup></Host>
@@ -163,7 +163,7 @@ describe("standalone NSE host lifetime", () => {
 describe("standalone picker and menu keyboard contracts", () => {
   it("retains an open menu branch and focus across an unrelated parent render", async () => {
     const items = [{ value: "file", label: "File", children: [{ value: "save", label: "Save document" }] }];
-    const fixture = (revision: number) => <Host><output>{revision}</output><NSEMenuView label="Document actions" items={items} /></Host>;
+    const fixture = (revision: number) => <Host><output>{revision}</output><MenuView label="Document actions" items={items} /></Host>;
     const view = render(fixture(1));
     fireEvent.click(screen.getByRole("button", { name: "Document actions" }));
     fireEvent.click(await screen.findByRole("menuitem", { name: "File" }));
@@ -176,7 +176,7 @@ describe("standalone picker and menu keyboard contracts", () => {
   });
 
   it("draws a tool menu's text label as the trigger's title, not as an image", () => {
-    render(<Host><NSEMenuView label="Presets" trigger="tool" controlSize="small" triggerLabel="Coil presets" items={[{ value: "all", label: "All" }]} /></Host>);
+    render(<Host><MenuView label="Presets" trigger="tool" controlSize="small" triggerLabel="Coil presets" items={[{ value: "all", label: "All" }]} /></Host>);
     const trigger = screen.getByRole("button", { name: "Coil presets" });
     expect(trigger.querySelector("img")).toBeNull();
     expect(trigger.textContent).toContain("Presets");
@@ -189,7 +189,7 @@ describe("standalone picker and menu keyboard contracts", () => {
     const fixture = (revision: number) => (
       <Host>
         <output>{revision}</output>
-        <NSEMenuView label={<Glyph />} trigger="tool" triggerLabel="Font actions" items={[
+        <MenuView label={<Glyph />} trigger="tool" triggerLabel="Font actions" items={[
           { value: "favourite", label: "Add to Favourites" },
           { value: "divider", label: "", separator: true },
           { value: "ruler", label: "Show Ruler" },
@@ -218,16 +218,16 @@ describe("standalone picker and menu keyboard contracts", () => {
       return (
         <>
           <div data-testid="clipped" style={{ clipPath: "inset(0)" }}>
-            <NSEOverlayProvider runtimePort={outer.runtime} defaultParentResponderId={outer.defaultParentResponderId} portalContainer={layer}>
+            <OverlayProvider runtimePort={outer.runtime} defaultParentResponderId={outer.defaultParentResponderId} portalContainer={layer}>
               {children}
-            </NSEOverlayProvider>
+            </OverlayProvider>
           </div>
           <div data-testid="overlay-layer" ref={setLayer} />
           <button type="button">Outside</button>
         </>
       );
     }
-    render(<Host><ClippedSurface><NSEMenuView label="Actions" items={[{ value: "one", label: "One" }]} /></ClippedSurface></Host>);
+    render(<Host><ClippedSurface><MenuView label="Actions" items={[{ value: "one", label: "One" }]} /></ClippedSurface></Host>);
     const trigger = screen.getByRole("button", { name: "Actions" });
     fireEvent.click(trigger);
     const menu = await screen.findByRole("menu");
@@ -243,11 +243,11 @@ describe("standalone picker and menu keyboard contracts", () => {
 
   it("preserves default trigger and selection feedback through the supplied engine", async () => {
     const trigger = vi.fn(async () => {});
-    const engine = { trigger } as NonNullable<React.ComponentProps<typeof NSEFeedbackProvider>["value"]>;
-    render(<NSEFeedbackProvider value={engine}><Host>
-      <NSEMenuView label="Feedback actions" items={[{ value: "save", label: "Save document" }]} />
+    const engine = { trigger } as NonNullable<React.ComponentProps<typeof FeedbackProvider>["value"]>;
+    render(<FeedbackProvider value={engine}><Host>
+      <MenuView label="Feedback actions" items={[{ value: "save", label: "Save document" }]} />
       <NSEPopUpButton label="Feedback format" items={[{ value: "plain", title: "Plain" }, { value: "rich", title: "Rich" }]} />
-    </Host></NSEFeedbackProvider>);
+    </Host></FeedbackProvider>);
     fireEvent.click(screen.getByRole("button", { name: "Feedback actions" }));
     expect(trigger).toHaveBeenLastCalledWith("soft");
     fireEvent.click(await screen.findByRole("menuitem", { name: "Save document" }));
@@ -260,10 +260,10 @@ describe("standalone picker and menu keyboard contracts", () => {
   });
 
   it("clears a listbox type-ahead timer when the branch unmounts while its host remains", async () => {
-    let authority: NSEOverlayProviderContextValue | undefined;
-    const publish = (value: NSEOverlayProviderContextValue) => { authority = value; };
+    let authority: OverlayProviderContextValue | undefined;
+    const publish = (value: OverlayProviderContextValue) => { authority = value; };
     const options = [{ id: "alpha", label: "Alpha" }, { id: "beta", label: "Beta" }];
-    const fixture = (show: boolean) => <Host><Probe publish={publish} />{show ? <NSEListboxPopup id="typeahead" defaultOpen options={options} /> : <span>Branch removed</span>}</Host>;
+    const fixture = (show: boolean) => <Host><Probe publish={publish} />{show ? <ListboxPopup id="typeahead" defaultOpen options={options} /> : <span>Branch removed</span>}</Host>;
     const view = render(fixture(true));
     const alpha = await screen.findByRole("option", { name: "Alpha" });
     await waitFor(() => expect(document.activeElement).toBe(alpha));
@@ -287,7 +287,7 @@ describe("standalone picker and menu keyboard contracts", () => {
   });
 
   it("opens an item menu with ArrowDown and skips disabled entries", async () => {
-    render(<Host><NSEMenuView label="Actions" items={[{ value: "first", label: "First" }, { value: "off", label: "Disabled", disabled: true }, { value: "last", label: "Last" }]} /></Host>);
+    render(<Host><MenuView label="Actions" items={[{ value: "first", label: "First" }, { value: "off", label: "Disabled", disabled: true }, { value: "last", label: "Last" }]} /></Host>);
     fireEvent.keyDown(screen.getByRole("button", { name: "Actions" }), { key: "ArrowDown" });
     const first = await screen.findByRole("menuitem", { name: "First" });
     await waitFor(() => expect(document.activeElement).toBe(first));
@@ -299,7 +299,7 @@ describe("standalone picker and menu keyboard contracts", () => {
 describe("virtualised standalone listbox focus", () => {
   const options = Array.from({ length: 250 }, (_, index) => ({ id: String(index), label: `Entry ${index}`, value: index }));
   it("scrolls an offscreen selected row into the virtual window before focusing it", async () => {
-    render(<Host><NSEListboxPopup id="large" defaultOpen options={options} selectedId="199" /></Host>);
+    render(<Host><ListboxPopup id="large" defaultOpen options={options} selectedId="199" /></Host>);
     const selected = await screen.findByRole("option", { name: "Entry 199" });
     await waitFor(() => expect(document.activeElement).toBe(selected));
     expect(screen.getAllByRole("option").length).toBeLessThan(30);
@@ -308,7 +308,7 @@ describe("virtualised standalone listbox focus", () => {
   });
 
   it("retains keyboard focus after End moves beyond the rendered rows", async () => {
-    render(<Host><NSEListboxPopup id="large" defaultOpen options={options} selectedId="0" /></Host>);
+    render(<Host><ListboxPopup id="large" defaultOpen options={options} selectedId="0" /></Host>);
     const first = await screen.findByRole("option", { name: "Entry 0" });
     await waitFor(() => expect(document.activeElement).toBe(first));
     fireEvent.keyDown(first, { key: "End" });

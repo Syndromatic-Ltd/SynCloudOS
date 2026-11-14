@@ -100,7 +100,7 @@ describe("MotionFX ownership and authorization", () => {
     const f = motionFixture(),
       service = new MotionService(f.adapter),
       manager = service.createManager();
-    manager.startDeviceMotionUpdates({ referenceFrame: "relative" }, () => {});
+    manager.startDeviceMotionUpdates({ referenceFrame: "xArbitraryZVertical" }, () => {});
     manager.createRecorder();
     expect(f.adapter.requestAuthorization).not.toHaveBeenCalled();
     service.dispose();
@@ -121,7 +121,7 @@ describe("MotionFX ownership and authorization", () => {
         signal: controller.signal,
         canRequestAuthorization: true,
       });
-    manager.startDeviceMotionUpdates({ referenceFrame: "relative" }, () => {});
+    manager.startDeviceMotionUpdates({ referenceFrame: "xArbitraryZVertical" }, () => {});
     const pending = manager.requestAuthorization();
     controller.abort();
     finish("available");
@@ -151,10 +151,10 @@ describe("MotionFX ownership and authorization", () => {
     manager.startGyroUpdates(() => {}, c.signal);
     expect(f.listeners.size).toBe(0);
     const handler = vi.fn();
-    manager.startDeviceMotionUpdates({ referenceFrame: "relative" }, () => {
+    manager.startDeviceMotionUpdates({ referenceFrame: "xArbitraryZVertical" }, () => {
       throw new Error("consumer");
     });
-    manager.startDeviceMotionUpdates({ referenceFrame: "relative" }, handler);
+    manager.startDeviceMotionUpdates({ referenceFrame: "xArbitraryZVertical" }, handler);
     f.emit(0);
     expect(handler).toHaveBeenCalledOnce();
     manager.dispose();

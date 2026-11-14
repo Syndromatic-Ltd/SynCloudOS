@@ -11,12 +11,14 @@ let browser: Awaited<ReturnType<typeof chromium.launch>>;
 beforeAll(async () => {
   const bundle = await build({
     ...decoratorEsbuildOptions,
+    // Root-relative asset URLs are the host's to serve, as they stay in the SDK's built CSS.
+    external: ["/assets/*"],
     stdin: { resolveDir: process.cwd(), loader: "tsx", contents: `
       import React, { useState } from "react";
       import { createRoot } from "react-dom/client";
       import { NSEView } from "./src/NSE/Views/NSEView";
       import { NSEAppearance } from "./src/NSE/Appearance/NSEAppearance";
-      import { NSEViewDrawingEnvironmentContext } from "./src/NSE/Views/NSEViewDrawingEnvironment";
+      import { ViewDrawingEnvironmentContext } from "./src/NSE/Views/NSEViewDrawingEnvironment";
       import { createOwnedGFXIdentifierIssuer } from "./src/FX/GraphicsFX/identifierAuthority";
       import { GFXColour } from "./src/FX/GraphicsFX/GFXColour";
       import { GFXPath } from "./src/FX/GraphicsFX/GFXPath";
@@ -32,19 +34,20 @@ beforeAll(async () => {
       window.drawnBounds = [];
       function Figures() {
         const [updated, setUpdated] = useState(false);
-        return <NSEViewDrawingEnvironmentContext.Provider value={environment}>
+        return <ViewDrawingEnvironmentContext.Provider value={environment}>
           <button id="redraw" onClick={() => setUpdated(value => !value)}>Redraw</button>
           {['aqua', 'darkAqua'].map((name, index) => <NSEView key={name} id={name} className="figure" appearance={new NSEAppearance(name)}
             aria-label={name + ' figure'} style={{ top: 60 + index * 180 }} draw={(rect, context) => {
               window.drawnBounds.push({ name, ...rect });
               context.setFill(GFXColour.parse(updated ? '#008844' : '#0055aa')); context.fill(GFXPath.rect(rect));
             }}><span className="foreground">Subview</span></NSEView>)}
-        </NSEViewDrawingEnvironmentContext.Provider>;
+        </ViewDrawingEnvironmentContext.Provider>;
       }
       createRoot(document.getElementById('root')).render(<Figures />);
     ` },
     bundle: true, format: "iife", platform: "browser", jsx: "automatic", target: "es2022", write: false, outfile: "figure.js",
-    define: { "process.env.NODE_ENV": '"production"', "import.meta.env.DEV": "false" },
+    // An IIFE has no import.meta: the theme resolves its resource files against a module URL.
+    define: { "process.env.NODE_ENV": '"production"', "import.meta.env.DEV": "false", "import.meta.url": JSON.stringify(new URL("../../src/NSE/Appearance/atmoTheme.ts", import.meta.url).href) },
   });
   script = bundle.outputFiles!.find(file => file.path.endsWith(".js"))!.text;
   styles = bundle.outputFiles!.find(file => file.path.endsWith(".css"))!.text;

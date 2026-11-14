@@ -20,7 +20,7 @@
 
 import { useMemo } from "react";
 import { NSEBox } from "../../../NSE/public/controls";
-import { NSEListItem } from "../../../NSE/Controls/Selection/NSEListItem";
+import { GroupedRow } from "../../../NSE/Controls/Selection/GroupedRow";
 import { definePreferencePane, type PreferencePaneViewProps } from "../../../SynCloudOS/Preferences";
 import { useKernelSynCloudOS } from "../../../SynCloudOSReact";
 import { useSystemText } from "../useSystemText";
@@ -47,13 +47,13 @@ function AppearancePane({ appearance }: PreferencePaneViewProps) {
     <div className="nse-prefs-section">
       <NSEBox>
         {choices.map((choice) => (
-          <NSEListItem
+          <GroupedRow
             key={choice.value}
             selected={appearance === choice.value}
             onClick={() => runtime.appearance.set(choice.value)}
           >
             {choice.label}
-          </NSEListItem>
+          </GroupedRow>
         ))}
       </NSEBox>
       <p className="nse-prefs-note">

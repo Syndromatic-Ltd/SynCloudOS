@@ -19,12 +19,12 @@
  */
 import { describe, expect, it } from "vitest";
 import { NSEAlert, NSEModalResponse, NSEViewController, NSEWindowController } from "../../../src/NSE/Application";
-import { nseSetKeyWindowModalPresenter, nseWindowInternals, type NSEWindowAlertRequest, type NSEWindowMount } from "../../../src/NSE/Application/NSEWindowController";
+import { nseSetKeyWindowModalPresenter, nseWindowInternals, type WindowAlertRequest, type WindowMount } from "../../../src/NSE/Application/NSEWindowController";
 
-function mountedWindow(choose: (request: NSEWindowAlertRequest, signal: AbortSignal) => Promise<string>) {
+function mountedWindow(choose: (request: WindowAlertRequest, signal: AbortSignal) => Promise<string>) {
   const controller = new NSEWindowController();
-  const requests: NSEWindowAlertRequest[] = [];
-  const mount: NSEWindowMount = {
+  const requests: WindowAlertRequest[] = [];
+  const mount: WindowMount = {
     windowId: "window-1",
     getSnapshot: () => null,
     subscribe: () => () => {},
@@ -169,7 +169,7 @@ describe("NSEAlert", () => {
     alert.addButton("Cancel");
     await expect(alert.runModal()).rejects.toThrow(/active application/);
     const owner = {};
-    const requests: NSEWindowAlertRequest[] = [];
+    const requests: WindowAlertRequest[] = [];
     nseSetKeyWindowModalPresenter(owner, async (request) => { requests.push(request); return "1"; });
     try {
       await expect(alert.runModal()).resolves.toBe(NSEModalResponse.alertSecondButtonReturn);

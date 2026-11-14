@@ -1,0 +1,60 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+import type { CSSProperties } from "react";
+import type { TopBarItem, TopBarStyleDefinition, TopBarVariant } from "./topBarTypes";
+
+import { nseTopBarGlyphs } from "./topBarAssets";
+
+const cumulus: TopBarStyleDefinition = {
+  icons: nseTopBarGlyphs
+};
+
+/**
+ * Cumulus chrome metrics and built-in item glyphs. The glass bar and its inset controls
+ * are vector CSS material (`[data-variant="atmoCumulus"]` in nse-chrome.css);
+ * the `atmoMetal` variant is likewise CSS-driven and has no definition here.
+ */
+export const nseTopBarStyles = {
+  atmoCumulus: cumulus
+} satisfies Record<"atmoCumulus", TopBarStyleDefinition>;
+
+/**
+ * A chrome variant's rendered height, as the CSS value to reserve above app content: the exact
+ * expression the bar itself uses, so the bar and the content below it can never disagree —
+ * including a host override of `--nse-topbar-height` and the compact breakpoint.
+ */
+export function nseTopBarHeightCssValue(variant: TopBarVariant): string {
+  const token = variant === "atmoMetal" ? "--nse-topbar-height-metal" : "--nse-topbar-height-cumulus";
+  return `var(--nse-topbar-height, var(${token}))`;
+}
+
+/**
+ * The inline style that points a glyph's mask at an SVG through `--nse-topbar-glyph`: the
+ * item's own `icon`, else its kind's built-in glyph. Undefined when neither exists (a `custom`
+ * item with no icon), so the caller renders no glyph rather than an unmasked block.
+ */
+export function resolveNSETopBarGlyphStyle(
+  item: Pick<TopBarItem, "kind" | "icon">,
+  icons: TopBarStyleDefinition["icons"] = nseTopBarGlyphs
+): CSSProperties | undefined {
+  const url = item.icon ?? (item.kind === "custom" ? undefined : icons[item.kind]);
+  return url ? ({ "--nse-topbar-glyph": `url(${JSON.stringify(url)})` } as CSSProperties) : undefined;
+}

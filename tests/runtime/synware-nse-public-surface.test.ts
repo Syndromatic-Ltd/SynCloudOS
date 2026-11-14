@@ -71,6 +71,7 @@ describe("SynWare NSE public framework boundary", () => {
       "NSETreeNode",
       "NSEControlValidation",
       "NSETableCellView", "NSETableCellViewProps",
+      "createNSEColourPanelPreferences",
     ]));
     for (const internal of ["SelectionModel", "ChangeSet", "ValueTransformer", "createValueTransformer", "sortWithDescriptors", "DateFormatter", "DecimalValue", "NSEUserDefaults", "NSEIndexPath", "NSEFormatter"]) expect(publicExports().names).not.toContain(internal);
     expect(publicExports(resolve("src/NSE/public/controls.ts")).names).toEqual(expect.arrayContaining([

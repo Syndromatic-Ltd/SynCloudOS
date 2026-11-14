@@ -18,70 +18,72 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createContext, useCallback, useContext, useEffect, useMemo, type PropsWithChildren, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useInsertionEffect, useMemo, type PropsWithChildren, type ReactNode } from "react";
 
 import type { ColourPanelService, CommandSystem, DragEndpoint } from "../../../SynCloudOS/SynCloudOS";
-import type { NSEDragCommandPort } from "../../Drag";
-import type { NSEDragSessionPort } from "../../Drag/dragSessionPort";
-import { NSEColourPanelController } from "./NSEColourPanelController";
+import type { DragCommandPort } from "../../Drag";
+import type { DragSessionPort } from "../../Drag/dragSessionPort";
+import { createReactOwnedColourPanelController, observeReactOwnedColourPanelController, type NSEColourPanelController } from "./NSEColourPanelController";
 import type { NSEColourPanelControllerOptions } from "./colourPanelTypes";
 import { nseUnowned } from "../../Controllers/ownership";
 import { useNSEDeferredDisposal } from "../../interactionLifecycle";
 
-export type NSEColourPanelServicePort = Pick<
+export type ColourPanelServicePort = Pick<
   ColourPanelService,
   "ownerToken" | "getSnapshot" | "getPickers" | "subscribe" | "registerPicker" | "activateTarget" |
   "open" | "close" | "choosePicker" | "preview" | "commit" | "cancel" | "addRecent" | "setSwatches"
 >;
 
-const NSEColourPanelServiceContext = createContext<NSEColourPanelServicePort | null>(null);
+const ColourPanelServiceContext = createContext<ColourPanelServicePort | null>(null);
 const NSEColourPanelControllerContext = createContext<NSEColourPanelController | null>(null);
-const NSEColourPanelResponderContext = createContext<string | null>(null);
-const NSEColourPanelCommandsContext = createContext<NSEDragCommandPort | null>(null);
-export interface NSEColourPanelDragPort {
-  readonly manager: NSEDragSessionPort;
+const ColourPanelResponderContext = createContext<string | null>(null);
+const ColourPanelCommandsContext = createContext<DragCommandPort | null>(null);
+export interface ColourPanelDragPort {
+  readonly manager: DragSessionPort;
   readonly endpoint: DragEndpoint;
   /** Issues a distinct runtime-owned endpoint for a concrete control rather
    * than reconstructing one by copying caller-visible identity fields. */
   endpointForResponder?(responderId: string): DragEndpoint;
 }
-const NSEColourPanelDragContext = createContext<NSEColourPanelDragPort | null>(null);
+const ColourPanelDragContext = createContext<ColourPanelDragPort | null>(null);
 
 export interface NSEColourPanelProviderProps extends PropsWithChildren {
-  readonly service: NSEColourPanelServicePort;
+  readonly service: ColourPanelServicePort;
   readonly options?: NSEColourPanelControllerOptions;
-  readonly commands?: NSEDragCommandPort & Pick<CommandSystem, "register">;
+  readonly commands?: DragCommandPort & Pick<CommandSystem, "register">;
   readonly responderId?: string;
-  readonly drag?: NSEColourPanelDragPort;
+  readonly drag?: ColourPanelDragPort;
 }
 
 export function NSEColourPanelProvider({ service, options, commands, responderId, drag, children }: NSEColourPanelProviderProps) {
   if (drag && service.ownerToken !== drag.manager.ownerToken) {
     throw new TypeError("NSE colour panel and drag authorities must belong to the same runtime.");
   }
-  const controller = useMemo(() => new NSEColourPanelController(service, { owner: nseUnowned, ...options }), [service, options?.owner, options?.ownerSignal, options?.preferences, options?.transferAdapter, options?.undoManager]);
+  const controller = useMemo(() => createReactOwnedColourPanelController(service, { owner: nseUnowned, ...options }), [service, options?.owner, options?.ownerSignal, options?.preferences, options?.transferAdapter, options?.undoManager]);
+  useInsertionEffect(() => observeReactOwnedColourPanelController(controller), [controller]);
   useNSEDeferredDisposal(controller);
   const commandResponderId = responderId ?? "colour-panel";
-  // The panel's commands (Show Colours, …) belong to the one shared panel: a
-  // provider nested inside another over the same service leaves them there.
-  const outerService = useContext(NSEColourPanelServiceContext);
-  const registersCommands = Boolean(commands) && outerService !== service;
+  // The panel's commands (Show Colours, …) belong to the one shared panel: a provider nested
+  // inside another that already registered them over the same service leaves them there.
+  const outerService = useContext(ColourPanelServiceContext);
+  const outerCommands = useContext(ColourPanelCommandsContext);
+  const registersCommands = Boolean(commands) && !(outerService === service && outerCommands);
   useEffect(() => registersCommands && commands ? controller.registerCommands(commands, commandResponderId) : undefined, [commands, commandResponderId, controller, registersCommands]);
-  return <NSEColourPanelServiceContext.Provider value={service}><NSEColourPanelControllerContext.Provider value={controller}><NSEColourPanelResponderContext.Provider value={responderId ?? null}><NSEColourPanelCommandsContext.Provider value={commands ?? null}><NSEColourPanelDragContext.Provider value={drag ?? null}>{children}</NSEColourPanelDragContext.Provider></NSEColourPanelCommandsContext.Provider></NSEColourPanelResponderContext.Provider></NSEColourPanelControllerContext.Provider></NSEColourPanelServiceContext.Provider>;
+  return <ColourPanelServiceContext.Provider value={service}><NSEColourPanelControllerContext.Provider value={controller}><ColourPanelResponderContext.Provider value={responderId ?? null}><ColourPanelCommandsContext.Provider value={commands ?? null}><ColourPanelDragContext.Provider value={drag ?? null}>{children}</ColourPanelDragContext.Provider></ColourPanelCommandsContext.Provider></ColourPanelResponderContext.Provider></NSEColourPanelControllerContext.Provider></ColourPanelServiceContext.Provider>;
 }
 
-export function useOptionalNSEColourPanelDrag(): NSEColourPanelDragPort | null {
-  return useContext(NSEColourPanelDragContext);
+export function useOptionalNSEColourPanelDrag(): ColourPanelDragPort | null {
+  return useContext(ColourPanelDragContext);
 }
 
 /** The provider only supplies this when its caller established a concrete
  * responder boundary. Controls otherwise retain their standalone IDs. */
 export function useOptionalNSEColourPanelResponderId(): string | null {
-  return useContext(NSEColourPanelResponderContext);
+  return useContext(ColourPanelResponderContext);
 }
 
-export function useOptionalNSEColourPanelCommands(): NSEDragCommandPort | null {
-  return useContext(NSEColourPanelCommandsContext);
+export function useOptionalNSEColourPanelCommands(): DragCommandPort | null {
+  return useContext(ColourPanelCommandsContext);
 }
 
 export function useNSEColourPanelController(): NSEColourPanelController {
@@ -94,8 +96,8 @@ export function useOptionalNSEColourPanelController(): NSEColourPanelController 
   return useContext(NSEColourPanelControllerContext);
 }
 
-export function useNSEColourPanelService(): NSEColourPanelServicePort {
-  const service = useContext(NSEColourPanelServiceContext);
+export function useNSEColourPanelService(): ColourPanelServicePort {
+  const service = useContext(ColourPanelServiceContext);
   if (!service) throw new Error("NSE colour controls require an NSEColourPanelProvider.");
   return service;
 }
@@ -108,12 +110,12 @@ export function useNSEColourPanelService(): NSEColourPanelServicePort {
  * returns the content unchanged.
  */
 export function useNSEColourPanelContextCarrier(): (children: ReactNode) => ReactNode {
-  const service = useContext(NSEColourPanelServiceContext);
+  const service = useContext(ColourPanelServiceContext);
   const controller = useContext(NSEColourPanelControllerContext);
-  const responderId = useContext(NSEColourPanelResponderContext);
-  const commands = useContext(NSEColourPanelCommandsContext);
-  const drag = useContext(NSEColourPanelDragContext);
+  const responderId = useContext(ColourPanelResponderContext);
+  const commands = useContext(ColourPanelCommandsContext);
+  const drag = useContext(ColourPanelDragContext);
   return useCallback((children: ReactNode) => service && controller
-    ? <NSEColourPanelServiceContext.Provider value={service}><NSEColourPanelControllerContext.Provider value={controller}><NSEColourPanelResponderContext.Provider value={responderId}><NSEColourPanelCommandsContext.Provider value={commands}><NSEColourPanelDragContext.Provider value={drag}>{children}</NSEColourPanelDragContext.Provider></NSEColourPanelCommandsContext.Provider></NSEColourPanelResponderContext.Provider></NSEColourPanelControllerContext.Provider></NSEColourPanelServiceContext.Provider>
+    ? <ColourPanelServiceContext.Provider value={service}><NSEColourPanelControllerContext.Provider value={controller}><ColourPanelResponderContext.Provider value={responderId}><ColourPanelCommandsContext.Provider value={commands}><ColourPanelDragContext.Provider value={drag}>{children}</ColourPanelDragContext.Provider></ColourPanelCommandsContext.Provider></ColourPanelResponderContext.Provider></NSEColourPanelControllerContext.Provider></ColourPanelServiceContext.Provider>
     : children, [commands, controller, drag, responderId, service]);
 }

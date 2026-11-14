@@ -22,12 +22,12 @@
 import React from "react";
 import { cleanup, render } from "@testing-library/react";
 import { afterEach, expect, it } from "vitest";
-import { NSEMetalSurface } from "../../../src/NSE/Material/NSEMetalSurface";
+import { MetalSurface } from "../../../src/NSE/Material/MetalSurface";
 
 afterEach(cleanup);
 
 it("projects material semantics without source-path or implementation-lineage diagnostics", () => {
-  const { container } = render(<NSEMetalSurface mode="light">Content</NSEMetalSurface>);
+  const { container } = render(<MetalSurface mode="light">Content</MetalSurface>);
   const surface = container.querySelector('[data-nse-material="metal"]')!;
   expect(surface.textContent).toBe("Content");
 

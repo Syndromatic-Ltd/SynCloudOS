@@ -1,0 +1,126 @@
+{
+  "base": "http://127.0.0.1:5387",
+  "runs": 5,
+  "chromium": "149.0.7827.55",
+  "recordedAt": "2026-11-12T10:06:39.806Z",
+  "scenarios": {
+    "cold-load-board": {
+      "styleMs": 54.6,
+      "styleCount": 332,
+      "maxStyleMs": 13.1,
+      "parseCssMs": 0,
+      "layoutMs": 9.7,
+      "scriptMs": 297.7,
+      "longestTaskMs": 205.1,
+      "tasksOver50": 3,
+      "elements": 208
+    },
+    "launch-about": {
+      "styleMs": 74.4,
+      "styleCount": 201,
+      "maxStyleMs": 17.6,
+      "parseCssMs": 0,
+      "layoutMs": 11,
+      "scriptMs": 444.5,
+      "longestTaskMs": 91.1,
+      "tasksOver50": 3,
+      "elements": 319
+    },
+    "about-full-recalc": {
+      "fullRecalcMs": 5.3,
+      "elements": 319
+    },
+    "quickswitch-open": {
+      "styleMs": 7.3,
+      "styleCount": 48,
+      "maxStyleMs": 1.6,
+      "parseCssMs": 0,
+      "layoutMs": 0.8,
+      "scriptMs": 97.7,
+      "longestTaskMs": 62.8,
+      "tasksOver50": 1,
+      "elements": 367
+    },
+    "quickswitch-select": {
+      "styleMs": 6.9,
+      "styleCount": 69,
+      "maxStyleMs": 0.4,
+      "parseCssMs": 0,
+      "layoutMs": 0.4,
+      "scriptMs": 51.4,
+      "longestTaskMs": 29.2,
+      "tasksOver50": 0,
+      "elements": 319
+    },
+    "return-to-webspring": {
+      "styleMs": 21.3,
+      "styleCount": 94,
+      "maxStyleMs": 7.3,
+      "parseCssMs": 0,
+      "layoutMs": 1,
+      "scriptMs": 169.3,
+      "longestTaskMs": 83.6,
+      "tasksOver50": 1,
+      "elements": 177
+    },
+    "cold-load-gallery": {
+      "styleMs": 560.7,
+      "styleCount": 210,
+      "maxStyleMs": 59.9,
+      "parseCssMs": 0,
+      "layoutMs": 31.2,
+      "scriptMs": 1301,
+      "longestTaskMs": 163,
+      "tasksOver50": 8,
+      "elements": 985
+    },
+    "gallery-full-recalc": {
+      "fullRecalcMs": 50,
+      "elements": 985
+    },
+    "gallery-hover-sweep": {
+      "styleMs": 1.8,
+      "styleCount": 8,
+      "maxStyleMs": 0.4,
+      "parseCssMs": 0,
+      "layoutMs": 0.1,
+      "scriptMs": 38.8,
+      "longestTaskMs": 2.2,
+      "tasksOver50": 0,
+      "elements": 982
+    },
+    "gallery-section:Tables & Trees": {
+      "styleMs": 104.3,
+      "styleCount": 21,
+      "maxStyleMs": 17.1,
+      "parseCssMs": 0,
+      "layoutMs": 3.1,
+      "scriptMs": 424.9,
+      "longestTaskMs": 431.7,
+      "tasksOver50": 1,
+      "elements": 1223
+    },
+    "gallery-section:Buttons": {
+      "styleMs": 111.1,
+      "styleCount": 6,
+      "maxStyleMs": 37.1,
+      "parseCssMs": 0,
+      "layoutMs": 1.4,
+      "scriptMs": 324.4,
+      "longestTaskMs": 317,
+      "tasksOver50": 1,
+      "elements": 1223
+    },
+    "gallery-section:Menus & Popups": {
+      "styleMs": 41,
+      "styleCount": 6,
+      "maxStyleMs": 19.6,
+      "parseCssMs": 0,
+      "layoutMs": 5.3,
+      "scriptMs": 298.3,
+      "longestTaskMs": 300.6,
+      "tasksOver50": 1,
+      "elements": 1463
+    }
+  }
+}

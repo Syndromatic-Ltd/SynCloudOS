@@ -19,26 +19,26 @@
  */
 
 import {
-  createElement,
   useCallback,
   useId,
   useState,
   type HTMLAttributes,
   type ReactNode
 } from "react";
+import { createElement } from "../Theme/contract/hookMirrorReact";
 import "../Navigation/SourceList/nse-sourcelist.css";
 import { NSEButton } from "../Controls/Buttons/NSEButton";
 import {
-  getOptionalNSESmoothSurfaceProps,
-  type NSESmoothSurfaceRequest,
-  type NSESmoothSurfaceStyle
+  getOptionalSmoothSurfaceProps,
+  type SmoothSurfaceRequest,
+  type SmoothSurfaceStyle
 } from "../SmoothSurface";
 
-type NSEContainerElement = "div" | "section" | "aside" | "main" | "nav" | "article" | "ul" | "ol";
+type ContainerElement = "div" | "section" | "aside" | "main" | "nav" | "article" | "ul" | "ol";
 
 export type NSEDrawerPlacement = "leading" | "trailing" | "top" | "bottom";
 export type ContainerPaneVariant = "plain" | "surface" | "sidebar" | "inspector" | "floating";
-interface NSEDisclosureOptions {
+interface DisclosureOptions {
   open?: boolean;
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -49,20 +49,20 @@ interface NSEDisclosureOptions {
  * SDK's leading-aligned content stack at standard spacing; `flow` is plain
  * block flow for fully custom layout (nse-layout-defaults.css).
  */
-export type NSEContainerContentLayout = "stack" | "flow";
+export type ContainerContentLayout = "stack" | "flow";
 
 export interface ContainerPaneProps extends Omit<HTMLAttributes<HTMLElement>, "title"> {
-  as?: NSEContainerElement;
+  as?: ContainerElement;
   title?: ReactNode;
   subtitle?: ReactNode;
   actions?: ReactNode;
   footer?: ReactNode;
   variant?: ContainerPaneVariant;
-  smoothSurface?: NSESmoothSurfaceRequest;
-  contentLayout?: NSEContainerContentLayout;
+  smoothSurface?: SmoothSurfaceRequest;
+  contentLayout?: ContainerContentLayout;
 }
 
-export interface NSEDrawerProps extends Omit<HTMLAttributes<HTMLElement>, "title">, NSEDisclosureOptions {
+export interface NSEDrawerProps extends Omit<HTMLAttributes<HTMLElement>, "title">, DisclosureOptions {
   title?: ReactNode;
   subtitle?: ReactNode;
   actions?: ReactNode;
@@ -71,15 +71,15 @@ export interface NSEDrawerProps extends Omit<HTMLAttributes<HTMLElement>, "title
   modal?: boolean;
   keepMounted?: boolean;
   closeLabel?: string;
-  smoothSurface?: NSESmoothSurfaceRequest;
-  contentLayout?: NSEContainerContentLayout;
+  smoothSurface?: SmoothSurfaceRequest;
+  contentLayout?: ContainerContentLayout;
 }
 
 function classes(...values: Array<string | false | null | undefined>) {
   return values.filter(Boolean).join(" ");
 }
 
-function useDisclosureState({ open, defaultOpen = false, onOpenChange }: NSEDisclosureOptions) {
+function useDisclosureState({ open, defaultOpen = false, onOpenChange }: DisclosureOptions) {
   const [internalOpen, setInternalOpen] = useState(defaultOpen);
   const isControlled = open !== undefined;
   const isOpen = isControlled ? open : internalOpen;
@@ -109,10 +109,10 @@ export function ContainerPane({
 }: ContainerPaneProps) {
   const titleId = useId();
   const labelledBy = props["aria-labelledby"] ?? (title ? titleId : undefined);
-  const surfaceProps = getOptionalNSESmoothSurfaceProps(
+  const surfaceProps = getOptionalSmoothSurfaceProps(
     smoothSurface,
     classes("nse-container-pane", className),
-    style as NSESmoothSurfaceStyle | undefined
+    style as SmoothSurfaceStyle | undefined
   );
 
   return createElement(

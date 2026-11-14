@@ -58,7 +58,7 @@ export function stackNeedsArrangedLayout(props: NSEStackViewProps): boolean {
  *
  * @internal
  */
-export function NSEFlowStackView({
+export function FlowStackView({
   orientation = "horizontal",
   distribution = "fill",
   alignment,

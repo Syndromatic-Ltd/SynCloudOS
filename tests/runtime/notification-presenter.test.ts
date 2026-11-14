@@ -20,7 +20,7 @@
 
 import { describe, expect, it } from "vitest";
 import { resolveNotificationMotion } from "../../src/Webspring/NotificationCentre.transitions";
-import { compileNSEPresentation, type NSEPresentationSpec } from "../../src/NSE/Animation";
+import { compileNSEPresentation, type PresentationSpec } from "../../src/NSE/Animation";
 import { createNotificationActionPlan, getPrimaryNotificationAction } from "../../src/Webspring/notificationActions";
 import type { SynCloudOSNotification } from "../../src/SynCloudOS/NotificationCenter/notificationTypes";
 
@@ -66,7 +66,7 @@ function createNotification(overrides: Partial<SynCloudOSNotification> = {}): Sy
 describe("Webspring notification presenter model", () => {
   it("keeps cube and centre motion owner-local with a reduced fallback", () => {
     const standard = resolveNotificationMotion(false);
-    const flip = (spec: NSEPresentationSpec | null) => compileNSEPresentation(spec!, "rotor").animations[0];
+    const flip = (spec: PresentationSpec | null) => compileNSEPresentation(spec!, "rotor").animations[0];
     const enter = (state: Parameters<typeof standard.rotor>[0], previous: string | null) => {
       const presentation = standard.rotor(state).enter;
       return typeof presentation === "function" ? presentation(previous) : presentation;

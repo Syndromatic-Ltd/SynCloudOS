@@ -20,14 +20,14 @@
 
 import "./nse-tooltips.css";
 
-export { NSETooltipProvider, useNSETooltipProvider, useOptionalNSETooltipProvider } from "./NSETooltipProvider";
-export type { NSETooltipProviderProps } from "./NSETooltipProvider";
-export { NSETooltip } from "./NSETooltip";
+export { TooltipProvider, useTooltipProvider, useOptionalTooltipProvider } from "./TooltipProvider";
+export type { TooltipProviderProps } from "./TooltipProvider";
+export { Tooltip } from "./Tooltip";
 export { useNSETooltip } from "./useNSETooltip";
 export type {
-  NSETooltipBinding,
-  NSETooltipContent,
-  NSETooltipOptions,
-  NSETooltipProps,
-  NSETooltipScheduler,
+  TooltipBinding,
+  TooltipContent,
+  TooltipOptions,
+  TooltipProps,
+  TooltipScheduler,
 } from "./tooltipTypes";

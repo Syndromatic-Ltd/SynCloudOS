@@ -23,4 +23,4 @@ export { NSEButton } from "../Controls/Buttons/NSEButton";
 
 // Development Inspector chrome; this projection is not an SDK package entry.
 export { ContainerPane } from "../Containers/NSEContainers";
-export { NSEInputBox } from "../Controls/Fields/NSEFields";
+export { InputBox } from "../Controls/Fields/NSEFields";

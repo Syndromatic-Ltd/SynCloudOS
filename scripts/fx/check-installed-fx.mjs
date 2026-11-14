@@ -30,22 +30,40 @@ import {
   requiredFxFamilies,
 } from "../synware/sdk-package-manifest.mjs";
 
-const FX_FAMILIES = Object.freeze([
-  "animation", "graphics", "image", "text", "audio", "haptics", "motion",
-  "media", "video", "midi", "location", "lumina", "compression",
-]);
+export const FX_FAMILIES = Object.freeze([...requiredFxFamilies]);
 
 assert.deepEqual(requiredFxFamilies, FX_FAMILIES, "Installed acceptance family list must match the package manifest contract.");
 
 const repositoryRoot = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 
-function assertCompleteFamilyMatrix(rows) {
+export function assertCompleteFamilyMatrix(rows) {
   assert(Array.isArray(rows), "FX receipt familyResults must be an array.");
   assert.deepEqual(rows.map(row => row?.family), FX_FAMILIES,
-    "Installed acceptance must retain exactly one explicit row for every one of the thirteen FX families.");
+    `Installed acceptance must retain exactly one explicit row for every one of the ${FX_FAMILIES.length} FX families.`);
 }
 
-function createInitialFxReceipt({ manifest, manifestPath, mode, base = "/" }) {
+export function assertScenarioFamilyCoverage(scenarios, families = FX_FAMILIES, modeLabel = "installed") {
+  assert(Array.isArray(scenarios), `FX ${modeLabel} scenarios must be an array.`);
+  const unknown = [...new Set(scenarios.flatMap(scenario => scenario.families ?? []).filter(family => !families.includes(family)))];
+  assert.equal(unknown.length, 0,
+    `Installed ${modeLabel} acceptance references undeclared FX family(s): ${unknown.join(", ")}.`);
+  const missing = families.filter(family => !scenarios.some(scenario => scenario.families?.includes(family)));
+  assert.equal(missing.length, 0,
+    `Installed ${modeLabel} acceptance is missing explicit coverage for family(s): ${missing.join(", ")}.`);
+  return Object.freeze(families.filter(family => scenarios.some(scenario => scenario.families?.includes(family))));
+}
+
+export function assertModeReceiptComplete(receipt, mode) {
+  assertCompleteFamilyMatrix(receipt?.familyResults);
+  const dimension = mode === "deterministic" ? "D" : "B";
+  const incomplete = receipt.familyResults
+    .filter(row => row.I !== "passed" || row[dimension] !== "passed")
+    .map(row => row.family);
+  assert.equal(incomplete.length, 0,
+    `${mode === "deterministic" ? "Deterministic" : "Installed browser"} acceptance is missing verified evidence for family(s): ${incomplete.join(", ")}.`);
+}
+
+export function createInitialFxReceipt({ manifest, manifestPath, mode, base = "/" }) {
   assert.equal(manifest.schemaVersion, 2, "Installed FX acceptance requires SDK manifest schema 2.");
   assert(mode === "deterministic" || mode === "browser", `Unsupported installed acceptance mode: ${mode}`);
   const familyResults = FX_FAMILIES.map(family => ({
@@ -142,7 +160,7 @@ function execute(receipt, { id, args, families, dimension, assertionText, enviro
   return result.stdout ?? "";
 }
 
-const deterministicScenarios = Object.freeze([
+export const deterministicScenarios = Object.freeze([
   { id: "foundation-compression-substantive", test: "tests/runtime/foundation-packed-consumer.test.ts", families: ["compression"], assertionText: "Installed Foundation/CompressionFX worker and declaration specimen passed." },
   {
     id: "original-seven-substantive",
@@ -180,9 +198,65 @@ const deterministicScenarios = Object.freeze([
     families: ["lumina"],
     assertionText: "Installed LuminaFX named-route, query, mutation and public declaration specimen passed.",
   },
+  {
+    id: "network-substantive",
+    test: "tests/runtime/fx/network-packed.test.ts",
+    families: ["network"],
+    assertionText: "Installed NetworkFX path monitor attribution and declaration boundary specimen passed.",
+  },
+  {
+    id: "crypto-substantive",
+    test: "tests/runtime/fx/packed-crypto.test.ts",
+    families: ["crypto"],
+    assertionText: "Installed CryptoFX surface, runtime and declaration specimen passed.",
+  },
+  {
+    id: "dispatch-substantive",
+    test: "tests/runtime/fx/dispatch-packed.test.ts",
+    families: ["dispatch"],
+    assertionText: "Installed DispatchFX per-app attribution and module graph specimen passed.",
+  },
+  {
+    id: "bluetooth-substantive",
+    test: "tests/runtime/fx/bluetooth-packed.test.ts",
+    families: ["bluetooth"],
+    assertionText: "Installed BluetoothFX central manager attribution and declaration specimen passed.",
+  },
+  {
+    id: "nfc-substantive",
+    test: "tests/runtime/fx/nfc-packed.test.ts",
+    families: ["nfc"],
+    assertionText: "Installed NFCFX NDEF session attribution and declaration specimen passed.",
+  },
+  {
+    id: "speech-substantive",
+    test: "tests/runtime/fx/speech-packed.test.ts",
+    families: ["speech"],
+    assertionText: "Installed SpeechFX recognizer attribution and declaration specimen passed.",
+  },
+  {
+    id: "contacts-substantive",
+    test: "tests/runtime/fx/contacts-packed.test.ts",
+    families: ["contacts"],
+    assertionText: "Installed ContactsFX picker and store attribution specimen passed.",
+  },
+  {
+    id: "pass-substantive",
+    test: "tests/runtime/fx/pass-packed.test.ts",
+    families: ["pass"],
+    assertionText: "Installed PassFX payment controller attribution and declaration specimen passed.",
+  },
+  {
+    id: "xr-substantive",
+    test: "tests/runtime/fx/xr-packed.test.ts",
+    families: ["xr"],
+    assertionText: "Installed XRFX session attribution and declaration specimen passed.",
+  },
 ]);
 
-const browserScenarios = Object.freeze([
+export const DETERMINISTIC_ACCEPTANCE_FAMILIES = assertScenarioFamilyCoverage(deterministicScenarios, FX_FAMILIES, "deterministic");
+
+export const browserScenarios = Object.freeze([
   { id: "compression-worker-browser", script: "scripts/synware/check-fx-compression-consumer.mjs", families: ["compression"] },
   { id: "lifecycle-browser-root", script: "scripts/synware/check-fx-browser-lifecycle-consumer.mjs", families: ["animation", "haptics", "motion", "midi", "location"], args: ["--base", "/"] },
   { id: "lifecycle-browser-nested", script: "scripts/synware/check-fx-browser-lifecycle-consumer.mjs", families: ["animation", "haptics", "motion", "midi", "location"], useAggregateBase: true },
@@ -194,13 +268,14 @@ const browserScenarios = Object.freeze([
   { id: "audio-opus-browser", script: "scripts/synware/check-fx-audio-codec-consumer.mjs", families: ["audio", "video"] },
   { id: "media-timeline-browser", script: "scripts/synware/check-fx-media-timeline-consumer.mjs", families: ["image", "audio", "media", "video"] },
   { id: "lumina-storage-worker-browser", script: "scripts/synware/check-omitted-products-consumer.mjs", families: ["lumina"] },
+  { id: "crypto-worker-browser", script: "scripts/synware/check-fx-crypto-consumer.mjs", families: ["crypto"] },
+  { id: "dispatch-browser-root", script: "scripts/synware/check-fx-dispatch-consumer.mjs", families: ["dispatch"], args: ["--base", "/"] },
+  { id: "dispatch-browser-nested", script: "scripts/synware/check-fx-dispatch-consumer.mjs", families: ["dispatch"], useAggregateBase: true },
+  { id: "device-families-browser-root", script: "scripts/synware/check-fx-device-families-consumer.mjs", families: ["network", "bluetooth", "nfc", "speech", "contacts", "pass", "xr"], args: ["--base", "/"] },
+  { id: "device-families-browser-nested", script: "scripts/synware/check-fx-device-families-consumer.mjs", families: ["network", "bluetooth", "nfc", "speech", "contacts", "pass", "xr"], useAggregateBase: true },
 ]);
 
-const BROWSER_ACCEPTANCE_FAMILIES = Object.freeze(
-  FX_FAMILIES.filter(family => browserScenarios.some(scenario => scenario.families.includes(family))),
-);
-assert.deepEqual(BROWSER_ACCEPTANCE_FAMILIES, FX_FAMILIES,
-  "Installed browser acceptance must retain at least one explicit scenario for every FX family.");
+export const BROWSER_ACCEPTANCE_FAMILIES = assertScenarioFamilyCoverage(browserScenarios, FX_FAMILIES, "browser");
 
 function receiptDirectory() {
   const directory = resolve(repositoryRoot, ".artifacts/expanded-fx/installed");
@@ -216,13 +291,14 @@ function persistReceipt(receipt) {
   return path;
 }
 
-function runInstalledFx({ mode, manifestPath, base = "/", keep = false }) {
+export function runInstalledFx({ mode, manifestPath, base = "/", keep = false }) {
   const verified = readVerifiedSdkArchive(repositoryRoot, manifestPath ? { manifestPath } : {});
   assertSdkSourceUnchanged(verified.manifest.source, captureSdkSourceFingerprint(repositoryRoot));
   const receipt = createInitialFxReceipt({ manifest: verified.manifest, manifestPath: verified.manifestPath, mode, base });
   const environment = { SYNCLOUDOS_SDK_MANIFEST: verified.manifestPath };
   try {
     if (mode === "deterministic") {
+      assertScenarioFamilyCoverage(deterministicScenarios, FX_FAMILIES, "deterministic");
       const vitest = resolve(repositoryRoot, "node_modules/vitest/vitest.mjs");
       for (const scenario of deterministicScenarios) {
         execute(receipt, {
@@ -234,9 +310,15 @@ function runInstalledFx({ mode, manifestPath, base = "/", keep = false }) {
           environment,
         });
       }
-      assert(receipt.familyResults.every(row => row.I === "passed" && row.D === "passed"),
-        "Deterministic acceptance is missing a required family result.");
+      assertModeReceiptComplete(receipt, "deterministic");
     } else {
+      assertScenarioFamilyCoverage(browserScenarios, FX_FAMILIES, "browser");
+      const browserEnvironment = {
+        ...environment,
+        ...(process.env.CRFX_BROWSER_EVIDENCE_PATH
+          ? {}
+          : { CRFX_BROWSER_EVIDENCE_PATH: resolve(repositoryRoot, ".artifacts/synapp-sdk/fx-crypto-consumer.json") }),
+      };
       for (const scenario of browserScenarios) {
         const scenarioArguments = scenario.useAggregateBase
           ? ["--base", base]
@@ -247,11 +329,10 @@ function runInstalledFx({ mode, manifestPath, base = "/", keep = false }) {
           families: scenario.families,
           dimension: "B",
           assertionText: `${scenario.id}: installed browser acceptance passed.`,
-          environment,
+          environment: browserEnvironment,
         });
       }
-      assert(receipt.familyResults.every(row => row.I === "passed" && row.B === "passed"),
-        "Installed browser acceptance still has families without browser evidence.");
+      assertModeReceiptComplete(receipt, "browser");
     }
     assertSdkSourceUnchanged(verified.manifest.source, captureSdkSourceFingerprint(repositoryRoot));
     receipt.passed = true;

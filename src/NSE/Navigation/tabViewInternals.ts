@@ -1,12 +1,12 @@
 import type { ReactNode } from "react";
 import type { NSETreeController } from "../Controllers/NSETreeController";
 import type { NSETabViewController } from "./NSETabViewController";
-import type { NSETabBarController } from "./NSETabBarController";
-import type { NSEAdaptiveTabOutlineItem } from "./adaptiveTabView";
+import type { TabBarController } from "./TabBarController";
+import type { AdaptiveTabOutlineItem } from "./adaptiveTabView";
 
 interface TabViewProjection {
-  control(): NSETabBarController<ReactNode> | null;
-  outline(): NSETreeController<NSEAdaptiveTabOutlineItem, string>;
+  control(): TabBarController<ReactNode> | null;
+  outline(): NSETreeController<AdaptiveTabOutlineItem, string>;
 }
 
 // Renderer access stays outside the public view-controller declaration and SDK entry points.

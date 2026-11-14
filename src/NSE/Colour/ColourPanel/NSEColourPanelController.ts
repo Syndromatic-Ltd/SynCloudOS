@@ -20,18 +20,18 @@
 
 import type { ColourPanelCloseReason, ColourPanelService, ColourPanelServiceChange, CommandPayloadSchema, CommandSystem, SynCloudOSRuntime } from "../../../SynCloudOS/SynCloudOS";
 import { defineSyncUndoAction } from "../../../SynCloudOS/nseRuntimeContracts";
-import { GFXColour } from "../../../FX/GraphicsFX/public";
+import { GFXColour } from "../../../FX/GraphicsFX/GFXColour";
 import { parseNSEColourTransfer, serialiseNSEColourTransfer } from "../Transfer";
-import type { NSEColourChange, NSEColourPanelControllerOptions, NSEColourPanelSnapshot, NSEColourPicker, NSEColourTarget } from "./colourPanelTypes";
-import { NSEControllerLifetime } from "../../Controllers/controllerLifetime";
+import type { ColourChange, NSEColourPanelControllerOptions, NSEColourPanelSnapshot, NSEColourPicker, ColourTarget } from "./colourPanelTypes";
+import { ControllerLifetime } from "../../Controllers/controllerLifetime";
 
-type NSEColourPanelServicePort = Pick<
+type ColourPanelServicePort = Pick<
   ColourPanelService,
   "getSnapshot" | "subscribe" | "registerPicker" | "activateTarget" | "open" | "close" |
   "choosePicker" | "preview" | "commit" | "cancel" | "addRecent" | "setSwatches"
 >;
 
-export class NSEColourCommitUnknownStateError extends Error {
+export class ColourCommitUnknownStateError extends Error {
   readonly code = "nse-colour-commit-outcome-unknown";
 
   constructor(message: string, options?: ErrorOptions) {
@@ -40,7 +40,7 @@ export class NSEColourCommitUnknownStateError extends Error {
   }
 }
 
-export class NSEColourCommitCompensationError extends AggregateError {
+export class ColourCommitCompensationError extends AggregateError {
   readonly code = "nse-colour-commit-compensation-failed";
 
   constructor(primary: unknown, compensation: readonly unknown[]) {
@@ -49,8 +49,23 @@ export class NSEColourCommitCompensationError extends AggregateError {
   }
 }
 
+const deferColourPanelObservation = Symbol("nse.deferColourPanelObservation");
+const panelObservers = new WeakMap<NSEColourPanelController, () => () => void>();
+
+export function createReactOwnedColourPanelController(
+  service: ColourPanelServicePort,
+  options: NSEColourPanelControllerOptions,
+): NSEColourPanelController {
+  const deferred = { ...options, [deferColourPanelObservation]: true };
+  return new NSEColourPanelController(service, deferred);
+}
+
+export function observeReactOwnedColourPanelController(controller: NSEColourPanelController): (() => void) | undefined {
+  return panelObservers.get(controller)?.();
+}
+
 export class NSEColourPanelController {
-  readonly #service: NSEColourPanelServicePort;
+  readonly #service: ColourPanelServicePort;
   readonly #pickers = new Map<string, NSEColourPicker>();
   readonly #alphaTargets = new Set<string>();
   readonly #undoManager: NSEColourPanelControllerOptions["undoManager"];
@@ -59,11 +74,11 @@ export class NSEColourPanelController {
   #applyingUndo = false;
   #serviceSnapshot: ReturnType<ColourPanelService["getSnapshot"]> | null = null;
   #facadeSnapshot: NSEColourPanelSnapshot | null = null;
-  readonly #lifetime: NSEControllerLifetime;
+  readonly #lifetime: ControllerLifetime;
   readonly #registrations = new Set<() => void>();
 
-  constructor(runtime: Pick<SynCloudOSRuntime, "colourPanel"> | NSEColourPanelServicePort, options: NSEColourPanelControllerOptions = {}) {
-    this.#lifetime = new NSEControllerLifetime(options, { kind: "NSEColourPanelController", id: "colour-panel" });
+  constructor(runtime: Pick<SynCloudOSRuntime, "colourPanel"> | ColourPanelServicePort, options: NSEColourPanelControllerOptions = {}) {
+    this.#lifetime = new ControllerLifetime(options, { kind: "NSEColourPanelController", id: "colour-panel" });
     this.#service = "colourPanel" in runtime ? runtime.colourPanel : runtime;
     this.#undoManager = options.undoManager;
     this.#preferences = options.preferences;
@@ -73,7 +88,12 @@ export class NSEColourPanelController {
       this.#service.setSwatches(palette.swatches);
       for (const recent of [...palette.recents].reverse()) this.#service.addRecent(recent);
     }
-    this.#lifetime.bind(() => this.dispose());
+    const observe = () => {
+      this.#lifetime.bind(() => this.dispose());
+      return () => this.#lifetime.unbind();
+    };
+    if (deferColourPanelObservation in options) panelObservers.set(this, observe);
+    else observe();
   }
 
   get isDisposed(): boolean { return this.#lifetime.isDisposed; }
@@ -131,9 +151,9 @@ export class NSEColourPanelController {
    * client shares the one instance. */
   get sharedPanelKey(): string { return this.#service.getSnapshot().runtimeId; }
 
-  activateTarget(target: NSEColourTarget): () => void {
+  activateTarget(target: ColourTarget): () => void {
     this.#lifetime.assertLive("activateTarget");
-    const adapt = (change: ColourPanelServiceChange): NSEColourChange => Object.freeze({
+    const adapt = (change: ColourPanelServiceChange): ColourChange => Object.freeze({
       previous: GFXColour.parse(change.previousCSS),
       current: GFXColour.parse(change.currentCSS),
       phase: change.phase,
@@ -202,9 +222,9 @@ export class NSEColourPanelController {
             }
           } catch (rollbackError) { compensation.push(rollbackError); }
         }
-        if (compensation.length > 0) throw new NSEColourCommitCompensationError(error, compensation);
+        if (compensation.length > 0) throw new ColourCommitCompensationError(error, compensation);
         if (unknownPublisher) {
-          throw new NSEColourCommitUnknownStateError(
+          throw new ColourCommitUnknownStateError(
             "A colour commit publisher failed before acknowledging its outcome; the affected state is unknown.",
             { cause: error },
           );
@@ -221,7 +241,7 @@ export class NSEColourPanelController {
       preview: (change) => {
         try { target.preview(adapt(change)); }
         catch (error) {
-          throw new NSEColourCommitUnknownStateError(
+          throw new ColourCommitUnknownStateError(
             "A colour preview publisher failed before acknowledging its outcome; the affected state is unknown.",
             { cause: error },
           );

@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export interface NSEPickerTransaction<T> {
+export interface PickerTransaction<T> {
   readonly opening: T | null;
   readonly hasOpening: boolean;
   readonly draft: T;
@@ -26,18 +26,18 @@ export interface NSEPickerTransaction<T> {
   readonly open: boolean;
 }
 
-export type NSEPickerTransactionAction<T> =
+export type PickerTransactionAction<T> =
   | Readonly<{ type: "begin"; value: T; draft?: T }>
   | Readonly<{ type: "preview"; value: T }>
   | Readonly<{ type: "commit"; value: T }>
   | Readonly<{ type: "cancel" }>
   | Readonly<{ type: "replace"; value: T }>;
 
-export function createPickerTransaction<T>(value: T): NSEPickerTransaction<T> {
+export function createPickerTransaction<T>(value: T): PickerTransaction<T> {
   return Object.freeze({ opening: null, hasOpening: false, draft: value, previewed: false, open: false });
 }
 
-export function reducePickerTransaction<T>(state: NSEPickerTransaction<T>, action: NSEPickerTransactionAction<T>): NSEPickerTransaction<T> {
+export function reducePickerTransaction<T>(state: PickerTransaction<T>, action: PickerTransactionAction<T>): PickerTransaction<T> {
   switch (action.type) {
     case "begin": return Object.freeze({ opening: action.value, hasOpening: true, draft: action.draft === undefined ? action.value : action.draft, previewed: false, open: true });
     case "preview": return Object.freeze({ ...state, draft: action.value, previewed: true });

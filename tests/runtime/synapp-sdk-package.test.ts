@@ -22,7 +22,7 @@
 
 import { execFileSync, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import ts from "typescript";
 import { forwardRef, memo } from "react";
@@ -249,6 +249,19 @@ describe("portable SynWare SDK packages", () => {
     const packagedNSEStylesheet = readFileSync(packagedNSEStyles, "utf8");
     const importedNSEStyles = [...packagedNSEStylesheet.matchAll(/@import "([^"]+)";/g)].map((match) => readFileSync(join(dirname(packagedNSEStyles), match[1]!), "utf8"));
     expect([packagedNSEStylesheet, ...importedNSEStyles].join("\n")).toContain("[data-nse-view-drawing-layer]");
+    // Two published stylesheets list the theme. Imported from script they become imports of the same files, so the theme loads once.
+    // Plain Node loads the packaged plugin, as a consumer's Vite does.
+    const stylesheetFiles = (entry: string): string[] => JSON.parse(execFileSync(process.execPath, ["--input-type=module", "-e", [
+      `const { synCloudOS } = await import(${JSON.stringify(pathToFileURL(join(repositoryRoot, ".artifacts", "synapp-sdk", "packages", "syncloudos", "vite.mjs")).href)});`,
+      `const plugin = [synCloudOS({ webspringEntry: false })].flat().find(candidate => candidate.name === "syncloudos:project");`,
+      `const id = plugin.resolveId("@syndromatic/syncloudos/${entry}/styles.css", "/consumer/src/main.tsx");`,
+      `console.log(JSON.stringify([...plugin.load(id).matchAll(/import "([^"]+)";/gu)].map(match => match[1])));`,
+    ].join("\n")], { cwd: repositoryRoot, encoding: "utf8" }));
+    const browserFiles = stylesheetFiles("browser");
+    const sharedTheme = browserFiles.filter((file) => /\/assets\/atmo-[^/]+\.css$/u.test(file));
+    expect(sharedTheme.length).toBe(1);
+    expect(stylesheetFiles("webspring")).toContain(sharedTheme[0]);
+    expect(browserFiles.every((file) => existsSync(file))).toBe(true);
     const viewDeclarations = readFileSync(join(repositoryRoot, ".artifacts", "synapp-sdk", "packages", "syncloudos", "types", "NSE", "Views", "NSEView.d.ts"), "utf8");
     expect(viewDeclarations).toMatch(/draw\?:.*GFXContext/u);
     expect(viewDeclarations).toContain("NSEViewLayerContentsPlacement");
@@ -336,7 +349,7 @@ for (const removed of ["NSERoundedBox", "NSEShadowView", "NSESmoothSurface", "NS
   assert.equal(removed in controls, false);
 }
 for (const removed of ["NSEGraphicsView", "convertPointToGFXDisplayList"]) assert.equal(removed in nse, false);
-for (const internal of ["NSEViewDrawingEnvironmentContext", "NSEViewDisplayList"]) assert.equal(internal in nse, false);
+for (const internal of ["NSEViewDrawingEnvironmentContext", "NSEViewDisplayList", "ViewDrawingEnvironmentContext", "ViewDisplayList"]) assert.equal(internal in nse, false);
 assert.equal("AnimationFX" in appearance, false);
 assert.equal("useAnimationFX" in appearance, false);
 assert.equal(typeof nse.NSEStackView, "function");
@@ -540,6 +553,27 @@ interface ImportMeta { glob(pattern: string, options: { eager: true; query?: str
       value instanceof Error ? `${value.name}: ${value.message}\n${value.stack ?? ""}` : String(value)
     )))).toEqual([]);
   }, 300_000);
+
+  it("keeps the PDF library out of what the shell entries load at start-up", () => {
+    const packageDirectory = join(repositoryRoot, ".artifacts", "synapp-sdk", "packages", "syncloudos");
+    for (const entry of ["index.js", "sdk.js", "nse.js", "webspring.js"]) {
+      // Follow static imports only: a dynamic import loads when a PDF is first made.
+      const seen = new Set<string>();
+      const pending = [join(packageDirectory, entry)];
+      while (pending.length) {
+        const file = pending.pop()!;
+        if (seen.has(file)) continue;
+        seen.add(file);
+        const source = readFileSync(file, "utf8");
+        for (const match of source.matchAll(/(?:^|[;\n])\s*(?:import|export)\s*(?:[^"'()]*?from\s*)?["'](\.{1,2}\/[^"']+\.js)["']/gu)) {
+          pending.push(resolve(dirname(file), match[1]));
+        }
+      }
+      expect(seen.size, entry).toBeGreaterThan(1);
+      // The font subset recorder is ours and small; the document and context chunks carry the library.
+      expect([...seen].map(file => basename(file)).filter(name => /PDF/u.test(name) && !name.startsWith("GFXPDFFontSubset-")), entry).toEqual([]);
+    }
+  });
 
   it("keeps the reviewed runtime entry graph free of privileged exports", () => {
     const exports = [

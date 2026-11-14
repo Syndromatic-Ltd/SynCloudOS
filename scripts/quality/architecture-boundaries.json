@@ -875,7 +875,7 @@
         "nse": [
           "src/NSE/NSE.ts",
           "src/NSE/Appearance/index.ts",
-          "src/NSE/Theme/NSETheme.ts", "src/NSE/Theme/contract/hooks.ts", "src/NSE/Theme/themeColourStyle.ts",
+          "src/NSE/Theme/NSETheme.ts", "src/NSE/Theme/contract/hooks.ts", "src/NSE/Theme/contract/hookMirrorDOM.ts", "src/NSE/Theme/themeColourStyle.ts",
           "src/NSE/Material/index.ts",
           "src/NSE/Material/tokens.ts"
         ]
@@ -960,7 +960,7 @@
           "src/NSE/SmoothSurface/index.ts",
           "src/NSE/SystemUI/index.ts",
           "src/NSE/sdkPackageEntry.ts",
-          "src/NSE/Controls/Selection/NSEListItem.tsx"
+          "src/NSE/Controls/Selection/GroupedRow.tsx"
         ],
         "appearance": [
           "src/NSE/Appearance/index.ts",
@@ -1217,7 +1217,7 @@
       "reason": "Kernel and React host bootstrap for application classes and sessions. Not an SDK package export."
     },
     {
-      "path": "src/NSE/Controls/Selection/NSEListItem.tsx",
+      "path": "src/NSE/Controls/Selection/GroupedRow.tsx",
       "consumers": [
         "nse",
         "webspring"

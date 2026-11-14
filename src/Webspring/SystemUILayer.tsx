@@ -21,10 +21,10 @@
 import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
 import { useEffect, useId, useLayoutEffect, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
-import { NSEAlertSurface, NSEAlertBackdrop, NSEFocusPortProvider, NSEFocusScope } from "../NSE/NSE";
+import { AlertSurface, AlertBackdrop, FocusPortProvider, FocusScope } from "../NSE/NSE";
 import { NSEButton } from "@syndromatic/syncloudos/nse/controls";
 import { useNSEFeedback } from "../NSE/hostComposition";
-import { NSEAboutDialog, NSEConfirmDialog, NSEPreferencesToast } from "../NSE/SystemUI";
+import { AboutDialog, NSEConfirmDialog, PreferencesToast } from "../NSE/SystemUI";
 import type { RuntimeSnapshot, SynCloudOSAppInfo } from "../SynCloudOS/SynCloudOS";
 import { useAppearance, useResolvedMode, useRuntimeNSEFocusPort, useRuntimeSelector, useKernelSynCloudOS, useSettings } from "../SynCloudOSReact";
 import type { SynCloudOSRuntime } from "../SynCloudOS/SynCloudOS";
@@ -114,9 +114,9 @@ function ReturnDecisionDialog({
   };
 
   return createPortal(
-    <NSEFocusScope options={{ scopeId: "system-ui:return-decision", kind: "modal", modal: true, trapFocus: true, asChild: true }}>
-      <NSEAlertBackdrop presentation={runtime.presentationTraits} onSafeDismiss={onSafeDismiss}>
-        <NSEAlertSurface
+    <FocusScope options={{ scopeId: "system-ui:return-decision", kind: "modal", modal: true, trapFocus: true, asChild: true }}>
+      <AlertBackdrop presentation={runtime.presentationTraits} onSafeDismiss={onSafeDismiss}>
+        <AlertSurface
           appearance={alertAppearance}
           labelledBy={titleId}
           describedBy={messageId}
@@ -145,9 +145,9 @@ function ReturnDecisionDialog({
               onClick={runKeep}
             />
           </div>
-        </NSEAlertSurface>
-      </NSEAlertBackdrop>
-    </NSEFocusScope>,
+        </AlertSurface>
+      </AlertBackdrop>
+    </FocusScope>,
     document.body,
   );
 }
@@ -208,9 +208,9 @@ export function SystemUILayer({ onLogOut, account, preferences, siteName = "this
   const returnQuitLabel = systemT("navigation.returnDecisionQuit", "Quit");
   const returnKeepLabel = systemT("navigation.returnDecisionKeepWindows", "Keep Windows");
   return (
-    <NSEFocusPortProvider port={nseFocusPort}>
+    <FocusPortProvider port={nseFocusPort}>
       <SystemUIAccountContext.Provider value={account ?? null}>
-        <NSEPreferencesToast
+        <PreferencesToast
           open={ui.preferencesPane !== null}
           focusScopeId="system-ui:preferences"
           initialPane={ui.preferencesPane || undefined}
@@ -224,7 +224,7 @@ export function SystemUILayer({ onLogOut, account, preferences, siteName = "this
         />
       </SystemUIAccountContext.Provider>
       {aboutApp ? (
-        <NSEAboutDialog
+        <AboutDialog
           presentation={runtime.presentationTraits}
           open
           appearance={resolvedMode === "dark" ? "dark" : "light"}
@@ -284,6 +284,6 @@ export function SystemUILayer({ onLogOut, account, preferences, siteName = "this
           keepLabel={returnKeepLabel}
         />
       ) : null}
-    </NSEFocusPortProvider>
+    </FocusPortProvider>
   );
 }

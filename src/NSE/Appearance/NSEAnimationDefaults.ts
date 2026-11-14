@@ -21,7 +21,7 @@
 import type { AFXAnimationTiming } from "../../FX/AnimationFX/public";
 import { afxAnimationTiming } from "../../FX/AnimationFX/animationValues";
 
-export interface NSEAnimationDefaults {
+export interface AnimationDefaults {
   readonly easing: {
     readonly standard: Extract<AFXAnimationTiming, { readonly kind: "cubic-bezier" }>;
     readonly emphasized: Extract<AFXAnimationTiming, { readonly kind: "cubic-bezier" }>;
@@ -83,7 +83,7 @@ const durationSeconds = Object.freeze({
   standard: 0.18,
 });
 
-export const NSEAnimationDefaults: NSEAnimationDefaults = Object.freeze({
+export const AnimationDefaults: AnimationDefaults = Object.freeze({
   easing,
   durationSeconds,
 });

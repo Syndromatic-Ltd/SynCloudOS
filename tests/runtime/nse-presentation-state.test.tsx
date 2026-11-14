@@ -23,18 +23,18 @@ import React, { useRef } from "react";
 import { act, cleanup, render } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
-  NSEAnimationEnvironmentProvider,
-  NSEPresence,
-  NSEPresenceBoundary,
+  AnimationEnvironmentProvider,
+  Presence,
+  PresenceBoundary,
   compileNSEPresentation,
   nseFilterStyle,
   nseTransformStyle,
-  NSELayoutView,
+  LayoutView,
   useNSEPresentation,
-  type NSEAnimator,
-  type NSELayoutTransitionTiming,
-  type NSEPresentationEnter,
-  type NSEPresentationSpec,
+  type Animator,
+  type LayoutTransitionTiming,
+  type PresentationEnter,
+  type PresentationSpec,
 } from "../../src/NSE/Animation";
 import type {
   AFXAnimationDefinition,
@@ -54,7 +54,7 @@ interface Played {
 /** An animator whose animations run until the test settles them. */
 function controlledAnimator() {
   const played: Played[] = [];
-  const animator: NSEAnimator = {
+  const animator: Animator = {
     ownerAppId: "syncloudos.system",
     animations: {
       acquireOwner: (owner) => Object.freeze({ ...owner, epoch: 1, release() {} }),
@@ -78,12 +78,12 @@ function controlledAnimator() {
         });
         return handle;
       },
-    } as NSEAnimator["animations"],
+    } as Animator["animations"],
   };
   return { animator, played };
 }
 
-const fade = (from: number, to: number, duration = 0.2): NSEPresentationSpec =>
+const fade = (from: number, to: number, duration = 0.2): PresentationSpec =>
   ({ duration, timing: "linear", tracks: [{ keyPath: "opacity", values: [from, to] }] });
 
 describe("presentation compilation", () => {
@@ -183,7 +183,7 @@ describe("height presentation", () => {
     }
     const scrollHeight = vi.spyOn(HTMLElement.prototype, "scrollHeight", "get").mockReturnValue(96);
     try {
-      render(<NSEAnimationEnvironmentProvider animator={animator}><Body /></NSEAnimationEnvironmentProvider>);
+      render(<AnimationEnvironmentProvider animator={animator}><Body /></AnimationEnvironmentProvider>);
     } finally {
       scrollHeight.mockRestore();
     }
@@ -214,7 +214,7 @@ describe("per-segment timing", () => {
 
 function Stateful({ state, enter, onPresented }: {
   state: string;
-  enter: NSEPresentationEnter;
+  enter: PresentationEnter;
   onPresented?: (state: string) => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -228,9 +228,9 @@ describe("state presentation", () => {
     const onPresented = vi.fn();
     const enter = vi.fn((previous: string | null) => previous === "incoming" ? null : fade(0, 1, previous === null ? 0.3 : 0.5));
     const view = (state: string) => (
-      <NSEAnimationEnvironmentProvider animator={animator}>
+      <AnimationEnvironmentProvider animator={animator}>
         <Stateful state={state} enter={enter} onPresented={onPresented} />
-      </NSEAnimationEnvironmentProvider>
+      </AnimationEnvironmentProvider>
     );
     const { rerender } = render(view("staged"));
     expect(enter).toHaveBeenLastCalledWith(null);
@@ -261,9 +261,9 @@ describe("state presentation", () => {
     const { animator, played } = controlledAnimator();
     const onPresented = vi.fn();
     const view = (state: string) => (
-      <NSEAnimationEnvironmentProvider animator={animator}>
+      <AnimationEnvironmentProvider animator={animator}>
         <Stateful state={state} enter={fade(0, 1)} onPresented={onPresented} />
-      </NSEAnimationEnvironmentProvider>
+      </AnimationEnvironmentProvider>
     );
     const { rerender, unmount } = render(view("a"));
     rerender(view("b"));
@@ -279,9 +279,9 @@ describe("state presentation", () => {
     const onPresented = vi.fn();
     const list = (order: readonly string[]) => (
       <React.StrictMode>
-        <NSEAnimationEnvironmentProvider animator={animator}>
+        <AnimationEnvironmentProvider animator={animator}>
           {order.map((id) => <Stateful key={id} state="shown" enter={fade(0, 1)} onPresented={onPresented} />)}
-        </NSEAnimationEnvironmentProvider>
+        </AnimationEnvironmentProvider>
       </React.StrictMode>
     );
     const rendered = render(list(["a", "b", "c"]));
@@ -310,9 +310,9 @@ describe("state presentation", () => {
   it("hands an interrupted presentation over from the value it presents", async () => {
     const { animator, played } = controlledAnimator();
     const view = (state: string) => (
-      <NSEAnimationEnvironmentProvider animator={animator}>
+      <AnimationEnvironmentProvider animator={animator}>
         <Stateful state={state} enter={fade(0, 1)} />
-      </NSEAnimationEnvironmentProvider>
+      </AnimationEnvironmentProvider>
     );
     const { rerender } = render(view("a"));
     const element = document.querySelector<HTMLElement>('[data-part="stateful"]')!;
@@ -340,9 +340,9 @@ describe("keyed presence", () => {
     const { animator, played } = controlledAnimator();
     const onExitComplete = vi.fn();
     const view = (names: readonly string[]) => (
-      <NSEAnimationEnvironmentProvider animator={animator}>
-        <ul><NSEPresence onExitComplete={onExitComplete}>{names.map((name) => <Item key={name} name={name} />)}</NSEPresence></ul>
-      </NSEAnimationEnvironmentProvider>
+      <AnimationEnvironmentProvider animator={animator}>
+        <ul><Presence onExitComplete={onExitComplete}>{names.map((name) => <Item key={name} name={name} />)}</Presence></ul>
+      </AnimationEnvironmentProvider>
     );
     const { rerender } = render(view(["a", "b", "c"]));
     const exitOf = (name: string) => played.find(({ target, definition }) =>
@@ -362,11 +362,11 @@ describe("keyed presence", () => {
   it("does not wait on presentations below a presence boundary", async () => {
     const { animator, played } = controlledAnimator();
     const view = (shown: boolean) => (
-      <NSEAnimationEnvironmentProvider animator={animator}>
-        <ul><NSEPresence>{shown ? (
-          <div key="window"><Item name="shell" /><NSEPresenceBoundary><Item name="app" /></NSEPresenceBoundary></div>
-        ) : null}</NSEPresence></ul>
-      </NSEAnimationEnvironmentProvider>
+      <AnimationEnvironmentProvider animator={animator}>
+        <ul><Presence>{shown ? (
+          <div key="window"><Item name="shell" /><PresenceBoundary><Item name="app" /></PresenceBoundary></div>
+        ) : null}</Presence></ul>
+      </AnimationEnvironmentProvider>
     );
     const { rerender } = render(view(true));
     rerender(view(false));
@@ -379,9 +379,9 @@ describe("keyed presence", () => {
   it("re-enters a key shown again during its exit, keeping its element", async () => {
     const { animator, played } = controlledAnimator();
     const view = (names: readonly string[]) => (
-      <NSEAnimationEnvironmentProvider animator={animator}>
-        <ul><NSEPresence>{names.map((name) => <Item key={name} name={name} />)}</NSEPresence></ul>
-      </NSEAnimationEnvironmentProvider>
+      <AnimationEnvironmentProvider animator={animator}>
+        <ul><Presence>{names.map((name) => <Item key={name} name={name} />)}</Presence></ul>
+      </AnimationEnvironmentProvider>
     );
     const { rerender } = render(view(["a", "b"]));
     const b = document.querySelector('[data-item="b"]');
@@ -417,15 +417,15 @@ describe("layout view", () => {
       }
     };
   }
-  const reorder: NSELayoutTransitionTiming = { duration: 0.74, timing: { kind: "spring", stiffness: 340, damping: 20, mass: 0.8 } };
-  const environment = (animator: NSEAnimator, children: React.ReactNode) => (
-    <NSEAnimationEnvironmentProvider animator={animator} reducedMotion={false}>{children}</NSEAnimationEnvironmentProvider>
+  const reorder: LayoutTransitionTiming = { duration: 0.74, timing: { kind: "spring", stiffness: 340, damping: 20, mass: 0.8 } };
+  const environment = (animator: Animator, children: React.ReactNode) => (
+    <AnimationEnvironmentProvider animator={animator} reducedMotion={false}>{children}</AnimationEnvironmentProvider>
   );
   const at = (left: number, top: number) => ({ "data-left": left, "data-top": top });
 
   it("plays a move from the old place to the new one, and animates any shift without a key", withLayout(() => {
     const { animator, played } = controlledAnimator();
-    const view = (left: number, top: number) => environment(animator, <NSELayoutView layoutTransition={reorder} {...at(left, top)} />);
+    const view = (left: number, top: number) => environment(animator, <LayoutView layoutTransition={reorder} {...at(left, top)} />);
     const rendered = render(view(0, 0));
     expect(played).toHaveLength(0);
     rendered.rerender(view(120, 40));
@@ -439,7 +439,7 @@ describe("layout view", () => {
 
   it("measures a keyed view only when its key changes", withLayout(() => {
     const { animator, played } = controlledAnimator();
-    const view = (key: number, left: number) => environment(animator, <NSELayoutView layoutKey={key} layoutTransition={reorder} {...at(left, 0)} />);
+    const view = (key: number, left: number) => environment(animator, <LayoutView layoutKey={key} layoutTransition={reorder} {...at(left, 0)} />);
     const rendered = render(view(0, 0));
     rendered.rerender(view(0, 50));
     expect(played).toHaveLength(0);
@@ -449,8 +449,8 @@ describe("layout view", () => {
 
   it("continues an interrupted move from where the view is drawn, and moves at once without a transition", withLayout(() => {
     const { animator, played } = controlledAnimator();
-    const view = (left: number, transition: NSELayoutTransitionTiming | null = reorder) =>
-      environment(animator, <NSELayoutView data-testid="slot" layoutTransition={transition} {...at(left, 0)} />);
+    const view = (left: number, transition: LayoutTransitionTiming | null = reorder) =>
+      environment(animator, <LayoutView data-testid="slot" layoutTransition={transition} {...at(left, 0)} />);
     const rendered = render(view(0));
     rendered.rerender(view(100));
     // Part-way home, the view is drawn 30px short of its new place.
@@ -469,7 +469,7 @@ describe("layout view", () => {
     const list = (order: readonly string[]) => (
       <React.StrictMode>
         {environment(animator, order.map((id, index) => (
-          <NSELayoutView key={id} data-testid={id} layoutTransition={reorder} {...at(index * 100, 0)} />
+          <LayoutView key={id} data-testid={id} layoutTransition={reorder} {...at(index * 100, 0)} />
         )))}
       </React.StrictMode>
     );

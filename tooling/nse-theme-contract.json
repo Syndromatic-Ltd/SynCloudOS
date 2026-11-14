@@ -7,7 +7,6 @@
         "cell",
         "content",
         "image",
-        "shadow",
         "title"
       ],
       "states": [
@@ -504,6 +503,15 @@
         "cell",
         "content",
         "row"
+      ],
+      "states": [],
+      "variants": {}
+    },
+    "icon-well": {
+      "parts": [
+        "background",
+        "image",
+        "shadow"
       ],
       "states": [],
       "variants": {}
@@ -1273,6 +1281,9 @@
         ],
         "chrome": [
           "standard"
+        ],
+        "presentation": [
+          "sheet"
         ]
       }
     },

@@ -20,7 +20,7 @@
 
 import type { KeyboardEventHandler } from "react";
 import type { WindowRecord, WindowRole } from "../../SynCloudOS/SynCloudOS";
-import type { NSEWindowViewProps } from "./windowViewTypes";
+import type { WindowViewProps } from "./windowViewTypes";
 
 export function assertNSEWindowViewRole(component: string, record: WindowRecord, expected: WindowRole): void {
   if (record.role !== expected) {
@@ -29,7 +29,7 @@ export function assertNSEWindowViewRole(component: string, record: WindowRecord,
 }
 
 export function windowEscapeCloseHandler(
-  props: Pick<NSEWindowViewProps, "record" | "dispatchCommand">,
+  props: Pick<WindowViewProps, "record" | "dispatchCommand">,
   enabled: boolean,
 ): KeyboardEventHandler<HTMLElement> | undefined {
   if (!enabled) return undefined;

@@ -19,7 +19,7 @@
  */
 
 import { createContext, useContext, type ReactNode } from "react";
-import type { NSEChromeScheme } from "../../Windows/Chrome/nseTopBarTypes";
+import type { NSEChromeScheme } from "../../Windows/Chrome/topBarTypes";
 
 /**
  * Carries the system-owned source-list rail state from `ApplicationStageView` (which renders the seam'd top

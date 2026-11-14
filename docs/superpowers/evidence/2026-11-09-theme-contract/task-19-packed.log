@@ -1,0 +1,18 @@
+✔ framework source does not fetch assets from the consumer origin root (100.0407ms)
+✔ all authored CSS asset URLs rewrite to existing framework-owned resources (31.0305ms)
+✔ CSS-only package emits browser runtime rules and relocatable artwork (176.0537ms)
+✔ browser runtime owns the generic runtime stylesheet (0.3505ms)
+✔ framework artwork survives an isolated Vite library build and relocation without public files (67.9921ms)
+✔ upstream attribution stays in release notices while retired names are rejected in product code (4.6314ms)
+✔ the packed Webspring stylesheet includes the Board and leaves site launchers to their sites (17.2438ms)
+✔ framework source and SDK contain no retired effect subsystem (109.7351ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 585.2547
+ Test Files  290 passed (290)
+      Tests  1686 passed (1686)

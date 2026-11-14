@@ -22,31 +22,30 @@ import { installedApplicationMenuSections } from "../SynCloudOSReact";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type Ref, type ReactNode } from "react";
 import { nseUnowned } from "../NSE/sdkPackageEntry";
 import { useWebspringLaunchZoom } from "./WebspringLaunchZoomContext";
-import { useNSEAnimationEnvironment, useNSEPresenceExiting, useNSEPresentation, type NSEPresentationSpec } from "../NSE/Animation";
+import { useNSEAnimationEnvironment, useNSEPresenceExiting, useNSEPresentation, type PresentationSpec } from "../NSE/Animation";
 import { useApplicationStageMotion } from "./ApplicationStage.transitions";
 import { WEBSPRING_MULTI_SWITCH_ROLES, WEBSPRING_PRESENTATION_ROLES, type WebspringMultiSwitchRole } from "../SynCloudOS/SynCloudOS";
 import {
-  NSEFocusPortProvider,
-  NSEControlRuntimeProvider,
-  NSEApplicationNavigationChromeController,
-  NSEApplicationNavigationChromeProvider,
-  NSEMenu,
-  NSEOverlayProvider,
-  NSETooltipProvider,
-  NSEWindowSurfaceBridgeProvider,
+  FocusPortProvider,
+  ControlRuntimeProvider,
+  ApplicationNavigationChromeController,
+  ApplicationNavigationChromeProvider,
+  OverlayProvider,
+  TooltipProvider,
+  WindowSurfaceBridgeProvider,
   useNSEDeferredDisposal,
 } from "../NSE/NSE";
 import { nseMenuModel } from "../NSE/NSE";
 import { ApplicationNavigationBackButton } from "./ApplicationNavigationBackButton";
 import { NSEButton } from "@syndromatic/syncloudos/nse/controls";
-import { NSETopBar } from "../NSE/hostComposition";
+import { createReactOwnedNSEMenu, TopBar, useMenuLifetime } from "../NSE/hostComposition";
 import { SourceListFrameProvider, type SourceListFrameContextValue } from "../NSE/hostComposition";
 import { activateResponderHierarchy, clearOwnedResponderAnchor, QuickSwitchTriggerProvider, ResponderScope, useHostSiteBranding, useResolvedMode, useRuntimeNSEControlPort, useRuntimeNSEFocusPort, useRuntimeNSEMenuPort, useRuntimeNSEOverlayPort, useRuntimeSelector, useKernelSynCloudOS } from "../SynCloudOSReact";
 import type { SynCloudOSAppInfo } from "../SynCloudOS/SynCloudOS";
 import { AppViewChrome, type AppViewPresentation } from "./AppViewChrome";
 import { AppViewContent } from "./AppViewContent";
 import { SynWareEntryRenderer } from "./SynWareEntryRenderer";
-import { NSEWindowTitlebarHostContext, type NSEWindowTitlebarDocument, type NSEWindowTitlebarHost } from "../NSE/hostComposition";
+import { WindowTitlebarHostContext, type WindowTitlebarDocument, type WindowTitlebarHost } from "../NSE/hostComposition";
 import { createApplicationMenuStore, useApplicationMenuSnapshot, type ApplicationMenuStore } from "../SynCloudOSReact";
 import { applicationDeclaresAbout, applicationMenuLabels, ApplicationMenuOverlayHost, ApplicationMenuTriggerBridge, menuOpensSystemPreferencesDirectly } from "./applicationMenuPresentation";
 import { createWebspringAppMenuModel } from "./webspringAppMenu";
@@ -57,7 +56,7 @@ import { createTransientWindowSurfaceBridge, type WindowContentRendererRegistry 
 /** Navigation chrome that slides in with the navigation it belongs to. */
 function NavigationChromeSlot({ className, enter, children }: {
   readonly className: string;
-  readonly enter: NSEPresentationSpec | null;
+  readonly enter: PresentationSpec | null;
   readonly children: ReactNode;
 }) {
   const slotRef = useRef<HTMLSpanElement>(null);
@@ -125,7 +124,7 @@ export function ApplicationStageView({
   const resolvedMode = useResolvedMode();
   const usesStandardTopBar = frame.topBar === "standard";
   const siteBranding = useHostSiteBranding();
-  const navigationChromeController = useMemo(() => new NSEApplicationNavigationChromeController({ owner: nseUnowned }), [stage.id]);
+  const navigationChromeController = useMemo(() => new ApplicationNavigationChromeController({ owner: nseUnowned }), [stage.id]);
   const navigationChromeSnapshot = useSyncExternalStore(
     navigationChromeController.subscribe,
     navigationChromeController.getSnapshot,
@@ -144,10 +143,10 @@ export function ApplicationStageView({
   const railLabel = sourceList?.railLabel ?? app.shortName;
   const [railWidth, setRailWidthState] = useState(railDefault);
   // The window shown on the stage puts its document (title, subtitle, titlebar accessories) in the standard bar.
-  const [titlebarDocument, setTitlebarDocument] = useState<NSEWindowTitlebarDocument | null>(null);
+  const [titlebarDocument, setTitlebarDocument] = useState<WindowTitlebarDocument | null>(null);
   const [leadingAccessories, setLeadingAccessories] = useState<HTMLSpanElement | null>(null);
   const [trailingAccessories, setTrailingAccessories] = useState<HTMLSpanElement | null>(null);
-  const titlebarHost = useMemo<NSEWindowTitlebarHost | null>(() => (usesStandardTopBar ? Object.freeze({
+  const titlebarHost = useMemo<WindowTitlebarHost | null>(() => (usesStandardTopBar ? Object.freeze({
     setDocument: setTitlebarDocument,
     leadingAccessories,
     trailingAccessories,
@@ -260,12 +259,10 @@ export function ApplicationStageView({
   }, [activateMenu, app, frame.rightSlot, hasRightSlot, locale, opensPreferencesDirectly]);
   const appMenuRuntime = useRuntimeNSEMenuPort();
   const appMenuController = useMemo(
-    () => new NSEMenu({ ownerSignal: appMenuRuntime.signal, [nseMenuModel]: appMenuModel, runtime: appMenuRuntime }),
+    () => createReactOwnedNSEMenu({ ownerSignal: appMenuRuntime.signal, [nseMenuModel]: appMenuModel, runtime: appMenuRuntime }),
     [appMenuModel, appMenuRuntime],
   );
-  // `useRuntimeNSEMenuPort` remains the canonical command bridge; the controller
-  // is shell-owned, so StrictMode-safe disposal follows the shell microtask lifetime.
-  useNSEDeferredDisposal(appMenuController);
+  useMenuLifetime(appMenuController);
   const { reducedMotion } = useNSEAnimationEnvironment();
   const stageMotion = useApplicationStageMotion({
     role: multiSwitchRole,
@@ -407,11 +404,11 @@ export function ApplicationStageView({
     };
   }, [applicationResponderId, runtime, stage.isFocused]);
   return (
-    <NSEOverlayProvider runtimePort={nseOverlayPort} defaultParentResponderId={applicationResponderId} portalContainer={overlayDestination}>
-    <NSETooltipProvider>
-    <NSEWindowSurfaceBridgeProvider bridge={stageWindowSurfaceBridge}>
-    <NSEControlRuntimeProvider port={nseControlPort}>
-    <NSEApplicationNavigationChromeProvider controller={navigationChromeController} standardChromeAvailable={usesStandardTopBar}>
+    <OverlayProvider runtimePort={nseOverlayPort} defaultParentResponderId={applicationResponderId} portalContainer={overlayDestination}>
+    <TooltipProvider>
+    <WindowSurfaceBridgeProvider bridge={stageWindowSurfaceBridge}>
+    <ControlRuntimeProvider port={nseControlPort}>
+    <ApplicationNavigationChromeProvider controller={navigationChromeController} standardChromeAvailable={usesStandardTopBar}>
     <ResponderScope asChild responderId={applicationResponderId} kind="application" parentResponderId="workspace" scopeId={applicationResponderId} undoOwner={applicationUndoOwner} diagnosticsLabel={appName}>
     <AppViewChrome.Root
       safeAreaInsets={presentationTraits.safeAreaInsets}
@@ -441,7 +438,7 @@ export function ApplicationStageView({
         presentation={surfacePresentation}
       >
         {showsApplicationStageTopBar && !sourceList && !documentTitlebar ? standardTopBar : null}
-        <NSEFocusPortProvider port={nseFocusPort}>
+        <FocusPortProvider port={nseFocusPort}>
         <SourceListFrameProvider value={sourceListContext}>
           <ApplicationMenuTriggerBridge
             menuStore={appMenuStore}
@@ -459,7 +456,7 @@ export function ApplicationStageView({
               className="webspring-app-view-fullbleed-content"
               aria-label={appName}
             >
-              <NSEWindowTitlebarHostContext.Provider value={titlebarHost}>
+              <WindowTitlebarHostContext.Provider value={titlebarHost}>
               <SynWareEntryRenderer
                 runtime={runtime}
                 app={app}
@@ -470,30 +467,30 @@ export function ApplicationStageView({
                 loadingPackageLabel={loadingPackageLabel}
                 missingComponentLabel={missingComponentLabel}
               />
-              </NSEWindowTitlebarHostContext.Provider>
+              </WindowTitlebarHostContext.Provider>
             </div>
           </AppViewContent.Surface>
           </QuickSwitchTriggerProvider>
           </ApplicationMenuTriggerBridge>
         </SourceListFrameProvider>
-        </NSEFocusPortProvider>
+        </FocusPortProvider>
       </AppViewChrome.Surface>
     </AppViewChrome.Root>
     </ResponderScope>
-    </NSEApplicationNavigationChromeProvider>
-    </NSEControlRuntimeProvider>
-    </NSEWindowSurfaceBridgeProvider>
+    </ApplicationNavigationChromeProvider>
+    </ControlRuntimeProvider>
+    </WindowSurfaceBridgeProvider>
     <div ref={overlayRootRef} className="webspring-app-overlay-destination" data-multiswitch-role={multiSwitchRole ?? undefined}
       inert={overlayInactive ? true : undefined} aria-hidden={overlayInactive ? true : undefined}
       style={{ ...stageMotion.root.style, zIndex: stage.zIndex + 70, ...(staged ? { visibility: "hidden" as const } : {}) }}>
       <div ref={attachOverlayDestination} className="webspring-app-overlay-plane" data-multiswitch-role={multiSwitchRole ?? undefined} style={stageMotion.surface.style} />
     </div>
-    </NSETooltipProvider>
-    </NSEOverlayProvider>
+    </TooltipProvider>
+    </OverlayProvider>
   );
 }
 
-type TopBarProps = Parameters<typeof NSETopBar>[0];
+type TopBarProps = Parameters<typeof TopBar>[0];
 
 /** The standard bar's right-hand control: what it draws and what it does when pressed. */
 interface RightSlotControl {
@@ -515,7 +512,7 @@ function ApplicationStageTopBar({
 }) {
   const menu = useApplicationMenuSnapshot(menuStore);
   return (
-    <NSETopBar
+    <TopBar
       {...props}
       trailingItems={rightSlot && props.trailing === undefined ? [{
           kind: rightSlot.kind,

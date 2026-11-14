@@ -19,34 +19,34 @@
  */
 
 import { useCallback, useContext, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
-import { NSEActionResponderContext } from "../Controls/Core/useNSEControlAction";
-import { NSEPopup, type NSEPopupPresentation } from "./NSEPopup";
-import { useNSEOverlayProvider } from "./NSEOverlayProvider";
-import type { NSEOverlayDismissReason } from "./overlayTypes";
-import { useOptionalNSEWindowSurfaceBridge, type NSEWindowSurfaceBridge, type NSEPopoverPreferredEdge, type NSEPopoverBehavior } from "./NSEWindowSurfaceBridge";
+import { ActionResponderContext } from "../Controls/Core/useNSEControlAction";
+import { NSEPopup, type PopupPresentation } from "./NSEPopup";
+import { useNSEOverlayProvider } from "./OverlayProvider";
+import type { OverlayDismissReason } from "./overlayTypes";
+import { useOptionalNSEWindowSurfaceBridge, type WindowSurfaceBridge, type PopoverPreferredEdge, type NSEPopoverBehavior } from "./NSEWindowSurfaceBridge";
 import { nsePopoverEdgePlacement } from "./popoverPosition";
 import { reportNSEWindowSurfaceError, useNSEWindowSurfaceLifecycle } from "./useNSEWindowSurfaceLifecycle";
 import { useNSEPresentedContent } from "./useNSEPresentedContent";
-import { NSEWindowFittingContent, type NSEWindowFittingSize } from "./NSEWindowFittingContent";
+import { WindowFittingContent, type WindowFittingSize } from "./NSEWindowFittingContent";
 
-export interface NSEPopoverWindowRequest {
+export interface PopoverWindowRequest {
   readonly id: string;
   readonly role: "popover" | "sheet";
   /** Null denotes an application-stage surface with no WindowManager parent. */
   readonly parentWindowControllerId: string | null;
   readonly anchor: HTMLElement | null;
-  readonly presentation: NSEPopupPresentation;
+  readonly presentation: PopupPresentation;
 }
 
 /**
  * Window-host adapter seam. A host that can register a serialisable content
  * renderer supplies this port; NSE itself never manufactures a WindowRecord.
  */
-export interface NSEPopoverWindowBridge {
-  open?(request: NSEPopoverWindowRequest): void;
-  close?(request: NSEPopoverWindowRequest): void;
-  present?: NSEWindowSurfaceBridge["present"];
-  dismiss?: NSEWindowSurfaceBridge["dismiss"];
+export interface PopoverWindowBridge {
+  open?(request: PopoverWindowRequest): void;
+  close?(request: PopoverWindowRequest): void;
+  present?: WindowSurfaceBridge["present"];
+  dismiss?: WindowSurfaceBridge["dismiss"];
 }
 
 export interface NSEPopoverProps {
@@ -56,14 +56,14 @@ export interface NSEPopoverProps {
   /** NSPopover.show(relativeTo:of:preferredEdge:): a rectangle in the anchor's
    * local coordinates; omitted means the entire positioning view. */
   readonly relativeTo?: Pick<DOMRectReadOnly, "x" | "y" | "width" | "height">;
-  readonly preferredEdge?: NSEPopoverPreferredEdge;
+  readonly preferredEdge?: PopoverPreferredEdge;
   readonly behavior?: NSEPopoverBehavior;
   /** Null denotes an application-stage surface with no WindowManager parent. */
   readonly parentWindowControllerId: string | null;
   readonly parentResponderId?: string;
   readonly parentId?: string | null;
   readonly parentScopeId?: string;
-  readonly presentation?: NSEPopupPresentation;
+  readonly presentation?: PopupPresentation;
   readonly labelledBy?: string;
   readonly describedBy?: string;
   /** The popover's accessible name (it has no title bar). */
@@ -74,13 +74,13 @@ export interface NSEPopoverProps {
    * `--nse-popover-content-fill` on its root for the arrow. Defaults to true. */
   readonly drawsBackground?: boolean;
   readonly children: ReactNode;
-  readonly windowBridge?: NSEPopoverWindowBridge;
+  readonly windowBridge?: PopoverWindowBridge;
   /** Keep content in the canonical overlay stack even when a physical-window bridge is available. */
   readonly surface?: "automatic" | "overlay";
-  onOpenChange(open: boolean, reason: NSEOverlayDismissReason): void;
+  onOpenChange(open: boolean, reason: OverlayDismissReason): void;
 }
 
-function useResolvedPresentation(presentation: NSEPopupPresentation | undefined): NSEPopupPresentation {
+function useResolvedPresentation(presentation: PopupPresentation | undefined): PopupPresentation {
   const { runtime } = useNSEOverlayProvider();
   const traits = useSyncExternalStore(
     (listener) => runtime.environment.presentation.subscribe(listener),
@@ -130,10 +130,10 @@ export function NSEPopover({
     placement: preferredEdge ? nsePopoverEdgePlacement[preferredEdge] : automaticPresentation.placement,
   }), [automaticPresentation, preferredEdge]);
   const hostedBridge = useOptionalNSEWindowSurfaceBridge();
-  const nearestResponder = useContext(NSEActionResponderContext);
+  const nearestResponder = useContext(ActionResponderContext);
   const { defaultParentResponderId } = useNSEOverlayProvider();
   const resolvedParentResponderId = parentResponderId ?? nearestResponder ?? defaultParentResponderId;
-  const canonicalBridge = surface === "overlay" ? null : windowBridge?.present && windowBridge.dismiss ? windowBridge as NSEWindowSurfaceBridge : hostedBridge;
+  const canonicalBridge = surface === "overlay" ? null : windowBridge?.present && windowBridge.dismiss ? windowBridge as WindowSurfaceBridge : hostedBridge;
   const handleDidClose = useNSEWindowSurfaceLifecycle({
     bridge: canonicalBridge,
     requestId: id,
@@ -141,11 +141,11 @@ export function NSEPopover({
     onDismissRefused: () => onOpenChange(true, "programmatic"),
     onDidClose: () => onOpenChange(false, "programmatic"),
   });
-  const [fitting, setFitting] = useState<NSEWindowFittingSize | null>(null);
-  const onFittingSize = useCallback((next: NSEWindowFittingSize) => {
+  const [fitting, setFitting] = useState<WindowFittingSize | null>(null);
+  const onFittingSize = useCallback((next: WindowFittingSize) => {
     setFitting((current) => current && current.width === next.width && current.height === next.height ? current : next);
   }, []);
-  const windowRequest = useMemo<NSEPopoverWindowRequest>(() => ({
+  const windowRequest = useMemo<PopoverWindowRequest>(() => ({
     id,
     role: resolvedPresentation.mode === "sheet" ? "sheet" : "popover",
     parentWindowControllerId,
@@ -185,7 +185,7 @@ export function NSEPopover({
   }), [anchor, relativeTo, preferredEdge, behavior, drawsBackground, describedBy, contentSize?.height, contentSize?.width, fitting?.height, fitting?.width, handleDidClose, id, labelledBy, parentWindowControllerId, resolvedParentResponderId, resolvedPresentation.mode, resolvedPresentation.placement, resolvedPresentation.collisionPadding, title]);
   const presentedContent = useNSEPresentedContent(contentSize
     ? children
-    : <NSEWindowFittingContent onFittingSize={onFittingSize}>{children}</NSEWindowFittingContent>);
+    : <WindowFittingContent onFittingSize={onFittingSize}>{children}</WindowFittingContent>);
   useEffect(() => {
     if (!open || !canonicalBridge) return;
     canonicalBridge.present(canonicalRequest, presentedContent).catch((error: unknown) => {

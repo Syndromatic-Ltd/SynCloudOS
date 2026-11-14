@@ -21,7 +21,7 @@
 import { defineSyncUndoAction } from "../../../SynCloudOS/nseRuntimeContracts";
 import type { NSEUndoManagerPort } from "./valueControlTypes";
 
-export class NSEValueControlUnknownStateError extends Error {
+export class ValueControlUnknownStateError extends Error {
   readonly code = "nse-value-control-outcome-unknown";
 
   constructor(message: string, options?: ErrorOptions) {
@@ -30,7 +30,7 @@ export class NSEValueControlUnknownStateError extends Error {
   }
 }
 
-export class NSEValueControlCompensationError extends AggregateError {
+export class ValueControlCompensationError extends AggregateError {
   readonly code = "nse-value-control-compensation-failed";
 
   constructor(primary: unknown, compensation: readonly unknown[]) {
@@ -71,10 +71,10 @@ export function commitUndoableValue<T>(options: {
       catch (rollbackError) { compensationFailures.push(rollbackError); }
     }
     if (compensationFailures.length > 0) {
-      throw new NSEValueControlCompensationError(error, compensationFailures);
+      throw new ValueControlCompensationError(error, compensationFailures);
     }
     if (!published) {
-      throw new NSEValueControlUnknownStateError(
+      throw new ValueControlUnknownStateError(
         "The controlled value setter failed before acknowledging publication; its model state is unknown.",
         { cause: error },
       );

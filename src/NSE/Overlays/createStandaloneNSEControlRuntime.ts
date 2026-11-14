@@ -25,29 +25,29 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
   type ReactNode,
 } from "react";
-import { createNSEOverlayManager } from "./NSEOverlayManager";
+import { createOverlayManager } from "./overlayManager";
 import type {
-  NSEOverlayFocusScopeOptions,
-  NSEOverlayManager,
-  NSEOverlayRuntimePort,
+  OverlayFocusScopeOptions,
+  OverlayManager,
+  OverlayRuntimePort,
 } from "./overlayTypes";
-import type { NSEFocusPort, NSEFocusScopeOptions } from "../Focus/NSEFocusPort";
+import type { FocusPort, FocusScopeOptions } from "../Focus/NSEFocusPort";
 import type { SynCloudOSPresentationTraits } from "../../SynCloudOS/SynCloudOS";
 
-export interface NSEStandaloneControlRuntimeOptions {
+export interface StandaloneControlRuntimeOptions {
   readonly document: Document;
   readonly window: Window;
-  readonly presentation: NSEOverlayRuntimePort["environment"]["presentation"];
+  readonly presentation: OverlayRuntimePort["environment"]["presentation"];
   readonly parentResponderId?: string;
   readonly runtimeId?: string;
-  readonly onPlacementFailure?: NSEOverlayRuntimePort["reportPlacementFailure"];
+  readonly onPlacementFailure?: OverlayRuntimePort["reportPlacementFailure"];
 }
 
-export interface NSEStandaloneControlRuntime {
-  readonly runtime: NSEOverlayRuntimePort;
-  readonly runtimePort: NSEOverlayRuntimePort;
-  readonly manager: NSEOverlayManager;
-  readonly focusPort: NSEFocusPort;
+export interface StandaloneControlRuntime {
+  readonly runtime: OverlayRuntimePort;
+  readonly runtimePort: OverlayRuntimePort;
+  readonly manager: OverlayManager;
+  readonly focusPort: FocusPort;
   readonly parentResponderId: string;
   start(): void;
   dispose(reason?: unknown): void;
@@ -55,7 +55,7 @@ export interface NSEStandaloneControlRuntime {
 
 interface LocalFocusScopeOptions {
   readonly scopeId: string;
-  readonly kind: NSEFocusScopeOptions["kind"] | NSEOverlayFocusScopeOptions["kind"];
+  readonly kind: FocusScopeOptions["kind"] | OverlayFocusScopeOptions["kind"];
   readonly parentResponderId?: string;
   readonly parentScopeId?: string;
   readonly modal?: boolean;
@@ -73,7 +73,7 @@ interface LocalFocusScopeRecord {
 
 interface LocalFocusAuthority {
   readonly runtimeId: string;
-  readonly focusPort: NSEFocusPort;
+  readonly focusPort: FocusPort;
   start(): void;
   restoreFocus(responderId: string, anchor: HTMLElement | null): void;
   enter(options: LocalFocusScopeOptions, root: HTMLElement | null): () => void;
@@ -169,7 +169,7 @@ function responderMarker(element: EventTarget | null): string | null {
 
 class LocalFocusAuthorityImpl implements LocalFocusAuthority {
   readonly runtimeId: string;
-  readonly focusPort: NSEFocusPort;
+  readonly focusPort: FocusPort;
   #document: Document;
   #scopes = new Map<string, LocalFocusScopeRecord>();
   #lastFocusedByResponder = new Map<string, HTMLElement>();
@@ -189,7 +189,7 @@ class LocalFocusAuthorityImpl implements LocalFocusAuthority {
     this.runtimeId = runtimeId;
     this.focusPort = {
       runtimeId,
-      wrapFocusScope: (options: NSEFocusScopeOptions, children: ReactNode) => createElement(StandaloneFocusScope, {
+      wrapFocusScope: (options: FocusScopeOptions, children: ReactNode) => createElement(StandaloneFocusScope, {
         authority: this,
         options,
         children,
@@ -265,7 +265,7 @@ function StandaloneFocusScope({
   children,
 }: {
   readonly authority: LocalFocusAuthorityImpl;
-  readonly options: NSEFocusScopeOptions;
+  readonly options: FocusScopeOptions;
   readonly children: ReactNode;
 }) {
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -308,11 +308,11 @@ function StandaloneFocusScope({
 // The local authority exposes the active element through the explicit
 // document supplied by the standalone host; scopes never consult globals.
 
-export function createStandaloneNSEControlRuntime(options: NSEStandaloneControlRuntimeOptions): NSEStandaloneControlRuntime {
+export function createStandaloneNSEControlRuntime(options: StandaloneControlRuntimeOptions): StandaloneControlRuntime {
   if (!options.document || !options.window || !options.presentation) throw new TypeError("Standalone NSE controls require a document, window and presentation port.");
   const runtimeId = options.runtimeId?.trim() || nextRuntimeId();
   const parentResponderId = options.parentResponderId?.trim() || `standalone:${runtimeId}`;
-  const manager = createNSEOverlayManager();
+  const manager = createOverlayManager();
   const controller = new AbortController();
   const focusAuthority = new LocalFocusAuthorityImpl(options.document, runtimeId);
   const workAreaListeners = new Set<() => void>();
@@ -355,7 +355,7 @@ export function createStandaloneNSEControlRuntime(options: NSEStandaloneControlR
     options.window.clearTimeout(handle as number);
   };
 
-  const runtime: NSEOverlayRuntimePort = {
+  const runtime: OverlayRuntimePort = {
     runtimeId,
     signal: controller.signal,
     environment: {

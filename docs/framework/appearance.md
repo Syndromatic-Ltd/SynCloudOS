@@ -10,24 +10,28 @@ What you import depends on whether the page runs the SynCloudOS host.
 
 | Page | Imports | Appearance |
 | --- | --- | --- |
-| A site or single application on `mountSynCloudOS` | `@syndromatic/syncloudos/nse/styles.css` and `@syndromatic/syncloudos/browser/styles.css`, once, in the host entry | The host installs Atmo for the shell and every SynWare it hosts. Don't import the Atmo theme stylesheet or wrap anything in `NSEAppearanceProvider`. |
-| A standalone React page without the host | `@syndromatic/syncloudos/nse/styles.css` and `@syndromatic/syncloudos/nse/themes/atmo/styles.css` | Wrap the page in `NSEAppearanceProvider`, as below. |
+| A site or single application on `mountSynCloudOS` | `@syndromatic/syncloudos/nse/styles.css` and `@syndromatic/syncloudos/browser/styles.css`, once, in the host entry | The host installs Atmo for the shell and every SynWare it hosts. Don't import the Atmo theme stylesheet or set an appearance on the root view. |
+| A standalone React page without the host | `@syndromatic/syncloudos/nse/styles.css` and `@syndromatic/syncloudos/nse/themes/atmo/styles.css` | Set an `NSEAppearance` on the page's root `NSEView`, as below. |
 
-A SynWare never imports these stylesheets itself; the page that hosts it does. A standalone React page provides the appearance directly:
+A SynWare never imports these stylesheets itself; the page that hosts it does. A standalone React page sets the appearance on its root view, as `NSView.appearance` does:
 
 ```tsx
-import { NSEAppearanceProvider } from "@syndromatic/syncloudos/nse/appearance";
+import { NSEAppearance } from "@syndromatic/syncloudos/nse/appearance";
 import { atmoTheme } from "@syndromatic/syncloudos/nse/themes/atmo";
-import { NSEButton } from "@syndromatic/syncloudos/nse";
+import { NSEButton, NSEView } from "@syndromatic/syncloudos/nse";
+
+const appearance = new NSEAppearance("aqua", { theme: atmoTheme });
 
 export function Page() {
   return (
-    <NSEAppearanceProvider theme={atmoTheme} colourScheme="auto">
+    <NSEView appearance={appearance}>
       <NSEButton title="Continue" keyEquivalent={"\r"} />
-    </NSEAppearanceProvider>
+    </NSEView>
   );
 }
 ```
+
+Use `"darkAqua"` for the dark appearance. Views without an appearance take their superview's, as `NSView.effectiveAppearance` does.
 
 ## Axes of appearance
 

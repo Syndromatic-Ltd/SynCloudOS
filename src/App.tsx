@@ -24,7 +24,8 @@ import { WebspringHost } from "./Webspring/WebspringHost";
 import type { SynCloudOSShellResources } from "./Webspring/WebspringController";
 import type { AuthenticationInput, WebspringDefinition } from "./Webspring/webspringTypes";
 import { WindowContentRendererRegistry, WindowLayer, syncApplicationWindowContentRenderers, type ApplicationWindowRendererRegistrations } from "./Webspring/WindowLayer";
-import type { SystemStartupPhase } from "./Webspring/SystemStartupLayer";
+import { systemStartupPhaseMachine, type SystemStartupPhase } from "./SynCloudOS/RootRuntime/startupPhaseMachine";
+import { nextState } from "./Foundation/internal/StateMachine";
 import { useRuntimeSelector, useKernelSynCloudOS } from "./SynCloudOSReact";
 import { SystemUILayer } from "./Webspring/SystemUILayer";
 
@@ -69,7 +70,7 @@ export function App({ shell, shellResources, authentication }: {
   const [startupPhase, setStartupPhase] = useState<SystemStartupPhase>("booting");
 
   useEffect(() => {
-    setStartupPhase(presentationReady ? "complete" : "material");
+    setStartupPhase(phase => nextState(systemStartupPhaseMachine.definition, phase, presentationReady ? "presentationReady" : "presentationPending") ?? phase);
   }, [presentationReady]);
 
   useEffect(() => {

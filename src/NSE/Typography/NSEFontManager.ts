@@ -19,11 +19,11 @@
  */
 
 import { normaliseFontDescriptor, type NSEFontDescriptor, type NSEFontFamily, type NSEFontPreset } from "../Text/fontDescriptors";
-import { sharedNSEFontLibrary, type NSEFontLibrary } from "./NSEFontLibrary";
+import { sharedNSEFontLibrary, type FontLibrary } from "./NSEFontLibrary";
 import {
   normaliseFontCommandPayload,
   normaliseParagraphStyleMutation,
-  type NSEFontCommandPayload,
+  type FontCommandPayload,
   type NSEParagraphStyle,
 } from "./typographyTypes";
 
@@ -100,25 +100,25 @@ export interface NSEFontManagerOptions {
   readonly families?: readonly NSEFontFamily[];
   /** Imported fonts and collections; the shared library by default, or
    * null to offer only the supplied families. */
-  readonly library?: NSEFontLibrary | null;
+  readonly library?: FontLibrary | null;
 }
 
 export class NSEFontManager {
   /** Captured host-supplied metadata. Imported faces are in allFamilies(). */
   readonly availableFamilies: readonly NSEFontFamily[];
   readonly #presets: ReadonlyMap<string, NSEFontPreset>;
-  readonly #libraryOption: NSEFontLibrary | null | undefined;
+  readonly #libraryOption: FontLibrary | null | undefined;
 
   constructor(options: NSEFontManagerOptions = {}) {
     const supplied = metadataRecord(options, "Font manager options", ["families", "library"]);
     this.availableFamilies = captureFamilies(supplied.families === undefined ? [] : supplied.families);
     this.#presets = new Map(this.availableFamilies.flatMap((family) => family.presets).map((preset) => [preset.id, preset]));
-    this.#libraryOption = supplied.library as NSEFontLibrary | null | undefined;
+    this.#libraryOption = supplied.library as FontLibrary | null | undefined;
   }
 
   /** Resolved on first use, so constructing a manager touches no browser
    * font, storage or database API. */
-  get library(): NSEFontLibrary | null {
+  get library(): FontLibrary | null {
     return this.#libraryOption === undefined ? sharedNSEFontLibrary() : this.#libraryOption;
   }
 
@@ -162,7 +162,7 @@ export class NSEFontManager {
     });
   }
 
-  fontCommand(id: string, size: number): NSEFontCommandPayload {
+  fontCommand(id: string, size: number): FontCommandPayload {
     if (!this.getPreset(id)) throw new TypeError(`Unknown font ${id}.`);
     return normaliseFontCommandPayload({ fontId: id, size });
   }

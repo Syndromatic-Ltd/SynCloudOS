@@ -21,19 +21,19 @@
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState, type HTMLAttributes, type ReactNode, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import "./nsePreferencesToast.css";
-import { NSEPresence, useNSEAnimationEnvironment, useNSEPresentation, useNSEPresenceExiting } from "../Animation";
+import { Presence, useNSEAnimationEnvironment, useNSEPresentation, useNSEPresenceExiting } from "../Animation";
 import {
   resolveNSEPreferencesTransitions,
-  type NSEPreferencesPaneDirection,
-  type NSEPreferencesTransitions,
+  type PreferencesPaneDirection,
+  type PreferencesTransitions,
 } from "./NSEPreferencesToast.transitions";
-import { NSEListItem } from "../Controls/Selection/NSEListItem";
-import { NSEFocusScope, resolveNSEFocusReturnTarget } from "../Focus";
+import { GroupedRow } from "../Controls/Selection/GroupedRow";
+import { FocusScope, resolveNSEFocusReturnTarget } from "../Focus";
 import { NSEWindowController } from "../Application/NSEWindowController";
 import { NSETitlebarAccessoryViewController } from "../Application/NSETitlebarAccessoryViewController";
-import { NSEWindowTitlebarContent } from "../Windows/windowTitlebarContext";
+import { WindowTitlebarContent } from "../Windows/windowTitlebarContext";
 import { NSEImage } from "../Controls/Images/NSEImageResource";
-import { NSEControlImage } from "../Controls/Images/NSEControlImage";
+import { ControlImage } from "../Controls/Images/NSEControlImage";
 import { NSEButton } from "../Controls/Buttons/NSEButton";
 import { projectNSEAppearance, useNSEAppearance } from "../Appearance";
 
@@ -62,7 +62,7 @@ export interface NSEPreferencePane {
   render: () => ReactNode;
 }
 
-export interface NSEPreferencesToastProps {
+export interface PreferencesToastProps {
   open: boolean;
   /** Runtime hosts can provide a stable logical scope identity. */
   focusScopeId?: string;
@@ -79,14 +79,14 @@ export interface NSEPreferencesToastProps {
   onClose: () => void;
 }
 
-type PaneDirection = NSEPreferencesPaneDirection;
+type PaneDirection = PreferencesPaneDirection;
 
 /** The way the pane stack last moved. A context rather than a prop, so a title
  * or pane already leaving takes its exit from the navigation that removed it
  * (as Framer Motion's AnimatePresence `custom` did). */
 const PaneDirectionContext = createContext<PaneDirection>("forward");
 
-function usePreferencesTransitions(): NSEPreferencesTransitions {
+function usePreferencesTransitions(): PreferencesTransitions {
   return resolveNSEPreferencesTransitions(useNSEAnimationEnvironment().reducedMotion);
 }
 
@@ -167,11 +167,11 @@ function PreferencesTitlebar({ title, titleView, leading }: { title: ReactNode; 
   if (!panel || panel.isDisposed) return null;
   const back = panel.window.titlebarAccessoryViewControllers[0] as PreferencesBackAccessory;
   back.content = leading;
-  return <NSEWindowTitlebarContent toolbarStyle={panel.window.toolbarStyle} title={titleView}
+  return <WindowTitlebarContent toolbarStyle={panel.window.toolbarStyle} title={titleView}
     leading={<PreferencesBackAccessory.view controller={back} />} className="nse-prefs-header" />;
 }
 
-export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialPane, backLabel, appearance, resolvedMode, runtimeOwner, onClose }: NSEPreferencesToastProps) {
+export function PreferencesToast({ open, focusScopeId, title, panes, initialPane, backLabel, appearance, resolvedMode, runtimeOwner, onClose }: PreferencesToastProps) {
   const inheritedAppearance = useNSEAppearance();
   const requestedAppearance = appearance ?? inheritedAppearance.requestedColourScheme;
   const projectedMode = resolvedMode ?? inheritedAppearance.resolvedColourScheme;
@@ -260,9 +260,9 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
   // Mounted whether or not it is open: returning null on close would unmount the
   // panel on the same frame the flag flips, and the exit would never play.
   return createPortal(
-    <NSEPresence onExitComplete={() => setActiveId(null)}>
+    <Presence onExitComplete={() => setActiveId(null)}>
       {open ? (
-        <NSEFocusScope options={{ scopeId: focusScopeId ?? "nse-preferences-toast", kind: "modal", modal: true, trapFocus: true, asChild: true }}>
+        <FocusScope options={{ scopeId: focusScopeId ?? "nse-preferences-toast", kind: "modal", modal: true, trapFocus: true, asChild: true }}>
           <div
             className="nse-prefs-backdrop"
             {...appearanceProjection}
@@ -301,15 +301,15 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
                 // through each other without either escaping the plate or
                 // changing the header's height while it happens.
                 <span data-nse-part="header" className="nse-prefs-title-clip">
-                  <NSEPresence initial={false}>
+                  <Presence initial={false}>
                     <PaneTitle key={active ? active.id : "__root"}>
                       {active ? active.label : title}
                     </PaneTitle>
-                  </NSEPresence>
+                  </Presence>
                 </span>
               )}
               leading={(
-                <NSEPresence initial={false}>
+                <Presence initial={false}>
                   {active ? (
                     <BackSlot key="back">
                       <NSEButton
@@ -322,7 +322,7 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
                       />
                     </BackSlot>
                   ) : null}
-                </NSEPresence>
+                </Presence>
               )}
             />
             <PreferencesBody height={bodyHeight}>
@@ -331,13 +331,13 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
                   changed, THEN the box resized — and doubled how long the whole
                   move took. */}
               <div data-nse-part="content" className="nse-prefs-panes">
-                <NSEPresence initial={false}>
+                <Presence initial={false}>
                 <PaneSlide key={active ? active.id : "__list"}>
                   <div data-nse-part="content" className="nse-prefs-pane-content" ref={trackContent}>
                   {active ? active.render() : (
                     <div data-nse-part="content" className="nse-prefs-list">
                       {panes.map((pane) => (
-                        <NSEListItem
+                        <GroupedRow
                           key={pane.id}
                           leading={pane.icon}
                           meta={pane.meta}
@@ -355,7 +355,7 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
                                   {pane.accessory}
                                 </span>
                               ) : null}
-                              <span data-nse-part="disclosure" className="nse-prefs-chevron" aria-hidden="true"><NSEControlImage image={NSEImage.named(NSEImage.goForwardTemplateName)} /></span>
+                              <span data-nse-part="disclosure" className="nse-prefs-chevron" aria-hidden="true"><ControlImage image={NSEImage.named(NSEImage.goForwardTemplateName)} /></span>
                             </span>
                           )}
                           onClick={() => goToPane(pane.id)}
@@ -363,21 +363,21 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
                           {/* Native keyboard activation bubbles through the same row action.
                               Accessories remain siblings, never children of this button. */}
                           <button type="button" data-nse-part="cell" className="nse-prefs-pane-link">{pane.label}</button>
-                        </NSEListItem>
+                        </GroupedRow>
                       ))}
                     </div>
                   )}
                   </div>
                 </PaneSlide>
-                </NSEPresence>
+                </Presence>
               </div>
             </PreferencesBody>
             </PaneDirectionContext.Provider>
           </PreferencesPanel>
           </div>
-        </NSEFocusScope>
+        </FocusScope>
       ) : null}
-    </NSEPresence>,
+    </Presence>,
     document.body
   );
 }

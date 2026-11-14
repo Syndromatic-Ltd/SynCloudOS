@@ -22,11 +22,13 @@ import {
   createContext,
   useCallback,
   useContext,
+  useLayoutEffect,
   useMemo,
   useSyncExternalStore,
   type PropsWithChildren,
 } from "react";
 import { freezeNSETheme, type NSETheme } from "../Theme/NSETheme";
+import { installNSEHookMirror } from "../Theme/contract/hookMirrorDOM";
 import { atmoTheme } from "./atmoTheme";
 import { projectNSEAppearance } from "./appearanceProjection";
 import type {
@@ -119,6 +121,8 @@ export function NSEAppearanceProvider({
     transparency,
   ]);
   const projection = useMemo(() => projectNSEAppearance(value), [value]);
+  // Hooks the JSX runtime did not write (imperative DOM, unbundled apps) still get their mirror classes.
+  useLayoutEffect(() => typeof document === "undefined" ? undefined : installNSEHookMirror(document), []);
 
   const contextualChildren = (
     <NSEAppearanceContext.Provider value={value}>

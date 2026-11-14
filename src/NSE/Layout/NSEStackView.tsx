@@ -20,7 +20,6 @@
 
 import {
   Children,
-  cloneElement,
   isValidElement,
   useCallback,
   useEffect,
@@ -32,8 +31,9 @@ import {
   type ReactElement,
   type ReactNode,
 } from "react";
+import { cloneElement } from "../Theme/contract/hookMirrorReact";
 import { createPortal } from "react-dom";
-import { NSEFlowStackView, stackNeedsArrangedLayout } from "./flowStackView";
+import { FlowStackView, stackNeedsArrangedLayout } from "./flowStackView";
 import { resolveNSESpacing } from "./layoutSpacing";
 import { NSEStackItem } from "./NSEStackItem";
 import { resolveStackLayout } from "./resolveStackLayout";
@@ -166,7 +166,7 @@ function firstFocusable(target: HTMLElement | null | undefined): HTMLElement | n
  * presentation. Moving the host preserves component state and effect identity
  * without cloning an authoritative action into a second React parent.
  */
-function NSEStackItemPortal({
+function StackItemPortal({
   element,
   ownerDocument,
   target,
@@ -263,7 +263,7 @@ function isNativeOverflowActionTarget(target: EventTarget | null): boolean {
  * runtime-owned observer and scheduler pair. Both give the same frames.
  */
 export function NSEStackView(props: NSEStackViewProps) {
-  return stackNeedsArrangedLayout(props) ? <NSEArrangedStackView {...props} /> : <NSEFlowStackView {...props} />;
+  return stackNeedsArrangedLayout(props) ? <ArrangedStackView {...props} /> : <FlowStackView {...props} />;
 }
 
 /** A named spacing is resolved to pixels from the host's computed style. */
@@ -279,7 +279,7 @@ function useSpacingInPixels(spacing: NSEStackViewProps["spacing"], host: HTMLEle
   return resolved;
 }
 
-function NSEArrangedStackView({
+function ArrangedStackView({
   orientation = "horizontal",
   distribution = "fill",
   alignment = orientation === "vertical" ? "fill" : "centre",
@@ -591,7 +591,7 @@ function NSEArrangedStackView({
             ? overflowMenu
             : visibleItemsHost;
         return (
-          <NSEStackItemPortal
+          <StackItemPortal
             key={entry.layout.id}
             element={element}
             ownerDocument={host?.ownerDocument ?? null}

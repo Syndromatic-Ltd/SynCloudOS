@@ -22,14 +22,13 @@ import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
 
 import { nseControlHooks, nseStateHooks } from "../../Theme/contract/hooks";
 import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction";
-import { NSEMetalThumb, type NSEThumbMaterial } from "../../Appearance/NSEMetalThumb";
-import { NSEDivider } from "../Selection/NSEDivider";
+import { MetalThumb, type NSEThumbMaterial } from "../../Appearance/MetalThumb";
+import { Divider } from "../Selection/NSEDivider";
 import { nseCSSValue } from "../../Graphics/NSEShadow";
-import { nseNonNegative, useNSEViewLayerProperties, type NSEViewLayerProperties } from "../../Views/viewLayerProperties";
+import { nseNonNegative, useNSEViewLayerProperties, type ViewLayerProperties } from "../../Views/viewLayerProperties";
 import {
   Children,
   Fragment,
-  cloneElement,
   isValidElement,
   useCallback,
   useEffect,
@@ -45,18 +44,19 @@ import {
   type PointerEvent as ReactPointerEvent,
   type ReactNode
 } from "react";
+import { cloneElement } from "../../Theme/contract/hookMirrorReact";
 import type { NSEFormatter, NSEFormatterContext } from "../../../Foundation/public";
 import {
   useNSEControlCommand,
   useNSEControlFormReset,
   useNSEControlValue,
-  type NSECheckboxState,
-  type NSEControlCommandBinding,
+  type CheckboxState,
+  type ControlCommandBinding,
   type NSEControlInteractionPhase,
   type NSEControlValidation,
 } from "../Core";
 import type { HFXFeedbackRequest } from "../../Feedback";
-import type { NSESmoothSurfaceRequest } from "../../SmoothSurface";
+import type { SmoothSurfaceRequest } from "../../SmoothSurface";
 import {
   classes,
   clamp,
@@ -95,7 +95,7 @@ export interface NSEPlainTextFieldProps extends NSETextFieldChromeProps, Omit<
   value?: string;
   defaultValue?: string;
   invalid?: boolean;
-  command?: NSEControlCommandBinding<string>;
+  command?: ControlCommandBinding<string>;
   onValueChange?(value: string, phase: NSEControlInteractionPhase): void;
 }
 
@@ -108,7 +108,7 @@ export interface NSEFormattedTextFieldProps<T> extends NSETextFieldChromeProps, 
   invalid?: boolean;
   formatter: NSEFormatter<T>;
   formatterContext: NSEFormatterContext;
-  command?: NSEControlCommandBinding<T>;
+  command?: ControlCommandBinding<T>;
   onValueChange?(value: T, phase: NSEControlInteractionPhase): void;
 }
 
@@ -130,7 +130,7 @@ export interface NSETextFieldProps<T = string> extends NSETextFieldChromeProps, 
   invalid?: boolean;
   formatter?: NSEFormatter<T>;
   formatterContext?: NSEFormatterContext;
-  command?: NSEControlCommandBinding<T>;
+  command?: ControlCommandBinding<T>;
   onValueChange?(value: T, phase: NSEControlInteractionPhase): void;
 }
 
@@ -167,7 +167,7 @@ export interface NSELabelTextFieldProps extends Omit<HTMLAttributes<HTMLSpanElem
 /** NSView.BackgroundStyle. */
 export type NSELabelBackgroundStyle = "normal" | "emphasised" | "raised" | "lowered";
 
-function NSELabelTextField({ isEditable: _isEditable, font = "body", textColour = "labelColour", monospacedDigits = false, lineBreakMode = "byWordWrapping", backgroundStyle = "normal", className = "", children, ...props }: NSELabelTextFieldProps) {
+function LabelTextField({ isEditable: _isEditable, font = "body", textColour = "labelColour", monospacedDigits = false, lineBreakMode = "byWordWrapping", backgroundStyle = "normal", className = "", children, ...props }: NSELabelTextFieldProps) {
   return (
     <span
       {...props}
@@ -185,18 +185,18 @@ function NSELabelTextField({ isEditable: _isEditable, font = "body", textColour 
   );
 }
 
-type NSEEditableTextFieldProps<T> = NSEBoundValueProps<T, NSETextFieldProps<T>, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>;
+type EditableTextFieldProps<T> = NSEBoundValueProps<T, NSETextFieldProps<T>, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>;
 
-export function NSETextField<T = string>(props: NSELabelTextFieldProps | NSEEditableTextFieldProps<T>) {
-  if ((props as { readonly isEditable?: boolean }).isEditable === false) return <NSELabelTextField {...props as NSELabelTextFieldProps} />;
-  return <NSEEditableTextField<T> {...props as NSEEditableTextFieldProps<T>} />;
+export function NSETextField<T = string>(props: NSELabelTextFieldProps | EditableTextFieldProps<T>) {
+  if ((props as { readonly isEditable?: boolean }).isEditable === false) return <LabelTextField {...props as NSELabelTextFieldProps} />;
+  return <EditableTextField<T> {...props as EditableTextFieldProps<T>} />;
 }
 
-function NSEEditableTextField<T>(props: NSEEditableTextFieldProps<T>) {
-  return <NSETextFieldControl {...useNSEValueBinding<T, NSETextFieldProps<T>, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>(props, {fallback: '' as T})} />;
+function EditableTextField<T>(props: EditableTextFieldProps<T>) {
+  return <TextFieldControl {...useNSEValueBinding<T, NSETextFieldProps<T>, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>(props, {fallback: '' as T})} />;
 }
 
-function NSETextFieldControl<T = string>(props: NSETextFieldProps<T>) {
+function TextFieldControl<T = string>(props: NSETextFieldProps<T>) {
   const {
     label,
     controlSize = "regular",
@@ -247,7 +247,7 @@ function NSETextFieldControl<T = string>(props: NSETextFieldProps<T>) {
   });
   const [draft, setDraft] = useState(() => toTextValue(currentValue.value, formatter, formatterContext));
   const [editingValidation, setEditingValidation] = useState<NSEControlValidation | undefined>();
-  const command = useNSEControlCommand(commandBinding as NSEControlCommandBinding<T | string> | undefined);
+  const command = useNSEControlCommand(commandBinding as ControlCommandBinding<T | string> | undefined);
   const effectiveValidation = editingValidation ?? validation ?? (invalid
     ? { kind: "invalid", code: "invalid", message: "This value needs attention." } as const
     : undefined);
@@ -410,7 +410,7 @@ function NSETextFieldControl<T = string>(props: NSETextFieldProps<T>) {
   );
 }
 
-export interface NSEInputBoxProps extends HTMLAttributes<HTMLDivElement> {
+export interface InputBoxProps extends HTMLAttributes<HTMLDivElement> {
   label?: ReactNode;
   invalid?: boolean;
   /** NSControl.isEnabled (default true). */
@@ -440,7 +440,7 @@ A box styled like a single input that wraps a set of controls — an icon, the t
 so they appear to live inside one field. It takes on the focused look whenever any
 child is focused, or always when `alwaysLooksFocused` is set.
 */
-export function NSEInputBox({
+export function InputBox({
   label,
   invalid = false,
   isEnabled = true,
@@ -448,7 +448,7 @@ export function NSEInputBox({
   className = "",
   children,
   ...props
-}: NSEInputBoxProps) {
+}: InputBoxProps) {
   return (
     <div
       {...props}
@@ -482,7 +482,7 @@ export interface NSESwitchProps extends Omit<ButtonHTMLAttributes<HTMLButtonElem
   selectionHaptic?: HFXFeedbackRequest;
 }
 
-type NSESwitchControlProps = Omit<NSESwitchProps, "state" | "defaultState" | "onStateChange"> & {
+type SwitchControlProps = Omit<NSESwitchProps, "state" | "defaultState" | "onStateChange"> & {
   checked?: boolean;
   defaultChecked?: boolean;
   onCheckedChange?: (checked: boolean) => void;
@@ -490,15 +490,15 @@ type NSESwitchControlProps = Omit<NSESwitchProps, "state" | "defaultState" | "on
 
 /** NSSwitch: an on/off switch. Bound through Cocoa Bindings' `value`, it reads and writes a Boolean. */
 export function NSESwitch(props: NSEBoundValueProps<boolean, NSESwitchProps, 'state' | 'defaultState' | 'onStateChange'>) {
-  const bound = useNSEValueBinding<boolean, NSESwitchControlProps & { binding?: unknown }, 'checked' | 'onCheckedChange'>(
+  const bound = useNSEValueBinding<boolean, SwitchControlProps & { binding?: unknown }, 'checked' | 'onCheckedChange'>(
     toSwitchControlProps(props) as never,
     { value: 'checked', change: 'onCheckedChange', excludes: ['defaultChecked'], fallback: false },
-  ) as NSESwitchControlProps & { disabled?: boolean };
+  ) as SwitchControlProps & { disabled?: boolean };
   const { disabled, ...rest } = bound;
-  return <NSESwitchControl {...rest} isEnabled={(rest.isEnabled ?? true) && !disabled} />;
+  return <SwitchControl {...rest} isEnabled={(rest.isEnabled ?? true) && !disabled} />;
 }
 
-function toSwitchControlProps(props: NSESwitchProps & { binding?: unknown }): NSESwitchControlProps & { binding?: unknown } {
+function toSwitchControlProps(props: NSESwitchProps & { binding?: unknown }): SwitchControlProps & { binding?: unknown } {
   const { state, defaultState, onStateChange, ...rest } = props;
   return {
     ...rest,
@@ -508,7 +508,7 @@ function toSwitchControlProps(props: NSESwitchProps & { binding?: unknown }): NS
   };
 }
 
-function NSESwitchControl({
+function SwitchControl({
   thumbMaterial = "standard",
   checked,
   defaultChecked,
@@ -524,7 +524,7 @@ function NSESwitchControl({
   style,
   type = "button",
   ...props
-}: NSESwitchControlProps) {
+}: SwitchControlProps) {
   const disabled = !isEnabled;
   const theme = useNSEThemeInteraction<HTMLButtonElement>(isEnabled, true, props);
   const { triggerNSEControlHaptic, triggerNSEControlHapticForEvent } = useNSEControlFeedback();
@@ -668,21 +668,21 @@ function NSESwitchControl({
         <span data-nse-part="fill" data-nse-position="trailing" className="nse-control-toggle-rail nse-control-toggle-rail-end" />
         <span data-nse-part="title" data-nse-state="on" className="nse-control-toggle-text nse-control-toggle-text-on"><span data-nse-part="label" className="nse-control-toggle-state-label" ref={onTextRef}>{onLabel}</span></span>
         <span data-nse-part="title" data-nse-state="off" className="nse-control-toggle-text nse-control-toggle-text-off"><span data-nse-part="label" className="nse-control-toggle-state-label" ref={offTextRef}>{offLabel}</span></span>
-        <span data-nse-part="knob" className="nse-control-toggle-thumb" ref={thumbRef}>{thumbMaterial === "metal" ? <NSEMetalThumb disabled={disabled} /> : null}</span>
+        <span data-nse-part="knob" className="nse-control-toggle-thumb" ref={thumbRef}>{thumbMaterial === "metal" ? <MetalThumb disabled={disabled} /> : null}</span>
       </span>
     </button>
   );
 }
 
-export interface NSERadioOption {
+export interface RadioOption {
   value: string;
   label: ReactNode;
   isEnabled?: boolean;
-  command?: NSEControlCommandBinding<{ readonly value: string }>;
+  command?: ControlCommandBinding<{ readonly value: string }>;
 }
 
-export interface NSERadioGroupProps extends Omit<HTMLAttributes<HTMLDivElement>, "onChange"> {
-  options: NSERadioOption[];
+export interface RadioGroupProps extends Omit<HTMLAttributes<HTMLDivElement>, "onChange"> {
+  options: RadioOption[];
   value?: string;
   defaultValue?: string;
   onValueChange?: (value: string, phase: "commit") => void;
@@ -695,8 +695,8 @@ export interface NSERadioGroupProps extends Omit<HTMLAttributes<HTMLDivElement>,
   selectionHaptic?: HFXFeedbackRequest;
 }
 
-interface NSERadioOptionControlProps {
-  readonly option: NSERadioOption;
+interface RadioOptionControlProps {
+  readonly option: RadioOption;
   readonly selected: boolean;
   readonly position: "single" | "first" | "middle" | "last";
   readonly name: string;
@@ -709,7 +709,7 @@ interface NSERadioOptionControlProps {
   readonly onKeyDown: (event: KeyboardEvent<HTMLInputElement>) => void;
 }
 
-function NSERadioOptionControl({ option, selected, position, name, required, disabled, tabStop, onAvailabilityChange, inputRef, onCommit, onKeyDown }: NSERadioOptionControlProps) {
+function RadioOptionControl({ option, selected, position, name, required, disabled, tabStop, onAvailabilityChange, inputRef, onCommit, onKeyDown }: RadioOptionControlProps) {
   const command = useNSEControlCommand(option.command);
   const presentation = command.presentation;
   const theme = useNSEThemeInteraction<HTMLLabelElement>(!disabled && option.isEnabled !== false, true);
@@ -760,11 +760,11 @@ function NSERadioOptionControl({ option, selected, position, name, required, dis
   );
 }
 
-export function NSERadioGroup(props: NSEBoundValueProps<string, NSERadioGroupProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>) {
-  return <NSERadioGroupControl {...useNSEValueBinding<string, NSERadioGroupProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>(props, {fallback:''})} />;
+export function RadioGroup(props: NSEBoundValueProps<string, RadioGroupProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>) {
+  return <RadioGroupControl {...useNSEValueBinding<string, RadioGroupProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>(props, {fallback:''})} />;
 }
 
-function NSERadioGroupControl({
+function RadioGroupControl({
   options,
   value,
   defaultValue,
@@ -779,7 +779,7 @@ function NSERadioGroupControl({
   onKeyDown,
   dir,
   ...props
-}: NSERadioGroupProps) {
+}: RadioGroupProps) {
   const disabled = !isEnabled;
   const { triggerNSEControlHaptic, triggerNSEControlHapticForEvent } = useNSEControlFeedback();
 
@@ -859,7 +859,7 @@ function NSERadioGroupControl({
               ? "last"
               : "middle";
         return (
-          <NSERadioOptionControl
+          <RadioOptionControl
             key={option.value}
             option={option}
             selected={selected}
@@ -925,7 +925,7 @@ export interface NSEBoxContentViewMargins {
  */
 export type NSEContentLayout = "stack" | "flow";
 
-export interface NSEBoxProps extends Omit<HTMLAttributes<HTMLFieldSetElement>, "title">, NSEViewLayerProperties {
+export interface NSEBoxProps extends Omit<HTMLAttributes<HTMLFieldSetElement>, "title">, ViewLayerProperties {
   /** NSBox.title. A titled separator draws its title as the theme's captioned separator. */
   title?: ReactNode;
   /** NSBox.titlePosition (default atTop with a title, otherwise noTitle). */
@@ -1016,7 +1016,7 @@ export function NSEBox({
     }
     const separatorLabel = props["aria-label"] ?? (typeof title === "string" ? title : undefined);
     if (title && titlePosition !== "noTitle") {
-      return <NSEDivider data-nse-control="box" data-nse-box-type={boxType} data-nse-title-position={titlePosition} data-nse-border-type={borderType} className={classes("nse-box", "nse-box-separator-titled", className)} variant="alpha" caption={title} label={separatorLabel} style={style} />;
+      return <Divider data-nse-control="box" data-nse-box-type={boxType} data-nse-title-position={titlePosition} data-nse-border-type={borderType} className={classes("nse-box", "nse-box-separator-titled", className)} variant="alpha" caption={title} label={separatorLabel} style={style} />;
     }
     return (
       <div

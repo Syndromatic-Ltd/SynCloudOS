@@ -21,7 +21,7 @@
 import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { RuntimeResourceLedger } from "../Resources/RuntimeResourceLedger";
 import type { RuntimePerformancePolicy } from "../Performance/RuntimePerformancePolicy";
-import { createAppLifecycleRules } from "../AppManager/AppLifecycle";
+import { canBeginAppLifecycleOperation, createAppLifecycleRules } from "../AppManager/AppLifecycle";
 import { AppInfo } from "../AppInfo/AppInfo";
 import type { AppLifecycleEvent, AppManagerRuntimeRecord, SynCloudOSAppLifecycleState } from "../AppManager/appManagerTypes";
 import type { SynCloudOSBundleLifecycleHook, SynCloudOSBundleLifecycleHookName, TrustedSynWareBundle } from "../BundleLoader/bundleTypes";
@@ -172,19 +172,6 @@ function isPolicyDenied(decision: unknown): boolean {
     ("decision" in decision && decision.decision === "deny") ||
     ("launch" in decision && decision.launch === "deny")
   );
-}
-
-function legalLifecycleState(stage: "launch" | "activate" | "suspend" | "close", state: SynCloudOSAppLifecycleState): boolean {
-  if (stage === "launch" || stage === "activate") {
-    return state === "registered" || state === "idle" || state === "ready" || state === "suspended";
-  }
-  if (stage === "suspend") return state === "active";
-  return state === "active" ||
-    state === "suspended" ||
-    state === "ready" ||
-    state === "idle" ||
-    state === "failed" ||
-    state === "registered";
 }
 
 export function createLifecycle(
@@ -808,7 +795,7 @@ export function createLifecycle(
           const access = validateLifecycleAccess(appId, stage);
           if (!access.ok) return access;
         }
-        return legalLifecycleState(stage, state)
+        return canBeginAppLifecycleOperation(stage, state)
           ? { ok: true }
           : { ok: false, code: "illegal-lifecycle-state", reason: `Cannot ${stage} ${appId} from ${state}.` };
       },
@@ -897,7 +884,7 @@ export function createLifecycle(
         if (!AppRegistry.getApp(appId)) return { ok: false, code: "app-not-found", reason: `No app is registered for ${appId}.` };
         const access = validateLifecycleAccess(appId, "launch");
         if (!access.ok) return access;
-        return legalLifecycleState("launch", state)
+        return canBeginAppLifecycleOperation("launch", state)
           ? { ok: true }
           : { ok: false, code: "illegal-lifecycle-state", reason: `Cannot launch ${appId} from ${state}.` };
       },
@@ -929,6 +916,10 @@ export function createLifecycle(
         }
         return result.transition;
       },
+      // AppKit sends applicationDidFinishLaunching once the main window is up, so presentation precedes did.
+      effects: options.presentAfterCommit
+        ? [{ onError: "stop", run: (context) => options.presentAfterCommit!({ signal: context.signal }) }]
+        : undefined,
       did,
     });
     return linkExternalSignal(retainOperation(handle), options.signal);

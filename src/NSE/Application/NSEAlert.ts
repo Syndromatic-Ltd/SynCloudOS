@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { nseEndSheet, nsePresentModalAlert, nsePresentWindowAlert, type NSESheet, type NSEWindow, type NSEWindowAlertRequest } from "./NSEWindowController";
+import { nseEndSheet, nsePresentModalAlert, nsePresentWindowAlert, type Sheet, type NSEWindow, type WindowAlertRequest } from "./NSEWindowController";
 
 /** How an alert presents itself, after NSAlert.Style. */
 export type NSEAlertStyle = "warning" | "informational" | "critical";
@@ -83,7 +83,7 @@ function requireTitle(value: unknown, owner: string): string {
  * With no buttons added, the alert shows one OK button. Escape, or closing the window, chooses the button titled
  * "Cancel" (or whose key equivalent is Escape), else the last button.
  */
-export class NSEAlert implements NSESheet {
+export class NSEAlert implements Sheet {
   #messageText = "";
   #informativeText = "";
   #alertStyle: NSEAlertStyle = "warning";
@@ -140,7 +140,7 @@ export class NSEAlert implements NSESheet {
     return this.#run(null, nsePresentModalAlert);
   }
 
-  async #run(window: NSEWindow | null, present: (request: NSEWindowAlertRequest, signal: AbortSignal) => Promise<string>): Promise<NSEModalResponse> {
+  async #run(window: NSEWindow | null, present: (request: WindowAlertRequest, signal: AbortSignal) => Promise<string>): Promise<NSEModalResponse> {
     const title = this.#messageText.trim();
     if (!title) throw new TypeError("An alert needs messageText before it is presented.");
     if (this.#presentation) throw new TypeError("This alert is already presented.");

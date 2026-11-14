@@ -20,7 +20,7 @@
 
 import { useEffect, useRef } from "react";
 
-export interface NSEDisposable {
+export interface Disposable {
   dispose(): void;
 }
 
@@ -29,20 +29,20 @@ export interface NSEDisposalScheduler {
   clearTimeout(handle: unknown): void;
 }
 
-interface NSEMicrotaskDisposalHandle { cancelled: boolean }
+interface MicrotaskDisposalHandle { cancelled: boolean }
 
 /** The default scheduler: it defers a release by one microtask, which is
  * enough for React's synchronous StrictMode cleanup/setup replay to cancel
  * it, and creates no runtime-owned timers while a shell is being unmounted. */
 const microtaskDisposalScheduler: NSEDisposalScheduler = Object.freeze({
   setTimeout(callback: () => void, _delayMs: number) {
-    const handle: NSEMicrotaskDisposalHandle = { cancelled: false };
+    const handle: MicrotaskDisposalHandle = { cancelled: false };
     queueMicrotask(() => { if (!handle.cancelled) callback(); });
     return handle;
   },
   clearTimeout(handle: unknown) {
     if (!handle || typeof handle !== "object") return;
-    const candidate = handle as Partial<NSEMicrotaskDisposalHandle>;
+    const candidate = handle as Partial<MicrotaskDisposalHandle>;
     if (typeof candidate.cancelled === "boolean") candidate.cancelled = true;
   },
 });
@@ -61,10 +61,10 @@ const microtaskDisposalScheduler: NSEDisposalScheduler = Object.freeze({
  * the final one.
  */
 export function useNSEDeferredDisposal(
-  resource: NSEDisposable | null | undefined,
+  resource: Disposable | null | undefined,
   scheduler: NSEDisposalScheduler = microtaskDisposalScheduler,
 ): void {
-  const pending = useRef(new Map<NSEDisposable, { readonly lease: object; handle: unknown | null }>());
+  const pending = useRef(new Map<Disposable, { readonly lease: object; handle: unknown | null }>());
 
   useEffect(() => {
     if (!resource) return undefined;

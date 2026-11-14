@@ -1,10 +1,12 @@
 /* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
 
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { NSETooltipProvider } from "../NSE/Tooltips";
-import { NSEAlertBackdrop } from "../NSE/SystemUI";
+import { TooltipProvider } from "../NSE/Tooltips";
+import { AlertBackdrop } from "../NSE/SystemUI";
 import { SCOSAlertPresenter } from "./SCOSAlertPresenter";
-import { NSEMenu, NSEOverlayProvider, NSEWindowSurfaceBridgeProvider, useNSEDeferredDisposal } from "../NSE/NSE";
+import { OverlayProvider, WindowSurfaceBridgeProvider, useNSEDeferredDisposal } from "../NSE/NSE";
+import { createReactOwnedNSEMenu } from "../NSE/Menus/NSEMenu";
+import { useMenuLifetime } from "../NSE/Menus/useMenuLifetime";
 import { nseMenuModel } from "../NSE/Menus/menuTypes";
 import { NSEButton } from "@syndromatic/syncloudos/nse/controls";
 import { SynWareEntryRenderer } from "../Webspring/SynWareEntryRenderer";
@@ -173,8 +175,8 @@ export function ApplicationHost({ applicationId, authentication, home }: Applica
     ],
   }), [appName, appPreferences, applicationId, authenticationPolicy, declaresAbout, locale, menuLabels, signedIn]);
   const menuPort = useRuntimeNSEMenuPort();
-  const menuController = useMemo(() => new NSEMenu({ ownerSignal: menuPort.signal, [nseMenuModel]: menuModel, runtime: menuPort }), [menuModel, menuPort]);
-  useNSEDeferredDisposal(menuController);
+  const menuController = useMemo(() => createReactOwnedNSEMenu({ ownerSignal: menuPort.signal, [nseMenuModel]: menuModel, runtime: menuPort }), [menuModel, menuPort]);
+  useMenuLifetime(menuController);
   const logOut = useCallback(async () => {
     const result = await runtime.commands.dispatch("session.logOut", undefined, { source: "system" });
     return result.status === "executed";
@@ -208,18 +210,18 @@ export function ApplicationHost({ applicationId, authentication, home }: Applica
         style={{ position: "fixed", inset: 0, overflow: "hidden", margin: 0 }}>
         <SynCloudOSWatchdog runtime={runtime} watchdogName={`${app.packageName} application`} scope="app" app={app}
           resetKey={applicationId} fallback={() => null}>
-          <NSEOverlayProvider runtimePort={overlayPort} defaultParentResponderId={responderId}>
-          <NSETooltipProvider>
-          <NSEWindowSurfaceBridgeProvider bridge={bridge}>
+          <OverlayProvider runtimePort={overlayPort} defaultParentResponderId={responderId}>
+          <TooltipProvider>
+          <WindowSurfaceBridgeProvider bridge={bridge}>
           {contentMenu ? <ApplicationMenuOverlayHost menuStore={menuStore} model={menuModel} controller={menuController}
             overlay={{ id: `application-host:app-menu-overlay:${applicationId}`, parentResponderId: responderId, placement: "block-end-inline-end" }}
             anchorTitle={appName} /> : null}
           {contentMenu ? <ApplicationMenuTriggerBridge menuStore={menuStore} label={appName}>
             {framedEntry}
           </ApplicationMenuTriggerBridge> : framedEntry}
-          </NSEWindowSurfaceBridgeProvider>
-          </NSETooltipProvider>
-          </NSEOverlayProvider>
+          </WindowSurfaceBridgeProvider>
+          </TooltipProvider>
+          </OverlayProvider>
         </SynCloudOSWatchdog>
       </section>
     </ResponderScope> : null}
@@ -237,12 +239,12 @@ export function ApplicationHost({ applicationId, authentication, home }: Applica
     />
     <SCOSAlertPresenter center={runtime.alerts} presentation={runtime.presentationTraits} appearance={appearance} />
     {error ? <FocusScope asChild key={error.id} scopeId={`application-host-error:${error.id}`} kind="modal" parentResponderId="runtime" trapFocus>
-      <NSEAlertBackdrop presentation={runtime.presentationTraits} onSafeDismiss={error.recoverable === false ? undefined : () => runtime.errors.dismiss(error.id)}>
+      <AlertBackdrop presentation={runtime.presentationTraits} onSafeDismiss={error.recoverable === false ? undefined : () => runtime.errors.dismiss(error.id)}>
         <SystemAlert error={error} appearance={appearance} applicationIcon={app?.icon.src ?? null}
           onDismiss={() => runtime.errors.dismiss(error.id)} onReload={() => browserWindow?.location.reload()}
           onReturn={() => browserWindow?.location.reload()}
           onOpenMailClient={destination => browserWindow?.location.assign(destination)} />
-      </NSEAlertBackdrop>
+      </AlertBackdrop>
     </FocusScope> : null}
   </>;
 }

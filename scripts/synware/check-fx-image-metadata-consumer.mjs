@@ -197,12 +197,13 @@ function Probe() {
     try {
       await resource.ready;
       const profile = resource.sourceICCProfile;
-      const profileBytes = profile ? Array.from(profile.slice(36, 40)) : null;
-      if (profile) profile[36] = 0;
-      const copied = resource.sourceICCProfile?.[36] === 97;
+      const profileBytes = profile ? Array.from(profile.bytes.slice(36, 40)) : null;
+      // NSEData hands out copies: changing one must not reach the resource.
+      if (profile) (profile.bytes as Uint8Array)[36] = 0;
+      const copied = resource.sourceICCProfile?.bytes[36] === 97;
       const lease = await resource.pixelLease();
       const pixels = lease.copyImage(); lease.release();
-      const ready = { sourceOrientation: resource.sourceOrientation, profileLength: profile?.length ?? null, profileBytes,
+      const ready = { sourceOrientation: resource.sourceOrientation, profileLength: profile?.count ?? null, profileBytes,
         copied, size: resource.intrinsicSize, pixelSize: [pixels.width, pixels.height], topRight: pixels.pixel(1, 0), bottomLeft: pixels.pixel(0, 2) };
       resource.release();
       const webp = app.images.load({ source: { kind: "bytes", mimeType: "image/webp", bytes: await webpFixture() }, accessibleLabel: "WebP metadata probe" });
@@ -212,8 +213,8 @@ function Probe() {
         const webpProfile = webp.sourceICCProfile;
         const webpLease = await webp.pixelLease();
         const webpPixels = webpLease.copyImage(); webpLease.release();
-        webpReady = { sourceOrientation: webp.sourceOrientation, profileLength: webpProfile?.length ?? null,
-          profileBytes: webpProfile ? Array.from(webpProfile.slice(36, 40)) : null,
+        webpReady = { sourceOrientation: webp.sourceOrientation, profileLength: webpProfile?.count ?? null,
+          profileBytes: webpProfile ? Array.from(webpProfile.bytes.slice(36, 40)) : null,
           size: webp.intrinsicSize, pixelSize: [webpPixels.width, webpPixels.height],
           topLeft: webpPixels.pixel(0, 0), topRight: webpPixels.pixel(2, 0) };
       } finally { webp.release(); }
@@ -222,12 +223,12 @@ function Probe() {
       try {
         await png.ready;
         const pngProfile = png.sourceICCProfile;
-        const pngProfileBytes = pngProfile ? Array.from(pngProfile.slice(36, 40)) : null;
-        if (pngProfile) pngProfile[36] = 0;
-        const copied = png.sourceICCProfile?.[36] === 97;
+        const pngProfileBytes = pngProfile ? Array.from(pngProfile.bytes.slice(36, 40)) : null;
+        if (pngProfile) (pngProfile.bytes as Uint8Array)[36] = 0;
+        const copied = png.sourceICCProfile?.bytes[36] === 97;
         const lease = await png.pixelLease();
         const pixels = lease.copyImage(); lease.release();
-        pngReady = { sourceOrientation: png.sourceOrientation, profileLength: pngProfile?.length ?? null, pngProfileBytes, copied,
+        pngReady = { sourceOrientation: png.sourceOrientation, profileLength: pngProfile?.count ?? null, pngProfileBytes, copied,
           size: png.intrinsicSize, pixelSize: [pixels.width, pixels.height] };
       } finally { png.release(); }
       const gif = app.images.load({ source: { kind: "bytes", mimeType: "image/gif", bytes: gifFixture() }, accessibleLabel: "GIF metadata probe" });
@@ -235,10 +236,10 @@ function Probe() {
       try {
         await gif.ready;
         const profile = gif.sourceICCProfile;
-        const profileBytes = profile ? Array.from(profile.slice(36, 40)) : null;
-        if (profile) profile[36] = 0;
-        gifReady = { size: gif.intrinsicSize, profileLength: profile?.length ?? null, profileBytes,
-          copied: gif.sourceICCProfile?.[36] === 97 };
+        const profileBytes = profile ? Array.from(profile.bytes.slice(36, 40)) : null;
+        if (profile) (profile.bytes as Uint8Array)[36] = 0;
+        gifReady = { size: gif.intrinsicSize, profileLength: profile?.count ?? null, profileBytes,
+          copied: gif.sourceICCProfile?.bytes[36] === 97 };
       } finally { gif.release(); }
       window.fxImageMetadata = { ready: true, ...ready,
         webp: { ...webpReady, releasedOrientation: webp.sourceOrientation, releasedProfile: webp.sourceICCProfile },

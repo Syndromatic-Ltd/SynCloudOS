@@ -22,8 +22,8 @@
 import React, { StrictMode } from "react";
 import { render, fireEvent, cleanup } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { NSEMaterialLighting } from "../../../src/NSE/Appearance/NSEMaterialLighting";
-import { NSEMaterialLightingProvider } from "../../../src/NSE/Appearance/NSEMetalThumb";
+import { MaterialLighting } from "../../../src/NSE/Appearance/NSEMaterialLighting";
+import { MaterialLightingProvider } from "../../../src/NSE/Appearance/MetalThumb";
 import { NSESlider } from "../../../src/NSE/Controls/Values/NSESlider";
 import { NSESwitch } from "../../../src/NSE/Controls/Fields/NSEFields";
 import { MFXAttitude } from "../../../src/FX/MotionFX/MFXAttitude";
@@ -84,13 +84,13 @@ function harness() {
     frames,
     states,
     samples,
-    store: new NSEMaterialLighting(create, scheduler),
+    store: new MaterialLighting(create, scheduler),
     sample: (roll: number, pitch: number) => {
       for (const callback of samples)
         callback({
           attitude: MFXAttitude.fromEuler(roll, pitch, 0),
           timestamp: now,
-          referenceFrame: "relative",
+          referenceFrame: "xArbitraryZVertical",
           gravity: null,
           userAcceleration: null,
           rotationRate: null,
@@ -116,7 +116,7 @@ describe("metal material controls", () => {
   it("keeps standard and disabled-only control trees entirely passive", () => {
     const h = harness(),
       view = render(
-        <NSEMaterialLightingProvider value={h.store}>
+        <MaterialLightingProvider value={h.store}>
           <NSESlider aria-label="Standard" value={20} />
           <NSESlider
             thumbMaterial="metal"
@@ -130,7 +130,7 @@ describe("metal material controls", () => {
             thumbMaterial="metal"
             aria-label="Disabled switch"
           />
-        </NSEMaterialLightingProvider>,
+        </MaterialLightingProvider>,
       );
     expect(h.create).not.toHaveBeenCalled();
     expect(h.states.size).toBe(0);
@@ -148,11 +148,11 @@ describe("metal material controls", () => {
     h.sample(1, 1);
     h.advance(0.05);
     expect(h.store.getSnapshot().active).toBe(true);
-    expect(Math.abs(h.store.getSnapshot().angle)).toBeLessThanOrEqual(0.24);
+    expect(Math.abs(h.store.getSnapshot().angle)).toBeLessThanOrEqual(1.35);
     const angle = h.store.getSnapshot().angle;
     h.sample(-1, -1);
     h.advance(0.06);
-    expect(Math.abs(h.store.getSnapshot().angle - angle)).toBeLessThan(0.1);
+    expect(Math.abs(h.store.getSnapshot().angle - angle)).toBeLessThan(0.75);
     h.advance(1);
     expect(h.store.getSnapshot().active).toBe(false);
     expect(h.frames.size).toBe(0);
@@ -163,6 +163,26 @@ describe("metal material controls", () => {
     expect(h.states.size).toBe(0);
     expect(h.authorize).not.toHaveBeenCalled();
   });
+  it("treats the held pose as rest and answers a turn away from it, however the device is held", () => {
+    const h = harness();
+    const release = h.store.subscribe(() => {});
+    // Held upright and still: no light movement, although the pose is far from flat.
+    h.sample(1.4, 0);
+    h.advance(0.05);
+    h.sample(1.4, 0);
+    h.advance(0.1);
+    expect(h.store.getSnapshot().active).toBe(true);
+    expect(Math.abs(h.store.getSnapshot().angle)).toBeLessThan(0.01);
+    // Turned half a radian about the device's upright axis.
+    for (let time = 0.15; time < 0.6; time += 0.05) {
+      h.sample(1.4, 0.5);
+      h.advance(time);
+    }
+    expect(h.store.getSnapshot().angle).toBeGreaterThan(0.3);
+    expect(h.store.getSnapshot().angle).toBeLessThan(0.7);
+    release();
+  });
+
   it("suspends subscriptions for hidden and reduced states and resumes without a prompt", () => {
     const h = harness(),
       release = h.store.subscribe(() => {});
@@ -186,7 +206,7 @@ describe("metal material controls", () => {
       volume = vi.fn(),
       toggle = vi.fn();
     const view = render(
-      <NSEMaterialLightingProvider value={h.store}>
+      <MaterialLightingProvider value={h.store}>
         <NSESlider aria-label="Standard" value={50} />
         <NSESlider
           thumbMaterial="metal"
@@ -206,7 +226,7 @@ describe("metal material controls", () => {
           thumbMaterial="metal"
           aria-label="Sound"
         />
-      </NSEMaterialLightingProvider>,
+      </MaterialLightingProvider>,
     );
     expect(h.create).toHaveBeenCalledTimes(1);
     fireEvent.keyDown(view.getByRole("slider", { name: "Volume" }), {
@@ -230,10 +250,10 @@ describe("metal material controls", () => {
     const h = harness(),
       view = render(
         <StrictMode>
-          <NSEMaterialLightingProvider value={h.store}>
+          <MaterialLightingProvider value={h.store}>
             <NSESlider thumbMaterial="metal" aria-label="Volume" value={40} />
             <NSESwitch state="on" thumbMaterial="metal" aria-label="Sound" />
-          </NSEMaterialLightingProvider>
+          </MaterialLightingProvider>
         </StrictMode>,
       );
     expect(h.samples.size).toBe(1);

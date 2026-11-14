@@ -19,18 +19,18 @@
  */
 
 import { useEffect, useRef, type PropsWithChildren } from "react";
-import { NSEFocusPortProvider } from "../Focus/NSEFocusPort";
-import { NSEOverlayProvider } from "./NSEOverlayProvider";
-import type { NSEOverlayRuntimePort } from "./overlayTypes";
+import { FocusPortProvider } from "../Focus/NSEFocusPort";
+import { OverlayProvider } from "./OverlayProvider";
+import type { OverlayRuntimePort } from "./overlayTypes";
 import {
   createStandaloneNSEControlRuntime,
-  type NSEStandaloneControlRuntime,
+  type StandaloneControlRuntime,
 } from "./createStandaloneNSEControlRuntime";
 
-export interface NSEStandaloneControlHostProps extends PropsWithChildren {
+export interface StandaloneControlHostProps extends PropsWithChildren {
   readonly document: Document;
   readonly window: Window;
-  readonly presentation: NSEOverlayRuntimePort["environment"]["presentation"];
+  readonly presentation: OverlayRuntimePort["environment"]["presentation"];
   readonly parentResponderId?: string;
 }
 
@@ -39,14 +39,14 @@ export interface NSEStandaloneControlHostProps extends PropsWithChildren {
  * authority used by a mounted SynCloudOS runtime. Each host owns one manager
  * and one runtime for its lifetime; sibling hosts never share registrations.
  */
-export function NSEStandaloneControlHost({
+export function StandaloneControlHost({
   document,
   window,
   presentation,
   parentResponderId,
   children,
-}: NSEStandaloneControlHostProps) {
-  const runtimeRef = useRef<NSEStandaloneControlRuntime | null>(null);
+}: StandaloneControlHostProps) {
+  const runtimeRef = useRef<StandaloneControlRuntime | null>(null);
   if (!runtimeRef.current) {
     runtimeRef.current = createStandaloneNSEControlRuntime({
       document,
@@ -70,14 +70,14 @@ export function NSEStandaloneControlHost({
   }, [standalone]);
 
   return (
-    <NSEFocusPortProvider port={standalone.focusPort}>
-      <NSEOverlayProvider
+    <FocusPortProvider port={standalone.focusPort}>
+      <OverlayProvider
         manager={standalone.manager}
         runtimePort={standalone.runtime}
         defaultParentResponderId={standalone.parentResponderId}
       >
         {children}
-      </NSEOverlayProvider>
-    </NSEFocusPortProvider>
+      </OverlayProvider>
+    </FocusPortProvider>
   );
 }

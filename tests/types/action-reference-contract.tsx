@@ -3,7 +3,7 @@ import { action, actionRef, useAction, type NSEActionReference, type NSEActionOp
 import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
 import { NSEPopUpButton } from "../../src/NSE/Menus/NSEPopUpButton";
 import { NSESegmentedControl } from "../../src/NSE/Controls/Values/NSESegmentedControl";
-import type { NSEMenuActionEntry } from "../../src/NSE/Menus/menuTypes";
+import type { MenuActionEntry } from "../../src/NSE/Menus/menuTypes";
 import type { NSEToolbarActionItem } from "../../src/NSE/Toolbars/toolbarTypes";
 import { NSEMenu } from "../../src/NSE/Menus/NSEMenu";
 import { NSEToolbarController } from "../../src/NSE/Toolbars/NSEToolbarController";
@@ -60,9 +60,9 @@ function View() {
   </>;
 }
 void View;
-const menu: NSEMenuActionEntry<string> = { kind: "command", id: "choose", action: choose, payload: "note" };
+const menu: MenuActionEntry<string> = { kind: "command", id: "choose", action: choose, payload: "note" };
 // @ts-expect-error Menu payload must match reference.
-const badMenu: NSEMenuActionEntry<string> = { kind: "command", id: "choose", action: choose, payload: 2 };
+const badMenu: MenuActionEntry<string> = { kind: "command", id: "choose", action: choose, payload: 2 };
 const toolbar: NSEToolbarActionItem<string> = { kind: "command", id: "choose", action: choose, payload: "note", label: "Choose", paletteLabel: "Choose", icon: null };
 // @ts-expect-error Toolbar payload must match reference.
 const badToolbar: NSEToolbarActionItem<string> = { kind: "command", id: "choose", action: choose, payload: 2, label: "Choose", paletteLabel: "Choose", icon: null };

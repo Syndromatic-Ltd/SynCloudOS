@@ -1,0 +1,15 @@
+{
+  "safeEntries": [
+    "@syndromatic/syncloudos/fx/dispatch",
+    "@syndromatic/syncloudos/fx/crypto",
+    "@syndromatic/syncloudos/fx/compression"
+  ],
+  "safeSubpaths": [
+    "@syndromatic/syncloudos/foundation"
+  ],
+  "unsafeExports": {
+    "@syndromatic/syncloudos/foundation": [
+      "NSEUserDefaults"
+    ]
+  }
+}

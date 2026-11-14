@@ -24,7 +24,7 @@ import type { NSEAttachmentAppearance, NSEAttributedAttachmentRun } from "../../
 import type { NSETextAttachmentImage, NSETextAttachmentResolver } from "../textViewTypes";
 
 /** What an attachment cell may do to the text it sits in. */
-export interface NSEAttachmentCellEditing {
+export interface AttachmentCellEditing {
   editable(): boolean;
   /** Resizes the attachment at a backend position. */
   resize(position: number, bounds: { readonly width: number; readonly height: number }, actionName: string): void;
@@ -108,7 +108,7 @@ function applyAppearance(box: HTMLElement, image: HTMLImageElement, decoration: 
  * dragging any of them resizes it in proportion, never stretched. Dragging the
  * image itself moves it through the text, which re-wraps around it as it goes.
  */
-export function nseAttachmentNodeViews(doc: Document, resolver: () => NSETextAttachmentResolver | undefined, editing: NSEAttachmentCellEditing): NonNullable<EditorProps["nodeViews"]> {
+export function nseAttachmentNodeViews(doc: Document, resolver: () => NSETextAttachmentResolver | undefined, editing: AttachmentCellEditing): NonNullable<EditorProps["nodeViews"]> {
   return {
     attachment(initial, _view, getPos) {
       let node: ProseMirrorNode = initial, generation = 0, selected = false;

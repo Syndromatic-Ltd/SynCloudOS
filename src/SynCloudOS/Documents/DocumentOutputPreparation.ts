@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { GFXPDFContext } from "../../FX/GraphicsFX/pdf/GFXPDFContext";
+import type { GFXPDFContext } from "../../FX/GraphicsFX/pdf/GFXPDFContext";
 import { immutableDocumentValue } from "./documentTypes";
 import type {
   DocumentOutputDependencies, DocumentOutputDependencyReceipt, DocumentOutputLease,
@@ -182,7 +182,10 @@ export function createDocumentOutputPreparation<TModel>(dependencies: DocumentOu
         }
         if (!pages.length) throw new RangeError("Output requires at least one engine-supplied page.");
         // Use the existing PDF validator and limits rather than creating separate page rules.
-        recorder = new GFXPDFContext(metadata);
+        // The PDF library loads with the first output, not with every page of every site.
+        const { GFXPDFContext: PDFContext } = await import("../../FX/GraphicsFX/pdf/GFXPDFContext");
+        signal.throwIfAborted();
+        recorder = new PDFContext(metadata);
         for (const page of pages) {
           if (typeof page.draw !== "function") throw new TypeError("Each output page requires a drawing callback.");
           recorder.beginPage(page.geometry);
@@ -200,7 +203,7 @@ export function createDocumentOutputPreparation<TModel>(dependencies: DocumentOu
             let result: DocumentOutputPDFResult;
             try {
               signal.throwIfAborted();
-              recorder = new GFXPDFContext(metadata);
+              recorder = new PDFContext(metadata);
               const context = drawingContext(recorder);
               const drawing = Object.freeze({ snapshot, dependencies: readOnlyDependencies(retainedValues), signal });
               for (const page of pages) {

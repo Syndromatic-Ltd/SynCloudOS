@@ -173,7 +173,7 @@ Verification: **807 focused tests across nine files passed**, including **691 re
 
 Owner review: `plain-login-chromium.png` and `plain-login-chromium-high-dpr.png` show the existing login window with ornaments switched off. They are separate evidence, not parity baselines. No plain-login design was added.
 
-### Task 14 — Atmo bundle (in progress)
+### Task 14 — Atmo bundle
 
 The push-button slice is complete. Created the static `Atmo.scostheme` metadata, colour maps, image data and byte-preserved artwork. Ported **58 drawing rules / 189 selectors** for push, image, textured and disclosure buttons into two bundle stylesheets. Their selectors use public hooks. Typography, motion and interaction layout remain framework-owned; later slices continue the separation and connect the bundle as the built-in value.
 
@@ -215,11 +215,66 @@ The remaining scroller, disclosure-orientation and form-metric slice moves **22 
 
 Verification: **38 focused tests in four files**, bundle validation and typecheck passed. **99 paired style cases** showed zero differences. The complete frozen screenshot gate passed **82/82, zero differences**, in `task-14-core-baseline.log`; all **2,648 PNG hashes remain unchanged**.
 
-Remaining Task 14 slices: menus/toolbars, windows, overlays and system UI; final built-in data connection, structure split and removal of the old theme directory.
+The final slices (`98507e59`, `ed994a99`, `f0afecf0`) move control structure, typography and motion into the framework's `src/NSE/Structure/controls.css` (layer `nse.atmo`, scoped to the theme boundary), draw every remaining selector through the contract, and make the framework load Atmo from `Atmo.scostheme`. `atmoTheme` is generated from the bundle's `Info.ts` and `Theme.json`; `NSEImageResource` and `NSEWorkspace` read artwork through it, with no fallback table. `atmoMotion` is removed, because motion belongs to `NSEAnimationDefaults`. The SDK ships `themes/Atmo.scostheme`. No `.nse-` selector remains in the bundle.
 
-### Tasks 15–19
+Verification: computed styles of all **1,552 catalogue surfaces** match the pre-move commit element for element (only login-window image timing differs between runs). Bundle validation reports zero errors, **151 theme tooling tests** pass, and the frozen gate passed **82/82, zero differences**.
 
-Pending. Final split-suite and packed SDK acceptance remain for Task 19.
+The old `src/NSE/Themes/Atmo/` directory (40 files) is now unreferenced. Deleting it awaits the owner's confirmation.
+
+### Task 15 — Webspring and framework apps use public hooks
+
+`f625b25d` rewrites Webspring and inspector selectors from private `.nse-*` classes to contract hooks with the same specificity, and gives `IconWell` its `icon-well` identity. A selector-equivalence check matched every element on **1,552 surfaces, zero mismatches**.
+
+Exception, left as is: `window-chrome.css` still selects `.nse-sheet`, `.nse-window-sheet-backdrop` and the titlebar classes. The open-panel sheet backdrop has no hooks, and the titlebar shares that hosting subsystem.
+
+Host modules now reach framework-internal layout and theme hooks through the existing internal entrypoints `hostComposition.ts` and `applicationHostInterop.ts`, rather than deep imports. The architecture boundary check validates **1,811 files and 8,296 edges**.
+
+### Task 16 — idiom rules
+
+`9316d173` adds theme-aware rules (`idiom.control-internals`, `idiom.theme-private-class` and the theme limits) and the `idiom.layout-guide` warning. `07bfc44a` lets a focus replacement sit in another rule of the same theme.
+
+### Task 17 — `validate_theme` and `scaffold_theme`
+
+`511c7797` adds both MCP tools. `validate_theme` checks a bundle against the installed contract and reports coverage counts. `scaffold_theme` never overwrites, and writes a commented rule for every contract part.
+
+### Task 18 — documentation
+
+`48f3db8e` adds:
+
+- `docs/framework/themes.md`;
+- the generated `theme-contract.md`, from `build-theme-contract.mjs`;
+- a rewrite of the stale appearance sections;
+- layout guides and safe areas in `windows.md`;
+- every removal, listed in the beta.2 migration guide.
+
+The guide's examples were assembled into a real bundle, which validated with no idiom findings.
+
+### Task 19 — final verification
+
+Regressions found by the full suite, the installed consumers and the Syndromatic site migration were fixed before acceptance:
+
+- `e09bc2f6`, `a5e8d45e`, `4d8b4c33`: tests renamed to the AppKit counterparts of the theme and layout names; scoped colour selectors; invalid-geometry hosts; licence notices.
+- `2f4a6308`: host modules reach layout and theme internals through the host entrypoints.
+- `ea0e7ddc`: a closing window's exit frame keeps the open frame's tree, so its contents stay drawn.
+- `53731adc`, refined by `dc5abdf5`: under a transform (a window zooming open), a view's safe area reads its laid-out frame, so About no longer lays out against a scaled frame. Without a transform it keeps the client rectangle, whose sub-pixel precision the baseline needs.
+- `2ba0e965`: contract selectors reach the parts they drew before the migration. This covers sheet presentation, metal-context source lists and outlines, box titles, navigation headers, grouped text fields, horizontal scroller tracks, and tab-panel padding (which leaked onto NSETabBar's panels).
+- `36eda0a5`: two specificity slips from `2ba0e965` are reverted, as the frozen gate showed. Colour-control geometry is no longer wrapped in `:where()`, and the panel part is matched inside `:where()`, so the colour panel's own `padding: 0` still wins.
+- `7db82f39`, `17918028`: tests and installed consumers use the public API, namely `NSEData` (`count`, `bytes`, `blob`), `NSEView` with `NSEAppearance`, and the two coalesced typing actions an NSTextView undoes. The VFX-06 probe sits inside its view's safe area, clear of the top bar's overhanging hit targets; that check failed the same way on the pre-plan commit `865c7a7b`.
+- `656a032a`: the appearance and theme guides show `NSEView` with `NSEAppearance` instead of the internal provider.
+
+Results:
+
+- Framework typecheck passed (`task-19-typecheck.log`).
+- Full Vitest suite: **1,019 files, 9,819 tests, none failing** (`task-19-vitest.log`, with the packed files rerun after a fresh build in `task-19-vitest-packed-rerun.log`).
+- Packaging (`node --test tests/packaging/*.test.mjs`): **8/8**. FX runtime and packed tests: **290 files, 1,686 tests** (`task-19-packed.log`).
+- SDK build passed. Installed consumer checks: **13/14** (`task-19-consumers.log`). The exception is `developer-mcp`, below.
+- Frozen baseline, `theme-baseline` and `theme-nesting` on chromium, chromium-high-dpr and chromium-reduced-motion with no updates: **177/177, zero differences** (`task-19-baseline-final.log`). The run used one worker. With parallel workers, the folder-presentation capture (the Task 1 timing case) differs by 75–77 pixels in about one run in three. It does so with or without this task's fixes, and passed 6/6 serially.
+
+Awaiting the owner:
+
+1. **Undrawn contract parts.** `validate_theme` reports **57 of 456 parts** that no Atmo stylesheet names (`badge.badge`, `board.group` … `window.window-fitting-content`), so the `developer-mcp` consumer check fails. It passed on `865c7a7b`, before the coverage rule existed. Each option changes something visible or public: give Atmo rules for them, drop them from the contract, or count framework structure as drawing.
+2. **Style recalculation cost.** A full recalc over the ~980-element gallery takes 372ms, against 6ms on the pre-plan SDK. Opening it spends about 3.4s in style recalc, which trips the "stopped responding" watchdog. About 90% is selector matching. Rightmost `:is(…)` lists cannot be bucketed, and `:where(X *)` ancestor filters defeat the Bloom filter; removing the `:is()`-list rules brings it to about 4ms. The proposed fix regenerates Atmo's ~12,000 rules so each ends in a specific part, with ancestor context as descendant combinators, then proves computed styles identical on every catalogue surface and passes the frozen gate.
+3. **Old theme directory.** Deleting the unreferenced `src/NSE/Themes/Atmo/` (40 files) awaits confirmation.
 
 ## Initial capture correction and retained evidence
 
@@ -307,7 +362,12 @@ Part-name mappings, semantic colour values without Atmo precedent and Beta 2 rem
 | Focused settled-paint folder repetitions | 12 passed, 0 failed |
 | Catalogue TypeScript check | Passed |
 | `git diff --check` | Passed |
-| Full framework Vitest suite | Not run; reserved for Task 19 |
-| Packed SDK tests | Not run |
+| Task 19 framework typecheck | Passed |
+| Task 19 full framework Vitest suite | 1,019 files, 9,819 tests, 0 failed. The first run passed 1,002 files; its 17 packed-SDK files stopped at the source-staleness guard because source had changed after the build. After `sdk:build` those 17 files passed 19/19 (`task-19-vitest-packed-rerun.log`). |
+| Task 19 packaging tests (`node --test`) | 8 passed, 0 failed |
+| Task 19 FX runtime and packed tests | 290 files, 1,686 tests passed |
+| Task 19 installed consumer checks | 13 of 14 passed; `developer-mcp` awaits the owner's decision on undrawn parts |
+| Task 19 frozen baseline (3 projects, one worker, no updates) | 177 passed, 0 failed, zero differences |
+| Task 19 `git diff --check` | Passed |
 
 Historical capture/diagnostic failures are retained as evidence and are not counted as final acceptance passes.

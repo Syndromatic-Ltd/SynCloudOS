@@ -89,8 +89,8 @@ function renderAppMenu(mode: "desktop" | "mobile" = "desktop", strict = false) {
       />
     </SynCloudOSProvider>
   );
-  render(strict ? <React.StrictMode>{view}</React.StrictMode> : view);
-  return { runtime, validation };
+  const { unmount } = render(strict ? <React.StrictMode>{view}</React.StrictMode> : view);
+  return { runtime, validation, unmount };
 }
 
 afterEach(() => {
@@ -99,6 +99,30 @@ afterEach(() => {
 });
 
 describe("Webspring app menu", () => {
+  it("releases the stage menu's abort subscription after a StrictMode unmount", async () => {
+    const held = new Set<EventListenerOrEventListenerObject>();
+    const add = AbortSignal.prototype.addEventListener;
+    const remove = AbortSignal.prototype.removeEventListener;
+    vi.spyOn(AbortSignal.prototype, "addEventListener").mockImplementation(function (this: AbortSignal, type, listener, options) {
+      if (type === "abort" && typeof listener === "function" && listener.name === "#runtimeAbort") held.add(listener);
+      add.call(this, type, listener, options);
+    });
+    vi.spyOn(AbortSignal.prototype, "removeEventListener").mockImplementation(function (this: AbortSignal, type, listener, options) {
+      if (type === "abort" && listener) held.delete(listener);
+      remove.call(this, type, listener, options);
+    });
+    const before = held.size;
+    const { runtime, unmount } = renderAppMenu("desktop", true);
+    try {
+      expect(held.size).toBeGreaterThan(before);
+      unmount();
+      await Promise.resolve();
+      expect(held.size).toBe(before);
+    } finally {
+      await runtime.dispose("stage-menu-lifetime-test");
+    }
+  });
+
   it("opens one immutable command generation, dispatches through the runtime, and restores trigger focus", async () => {
     const { runtime, validation } = renderAppMenu();
     const trigger = screen.getByRole("button", { name: "User Info" });

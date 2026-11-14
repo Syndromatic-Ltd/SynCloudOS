@@ -20,7 +20,7 @@
 
 import type { MouseEvent, ReactNode } from "react";
 
-export interface NSETableCellProps {
+export interface TableCellProps {
   readonly id: string;
   readonly columnIndex: number;
   readonly width: number;
@@ -32,7 +32,7 @@ export interface NSETableCellProps {
   readonly onDoubleClick: () => void;
 }
 
-export function NSETableCell({
+export function TableCell({
   id,
   columnIndex,
   width,
@@ -42,7 +42,7 @@ export function NSETableCell({
   children,
   onClick,
   onDoubleClick,
-}: NSETableCellProps) {
+}: TableCellProps) {
   return (
     <div
       id={id}

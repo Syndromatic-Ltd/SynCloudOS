@@ -341,6 +341,22 @@ describe("mounted application context and interaction authority", () => {
     replacement.dispose();
   });
 
+  it("answers a focus request for a departed responder as missing, and still refuses another app's responder", () => {
+    const runtime = createTestRuntime();
+    runtimes.push(runtime);
+    const app = registerApp(runtime, "com.example.focus-app");
+    const victim = registerApp(runtime, "com.example.focus-victim");
+    const control = runtime.responders.register({ id: "control:focus-app", kind: "control", parentId: `application:${app.bundleIdentifier}`, scopeId: "com.example.focus-app" });
+    runtime.responders.register({ id: "control:focus-victim", kind: "control", parentId: `application:${victim.bundleIdentifier}`, scopeId: "com.example.focus-victim" });
+    const mount = createMountedSynWareRuntime({ runtime, app, responderId: `application:${app.bundleIdentifier}` });
+    expect(mount.runtime.focus.requestFocus("control:focus-app")).toMatchObject({ status: "focused" });
+    control.dispose();
+    expect(mount.runtime.focus.requestFocus("control:focus-app")).toMatchObject({ status: "missing", responderId: "control:focus-app" });
+    expect(mount.runtime.focus.requestFocus("control:never-registered")).toMatchObject({ status: "missing" });
+    expect(() => mount.runtime.focus.requestFocus("control:focus-victim")).toThrow(/owned responders/i);
+    expect(runtime.focus.getFocusedResponderId()).not.toBe("control:focus-victim");
+  });
+
   it("allows mounted command and focus authority beneath an app-owned canonical document while rejecting a foreign document tree", async () => {
     const runtime = createTestRuntime();
     runtimes.push(runtime);
