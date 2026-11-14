@@ -24,24 +24,24 @@ import { useNSEPresentedContent } from "../Overlays/useNSEPresentedContent";
 import { WindowFittingContent, centredWindowBounds, type WindowFittingSize } from "../Overlays/NSEWindowFittingContent";
 import type { FilePanelResult, FilePanelSaveTarget } from "../../SynCloudOS/SynCloudOS";
 
-export type NSEFilePanelWindowRole = "panel" | "sheet";
+export type FilePanelWindowRole = "panel" | "sheet";
 
-export interface NSEFilePanelWindowRequest {
+export interface FilePanelWindowRequest {
   readonly id: string;
-  readonly role: NSEFilePanelWindowRole;
+  readonly role: FilePanelWindowRole;
   /** Null denotes a top-level application-stage panel. */
   readonly parentWindowControllerId: string | null;
 }
 
 /** Window-host seam: the application owns WindowManager records and renderers. */
-export interface NSEFilePanelWindowBridge {
-  open?(request: NSEFilePanelWindowRequest): void;
-  close?(request: NSEFilePanelWindowRequest): void;
+export interface FilePanelWindowBridge {
+  open?(request: FilePanelWindowRequest): void;
+  close?(request: FilePanelWindowRequest): void;
   present?: WindowSurfaceBridge["present"];
   dismiss?: WindowSurfaceBridge["dismiss"];
 }
 
-export interface NSEFilePanelViewProps {
+export interface FilePanelViewProps {
   readonly id: string;
   readonly open: boolean;
   readonly anchor: HTMLElement | null;
@@ -51,13 +51,13 @@ export interface NSEFilePanelViewProps {
   readonly parentWindowControllerId: string | null;
   readonly compact?: boolean;
   readonly title: string;
-  readonly windowBridge?: NSEFilePanelWindowBridge;
+  readonly windowBridge?: FilePanelWindowBridge;
   readonly result: FilePanelResult<unknown> | FilePanelResult<FilePanelSaveTarget> | null;
   readonly children: React.ReactNode;
   onOpenChange(open: boolean, reason: OverlayDismissReason): void;
 }
 
-function resultMessage(result: NSEFilePanelViewProps["result"]): string | null {
+function resultMessage(result: FilePanelViewProps["result"]): string | null {
   if (!result || result.kind === "accepted" || result.kind === "cancelled") return null;
   if (result.kind === "choose-another") return "Choose another destination.";
   if (result.kind === "unavailable") return result.message;
@@ -70,7 +70,7 @@ function resultMessage(result: NSEFilePanelViewProps["result"]): string | null {
  * sheet through the explicit host bridge; this component never registers a
  * parallel window record.
  */
-export function NSEFilePanelView({
+export function FilePanelView({
   id,
   open,
   anchor,
@@ -83,7 +83,7 @@ export function NSEFilePanelView({
   result,
   children,
   onOpenChange,
-}: NSEFilePanelViewProps) {
+}: FilePanelViewProps) {
   if (!id.trim()) throw new TypeError("NSE file panel IDs must not be empty.");
   if (!parentResponderId.trim()) throw new TypeError("NSE file panels require a parent responder ID.");
   if (parentWindowControllerId !== null && !parentWindowControllerId.trim()) throw new TypeError("NSE file-panel parent window controller IDs must not be empty.");

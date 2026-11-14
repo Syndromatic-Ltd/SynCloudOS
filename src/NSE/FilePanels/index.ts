@@ -21,9 +21,9 @@
 import "./nse-file-panels.css";
 import "./open-panel.atmo.css";
 
-export { NSEFilePanelView } from "./NSEFilePanelView";
-export type { NSEFilePanelViewProps, NSEFilePanelWindowBridge, NSEFilePanelWindowRequest, NSEFilePanelWindowRole } from "./NSEFilePanelView";
+export { FilePanelView } from "./NSEFilePanelView";
+export type { FilePanelViewProps, FilePanelWindowBridge, FilePanelWindowRequest, FilePanelWindowRole } from "./NSEFilePanelView";
 export { NSEOpenPanel } from "./NSEOpenPanel";
-export type { NSEFilePanelService, NSEOpenPanelURL } from "./NSEOpenPanel";
+export type { OpenPanelService, NSEOpenPanelURL } from "./NSEOpenPanel";
 export { NSESavePanel } from "./NSESavePanel";
 export type { NSESavePanelProps } from "./NSESavePanel";

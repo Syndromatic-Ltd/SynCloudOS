@@ -6,7 +6,7 @@ import { NSEImageView } from "../Controls/Images/NSEImage";
 import { NSEWorkspace } from "../Application/NSEWorkspace";
 
 export interface OpenPanelSource { readonly id: string; readonly name: string; readonly locked?: boolean; readonly group?: boolean; readonly children?: readonly OpenPanelSource[] }
-export function NSEOpenPanelSources({ id, groups, selectedId, onSelect }: { id: string; groups: readonly OpenPanelSource[]; selectedId: string | null; onSelect(id: string): void }) {
+export function OpenPanelSources({ id, groups, selectedId, onSelect }: { id: string; groups: readonly OpenPanelSource[]; selectedId: string | null; onSelect(id: string): void }) {
   const content = useMemo(() => groups.map(group => ({ ...group, group: true })), [groups]);
   const controller = useNSETreeController<OpenPanelSource, string>({ id, content, getId: item => item.id,
     getChildren: item => item.children ?? [], withChildren: (item, children) => ({ ...item, children }), selection: { mode: "single", allowsEmpty: true } });

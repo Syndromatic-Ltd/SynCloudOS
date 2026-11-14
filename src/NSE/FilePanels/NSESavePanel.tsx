@@ -22,8 +22,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { OverlayDismissReason } from "../Overlays";
 import type { FilePanelDocumentSaveBinding, FilePanelDocumentSaveResult, FilePanelResult, FilePanelSaveTarget, SavePanelRequest } from "../../SynCloudOS/SynCloudOS";
 import { saveFilePanelTarget } from "../../SynCloudOS/nseRuntimeContracts";
-import { NSEFilePanelView, type NSEFilePanelWindowBridge } from "./NSEFilePanelView";
-import type { NSEFilePanelService } from "./NSEOpenPanel";
+import { FilePanelView, type FilePanelWindowBridge } from "./NSEFilePanelView";
+import type { OpenPanelService } from "./NSEOpenPanel";
 import { NSEButton } from "../Controls/Buttons/NSEButton";
 
 export interface NSESavePanelProps {
@@ -35,8 +35,8 @@ export interface NSESavePanelProps {
   /** Null denotes a top-level application-stage panel. */
   readonly parentWindowControllerId: string | null;
   readonly compact?: boolean;
-  readonly service: NSEFilePanelService;
-  readonly windowBridge?: NSEFilePanelWindowBridge;
+  readonly service: OpenPanelService;
+  readonly windowBridge?: FilePanelWindowBridge;
   readonly request: SavePanelRequest;
   /** Optional document bridge; selected browser handles never become synthetic locations. */
   readonly documentSaveBinding?: FilePanelDocumentSaveBinding;
@@ -50,7 +50,7 @@ function retryRequestAfterChooseAnother(request: SavePanelRequest): SavePanelReq
   return withoutExistingTarget as SavePanelRequest;
 }
 
-function releaseRejectedTarget(service: NSEFilePanelService, target: FilePanelSaveTarget): void {
+function releaseRejectedTarget(service: OpenPanelService, target: FilePanelSaveTarget): void {
   if (target.kind === "file-handle") service.release(target.reference, "caller-finished");
 }
 
@@ -160,7 +160,7 @@ export function NSESavePanel({
     onOpenChange(nextOpen, reason);
   }, [cancelActive, onOpenChange]);
   return (
-    <NSEFilePanelView
+    <FilePanelView
       id={id}
       open={open}
       anchor={anchor}
@@ -185,6 +185,6 @@ export function NSESavePanel({
           onClick={() => void choose()}
         />
       </div>
-    </NSEFilePanelView>
+    </FilePanelView>
   );
 }
