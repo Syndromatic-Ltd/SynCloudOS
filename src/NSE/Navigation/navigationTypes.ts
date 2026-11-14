@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { NSETabStripPresentation } from "./tabStrip";
+import type { TabStripPresentation } from "./tabStrip";
 import type { ReactNode } from "react";
 
 /** Semantic icon data only. NavigationFoundation does not assign final visual treatment. */
@@ -96,7 +96,7 @@ export interface NSENavigationSelectionOptions {
   readonly source?: string;
 }
 
-export interface NSETabBarControllerSnapshot {
+export interface TabBarControllerSnapshot {
   readonly revision: number;
   readonly id: string;
   readonly selectedDestinationId: string;
@@ -107,7 +107,7 @@ export interface NSETabBarControllerSnapshot {
   readonly moreStack: NSENavigationStackSnapshot | null;
 }
 
-export interface NSETabBarRestorationSnapshot {
+export interface TabBarRestorationSnapshot {
   readonly selectedDestinationId?: string | null;
   readonly more?: NSENavigationStackRestorationSnapshot | null;
 }
@@ -154,7 +154,7 @@ export interface NSETabViewProps {
   readonly parentResponderId?: string;
   /** `tabStyle: "icons"` draws the tabs as a row of icons (the colour panel's
    * modes, a Preferences window's panes) instead of the joined capsule. */
-  readonly presentation?: NSETabStripPresentation;
+  readonly presentation?: TabStripPresentation;
   onSelectedIdChange?(id: string, reason: "pointer" | "keyboard"): void;
   onRequestClose?(id: string): void;
   onRequestReorder?(id: string, toIndex: number): void;

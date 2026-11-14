@@ -28,7 +28,7 @@ import { useResolvedMode as useScopedResolvedMode } from "../../src/SynCloudOS/A
 import { clearOwnedResponderAnchor, SynCloudOSProvider } from "../../src/SynCloudOSReact";
 import { useSCOS, useQuickSwitchTrigger } from "../../src/SynCloudOS/AppSDK";
 import { createInMemoryNSETextOwner, plainNSETextContent, NSETextCommands, NSETextView, TextEditingSession } from "@syndromatic/syncloudos/nse/text";
-import { NSEHierarchyStack, NSENavigationStackController, NSETabBarController } from "../../src/NSE/Navigation";
+import { NSEHierarchyStack, NSENavigationStackController, TabBarController } from "../../src/NSE/Navigation";
 import { useNSEDeferredDisposal, type NSEDisposalScheduler } from "../../src/NSE/NSE";
 import { ResponderScope, useStrings } from "@syndromatic/syncloudos/sdk";
 import { SynWareProvider } from "../../src/SynCloudOS/AppSDK/SynWareContext";
@@ -124,7 +124,7 @@ function renderFrame(beforeRender?: (runtime: ReturnType<typeof createTestRuntim
 }
 
 function ApplicationStageHierarchyFixture() {
-  const [tabs] = React.useState(() => new NSETabBarController<React.ReactNode>({
+  const [tabs] = React.useState(() => new TabBarController<React.ReactNode>({
     id: "stage-hierarchy-tabs",
     destinations: [
       { id: "home", label: "Home", accessibleLabel: "Home destination", icon: { kind: "template", name: "home" } },

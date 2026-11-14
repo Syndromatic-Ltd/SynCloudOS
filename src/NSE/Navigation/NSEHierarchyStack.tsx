@@ -21,7 +21,7 @@
 import { useCallback, useLayoutEffect, useRef, useSyncExternalStore, type ReactNode } from "react";
 import { useNSEApplicationNavigationChrome } from "./NSEApplicationNavigationChrome";
 import { NSENavigationStackController } from "./NSENavigationStackController";
-import { NSETabBarController } from "./NSETabBarController";
+import { TabBarController } from "./TabBarController";
 
 function destinationLabel(destination: { readonly accessibleLabel?: string; readonly label: ReactNode } | null): string {
   if (!destination) return "destination";
@@ -32,7 +32,7 @@ function destinationLabel(destination: { readonly accessibleLabel?: string; read
 }
 
 export interface NSEHierarchyStackProps {
-  readonly controller: NSETabBarController<ReactNode>;
+  readonly controller: TabBarController<ReactNode>;
   readonly stackController: NSENavigationStackController;
   readonly "aria-label": string;
   readonly className?: string;

@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { nseUnowned } from "../../src/NSE/Controllers/ownership";
 import { NSEViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
-import { NSETabBarController } from "../../src/NSE/Navigation/NSETabBarController";
+import { TabBarController } from "../../src/NSE/Navigation/TabBarController";
 
 class Source {
   value = "first";
@@ -20,7 +20,7 @@ afterEach(() => { cleanup(); for (const owner of owners.splice(0)) owner.dispose
 
 describe("explicit class view dependencies", () => {
   it("removes disposed navigation content independently of semantic snapshot subscriptions", () => {
-    class Region extends NSETabBarController { static override view = () => <p>Disposable navigation region</p>; }
+    class Region extends TabBarController { static override view = () => <p>Disposable navigation region</p>; }
     const region = new Region({ owner: nseUnowned, id: "navigation-region", destinations: [{ id: "first", label: "First", icon: { kind: "template", name: "first" } }] });
     owners.push(region); render(<NSEViewControllerView controller={region} />);
     expect(screen.getByText("Disposable navigation region")).toBeTruthy();
