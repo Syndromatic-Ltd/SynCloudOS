@@ -1,0 +1,121 @@
+{
+  "framework": "131b9eda",
+  "site": "c138484 with existing local edits",
+  "chromium": "149.0.7827.55",
+  "url": "http://127.0.0.1:5462",
+  "scope": "Phase 0 closed-scene references and production toolbar button closed and open on the new SDK.",
+  "captures": [
+    {
+      "device": "desktop",
+      "scheme": "light",
+      "app": "about",
+      "material": "cumulus",
+      "viaOverflow": false,
+      "before": "../../site/about-light-1280.png",
+      "closed": "closed-desktop-light-cumulus.png",
+      "open": "open-desktop-light-cumulus.png",
+      "viewport": {
+        "width": 1280,
+        "height": 850
+      }
+    },
+    {
+      "device": "desktop",
+      "scheme": "light",
+      "app": "software",
+      "material": "metal",
+      "viaOverflow": false,
+      "before": "../../site/software-light-1280.png",
+      "closed": "closed-desktop-light-metal.png",
+      "open": "open-desktop-light-metal.png",
+      "viewport": {
+        "width": 1280,
+        "height": 850
+      }
+    },
+    {
+      "device": "desktop",
+      "scheme": "dark",
+      "app": "about",
+      "material": "cumulus",
+      "viaOverflow": false,
+      "before": "../../site/about-dark-1280.png",
+      "closed": "closed-desktop-dark-cumulus.png",
+      "open": "open-desktop-dark-cumulus.png",
+      "viewport": {
+        "width": 1280,
+        "height": 850
+      }
+    },
+    {
+      "device": "desktop",
+      "scheme": "dark",
+      "app": "software",
+      "material": "metal",
+      "viaOverflow": false,
+      "before": "../../site/software-dark-1280.png",
+      "closed": "closed-desktop-dark-metal.png",
+      "open": "open-desktop-dark-metal.png",
+      "viewport": {
+        "width": 1280,
+        "height": 850
+      }
+    },
+    {
+      "device": "phone",
+      "scheme": "light",
+      "app": "about",
+      "material": "cumulus",
+      "viaOverflow": false,
+      "before": "../../site/about-light-390.png",
+      "closed": "closed-phone-light-cumulus.png",
+      "open": "open-phone-light-cumulus.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "device": "phone",
+      "scheme": "light",
+      "app": "software",
+      "material": "metal",
+      "viaOverflow": true,
+      "before": "../../site/software-light-390.png",
+      "closed": "closed-phone-light-metal.png",
+      "open": "open-phone-light-metal.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "device": "phone",
+      "scheme": "dark",
+      "app": "about",
+      "material": "cumulus",
+      "viaOverflow": false,
+      "before": "../../site/about-dark-390.png",
+      "closed": "closed-phone-dark-cumulus.png",
+      "open": "open-phone-dark-cumulus.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "device": "phone",
+      "scheme": "dark",
+      "app": "software",
+      "material": "metal",
+      "viaOverflow": true,
+      "before": "../../site/software-dark-390.png",
+      "closed": "closed-phone-dark-metal.png",
+      "open": "open-phone-dark-metal.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    }
+  ]
+}

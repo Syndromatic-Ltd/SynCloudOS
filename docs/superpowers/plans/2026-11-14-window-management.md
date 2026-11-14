@@ -28,16 +28,17 @@ document-local focus, full-screen transition states, restoration migration, and 
    comment, as `bottomBarAccessory` does).
 2. No aliases, shims, deprecation periods or compatibility flags. Removed means removed; migrate every caller
    in the framework **and** the site (`webspring-folders/site`) in the same change.
-3. The Atmo look is preserved. Anything that changes pixels on an existing surface stops at a visual gate
-   (below) for Claude and the owner. Never run `--update-snapshots`; the frozen theme baseline only moves with
-   owner sign-off.
+3. Preserve the Atmo look. Each visual gate collects before and after screenshots for desktop and phone,
+   light and dark, and Cumulus and Metal. Record what changed and why in the evidence README. Continue through
+   the phases for one design review with Claude and the owner. Keep the frozen baseline and screenshot
+   assertions intact. Leave intended visual failures visible and list them under Pending design review.
 4. Theme CSS follows the theme validator (`scripts/synware/theme-bundles.mjs`): no `.nse-` classes, keyframes,
    transitions, `font-*`, or `display`/`content` on semantic parts in theme files. Structure goes in framework CSS.
 5. Windows checkout: write files with LF. Python: `open(p, "w", newline="")`. After scripted edits, compare
    carriage-return counts with HEAD.
-6. Small commits, one concern each. `tsc -p tsconfig.app.json --noEmit`, the affected `tests/runtime` files and
-   the affected e2e specs pass before each commit. Run `vitest run tests/runtime` (a folder, not a file list:
-   long file lists overflow the Windows command line) at the end of each phase.
+6. Commit each phase locally in its worktree. Run the affected checks, followed by the full runtime and test
+   suites against frozen framework source, both typechecks and both browser suites. Record their outcomes and
+   the retired-name search. Leave master and remote branches alone.
 7. Keep comments short (two sentences at most).
 
 ## What is true today (verified)
@@ -470,6 +471,11 @@ container moves between same-document slots. Generation-fenced child-document tr
 verified in the prototype. The production bind/unbind acknowledgement, cross-document surface-loss recovery
 and launch/return motion acceptance remain open. Electron remains a separate phase.
 
+The current production port exposes capabilities, `requestFullScreen` and the event subscription. The
+browser reports `separateSurfaces: false`. Production child-window work still needs an acknowledged,
+generation-scoped binding, stylesheet and overlay roots in the destination document, and paired close/loss
+handling. The prototype's lifecycle and focus tests are the acceptance cases for that extension.
+
 ### Phase 1: dead code and dead fields (Codex)
 
 - Delete `AppFrame.tsx`, `nse-app-frame*` CSS and the `status-bar` theme part; rewrite the two tests and the
@@ -613,4 +619,5 @@ in the same commits as the API they use.
 - Key state and the focused responder never disagree; modals block only their domain.
 - Full-screen transitions handle refusal, re-toggle, OS-initiated changes and close mid-transition.
 - Saved windows from before the change restore with their geometry.
-- Full `tests/runtime`, typecheck and the e2e suites pass; visual gates signed off.
+- Runtime, typecheck and e2e outcomes are recorded on frozen source. The single design review owns the
+  disposition of any pending visual changes against the preserved baseline.
