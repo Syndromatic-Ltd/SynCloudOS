@@ -1,0 +1,647 @@
+{
+  "commit": "8dbf7598",
+  "note": "The browser offers native detach at desktop widths. Phone rows verify the narrow stage and floating window, start native detach at desktop width, then measure the detached browser child and reattached opener at the recorded phone viewport.",
+  "samples": [
+    {
+      "size": "desktop",
+      "scheme": "light",
+      "material": "cumulus",
+      "host": "webspring",
+      "results": [
+        {
+          "stage": "stage",
+          "screenshot": "desktop-light-cumulus-webspring-stage.png",
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": false
+        },
+        {
+          "stage": "floating",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        },
+        {
+          "stage": "native",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        },
+        {
+          "stage": "reattached",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        }
+      ]
+    },
+    {
+      "size": "desktop",
+      "scheme": "light",
+      "material": "cumulus",
+      "host": "single",
+      "results": [
+        {
+          "stage": "stage",
+          "screenshot": "desktop-light-cumulus-single-stage.png",
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": false
+        },
+        {
+          "stage": "floating",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        },
+        {
+          "stage": "native",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        },
+        {
+          "stage": "reattached",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        }
+      ]
+    },
+    {
+      "size": "desktop",
+      "scheme": "light",
+      "material": "metal",
+      "host": "webspring",
+      "results": [
+        {
+          "stage": "stage",
+          "screenshot": "desktop-light-metal-webspring-stage.png",
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": false
+        },
+        {
+          "stage": "floating",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        },
+        {
+          "stage": "native",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        },
+        {
+          "stage": "reattached",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        }
+      ]
+    },
+    {
+      "size": "desktop",
+      "scheme": "light",
+      "material": "metal",
+      "host": "single",
+      "results": [
+        {
+          "stage": "stage",
+          "screenshot": "desktop-light-metal-single-stage.png",
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": false
+        },
+        {
+          "stage": "floating",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        },
+        {
+          "stage": "native",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        },
+        {
+          "stage": "reattached",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        }
+      ]
+    },
+    {
+      "size": "desktop",
+      "scheme": "dark",
+      "material": "cumulus",
+      "host": "webspring",
+      "results": [
+        {
+          "stage": "stage",
+          "screenshot": "desktop-dark-cumulus-webspring-stage.png",
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": false
+        },
+        {
+          "stage": "floating",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        },
+        {
+          "stage": "native",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        },
+        {
+          "stage": "reattached",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        }
+      ]
+    },
+    {
+      "size": "desktop",
+      "scheme": "dark",
+      "material": "cumulus",
+      "host": "single",
+      "results": [
+        {
+          "stage": "stage",
+          "screenshot": "desktop-dark-cumulus-single-stage.png",
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": false
+        },
+        {
+          "stage": "floating",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        },
+        {
+          "stage": "native",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        },
+        {
+          "stage": "reattached",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        }
+      ]
+    },
+    {
+      "size": "desktop",
+      "scheme": "dark",
+      "material": "metal",
+      "host": "webspring",
+      "results": [
+        {
+          "stage": "stage",
+          "screenshot": "desktop-dark-metal-webspring-stage.png",
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": false
+        },
+        {
+          "stage": "floating",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        },
+        {
+          "stage": "native",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        },
+        {
+          "stage": "reattached",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        }
+      ]
+    },
+    {
+      "size": "desktop",
+      "scheme": "dark",
+      "material": "metal",
+      "host": "single",
+      "results": [
+        {
+          "stage": "stage",
+          "screenshot": "desktop-dark-metal-single-stage.png",
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": false
+        },
+        {
+          "stage": "floating",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        },
+        {
+          "stage": "native",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        },
+        {
+          "stage": "reattached",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        }
+      ]
+    },
+    {
+      "size": "phone",
+      "scheme": "light",
+      "material": "cumulus",
+      "host": "webspring",
+      "results": [
+        {
+          "stage": "stage",
+          "screenshot": "phone-light-cumulus-webspring-stage.png",
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": false
+        },
+        {
+          "stage": "floating",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        },
+        {
+          "stage": "native",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        },
+        {
+          "stage": "reattached",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        }
+      ]
+    },
+    {
+      "size": "phone",
+      "scheme": "light",
+      "material": "cumulus",
+      "host": "single",
+      "results": [
+        {
+          "stage": "stage",
+          "screenshot": "phone-light-cumulus-single-stage.png",
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": false
+        },
+        {
+          "stage": "floating",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        },
+        {
+          "stage": "native",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        },
+        {
+          "stage": "reattached",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        }
+      ]
+    },
+    {
+      "size": "phone",
+      "scheme": "light",
+      "material": "metal",
+      "host": "webspring",
+      "results": [
+        {
+          "stage": "stage",
+          "screenshot": "phone-light-metal-webspring-stage.png",
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": false
+        },
+        {
+          "stage": "floating",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        },
+        {
+          "stage": "native",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        },
+        {
+          "stage": "reattached",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        }
+      ]
+    },
+    {
+      "size": "phone",
+      "scheme": "light",
+      "material": "metal",
+      "host": "single",
+      "results": [
+        {
+          "stage": "stage",
+          "screenshot": "phone-light-metal-single-stage.png",
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": false
+        },
+        {
+          "stage": "floating",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        },
+        {
+          "stage": "native",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        },
+        {
+          "stage": "reattached",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        }
+      ]
+    },
+    {
+      "size": "phone",
+      "scheme": "dark",
+      "material": "cumulus",
+      "host": "webspring",
+      "results": [
+        {
+          "stage": "stage",
+          "screenshot": "phone-dark-cumulus-webspring-stage.png",
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": false
+        },
+        {
+          "stage": "floating",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        },
+        {
+          "stage": "native",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        },
+        {
+          "stage": "reattached",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        }
+      ]
+    },
+    {
+      "size": "phone",
+      "scheme": "dark",
+      "material": "cumulus",
+      "host": "single",
+      "results": [
+        {
+          "stage": "stage",
+          "screenshot": "phone-dark-cumulus-single-stage.png",
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": false
+        },
+        {
+          "stage": "floating",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        },
+        {
+          "stage": "native",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        },
+        {
+          "stage": "reattached",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        }
+      ]
+    },
+    {
+      "size": "phone",
+      "scheme": "dark",
+      "material": "metal",
+      "host": "webspring",
+      "results": [
+        {
+          "stage": "stage",
+          "screenshot": "phone-dark-metal-webspring-stage.png",
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": false
+        },
+        {
+          "stage": "floating",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        },
+        {
+          "stage": "native",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        },
+        {
+          "stage": "reattached",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        }
+      ]
+    },
+    {
+      "size": "phone",
+      "scheme": "dark",
+      "material": "metal",
+      "host": "single",
+      "results": [
+        {
+          "stage": "stage",
+          "screenshot": "phone-dark-metal-single-stage.png",
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": false
+        },
+        {
+          "stage": "floating",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        },
+        {
+          "stage": "native",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        },
+        {
+          "stage": "reattached",
+          "screenshot": null,
+          "railHeight": 28,
+          "railGapAtBottom": 0,
+          "overlappingContent": 0,
+          "retained": true
+        }
+      ]
+    }
+  ],
+  "failures": []
+}

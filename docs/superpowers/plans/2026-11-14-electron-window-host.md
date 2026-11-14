@@ -16,7 +16,7 @@ The [Webspring browser regression](../../../tests/e2e/detached-window.spec.ts) n
 
 [WindowHostEnvironment](../../../src/SynCloudOS/Windows/WindowHostEnvironment.ts) now supplies paired `bind` and `unbind` operations for hosts with separate surfaces. A binding carries the window ID, generation and a connected renderer outlet. The manager selects the acknowledged generation, and the browser waits for the old outlet to empty before destroying its popup. Use this contract for the Electron adapter. Add Electron-specific validation for native messages and keep the outlet element in the renderer. Fullscreen and titlebar-area responses must also be fenced against the native binding generation before forwarding them to the current runtime port.
 
-Record the exact framework, site and Electron/Chromium versions before running the native experiment. The production browser cases are the control for it. Remaining scenarios for the first Electron implementation include:
+Record the exact framework, site and Electron/Chromium versions before running the native experiment. The production browser cases are the control for it. Run these scenarios during the first Electron implementation.
 
 - [ ] Repeat the retained-editor round trip with selection, undo, toolbar, bottom accessory and inspector in one native run. Cover parent sheets, application and workspace modality, and an unrelated application's responder.
 - [ ] Run competing transfers, stale activation, close before destination readiness, loss of each surface and quit veto. Check event order and ensure one controller and one live mount.
@@ -36,7 +36,7 @@ Record the exact framework, site and Electron/Chromium versions before running t
 
 ## Protocol and transfer transaction
 
-Proposed Electron IPC envelope for adapting the production host port:
+The adapter can use this Electron IPC envelope.
 
 ```ts
 type HostMessage<T> = {
