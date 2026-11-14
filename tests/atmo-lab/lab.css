@@ -1,0 +1,47 @@
+/* Atmo Lab shell layout. Controls and surfaces are NSE's own; this file only places them. */
+html, body, #root { margin: 0; height: 100%; }
+body { font: 13px/1.4 var(--nse-font-system, -apple-system, "Segoe UI", sans-serif); }
+html[data-appearance="light"] body { background: #cdcfd2; color: #2a2f36; }
+html[data-appearance="dark"] body { background: #202227; color: #dde3ea; }
+#root > * { height: 100%; }
+
+.lab { display: grid; grid-template-columns: 220px 1fr; height: 100%; }
+.lab-nav { display: flex; flex-direction: column; min-height: 0; overflow: auto; box-shadow: inset -1px 0 0 rgb(0 0 0 / 22%); }
+.lab-nav header { padding: 18px 18px 10px; }
+.lab-nav h1 { margin: 0; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; text-shadow: var(--nse-sidebar-metal-emboss); }
+.lab-nav header p { margin: 2px 0 0; font-size: 11px; opacity: 0.6; }
+
+.lab-main { display: grid; grid-template-rows: auto auto 1fr; min-width: 0; min-height: 0; }
+.lab-brief { display: flex; flex-wrap: wrap; gap: 8px 22px; align-items: center; padding: 8px 16px; border-bottom: 1px solid rgb(0 0 0 / 14%); }
+html[data-appearance="dark"] .lab-brief { border-bottom-color: rgb(0 0 0 / 50%); }
+.lab-brief p { margin: 0; flex: 1 1 340px; opacity: 0.75; }
+.lab-labelled { display: inline-flex; gap: 8px; align-items: center; font-size: 12px; font-weight: 600; }
+.lab-angle > :nth-child(1) { min-width: 140px; }
+.lab-angle output { width: 4ch; font-variant-numeric: tabular-nums; font-weight: 400; }
+.lab-catalogue-picker { display: flex; gap: 6px; align-items: center; }
+.lab-catalogue-picker > span { font-size: 12px; opacity: 0.7; }
+
+.lab-stage { display: grid; gap: 1px; background: rgb(0 0 0 / 22%); min-height: 0; }
+.lab-stage[data-mode="split"] { grid-template-columns: 1fr 1fr; }
+.lab-pane { position: relative; display: grid; grid-template-rows: auto 1fr; min-width: 0; min-height: 0; justify-items: center; background: inherit; }
+html[data-appearance="light"] .lab-pane { background: #c4c6ca; }
+html[data-appearance="dark"] .lab-pane { background: #17191d; }
+.lab-pane-label { justify-self: stretch; padding: 5px 14px; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #3a78c2; }
+html[data-appearance="dark"] .lab-pane-label { color: #6aa9e6; }
+.lab-pane-label[data-modified], .lab-pane-label [data-modified] { color: #2f8f5b; }
+html[data-appearance="dark"] .lab-pane-label[data-modified], html[data-appearance="dark"] .lab-pane-label [data-modified] { color: #58c48a; }
+.lab-pane iframe { width: 100%; height: 100%; border: 0; display: block; background: transparent; }
+.lab-pane > iframe[style] { box-shadow: 0 0 0 1px rgb(0 0 0 / 25%), 0 8px 30px rgb(0 0 0 / 25%); }
+
+.lab-swipe { position: relative; width: 100%; height: 100%; }
+.lab-swipe > iframe, .lab-swipe-top { position: absolute; inset: 0; }
+.lab-swipe-top iframe { width: 100%; height: 100%; border: 0; }
+.lab-swipe-handle { position: absolute; top: 0; bottom: 0; width: 18px; margin-left: -9px; cursor: ew-resize; touch-action: none; }
+.lab-swipe-handle::before { content: ""; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: #2f8f5b; box-shadow: 0 0 0 1px rgb(0 0 0 / 25%); }
+.lab-swipe-handle::after { content: ""; position: absolute; left: 1px; top: 50%; width: 16px; height: 32px; margin-top: -16px; border-radius: 8px; background: #2f8f5b; box-shadow: 0 1px 3px rgb(0 0 0 / 40%); }
+
+@media (max-width: 760px) {
+  .lab { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+  .lab-nav { max-height: 180px; }
+  .lab-stage[data-mode="split"] { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+}

@@ -9,6 +9,7 @@
     "test": "vitest run",
     "test:e2e": "node scripts/test-e2e-matrix.mjs",
     "test:runtime": "vitest run tests/runtime",
+    "atmo:lab": "node node_modules/vite/bin/vite.js --config tests/atmo-lab/vite.config.ts",
     "synware:create": "node scripts/synware/create-synware.mjs",
     "synware:validate": "node scripts/synware/validate-synware.mjs",
     "synware:audit": "node scripts/synware/audit-sdk-imports.mjs",
