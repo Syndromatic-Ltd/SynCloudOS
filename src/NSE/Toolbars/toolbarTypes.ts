@@ -43,7 +43,7 @@ import type { NSEWindowSurfaceBridge } from "../Overlays";
  * available catalogue stay in the host's window and toolbar configuration; they are not
  * duplicated into preferences or an ambient registry.
  */
-export interface NSEToolbarPreferences {
+export interface ToolbarPreferences {
   readonly itemIds: readonly string[];
   readonly displayMode: "icon-and-label" | "icon-only" | "label-only";
   readonly sizeMode: "regular" | "small";
@@ -84,7 +84,7 @@ export type NSEToolbarItem =
   | { readonly kind: "flexible-space"; readonly id: string; readonly minimumWidth: number }
   | { readonly kind: "separator"; readonly id: string };
 
-export type NSEToolbarOwner =
+export type ToolbarOwner =
   | { readonly kind: "window"; readonly windowControllerId: string }
   | { readonly kind: "application"; readonly applicationId: string };
 
@@ -99,14 +99,14 @@ export type NSEToolbarItemInput = NSEToolbarItem | NSEToolbarActionItem;
 
 export interface NSEToolbarConfiguration {
   readonly identifier: string;
-  readonly owner: NSEToolbarOwner;
-  readonly displayMode: NSEToolbarPreferences["displayMode"];
-  readonly sizeMode: NSEToolbarPreferences["sizeMode"];
+  readonly owner: ToolbarOwner;
+  readonly displayMode: ToolbarPreferences["displayMode"];
+  readonly sizeMode: ToolbarPreferences["sizeMode"];
   readonly allowedItemIds: readonly string[];
   readonly defaultItemIds: readonly string[];
 }
 
-export interface NSEToolbarRuntimePort {
+export interface ToolbarRuntimePort {
   readonly signal: AbortSignal;
   readonly commands: {
     getPresentationGeneration(): { readonly registryGeneration: number; readonly responderGeneration: number };
@@ -135,7 +135,7 @@ export interface NSEToolbarRuntimePort {
   readonly resolveAction?: NSEMenuRuntimePort["resolveAction"];
 }
 
-export type NSEToolbarPresentedItem =
+export type ToolbarPresentedItem =
   | {
       readonly kind: "command";
       readonly id: string;
@@ -172,9 +172,9 @@ export interface NSEToolbarSnapshot {
   readonly generation: number;
   readonly validating: boolean;
   readonly itemIds: readonly string[];
-  readonly displayMode: NSEToolbarPreferences["displayMode"];
-  readonly sizeMode: NSEToolbarPreferences["sizeMode"];
-  readonly items: readonly NSEToolbarPresentedItem[];
+  readonly displayMode: ToolbarPreferences["displayMode"];
+  readonly sizeMode: ToolbarPreferences["sizeMode"];
+  readonly items: readonly ToolbarPresentedItem[];
   readonly diagnostic: "validation-failed" | null;
 }
 
@@ -182,46 +182,46 @@ export interface NSEToolbarControllerOptions extends NSEControllerOwnershipOptio
   readonly configuration: NSEToolbarConfiguration;
   readonly items: readonly NSEToolbarItemInput[];
   /** The host constructs and owns this preference controller. */
-  readonly preferences: NSEUserDefaultsController<NSEToolbarPreferences>;
-  readonly runtime: NSEToolbarRuntimePort;
+  readonly preferences: NSEUserDefaultsController<ToolbarPreferences>;
+  readonly runtime: ToolbarRuntimePort;
 }
 
-export type NSEToolbarRefreshResult =
+export type ToolbarRefreshResult =
   | { readonly status: "published"; readonly generation: number }
   | { readonly status: "cancelled"; readonly generation: number }
   | { readonly status: "failed"; readonly generation: number; readonly code: "validation-failed" };
 
-export interface NSEToolbarLayoutEntry {
+export interface ToolbarLayoutEntry {
   readonly id: string;
   readonly instanceId: string;
-  readonly kind: NSEToolbarPresentedItem["kind"];
+  readonly kind: ToolbarPresentedItem["kind"];
   readonly allocatedWidth: number;
-  readonly item: NSEToolbarPresentedItem;
+  readonly item: ToolbarPresentedItem;
 }
 
-export interface NSEToolbarLayout {
+export interface ToolbarLayout {
   readonly direction: "ltr" | "rtl";
   readonly availableWidth: number;
   readonly visibleItemIds: readonly string[];
   readonly overflowItemIds: readonly string[];
-  readonly entries: readonly NSEToolbarLayoutEntry[];
-  readonly overflowEntries: readonly NSEToolbarLayoutEntry[];
+  readonly entries: readonly ToolbarLayoutEntry[];
+  readonly overflowEntries: readonly ToolbarLayoutEntry[];
   readonly overflowRequired: boolean;
   readonly clipped: boolean;
 }
 
-export interface NSEToolbarLayoutOptions {
-  readonly displayMode: NSEToolbarPreferences["displayMode"];
-  readonly sizeMode: NSEToolbarPreferences["sizeMode"];
+export interface ToolbarLayoutOptions {
+  readonly displayMode: ToolbarPreferences["displayMode"];
+  readonly sizeMode: ToolbarPreferences["sizeMode"];
   readonly direction: "ltr" | "rtl";
 }
 
-export interface NSEToolbarConfigurationSheetWindowRequest {
+export interface ToolbarConfigurationSheetWindowRequest {
   readonly id: string;
   readonly role: "sheet";
   /** Null denotes a top-level application-stage sheet. */
   readonly parentWindowControllerId: string | null;
-  readonly owner: NSEToolbarOwner;
+  readonly owner: ToolbarOwner;
 }
 
 /**
@@ -229,14 +229,14 @@ export interface NSEToolbarConfigurationSheetWindowRequest {
  * renderer and owns WindowManager.create/open/close; NSE never makes a second
  * WindowRecord to show toolbar preferences.
  */
-export interface NSEToolbarConfigurationSheetWindowBridge {
-  open?(request: NSEToolbarConfigurationSheetWindowRequest): void;
-  close?(request: NSEToolbarConfigurationSheetWindowRequest): void;
+export interface ToolbarConfigurationSheetWindowBridge {
+  open?(request: ToolbarConfigurationSheetWindowRequest): void;
+  close?(request: ToolbarConfigurationSheetWindowRequest): void;
   present?: NSEWindowSurfaceBridge["present"];
   dismiss?: NSEWindowSurfaceBridge["dismiss"];
 }
 
-export interface NSEToolbarConfigurationSession {
+export interface ToolbarConfigurationSession {
   begin(transaction: ControllerEditTransaction): void;
   commit(): ControllerCommitResult;
   discard(): void;

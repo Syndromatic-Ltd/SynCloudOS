@@ -22,9 +22,9 @@ import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore
 import { NSEPopup, reportNSEWindowSurfaceError, useNSEWindowSurfaceLifecycle, useOptionalNSEWindowSurfaceBridge, type OverlayDismissReason, type NSEWindowSurfaceBridge } from "../Overlays";
 import { useNSEPresentedContent } from "../Overlays/useNSEPresentedContent";
 import type { NSEToolbarController } from "./NSEToolbarController";
-import type { NSEToolbarConfigurationSheetWindowBridge } from "./toolbarTypes";
+import type { ToolbarConfigurationSheetWindowBridge } from "./toolbarTypes";
 
-export interface NSEToolbarConfigurationSheetProps {
+export interface ToolbarConfigurationSheetProps {
   readonly id: string;
   readonly open: boolean;
   readonly anchor: HTMLElement | null;
@@ -34,7 +34,7 @@ export interface NSEToolbarConfigurationSheetProps {
   readonly parentWindowControllerId: string | null;
   readonly controller: NSEToolbarController;
   /** Optional explicit window-host seam; production hosts supply the nearest bridge by context. */
-  readonly windowBridge?: NSEToolbarConfigurationSheetWindowBridge;
+  readonly windowBridge?: ToolbarConfigurationSheetWindowBridge;
   onOpenChange(open: boolean, reason: OverlayDismissReason): void;
 }
 
@@ -57,7 +57,7 @@ function allowsAnother(controller: NSEToolbarController, id: string, itemIds: re
  * The window bridge owns physical sheet records; the overlay wraps the same
  * interaction boundary to retain focus/portal authority in the nearest runtime.
  */
-export function NSEToolbarConfigurationSheet({
+export function ToolbarConfigurationSheet({
   id,
   open,
   anchor,
@@ -67,7 +67,7 @@ export function NSEToolbarConfigurationSheet({
   controller,
   windowBridge,
   onOpenChange,
-}: NSEToolbarConfigurationSheetProps) {
+}: ToolbarConfigurationSheetProps) {
   if (!id.trim()) throw new TypeError("NSE toolbar configuration sheet IDs must not be empty.");
   if (!parentResponderId.trim()) throw new TypeError("NSE toolbar configuration sheets require a parent responder ID.");
   if (parentWindowControllerId !== null && !parentWindowControllerId.trim()) throw new TypeError("NSE toolbar configuration-sheet parent window controller IDs must not be empty.");

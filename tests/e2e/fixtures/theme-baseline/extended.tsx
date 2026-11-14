@@ -13,7 +13,7 @@ import { NSETreeController } from "../../../../src/NSE/Controllers/NSETreeContro
 import { nseUnowned } from "../../../../src/NSE/Controllers/ownership";
 import type { ThemeBaselineSurface } from "./catalogue";
 import { NSEImageView } from "../../../../src/NSE/Controls/Images/NSEImage";
-import { NSEToolbarView } from "../../../../src/NSE/Toolbars/NSEToolbarView";
+import { ToolbarView } from "../../../../src/NSE/Toolbars/ToolbarView";
 import { LoadingSpinner } from "../../../../src/NSE/Components/LoadingSpinner";
 import { Badge } from "../../../../src/NSE/Components/Badge";
 import { ColourWellSurface } from "./panels";
@@ -71,7 +71,7 @@ export function extendedThemeBaselineCatalogue(): ThemeBaselineSurface[] {
   for (const imageScaling of ["proportionallyUpOrDown", "none"] as const) add(`image-view-${imageScaling}`, () => <NSEImageView src="/assets/webspring/Panel.png" alt="Panel artwork" imageScaling={imageScaling} style={{ height: 240 }} />);
   for (const editable of [false, true]) for (const selected of [false, true]) add(`text-view-${editable ? "editable" : "read-only"}-${selected ? "selected" : "normal"}`, () => <TextSurface editable={editable} selected={selected} />);
   add("ruler-view", () => <NSE.NSERulerView value={{ alignment: "start", firstLineIndent: 12, headIndent: 24, tailIndent: 0, lineHeight: "normal", tabStops: [48, 96, 144] }} onChange={noop} />);
-  for (const position of ["top", "bottom", "inline"] as const) add(`toolbar-${position}`, () => <NSEToolbarView composition="children" position={position}><NSE.NSEButton title="Add" bezelStyle="texturedRounded" /><NSE.NSEButton title="Remove" bezelStyle="texturedRounded" /></NSEToolbarView>);
+  for (const position of ["top", "bottom", "inline"] as const) add(`toolbar-${position}`, () => <ToolbarView composition="children" position={position}><NSE.NSEButton title="Add" bezelStyle="texturedRounded" /><NSE.NSEButton title="Remove" bezelStyle="texturedRounded" /></ToolbarView>);
   for (const mode of ["clip", "scroll"] as const) add(`clip-view-${mode}`, () => <NSE.NSEClipView mode={mode} style={{ height: 120 }}><p>Visible content</p><div style={{ height: 300 }}>Document content</div></NSE.NSEClipView>);
   add("badge", () => <Badge count={12} />);
   add("loading-spinner", () => <LoadingSpinner />);

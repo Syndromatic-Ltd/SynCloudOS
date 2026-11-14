@@ -31,11 +31,11 @@ import { NSEMenu, MenuView, nseMenuModel, type MenuEntry, type MenuModel } from 
 import { MenuOverlay } from "../Menus/MenuOverlay";
 import { useOptionalOverlayProvider } from "../Overlays";
 import type { NSEToolbarController } from "./NSEToolbarController";
-import type { NSEToolbarLayoutEntry } from "./toolbarTypes";
+import type { ToolbarLayoutEntry } from "./toolbarTypes";
 
-export interface NSEToolbarOverflowMenuProps {
+export interface ToolbarOverflowMenuProps {
   readonly controller: NSEToolbarController;
-  readonly entries: readonly NSEToolbarLayoutEntry[];
+  readonly entries: readonly ToolbarLayoutEntry[];
   /** Stable overlay-branch provenance supplied by the window/application host. */
   readonly overlayId: string;
   readonly parentResponderId: string;
@@ -45,7 +45,7 @@ export interface NSEToolbarOverflowMenuProps {
   onFocus?(): void;
 }
 
-function modelFor(controller: NSEToolbarController, entries: readonly NSEToolbarLayoutEntry[]): MenuModel {
+function modelFor(controller: NSEToolbarController, entries: readonly ToolbarLayoutEntry[]): MenuModel {
   const menuEntries: MenuEntry[] = [];
   for (const entry of entries) {
     const item = entry.item;
@@ -78,7 +78,7 @@ function modelFor(controller: NSEToolbarController, entries: readonly NSEToolbar
  * Overflow is an ordinary menu branch. It does not cache a separate
  * command presentation, and its dismissal/focus rules remain provider-owned.
  */
-export function NSEToolbarOverflowMenu({
+export function ToolbarOverflowMenu({
   controller,
   entries,
   overlayId,
@@ -87,7 +87,7 @@ export function NSEToolbarOverflowMenu({
   triggerRef,
   tabIndex,
   onFocus,
-}: NSEToolbarOverflowMenuProps) {
+}: ToolbarOverflowMenuProps) {
   const provider = useOptionalOverlayProvider();
   const [open, setOpen] = useState(false);
   const [hovered, setHovered] = useState(false);

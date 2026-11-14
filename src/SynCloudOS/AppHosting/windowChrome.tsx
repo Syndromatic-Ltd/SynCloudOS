@@ -28,8 +28,8 @@ import type { NSEAnyWindowController } from "../../NSE/applicationHostInterop";
 import { useObserve, NSEActionResponderContext } from "../../NSE/applicationHostInterop";
 import { nseAttachToolbar, nseEndToolbarCustomization, nseToolbarEngine, nseToolbarTabViews } from "../../NSE/applicationHostInterop";
 import type { NSEToolbar } from "../../NSE/NSE";
-import { NSEToolbarView } from "../../NSE/applicationHostInterop";
-import { NSEToolbarConfigurationSheet } from "../../NSE/applicationHostInterop";
+import { ToolbarView } from "../../NSE/applicationHostInterop";
+import { ToolbarConfigurationSheet } from "../../NSE/applicationHostInterop";
 import type { NSETitlebarAccessoryViewController } from "../../NSE/NSE";
 import { SynWareRuntimeContext } from "../../SynCloudOSReact";
 import { useSynWareContext } from "../AppSDK/SynWareContext";
@@ -225,7 +225,7 @@ export function NSEWindowToolbar({ controller, toolbar }: { readonly controller:
     <>
       <div ref={element} className="nse-window-toolbar" data-nse-part="toolbar" data-mode={mode} data-nse-colour-scheme-resolved={mode} data-toolbar-identifier={toolbar.identifier} data-has-tab-items={tabViews.length ? "true" : undefined}>
         {engine && width > 0 && (!tabViews.length || toolbar.items.length > 0) ? (
-          <NSEToolbarView
+          <ToolbarView
             composition="configured"
             controller={engine}
             width={Math.max(0, width - tabItemsWidth)}
@@ -237,7 +237,7 @@ export function NSEWindowToolbar({ controller, toolbar }: { readonly controller:
         </div> : null}
       </div>
       {engine && toolbar.customizationPaletteIsRunning ? (
-        <NSEToolbarConfigurationSheet
+        <ToolbarConfigurationSheet
           id={`${overlayId}:customize`}
           open
           anchor={element.current}

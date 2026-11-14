@@ -11,7 +11,7 @@ import { instantiateInOwnerScope, NSEOwnershipScope, type NSEControllerOwnership
 import { NSEMenu } from "../../src/NSE/Menus/NSEMenu";
 import type { NSEMenuRuntimePort } from "../../src/NSE/Menus/menuTypes";
 import { NSEToolbarController } from "../../src/NSE/Toolbars/NSEToolbarController";
-import type { NSEToolbarPreferences } from "../../src/NSE/Toolbars/toolbarTypes";
+import type { ToolbarPreferences } from "../../src/NSE/Toolbars/toolbarTypes";
 import { useRuntimeNSEMenuPort } from "../../src/SynCloudOSReact/nseMenuPort";
 import { createClassApplicationHost, type ClassApplicationHost } from "./fixtures/classApplicationHost";
 import { defaultsFrom } from "../fixtures/userDefaults";
@@ -25,13 +25,13 @@ afterEach(async () => {
 const kinds = ["menu", "toolbar"] as const;
 type Kind = typeof kinds[number];
 function preferences(signal: AbortSignal) {
-  const value = new NSEUserDefaultsController<NSEToolbarPreferences>({
+  const value = new NSEUserDefaultsController<ToolbarPreferences>({
     ownerSignal: signal, namespace: "runtime-owned-toolbar", schema: {
       version: 1, defaults: { itemIds: [], displayMode: "icon-only", sizeMode: "regular" }, migrations: [],
       fields: {
         itemIds: { validate: (value): value is readonly string[] => Array.isArray(value) && value.every(item => typeof item === "string") },
-        displayMode: { validate: (value): value is NSEToolbarPreferences["displayMode"] => value === "icon-only" || value === "icon-and-label" || value === "label-only" },
-        sizeMode: { validate: (value): value is NSEToolbarPreferences["sizeMode"] => value === "small" || value === "regular" },
+        displayMode: { validate: (value): value is ToolbarPreferences["displayMode"] => value === "icon-only" || value === "icon-and-label" || value === "label-only" },
+        sizeMode: { validate: (value): value is ToolbarPreferences["sizeMode"] => value === "small" || value === "regular" },
       },
     }, defaults: defaultsFrom({ read: () => null, write() {}, remove() {} }),
   });
