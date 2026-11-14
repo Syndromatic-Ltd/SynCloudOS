@@ -1,6 +1,6 @@
 # Electron Window Host Implementation Plan
 
-> Written design only. This phase does not install Electron, add an adapter, package an application, or approve native acceptance. A later implementation request starts execution after the production browser gate below passes.
+> Written design only. This phase does not install Electron, add an adapter, package an application, or approve native acceptance. A later implementation request starts with the browser evidence below and verifies the native host contract.
 
 **Goal:** Present existing SynCloudOS windows in native host surfaces without duplicating application, document, controller, command or close authority.
 
@@ -10,17 +10,18 @@
 
 ## Evidence and production prerequisite
 
-The [amended window-management plan](2026-11-14-window-management.md) records Phase 0b's four passing Chromium tests. A stable portal target retained a class window through two fixture slots and a same-origin child document; the fixture checked draft, ID, load counts, toolbar/accessory state, selection/undo, attached-sheet Escape, child closure, early destination loss and quit veto. A child-document popover Escape failure was reproduced and repaired with document-local listeners and realm-safe node checks. The [evidence receipt](../evidence/2026-11-14-window-management/README.md) explicitly limits these results to the prototype.
+The [amended window-management plan](2026-11-14-window-management.md#transfer-prototype-results-sol) records the Chromium prototype and production Webspring handoff. The prototype retained one class window and its draft across a same-origin child document. It covered selection, undo, toolbar and accessory retention, child closure, early loss, Escape and quit veto.
 
-Those fixture slots are not the production Webspring stage and floating layer. Before any Electron implementation:
+The [Webspring browser regression](../../../tests/e2e/detached-window.spec.ts) now covers stage to floating to a same-origin native browser popup and back, preserving the mounted editor, draft, window ID and one controller load. It checks child viewport changes, attached-sheet Tab and Escape, focus return, a close veto and recovery after the OS closes the popup. The [installed SDK captures](../evidence/2026-11-14-window-management/phase-3/installed-native/) repeat desktop popup round trips in About and Software. The [runtime surface tests](../../../tests/runtime/window-host-surfaces.test.ts) cover stale activation and loss, a retired pending bind and key-modal activation.
 
-- [ ] Run the real application host through stage → floating → stage and stage → child document → floating → stage. Observe one window ID, one controller/root, one live mount and unchanged draft, selection, undo, toolbar and accessories.
-- [ ] Exercise an inspector, another application's document, a parent sheet, an application-modal window and a workspace modal. Key/main and focus must agree; unrelated windows remain usable when their domain permits it.
-- [ ] Repeat interrupted transfers, two competing transfers, a stale destination activation, close before destination readiness, source loss, destination loss and an application quit veto. Every failed move restores its source or reports a retained unavailable surface; no accidental close or duplicate mount is acceptable.
-- [ ] Verify menu/popover Tab, Escape, dismissal and focus return in both documents, including after returning to the opener.
-- [ ] Pin framework/site HEADs, dependency receipts and browser version. Capture event order and identity counts alongside the rendered evidence. A unit-test or prototype pass cannot replace this gate.
+[WindowHostEnvironment](../../../src/SynCloudOS/Windows/WindowHostEnvironment.ts) now supplies paired `bind` and `unbind` operations for hosts with separate surfaces. A binding carries the window ID, generation and a connected renderer outlet. The manager selects the acknowledged generation, and the browser waits for the old outlet to empty before destroying its popup. Use this contract for the Electron adapter. Add Electron-specific validation for native messages and keep the outlet element in the renderer. Fullscreen and titlebar-area responses must also be fenced against the native binding generation before forwarding them to the current runtime port.
 
-The current `src/SynCloudOS/Windows/WindowHostEnvironment.ts` has capabilities, fullscreen requests and events, but no acknowledged bind/unbind operation or surface generation. Its shape must be extended only after these tests establish the production ownership contract.
+Record the exact framework, site and Electron/Chromium versions before running the native experiment. The production browser cases are the control for it. Remaining scenarios for the first Electron implementation include:
+
+- [ ] Repeat the retained-editor round trip with selection, undo, toolbar, bottom accessory and inspector in one native run. Cover parent sheets, application and workspace modality, and an unrelated application's responder.
+- [ ] Run competing transfers, stale activation, close before destination readiness, loss of each surface and quit veto. Check event order and ensure one controller and one live mount.
+- [ ] Verify menu/popover Tab, Escape, dismissal and focus return in the child and opener.
+- [ ] Establish the native frame readiness, caption exclusion and fullscreen event behavior on each target OS.
 
 ## Constraints and authority
 
@@ -35,7 +36,7 @@ The current `src/SynCloudOS/Windows/WindowHostEnvironment.ts` has capabilities, 
 
 ## Protocol and transfer transaction
 
-Proposed data envelope, to be reconciled with the production browser contract before implementation:
+Proposed Electron IPC envelope for adapting the production host port:
 
 ```ts
 type HostMessage<T> = {
@@ -94,8 +95,8 @@ On macOS, native fullscreen is asynchronous and completion is reported by fullsc
 Proposed host package location: `hosts/electron-window-host/`, with its own dependency manifest and no Electron dependency added to the browser SDK.
 
 1. **Protocol and main-process registry.** Create `src/protocol.ts`, `src/main/windowRegistry.ts` and `tests/window-registry.test.ts` in that package. First test wrong sender/frame/origin, stale epoch/generation, replayed requests and non-finite geometry; then implement validation and exact native-handle ownership. Gate: every denied message performs zero native calls, and retries acknowledge the same result without repeating side effects.
-2. **Preload and renderer host port.** Create `src/preload.ts`, `src/renderer/ElectronWindowHost.ts` and `tests/window-host.test.ts`. Expose only the named operations above. Extend framework `WindowHostEnvironment.ts` with the production-approved transfer contract and tests under `tests/runtime/window-host-environment.test.ts`; retain the stage adapter. Gate: stale events cannot activate, close or rebind a current window.
-3. **Actual child-surface transfer.** Create `src/main/childWindows.ts` and `tests/e2e/window-transfer.spec.ts`. Port the production editor/inspector fixture, keep a single runtime and record creation/load/disposal counters. Gate: all transfer and failure scenarios in the prerequisite matrix pass in Electron; otherwise stop and write a separate renderer-protocol proposal.
+2. **Preload and renderer host port.** Create `src/preload.ts`, `src/renderer/ElectronWindowHost.ts` and `tests/window-host.test.ts`. Expose the named operations above and implement the existing `WindowHostEnvironment` surface contract. Reuse the stage adapter and exercise `tests/runtime/window-host-surfaces.test.ts` when the framework boundary changes. Gate: stale events cannot activate, close or rebind a current window.
+3. **Actual child-surface transfer.** Create `src/main/childWindows.ts` and `tests/e2e/window-transfer.spec.ts`. Port the production editor/inspector fixture, keep a single runtime and record creation/load/disposal counters. Gate: the production-browser control cases and the native transfer scenarios pass in Electron; otherwise stop and write a separate renderer-protocol proposal.
 4. **Fullscreen and transactional native close.** Create `src/main/windowEvents.ts`, `tests/e2e/fullscreen.spec.ts` and `tests/e2e/window-close.spec.ts`. Test event confirmations, refusal, queued intents, close mid-transition, document save/discard/cancel, window veto, application veto and asynchronous close leases. Gate: no native destruction precedes the logical close commit, and no stale completion changes a closed/rebound window.
 5. **Native chrome and menus.** Create `src/main/applicationMenu.ts` and `tests/e2e/native-chrome.spec.ts`. Translate application menu snapshots into native menu items, route selections to the current responder context and revalidate before dispatch. Project the host's available titlebar area into the shared titlebar's exclusion geometry; do not treat that available rectangle as the buttons' occupied rectangle. Gate: one titlebar, no overlapping interactive regions, working keyboard menus and distinct key/main behavior.
 6. **Recovery and platform receipt.** Create `tests/e2e/surface-loss.spec.ts` and `docs/acceptance.md`. Test child crash, authority crash, opener closure, reconnect and restoration into a new epoch. Gate: preserved durable data is distinguishable from unrecoverable unsaved state, there are no duplicate controllers within the surviving epoch, and every platform check below has a receipt.
@@ -125,4 +126,4 @@ git diff --check
 
 The future host package must supply `npm.cmd test` for protocol/unit tests and `npm.cmd run test:e2e` for launching its packaged-development Electron harness. Those scripts are packet deliverables, not existing commands claimed by this document. Native platform receipts are required in addition to green automation.
 
-Stop implementation and return to design if the configured child cannot share authority, the production browser gate fails, focus/modality require a second logical owner, or native close cannot respect the existing transaction. Do not resolve these failures with duplicated runtimes, serialized React objects, compatibility aliases or silent best-effort transitions.
+Stop implementation and return to design if the configured child cannot share authority, the retained-window browser control regresses, focus/modality require a second logical owner, or native close cannot respect the existing transaction. Do not resolve these failures with duplicated runtimes, serialized React objects, compatibility aliases or silent best-effort transitions.
