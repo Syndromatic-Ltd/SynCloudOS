@@ -44,7 +44,7 @@ const validPalette = (maximum: number) => (value: unknown): value is readonly st
     catch { return false; }
   });
 
-export function createColourPanelPreferences(
+export function createNSEColourPanelPreferences(
   persistence: ColourPanelPreferencePersistence,
   namespace = "nse.colour-panel.palette",
   ownership: NSEControllerOwnership = {},
