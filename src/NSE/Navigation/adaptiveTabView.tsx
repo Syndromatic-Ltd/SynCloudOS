@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
+import { isNSEDOMNode } from "../Focus/domRealm";
 import { useNSEAppearance } from "../Appearance/NSEAppearanceProvider";
 import { WindowLayoutContext, useNSEWindowChromeElement } from "../Layout/windowObstructions";
 import { useNSEViewSafeArea } from "../Layout/useNSESafeArea";
@@ -110,7 +111,7 @@ export function AdaptiveTabView({ controller, scope }: { readonly controller: NS
 
   useLayoutEffect(() => {
     const element = root.current;
-    if (!element || !navigationHadFocus.current) return;
+    if (renderer === "none" || !element || !navigationHadFocus.current) return;
     const active = element.ownerDocument.activeElement;
     if (active && active !== element.ownerDocument.body && !element.contains(active)) return;
     const target = compact
@@ -126,7 +127,7 @@ export function AdaptiveTabView({ controller, scope }: { readonly controller: NS
     data-navigation-renderer={renderer}
     style={{ ...safeArea.properties, "--nse-navigation-rail-width": `${railWidth}px` } as CSSProperties}
     onFocusCapture={event => { navigationHadFocus.current = Boolean((event.target as Element).closest('.nse-adaptive-tab-sidebar, [data-nse-adaptive-tabs-chrome]')); }}
-    onBlurCapture={event => { if (event.relatedTarget instanceof Node && !event.currentTarget.contains(event.relatedTarget)) navigationHadFocus.current = false; }}>
+    onBlurCapture={event => { if (isNSEDOMNode(event.relatedTarget) && !event.currentTarget.contains(event.relatedTarget)) navigationHadFocus.current = false; }}>
     <NSESplitView className="nse-adaptive-tab-split"
       sidebar={<div ref={sidebar} className="nse-adaptive-tab-sidebar" hidden={renderer !== "source-list-content"} inert={renderer !== "source-list-content"}>
         <NSEOutlineView controller={outline} selectionHighlightStyle="sourceList" viewportBlockSize="fill"
