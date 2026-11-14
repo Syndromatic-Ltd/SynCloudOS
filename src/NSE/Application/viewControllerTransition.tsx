@@ -38,7 +38,7 @@ export enum NSEViewControllerTransitionOptions {
 }
 
 /** @internal One retained child-view slot, including its replacement in flight. */
-export interface NSEChildTransition {
+export interface ChildTransition {
   readonly backend?: "afx" | "viewTransition";
   readonly from: NSEViewController<unknown> | null;
   readonly to: NSEViewController<unknown>;
@@ -61,9 +61,9 @@ function childViewKey(controller: NSEViewController<unknown>): string {
 }
 
 /** @internal The slot outlives each swap, as the views' AppKit superview does. */
-export function NSETransitionSlot({ transition, Renderer, className }: {
-  readonly transition: NSEChildTransition;
-  readonly Renderer: import("./viewControllerRenderer").NSEViewControllerRenderer;
+export function TransitionSlot({ transition, Renderer, className }: {
+  readonly transition: ChildTransition;
+  readonly Renderer: import("./viewControllerRenderer").ViewControllerRenderer;
   readonly className?: string;
 }) {
   const { animator, reducedMotion } = useNSEAnimationEnvironment();

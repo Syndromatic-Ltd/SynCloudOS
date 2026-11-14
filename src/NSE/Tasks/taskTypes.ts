@@ -1,5 +1,5 @@
 import type { NSEObservable } from '../Objects/observable';
-import type { NSEDisposable, NSESynchronousDisposable } from '../Application/ownedFactory';
+import type { Disposable, SynchronousDisposable } from '../Application/ownedFactory';
 export type { NSETaskLifetime } from '../Application/viewActivity';
 import type { NSETaskLifetime } from '../Application/viewActivity';
 export type NSETaskSettlement<T> =
@@ -11,7 +11,7 @@ export interface NSETaskContext {
   readonly generation:number;
   throwIfCancelled():void;
   commit<R>(change:()=>R & (R extends PromiseLike<unknown> ? never : unknown)):boolean;
-  own<T extends NSEDisposable>(factory:(signal:AbortSignal)=>NSESynchronousDisposable<T>):T;
+  own<T extends Disposable>(factory:(signal:AbortSignal)=>SynchronousDisposable<T>):T;
 }
 export interface NSETaskRun<T> {readonly signal:AbortSignal;readonly finished:Promise<NSETaskSettlement<T>>;cancel():void}
 export interface NSETaskSnapshot<T> {readonly revision:number;readonly pending:boolean;readonly value:T|undefined;readonly error:unknown|null}

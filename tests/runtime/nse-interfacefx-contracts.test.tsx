@@ -34,7 +34,7 @@ import { TopBar } from "../../src/NSE/Windows/Chrome";
 import { NSESplitViewController, NSESplitViewItem } from "../../src/NSE/DataViews/Split";
 import { NSEOutlineView } from "../../src/NSE/DataViews/Outline";
 import { NSETreeController } from "../../src/NSE/Controllers/NSETreeController";
-import { NSEViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
+import { ViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
 import { createStaticPresentationTraits } from "../fixtures/presentationTraits";
 import { tabViewController, renderTabController, updateTraits, TestContentViewController } from "../fixtures/tabViewController";
 import { NSEGridView } from "../../src/NSE/Layout";
@@ -105,7 +105,7 @@ describe("NSE semantic contracts", () => {
       new NSESplitViewItem({ identifier: "home", behavior: "sidebar", viewController: sidebar }),
       new NSESplitViewItem({ identifier: "library", viewController: detail }),
     ] });
-    render(<NSEViewControllerView controller={split} />);
+    render(<ViewControllerView controller={split} />);
     updateTraits(split, createStaticPresentationTraits({ width: 390, height: 844 }));
     const open = screen.getByRole("button", { name: "Open Library destination" }); open.focus(); fireEvent.click(open);
     expect(screen.getByTestId("hierarchy-library")).not.toBeNull();
@@ -120,7 +120,7 @@ describe("NSE semantic contracts", () => {
       new NSESplitViewItem({ identifier: "home", behavior: "sidebar", viewController: new TestContentViewController("Home", () => <p>Home</p>), minimumThickness: 208 }),
       new NSESplitViewItem({ identifier: "library", viewController: detail, minimumThickness: 280 }),
     ] });
-    render(<NSEViewControllerView controller={split} />);
+    render(<ViewControllerView controller={split} />);
     updateTraits(split, createStaticPresentationTraits({ width: 390, height: 844 })); act(() => split.showDetail(detail));
     const input = screen.getByRole("textbox", { name: "Hierarchy library draft" }), host = screen.getByTestId("hierarchy-library-retained-host");
     host.scrollTop = 43; fireEvent.change(input, { target: { value: "retained hierarchy draft" } }); input.focus();

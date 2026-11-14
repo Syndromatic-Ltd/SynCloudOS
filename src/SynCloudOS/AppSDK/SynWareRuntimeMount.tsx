@@ -27,7 +27,7 @@ import { createMountedSynWareRuntime } from "./appRuntimeFacade";
 import type { SynWareRuntime } from "./appRuntimeTypes";
 import { createSynWareContextValue } from "./createSynWareContextValue";
 import { SynWareProvider } from "./SynWareContext";
-import { NSEOpenPanelApplicationHost } from "../AppHosting/openPanelHosting";
+import { OpenPanelApplicationHost } from "../AppHosting/openPanelHosting";
 import { useSCOS } from "./scos/useSCOS";
 import { createFontCatalogueResourceLoader, FontCatalogueProvider, useFontCatalogue } from "./fontAccess";
 import { createSynWareNSEAnimations } from "./SynWareNSEMediaAdapters";
@@ -45,7 +45,7 @@ import type { AFXFrameScheduler } from "../../FX/AnimationFX/AFXLayer";
 import { createRuntimeAnimationState, createScopedAnimationFrames } from "../AnimationFX/scopedAnimationFrames";
 import { controllerServicesFor, installControllerServices } from "./controllerServices";
 import { MenuRuntimeProvider } from "../../NSE/applicationHostInterop";
-import { NSEViewActivityProvider } from "../../NSE/applicationHostInterop";
+import { ViewActivityProvider } from "../../NSE/applicationHostInterop";
 import { PresentedContentProvider } from "../../NSE/applicationHostInterop";
 import { NSEActionScopeProvider } from "../../NSE/applicationHostInterop";
 import { useRuntimeNSEMenuPort } from "../../SynCloudOSReact";
@@ -133,7 +133,7 @@ function MountedAppPresentationBoundary({
   }), [appAnimations, runtime.app.bundleIdentifier]);
   return (
     <PresenceBoundary>
-    <NSEViewActivityProvider source={animationState}>
+    <ViewActivityProvider source={animationState}>
     <AnimationEnvironmentProvider reducedMotion={reducedMotion} animator={animator} layers={appAnimations} frames={appFrames}>
     <NSEConformanceEvidenceProvider port={conformanceEvidencePort}>
       <OverlayProvider runtimePort={overlayPort} defaultParentResponderId={`application:${runtime.app.bundleIdentifier}`}>
@@ -145,7 +145,7 @@ function MountedAppPresentationBoundary({
       </OverlayProvider>
     </NSEConformanceEvidenceProvider>
     </AnimationEnvironmentProvider>
-    </NSEViewActivityProvider>
+    </ViewActivityProvider>
     </PresenceBoundary>
   );
 }
@@ -506,22 +506,22 @@ export function SynWareRuntimeMount({ runtime, app, responderId, windowControlle
   const wrapPresentedContent = (content: ReactNode) => (
     <SynCloudOSRuntimeContext.Provider value={null}>
       <SynWareRuntimeContext.Provider value={mounted.mount.runtime}>
-        <SynWareProvider value={context}><NSEOpenPanelApplicationHost value={context}>
+        <SynWareProvider value={context}><OpenPanelApplicationHost value={context}>
           <FontCatalogueProvider catalogue={fontCatalogue}><NSEActionScopeProvider appId={app.bundleIdentifier}><PresentedApplicationControls>{content}</PresentedApplicationControls></NSEActionScopeProvider></FontCatalogueProvider>
-        </NSEOpenPanelApplicationHost></SynWareProvider>
+        </OpenPanelApplicationHost></SynWareProvider>
       </SynWareRuntimeContext.Provider>
     </SynCloudOSRuntimeContext.Provider>
   );
   return (
     <SynCloudOSRuntimeContext.Provider value={null}>
       <SynWareRuntimeContext.Provider value={mounted.mount.runtime}>
-        <SynWareProvider value={context}><NSEOpenPanelApplicationHost value={context}>
+        <SynWareProvider value={context}><OpenPanelApplicationHost value={context}>
           <FontCatalogueProvider catalogue={fontCatalogue}>
             <MountedAppPresentationBoundary runtime={mounted.mount.runtime} kernelRuntime={runtime} context={mounted.contextBase}>
               <PresentedContentProvider value={wrapPresentedContent}>{presentedChildren}</PresentedContentProvider>
             </MountedAppPresentationBoundary>
           </FontCatalogueProvider>
-        </NSEOpenPanelApplicationHost></SynWareProvider>
+        </OpenPanelApplicationHost></SynWareProvider>
       </SynWareRuntimeContext.Provider>
     </SynCloudOSRuntimeContext.Provider>
   );

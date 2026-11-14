@@ -20,7 +20,7 @@
 
 import { useEffect, useRef } from "react";
 
-export interface NSEDisposable {
+export interface Disposable {
   dispose(): void;
 }
 
@@ -61,10 +61,10 @@ const microtaskDisposalScheduler: NSEDisposalScheduler = Object.freeze({
  * the final one.
  */
 export function useNSEDeferredDisposal(
-  resource: NSEDisposable | null | undefined,
+  resource: Disposable | null | undefined,
   scheduler: NSEDisposalScheduler = microtaskDisposalScheduler,
 ): void {
-  const pending = useRef(new Map<NSEDisposable, { readonly lease: object; handle: unknown | null }>());
+  const pending = useRef(new Map<Disposable, { readonly lease: object; handle: unknown | null }>());
 
   useEffect(() => {
     if (!resource) return undefined;

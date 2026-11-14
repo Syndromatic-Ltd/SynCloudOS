@@ -3,7 +3,7 @@ import React from "react";
 import { act, cleanup, render } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEViewController, nseUpdateTraits } from "../../src/NSE/Application/NSEViewController";
-import { NSEViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
+import { ViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
 import { NSETabViewController, NSETabViewItem } from "../../src/NSE/Navigation/NSETabViewController";
 import { NSEScrollView } from "../../src/NSE/Scroll/NSEScrollView";
 import { WindowLayoutContext, WindowLayoutModel } from "../../src/NSE/Layout/windowChromeObstructions";
@@ -34,7 +34,7 @@ function setup(width = 390, direction = "ltr") {
 describe("framework layout-guide adoption", () => {
   it("keeps compact scrolling content clear of the measured bottom strip", () => {
     const fixture = setup(); fixture.add("second");
-    const view = render(<WindowLayoutContext.Provider value={fixture.model}><NSEViewControllerView controller={fixture.tabs} /></WindowLayoutContext.Provider>);
+    const view = render(<WindowLayoutContext.Provider value={fixture.model}><ViewControllerView controller={fixture.tabs} /></WindowLayoutContext.Provider>);
     fixture.flush();
     expect(fixture.model.getSnapshot().insets.bottom).toBe(92);
     expect(view.container.querySelector<HTMLElement>(".nse-scroll-view-content")!.style.paddingBottom).toBe("92px");
@@ -42,7 +42,7 @@ describe("framework layout-guide adoption", () => {
   });
   it("registers an RTL source list on the right without insetting the content twice", () => {
     const fixture = setup(1000, "rtl"); fixture.add("second");
-    const view = render(<WindowLayoutContext.Provider value={fixture.model}><NSEViewControllerView controller={fixture.tabs} /></WindowLayoutContext.Provider>);
+    const view = render(<WindowLayoutContext.Provider value={fixture.model}><ViewControllerView controller={fixture.tabs} /></WindowLayoutContext.Provider>);
     fixture.flush();
     expect(fixture.model.getSnapshot().insets).toEqual({ top: 0, left: 0, bottom: 0, right: 264 });
     expect(view.container.querySelector<HTMLElement>(".nse-scroll-view-content")!.style.paddingRight).toBe("0px");
@@ -50,7 +50,7 @@ describe("framework layout-guide adoption", () => {
   });
   it("updates in one animation frame when a second destination enables the strip", () => {
     const fixture = setup();
-    render(<WindowLayoutContext.Provider value={fixture.model}><NSEViewControllerView controller={fixture.tabs} /></WindowLayoutContext.Provider>);
+    render(<WindowLayoutContext.Provider value={fixture.model}><ViewControllerView controller={fixture.tabs} /></WindowLayoutContext.Provider>);
     fixture.flush(); expect(fixture.model.getSnapshot().insets.bottom).toBe(0);
     act(() => fixture.add("second"));
     expect(fixture.callbacks.size).toBe(1); fixture.flush();

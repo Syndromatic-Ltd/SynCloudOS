@@ -11,7 +11,7 @@ import { atmoTheme } from '../../../../src/NSE/Appearance/atmo';
 import { freezeNSETheme } from '../../../../src/NSE/Theme/NSETheme';
 import { StandaloneControlHost } from '../../../../src/NSE/Overlays';
 import { NSEViewController, nseUpdateTraits } from '../../../../src/NSE/Application/NSEViewController';
-import { NSEViewControllerView } from '../../../../src/SynCloudOS/AppHosting/applicationHosting';
+import { ViewControllerView } from '../../../../src/SynCloudOS/AppHosting/applicationHosting';
 import { NSETabViewController, NSETabViewItem } from '../../../../src/NSE/Navigation/NSETabViewController';
 import { NSEScrollView } from '../../../../src/NSE/Scroll/NSEScrollView';
 import { WindowLayoutContext, WindowLayoutModel } from '../../../../src/NSE/Layout/windowChromeObstructions';
@@ -38,7 +38,7 @@ function Navigation() {
   const flow = parameters.get('flow') as 'in-flow' | 'overlay';
   const theme=freezeNSETheme({...atmoTheme,bundleIdentifier:'com.example.navigation',navigation:{...atmoTheme.navigation,[widthClass]:{placement,flow}}} as typeof atmoTheme);
   useLayoutEffect(()=> { const stop=model.connectRoot(root.current!); return ()=>{stop();model.dispose();tabs.dispose();}; },[model,tabs]);
-  return <NSEAppearanceProvider theme={theme}><div ref={root} dir={parameters.get('dir') ?? 'ltr'} style={{position:'relative',width,height}}><WindowLayoutContext.Provider value={model}><NSEViewControllerView controller={tabs}/></WindowLayoutContext.Provider></div></NSEAppearanceProvider>;
+  return <NSEAppearanceProvider theme={theme}><div ref={root} dir={parameters.get('dir') ?? 'ltr'} style={{position:'relative',width,height}}><WindowLayoutContext.Provider value={model}><ViewControllerView controller={tabs}/></WindowLayoutContext.Provider></div></NSEAppearanceProvider>;
 }
 function Contents() {
   if(parameters.has('placement')) return <Navigation/>;

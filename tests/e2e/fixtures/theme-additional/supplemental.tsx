@@ -57,7 +57,7 @@ import { freezeNSETheme } from "../../../../src/NSE/Theme/NSETheme";
 import { LoginWindow } from "../../../../src/NSE/SystemUI/LoginWindow";
 import { SystemSurface } from "../theme-baseline/system";
 import { NSEViewController, nseUpdateTraits } from "../../../../src/NSE/Application/NSEViewController";
-import { NSEViewControllerView } from "../../../../src/SynCloudOS/AppHosting/applicationHosting";
+import { ViewControllerView } from "../../../../src/SynCloudOS/AppHosting/applicationHosting";
 import { NSETabViewController, NSETabViewItem } from "../../../../src/NSE/Navigation/NSETabViewController";
 import { createStaticPresentationTraits } from "../../../fixtures/presentationTraits";
 import { windowSpecimens } from "./windowSpecimens";
@@ -128,5 +128,5 @@ function ThemeNavigation({ widthClass, placement, flow }: { widthClass: "compact
   });
   useEffect(() => () => tabs.dispose(), [tabs]);
   const theme = freezeNSETheme({ ...atmoTheme, navigation: { ...atmoTheme.navigation, [widthClass]: { placement, flow } } } as typeof atmoTheme);
-  return <NSEAppearanceProvider theme={theme}><NSEViewControllerView controller={tabs} /></NSEAppearanceProvider>;
+  return <NSEAppearanceProvider theme={theme}><ViewControllerView controller={tabs} /></NSEAppearanceProvider>;
 }

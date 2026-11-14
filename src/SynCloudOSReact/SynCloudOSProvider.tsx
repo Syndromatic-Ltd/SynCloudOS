@@ -25,8 +25,8 @@ import {
   SafeAreaMeasurementProvider,
 } from "../NSE/hostComposition";
 import { AnimationEnvironmentProvider, type Animator } from "../NSE/Animation";
-import { NSEViewControllerRendererProvider } from "../NSE/applicationHostInterop";
-import { NSEViewControllerView } from "../SynCloudOS/AppHosting/runtimeEntry";
+import { ViewControllerRendererProvider } from "../NSE/applicationHostInterop";
+import { ViewControllerView } from "../SynCloudOS/AppHosting/runtimeEntry";
 import { registerNSEHapticFeedbackEngine } from "../NSE/hostComposition";
 import { ViewDrawingEnvironmentContext, type ViewDrawingEnvironment } from "../NSE/hostComposition";
 import {
@@ -111,9 +111,9 @@ export function SynCloudOSProvider({
           <NSEFeedbackProvider value={runtime.haptics}>
             <NSEMaterialLightingProvider value={lighting}>
               <ViewDrawingEnvironmentContext.Provider value={drawingEnvironment}>
-                <NSEViewControllerRendererProvider value={NSEViewControllerView}>
+                <ViewControllerRendererProvider value={ViewControllerView}>
                   <SafeAreaMeasurementProvider>{children}</SafeAreaMeasurementProvider>
-                </NSEViewControllerRendererProvider>
+                </ViewControllerRendererProvider>
               </ViewDrawingEnvironmentContext.Provider>
             </NSEMaterialLightingProvider>
           </NSEFeedbackProvider>

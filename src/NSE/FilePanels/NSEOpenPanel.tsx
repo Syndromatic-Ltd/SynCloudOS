@@ -23,7 +23,7 @@ import type { FilePanelReference, FilePanelResult, FilePanelService, OpenPanelRe
 import { matchesOpenPanelContentType, openPanelAcceptTypes, type FilePanelDirectory } from "../../SynCloudOS/nseRuntimeContracts";
 import type { MediaPanelItem, MediaPanelProvider } from "../../SynCloudOS/nseRuntimeContracts";
 import { NSEModalResponse } from "../Application/NSEAlert";
-import { nseEndSheet, type NSESheet, type NSEWindow } from "../Application/NSEWindowController";
+import { nseEndSheet, type Sheet, type NSEWindow } from "../Application/NSEWindowController";
 import { resolveNSEOpenPanelHost, type NSEOpenPanelHost } from "./openPanelHost";
 import { NSEOpenPanelContent } from "./NSEOpenPanelContent";
 
@@ -54,7 +54,7 @@ export interface OpenPanelSession {
 let sequence = 0;
 
 /** NSOpenPanel: configure an object, then begin a sheet or an application-modal session. */
-export class NSEOpenPanel implements NSESheet {
+export class NSEOpenPanel implements Sheet {
   canChooseFiles = true;
   canChooseDirectories = false;
   allowsMultipleSelection = false;

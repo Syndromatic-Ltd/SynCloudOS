@@ -4,7 +4,7 @@ import { act, cleanup, render } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import { NSETabViewController, NSETabViewItem } from "../../src/NSE/Navigation/NSETabViewController";
 import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
-import { NSEViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
+import { ViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
 import { nseUnowned } from "../../src/NSE/Controllers/ownership";
 import { AnimationEnvironmentProvider, type Animator } from "../../src/NSE/Animation/NSEAnimationEnvironment";
 import { outlet, type NSEViewOutlet } from "../../src/NSE/Application/viewOutlet";
@@ -36,7 +36,7 @@ it("keeps the incoming tab mounted through transition settlement", async () => {
     acquireOwner: () => ({ release() {} }),
     animate: () => ({ finished: new Promise(resolve => finish.push(() => resolve({ state: "completed", reduced: false }))), cancel() {} }),
   } } as unknown as Animator;
-  const mounted = render(<AnimationEnvironmentProvider animator={animator}><NSEViewControllerView controller={tabs} /></AnimationEnvironmentProvider>);
+  const mounted = render(<AnimationEnvironmentProvider animator={animator}><ViewControllerView controller={tabs} /></AnimationEnvironmentProvider>);
   await act(async () => { tabs.selectTabViewItem("Second"); });
   await act(async () => { for (const done of finish.splice(0)) done(); });
   expect(tabs.second.viewDidAppear).toHaveBeenCalledTimes(1);

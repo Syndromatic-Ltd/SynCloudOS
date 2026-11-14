@@ -33,7 +33,7 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 
-import { NSEChildViewControllerView } from "../../Application/viewControllerRenderer";
+import { ChildViewControllerView } from "../../Application/viewControllerRenderer";
 import { NSEButton } from "../../Controls/Buttons/NSEButton";
 import { dataViewAllowsMutation, dataViewIsBusy, dataViewPresentsContent } from "../Core";
 import { NSESplitView } from "./NSESplitView";
@@ -194,7 +194,7 @@ export function SplitViewControllerView({ controller }: { readonly controller: N
   const paneContent = (identifier: string) => {
     const host = hostFor(identifier);
     const item = definitions.get(identifier);
-    return host ? <PaneSlot host={host} /> : item ? <NSEChildViewControllerView controller={item.viewController} /> : null;
+    return host ? <PaneSlot host={host} /> : item ? <ChildViewControllerView controller={item.viewController} /> : null;
   };
   const paneRef = (identifier: string) => (node: HTMLDivElement | null) => {
     if (node) paneNodes.current.set(identifier, node);
@@ -235,7 +235,7 @@ export function SplitViewControllerView({ controller }: { readonly controller: N
 
   // Denied, loading and error states expose no item views at all.
   const keepAlive = presentsContent && ownerDocument
-    ? items.map((item) => createPortal(<NSEChildViewControllerView controller={item.viewController} />, hostFor(item.identifier)!, item.identifier))
+    ? items.map((item) => createPortal(<ChildViewControllerView controller={item.viewController} />, hostFor(item.identifier)!, item.identifier))
     : null;
   return <ControllerNavigationChromeBoundary>{keepAlive}{renderPresentation()}</ControllerNavigationChromeBoundary>;
 

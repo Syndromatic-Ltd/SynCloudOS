@@ -4,7 +4,7 @@ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, it, vi } from "vitest";
 import { NSEApplication } from "../../src/NSE/Application/NSEApplication";
 import { NSEViewController, nseUpdateTraits } from "../../src/NSE/Application/NSEViewController";
-import { NSEViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
+import { ViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
 import { createStaticPresentationTraits } from "../fixtures/presentationTraits";
 import { nseWindowPresentedTitle, NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
 import { NSETabViewController, NSETabViewItem } from "../../src/NSE/Navigation/NSETabViewController";
@@ -34,7 +34,7 @@ it("adapts peer tabs to a desktop source list, compact bottom tabs and a short-w
   const tabs = new Sections();
   tabs.tabStyle = "sidebarAdaptable";
   resizeTabs(tabs, 1440, 900);
-  render(<NSEViewControllerView controller={tabs} />);
+  render(<ViewControllerView controller={tabs} />);
   expect(screen.getByRole("tree", { name: "Sections" })).toBeTruthy();
   expect(screen.queryByRole("tablist")).toBeNull();
   const page = screen.getByText("Company page");
@@ -54,7 +54,7 @@ it("adapts peer tabs to a desktop source list, compact bottom tabs and a short-w
 it("keeps fixed bottom tabs on wide and short layouts", () => {
   const tabs = new Sections();
   resizeTabs(tabs, 1440, 900);
-  render(<NSEViewControllerView controller={tabs} />);
+  render(<ViewControllerView controller={tabs} />);
   expect(screen.getByRole("tablist").getAttribute("aria-orientation")).toBe("horizontal");
   resizeTabs(tabs, 900, 400);
   expect(screen.getByRole("tablist").getAttribute("aria-orientation")).toBe("horizontal");
@@ -65,7 +65,7 @@ it("keeps fixed bottom tabs on wide and short layouts", () => {
 it("shows every tab directly rather than inventing a More history", () => {
   const tabs = new Sections();
   for (const name of ["News", "Work", "Contact"]) tabs.addTabViewItem(new NSETabViewItem({ viewController: tabs.addChild(Pane, name), identifier: name.toLowerCase() }));
-  render(<NSEViewControllerView controller={tabs} />);
+  render(<ViewControllerView controller={tabs} />);
   expect(screen.getAllByRole("tab")).toHaveLength(6);
   expect(screen.queryByRole("tab", { name: /More/ })).toBeNull();
   tabs.dispose();
@@ -76,7 +76,7 @@ it("keeps the adaptive compact bottom bar to five slots, with the rest under Mor
   for (const name of ["News", "Work", "Contact"]) tabs.addTabViewItem(new NSETabViewItem({ viewController: tabs.addChild(Pane, name), identifier: name.toLowerCase() }));
   tabs.tabStyle = "sidebarAdaptable";
   resizeTabs(tabs, 390, 844);
-  render(<NSEViewControllerView controller={tabs} />);
+  render(<ViewControllerView controller={tabs} />);
   expect(screen.getAllByRole("tab")).toHaveLength(5);
   expect(screen.getByRole("tab", { name: /More/ })).toBeTruthy();
   act(() => { tabs.tabStyle = "segmentedControlOnBottom"; });
@@ -89,7 +89,7 @@ it("retains the same section DOM when an outer split hands unspecified presentat
   const tabs = new Sections();
   tabs.tabStyle = "unspecified";
   resizeTabs(tabs, 390, 844);
-  render(<NSEViewControllerView controller={tabs} />);
+  render(<ViewControllerView controller={tabs} />);
   const page = screen.getByText("Company page");
   act(() => { tabs.tabStyle = "sidebarAdaptable"; });
   expect(screen.getByRole("tablist")).toBeTruthy();
@@ -111,7 +111,7 @@ it("uses the tab view's measured content budget and keeps its last renderer duri
     disconnect() {}
   }
   vi.stubGlobal("ResizeObserver", Observer);
-  render(<NSEViewControllerView controller={tabs} />);
+  render(<ViewControllerView controller={tabs} />);
   resizeTabs(tabs, 1440, 900);
   const root = document.querySelector(".nse-adaptive-tab-controller") as HTMLElement;
   let width = 430;
@@ -133,7 +133,7 @@ it("uses current foldable book regions before compact peer tabs and preserves th
   tabs[nseUpdateTraits]({ reducedMotion: false, presentation: { ...presentation, viewportFeatures: { posture: "folded", segments: [
     { x: 0, y: 0, width: 329, height: 867 }, { x: 340, y: 0, width: 329, height: 867 },
   ] } } });
-  render(<NSEViewControllerView controller={tabs} />);
+  render(<ViewControllerView controller={tabs} />);
   act(() => tabs[nseUpdateTraits]({ reducedMotion: false, presentation: { ...presentation, viewportFeatures: { posture: "folded", segments: [
     { x: 0, y: 0, width: 329, height: 867 }, { x: 340, y: 0, width: 329, height: 867 },
   ] } } }));
@@ -148,7 +148,7 @@ it("moves source-list focus into compact tabs while leaving editor focus in its 
   const tabs = new Sections();
   tabs.tabStyle = "sidebarAdaptable";
   resizeTabs(tabs, 1440, 900);
-  render(<NSEViewControllerView controller={tabs} />);
+  render(<ViewControllerView controller={tabs} />);
   act(() => screen.getByRole("tree").focus());
   resizeTabs(tabs, 390, 844);
   expect(document.activeElement).toBe(screen.getByRole("tab", { name: /Company/ }));

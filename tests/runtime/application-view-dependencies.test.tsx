@@ -5,7 +5,7 @@ import { act, cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { nseUnowned } from "../../src/NSE/Controllers/ownership";
-import { NSEViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
+import { ViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
 import { TabBarController } from "../../src/NSE/Navigation/TabBarController";
 
 class Source {
@@ -22,7 +22,7 @@ describe("explicit class view dependencies", () => {
   it("removes disposed navigation content independently of semantic snapshot subscriptions", () => {
     class Region extends TabBarController { static override view = () => <p>Disposable navigation region</p>; }
     const region = new Region({ owner: nseUnowned, id: "navigation-region", destinations: [{ id: "first", label: "First", icon: { kind: "template", name: "first" } }] });
-    owners.push(region); render(<NSEViewControllerView controller={region} />);
+    owners.push(region); render(<ViewControllerView controller={region} />);
     expect(screen.getByText("Disposable navigation region")).toBeTruthy();
     act(() => { region.dispose(); }); expect(screen.queryByText("Disposable navigation region")).toBeNull();
   });
@@ -34,8 +34,8 @@ describe("explicit class view dependencies", () => {
       readonly source = source;
     }
     const root = new Root({ owner: nseUnowned }); owners.push(root);
-    renderToString(<NSEViewControllerView controller={root} />); expect(source.listeners.size).toBe(0);
-    const view = render(<React.StrictMode><NSEViewControllerView controller={root} /></React.StrictMode>);
+    renderToString(<ViewControllerView controller={root} />); expect(source.listeners.size).toBe(0);
+    const view = render(<React.StrictMode><ViewControllerView controller={root} /></React.StrictMode>);
     expect(source.listeners.size).toBe(1); const before = renders;
     act(() => { source.publish(); }); expect(renders).toBe(before);
     act(() => { source.publish("changed dependency"); }); expect(screen.getByText("changed dependency")).toBeTruthy();
@@ -51,7 +51,7 @@ describe("explicit class view dependencies", () => {
       replace() { this.source = second; this.notifyObservers(); }
     }
     const root = new Root({ owner: nseUnowned }); owners.push(root);
-    render(<NSEViewControllerView controller={root} />);
+    render(<ViewControllerView controller={root} />);
     expect(first.listeners.size).toBe(1);
     act(() => { root.replace(); }); expect(screen.getByText("replacement")).toBeTruthy();
     expect(first.listeners.size).toBe(0); expect(second.listeners.size).toBe(1);
@@ -67,7 +67,7 @@ describe("explicit class view dependencies", () => {
       constructor(readonly index: number) { super({ owner: nseUnowned }); }
     }
     const first = new Region(1); const second = new Region(2); owners.push(first, second);
-    render(<><NSEViewControllerView controller={first} /><NSEViewControllerView controller={second} /></>);
+    render(<><ViewControllerView controller={first} /><ViewControllerView controller={second} /></>);
     const before = secondRenders;
     act(() => { first.source.publish("updated region"); });
     expect(screen.getByText("updated region-1")).toBeTruthy(); expect(secondRenders).toBe(before); expect(firstRenders).toBeGreaterThan(1);

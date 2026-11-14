@@ -7,7 +7,7 @@ import { nseUnowned } from "../../src/NSE/Controllers/ownership";
 import { finalizeNSEAuthoringOwner } from "../../src/NSE/Application/authoringLifecycle";
 import { NSEObject, observable } from "../../src/NSE/Objects";
 import { observes } from "../../src/NSE/Objects/observes";
-import { NSEViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
+import { ViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
 import { nseUpdateViewActivity } from "../../src/NSE/Application/NSEViewController";
 import { attachNSEAuthoringContext } from "../../src/NSE/Application/authoringContext";
 
@@ -38,7 +38,7 @@ describe("scoped observations", () => {
       @observes("query", { lifetime: "visible", initial: true }) visible() { events.push("visible"); }
     }
     const root = new Root({ owner: nseUnowned }); owners.push(root);
-    const view = render(<React.StrictMode><NSEViewControllerView controller={root} /></React.StrictMode>);
+    const view = render(<React.StrictMode><ViewControllerView controller={root} /></React.StrictMode>);
     expect(events).toEqual(["load", "mounted", "visible"]);
     act(() => { root[nseUpdateViewActivity](false); root.query = "hidden"; }); await settle();
     expect(events).toEqual(["load", "mounted", "visible", "mounted"]);

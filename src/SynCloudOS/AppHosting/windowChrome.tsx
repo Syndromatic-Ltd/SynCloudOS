@@ -79,7 +79,7 @@ function AccessoryObserver({ accessory, children }: { readonly accessory: NSETit
  * stage title bar (Atmo draws them either side of the title); bottom accessories, and in a window of
  * its own every accessory, draw in the accessory row at the top of the window's content, under the toolbar.
  */
-export function NSEWindowTitlebarAccessories({ accessories, renderController, host, placement }: AccessoryProps & {
+export function WindowTitlebarAccessories({ accessories, renderController, host, placement }: AccessoryProps & {
   readonly host: WindowTitlebarHost | null;
   readonly placement: "titlebar" | "row";
 }) {
@@ -120,7 +120,7 @@ export function nseContentBorderSize(thickness: number): "large" | "small" {
  * It lies behind the content, so the content's own controls sit over it; only its edge, which casts a
  * shadow up onto the content, is drawn above.
  */
-export function NSEWindowContentBorder({ thickness }: { readonly thickness: number }) {
+export function WindowContentBorder({ thickness }: { readonly thickness: number }) {
   useNSEWindowChromeObstruction("bottom", thickness, false);
   const mode = useWindowChromeMode();
   const style = { "--nse-window-content-border-thickness": `${thickness}px` } as CSSProperties;
@@ -143,7 +143,7 @@ function useWindowChromeMode(): "light" | "dark" {
  * Draws `window.toolbar`: its items validated and dispatched along the window's responder chain,
  * laid out to the width it is given, and the customisation sheet while it runs.
  */
-export function NSEWindowToolbar({ controller, toolbar }: { readonly controller: NSEAnyWindowController; readonly toolbar: NSEToolbar }) {
+export function WindowToolbar({ controller, toolbar }: { readonly controller: NSEAnyWindowController; readonly toolbar: NSEToolbar }) {
   useObserve(toolbar);
   const tabViews = toolbar[nseToolbarTabViews];
   const tabItems = useRef<HTMLDivElement | null>(null);
@@ -257,13 +257,13 @@ export function NSEWindowToolbar({ controller, toolbar }: { readonly controller:
  * a portal, so it keeps its presenter's React context and responder chain, and reports itself attached
  * while it is shown, which blocks the rest of the window.
  */
-export interface NSEWindowSheetHost {
+export interface WindowSheetHost {
   readonly layer: HTMLElement | null;
   /** Marks a sheet attached; returns the function that detaches it. */
   attach(): () => void;
 }
 
-export const NSEWindowSheetHostContext = createContext<NSEWindowSheetHost | null>(null);
+export const WindowSheetHostContext = createContext<WindowSheetHost | null>(null);
 
 type InertElement = HTMLElement & { inert: boolean };
 
@@ -273,13 +273,13 @@ type InertElement = HTMLElement & { inert: boolean };
  * and `onAttachedChange` reports it so the window can refuse its close button.
  */
 export function useNSEWindowSheetHost(onAttachedChange: (attached: boolean) => void): {
-  readonly host: NSEWindowSheetHost;
+  readonly host: WindowSheetHost;
   readonly layerRef: (element: HTMLDivElement | null) => void;
   readonly attached: boolean;
 } {
   const [layer, setLayer] = useState<HTMLDivElement | null>(null);
   const [count, setCount] = useState(0);
-  const host = useMemo<NSEWindowSheetHost>(() => Object.freeze({
+  const host = useMemo<WindowSheetHost>(() => Object.freeze({
     layer,
     attach: () => {
       let attachedNow = true;
@@ -340,7 +340,7 @@ function copySheet(frame: HTMLElement): HTMLElement {
  * `frozen` reports the content gone), and when the sheet detaches that inert copy slides back up under the
  * title bar and toolbar, the enter in reverse, and is removed. With reduced motion the copy fades instead.
  */
-export function NSEWindowSheetFrame({ reducedMotion, frozen = false, holdsController = false, children }: {
+export function WindowSheetFrame({ reducedMotion, frozen = false, holdsController = false, children }: {
   readonly reducedMotion: boolean;
   /** The sheet draws a view controller's view, which leaves when the controller is disposed. */
   readonly holdsController?: boolean;
@@ -348,7 +348,7 @@ export function NSEWindowSheetFrame({ reducedMotion, frozen = false, holdsContro
   readonly frozen?: boolean;
   readonly children: ReactNode;
 }) {
-  const host = useContext(NSEWindowSheetHostContext);
+  const host = useContext(WindowSheetHostContext);
   const frameRef = useRef<HTMLDivElement | null>(null);
   const motion = useRef(reducedMotion);
   motion.current = reducedMotion;

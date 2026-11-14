@@ -2,7 +2,7 @@
 import React from "react";
 import { act, cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { NSEWindowController, nseWindowInternals, type NSEWindowMount } from "../../src/NSE/Application/NSEWindowController";
+import { NSEWindowController, nseWindowInternals, type WindowMount } from "../../src/NSE/Application/NSEWindowController";
 import { WindowLayoutContext, WindowLayoutModel, useNSEContentLayoutProperties, useNSEWindowChromeObstruction } from "../../src/NSE/Layout/windowChromeObstructions";
 
 afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
@@ -15,7 +15,7 @@ function setup() {
     getSnapshot: () => ({ title: "Document", bounds: { x: 0, y: 0, width: 800, height: 600 }, state: "open" }), subscribe: () => () => {},
     setTitle() {}, registerCloseGuard: () => () => {}, focus() {}, minimise() {}, zoom() {}, close: async () => ({ outcome: "closed" }),
     presentAlert: async () => "ok", presentModalAlert: async () => "ok",
-  } as NSEWindowMount);
+  } as WindowMount);
   return { model, controller, flush, callbacks, dispose: () => { detach(); controller.dispose(); model.dispose(); } };
 }
 function Bar({ height }: { height: number }) { useNSEWindowChromeObstruction("top", height, false); return <header style={{ height }} />; }

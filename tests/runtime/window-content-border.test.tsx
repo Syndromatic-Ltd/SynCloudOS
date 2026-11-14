@@ -2,7 +2,7 @@
 import React from "react";
 import { cleanup, render } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
-import { NSEWindowContentBorder } from "../../src/SynCloudOS/AppHosting/windowChrome";
+import { WindowContentBorder } from "../../src/SynCloudOS/AppHosting/windowChrome";
 import { NSETextField } from "../../src/NSE/Controls/Fields/NSEFields";
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
 
@@ -29,7 +29,7 @@ describe("a window's bottom content border", () => {
     expect(() => { controller.window.bottomBarAccessory = accessory; }).toThrow();
   });
   it("draws a band behind the content and an edge above it, sized by the thickness", () => {
-    const view = render(<NSEWindowContentBorder thickness={56} />);
+    const view = render(<WindowContentBorder thickness={56} />);
     const band = view.container.querySelector<HTMLElement>(".nse-window-content-border")!;
     const edge = view.container.querySelector<HTMLElement>(".nse-window-content-border-edge")!;
     expect(band.dataset.edge).toBe("minY");
@@ -37,7 +37,7 @@ describe("a window's bottom content border", () => {
     expect(band.getAttribute("aria-hidden")).toBe("true");
     expect(band.style.getPropertyValue("--nse-window-content-border-thickness")).toBe("56px");
     expect(edge.dataset.size).toBe("large");
-    view.rerender(<NSEWindowContentBorder thickness={24} />);
+    view.rerender(<WindowContentBorder thickness={24} />);
     expect(view.container.querySelector<HTMLElement>(".nse-window-content-border")!.dataset.size).toBe("small");
   });
 
