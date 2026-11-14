@@ -21,7 +21,7 @@
 import { useEffect, type ReactNode } from "react";
 import { rubberBandOffset } from "./index";
 
-export interface NSERubberBandProviderProps {
+export interface RubberBandProviderProps {
   children?: ReactNode;
   /** Turn the global effect on/off. Default true. */
   enabled?: boolean;
@@ -77,12 +77,12 @@ component already manages with `useNSERubberBandScroll` (`data-nse-rubberband="m
 surface with a child carrying a transform it didn't apply (an in-flight animation it shouldn't fight).
 Per-element state is kept for the element's lifetime so a rested surface re-engages on the next pull.
 */
-export function NSERubberBandProvider({
+export function RubberBandProvider({
   children,
   enabled = true,
   coeff = 0.55,
   settleDelay = 90
-}: NSERubberBandProviderProps) {
+}: RubberBandProviderProps) {
   useEffect(() => {
     if (!enabled || typeof document === "undefined") return;
     const states = new WeakMap<HTMLElement, BounceState>();

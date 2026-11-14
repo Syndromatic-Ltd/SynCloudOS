@@ -20,7 +20,7 @@
 
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
 import { LayoutView } from "../NSE/Animation";
-import { NSEFocusScope } from "../NSE/NSE";
+import { FocusScope } from "../NSE/NSE";
 import { webspringIconSprings } from "./Webspring.transitions";
 import type { WebspringFolderPresentationComponent, WebspringFolderPresentationProps } from "./webspringTypes";
 import { folderSplitPhaseMachine, type FolderSplitPhase } from "./folderSplitPhaseMachine";
@@ -336,7 +336,7 @@ function FolderSplit({ folder, stage, anchor, reducedMotion, renderApp, onClose,
     "--webspring-folder-underlay-colour": options.underlay.colour,
   } as CSSProperties;
 
-  return <NSEFocusScope options={{ scopeId: `webspring-folder:${scopeId}`, kind: "modal", modal: true, trapFocus: true, restoreFocus: true, asChild: true }}>
+  return <FocusScope options={{ scopeId: `webspring-folder:${scopeId}`, kind: "modal", modal: true, trapFocus: true, restoreFocus: true, asChild: true }}>
     <div
       data-nse-control="folder-presentation" data-nse-part="background" className="webspring-folder-split"
       data-phase={phase}
@@ -411,7 +411,7 @@ function FolderSplit({ folder, stage, anchor, reducedMotion, renderApp, onClose,
         </div> : null}
       </div>
     </div>
-  </NSEFocusScope>;
+  </FocusScope>;
 }
 
 /**

@@ -21,7 +21,7 @@ import { useInsertionEffect, useLayoutEffect, useMemo, useRef, useState, useSync
 import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { SynCloudOSAppInfo, SynCloudOSRuntime } from "../SynCloudOS";
 import { SynWareRuntimeContext, SynCloudOSRuntimeContext, useRuntimeNSEControlPort, useRuntimeNSEFocusPort, useRuntimeNSEOverlayPort } from "../../SynCloudOSReact";
-import { ControlRuntimeProvider, NSEFocusPortProvider, OverlayProvider, NSEConformanceEvidenceProvider, type NSEConformanceEvidencePort } from "../../NSE/NSE";
+import { ControlRuntimeProvider, FocusPortProvider, OverlayProvider, NSEConformanceEvidenceProvider, type NSEConformanceEvidencePort } from "../../NSE/NSE";
 import type { MountedSynWareRuntime } from "./appRuntimeFacade";
 import { createMountedSynWareRuntime } from "./appRuntimeFacade";
 import type { SynWareRuntime } from "./appRuntimeTypes";
@@ -139,7 +139,7 @@ function MountedAppPresentationBoundary({
       <OverlayProvider runtimePort={overlayPort} defaultParentResponderId={`application:${runtime.app.bundleIdentifier}`}>
         <ControlRuntimeProvider port={controlPort}>
           <MenuRuntimeProvider port={menuPort}>
-            <NSEFocusPortProvider port={focusPort}>{children}</NSEFocusPortProvider>
+            <FocusPortProvider port={focusPort}>{children}</FocusPortProvider>
           </MenuRuntimeProvider>
         </ControlRuntimeProvider>
       </OverlayProvider>

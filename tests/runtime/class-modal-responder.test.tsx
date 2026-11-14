@@ -6,7 +6,7 @@ import { NSEApplication } from "../../src/NSE/Application/NSEApplication";
 import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
 import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
-import { NSEFocusScope } from "../../src/NSE/Focus";
+import { FocusScope } from "../../src/NSE/Focus";
 import { observable } from "../../src/NSE/Objects";
 import { action } from "../../src/SynCloudOS/AppSDK/actions";
 import { ViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
@@ -34,14 +34,14 @@ async function mountModal(explicitParent = false) {
     @action dismiss() { (this.parent as Parent).shown = false; }
     static override view = function ChildView({ controller: child }: { readonly controller: Child }) {
       const parentResponderId = React.useContext(ParentResponder);
-      return <NSEFocusScope options={{ scopeId: "templates", kind: "modal", parentResponderId, restoreFocus: true }}>
+      return <FocusScope options={{ scopeId: "templates", kind: "modal", parentResponderId, restoreFocus: true }}>
         <section role="dialog" aria-label="Templates">
           <label>Template name<input aria-label="Template name" /></label>
           <output aria-label="Child choice">{child.selected}</output>
           <NSEButton title="Choose paper" action="selectTemplate" actionPayload="paper" />
           <NSEButton title="Close templates" action="dismiss" />
         </section>
-      </NSEFocusScope>;
+      </FocusScope>;
     };
   }
   class Parent extends NSEViewController {
@@ -130,7 +130,7 @@ it("restores a live owned modal parent when its previously focused child button 
         {controller.openerVisible && <ResponderScope responderId={openerId} kind="control" scopeId={hierarchy.responderId}>
           <button onClick={() => { controller.shown = true; }}>Open removable templates</button>
         </ResponderScope>}
-        {controller.shown && <NSEFocusScope options={{ scopeId: modalScopeId, kind: "modal", restoreFocus: true }}>
+        {controller.shown && <FocusScope options={{ scopeId: modalScopeId, kind: "modal", restoreFocus: true }}>
           <section role="dialog" aria-label="Removable templates">
             <ResponderScope responderId={modalControlId} kind="control" scopeId={modalScopeId}>
               <input aria-label="Temporary template name" />
@@ -138,7 +138,7 @@ it("restores a live owned modal parent when its previously focused child button 
             <NSEButton title="Remove original opener" action="removeOpener" />
             <NSEButton title="Close removable templates" action="dismiss" />
           </section>
-        </NSEFocusScope>}
+        </FocusScope>}
       </>;
     };
   }

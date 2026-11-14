@@ -26,7 +26,7 @@ import { useNSEAnimationEnvironment, useNSEPresenceExiting, useNSEPresentation, 
 import { useApplicationStageMotion } from "./ApplicationStage.transitions";
 import { WEBSPRING_MULTI_SWITCH_ROLES, WEBSPRING_PRESENTATION_ROLES, type WebspringMultiSwitchRole } from "../SynCloudOS/SynCloudOS";
 import {
-  NSEFocusPortProvider,
+  FocusPortProvider,
   ControlRuntimeProvider,
   ApplicationNavigationChromeController,
   ApplicationNavigationChromeProvider,
@@ -438,7 +438,7 @@ export function ApplicationStageView({
         presentation={surfacePresentation}
       >
         {showsApplicationStageTopBar && !sourceList && !documentTitlebar ? standardTopBar : null}
-        <NSEFocusPortProvider port={nseFocusPort}>
+        <FocusPortProvider port={nseFocusPort}>
         <SourceListFrameProvider value={sourceListContext}>
           <ApplicationMenuTriggerBridge
             menuStore={appMenuStore}
@@ -473,7 +473,7 @@ export function ApplicationStageView({
           </QuickSwitchTriggerProvider>
           </ApplicationMenuTriggerBridge>
         </SourceListFrameProvider>
-        </NSEFocusPortProvider>
+        </FocusPortProvider>
       </AppViewChrome.Surface>
     </AppViewChrome.Root>
     </ResponderScope>

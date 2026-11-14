@@ -37,8 +37,8 @@ import * as NSEText from "./Text";
 import * as NSETextEditing from "./TextEditing";
 export * from "./Text";
 export * from "./TextEditing";
-export { NSEFocusPortProvider, NSEFocusScope, useNSEFocusPort } from "./Focus";
-export type { NSEFocusPort, NSEFocusScopeKind, NSEFocusScopeOptions } from "./Focus";
+export { FocusPortProvider, FocusScope, useNSEFocusPort } from "./Focus";
+export type { FocusPort, FocusScopeKind, FocusScopeOptions } from "./Focus";
 export { NSEConformanceEvidenceProvider, useNSEConformanceEvidence } from "./Developer/NSEConformanceEvidence";
 export type { NSEConformanceEvidencePort, NSEConformanceEvidenceProviderProps } from "./Developer/NSEConformanceEvidence";
 /** Lifecycle cleanup is part of the public interaction layer for host shells. */

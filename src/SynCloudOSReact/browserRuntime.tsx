@@ -32,7 +32,7 @@ import { ApplicationHost, applicationRecoveryError } from "./ApplicationHost";
 import { createApplicationHostHome, type ApplicationHostHome } from "./applicationHome";
 import { NSEAppearanceProvider, type NSETheme } from "../NSE/Appearance";
 import { atmoTheme } from "../NSE/Appearance/atmo";
-import { NSERubberBandProvider } from "../NSE/Scroll";
+import { RubberBandProvider } from "../NSE/Scroll";
 import { AlertBackdrop } from "../NSE/SystemUI";
 import { SystemAlert } from "./SystemAlert";
 import { SCOSAlertPresenter } from "./SCOSAlertPresenter";
@@ -383,13 +383,13 @@ function renderHost(
         <NSEAppearanceProvider theme={appearance} appearanceService={runtime.appearance}>
           <RuntimeInputBoundary>
             {/* Above the recovery boundary, so the root error window scrolls like every other surface. */}
-            <NSERubberBandProvider><RootRecoveryBoundary runtime={runtime} options={options} fontCatalogue={fontCatalogue}>
+            <RubberBandProvider><RootRecoveryBoundary runtime={runtime} options={options} fontCatalogue={fontCatalogue}>
               <InstalledApplicationTitleBar />
               {home
                 ? <ApplicationHost applicationId={home.primaryId} authentication={options.authentication ?? "disabled"} home={home} />
                 : Shell && <Shell shell={options.shell!} shellResources={options.shellResources} authentication={options.authentication} />}
               {!home ? <SCOSAlertPresenter center={runtime.alerts} presentation={runtime.presentationTraits} /> : null}
-            </RootRecoveryBoundary></NSERubberBandProvider>
+            </RootRecoveryBoundary></RubberBandProvider>
           </RuntimeInputBoundary>
         </NSEAppearanceProvider>
       </SynCloudOSProvider>
@@ -520,12 +520,12 @@ function renderBootstrapRecovery(element: Element, attempt: BrowserMountAttempt,
   // NSE backdrop owns physical focus; no disposed kernel provider is retained.
   root.render(<HostSiteBrandingProvider value={recovery.branding}>
     <NSEAppearanceProvider theme={appearance} colourScheme={recovery.appearance}>
-      <NSERubberBandProvider><div className="syncloudos-root-error-shell"><AlertBackdrop>
+      <RubberBandProvider><div className="syncloudos-root-error-shell"><AlertBackdrop>
         <SystemAlert error={recovery.error}
           appearance={recovery.appearance} applicationIcon={recovery.applicationIcon}
           onDismiss={() => navigate(home)} onReturn={() => navigate(home)} onReload={() => navigate()}
           onOpenMailClient={(destination) => navigate(destination)} />
-      </AlertBackdrop></div></NSERubberBandProvider>
+      </AlertBackdrop></div></RubberBandProvider>
     </NSEAppearanceProvider>
   </HostSiteBrandingProvider>);
 }

@@ -21,7 +21,7 @@
 import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
 import { useEffect, useId, useLayoutEffect, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
-import { AlertSurface, AlertBackdrop, NSEFocusPortProvider, NSEFocusScope } from "../NSE/NSE";
+import { AlertSurface, AlertBackdrop, FocusPortProvider, FocusScope } from "../NSE/NSE";
 import { NSEButton } from "@syndromatic/syncloudos/nse/controls";
 import { useNSEFeedback } from "../NSE/hostComposition";
 import { AboutDialog, NSEConfirmDialog, PreferencesToast } from "../NSE/SystemUI";
@@ -114,7 +114,7 @@ function ReturnDecisionDialog({
   };
 
   return createPortal(
-    <NSEFocusScope options={{ scopeId: "system-ui:return-decision", kind: "modal", modal: true, trapFocus: true, asChild: true }}>
+    <FocusScope options={{ scopeId: "system-ui:return-decision", kind: "modal", modal: true, trapFocus: true, asChild: true }}>
       <AlertBackdrop presentation={runtime.presentationTraits} onSafeDismiss={onSafeDismiss}>
         <AlertSurface
           appearance={alertAppearance}
@@ -147,7 +147,7 @@ function ReturnDecisionDialog({
           </div>
         </AlertSurface>
       </AlertBackdrop>
-    </NSEFocusScope>,
+    </FocusScope>,
     document.body,
   );
 }
@@ -208,7 +208,7 @@ export function SystemUILayer({ onLogOut, account, preferences, siteName = "this
   const returnQuitLabel = systemT("navigation.returnDecisionQuit", "Quit");
   const returnKeepLabel = systemT("navigation.returnDecisionKeepWindows", "Keep Windows");
   return (
-    <NSEFocusPortProvider port={nseFocusPort}>
+    <FocusPortProvider port={nseFocusPort}>
       <SystemUIAccountContext.Provider value={account ?? null}>
         <PreferencesToast
           open={ui.preferencesPane !== null}
@@ -284,6 +284,6 @@ export function SystemUILayer({ onLogOut, account, preferences, siteName = "this
           keepLabel={returnKeepLabel}
         />
       ) : null}
-    </NSEFocusPortProvider>
+    </FocusPortProvider>
   );
 }

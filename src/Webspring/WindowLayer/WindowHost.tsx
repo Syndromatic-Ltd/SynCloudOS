@@ -24,7 +24,7 @@ import React, { useCallback, useLayoutEffect, useEffect, useMemo, useRef, useSta
 import { useNSEPresenceExiting, useNSEPresentation, type PresentationSpec } from "../../NSE/Animation";
 import {
   ControlRuntimeProvider,
-  NSEFocusPortProvider,
+  FocusPortProvider,
   OverlayProvider,
   TooltipProvider,
   WindowSurfaceBridgeProvider,
@@ -362,11 +362,11 @@ export function WindowHost({
       >
         <TooltipProvider>
         <ControlRuntimeProvider port={controlPort}>
-          <NSEFocusPortProvider port={focusPort}>
+          <FocusPortProvider port={focusPort}>
             {childTransientBridge ? (
               <WindowSurfaceBridgeProvider bridge={childTransientBridge}>{surfaceContent}</WindowSurfaceBridgeProvider>
             ) : surfaceContent}
-          </NSEFocusPortProvider>
+          </FocusPortProvider>
         </ControlRuntimeProvider>
       </TooltipProvider>
       </OverlayProvider>

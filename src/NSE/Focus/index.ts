@@ -19,13 +19,13 @@
  */
 
 export {
-  NSEFocusPortProvider,
-  NSEFocusScope,
+  FocusPortProvider,
+  FocusScope,
   useNSEFocusPort,
 } from "./NSEFocusPort";
 export { registerNSEFocusOrigin, resolveNSEFocusReturnTarget } from "./focusOrigin";
 export type {
-  NSEFocusPort,
-  NSEFocusScopeKind,
-  NSEFocusScopeOptions,
+  FocusPort,
+  FocusScopeKind,
+  FocusScopeOptions,
 } from "./NSEFocusPort";
