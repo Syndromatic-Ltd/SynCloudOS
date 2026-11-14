@@ -26,13 +26,13 @@ import type { MEFXMediaClient } from "../../FX/MediaFX/MEFXMediaClient";
 import type { MIFXAccess, MIFXClient } from "../../FX/MIDIFX/public";
 import type { MFXMotionClient, MFXMotionManager } from "../../FX/MotionFX/public";
 import type { VFXCaptureSession, VFXVideoClient } from "../../FX/VideoFX/public";
-import { manageNSEAnimationDisplayLink, manageNSEAnimationRenderer, type NSEManagedAnimationHost, type NSEManagedAFXDisplayLink, type NSEManagedAFXDisplayLinkOptions, type NSEManagedAFXRenderer, type NSEManagedAFXRendererOptions } from "./managedAnimationRenderer";
+import { manageNSEAnimationDisplayLink, manageNSEAnimationRenderer, type ManagedAnimationHost, type NSEManagedAFXDisplayLink, type NSEManagedAFXDisplayLinkOptions, type NSEManagedAFXRenderer, type NSEManagedAFXRendererOptions } from "./managedAnimationRenderer";
 import type { NSEViewController } from "./NSEViewController";
 import type { NSEViewOutlet } from "./viewOutlet";
 
 /** The FX clients of the mounted application, as the host hands them to a view controller. */
 export interface NSEViewControllerFXClients {
-  readonly animation?: NSEManagedAnimationHost;
+  readonly animation?: ManagedAnimationHost;
   readonly motion: MFXMotionClient;
   readonly location: LFXLocationClient;
   readonly haptics: HFXHapticClient;

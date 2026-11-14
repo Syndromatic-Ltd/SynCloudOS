@@ -7,7 +7,7 @@ import { NSEWindowController } from "../../src/NSE/Application/NSEWindowControll
 import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import * as activity from "../../src/NSE/Application/viewActivity";
 import { nseUnowned } from "../../src/NSE/Controllers/ownership";
-import { NSEViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
+import { ViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
 import { AnimationEnvironmentProvider } from "../../src/NSE/Animation";
 import { createClassApplicationHost, type ClassApplicationHost } from "./fixtures/classApplicationHost";
 
@@ -83,7 +83,7 @@ describe("controller authority epochs", () => {
     const frames = { now: () => 0, requestFrame: () => () => {}, reducedMotion: false, get suspended() { return suspended; }, subscribeState(listener: () => void) { listeners.add(listener); return () => { listeners.delete(listener); }; } };
     class Root extends NSEViewController { static override view = () => <p>Outside runtime activity</p>; }
     const root = new Root({ owner: nseUnowned });
-    const view = render(<React.StrictMode><AnimationEnvironmentProvider frames={frames}><NSEViewControllerView controller={root} /></AnimationEnvironmentProvider></React.StrictMode>);
+    const view = render(<React.StrictMode><AnimationEnvironmentProvider frames={frames}><ViewControllerView controller={root} /></AnimationEnvironmentProvider></React.StrictMode>);
     const visible = activity.getNSEActivityEpoch(root, "visible")!;
     expect(listeners.size).toBe(1);
     suspended = true; act(() => { for (const listener of listeners) listener(); });

@@ -43,10 +43,10 @@ interface ObjectOwnership {
 const ownershipByObject = new WeakMap<object, ObjectOwnership>();
 const objectByScope = new WeakMap<NSEOwnershipScope, object>();
 const scopeBySignal = new WeakMap<AbortSignal, NSEOwnershipScope>();
-const lifetimes = new WeakMap<object, NSEObjectLifetime>();
+const lifetimes = new WeakMap<object, ObjectLifetime>();
 
 /** @internal Lifetime/context registry for authoring descriptors; no application getters. */
-export function getNSEObjectLifetime(owner: object): NSEObjectLifetime | undefined { return lifetimes.get(owner); }
+export function getNSEObjectLifetime(owner: object): ObjectLifetime | undefined { return lifetimes.get(owner); }
 
 /**
  * @internal The target and its recorded lifetime owners, nearest first.
@@ -77,7 +77,7 @@ export function getNSEObjectOwners(target: object): readonly object[] {
  * `child = new DetailViewController()`) joins the owner that is constructing
  * it, or the one named by `owner` / `ownerSignal`.
  */
-export class NSEObjectLifetime {
+export class ObjectLifetime {
   readonly scope: NSEOwnershipScope;
   readonly record: SynCloudOSLifecycleRecord;
   /** What the framework handed to the constructor, when it constructed the object. */

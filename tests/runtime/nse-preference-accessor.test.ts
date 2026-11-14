@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { nseUnowned } from "../../src/NSE/Controllers/ownership";
-import { attachNSEAuthoringContext, type NSEAuthoringContext } from "../../src/NSE/Application/authoringContext";
+import { attachNSEAuthoringContext, type AuthoringContext } from "../../src/NSE/Application/authoringContext";
 import { finalizeNSEAuthoringOwner } from "../../src/NSE/Application/authoringLifecycle";
 import { preference, type NSEPreferenceDescriptor } from "../../src/NSE/Objects/preference";
 import { PreferencePersistenceError } from "../../src/NSE/Controllers/NSEUserDefaultsController";
@@ -11,7 +11,7 @@ afterEach(() => { for (const owner of owners.splice(0)) owner.dispose(); });
 function context() {
   const values = new Map<string, unknown>(); const listeners = new Set<() => void>(); let accepts = true;
   const write = vi.fn((key: string, value: unknown) => { if (!accepts) return false; values.set(key, value); for (const listener of listeners) listener(); return true; });
-  const result: NSEAuthoringContext = {
+  const result: AuthoringContext = {
     scheduler: { setTimeout: (callback, delay) => { const id = setTimeout(callback, delay); return { dispose: () => clearTimeout(id) }; } },
     errors: { capture: vi.fn() },
     persistence: { getPreference: <T,>(key: string, fallback: T): T => values.has(key) ? values.get(key) as T : fallback, setPreference: write },
@@ -19,7 +19,7 @@ function context() {
   };
   return { result, values, write, listeners, refuse: () => { accepts = false; } };
 }
-function create<T extends NSEViewController>(Controller: new () => T, ports: NSEAuthoringContext) {
+function create<T extends NSEViewController>(Controller: new () => T, ports: AuthoringContext) {
   const value = new Controller(); owners.push(value); attachNSEAuthoringContext(value, ports); finalizeNSEAuthoringOwner(value); return value;
 }
 class Settings extends NSEViewController {

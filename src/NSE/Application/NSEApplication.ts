@@ -27,8 +27,8 @@ import { nseDisposeFor, type NSEOwnedObject, type NSEOwner } from "../Controller
 import { NSEObject } from "../Objects/NSEObject";
 import { publishObservableChange } from "../Objects/observable";
 import type { NSEMenu } from "../Menus/NSEMenu";
-import { NSEObjectLifetime } from "./objectLifetime";
-import { ownNSEFactory, type NSEDisposable, type NSESynchronousDisposable } from "./ownedFactory";
+import { ObjectLifetime } from "./objectLifetime";
+import { ownNSEFactory, type Disposable, type SynchronousDisposable } from "./ownedFactory";
 import type { NSEAnyWindowController, NSEWindowController, NSEWindowControllerClass } from "./NSEWindowController";
 import type { AppBounds, AppOwnedWindowSnapshot } from "../../SynCloudOS/nseRuntimeContracts";
 import type { NSEViewController, NSEViewControllerClass } from "./NSEViewController";
@@ -125,7 +125,7 @@ export class NSEApplication extends NSEObject implements NSEOwner, NSEOwnedObjec
     if (!this.#context.userNotificationCenter) return Promise.reject(new DOMException("Remote notifications are unavailable.", "NotSupportedError"));
     return this.#context.userNotificationCenter().unregisterForRemoteNotifications();
   }
-  readonly #lifetime: NSEObjectLifetime;
+  readonly #lifetime: ObjectLifetime;
 
   /**
    * NSApplication.mainMenu: the menus across the application's menu bar, one
@@ -146,7 +146,7 @@ export class NSEApplication extends NSEObject implements NSEOwner, NSEOwnedObjec
 
   constructor() {
     super();
-    this.#lifetime = new NSEObjectLifetime(this, "NSEApplication", new.target.name || "NSEApplication", {});
+    this.#lifetime = new ObjectLifetime(this, "NSEApplication", new.target.name || "NSEApplication", {});
     if (!this.#lifetime.constructedByFramework) {
       throw new TypeError(`${new.target.name} is created by the framework; export it as the default export of the application module instead of calling new.`);
     }
@@ -172,7 +172,7 @@ export class NSEApplication extends NSEObject implements NSEOwner, NSEOwnedObjec
   }
 
   /** Constructs and owns a disposable synchronously, including after await. */
-  own<T extends NSEDisposable>(factory: (signal: AbortSignal) => NSESynchronousDisposable<T>): T {
+  own<T extends Disposable>(factory: (signal: AbortSignal) => SynchronousDisposable<T>): T {
     return ownNSEFactory(this, factory);
   }
 

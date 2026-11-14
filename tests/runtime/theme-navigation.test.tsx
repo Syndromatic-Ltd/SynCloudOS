@@ -6,7 +6,7 @@ import { NSEAppearanceProvider } from "../../src/NSE/Appearance/NSEAppearancePro
 import { freezeNSETheme } from "../../src/NSE/Theme/NSETheme";
 import { atmoTheme } from "../../src/NSE/Appearance/atmoTheme";
 import { NSEViewController, nseUpdateTraits } from "../../src/NSE/Application/NSEViewController";
-import { NSEViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
+import { ViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
 import { NSETabViewController, NSETabViewItem } from "../../src/NSE/Navigation/NSETabViewController";
 import { NSEScrollView } from "../../src/NSE/Scroll/NSEScrollView";
 import { WindowLayoutContext, WindowLayoutModel } from "../../src/NSE/Layout/windowChromeObstructions";
@@ -29,7 +29,7 @@ describe("theme navigation placement and chrome registration", () => {
     tabs[nseUpdateTraits]({ reducedMotion: true, presentation: createStaticPresentationTraits({ width, height: 844 }) });
     for (const id of ["first", "second"]) tabs.addTabViewItem(new NSETabViewItem({ identifier: id, viewController: tabs.addChild(Page, { title: id }) }));
     try {
-      const view = render(<NSEAppearanceProvider theme={theme}><WindowLayoutContext.Provider value={model}><NSEViewControllerView controller={tabs} /></WindowLayoutContext.Provider></NSEAppearanceProvider>);
+      const view = render(<NSEAppearanceProvider theme={theme}><WindowLayoutContext.Provider value={model}><ViewControllerView controller={tabs} /></WindowLayoutContext.Provider></NSEAppearanceProvider>);
       act(() => { const work = [...callbacks.values()]; callbacks.clear(); work.forEach(cb => cb(0)); });
       const element = view.container.querySelector<HTMLElement>(".nse-adaptive-tab-controller")!;
       expect(element.dataset.nseNavigationPlacement).toBe(placement); expect(element.dataset.nseNavigationFlow).toBe(flow);

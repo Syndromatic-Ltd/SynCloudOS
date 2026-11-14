@@ -3,7 +3,7 @@ import { NSEOwnershipScope, bindNSEOwnedResource, constructNSEOwnedResource, isN
 import { getNSEObjectLifetime } from '../Application/objectLifetime';
 import { ownNSEFactory } from '../Application/ownedFactory';
 import { getNSEAuthoringContext } from '../Application/authoringContext';
-import { getNSETaskLifetime, type NSEActivitySnapshot } from '../Application/viewActivity';
+import { getNSETaskLifetime, type ActivitySnapshot } from '../Application/viewActivity';
 import type { NSEApplication } from '../Application/NSEApplication';
 import type { NSEAnyWindowController } from '../Application/NSEWindowController';
 import type { NSEViewController } from '../Application/NSEViewController';
@@ -12,7 +12,7 @@ import { NSETaskQueueFullError, type NSEManagedTask, type NSETaskOptions, type N
 type Owner = NSEApplication|NSEAnyWindowController|NSEViewController<unknown>;
 type CancelReason = Extract<NSETaskSettlement<unknown>,{status:'cancelled'}>['reason'];
 interface Work<A,T> {
-  readonly argument:A;readonly generation:number;readonly epoch:NSEActivitySnapshot;
+  readonly argument:A;readonly generation:number;readonly epoch:ActivitySnapshot;
   readonly abort:AbortController;readonly handle:NSETaskRun<T>;readonly resolve:(result:NSETaskSettlement<T>)=>void;
   scope?:NSEOwnershipScope;invocationPending?:boolean;releaseObservation?:()=>void;settled:boolean;started:boolean;cancelling?:boolean;stopEpoch:()=>void;timer?:{dispose():void};
 }

@@ -6,7 +6,7 @@ import { NSEAlertBackdrop } from "../Components/NSEAlertBackdrop";
 import { NSEAlertSurface } from "../Components/NSEAlertSurface";
 import { NSEButton } from "../Controls/Buttons/NSEButton";
 import { NSEFocusScope } from "../Focus";
-import type { NSEWindowAlertRequest } from "../Application/NSEWindowController";
+import type { WindowAlertRequest } from "../Application/NSEWindowController";
 import type { WindowSurfaceRequest } from "../Overlays/NSEWindowSurfaceBridge";
 
 /** @internal NSE owns sheet drawing; the application host owns presentation and dismissal. */
@@ -53,7 +53,7 @@ export function OpenPanelSheetSurface({ request, compact, onClose, children }: {
 
 /** @internal Alert drawing consumes a request and callbacks, never an application queue or SDK. */
 export function WindowAlertContent({ request, scopeId, onChoose }: {
-  readonly request: NSEWindowAlertRequest;
+  readonly request: WindowAlertRequest;
   readonly scopeId: string;
   readonly onChoose: (buttonId?: string) => void;
 }) {

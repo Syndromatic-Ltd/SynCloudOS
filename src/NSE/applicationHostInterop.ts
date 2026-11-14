@@ -4,7 +4,7 @@
 export { NSEApplication } from "./Application/NSEApplication";
 export type { NSEApplicationClass, NSEApplicationContext, NSEOpenWindowOptions } from "./Application/NSEApplication";
 export { NSEWindowController, validateNSEWindowControllerClass, nseWindowInternals, nseSetKeyWindowModalPresenter } from "./Application/NSEWindowController";
-export type { NSEAnyWindowController, NSEWindowControllerClass, NSEWindowControllerContext, NSEWindowMount } from "./Application/NSEWindowController";
+export type { NSEAnyWindowController, NSEWindowControllerClass, NSEWindowControllerContext, WindowMount } from "./Application/NSEWindowController";
 export { validateNSEViewControllerClass, nseAttachView, nseUpdateTraits, nseUpdateViewActivity, nsePopoverPositioning, nsePresentationStyle, nseUpdateSafeArea } from "./Application/NSEViewController";
 // Safe areas and window chrome obstructions, measured by the framework host.
 export { ViewSafeAreaContext, useNSEViewSafeArea } from "./Layout/useNSESafeArea";
@@ -27,8 +27,8 @@ export type { NSEControlRuntimePort } from "./Controls/Core/controlTypes";
 export { NSEActionResponderContext, NSEActionScopeProvider } from "./Controls/Core/useNSEControlAction";
 export { useNSEAnimationEnvironment } from "./Animation/NSEAnimationEnvironment";
 export { useNSEOverlayFocusScope } from "./Overlays/useNSEOverlay";
-export { NSEViewActivityProvider, useNSEViewActivitySource } from "./Application/viewActivityContext";
-export { NSEViewControllerRendererProvider } from "./Application/viewControllerRenderer";
+export { ViewActivityProvider, useNSEViewActivitySource } from "./Application/viewActivityContext";
+export { ViewControllerRendererProvider } from "./Application/viewControllerRenderer";
 
 export { LocalisationProvider } from "./Navigation/compactMoreTitle";
 
@@ -36,7 +36,7 @@ export { LocalisationProvider } from "./Navigation/compactMoreTitle";
 export { WindowTitleSlotContext, WindowTitlebarContent, WindowTitlebarHostContext } from "./Windows/windowTitlebarContext";
 export type { WindowTitlebarDocument, WindowTitlebarHost } from "./Windows/windowTitlebarContext";
 export { nseWindowPresentedTitle } from "./Application/NSEWindowController";
-export type { NSEWindowAlertRequest } from "./Application/NSEWindowController";
+export type { WindowAlertRequest } from "./Application/NSEWindowController";
 export { registerNSEStandaloneViewControllerRenderer } from "./Application/viewControllerRenderer";
 export { nseAttachToolbar, nseEndToolbarCustomization, nseToolbarEngine, nseToolbarTabViews } from "./Toolbars/NSEToolbar";
 export { ToolbarView } from "./Toolbars/ToolbarView";

@@ -43,7 +43,7 @@ export { NSEConformanceEvidenceProvider, useNSEConformanceEvidence } from "./Dev
 export type { NSEConformanceEvidencePort, NSEConformanceEvidenceProviderProps } from "./Developer/NSEConformanceEvidence";
 /** Lifecycle cleanup is part of the public interaction layer for host shells. */
 export { useNSEDeferredDisposal } from "./interactionLifecycle";
-export type { NSEDisposable, NSEDisposalScheduler } from "./interactionLifecycle";
+export type { Disposable, NSEDisposalScheduler } from "./interactionLifecycle";
 import { NSEFeedbackProvider, useNSEFeedback } from "./Feedback";
 import * as NSEContainers from "./Containers";
 import * as NSEControllers from "./Controllers";

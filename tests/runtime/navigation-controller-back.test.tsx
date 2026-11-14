@@ -3,7 +3,7 @@ import React, { useSyncExternalStore, type ReactNode } from "react";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, expect, it } from "vitest";
 import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
-import { NSEViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
+import { ViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
 import { NSESplitViewController, NSESplitViewItem } from "../../src/NSE/DataViews/Split";
 import { NSEPageController } from "../../src/NSE/Page/NSEPageController";
 import { ApplicationNavigationChromeController, ApplicationNavigationChromeProvider } from "../../src/NSE/Navigation/NSEApplicationNavigationChrome";
@@ -32,13 +32,13 @@ function Stage({ controller }: { controller: ApplicationNavigationChromeControll
 }
 function renderAtStage(controller: NSEViewController<unknown>, available = true) {
   const chrome = new ApplicationNavigationChromeController(); owned.push(chrome);
-  render(<ApplicationNavigationChromeProvider controller={chrome} standardChromeAvailable={available}><Stage controller={chrome} /><NSEViewControllerView controller={controller} /></ApplicationNavigationChromeProvider>);
+  render(<ApplicationNavigationChromeProvider controller={chrome} standardChromeAvailable={available}><Stage controller={chrome} /><ViewControllerView controller={controller} /></ApplicationNavigationChromeProvider>);
   return chrome;
 }
 
 it.each([false, true])("restores each initiating pane control through two %s-stage split Back actions", (stage) => {
   const split = splitHierarchy();
-  if (stage) renderAtStage(split); else render(<NSEViewControllerView controller={split} />);
+  if (stage) renderAtStage(split); else render(<ViewControllerView controller={split} />);
   const openList = screen.getByRole("button", { name: "Open list" }); openList.focus(); fireEvent.click(openList);
   const openDetail = screen.getByRole("button", { name: "Open detail" }); openDetail.focus(); fireEvent.click(openDetail);
   const backList = screen.getByRole("button", { name: "Back to List" });
@@ -82,7 +82,7 @@ class History extends NSEPageController<string> {
 
 it.each([false, true])("draws one compact stack-history Back with %s-stage ownership", (stage) => {
   const pages = new History(); owned.push(pages); compact(pages);
-  if (stage) renderAtStage(pages); else render(<NSEViewControllerView controller={pages} />);
+  if (stage) renderAtStage(pages); else render(<ViewControllerView controller={pages} />);
   compact(pages);
   fireEvent.click(screen.getByRole("button", { name: "Read detail" }));
   const back = screen.getByRole("button", { name: "Back to Home" });

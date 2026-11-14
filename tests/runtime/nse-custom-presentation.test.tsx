@@ -3,7 +3,7 @@ import React from "react";
 import { act, render, screen, cleanup } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
-import { NSEViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
+import { ViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
 import { nseUnowned } from "../../src/NSE/Controllers/ownership";
 import { outlet, type NSEViewOutlet } from "../../src/NSE/Application/viewOutlet";
 import { Presence } from "../../src/NSE/Animation/NSEPresentation";
@@ -28,7 +28,7 @@ it("mounts custom presentations above a retained presenter and waits for dismiss
     }),
     animateDismissal: vi.fn(() => new Promise<void>(resolve => { finish = resolve; })),
   };
-  const mounted = render(<NSEViewControllerView controller={presenter} />);
+  const mounted = render(<ViewControllerView controller={presenter} />);
   act(() => { presenter.present(editor, animator); });
   expect(screen.getByText("Underlying list")).toBeTruthy();
   expect(screen.getByText("Presented editor")).toBeTruthy();
@@ -46,7 +46,7 @@ it("mounts custom presentations above a retained presenter and waits for dismiss
 it("settles refused dismissals and disposes a presentation when its owner leaves", async () => {
   const presenter = new Presenter({ owner: nseUnowned });
   const editor = new Editor({ owner: nseUnowned });
-  render(<NSEViewControllerView controller={presenter} />);
+  render(<ViewControllerView controller={presenter} />);
   act(() => { presenter.present(editor, { animatePresentation() {}, animateDismissal() { throw new Error("refused"); } }); });
   await act(async () => { editor.dismiss(); });
   expect(editor.isDisposed).toBe(true);
@@ -67,7 +67,7 @@ it("replaces children in their existing slot, retaining the incoming controller 
   }
   const parent = new Container({ owner: nseUnowned });
   const completion = vi.fn();
-  render(<NSEViewControllerView controller={parent} />);
+  render(<ViewControllerView controller={parent} />);
   await act(async () => { parent.transition(parent.first, parent.second, NSEViewController.TransitionOptions.crossfade, completion); });
   expect(screen.queryByText("First child")).toBeNull();
   expect(screen.getByText("Second child")).toBeTruthy();
@@ -94,7 +94,7 @@ it("hands a transition to a newly selected child without mounting its outlets tw
     select() { this.transition(this.first, this.second, NSEViewController.TransitionOptions.crossfade); this.selected = this.second; this.notifyObservers(); }
   }
   const tabs = new Tabs({ owner: nseUnowned });
-  const mounted = render(<NSEViewControllerView controller={tabs} />);
+  const mounted = render(<ViewControllerView controller={tabs} />);
   await act(async () => { tabs.select(); });
   expect(screen.queryByText("Original tab")).toBeNull();
   expect(screen.getAllByText("Selected tab")).toHaveLength(1);

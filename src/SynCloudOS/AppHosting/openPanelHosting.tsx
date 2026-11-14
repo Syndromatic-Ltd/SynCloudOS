@@ -6,7 +6,7 @@ import { createPortal } from "react-dom";
 import { useOptionalNSEWindowSurfaceBridge } from "../../NSE/NSE";
 import type { WindowSurfaceBridge, WindowSurfaceRequest } from "../../NSE/NSE";
 import { OpenPanelSheetSurface } from "../../NSE/applicationHostInterop";
-import { NSEWindowSheetFrame, NSEWindowSheetHostContext } from "./windowChrome";
+import { WindowSheetFrame, WindowSheetHostContext } from "./windowChrome";
 import type { NSEWindow } from "../../NSE/NSE";
 import type { SynWareContextValue } from "../AppSDK/appContextTypes";
 import { openPanelFileSystemFor } from "../FilePanels";
@@ -14,7 +14,7 @@ import { registerNSEOpenPanelHost, type NSEOpenPanelHost } from "../../NSE/appli
 import { NSEPopup } from "../../NSE/NSE";
 
 const Context = createContext<NSEOpenPanelHost | null>(null);
-export function NSEOpenPanelApplicationHost({ value, children }: PropsWithChildren<{ value: SynWareContextValue }>) {
+export function OpenPanelApplicationHost({ value, children }: PropsWithChildren<{ value: SynWareContextValue }>) {
   const bridge = useOptionalNSEWindowSurfaceBridge();
   const runtime = useContext(SynCloudOSRuntimeContext);
   const [compactPanel, setCompactPanel] = useState<{ request: WindowSurfaceRequest; content: ReactNode } | null>(null);
@@ -47,7 +47,7 @@ export function NSEOpenPanelApplicationHost({ value, children }: PropsWithChildr
   useEffect(() => () => { currentCompactPanel.current?.request.onDidClose?.(); }, []);
   return <Context.Provider value={host}>{children}{compactPanel ? <OpenPanelSheet request={compactPanel.request} onClose={() => { currentCompactPanel.current = null; setCompactPanel(null); compactPanel.request.onDidClose?.(); }}>{compactPanel.content}</OpenPanelSheet> : null}</Context.Provider>;
 }
-export function NSEOpenPanelWindowHost({ window, children }: PropsWithChildren<{ window: NSEWindow }>) {
+export function OpenPanelWindowHost({ window, children }: PropsWithChildren<{ window: NSEWindow }>) {
   const host = useContext(Context);
   const bridge = useOptionalNSEWindowSurfaceBridge();
   const [sheet, setSheet] = useState<{ request: WindowSurfaceRequest; content: ReactNode } | null>(null);
@@ -74,7 +74,7 @@ export function NSEOpenPanelWindowHost({ window, children }: PropsWithChildren<{
 
 /** The same window-owned sheet layer and close guard used by NSAlert and custom controller sheets. */
 function OpenPanelSheet({ request, onClose, children }: PropsWithChildren<{ request: WindowSurfaceRequest; onClose(): void }>) {
-  const sheetHost = useContext(NSEWindowSheetHostContext);
+  const sheetHost = useContext(WindowSheetHostContext);
   const { reducedMotion } = useNSEAnimationEnvironment();
   const compact = useContext(Context)?.compact() === true;
   useLayoutEffect(() => sheetHost?.attach(), [sheetHost]);
@@ -82,5 +82,5 @@ function OpenPanelSheet({ request, onClose, children }: PropsWithChildren<{ requ
     presentation={{ mode: "sheet" }} overlayKind="action-sheet" chrome="menu" modal aria-label={request.title} className="nse-open-compact-sheet"
     onOpenChange={open => { if (!open) onClose(); }}>{children}</NSEPopup>;
   const content = <OpenPanelSheetSurface request={request} compact={compact} onClose={onClose}>{children}</OpenPanelSheetSurface>;
-  return sheetHost?.layer ? createPortal(<NSEWindowSheetFrame reducedMotion={reducedMotion}>{content}</NSEWindowSheetFrame>, sheetHost.layer) : content;
+  return sheetHost?.layer ? createPortal(<WindowSheetFrame reducedMotion={reducedMotion}>{content}</WindowSheetFrame>, sheetHost.layer) : content;
 }

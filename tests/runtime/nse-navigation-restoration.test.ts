@@ -3,7 +3,7 @@ import { TabBarController } from "../../src/NSE/Navigation/TabBarController";
 import { NavigationStackController } from "../../src/NSE/Navigation/NSENavigationStackController";
 import { createNSETabSelectionRestoration, type NSENavigationRestorationDescriptor } from "../../src/NSE/Navigation/navigationRestoration";
 import { finalizeNSEAuthoringOwner } from "../../src/NSE/Application/authoringLifecycle";
-import { attachNSEAuthoringContext, type NSEAuthoringContext } from "../../src/NSE/Application/authoringContext";
+import { attachNSEAuthoringContext, type AuthoringContext } from "../../src/NSE/Application/authoringContext";
 import { nseUnowned } from "../../src/NSE/Controllers/ownership";
 import type { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { defaultsFrom } from "../fixtures/userDefaults";
@@ -14,12 +14,12 @@ const destinations = ["home", "library", "search"].map(id => ({ id, label: id, i
 function ports(stored: unknown) {
   const values = new Map<string, unknown>([["navigation", stored]]);
   const write = vi.fn((key: string, value: unknown) => { values.set(key, value); return true; });
-  const context: NSEAuthoringContext = { scheduler: { setTimeout: () => ({ dispose() {} }) }, errors: { capture: vi.fn() }, persistence: {
+  const context: AuthoringContext = { scheduler: { setTimeout: () => ({ dispose() {} }) }, errors: { capture: vi.fn() }, persistence: {
     getPreference: <T,>(key: string, fallback: T): T => values.has(key) ? values.get(key) as T : fallback, setPreference: write,
   }, subscribePreferences: () => () => {} };
   return { context, values, write };
 }
-function connect<T extends NSEViewController<unknown>>(owner: T, context: NSEAuthoringContext) { owners.push(owner); attachNSEAuthoringContext(owner, context); finalizeNSEAuthoringOwner(owner); return owner; }
+function connect<T extends NSEViewController<unknown>>(owner: T, context: AuthoringContext) { owners.push(owner); attachNSEAuthoringContext(owner, context); finalizeNSEAuthoringOwner(owner); return owner; }
 describe("navigation restoration descriptors", () => {
   it("preserves an existing unversioned raw app format when a version-zero adapter is declared", async () => {
     const storage = ports({ selected: "library" });

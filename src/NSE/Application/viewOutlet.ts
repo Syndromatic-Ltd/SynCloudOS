@@ -1,6 +1,6 @@
 import type { AFXLayer } from '../../FX/AnimationFX/AFXLayer';
 import type { AFXLayerActionMap } from '../../FX/AnimationFX/AFXLayerActions';
-import type { NSEViewController, NSEViewControllerBinding } from './NSEViewController';
+import type { NSEViewController, ViewControllerBinding } from './NSEViewController';
 import { createNSEViewAnimator, type NSEViewAnimator } from '../Animation/NSEViewAnimator';
 import { getNSEObjectLifetime } from './objectLifetime';
 import { getNSETaskLifetime } from './viewActivity';
@@ -21,18 +21,18 @@ export interface NSEViewOutlet<T extends NSEOutletElement> {
 }
 export interface NSEOutletOptions {readonly actions?:AFXLayerActionMap}
 interface Connection {readonly element:NSEOutletElement;readonly abort:AbortController;token:object;layer?:AFXLayer;pending?:object}
-const bindings=new WeakMap<object,NSEViewControllerBinding>();
+const bindings=new WeakMap<object,ViewControllerBinding>();
 const outlets=new WeakMap<object,Set<ManagedOutlet<NSEOutletElement>>>();
 const outletOwners=new WeakMap<object,object>();
 
 /** @internal Committed view binding, consumed by layers/renderers, not a new host. */
-export function getNSEOutletBinding(owner:object):NSEViewControllerBinding|undefined{return bindings.get(owner);}
+export function getNSEOutletBinding(owner:object):ViewControllerBinding|undefined{return bindings.get(owner);}
 /** @internal Refuse foreign/controller-crossing handles before acquiring renderer resources. */
 export function requireNSEOutletOwner(owner:object,handle:object):void {
   if(outletOwners.get(handle)!==owner)throw new TypeError('An outlet must belong to this view controller.');
 }
 /** @internal The owning controller calls this before load and at real detach. */
-export function bindNSEViewOutlets(owner:object,binding:NSEViewControllerBinding|null):void {
+export function bindNSEViewOutlets(owner:object,binding:ViewControllerBinding|null):void {
   if(binding){
     try{for(const outlet of outlets.get(owner)??[])outlet.validateDocument(binding.element.ownerDocument);bindings.set(owner,binding);}
     catch(error){for(const outlet of outlets.get(owner)??[])outlet.detach();bindings.delete(owner);throw error;}

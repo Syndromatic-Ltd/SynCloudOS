@@ -5,7 +5,7 @@ import { expect, it } from "vitest";
 import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { action } from "../../src/SynCloudOS/AppSDK/actions";
 import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
-import { NSEViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
+import { ViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
 import { SynWareRuntimeMount } from "../../src/SynCloudOS/AppSDK/SynWareRuntimeMount";
 import { useSCOS } from "../../src/SynCloudOS/AppSDK/scos/useSCOS";
 import { SynCloudOSRuntimeContext, SynWareRuntimeContext } from "../../src/SynCloudOSReact/runtimeContext";
@@ -62,7 +62,7 @@ it.each(["desktop", "compact"])("hosts presentAsPopover in a real %s window whil
   const view = render(<div data-syncloudos-runtime-owner={runtime.runtimeId}><SynCloudOSProvider runtime={runtime}>
     <HostSiteBrandingProvider value={{ name: "Fixture", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null, logoAlt: "Fixture" }}>
       <WindowSurfaceBridgeProvider bridge={bridge}><SynWareRuntimeMount runtime={runtime} app={app} responderId={responderId}>
-        <NSEViewControllerView controller={root} />
+        <ViewControllerView controller={root} />
       </SynWareRuntimeMount></WindowSurfaceBridgeProvider>
       <WindowLayer contentRegistry={registry} />
     </HostSiteBrandingProvider>

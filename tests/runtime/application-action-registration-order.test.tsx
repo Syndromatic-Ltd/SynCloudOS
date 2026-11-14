@@ -13,7 +13,7 @@ import { action, useAction } from "../../src/SynCloudOS/AppSDK/actions";
 import { useCommands } from "../../src/SynCloudOS/AppSDK/hooks/useCommands";
 import { createClassApplicationHost, type ClassApplicationHost } from "./fixtures/classApplicationHost";
 import { NSEPopup } from "../../src/NSE/Overlays/NSEPopup";
-import { NSEViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
+import { ViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
 
 const hosts: ClassApplicationHost[] = [];
 afterEach(async () => { for (const host of hosts.splice(0)) await host.dispose(); vi.restoreAllMocks(); });

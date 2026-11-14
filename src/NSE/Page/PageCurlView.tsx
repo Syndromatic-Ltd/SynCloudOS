@@ -4,7 +4,7 @@ import { useObserve } from "../Objects/useObserve";
 import type { NSEPageController } from "./NSEPageController";
 import { pageCurlConnection } from "./pageCurlConnection";
 import { rememberPagePrintSource } from "./pageSurfaceKey";
-import { NSEUntransitionedChildView } from "../Application/viewControllerRenderer";
+import { UntransitionedChildView } from "../Application/viewControllerRenderer";
 import { PageCurlLeaf } from "./PageCurlLeaf";
 import type { PageCorner, PageHandle } from "./pageTypes";
 import "./pageCurlController.css";
@@ -96,7 +96,7 @@ export function PageCurlView({ controller }: { readonly controller: NSEPageContr
       if (element) sources.current.set(object, element);
       else sources.current.delete(object);
     }} inert={name.endsWith("front") ? undefined : true}>
-      {Page ? <NSEUntransitionedChildView key={page} controller={Page} /> : null}
+      {Page ? <UntransitionedChildView key={page} controller={Page} /> : null}
     </div>;
   }
   const attachForward = useCallback((leaf: PageHandle | null) => bridge.attach("forward", leaf), [bridge]);

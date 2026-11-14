@@ -1,5 +1,5 @@
 import type { NSEViewController } from "../Application/NSEViewController";
-import { getNSEAuthoringContext, type NSEAuthoringContext } from "../Application/authoringContext";
+import { getNSEAuthoringContext, type AuthoringContext } from "../Application/authoringContext";
 import { getNSEObjectLifetime } from "../Application/objectLifetime";
 import { NSEUserDefaults } from "../../Foundation/NSEUserDefaults";
 import { encodeNSEPreference, equalNSEPreference, parseNSEPreference, readNSEPreference, validateNSEPreferenceDescriptor, writeNSEPreference, type NSEPreferenceDescriptor } from "../Objects/preference";
@@ -20,7 +20,7 @@ export function connectNSENavigationRestoration<Controller extends NSEViewContro
   const attached = getNSEAuthoringContext(controller);
   const adapter = descriptor.defaults ? NSEUserDefaults.storeOf(descriptor.defaults) : undefined;
   if (!attached && !adapter) throw new TypeError("Navigation restoration requires an attached app context or explicit NSEUserDefaults.");
-  const context: NSEAuthoringContext = adapter ? {
+  const context: AuthoringContext = adapter ? {
     scheduler: attached?.scheduler ?? { setTimeout: () => { throw new TypeError("No scheduler is attached."); } },
     errors: attached?.errors ?? { capture: error => { throw error; } },
     subscribePreferences: attached?.subscribePreferences ?? (() => () => {}),

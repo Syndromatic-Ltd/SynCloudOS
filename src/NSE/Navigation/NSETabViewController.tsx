@@ -21,7 +21,7 @@
 import { useId, type ReactNode } from "react";
 import { NSEViewController, type NSEViewControllerOptions } from "../Application/NSEViewController";
 import { useObserve } from "../Objects/useObserve";
-import { NSEChildViewControllerView } from "../Application/viewControllerRenderer";
+import { ChildViewControllerView } from "../Application/viewControllerRenderer";
 import { TabBar } from "./TabBar";
 import { TabBarController } from "./TabBarController";
 import { getNSETabBarPanelId, getNSETabBarTabId } from "./NSENavigationDestinationHost";
@@ -303,7 +303,7 @@ function TabViewControllerView({ controller }: { readonly controller: NSETabView
       {/* One superview slot owns both children through a swap. A keyed presence
           creates a second slot, remounting the incoming controller at handoff
           and losing its layer presentation. */}
-      {Selected ? <NSEChildViewControllerView controller={Selected} /> : null}
+      {Selected ? <ChildViewControllerView controller={Selected} /> : null}
     </div>
     {controller.tabStyle === "segmentedControlOnBottom" ? bar : null}
   </div>;

@@ -1,6 +1,6 @@
 import { PreferencePersistenceError } from "../Controllers/NSEUserDefaultsController";
 import { mutableClone, ownImmutable } from "../Controllers/immutableValue";
-import { getNSEAuthoringContext, type NSEAuthoringContext } from "../Application/authoringContext";
+import { getNSEAuthoringContext, type AuthoringContext } from "../Application/authoringContext";
 import { registerNSEAuthoringFinalizer } from "../Application/authoringLifecycle";
 import { getNSEObjectLifetime } from "../Application/objectLifetime";
 import { publishObservableChange } from "./observable";
@@ -58,7 +58,7 @@ export function readNSEPreference<T>(descriptor: NSEPreferenceDescriptor<T>, per
 }
 
 /** @internal Persist before publishing; adapters returning anything but true refused. */
-export function writeNSEPreference(context: NSEAuthoringContext, key: string, value: unknown): void {
+export function writeNSEPreference(context: AuthoringContext, key: string, value: unknown): void {
   try {
     if (context.persistence.setPreference(key, mutableClone(value)) !== true) throw new Error("The storage adapter refused the write.");
   } catch (error) {
@@ -73,8 +73,8 @@ export function equalNSEPreference(left: unknown, right: unknown): boolean {
 
 // Scoped notifications complement the canonical store subscription; storage
 // writes themselves do not necessarily publish a runtime-store revision.
-const channels = new WeakMap<NSEAuthoringContext, Map<string, Set<() => void>>>();
-function channel(context: NSEAuthoringContext, key: string): Set<() => void> {
+const channels = new WeakMap<AuthoringContext, Map<string, Set<() => void>>>();
+function channel(context: AuthoringContext, key: string): Set<() => void> {
   let keys = channels.get(context); if (!keys) { keys = new Map(); channels.set(context, keys); }
   let listeners = keys.get(key); if (!listeners) { listeners = new Set(); keys.set(key, listeners); }
   return listeners;
@@ -87,7 +87,7 @@ export function preference<T>(declaration: string | NSEPreferenceDescriptor<T>) 
   else validateNSEPreferenceDescriptor(declaration);
   return <This extends object>(_target: ClassAccessorDecoratorTarget<This, T>, member: ClassAccessorDecoratorContext<This, T>): ClassAccessorDecoratorResult<This, T> => {
     if (member.static || member.private || typeof member.name !== "string") throw new TypeError("@preference requires a public instance accessor.");
-    type State = { value: T; defaultValue: T; dirty: boolean; ready: boolean; writing: boolean; newer: boolean; context?: NSEAuthoringContext };
+    type State = { value: T; defaultValue: T; dirty: boolean; ready: boolean; writing: boolean; newer: boolean; context?: AuthoringContext };
     const states = new WeakMap<This, State>();
     const key = typeof declaration === "string" ? declaration : declaration.key;
     const validate = (state: State, value: unknown): T => {
@@ -95,7 +95,7 @@ export function preference<T>(declaration: string | NSEPreferenceDescriptor<T>) 
       if (!["string", "number", "boolean"].includes(typeof state.defaultValue) || typeof value !== typeof state.defaultValue || (typeof value === "number" && !Number.isFinite(value))) throw new TypeError(`Preference "${key}" requires its initializer's finite primitive kind.`);
       return value as T;
     };
-    const persisted = (value: T, ports: NSEAuthoringContext): unknown => typeof declaration === "string" ? value
+    const persisted = (value: T, ports: AuthoringContext): unknown => typeof declaration === "string" ? value
       : encodeNSEPreference(declaration, value, ports.persistence.getPreference<unknown>(key, absent));
     member.addInitializer(function (this: This) {
       registerNSEAuthoringFinalizer(this, () => {

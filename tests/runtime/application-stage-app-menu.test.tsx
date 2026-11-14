@@ -37,7 +37,7 @@ import { createSynWare } from "@syndromatic/syncloudos/sdk/testing";
 import { ApplicationStageView } from "../../src/Webspring/ApplicationStageView";
 import { tabViewController } from "../fixtures/tabViewController";
 import { nseUpdateTraits } from "../../src/NSE/Application/NSEViewController";
-import { NSEViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
+import { ViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
 import { WindowTitlebarHostContext } from "../../src/SynCloudOS/AppHosting/windowChrome";
 import { authoriseTestRuntime, createTestBundle, createTestRuntime, createTestRuntimeEnvironment, mountTestSynWareRuntime } from "./helpers";
 import { HostSiteBrandingProvider } from "../../src/SynCloudOSReact";
@@ -206,7 +206,7 @@ describe("ApplicationStageView app menu", () => {
         titlebar?.setDocument({ title: "Buttons", subtitle: "", documentEdited: false });
         return () => titlebar?.setDocument(null);
       }, [titlebar]);
-      return <NSEViewControllerView controller={controller} />;
+      return <ViewControllerView controller={controller} />;
     }
     runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.test-app", route: "/test" }, {
       loadModule: async () => ({ default: SourceListFixture }),
