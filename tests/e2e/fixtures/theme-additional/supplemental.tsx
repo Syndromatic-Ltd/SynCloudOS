@@ -12,7 +12,7 @@ import { NSETokenField } from "../../../../src/NSE/Controls/Completion/NSETokenF
 import { NSESegmentedControl } from "../../../../src/NSE/Controls/Values/NSESegmentedControl";
 import { NSEColourSwatches } from "../../../../src/NSE/Colour/Pickers/NSEColourSwatches";
 import { GFXColour } from "../../../../src/FX/GraphicsFX/GFXColour";
-import { NSETooltip } from "../../../../src/NSE/Tooltips/NSETooltip";
+import { Tooltip } from "../../../../src/NSE/Tooltips/Tooltip";
 import { VirtualViewport, useVirtualiser } from "../../../../src/NSE/DataViews/Virtualisation";
 import { NSEToolbarView } from "../../../../src/NSE/Toolbars/NSEToolbarView";
 import { NSEToolbarConfigurationSheet } from "../../../../src/NSE/Toolbars/NSEToolbarConfigurationSheet";
@@ -39,7 +39,7 @@ function Virtual() {
 }
 function Tooltip() {
   const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null);
-  return <><button ref={setAnchor}>Anchor</button><NSETooltip id="contract-tooltip" open anchor={anchor} content="Help" /></>;
+  return <><button ref={setAnchor}>Anchor</button><Tooltip id="contract-tooltip" open anchor={anchor} content="Help" /></>;
 }
 function Toolbar({ width, customising, borderless = false, labelled = false, sizeMode = "regular" }: { width: number; customising: boolean; borderless?: boolean; labelled?: boolean; sizeMode?: "regular" | "small" }) {
   const [controller] = useState(() => {

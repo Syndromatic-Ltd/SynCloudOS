@@ -1,7 +1,7 @@
 /* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
 
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { NSETooltipProvider } from "../NSE/Tooltips";
+import { TooltipProvider } from "../NSE/Tooltips";
 import { NSEAlertBackdrop } from "../NSE/SystemUI";
 import { SCOSAlertPresenter } from "./SCOSAlertPresenter";
 import { OverlayProvider, NSEWindowSurfaceBridgeProvider, useNSEDeferredDisposal } from "../NSE/NSE";
@@ -211,7 +211,7 @@ export function ApplicationHost({ applicationId, authentication, home }: Applica
         <SynCloudOSWatchdog runtime={runtime} watchdogName={`${app.packageName} application`} scope="app" app={app}
           resetKey={applicationId} fallback={() => null}>
           <OverlayProvider runtimePort={overlayPort} defaultParentResponderId={responderId}>
-          <NSETooltipProvider>
+          <TooltipProvider>
           <NSEWindowSurfaceBridgeProvider bridge={bridge}>
           {contentMenu ? <ApplicationMenuOverlayHost menuStore={menuStore} model={menuModel} controller={menuController}
             overlay={{ id: `application-host:app-menu-overlay:${applicationId}`, parentResponderId: responderId, placement: "block-end-inline-end" }}
@@ -220,7 +220,7 @@ export function ApplicationHost({ applicationId, authentication, home }: Applica
             {framedEntry}
           </ApplicationMenuTriggerBridge> : framedEntry}
           </NSEWindowSurfaceBridgeProvider>
-          </NSETooltipProvider>
+          </TooltipProvider>
           </OverlayProvider>
         </SynCloudOSWatchdog>
       </section>

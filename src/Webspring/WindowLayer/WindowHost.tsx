@@ -26,7 +26,7 @@ import {
   NSEControlRuntimeProvider,
   NSEFocusPortProvider,
   OverlayProvider,
-  NSETooltipProvider,
+  TooltipProvider,
   NSEWindowSurfaceBridgeProvider,
   NSEBorderlessWindowView,
   NSEHUDWindowView,
@@ -360,7 +360,7 @@ export function WindowHost({
         defaultParentResponderId={controller.windowResponderId}
         portalContainer={overlayLayerNode}
       >
-        <NSETooltipProvider>
+        <TooltipProvider>
         <NSEControlRuntimeProvider port={controlPort}>
           <NSEFocusPortProvider port={focusPort}>
             {childTransientBridge ? (
@@ -368,7 +368,7 @@ export function WindowHost({
             ) : surfaceContent}
           </NSEFocusPortProvider>
         </NSEControlRuntimeProvider>
-      </NSETooltipProvider>
+      </TooltipProvider>
       </OverlayProvider>
     </WindowChromeSlotContext.Provider>
   );

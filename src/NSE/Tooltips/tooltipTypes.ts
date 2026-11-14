@@ -21,10 +21,10 @@
 import type { HTMLAttributes, PointerEventHandler, ReactNode } from "react";
 import type { NSELogicalPlacement } from "../Overlays";
 
-export type NSETooltipContent = ReactNode;
+export type TooltipContent = ReactNode;
 
-export interface NSETooltipOptions {
-  readonly content: NSETooltipContent;
+export interface TooltipOptions {
+  readonly content: TooltipContent;
   readonly placement?: NSELogicalPlacement;
   readonly delayMs?: number;
   /** Do not duplicate a description that is already persistently visible. */
@@ -32,15 +32,15 @@ export interface NSETooltipOptions {
   readonly longPressOnCoarsePointer?: boolean;
 }
 
-export interface NSETooltipBinding {
+export interface TooltipBinding {
   readonly dismiss?: () => void;
   readonly anchorProps: HTMLAttributes<HTMLElement>;
   readonly tooltip: ReactNode;
 }
 
-export interface NSETooltipProps {
+export interface TooltipProps {
   readonly id: string;
-  readonly content: NSETooltipContent;
+  readonly content: TooltipContent;
   readonly open: boolean;
   readonly anchor: HTMLElement | null;
   readonly placement?: NSELogicalPlacement;
@@ -49,7 +49,7 @@ export interface NSETooltipProps {
   onPointerLeave?: PointerEventHandler<HTMLDivElement>;
 }
 
-export interface NSETooltipScheduler {
+export interface TooltipScheduler {
   setTimeout(callback: () => void, delayMs: number): unknown;
   clearTimeout(handle: unknown): void;
 }

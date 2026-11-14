@@ -25,7 +25,7 @@ import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction
 import { NSEMetalThumb } from "../../Appearance/NSEMetalThumb";
 import { cloneElement, useEffect, useRef, useState, type CSSProperties, type InputHTMLAttributes, type ReactElement, type ReactNode } from "react";
 import { useNSEFeedback } from "../../Feedback";
-import { useNSETooltip, useOptionalNSETooltipProvider } from "../../Tooltips";
+import { useNSETooltip, useOptionalTooltipProvider } from "../../Tooltips";
 import type { NSESliderProps } from "./valueControlTypes";
 import { commitUndoableValue } from "./valueControlTransaction";
 import { NSECircularSlider } from "./circularSlider";
@@ -66,7 +66,7 @@ function NSESliderControl({ __nseBindingEditor, sliderType: _sliderType, valueTe
   const feedback = useNSEFeedback();
   // The value tooltip needs the app's tooltip host; without one the slider
   // still works, its value spoken by the input alone.
-  const tooltips = useOptionalNSETooltipProvider();
+  const tooltips = useOptionalTooltipProvider();
 
   const disabled = !isEnabled;
   const theme = useNSEThemeInteraction<HTMLLabelElement>(isEnabled);

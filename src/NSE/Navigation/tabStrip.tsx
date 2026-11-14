@@ -25,7 +25,7 @@ import { useId, useMemo, useRef, useState, type MutableRefObject, type ReactNode
 import type { HFXFeedbackRequest } from "../Feedback";
 import { NSEListboxPopup, useOptionalOverlayProvider } from "../Overlays";
 import { useNSEControlCommand, useNSEControlFeedback } from "../Controls/Core";
-import { useNSETooltip, useOptionalNSETooltipProvider } from "../Tooltips";
+import { useNSETooltip, useOptionalTooltipProvider } from "../Tooltips";
 
 /**
  * How the tabs are drawn. "capsule" is the joined segmented capsule; "icons"
@@ -98,7 +98,7 @@ function tabName(item: NSETabStripItem): string {
 
 /** An icon tab named only by its picture carries its name in a tooltip. */
 function IconTabButton(props: TabButtonProps) {
-  const tooltips = useOptionalNSETooltipProvider();
+  const tooltips = useOptionalTooltipProvider();
   return !props.showsCaptions && tooltips ? <TooltipTabButton {...props} /> : <TabButton {...props} title={props.showsCaptions ? undefined : tabName(props.item)} />;
 }
 
