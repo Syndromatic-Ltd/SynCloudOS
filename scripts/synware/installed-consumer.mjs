@@ -136,22 +136,28 @@ export function createInstalledConsumer(repositoryRoot, label = "synware-install
   // finishes (or, for scripts, when the process exits), so callers cannot fill the disk.
   // Vitest stops workers without an exit event, hence onTestFinished. rmSync removes
   // links without following them. Set SYNWARE_KEEP_CONSUMERS=1 to inspect one.
-  if (!process.env.SYNWARE_KEEP_CONSUMERS) removeWhenFinished(root);
-  const repository = realpathSync.native(repositoryRoot);
-  assert(!isWithin(repository, root), "Installed consumer must be outside the repository.");
-  const frozen = copyVerifiedSdkArchive(repositoryRoot, root, { manifestPath: verified.manifestPath });
-  assert.deepEqual(frozen.manifest, verified.manifest, "SDK manifest changed while preparing the consumer.");
-  const npm = process.env.npm_execpath ?? resolve(dirname(process.execPath), "node_modules/npm/bin/npm-cli.js");
-  writeFileSync(join(root, "package.json"), JSON.stringify({ name: "synware-independent-consumer", version: "1.0.0", private: true, type: "module" }, null, 2));
-  writeFileSync(join(root, ".npmrc"), "audit=false\nfund=false\nignore-scripts=true\n");
-  const { archive } = frozen;
-  const dependencies = ["react", "react-dom", "@types/react", "@types/react-dom", "typescript", "vite"]
-    .map((name) => `${name}@${JSON.parse(readFileSync(join(repository, "node_modules", name, "package.json"), "utf8")).version}`);
-  runNode([npm, "install", "--prefer-offline", "--ignore-scripts", "--package-lock=false", archive, ...dependencies], root, { log: join(root, "install.log") });
-  const installed = realpathSync.native(join(root, "node_modules/@syndromatic/syncloudos"));
-  assert(isWithin(root, installed) && !isWithin(repository, installed), "The SDK must be installed, not linked to the repository.");
-  verifyInstalledSdkResources(installed, frozen.manifest);
-  return { ...frozen, root, installed, npm };
+  const automaticCleanup = options.automaticCleanup ?? !process.env.SYNWARE_KEEP_CONSUMERS;
+  if (automaticCleanup) removeWhenFinished(root);
+  try {
+    const repository = realpathSync.native(repositoryRoot);
+    assert(!isWithin(repository, root), "Installed consumer must be outside the repository.");
+    const frozen = copyVerifiedSdkArchive(repositoryRoot, root, { manifestPath: verified.manifestPath });
+    assert.deepEqual(frozen.manifest, verified.manifest, "SDK manifest changed while preparing the consumer.");
+    const npm = process.env.npm_execpath ?? resolve(dirname(process.execPath), "node_modules/npm/bin/npm-cli.js");
+    writeFileSync(join(root, "package.json"), JSON.stringify({ name: "synware-independent-consumer", version: "1.0.0", private: true, type: "module" }, null, 2));
+    writeFileSync(join(root, ".npmrc"), "audit=false\nfund=false\nignore-scripts=true\n");
+    const { archive } = frozen;
+    const dependencies = ["react", "react-dom", "@types/react", "@types/react-dom", "typescript", "vite"]
+      .map((name) => `${name}@${JSON.parse(readFileSync(join(repository, "node_modules", name, "package.json"), "utf8")).version}`);
+    runNode([npm, "install", "--prefer-offline", "--ignore-scripts", "--package-lock=false", archive, ...dependencies], root, { log: join(root, "install.log") });
+    const installed = realpathSync.native(join(root, "node_modules/@syndromatic/syncloudos"));
+    assert(isWithin(root, installed) && !isWithin(repository, installed), "The SDK must be installed, not linked to the repository.");
+    verifyInstalledSdkResources(installed, frozen.manifest);
+    return { ...frozen, root, installed, npm };
+  } catch (error) {
+    if (!automaticCleanup) rmSync(root, { recursive: true, force: true, maxRetries: 3 });
+    throw error;
+  }
 }
 
 export function assertIndependentModules(root, ids) {

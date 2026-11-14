@@ -124,7 +124,7 @@ export async function runInstalledAppBrowserCheck({
   verifyPage,
 }) {
   const normalizedBase = normalizeBase(base);
-  const consumer = createInstalledConsumer(repositoryRoot, prefix);
+  const consumer = createInstalledConsumer(repositoryRoot, prefix, { automaticCleanup: false });
   const output = resolve(repositoryRoot, ".artifacts/synapp-sdk", receiptFileName);
   const archiveSha256 = createHash("sha256").update(readFileSync(consumer.archive)).digest("hex");
   const evidence = {
@@ -233,6 +233,7 @@ export default {
     }
     evidence.browsers = browsers;
     assertSdkSourceUnchanged(consumer.manifest.source, captureSdkSourceFingerprint(repositoryRoot));
+    if (keep) evidence.retainedConsumer = consumer.root;
     evidence.passed = true;
   } catch (error) {
     evidence.error = error instanceof Error ? error.stack ?? error.message : String(error);
