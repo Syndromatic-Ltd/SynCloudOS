@@ -22,7 +22,7 @@
 import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { NSEAnimationEnvironmentProvider, type NSEAnimator } from "../../src/NSE/Animation";
+import { AnimationEnvironmentProvider, type Animator } from "../../src/NSE/Animation";
 import type { AFXAnimationDefinition } from "../../src/FX/AnimationFX/animationTypes";
 import { LoginWindow } from "../../src/NSE/SystemUI/LoginWindow";
 import { NSEFeedbackProvider } from "../../src/NSE/Feedback";
@@ -31,7 +31,7 @@ import type { HFXFeedbackRequest } from "../../src/FX/HapticsFX/HFXHapticEvent";
 /** Records each presentation by the class of the element it plays on. */
 function recordingAnimator() {
   const played: Array<{ className: string; definition: AFXAnimationDefinition }> = [];
-  const animator: NSEAnimator = {
+  const animator: Animator = {
     ownerAppId: "syncloudos.system",
     animations: {
       acquireOwner: (owner) => Object.freeze({ ...owner, epoch: 1, release() {} }),
@@ -40,7 +40,7 @@ function recordingAnimator() {
         return { id: "a", finished: new Promise(() => undefined), progress: 0, state: "running", cancel() {},
           seek() {}, pause() {}, resume() {} };
       },
-    } as NSEAnimator["animations"],
+    } as Animator["animations"],
   };
   const of = (className: string) => played.filter((record) => record.className.split(" ").includes(className));
   return { animator, played, of };
@@ -102,10 +102,10 @@ describe("LoginWindow browser parity", () => {
   });
   it("uses standard enter/error motion and switches both to reduced owner-local feedback", () => {
     const standard = recordingAnimator();
-    const view = (reducedMotion: boolean, animator: NSEAnimator, error?: string) => (
-      <NSEAnimationEnvironmentProvider reducedMotion={reducedMotion} animator={animator}>
+    const view = (reducedMotion: boolean, animator: Animator, error?: string) => (
+      <AnimationEnvironmentProvider reducedMotion={reducedMotion} animator={animator}>
         <LoginWindow error={error} methods={[{ id: "google", label: "Continue with Google" }]} />
-      </NSEAnimationEnvironmentProvider>
+      </AnimationEnvironmentProvider>
     );
     const rendered = render(view(false, standard.animator));
     const [swing] = standard.of("nse-login-window-swing-stage");

@@ -19,7 +19,7 @@
  */
 
 import { useRef, useSyncExternalStore, type PropsWithChildren } from "react";
-import { NSEPresence, useNSEPresentation } from "../NSE/Animation";
+import { Presence, useNSEPresentation } from "../NSE/Animation";
 import { LoginWindow } from "../NSE/SystemUI";
 import { LoginGatePresenter, type LoginGatePresenterProps } from "../SynCloudOS/RootRuntime";
 import { createLocaleServicesFacade } from "../SynCloudOS/SynCloudOS";
@@ -59,6 +59,6 @@ export function HostLoginGate(props: HostLoginGateProps) {
     LoginWindowComponent={typeof authentication === "object" && authentication.loginComponent ? authentication.loginComponent : LoginWindow}
     ModalFocusScopeComponent={LoginModalFocusScope}
     BackdropComponent={LoginBackdrop}
-    PresenceComponent={NSEPresence}
+    PresenceComponent={Presence}
   />;
 }

@@ -20,7 +20,7 @@
 
 import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
 import { useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from "react";
-import { NSEPresence, useNSEPresentation, type NSEPresentationSpec } from "../NSE/Animation";
+import { Presence, useNSEPresentation, type PresentationSpec } from "../NSE/Animation";
 import { ApplicationStageHost } from "./ApplicationStageHost";
 import type {
   SynCloudOSAppInfo,
@@ -39,7 +39,7 @@ import {
 
 import { choreographyTimings } from "../FX/AnimationFX/choreographyTimings";
 
-const backdropFade = (from: number, to: number): NSEPresentationSpec =>
+const backdropFade = (from: number, to: number): PresentationSpec =>
   Object.freeze({ duration: 0.22, timing: "ease-out", tracks: Object.freeze([Object.freeze({ keyPath: "opacity" as const, values: Object.freeze([from, to]) })]) });
 const multiSwitchBackdropMotion = Object.freeze({ enter: backdropFade(0, 1), exit: backdropFade(1, 0) });
 
@@ -228,8 +228,8 @@ export function ApplicationStageLayer({
       // surface: every window, floating panels included, goes inactive.
       onPointerDownCapture={() => runtime.windows.resignKey()}
     >
-      <NSEPresence>{hasMultiSwitch ? <MultiSwitchBackdrop /> : null}</NSEPresence>
-      <NSEPresence onExitComplete={handleWindowExitComplete}>
+      <Presence>{hasMultiSwitch ? <MultiSwitchBackdrop /> : null}</Presence>
+      <Presence onExitComplete={handleWindowExitComplete}>
         {presentations.map((presentation) => {
           const app = apps[normalizeBundleIdentifier(presentation.appId)];
           if (!app) return null;
@@ -252,7 +252,7 @@ export function ApplicationStageLayer({
             />
           );
         })}
-      </NSEPresence>
+      </Presence>
     </div>
   );
 }

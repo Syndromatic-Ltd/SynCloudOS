@@ -6,7 +6,7 @@ import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { NSEViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
 import { nseUnowned } from "../../src/NSE/Controllers/ownership";
 import { outlet, type NSEViewOutlet } from "../../src/NSE/Application/viewOutlet";
-import { NSEPresence } from "../../src/NSE/Animation/NSEPresentation";
+import { Presence } from "../../src/NSE/Animation/NSEPresentation";
 
 afterEach(cleanup);
 
@@ -90,7 +90,7 @@ it("hands a transition to a newly selected child without mounting its outlets tw
     readonly first = this.addChild(Child, { title: "Original tab" });
     readonly second = this.addChild(Child, { title: "Selected tab" });
     selected = this.first;
-    renderView() { return <NSEPresence><this.selected.view key={this.selected.title} /></NSEPresence>; }
+    renderView() { return <Presence><this.selected.view key={this.selected.title} /></Presence>; }
     select() { this.transition(this.first, this.second, NSEViewController.TransitionOptions.crossfade); this.selected = this.second; this.notifyObservers(); }
   }
   const tabs = new Tabs({ owner: nseUnowned });

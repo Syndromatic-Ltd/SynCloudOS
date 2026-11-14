@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEPopover } from "../../../src/NSE/sdkPackageEntry";
 import { OverlayProvider } from "../../../src/NSE/Overlays/OverlayProvider";
 import { computeOverlayPosition } from "../../../src/NSE/Overlays/computeOverlayPosition";
-import { NSEAnimationEnvironmentProvider } from "../../../src/NSE/Animation/NSEAnimationEnvironment";
+import { AnimationEnvironmentProvider } from "../../../src/NSE/Animation/NSEAnimationEnvironment";
 import { NSEViewController, nsePopoverPositioning } from "../../../src/NSE/Application/NSEViewController";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
 import { WindowSurfaceBridgeProvider } from "../../../src/NSE/Overlays/NSEWindowSurfaceBridge";
@@ -27,7 +27,7 @@ function Harness({ children, reducedMotion = false, compact = false }: { childre
     restoreFocus: () => undefined, reportPlacementFailure: () => { throw new Error("Placement failed"); },
     wrapFocusScope: (_options: unknown, node: React.ReactNode) => node,
   }), [compact]);
-  return <NSEAnimationEnvironmentProvider reducedMotion={reducedMotion}><OverlayProvider runtimePort={runtimePort}>{children}</OverlayProvider></NSEAnimationEnvironmentProvider>;
+  return <AnimationEnvironmentProvider reducedMotion={reducedMotion}><OverlayProvider runtimePort={runtimePort}>{children}</OverlayProvider></AnimationEnvironmentProvider>;
 }
 
 function Fixture({ drawsBackground = true, open = true }: { drawsBackground?: boolean; open?: boolean }) {

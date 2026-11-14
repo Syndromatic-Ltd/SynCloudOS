@@ -21,7 +21,7 @@
 import { useId, useLayoutEffect, useRef } from "react";
 import type { NSEViewController } from "./NSEViewController";
 import { useNSEAnimationEnvironment } from "../Animation/NSEAnimationEnvironment";
-import { compileNSEPresentation, useNSEPresentation, type NSEPresentationSpec } from "../Animation/NSEPresentation";
+import { compileNSEPresentation, useNSEPresentation, type PresentationSpec } from "../Animation/NSEPresentation";
 import type { AFXAnimationTiming } from "../../FX/AnimationFX/animationTypes";
 
 /** NSViewController.TransitionOptions. Combine an effect with allowUserInteraction. */
@@ -86,7 +86,7 @@ export function NSETransitionSlot({ transition, Renderer, className }: {
     const x = effect === 8 || effect === (rtl ? 64 : 32) ? 100 : effect === 16 || effect === (rtl ? 32 : 64) ? -100 : 0;
     const y = effect === 2 ? 100 : effect === 4 ? -100 : 0;
     const fade = reducedMotion || effect === 1;
-    const spec = (enter: boolean): NSEPresentationSpec => ({
+    const spec = (enter: boolean): PresentationSpec => ({
       duration: effect === 0 ? transition.duration : reducedMotion ? Math.min(0.12, transition.duration) : transition.duration,
       timing: transition.timing,
       tracks: effect === 0 ? [{ keyPath: "opacity", values: [1, 1] }] : fade

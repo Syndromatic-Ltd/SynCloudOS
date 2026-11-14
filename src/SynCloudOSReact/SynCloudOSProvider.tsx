@@ -24,7 +24,7 @@ import {
   NSEMaterialLightingProvider,
   NSESafeAreaMeasurementProvider,
 } from "../NSE/hostComposition";
-import { NSEAnimationEnvironmentProvider, type NSEAnimator } from "../NSE/Animation";
+import { AnimationEnvironmentProvider, type Animator } from "../NSE/Animation";
 import { NSEViewControllerRendererProvider } from "../NSE/applicationHostInterop";
 import { NSEViewControllerView } from "../SynCloudOS/AppHosting/runtimeEntry";
 import { registerNSEHapticFeedbackEngine } from "../NSE/hostComposition";
@@ -68,7 +68,7 @@ export function SynCloudOSProvider({
   // Shell NSE presentations (system alerts, dialogs) animate through the
   // runtime's AnimationFX service as the system; mounted apps replace this
   // with their own application-owned animator.
-  const shellAnimator = useMemo<NSEAnimator>(
+  const shellAnimator = useMemo<Animator>(
     () => Object.freeze({ animations: runtime.animations, ownerAppId: "syncloudos.system" }),
     [runtime],
   );
@@ -104,7 +104,7 @@ export function SynCloudOSProvider({
   }, [runtime, shellFrames]);
   return (
     <SynCloudOSRuntimeContext.Provider value={runtime}>
-      <NSEAnimationEnvironmentProvider reducedMotion={reducedMotion} animator={shellAnimator} layers={shellLayers} frames={shellFrames}>
+      <AnimationEnvironmentProvider reducedMotion={reducedMotion} animator={shellAnimator} layers={shellLayers} frames={shellFrames}>
         <ResponderHierarchyContext.Provider
           value={{ runtimeId: runtime.runtimeId, responderId: null }}
         >
@@ -118,7 +118,7 @@ export function SynCloudOSProvider({
             </NSEMaterialLightingProvider>
           </NSEFeedbackProvider>
         </ResponderHierarchyContext.Provider>
-      </NSEAnimationEnvironmentProvider>
+      </AnimationEnvironmentProvider>
     </SynCloudOSRuntimeContext.Provider>
   );
 }

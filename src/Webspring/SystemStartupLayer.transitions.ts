@@ -19,12 +19,12 @@
  */
 
 import { useMemo } from "react";
-import { NSEAnimationDefaults, useNSEAnimationEnvironment, type NSEPresentationSpec, type NSETransformComponents } from "../NSE/Animation";
+import { NSEAnimationDefaults, useNSEAnimationEnvironment, type PresentationSpec, type TransformComponents } from "../NSE/Animation";
 
 /** AnimationFX presentations for one part of the boot screen. */
 export interface SystemStartupMotionPreset {
-  readonly enter?: NSEPresentationSpec;
-  readonly exit: NSEPresentationSpec;
+  readonly enter?: PresentationSpec;
+  readonly exit: PresentationSpec;
 }
 
 export interface SystemStartupMotion {
@@ -40,8 +40,8 @@ const reducedFade = NSEAnimationDefaults.durationSeconds.reducedFade;
 // Framer tweens given only a duration ease with easeInOut (CSS ease-in-out).
 const framerTween = "ease-in-out";
 
-function presentation(duration: number, timing: NSEPresentationSpec["timing"], opacity: readonly [number, number],
-  transform?: readonly [NSETransformComponents, NSETransformComponents]): NSEPresentationSpec {
+function presentation(duration: number, timing: PresentationSpec["timing"], opacity: readonly [number, number],
+  transform?: readonly [TransformComponents, TransformComponents]): PresentationSpec {
   return Object.freeze({
     duration,
     timing,

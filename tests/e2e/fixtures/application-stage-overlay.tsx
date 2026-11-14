@@ -21,7 +21,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { createRoot } from "react-dom/client";
-import { NSEPresence } from "../../../src/NSE/Animation";
+import { Presence } from "../../../src/NSE/Animation";
 import { useNSEOverlayProvider } from "../../../src/NSE/Overlays";
 import { createSynWare, createSynWareBundle } from "../../../src/SynCloudOS/AppSDK/createSynWare";
 import { createBrowserRuntimeEnvironment } from "../../../src/SynCloudOS/PlatformAdapters/BrowserRuntimeEnvironment";
@@ -63,9 +63,9 @@ function Fixture() {
   return <SynCloudOSProvider runtime={runtime}>
     <HostSiteBrandingProvider value={{ name: "Stage", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null, logoAlt: "Stage" }}>
       <div className="webspring-apps-container">
-        <NSEPresence initial={false} onExitComplete={() => { exits++; }}>{shown ? <ApplicationStageView key={app.bundleIdentifier}
+        <Presence initial={false} onExitComplete={() => { exits++; }}>{shown ? <ApplicationStageView key={app.bundleIdentifier}
           app={app} lifecycle="active" staged={staged} multiSwitchRole={role} windowContentRegistry={registry}
-          stage={{ id: "application-stage:overlay", appId: app.bundleIdentifier, title: app.window.title, isFocused: true, zIndex: 2 }} /> : null}</NSEPresence>
+          stage={{ id: "application-stage:overlay", appId: app.bundleIdentifier, title: app.window.title, isFocused: true, zIndex: 2 }} /> : null}</Presence>
       </div>
     </HostSiteBrandingProvider>
   </SynCloudOSProvider>;

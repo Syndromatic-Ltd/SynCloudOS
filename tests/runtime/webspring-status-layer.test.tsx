@@ -24,7 +24,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-libra
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { WebspringStatusLayer } from "../../src/Webspring/WebspringStatusLayer";
-import { NSEAnimationEnvironmentProvider, type NSEAnimator } from "../../src/NSE/Animation";
+import { AnimationEnvironmentProvider, type Animator } from "../../src/NSE/Animation";
 import { useWebspringResponder } from "../../src/Webspring/useWebspringResponder";
 import { SynCloudOSWatchdog } from "../../src/SynCloudOS/ErrorManager/SynCloudOSWatchdog";
 import { RuntimeInputBoundary, SynCloudOSProvider, useRuntimeSelector } from "../../src/SynCloudOSReact";
@@ -89,7 +89,7 @@ describe("WebspringStatusLayer recovery", () => {
     const runtime = createTestRuntime({ authenticationPolicy: "required" });
     activeRuntimes.push(runtime);
     const exits: Array<{ target: Element; settle(): void }> = [];
-    const animator: NSEAnimator = {
+    const animator: Animator = {
       ownerAppId: "syncloudos.system",
       animations: {
         acquireOwner: (owner) => Object.freeze({ ...owner, epoch: 1, release() {} }),
@@ -99,7 +99,7 @@ describe("WebspringStatusLayer recovery", () => {
           if ((definition as { fill?: string }).fill === "forwards") exits.push({ target: target as Element, settle });
           return { id: "a", finished, progress: 0, cancel() {}, seek() {}, pause() {}, resume() {} };
         },
-      } as NSEAnimator["animations"],
+      } as Animator["animations"],
     };
     runtime.errors.capture({
       code: "UNRECOVERABLE_LOGIN_SESSION_MISMATCH",
@@ -111,9 +111,9 @@ describe("WebspringStatusLayer recovery", () => {
     });
     render(
       <SynCloudOSProvider runtime={runtime}>
-        <NSEAnimationEnvironmentProvider animator={animator}>
+        <AnimationEnvironmentProvider animator={animator}>
           <ConnectedStatusLayer />
-        </NSEAnimationEnvironmentProvider>
+        </AnimationEnvironmentProvider>
       </SynCloudOSProvider>,
     );
     fireEvent.click(await screen.findByRole("button", { name: "Cancel" }));

@@ -22,7 +22,7 @@
 import React from "react";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
-import { NSEAnimationEnvironmentProvider, type NSEAnimator } from "../../src/NSE/Animation";
+import { AnimationEnvironmentProvider, type Animator } from "../../src/NSE/Animation";
 import type { AFXAnimationDefinition, AFXAnimationSettlement } from "../../src/FX/AnimationFX/animationTypes";
 import type { SynCloudOSAppInfo } from "../../src/SynCloudOS/AppInfo/appInfoTypes";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
@@ -36,7 +36,7 @@ afterEach(cleanup);
 
 function recordingAnimator() {
   const played: Array<{ definition: AFXAnimationDefinition; settle(): Promise<void> }> = [];
-  const animator: NSEAnimator = {
+  const animator: Animator = {
     ownerAppId: "syncloudos.system",
     animations: {
       acquireOwner: (owner) => Object.freeze({ ...owner, epoch: 1, release() {} }),
@@ -50,7 +50,7 @@ function recordingAnimator() {
         return { id: "a", finished, progress: 0, state: "running", cancel: () => resolve({ state: "cancelled", reduced: false }),
           seek() {}, pause() {}, resume() {} };
       },
-    } as NSEAnimator["animations"],
+    } as Animator["animations"],
   };
   return { animator, played };
 }
@@ -64,9 +64,9 @@ it("drops the strip in and holds it until its exit settles; reduced motion only 
     const { animator, played } = recordingAnimator();
     const view = (open: boolean) => (
       <SynCloudOSProvider runtime={runtime}>
-        <NSEAnimationEnvironmentProvider animator={animator} reducedMotion={reducedMotion}>
+        <AnimationEnvironmentProvider animator={animator} reducedMotion={reducedMotion}>
           <WebspringQuickSwitchView apps={apps} lifecycle={{}} onClose={() => undefined} open={open} openAppIds={[]} />
-        </NSEAnimationEnvironmentProvider>
+        </AnimationEnvironmentProvider>
       </SynCloudOSProvider>
     );
     const rendered = render(view(true));
@@ -94,9 +94,9 @@ it("selects on hover without scrolling the row; keyboard selection only scrolls 
     const { animator } = recordingAnimator();
     render(
       <SynCloudOSProvider runtime={createTestRuntime()}>
-        <NSEAnimationEnvironmentProvider animator={animator} reducedMotion>
+        <AnimationEnvironmentProvider animator={animator} reducedMotion>
           <WebspringQuickSwitchView apps={row} lifecycle={{}} onClose={() => undefined} open openAppIds={[]} />
-        </NSEAnimationEnvironmentProvider>
+        </AnimationEnvironmentProvider>
       </SynCloudOSProvider>
     );
     expect(screen.getByRole("dialog", { name: "QuickSwitch" }).getAttribute("data-nse-control")).toBe("quick-switch");

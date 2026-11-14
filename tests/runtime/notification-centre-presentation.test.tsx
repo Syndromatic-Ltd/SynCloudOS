@@ -22,14 +22,14 @@
 import React from "react";
 import { act, cleanup, createEvent, fireEvent, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { NSEAnimationEnvironmentProvider, compileNSEPresentation, type NSEAnimator, type NSEPresentationEnter } from "../../src/NSE/Animation";
+import { AnimationEnvironmentProvider, compileNSEPresentation, type Animator, type PresentationEnter } from "../../src/NSE/Animation";
 import type { AFXAnimationDefinition, AFXAnimationSettlement } from "../../src/FX/AnimationFX/animationTypes";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
 import { NotificationCentrePresenter } from "../../src/Webspring/NotificationCentrePresenter";
 import { resolveNotificationMotion } from "../../src/Webspring/NotificationCentre.transitions";
 import { createTestRuntime } from "./helpers";
 
-const resolved = (enter: NSEPresentationEnter, previous: string | null) => typeof enter === "function" ? enter(previous) : enter;
+const resolved = (enter: PresentationEnter, previous: string | null) => typeof enter === "function" ? enter(previous) : enter;
 const endpoints = (spec: Parameters<typeof compileNSEPresentation>[0] | null) =>
   Object.fromEntries(compileNSEPresentation(spec!, "t", "enter", {}, { height: 80 }).animations.map(({ keyPath, from, to }) => [keyPath, [from, to]]));
 
@@ -82,7 +82,7 @@ describe("notification presentations", () => {
 
 function recordingAnimator() {
   const played: Array<{ target: Element; definition: AFXAnimationDefinition; settle(): Promise<void> }> = [];
-  const animator: NSEAnimator = {
+  const animator: Animator = {
     ownerAppId: "syncloudos.system",
     animations: {
       acquireOwner: (owner) => Object.freeze({ ...owner, epoch: 1, release() {} }),
@@ -96,7 +96,7 @@ function recordingAnimator() {
         return { id: "a", finished, progress: 0, state: "running", cancel: () => resolve({ state: "cancelled", reduced: false }),
           seek() {}, pause() {}, resume() {} };
       },
-    } as NSEAnimator["animations"],
+    } as Animator["animations"],
   };
   const on = (selector: string) => played.filter(({ target }) => target.matches(selector));
   return { animator, played, on };
@@ -117,9 +117,9 @@ async function bannerFixture() {
   const { animator, on } = recordingAnimator();
   const view = (open?: { key: number }) => (
     <SynCloudOSProvider runtime={runtime}>
-      <NSEAnimationEnvironmentProvider animator={animator} reducedMotion={false}>
+      <AnimationEnvironmentProvider animator={animator} reducedMotion={false}>
         <NotificationCentrePresenter snapshot={runtime.store.getSnapshot()} openRequest={open ?? null} />
-      </NSEAnimationEnvironmentProvider>
+      </AnimationEnvironmentProvider>
     </SynCloudOSProvider>
   );
   const rendered = render(view());
