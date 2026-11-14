@@ -20,7 +20,7 @@ interface ValueMapping<T> {
   readonly cancellable?: boolean;
 }
 /** @internal Passed only to controls that consume it, never to a DOM element. */
-export interface NSEValueBindingControlProps<T> { readonly __nseBindingEditor?:NSEBindingEdit<T> }
+export interface ValueBindingControlProps<T> { readonly __nseBindingEditor?:NSEBindingEdit<T> }
 
 /** Shared bridge into each existing control's native interaction implementation. */
 export function useNSEValueBinding<T, P extends object, K extends PropertyKey = 'value'|'defaultValue'|'onValueChange'|'undoManager'>(

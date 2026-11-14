@@ -27,7 +27,7 @@ import { useApplicationStageMotion } from "./ApplicationStage.transitions";
 import { WEBSPRING_MULTI_SWITCH_ROLES, WEBSPRING_PRESENTATION_ROLES, type WebspringMultiSwitchRole } from "../SynCloudOS/SynCloudOS";
 import {
   NSEFocusPortProvider,
-  NSEControlRuntimeProvider,
+  ControlRuntimeProvider,
   ApplicationNavigationChromeController,
   ApplicationNavigationChromeProvider,
   OverlayProvider,
@@ -407,7 +407,7 @@ export function ApplicationStageView({
     <OverlayProvider runtimePort={nseOverlayPort} defaultParentResponderId={applicationResponderId} portalContainer={overlayDestination}>
     <TooltipProvider>
     <WindowSurfaceBridgeProvider bridge={stageWindowSurfaceBridge}>
-    <NSEControlRuntimeProvider port={nseControlPort}>
+    <ControlRuntimeProvider port={nseControlPort}>
     <ApplicationNavigationChromeProvider controller={navigationChromeController} standardChromeAvailable={usesStandardTopBar}>
     <ResponderScope asChild responderId={applicationResponderId} kind="application" parentResponderId="workspace" scopeId={applicationResponderId} undoOwner={applicationUndoOwner} diagnosticsLabel={appName}>
     <AppViewChrome.Root
@@ -478,7 +478,7 @@ export function ApplicationStageView({
     </AppViewChrome.Root>
     </ResponderScope>
     </ApplicationNavigationChromeProvider>
-    </NSEControlRuntimeProvider>
+    </ControlRuntimeProvider>
     </WindowSurfaceBridgeProvider>
     <div ref={overlayRootRef} className="webspring-app-overlay-destination" data-multiswitch-role={multiSwitchRole ?? undefined}
       inert={overlayInactive ? true : undefined} aria-hidden={overlayInactive ? true : undefined}

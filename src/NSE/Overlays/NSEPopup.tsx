@@ -38,7 +38,7 @@ import { createPortal } from "react-dom";
 import type { OverlayAnchorPoint } from "./computeOverlayPosition";
 import { useNSEOverlay } from "./useNSEOverlay";
 import { useNSEOverlayProvider } from "./OverlayProvider";
-import { NSEActionResponderContext } from "../Controls/Core/useNSEControlAction";
+import { ActionResponderContext } from "../Controls/Core/useNSEControlAction";
 import { useNSEAppearanceProjection } from "../Appearance";
 import type {
   LogicalPlacement,
@@ -169,7 +169,7 @@ export function NSEPopup({
   const titleId = `nse-popup-title:${generatedId}`;
   const state = useNSEPopupState({ open, defaultOpen, onOpenChange });
   const { runtime, defaultParentResponderId } = useNSEOverlayProvider();
-  const nearestResponderId = useContext(NSEActionResponderContext);
+  const nearestResponderId = useContext(ActionResponderContext);
   const resolvedParentResponderId = parentResponderId ?? nearestResponderId ?? defaultParentResponderId;
   if (!resolvedParentResponderId) {
     throw new Error("NSEPopup requires parentResponderId or an NSEStandaloneControlHost.");

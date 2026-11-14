@@ -49,7 +49,7 @@ import { nseAttachView, nsePopoverPositioning, nsePresentationStyle, nseUpdateTr
 import { useObserve } from "../../NSE/applicationHostInterop";
 import { observableVersion, type NSEObservable } from "../../NSE/applicationHostInterop";
 import { nseDisposeFor } from "../../NSE/applicationHostInterop";
-import { NSEActionResponderContext, NSEActionScopeProvider } from "../../NSE/applicationHostInterop";
+import { ActionResponderContext, ActionScopeProvider } from "../../NSE/applicationHostInterop";
 import { ResponderScope } from "../../SynCloudOSReact";
 import { useResponderHierarchy } from "../../SynCloudOSReact";
 import { SynCloudOSRuntimeContext, SynWareRuntimeContext } from "../../SynCloudOSReact";
@@ -155,11 +155,11 @@ function BoundControllerResponder({ appRuntime, target, kind, host, children }: 
     return () => { binding.dispose(); };
   }, [appId, appRuntime.commands, responderId, target]);
   return (
-    <NSEActionResponderContext.Provider value={responderId}>
+    <ActionResponderContext.Provider value={responderId}>
       <ResponderScope responderId={responderId} kind={kind} parentResponderId={parentId} scopeId={scopeId} asChild>
         {host === "element" ? (children as ReactElement) : <div style={CONTENTS_STYLE}>{children}</div>}
       </ResponderScope>
-    </NSEActionResponderContext.Provider>
+    </ActionResponderContext.Provider>
   );
 }
 
@@ -523,7 +523,7 @@ export function WindowControllerView({ controller }: WindowControllerViewProps) 
   const hasBottomAccessory = bottomBorder > 0 && bottomBarAccessory != null;
   return (
     <WindowTitleSlotContext.Provider value={titleSlotHost}>
-    <NSEActionScopeProvider appId={appRuntime.app.bundleIdentifier}>
+    <ActionScopeProvider appId={appRuntime.app.bundleIdentifier}>
       <ControllerResponder target={controller} kind="controller">
         {accessories.length ? <WindowTitlebarAccessories accessories={accessories} renderController={renderAccessory} host={accessoryHost} placement="titlebar" /> : null}
           <div className="nse-window-chrome-frame">
@@ -538,7 +538,7 @@ export function WindowControllerView({ controller }: WindowControllerViewProps) 
             </div>
           </div>
       </ControllerResponder>
-    </NSEActionScopeProvider>
+    </ActionScopeProvider>
     </WindowTitleSlotContext.Provider>
   );
 }

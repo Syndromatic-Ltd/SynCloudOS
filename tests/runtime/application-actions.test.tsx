@@ -5,7 +5,7 @@ import { act, cleanup, fireEvent, render, renderHook, screen, waitFor } from "@t
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEObject, observable } from "../../src/NSE/Objects";
 import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
-import { NSEActionScopeProvider, NSEControlRuntimeProvider } from "../../src/NSE/Controls/Core";
+import { ActionScopeProvider, ControlRuntimeProvider } from "../../src/NSE/Controls/Core";
 import { NSESegmentedControl } from "../../src/NSE/Controls/Values/NSESegmentedControl";
 import { NSEPopUpButton } from "../../src/NSE/Menus/NSEPopUpButton";
 import { StandaloneControlHost } from "../../src/NSE/Overlays";
@@ -447,9 +447,9 @@ describe("actions in menus and controls", () => {
   function ControlsHost({ context, children }: React.PropsWithChildren<{ readonly context: SynWareContextValue }>) {
     return <SynWareProvider value={context}>
       <StandaloneControlHost document={document} window={window} presentation={createStaticPresentationPort({ width: 1024, height: 768 })} parentResponderId={responderIds.view}>
-        <NSEControlRuntimeProvider port={controlPort(context)}>
-          <NSEActionScopeProvider appId={appId}>{children}</NSEActionScopeProvider>
-        </NSEControlRuntimeProvider>
+        <ControlRuntimeProvider port={controlPort(context)}>
+          <ActionScopeProvider appId={appId}>{children}</ActionScopeProvider>
+        </ControlRuntimeProvider>
       </StandaloneControlHost>
     </SynWareProvider>;
   }
@@ -792,13 +792,13 @@ describe("actions in menus and controls", () => {
     const { context, app, view, focus } = fixture();
     focus("view");
     render(
-      <NSEControlRuntimeProvider port={controlPort(context)}>
-        <NSEActionScopeProvider appId={appId}>
+      <ControlRuntimeProvider port={controlPort(context)}>
+        <ActionScopeProvider appId={appId}>
           <NSEButton title="New note" action="newNote" />
           <NSEButton title="Reload" action="reload" />
           <NSEButton title="Rename" action="rename" actionPayload={{ title: "Button" }} />
-        </NSEActionScopeProvider>
-      </NSEControlRuntimeProvider>,
+        </ActionScopeProvider>
+      </ControlRuntimeProvider>,
     );
     await waitFor(() => expect((screen.getByRole("button", { name: "New note" }) as HTMLButtonElement).disabled).toBe(false));
     expect((screen.getByRole("button", { name: "Reload" }) as HTMLButtonElement).disabled).toBe(true);
@@ -812,11 +812,11 @@ describe("actions in menus and controls", () => {
     const { context, window, focus } = fixture();
     focus("window");
     render(
-      <NSEControlRuntimeProvider port={controlPort(context)}>
-        <NSEActionScopeProvider appId={appId}>
+      <ControlRuntimeProvider port={controlPort(context)}>
+        <ActionScopeProvider appId={appId}>
           <NSEButton title="Save" action="document.save" />
-        </NSEActionScopeProvider>
-      </NSEControlRuntimeProvider>,
+        </ActionScopeProvider>
+      </ControlRuntimeProvider>,
     );
     await waitFor(() => expect((screen.getByRole("button", { name: "Save" }) as HTMLButtonElement).disabled).toBe(false));
     await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Save" })); });
@@ -826,9 +826,9 @@ describe("actions in menus and controls", () => {
   it("refuses a bare action name outside an application", () => {
     const { context } = fixture();
     expect(() => render(
-      <NSEControlRuntimeProvider port={controlPort(context)}>
+      <ControlRuntimeProvider port={controlPort(context)}>
         <NSEButton title="New note" action="newNote" />
-      </NSEControlRuntimeProvider>,
+      </ControlRuntimeProvider>,
     )).toThrow(/action/i);
   });
   it("validates and sends each segmented candidate's id when no payload override is supplied", async () => {

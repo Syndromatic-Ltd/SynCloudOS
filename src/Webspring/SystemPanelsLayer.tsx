@@ -22,7 +22,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   NSEColourPanel,
   NSEColourPanelProvider,
-  NSEControlRuntimeProvider,
+  ControlRuntimeProvider,
   NSEFontPanel,
   OverlayProvider,
   WindowSurfaceBridgeProvider,
@@ -135,7 +135,7 @@ export function SystemPanelsLayer({ windowContentRegistry }: { readonly windowCo
   return (
     <OverlayProvider runtimePort={overlayPort} defaultParentResponderId="workspace">
       <WindowSurfaceBridgeProvider bridge={systemBridge}>
-        <NSEControlRuntimeProvider port={controlPort}>
+        <ControlRuntimeProvider port={controlPort}>
           <NSEColourPanelProvider service={runtime.colourPanel}>
             <NSEColourPanel />
             <NSEFontPanel
@@ -147,7 +147,7 @@ export function SystemPanelsLayer({ windowContentRegistry }: { readonly windowCo
               onOpenChange={setFontsOpen}
             />
           </NSEColourPanelProvider>
-        </NSEControlRuntimeProvider>
+        </ControlRuntimeProvider>
       </WindowSurfaceBridgeProvider>
     </OverlayProvider>
   );

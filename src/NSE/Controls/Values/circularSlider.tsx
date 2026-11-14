@@ -1,4 +1,4 @@
-import { useNSEValueBinding, type NSEValueBindingControlProps } from "../Core/useNSEValueBinding";
+import { useNSEValueBinding, type ValueBindingControlProps } from "../Core/useNSEValueBinding";
 import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
 /*
  * SynCloudOS
@@ -55,7 +55,7 @@ export function NSECircularSlider(supplied: NSEBoundValueProps<number, NSESlider
   return <NSECircularSliderControl {...useNSEValueBinding<number, NSECircularSliderProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>(props, {fallback:0,cancellable:true})} />;
 }
 
-function NSECircularSliderControl({ __nseBindingEditor, controlSize = "regular", valueText, ...props }: NSECircularSliderProps & NSEValueBindingControlProps<number>) {
+function NSECircularSliderControl({ __nseBindingEditor, controlSize = "regular", valueText, ...props }: NSECircularSliderProps & ValueBindingControlProps<number>) {
   const theme = useNSEThemeInteraction<HTMLSpanElement>(props.isEnabled !== false, true);
   const activePointer = useRef<number | null>(null);
   const opening = useRef(props.value);

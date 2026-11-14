@@ -31,7 +31,7 @@ import { NSEMenu } from "../../Menus/NSEMenu";
 import { MenuOverlay } from "../../Menus/MenuOverlay";
 import { MenuView } from "../../Menus/MenuView";
 import { useOptionalOverlayProvider } from "../../Overlays";
-import { NSEActionResponderContext } from "../Core/useNSEControlAction";
+import { ActionResponderContext } from "../Core/useNSEControlAction";
 import { NSEButton } from "../Buttons/NSEButton";
 import { NSEToolButtonGroup } from "../Buttons/NSEButtonFamilies";
 import { sizedControlStyle } from "../Core/nseControlsShared";
@@ -151,7 +151,7 @@ function NSEMenuSegment({ item, menu, props }: { readonly item: NSESegmentedItem
   const [open, setOpen] = useState(false);
   const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null);
   const provider = useOptionalOverlayProvider();
-  const nearestResponderId = useContext(NSEActionResponderContext);
+  const nearestResponderId = useContext(ActionResponderContext);
   const baseId = `nse-segment-menu:${useId().replace(/:/g, "")}`;
   const parentResponderId = props.parentResponderId ?? nearestResponderId ?? provider?.defaultParentResponderId;
   if (!provider || !parentResponderId) throw new Error("A segment with a command menu needs an overlay host and a parent responder.");

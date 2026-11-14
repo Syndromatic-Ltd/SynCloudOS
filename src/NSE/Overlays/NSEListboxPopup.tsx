@@ -24,7 +24,7 @@ import { useNSERubberBandScroll } from "../Scroll";
 import { NSEPopup, useNSEPopupOpenState, type PopupPresentation } from "./NSEPopup";
 import { useNSEOverlayProvider } from "./OverlayProvider";
 import type { OverlayDismissReason } from "./overlayTypes";
-import { NSEActionResponderContext } from "../Controls/Core/useNSEControlAction";
+import { ActionResponderContext } from "../Controls/Core/useNSEControlAction";
 
 export interface ListboxOption<T = unknown> {
   readonly id: string;
@@ -142,7 +142,7 @@ export function ListboxPopup<T = unknown>({
   onSelect,
 }: ListboxPopupProps<T>) {
   const provider = useNSEOverlayProvider();
-  const nearestResponderId = useContext(NSEActionResponderContext);
+  const nearestResponderId = useContext(ActionResponderContext);
   const generatedId = useId().replace(/:/g, "");
   const resolvedId = id ?? `nse-listbox:${generatedId}`;
   const resolvedParentResponderId = parentResponderId ?? nearestResponderId ?? provider.defaultParentResponderId;

@@ -26,7 +26,7 @@ import React, { useMemo } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEComboBox, NSETokenField } from "../../../src/NSE/Controls/Completion";
 import { NSESearchField, NSESecureTextField } from "../../../src/NSE/Controls/Fields";
-import { NSEControlRuntimeProvider, type NSEControlRuntimePort } from "../../../src/NSE/Controls/Core";
+import { ControlRuntimeProvider, type ControlRuntimePort } from "../../../src/NSE/Controls/Core";
 import type { CommandId } from "../../../src/SynCloudOS/SynCloudOS";
 import { OverlayProvider } from "../../../src/NSE/Overlays";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
@@ -220,9 +220,9 @@ describe("completion and field families", () => {
   it("dispatches search only through an accepted current command generation", async () => {
     const dispatch = vi.fn(async () => ({ status: "executed" as const }));
     const generation = { registryGeneration: 1, responderGeneration: 1 };
-    const port = { signal: new AbortController().signal, commands: { getPresentationGeneration: () => generation, validate: vi.fn(async () => ({ commandId: "search.perform", responderId: "workspace", title: "Search", enabled: true, denied: false, hidden: false, state: "off" as const })), prepareDispatch: vi.fn(async () => ({ status: "accepted" as const, acceptance: { responderId: "workspace" } })), dispatch } } as unknown as NSEControlRuntimePort;
+    const port = { signal: new AbortController().signal, commands: { getPresentationGeneration: () => generation, validate: vi.fn(async () => ({ commandId: "search.perform", responderId: "workspace", title: "Search", enabled: true, denied: false, hidden: false, state: "off" as const })), prepareDispatch: vi.fn(async () => ({ status: "accepted" as const, acceptance: { responderId: "workspace" } })), dispatch } } as unknown as ControlRuntimePort;
     const submit = vi.fn();
-    render(<NSEControlRuntimeProvider port={port}><NSESearchField aria-label="Command search" defaultValue="memo" command={{ id: "search.perform" as CommandId, payload: { query: "" } }} onSearch={submit} /></NSEControlRuntimeProvider>);
+    render(<ControlRuntimeProvider port={port}><NSESearchField aria-label="Command search" defaultValue="memo" command={{ id: "search.perform" as CommandId, payload: { query: "" } }} onSearch={submit} /></ControlRuntimeProvider>);
     await waitFor(() => expect(port.commands.validate).toHaveBeenCalled());
     fireEvent.keyDown(screen.getByRole("searchbox"), { key: "Enter" });
     await waitFor(() => expect(dispatch).toHaveBeenCalledWith("search.perform", { query: "memo" }, expect.objectContaining({ acceptance: expect.anything() })));

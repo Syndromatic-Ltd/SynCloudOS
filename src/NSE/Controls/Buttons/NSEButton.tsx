@@ -38,7 +38,7 @@ import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction
 import type { NSEImage } from "../Images/NSEImageResource";
 import type { HFXFeedbackPresetName, HFXFeedbackRequest } from "../../Feedback";
 import type { NSEBinding } from "../../Bindings/bindingTypes";
-import type { NSEControlActionProps, NSEControlValidation } from "../Core/controlTypes";
+import type { ControlActionProps, NSEControlValidation } from "../Core/controlTypes";
 import { useNSEControlFormReset, useNSEControlValue } from "../Core";
 import { classes, resolveNSEControlHaptic, useNSEControlFeedback } from "../Core/nseControlsShared";
 import { useNSEControlCommand } from "../Core/useNSEControlCommand";
@@ -80,7 +80,7 @@ export type NSEButtonControlSize = "small" | "regular" | "large";
 
 export interface NSEButtonProps<Payload = unknown>
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "title" | "disabled" | "children" | "value" | "defaultValue">,
-    NSEControlActionProps<Payload> {
+    ControlActionProps<Payload> {
   /** The button's title; for `imageOnly` buttons, the label read to assistive technology. */
   readonly title?: ReactNode;
   readonly buttonType?: NSEButtonType;

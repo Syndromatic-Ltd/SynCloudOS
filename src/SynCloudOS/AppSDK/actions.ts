@@ -22,7 +22,7 @@ import { observe } from "../../NSE/applicationHostInterop";
 import { getNSEObjectOwners } from "../../NSE/applicationHostInterop";
 import { publishNSEActionChange } from "../../NSE/applicationHostInterop";
 import { useNSEControlCommand } from "../../NSE/applicationHostInterop";
-import type { NSEControlRuntimePort } from "../../NSE/applicationHostInterop";
+import type { ControlRuntimePort } from "../../NSE/applicationHostInterop";
 import type { CommandDispatchResult } from "../SynCloudOS";
 import type { KeyBindingDeclaration } from "../SynCloudOS";
 import { useSCOS } from "./scos/useSCOS";
@@ -144,14 +144,14 @@ export function actionNames(target: object): readonly string[] {
 }
 
 /** What an object needs from its host to register its actions. */
-export interface NSEActionHost {
+export interface ActionHost {
   /** The application the actions belong to: bare names become `<appId>.<name>`. */
   readonly appId: string;
   readonly commands: Pick<AppCommandClient, "register">;
 }
 
 /** An object's registered actions. */
-export interface NSEActionBinding {
+export interface ActionBinding {
   /** Registers actions added, and drops actions removed, since the last sync; used after hot reload swaps the object's class. */
   refresh(): void;
   /** Removes every command this binding registered. Safe to call twice. */
@@ -172,7 +172,7 @@ const anyPayload: SynWareCommandPayloadSchema<unknown> = Object.freeze({
   parse: (value: unknown) => ({ ok: true as const, value }),
 });
 
-const liveBindings = new WeakMap<object, Set<NSEActionBinding>>();
+const liveBindings = new WeakMap<object, Set<ActionBinding>>();
 
 function capitalised(name: string): string {
   return name.charAt(0).toUpperCase() + name.slice(1);
@@ -262,7 +262,7 @@ function declarationFor(target: object, name: string, commandId: string, respond
  * Registration is all-or-nothing: if one action cannot be registered the others
  * are removed again and the error is thrown.
  */
-export function bindActionResponder(target: object, host: NSEActionHost, responderId: string): NSEActionBinding {
+export function bindActionResponder(target: object, host: ActionHost, responderId: string): ActionBinding {
   if (responderId.trim().length === 0) throw new TypeError("Actions need a responder to answer on.");
   const registered = new Map<string, { readonly commandId: string; readonly record: ActionRecord; readonly handle: { dispose(): unknown } }>();
   let disposed = false;
@@ -314,7 +314,7 @@ export function bindActionResponder(target: object, host: NSEActionHost, respond
   sync();
   const stopObserving = getNSEObjectOwners(target).map(owner => observe(owner, announceChanges));
 
-  const binding: NSEActionBinding = {
+  const binding: ActionBinding = {
     refresh: sync,
     dispose() {
       if (disposed) return;
@@ -325,7 +325,7 @@ export function bindActionResponder(target: object, host: NSEActionHost, respond
       liveBindings.get(target)?.delete(binding);
     },
   };
-  const bindings = liveBindings.get(target) ?? new Set<NSEActionBinding>();
+  const bindings = liveBindings.get(target) ?? new Set<ActionBinding>();
   bindings.add(binding);
   liveBindings.set(target, bindings);
   signal?.addEventListener("abort", binding.dispose, { once: true });
@@ -387,7 +387,7 @@ export function useAction(name: string | NSEActionReference, payload?: unknown):
   if (!sameActionPayload(stablePayload.current, payload)) stablePayload.current = payload;
   const boundPayload = stablePayload.current;
   const binding = useMemo(() => ({ id: nseActionCommandId(app.app.bundleIdentifier, name), payload: boundPayload }), [app.app.bundleIdentifier, name, boundPayload]);
-  const port = useMemo<NSEControlRuntimePort>(() => ({
+  const port = useMemo<ControlRuntimePort>(() => ({
     signal: app.signal,
     commands: {
       getPresentationGeneration: () => app.commands.getPresentationGeneration(),
