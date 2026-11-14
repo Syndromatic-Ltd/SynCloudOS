@@ -20,7 +20,7 @@
 
 export * from "./windowViewTypes";
 export * from "./windowAppearanceContract";
-export * from "./WindowTitleBar";
+export * from "./WindowTitlebarControls";
 export * from "./WindowView";
 export * from "./StandardWindowView";
 export * from "./PanelView";

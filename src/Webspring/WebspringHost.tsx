@@ -215,6 +215,19 @@ export function WebspringHost({
   const { reducedMotion } = useNSEAnimationEnvironment();
   const phase = startupPhase ?? "complete";
   const authenticationPolicy = typeof authentication === "object" ? authentication.policy : authentication;
+  useEffect(() => {
+    if (authenticationPolicy === "disabled" || !controller) return;
+    const command = runtime.commands.register({
+      id: "session.requestSignIn", responderId: "runtime",
+      title: { key: "command.session.requestSignIn", fallback: "Sign In" },
+      payload: { description: "No payload.", parse: value => value === undefined
+        ? { ok: true, value: undefined } : { ok: false, issues: ["Sign In takes no payload."] } },
+      scope: "runtime", defaultKeyBindings: [], undo: { kind: "none" },
+      validate: () => ({ enabled: !runtime.store.getSnapshot().loginServices.isAuthorised }),
+      execute: () => controller.actions.requestSignIn(),
+    });
+    return () => { command.dispose(); };
+  }, [authenticationPolicy, controller, runtime]);
   const gateRequested = authenticationPolicy !== "disabled" && snapshot.statechart.currentState === "locked.loginWindow";
   const loginContinuationKey = `webspring:${normalizeBundleIdentifier(shell.manifest.bundleIdentifier)}:${shell.manifest.webspringShell.homeRoute}:login-continuation`;
   const [resumeLogin] = useState(() => {

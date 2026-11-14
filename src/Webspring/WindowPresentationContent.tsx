@@ -31,7 +31,7 @@ import {
 } from "../SynCloudOSReact";
 import { SynWareEntryRenderer } from "./SynWareEntryRenderer";
 import { useWebspringLocale } from "./webspringLocale";
-import type { SynCloudOSAppInfo, WindowController } from "../SynCloudOS/SynCloudOS";
+import { AppPresentationErrorFallback, SynCloudOSWatchdog, type SynCloudOSAppInfo, type WindowController } from "../SynCloudOS/SynCloudOS";
 
 interface Slot {
   readonly node: HTMLDivElement;
@@ -151,13 +151,18 @@ function PresentedApplicationWindow({ controller, app, slot, document }: {
   }), [app.bundleIdentifier, runtime.runtimeId, windowResponderId]);
   if (!presentation) return null;
   const navigation = presentation.navigation;
-  const content = <SynWareEntryRenderer
+  const watchdogPresentation = { id, kind: "window" as const, zIndex: controller.record.zIndex };
+  const content = <SynCloudOSWatchdog runtime={runtime} watchdogName={`${app.packageName} window presentation`}
+    scope="app" app={app} presentation={watchdogPresentation} resetKey={id}
+    fallback={() => <AppPresentationErrorFallback app={app} presentation={watchdogPresentation} />}>
+    <SynWareEntryRenderer
     runtime={runtime} app={app} responderId={windowResponderId} windowControllerId={id}
     isLoading={false} loadingClassName="webspring-window-loading"
     loadingLabel={locale.t("apps.loading", "Loading {app}", { app: locale.appName(app) })}
     loadingPackageLabel={locale.t("apps.loadingPackage", "Loading {packageName}", { packageName: app.packageName })}
     missingComponentLabel={locale.t("apps.missingComponent", "SynCloudOS could not find a component for {packageName}.", { packageName: app.packageName })}
-  />;
+    />
+  </SynCloudOSWatchdog>;
   return createPortal(
     <PresentingDocumentContext.Provider value={presentIn?.ownerDocument ?? document}>
       <ResponderHierarchyContext.Provider value={hierarchy}>

@@ -66,4 +66,4 @@ export { useNSEThemeInteraction } from "./Theme/contract/useThemeInteraction";
 export type { NSETheme } from "./Theme/NSETheme";
 export type { ViewDrawingEnvironment } from "./Views/NSEViewDrawingEnvironment";
 
-export { WindowTitleBar } from "./Windows/WindowTitleBar";
+export { WindowTitlebarControls } from "./Windows/WindowTitlebarControls";

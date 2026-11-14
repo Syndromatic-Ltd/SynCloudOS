@@ -117,7 +117,7 @@ export function WindowTitlebarAccessories({ accessories, renderController, host,
 function AccessoryRow({ children }: { readonly children: ReactNode }) {
   const element = useRef<HTMLDivElement>(null);
   useNSEWindowChromeElement(element, "top", false);
-  const mode = useWindowChromeMode();
+  const mode = useAccessoryColourScheme();
   return <div ref={element} className="nse-window-titlebar-accessories" data-nse-part="titlebar-accessories" data-mode={mode} data-nse-colour-scheme-resolved={mode}>{children}</div>;
 }
 
@@ -133,7 +133,7 @@ export function nseContentBorderSize(thickness: number): "large" | "small" {
  */
 export function WindowContentBorder({ thickness }: { readonly thickness: number }) {
   useNSEWindowChromeObstruction("bottom", thickness, false);
-  const mode = useWindowChromeMode();
+  const mode = useAccessoryColourScheme();
   const style = { "--nse-window-content-border-thickness": `${thickness}px` } as CSSProperties;
   const size = nseContentBorderSize(thickness);
   return <>
@@ -145,7 +145,7 @@ export function WindowContentBorder({ thickness }: { readonly thickness: number 
 }
 
 /** Light or dark, as the application's appearance resolves, for the window's own chrome. */
-function useWindowChromeMode(): "light" | "dark" {
+function useAccessoryColourScheme(): "light" | "dark" {
   const appearance = useSynWareContext()?.appearance;
   return useSyncExternalStore(appearance?.subscribe ?? noSubscription, () => (appearance?.resolved() === "dark" ? "dark" : "light"), () => "light");
 }
@@ -164,7 +164,7 @@ export function WindowToolbar({ controller, toolbar }: { readonly controller: NS
   // The window controller's responder when it has actions; otherwise the application's mount.
   const responderId = useContext(ActionResponderContext) ?? appRuntime?.responderId ?? null;
   const overlayId = `nse-window-toolbar:${useId()}`;
-  const mode = useWindowChromeMode();
+  const mode = useAccessoryColourScheme();
   const element = useRef<HTMLDivElement | null>(null);
   const layout = useContext(WindowLayoutContext);
   const inTitlebar = Boolean(useContext(WindowTitlebarHostContext)?.toolbar);

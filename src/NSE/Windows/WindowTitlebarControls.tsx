@@ -27,7 +27,7 @@ import type { WindowViewProps } from "./windowViewTypes";
 
 import "./nse-windows.css";
 
-export interface WindowTitleBarProps {
+export interface WindowTitlebarControlsProps {
   readonly record: WindowRecord;
   readonly dirty: boolean;
   readonly dispatchCommand: WindowViewProps["dispatchCommand"];
@@ -84,14 +84,14 @@ function WindowControl({
   );
 }
 
-export function WindowTitleBar({
+export function WindowTitlebarControls({
   record,
   dirty,
   dispatchCommand,
   moveHandleProps,
   controls = ["close", "minimise", "zoom", "fullScreen"],
   variant = "standard",
-}: WindowTitleBarProps) {
+}: WindowTitlebarControlsProps) {
   const document = React.useContext(WindowTitlebarDocumentContext);
   const host = React.useContext(WindowTitlebarHostContext);
   return (

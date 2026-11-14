@@ -330,10 +330,11 @@ export function registerStandardCommands(runtime: SynCloudOSRuntime): { dispose(
       enabled: runtime.lifecycle.getState(payload.appId ?? runtime.store.getSnapshot().application.activeAppId ?? "") === "active",
       disabledReason: "The application is not running.",
     }),
-    execute: ({ payload, signal }) => {
+    execute: ({ payload }) => {
       const appId = payload.appId ?? runtime.store.getSnapshot().application.activeAppId;
       if (!appId) return;
-      return runtime.lifecycle.close(appId, { reason: "application-menu-quit", signal }).result;
+      // Quitting disposes the mounted menu. The runtime carries the accepted close to completion.
+      void runtime.lifecycle.close(appId, { reason: "application-menu-quit" }).result;
     },
   }));
   register(declaration({

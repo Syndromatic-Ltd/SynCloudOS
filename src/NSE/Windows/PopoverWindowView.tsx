@@ -19,7 +19,7 @@
  */
 
 import React from "react";
-import { WindowTitleBar } from "./WindowTitleBar";
+import { WindowTitlebarControls } from "./WindowTitlebarControls";
 import { WindowView } from "./WindowView";
 import { assertNSEWindowViewRole, windowEscapeCloseHandler } from "./windowRoleViewHelpers";
 import type { WindowViewProps } from "./windowViewTypes";
@@ -30,7 +30,7 @@ export function PopoverWindowView(props: WindowViewProps) {
   if (!anchor) throw new TypeError("NSEPopoverWindowView requires window anchor provenance.");
   const titled = props.presentation.titleBarVisible && props.record.style.includes("titled");
   const titleBar = titled ? (
-    <WindowTitleBar
+    <WindowTitlebarControls
       record={props.record}
       dirty={props.dirty}
       dispatchCommand={props.dispatchCommand}

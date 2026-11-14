@@ -23,6 +23,7 @@ import type { SynCloudOSAppInfo, SynCloudOSRuntime } from "../SynCloudOS";
 import { SynWareRuntimeContext, SynCloudOSRuntimeContext, useRuntimeNSEControlPort, useRuntimeNSEFocusPort, useRuntimeNSEOverlayPort } from "../../SynCloudOSReact";
 import { ControlRuntimeProvider, FocusPortProvider, OverlayProvider, ConformanceEvidenceProvider, type ConformanceEvidencePort } from "../../NSE/NSE";
 import type { MountedSynWareRuntime } from "./appRuntimeFacade";
+import { WindowApplicationMenuHostContext } from "../AppHosting/windowApplicationMenu";
 import { createMountedSynWareRuntime } from "./appRuntimeFacade";
 import type { SynWareRuntime } from "./appRuntimeTypes";
 import { createSynWareContextValue } from "./createSynWareContextValue";
@@ -513,9 +514,11 @@ export function SynWareRuntimeMount({ runtime, app, responderId, windowControlle
       <SynWareRuntimeContext.Provider value={mounted.mount.runtime}>
         <SynWareProvider value={context}><OpenPanelApplicationHost value={context}>
           <FontCatalogueProvider catalogue={fontCatalogue}>
+            <WindowApplicationMenuHostContext.Provider value={runtime}>
             <MountedAppPresentationBoundary runtime={mounted.mount.runtime} kernelRuntime={runtime} context={mounted.contextBase}>
               <PresentedContentProvider value={wrapPresentedContent}>{presentedChildren}</PresentedContentProvider>
             </MountedAppPresentationBoundary>
+            </WindowApplicationMenuHostContext.Provider>
           </FontCatalogueProvider>
         </OpenPanelApplicationHost></SynWareProvider>
       </SynWareRuntimeContext.Provider>

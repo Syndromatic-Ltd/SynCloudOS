@@ -31,12 +31,11 @@ import { createTestBundle, createTestRuntime, createTestRuntimeEnvironment, auth
 
 afterEach(cleanup);
 
-function WebspringTestHost({ runtime, children, onNotificationCentreRequest, onApplicationMenuToggle }: PropsWithChildren<{
+function WebspringTestHost({ runtime, children, onNotificationCentreRequest }: PropsWithChildren<{
   runtime: ReturnType<typeof createWindowedTestRuntime>;
   onNotificationCentreRequest?: (notificationId?: string) => void;
-  onApplicationMenuToggle?: () => void;
 }>) {
-  useWebspringResponder({ onNotificationCentreRequest, onApplicationMenuToggle });
+  useWebspringResponder({ onNotificationCentreRequest });
   return <>{children}</>;
 }
 
@@ -165,13 +164,11 @@ describe("Webspring window host", () => {
   it("treats close-window and return-to-webspring as distinct commands", async () => {
     const runtime = createWindowedTestRuntime("com.example.diagnostics");
     const notificationRequests: Array<string | undefined> = [];
-    let applicationMenuToggles = 0;
     render(
       <SynCloudOSProvider runtime={runtime}>
         <WebspringTestHost
           runtime={runtime}
           onNotificationCentreRequest={(notificationId) => notificationRequests.push(notificationId)}
-          onApplicationMenuToggle={() => { applicationMenuToggles += 1; }}
         />
       </SynCloudOSProvider>,
     );
@@ -182,9 +179,7 @@ describe("Webspring window host", () => {
       workspaceResponderId: "workspace",
     });
     await runtime.commands.dispatch("webspring.notificationCentre.open", { notificationId: "notification:test" });
-    await runtime.commands.dispatch("webspring.applicationMenu.toggle", undefined);
     expect(notificationRequests).toEqual(["notification:test"]);
-    expect(applicationMenuToggles).toBe(1);
 
     await runtime.routes.openRoute("/diagnostics", { source: "test" }).result;
     expect(runtime.windows.list()).toHaveLength(1);

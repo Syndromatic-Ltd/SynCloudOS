@@ -119,7 +119,7 @@ export function ApplicationStageView({
   }, []);
   const resolvedMode = useResolvedMode();
   const [titlebarDocument, setTitlebarDocument] = useState<WindowTitlebarDocument | null>(null);
-  const usesStandardTopBar = frame.presentationMotion !== "content" || Boolean(titlebarDocument?.hasToolbar);
+  const usesStandardTopBar = standalone || frame.presentationMotion !== "content" || Boolean(titlebarDocument?.hasToolbar);
   const siteBranding = useHostSiteBranding();
   const navigationChromeController = useMemo(() => new ApplicationNavigationChromeController({ owner: nseUnowned }), [stage.id]);
   const navigationChromeSnapshot = useSyncExternalStore(
@@ -128,7 +128,7 @@ export function ApplicationStageView({
     navigationChromeController.getSnapshot,
   );
   const activeNavigationChrome = usesStandardTopBar ? navigationChromeSnapshot.active : null;
-  const showsApplicationStageTopBar = usesStandardTopBar;
+  const showsTitlebar = usesStandardTopBar;
   useNSEDeferredDisposal(navigationChromeController);
 
   const [slots, setSlots] = useState<WindowTitlebarSlots | null>(null);
@@ -180,7 +180,7 @@ export function ApplicationStageView({
       <span className="nse-app-topbar-glyph-shape" />
     </span>
   </button>;
-  const standardTopBar = showsApplicationStageTopBar ? <WindowTitlebarView
+  const standardTopBar = showsTitlebar ? <WindowTitlebarView
     document={{ ...(titlebarDocument ?? { subtitle: "", documentEdited: false }), title: currentTitle }}
     isKeyWindow={stage.isFocused} material={material} mode={resolvedMode}
     onSlotsChange={setSlots}
@@ -255,13 +255,7 @@ export function ApplicationStageView({
       clearOwnedResponderAnchor(runtime, "application", applicationResponderId);
     };
   }, [applicationResponderId, runtime, stage.isFocused, stage.windowId]);
-  return (
-    <OverlayProvider runtimePort={nseOverlayPort} defaultParentResponderId={applicationResponderId} portalContainer={overlayDestination}>
-    <TooltipProvider>
-    <WindowSurfaceBridgeProvider bridge={stageWindowSurfaceBridge}>
-    <ControlRuntimeProvider port={nseControlPort}>
-    <ApplicationNavigationChromeProvider controller={navigationChromeController} standardChromeAvailable={usesStandardTopBar}>
-    <ResponderScope asChild responderId={applicationResponderId} kind="application" parentResponderId="workspace" scopeId={applicationResponderId} undoOwner={applicationUndoOwner} diagnosticsLabel={appName}>
+  const stageRoot = (
     <AppViewChrome.Root
       safeAreaInsets={presentationTraits.safeAreaInsets}
       zIndex={stage.zIndex + 70}
@@ -272,7 +266,7 @@ export function ApplicationStageView({
       presentation={rootPresentation}
     >
       <AppViewChrome.Surface
-        material={material} hasTitlebar={showsApplicationStageTopBar}
+        material={material} hasTitlebar={showsTitlebar}
         multiSwitchRole={multiSwitchRole}
         presentation={surfacePresentation}
       >
@@ -311,7 +305,17 @@ export function ApplicationStageView({
         </FocusPortProvider>
       </AppViewChrome.Surface>
     </AppViewChrome.Root>
-    </ResponderScope>
+  );
+  return (
+    <OverlayProvider runtimePort={nseOverlayPort} defaultParentResponderId={applicationResponderId} portalContainer={overlayDestination}>
+    <TooltipProvider>
+    <WindowSurfaceBridgeProvider bridge={stageWindowSurfaceBridge}>
+    <ControlRuntimeProvider port={nseControlPort}>
+    <ApplicationNavigationChromeProvider controller={navigationChromeController} standardChromeAvailable={usesStandardTopBar}>
+    {stage.windowId ? stageRoot : (
+    <ResponderScope asChild responderId={applicationResponderId} kind="application" parentResponderId="workspace" scopeId={applicationResponderId} undoOwner={applicationUndoOwner} diagnosticsLabel={appName}>
+      {stageRoot}
+    </ResponderScope>)}
     </ApplicationNavigationChromeProvider>
     </ControlRuntimeProvider>
     </WindowSurfaceBridgeProvider>

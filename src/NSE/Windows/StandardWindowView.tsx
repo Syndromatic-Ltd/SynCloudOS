@@ -19,7 +19,7 @@
  */
 
 import React from "react";
-import { WindowTitleBar } from "./WindowTitleBar";
+import { WindowTitlebarControls } from "./WindowTitlebarControls";
 import { WindowView } from "./WindowView";
 import type { WindowViewProps, WindowResizeEdge } from "./windowViewTypes";
 import { assertNSEWindowViewRole } from "./windowRoleViewHelpers";
@@ -42,7 +42,7 @@ export function StandardWindowView(props: WindowViewProps) {
   const showsResizeHandles = presentation.kind === "desktop-window" &&
     presentation.resizable && record.style.includes("resizable");
   const titleBar = showsTitleBar ? (
-    <WindowTitleBar
+    <WindowTitlebarControls
       record={record}
       dirty={dirty}
       dispatchCommand={dispatchCommand}

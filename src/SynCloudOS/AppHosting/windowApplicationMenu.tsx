@@ -19,7 +19,7 @@
  */
 
 import { createPortal } from "react-dom";
-import { useCallback, useContext, useId, useMemo, useState, useSyncExternalStore, type PropsWithChildren } from "react";
+import { createContext, useCallback, useContext, useId, useMemo, useState, useSyncExternalStore, type PropsWithChildren } from "react";
 import { NSEMenuBar, createApplicationMenuModel, type MenuSection } from "../../NSE/NSE";
 import { createReactOwnedNSEMenu, orderMenuEntries } from "../../NSE/Menus/NSEMenu";
 import { nseMenuModel, type MenuEntryInput } from "../../NSE/Menus/menuTypes";
@@ -27,12 +27,15 @@ import { useMenuLifetime } from "../../NSE/Menus/useMenuLifetime";
 import { WindowApplicationMenuContext } from "../../NSE/Toolbars/ApplicationMenuToolbarButton";
 import { ActionResponderContext, useObserve } from "../../NSE/applicationHostInterop";
 import type { NSEApplication } from "../../NSE/Application";
-import { SynCloudOSRuntimeContext, SynWareRuntimeContext } from "../../SynCloudOSReact";
+import { SynWareRuntimeContext } from "../../SynCloudOSReact";
+import type { SynCloudOSRuntime } from "../Runtime/runtimeInstanceTypes";
 import { useRuntimeNSEMenuPort } from "../../SynCloudOSReact/nseMenuPort";
 import { useSynWareContext } from "../AppSDK/SynWareContext";
 import { installedApplicationMenuSections } from "./installedApplicationMenus";
 import { applicationMenuLabels, ApplicationMenuOverlayHost } from "../../Webspring/applicationMenuPresentation";
 import { createApplicationMenuStore, useApplicationMenuSnapshot } from "../../SynCloudOSReact/ApplicationMenuTrigger";
+
+export const WindowApplicationMenuHostContext = createContext<SynCloudOSRuntime | null>(null);
 
 export function WindowApplicationMenu({ app, destination, children }: PropsWithChildren<{
   readonly app: NSEApplication;
@@ -41,15 +44,22 @@ export function WindowApplicationMenu({ app, destination, children }: PropsWithC
   useObserve(app);
   const runtime = useContext(SynWareRuntimeContext);
   const context = useSynWareContext();
-  const kernel = useContext(SynCloudOSRuntimeContext);
+  const kernel = useContext(WindowApplicationMenuHostContext);
   const responder = useContext(ActionResponderContext) ?? runtime?.responderId ?? "";
   const port = useRuntimeNSEMenuPort();
+  const login = useSyncExternalStore(kernel?.store.subscribe ?? noSubscribe,
+    () => kernel?.store.getSnapshot().loginServices ?? null, () => null);
+  const hasSignIn = useSyncExternalStore(kernel?.commands.subscribe ?? noSubscribe,
+    () => kernel?.commands.inspect().registrations.some(item => item.commandId === "session.requestSignIn") ?? false, () => false);
   const current = useSyncExternalStore(runtime?.windows.subscribe ?? noSubscribe,
     () => runtime?.windows.getSnapshot().current ?? null, () => null);
   const presentation = useSyncExternalStore(context?.presentation.subscribe ?? noSubscribe,
     () => context?.presentation.getSnapshot() ?? null, () => null);
   const appId = runtime?.app.bundleIdentifier ?? "";
   const name = runtime?.app.displayName ?? "";
+  const preferencesCommand = `${appId.toLowerCase()}.showPreferences`;
+  const hasAppPreferences = useSyncExternalStore(kernel?.commands.subscribe ?? noSubscribe,
+    () => kernel?.commands.inspect().registrations.some(item => item.commandId === preferencesCommand) ?? false, () => false);
   const mainMenu = app.mainMenu;
   const [store] = useState(createApplicationMenuStore);
   const state = useApplicationMenuSnapshot(store);
@@ -64,13 +74,13 @@ export function WindowApplicationMenu({ app, destination, children }: PropsWithC
     const dock = kernel ? null : app.delegate?.applicationDockMenu?.(app);
     const extensions: MenuSection[] = [
       ...(kernel ? installedApplicationMenuSections(kernel, appId, app) : dock ? [{ id: "dock-menu", beforeId: "preferences", entries: dock.model.entries }] : []),
-      ...(current && context?.sessionId === null ? [{ id: "sign-in", entries: [
+      ...(hasSignIn && !login?.isAuthorised ? [{ id: "sign-in", entries: [
         { kind: "command" as const, id: "sign-in", commandId: "session.requestSignIn", labelOverride: "Sign In" },
       ] }] : []),
       { id: "quit", entries, weight: 100 },
     ];
-    return createApplicationMenuModel({ appId, labels, appPreferences: { commandId: `${appId}.showPreferences`, label: "Preferences…" }, includeLogOut: Boolean(context?.sessionId), extensions, createPayload });
-  }, [app, appId, context?.sessionId, Boolean(current), kernel, name, runtime]);
+    return createApplicationMenuModel({ appId, labels, appPreferences: hasAppPreferences ? { commandId: preferencesCommand, label: "Preferences…" } : undefined, includeLogOut: hasSignIn && Boolean(login?.isAuthorised), extensions, createPayload });
+  }, [app, appId, hasAppPreferences, hasSignIn, kernel, login?.isAuthorised, name, preferencesCommand, runtime]);
   const menu = useMemo(() => createReactOwnedNSEMenu({ ownerSignal: port.signal, runtime: port, [nseMenuModel]: model }), [model, port]);
   const composed = useMemo(() => {
     if (!mainMenu) return null;

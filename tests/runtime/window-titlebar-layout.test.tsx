@@ -2,7 +2,7 @@
 import React from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
-import { WindowTitleBar } from "../../src/NSE/Windows/WindowTitleBar";
+import { WindowTitlebarControls } from "../../src/NSE/Windows/WindowTitlebarControls";
 import { WindowTitlebarView } from "../../src/NSE/Windows/WindowTitlebarView";
 import { WindowTitlebarDocumentContext } from "../../src/NSE/Windows/windowTitlebarContext";
 import { createCanonicalWindowRecord } from "../../src/SynCloudOS/Windows/windowTypes";
@@ -32,7 +32,7 @@ it("keeps an empty menu portal target mounted and reports its disposal", () => {
 it("honours a hidden window title without removing its accessible naming target", () => {
   const document = { title: "Private draft", subtitle: "Unsaved", documentEdited: true, titleVisibility: "hidden" as const };
   const view = render(<WindowTitlebarDocumentContext value={document}>
-    <WindowTitleBar record={record} dirty dispatchCommand={vi.fn()} />
+    <WindowTitlebarControls record={record} dirty dispatchCommand={vi.fn()} />
   </WindowTitlebarDocumentContext>);
   expect(screen.queryByRole("heading")).toBeNull();
   expect(view.container.querySelector(`#${record.id}-title`)?.textContent).toBe("Private draftUnsaved");
@@ -40,7 +40,7 @@ it("honours a hidden window title without removing its accessible naming target"
 
 it("excludes window controls from the move and double-click gesture handlers", () => {
   const move = vi.fn(), zoom = vi.fn(), dispatch = vi.fn();
-  render(<WindowTitleBar record={record} dirty={false} dispatchCommand={dispatch} moveHandleProps={{ onPointerDown: move, onDoubleClick: zoom }} />);
+  render(<WindowTitlebarControls record={record} dirty={false} dispatchCommand={dispatch} moveHandleProps={{ onPointerDown: move, onDoubleClick: zoom }} />);
   const close = screen.getByRole("button", { name: `Close ${record.title}` });
   fireEvent.pointerDown(close);
   fireEvent.doubleClick(close);
@@ -53,7 +53,7 @@ it("excludes window controls from the move and double-click gesture handlers", (
 it.each(["unified", "unifiedCompact", "expanded", "preference"] as const)("provides a toolbar portal target for %s", toolbarStyle => {
   const document = { title: "Draft", subtitle: "", documentEdited: false, toolbarStyle, hasToolbar: true };
   const view = render(<WindowTitlebarDocumentContext value={document}>
-    <WindowTitleBar record={record} dirty={false} dispatchCommand={vi.fn()} />
+    <WindowTitlebarControls record={record} dirty={false} dispatchCommand={vi.fn()} />
   </WindowTitlebarDocumentContext>);
   expect(view.container.querySelector("[data-window-toolbar-slot]")).not.toBeNull();
 });

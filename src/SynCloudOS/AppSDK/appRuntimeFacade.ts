@@ -2566,6 +2566,9 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
       ["session.requestLogOut", "runtime"],
       ["workspace.returnToWebspring", "workspace"],
     ]);
+    for (const item of runtime.bundles.getBundle(app.bundleIdentifier)?.synWareManifest?.shortcutItems ?? []) {
+      safeHostCommandResponders.set(`webspring.shortcut.${app.bundleIdentifier}.${item.type}`, "webspring");
+    }
     const focusRequiredCommandIds = new Set(["nse.drag.begin", "nse.drag.drop", "nse.drag.cancel"]);
     const commandResponder = (commandId: string): string | null => {
       const responders = ownedCommandResponders.get(commandId);

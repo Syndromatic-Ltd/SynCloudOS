@@ -19,7 +19,7 @@
  */
 
 import React from "react";
-import { WindowTitleBar } from "./WindowTitleBar";
+import { WindowTitlebarControls } from "./WindowTitlebarControls";
 import { WindowView } from "./WindowView";
 import { assertNSEWindowViewRole, windowEscapeCloseHandler } from "./windowRoleViewHelpers";
 import type { WindowViewProps } from "./windowViewTypes";
@@ -28,7 +28,7 @@ export function PanelView(props: WindowViewProps) {
   assertNSEWindowViewRole("NSEPanelView", props.record, "panel");
   if (props.record.level === "normal") throw new TypeError("NSEPanelView requires a floating panel level.");
   const titleBar = props.presentation.titleBarVisible && props.record.style.includes("titled") ? (
-    <WindowTitleBar
+    <WindowTitlebarControls
       record={props.record}
       dirty={props.dirty}
       dispatchCommand={props.dispatchCommand}

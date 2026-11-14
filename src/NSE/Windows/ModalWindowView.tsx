@@ -19,7 +19,7 @@
  */
 
 import React from "react";
-import { WindowTitleBar } from "./WindowTitleBar";
+import { WindowTitlebarControls } from "./WindowTitlebarControls";
 import { WindowView } from "./WindowView";
 import { assertNSEWindowViewRole } from "./windowRoleViewHelpers";
 import type { WindowViewProps } from "./windowViewTypes";
@@ -27,7 +27,7 @@ import type { WindowViewProps } from "./windowViewTypes";
 export function ModalWindowView(props: WindowViewProps) {
   assertNSEWindowViewRole("NSEModalWindowView", props.record, "modal");
   const titleBar = props.presentation.titleBarVisible && props.record.style.includes("titled") ? (
-    <WindowTitleBar
+    <WindowTitlebarControls
       record={props.record}
       dirty={props.dirty}
       dispatchCommand={props.dispatchCommand}
