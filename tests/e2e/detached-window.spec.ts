@@ -67,19 +67,23 @@ test("presents the populated floating window before the stage exit hides its edi
   const draft = page.getByRole("textbox", { name: "Draft" });
   await draft.fill("An unsaved draft");
   const exit = page.getByRole("button", { name: "Exit Full Screen" });
-  const frames = await exit.evaluateHandle(button => ({ completed: new Promise<readonly boolean[]>(resolve => {
-    button.addEventListener("click", () => {
+  await page.evaluate(() => {
+    const sampleExit = (event: MouseEvent) => {
+      const button = (event.target as Element | null)?.closest('[data-window-control="fullScreen"]');
+      if (!button) return;
+      document.removeEventListener("click", sampleExit, true);
       const captured: boolean[] = [];
       const sample = () => {
-        const editor = button.ownerDocument.querySelector<HTMLInputElement>('input[aria-label="Draft"]');
+        const editor = document.querySelector<HTMLInputElement>('input[aria-label="Draft"]');
         captured.push(Boolean(editor?.closest("[data-window-id]") && editor.getBoundingClientRect().width > 0));
-        if (captured.length === 4) resolve(captured);
+        if (captured.length === 4) document.documentElement.dataset.transferFrames = captured.join(",");
         else requestAnimationFrame(sample);
       };
       requestAnimationFrame(sample);
-    }, { once: true });
-  }) }));
+    };
+    document.addEventListener("click", sampleExit, true);
+  });
   await exit.click();
-  expect(await frames.evaluate(result => result.completed)).toEqual([true, true, true, true]);
+  await expect(page.locator("html")).toHaveAttribute("data-transfer-frames", "true,true,true,true");
   await expect(draft).toHaveValue("An unsaved draft");
 });
