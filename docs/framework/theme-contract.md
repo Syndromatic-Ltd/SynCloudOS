@@ -540,7 +540,7 @@ Contract version 1: 72 controls, 48 colours.
 ### `toolbar-item`
 
 - Parts: `background`, `border`, `content`, `custom`, `highlight`, `image`, `item`, `overflow`, `overflow-glyph`, `separator`, `shadow`, `title`
-- States: `state=off`
+- States: `enabled=false`, `selected`, `state=off`
 - Variants:
   - `data-nse-style`: `bevel`, `borderless`, `cap`, `gloss`, `inner-shadow`, `labelled`, `splice`, `surface`
   - `data-nse-toolbar-bordered`: `false`

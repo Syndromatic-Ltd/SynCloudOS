@@ -1572,6 +1572,8 @@
         "title"
       ],
       "states": [
+        "enabled=false",
+        "selected",
         "state=off"
       ],
       "variants": {
