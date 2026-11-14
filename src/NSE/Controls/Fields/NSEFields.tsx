@@ -22,7 +22,7 @@ import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
 
 import { nseControlHooks, nseStateHooks } from "../../Theme/contract/hooks";
 import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction";
-import { NSEMetalThumb, type NSEThumbMaterial } from "../../Appearance/NSEMetalThumb";
+import { MetalThumb, type NSEThumbMaterial } from "../../Appearance/MetalThumb";
 import { NSEDivider } from "../Selection/NSEDivider";
 import { nseCSSValue } from "../../Graphics/NSEShadow";
 import { nseNonNegative, useNSEViewLayerProperties, type NSEViewLayerProperties } from "../../Views/viewLayerProperties";
@@ -668,7 +668,7 @@ function NSESwitchControl({
         <span data-nse-part="fill" data-nse-position="trailing" className="nse-control-toggle-rail nse-control-toggle-rail-end" />
         <span data-nse-part="title" data-nse-state="on" className="nse-control-toggle-text nse-control-toggle-text-on"><span data-nse-part="label" className="nse-control-toggle-state-label" ref={onTextRef}>{onLabel}</span></span>
         <span data-nse-part="title" data-nse-state="off" className="nse-control-toggle-text nse-control-toggle-text-off"><span data-nse-part="label" className="nse-control-toggle-state-label" ref={offTextRef}>{offLabel}</span></span>
-        <span data-nse-part="knob" className="nse-control-toggle-thumb" ref={thumbRef}>{thumbMaterial === "metal" ? <NSEMetalThumb disabled={disabled} /> : null}</span>
+        <span data-nse-part="knob" className="nse-control-toggle-thumb" ref={thumbRef}>{thumbMaterial === "metal" ? <MetalThumb disabled={disabled} /> : null}</span>
       </span>
     </button>
   );

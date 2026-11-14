@@ -25,7 +25,7 @@ import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction
 import { useRef, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 
 
-import { NSEMetalThumb } from "../../Appearance/NSEMetalThumb";
+import { MetalThumb } from "../../Appearance/MetalThumb";
 import { NSESlider } from "./NSESlider";
 import type { NSENumericValueContract, NSESliderProps } from "./valueControlTypes";
 
@@ -116,7 +116,7 @@ function NSECircularSliderControl({ __nseBindingEditor, controlSize = "regular",
       onPointerCancel={cancel}
       onLostPointerCapture={cancel}
       onKeyDown={(event) => { if (inert || !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) return; event.preventDefault(); keyChange(event.key); }}
-    ><NSEMetalThumb disabled={(props.isEnabled === false)} /><i aria-hidden="true" data-nse-part="knob"  /></span>
+    ><MetalThumb disabled={(props.isEnabled === false)} /><i aria-hidden="true" data-nse-part="knob"  /></span>
     <span data-nse-part="linear-alternative">
       <NSESlider {...props} {...(__nseBindingEditor?{__nseBindingEditor}:{})} aria-label={`${props["aria-label"]} linear alternative`} orientation="horizontal" />
     </span>

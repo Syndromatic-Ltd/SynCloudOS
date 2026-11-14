@@ -23,7 +23,7 @@ import React, { StrictMode } from "react";
 import { render, fireEvent, cleanup } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEMaterialLighting } from "../../../src/NSE/Appearance/NSEMaterialLighting";
-import { NSEMaterialLightingProvider } from "../../../src/NSE/Appearance/NSEMetalThumb";
+import { NSEMaterialLightingProvider } from "../../../src/NSE/Appearance/MetalThumb";
 import { NSESlider } from "../../../src/NSE/Controls/Values/NSESlider";
 import { NSESwitch } from "../../../src/NSE/Controls/Fields/NSEFields";
 import { MFXAttitude } from "../../../src/FX/MotionFX/MFXAttitude";

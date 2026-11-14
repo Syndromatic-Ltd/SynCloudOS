@@ -22,7 +22,7 @@
 import "./nse-chrome-primitives.css";
 import { nseStateHooks } from "../Theme/contract/hooks";
 
-export type NSEChromePrimitiveKind =
+export type ChromePrimitiveKind =
   | "surface"
   | "bevel"
   | "cap"
@@ -31,7 +31,7 @@ export type NSEChromePrimitiveKind =
   | "gloss"
   | "inner-shadow";
 
-export type NSEChromeVisualState =
+export type ChromeVisualState =
   | "normal"
   | "hover"
   | "pressed"
@@ -40,15 +40,15 @@ export type NSEChromeVisualState =
   | "disabled";
 
 
-export interface NSEChromePrimitiveProps {
-  readonly state: NSEChromeVisualState;
+export interface ChromePrimitiveProps {
+  readonly state: ChromeVisualState;
   readonly className?: string;
   readonly id?: string;
   readonly "data-testid"?: string;
 }
 
-interface NSEChromeLayerProps extends NSEChromePrimitiveProps {
-  readonly kind: NSEChromePrimitiveKind;
+interface ChromeLayerProps extends ChromePrimitiveProps {
+  readonly kind: ChromePrimitiveKind;
 }
 
 function classes(...values: readonly (string | undefined)[]) {
@@ -60,12 +60,12 @@ function classes(...values: readonly (string | undefined)[]) {
  * from its semantic owner; it never manages selection, focus, routing,
  * overflow, commands, or pointer input.
  */
-export function NSEChromePrimitive({
+export function ChromePrimitive({
   kind,
   state,
   className,
   ...attributes
-}: NSEChromeLayerProps) {
+}: ChromeLayerProps) {
 
   return (
     <span
@@ -82,16 +82,16 @@ export function NSEChromePrimitive({
   );
 }
 
-function layer(kind: NSEChromePrimitiveKind) {
-  return function NSEChromeLayer(props: NSEChromePrimitiveProps) {
-    return <NSEChromePrimitive {...props} kind={kind} />;
+function layer(kind: ChromePrimitiveKind) {
+  return function NSEChromeLayer(props: ChromePrimitiveProps) {
+    return <ChromePrimitive {...props} kind={kind} />;
   };
 }
 
-export const NSEChromeSurface = layer("surface");
-export const NSEChromeBevel = layer("bevel");
-export const NSEChromeCap = layer("cap");
-export const NSEChromeSplice = layer("splice");
-export const NSEChromeSeparator = layer("separator");
-export const NSEChromeGloss = layer("gloss");
-export const NSEChromeInnerShadow = layer("inner-shadow");
+export const ChromeSurface = layer("surface");
+export const ChromeBevel = layer("bevel");
+export const ChromeCap = layer("cap");
+export const ChromeSplice = layer("splice");
+export const ChromeSeparator = layer("separator");
+export const ChromeGloss = layer("gloss");
+export const ChromeInnerShadow = layer("inner-shadow");

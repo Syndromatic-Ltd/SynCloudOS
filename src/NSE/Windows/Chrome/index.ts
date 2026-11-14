@@ -18,16 +18,16 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { NSETopBar } from "./NSETopBar";
-export { NSETopBarButton } from "./NSETopBarButton";
-export { nseTopBarStyles } from "./nseTopBarStyles";
+export { TopBar } from "./TopBar";
+export { TopBarButton } from "./TopBarButton";
+export { nseTopBarStyles } from "./topBarStyles";
 export type {
   NSEChromeScheme,
-  NSETopBarItem,
-  NSETopBarItemKind,
-  NSETopBarItemPosition,
-  NSETopBarProps,
-  NSETopBarRail,
-  NSETopBarTitleAction,
-  NSETopBarVariant,
-} from "./nseTopBarTypes";
+  TopBarItem,
+  TopBarItemKind,
+  TopBarItemPosition,
+  TopBarProps,
+  TopBarRail,
+  TopBarTitleAction,
+  TopBarVariant,
+} from "./topBarTypes";

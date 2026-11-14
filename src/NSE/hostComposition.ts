@@ -27,7 +27,7 @@ export type {
   NSEMaterialLight,
   NSEMaterialLightingPort,
 } from "./Appearance/NSEMaterialLighting";
-export { NSEMaterialLightingProvider } from "./Appearance/NSEMetalThumb";
+export { NSEMaterialLightingProvider } from "./Appearance/MetalThumb";
 export {
   NSEFeedbackProvider,
   useNSEFeedback,
@@ -39,13 +39,13 @@ export { SourceListFrameProvider } from "./Navigation/SourceList/sourceListFrame
 export type { SourceListFrameContextValue } from "./Navigation/SourceList/sourceListFrameContext";
 
 export { NSEAlertBackdrop } from "./SystemUI";
-export { nseTopBarHeightCssValue } from "./Windows/Chrome/nseTopBarStyles";
+export { nseTopBarHeightCssValue } from "./Windows/Chrome/topBarStyles";
 export { NSEFocusScope } from "./Focus";
 export { NSEPopover } from "./Overlays/NSEPopover";
 export { NSEPopup } from "./Overlays/NSEPopup";
 
 // Window chrome and transient surfaces are drawn by NSE for framework hosts.
-export { NSETopBar } from "./Windows/Chrome/NSETopBar";
+export { TopBar } from "./Windows/Chrome/TopBar";
 export { NSEWindowTitlebarHostContext } from "./Windows/windowTitlebarContext";
 export type { NSEWindowTitlebarDocument, NSEWindowTitlebarHost } from "./Windows/windowTitlebarContext";
 export { NSEPopoverFrame } from "./Overlays/NSEPopoverFrame";

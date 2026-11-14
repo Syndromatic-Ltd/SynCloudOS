@@ -33,7 +33,7 @@ export interface NSEMetalSurfaceProps extends HTMLAttributes<HTMLDivElement> {
   readonly children?: ReactNode;
 }
 
-export function NSEMetalSurface({
+export function MetalSurface({
   mode,
   children,
   className = "",

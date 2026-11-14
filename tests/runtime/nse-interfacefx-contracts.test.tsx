@@ -25,12 +25,12 @@ import { resolve } from "node:path";
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { NSEAppFrame } from "../../src/NSE/Windows/NSEAppFrame";
+import { AppFrame } from "../../src/NSE/Windows/AppFrame";
 import { GroupedRow } from "../../src/NSE/Controls/Selection/GroupedRow";
 import { NSEProgressIndicator } from "../../src/NSE/Progress";
 import { NSESlider } from "../../src/NSE/Controls/Values";
 import { NSESplitView } from "../../src/NSE/DataViews/Split";
-import { NSETopBar } from "../../src/NSE/Windows/Chrome";
+import { TopBar } from "../../src/NSE/Windows/Chrome";
 import { NSESplitViewController, NSESplitViewItem } from "../../src/NSE/DataViews/Split";
 import { NSEOutlineView } from "../../src/NSE/DataViews/Outline";
 import { NSETreeController } from "../../src/NSE/Controllers/NSETreeController";
@@ -186,10 +186,10 @@ describe("NSE semantic contracts", () => {
     const tree = new NSETreeController({ id: "source-groups", content: groups, getId: (node: Node) => node.id, getChildren: (node: Node) => node.children, withChildren: (node: Node, children: readonly Node[]) => ({ ...node, children }), selection: { mode: "single" } });
     tree.expand("library"); tree.expand("archive"); tree.expand("tools"); tree.select(["inbox"]);
     const onSelect = vi.fn();
-    const { container } = render(<NSEAppFrame variant="sourceList" topBar={<NSETopBar title="Library" />} sidebar={
+    const { container } = render(<AppFrame variant="sourceList" topBar={<TopBar title="Library" />} sidebar={
       <NSEOutlineView controller={tree} aria-label="Sources" selectionHighlightStyle="sourceList" idForItem={node => node.id} labelForItem={node => node.label} childrenForItem={node => node.children} isExpandable={node => node.children.length > 0}
         delegate={{ isGroupItem: id => ["library", "collapsed", "tools"].includes(id), shouldSelect: id => !["library", "collapsed", "tools", "locked"].includes(id) }} onSelectionChange={onSelect} />
-    } statusBar={<footer>Ready · 5 rows</footer>}><article>Window content</article></NSEAppFrame>);
+    } statusBar={<footer>Ready · 5 rows</footer>}><article>Window content</article></AppFrame>);
     expect(container.querySelector(".nse-app-frame-content")?.textContent).toContain("Window content");
     expect(container.querySelector(".nse-app-frame-statusbar")?.textContent).toContain("5 rows");
     const rows = container.querySelectorAll('[data-nse-part="row"] .nse-control-list-primary');

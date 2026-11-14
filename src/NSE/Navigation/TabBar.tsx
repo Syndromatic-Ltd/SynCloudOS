@@ -41,7 +41,7 @@ import {
   getNSETabBarTabId,
   NSENavigationDestinationHost,
 } from "./NSENavigationDestinationHost";
-import { NSEMetalSurface } from "../Material/NSEMetalSurface";
+import { MetalSurface } from "../Material/MetalSurface";
 import { GroupedRows } from "../Controls/Selection/GroupedRows";
 import { GroupedRow } from "../Controls/Selection/GroupedRow";
 import { NSEHierarchyStack } from "./NSEHierarchyStack";
@@ -665,7 +665,7 @@ export function TabBarOverflowList({
       data-nse-tab-overflow-source-controller={controller.id}
     >
       <div className="nse-tab-bar-overflow-region" role="region" aria-label="More destinations">
-        <NSEMetalSurface
+        <MetalSurface
           mode={appearance.resolvedColourScheme}
           className="nse-tab-bar-overflow-metal-surface"
           onScroll={(event) => {
@@ -749,7 +749,7 @@ export function TabBarOverflowList({
               );
             })}
           </GroupedRows>
-        </NSEMetalSurface>
+        </MetalSurface>
       </div>
     </section>
   ) : null;

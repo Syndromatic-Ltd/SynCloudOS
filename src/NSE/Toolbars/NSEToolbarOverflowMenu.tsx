@@ -21,12 +21,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type RefCallback } from "react";
 
 import {
-  NSEChromeBevel,
-  NSEChromeGloss,
-  NSEChromeInnerShadow,
-  NSEChromeSurface,
-  type NSEChromeVisualState,
-} from "../Appearance/NSEChromePrimitives";
+  ChromeBevel,
+  ChromeGloss,
+  ChromeInnerShadow,
+  ChromeSurface,
+  type ChromeVisualState,
+} from "../Appearance/chromePrimitives";
 import { NSEMenu, NSEMenuView, nseMenuModel, type NSEMenuEntry, type NSEMenuModel } from "../Menus";
 import { NSEMenuOverlay } from "../Menus/NSEMenuOverlay";
 import { useOptionalOverlayProvider } from "../Overlays";
@@ -129,7 +129,7 @@ export function NSEToolbarOverflowMenu({
     // the model changes or the trigger unmounts.
     setOpen(nextOpen);
   }, [controller.runtime, menuController, model]);
-  const appearanceState: NSEChromeVisualState = pressed || open ? "pressed" : focused ? "focused" : hovered ? "hover" : "normal";
+  const appearanceState: ChromeVisualState = pressed || open ? "pressed" : focused ? "focused" : hovered ? "hover" : "normal";
 
 
   return (
@@ -165,10 +165,10 @@ export function NSEToolbarOverflowMenu({
         onPointerCancel={() => setPressed(false)}
         onClick={() => requestOpen(!open)}
       >
-        <NSEChromeSurface  state={appearanceState} />
-        <NSEChromeBevel  state={appearanceState} />
-        <NSEChromeGloss  state={appearanceState} />
-        <NSEChromeInnerShadow  state={appearanceState} />
+        <ChromeSurface  state={appearanceState} />
+        <ChromeBevel  state={appearanceState} />
+        <ChromeGloss  state={appearanceState} />
+        <ChromeInnerShadow  state={appearanceState} />
         <span aria-hidden="true" data-nse-part="overflow-glyph" />
       </button>
       {menuController ? (

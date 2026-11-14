@@ -34,15 +34,15 @@ import {
 import type { SmoothSurfaceRequest } from "../SmoothSurface";
 import { classes, getControlSmoothSurfaceProps } from "../Controls/Core/nseControlsShared";
 import {
-  NSEChromeBevel,
-  NSEChromeCap,
-  NSEChromeGloss,
-  NSEChromeInnerShadow,
-  NSEChromeSeparator,
-  NSEChromeSplice,
-  NSEChromeSurface,
-  type NSEChromeVisualState,
-} from "../Appearance/NSEChromePrimitives";
+  ChromeBevel,
+  ChromeCap,
+  ChromeGloss,
+  ChromeInnerShadow,
+  ChromeSeparator,
+  ChromeSplice,
+  ChromeSurface,
+  type ChromeVisualState,
+} from "../Appearance/chromePrimitives";
 import { NSEActionResponderContext } from "../Controls/Core/useNSEControlAction";
 import { allocateNSEToolbarItems } from "./toolbarLayout";
 import { NSEToolbarOverflowMenu } from "./NSEToolbarOverflowMenu";
@@ -196,7 +196,7 @@ function NSEConfiguredToolbar({
   };
 
 
-  const toolbarChromeState: NSEChromeVisualState = snapshot.diagnostic ? "disabled" : "normal";
+  const toolbarChromeState: ChromeVisualState = snapshot.diagnostic ? "disabled" : "normal";
 
   return (
     <div
@@ -217,10 +217,10 @@ function NSEConfiguredToolbar({
       data-nse-toolbar-clipped={layout.clipped ? "true" : undefined}
       onKeyDown={handleKeyDown}
     >
-      <NSEChromeSurface  state={toolbarChromeState} />
-      <NSEChromeBevel  state={toolbarChromeState} />
-      <NSEChromeGloss  state={toolbarChromeState} />
-      <NSEChromeInnerShadow  state={toolbarChromeState} />
+      <ChromeSurface  state={toolbarChromeState} />
+      <ChromeBevel  state={toolbarChromeState} />
+      <ChromeGloss  state={toolbarChromeState} />
+      <ChromeInnerShadow  state={toolbarChromeState} />
       {snapshot.diagnostic === "validation-failed" ? (
         <p
           role="status"
@@ -240,15 +240,15 @@ function NSEConfiguredToolbar({
         }
         if (item.kind === "separator") {
 
-          return <span key={entry.instanceId} className="nse-toolbar-separator" style={geometry} aria-hidden="true" data-nse-part="separator" ><NSEChromeSeparator  state="normal" /></span>;
+          return <span key={entry.instanceId} className="nse-toolbar-separator" style={geometry} aria-hidden="true" data-nse-part="separator" ><ChromeSeparator  state="normal" /></span>;
         }
         if (item.kind === "custom") {
 
           return (
             <span key={entry.instanceId} className="nse-toolbar-custom" style={geometry} role="group" aria-label={item.label} data-nse-control="toolbar-item" data-nse-part="custom" data-state="ready" data-nse-toolbar-item-id={entry.instanceId} data-nse-toolbar-labelled={item.showsLabel && snapshot.displayMode !== "icon-only" ? "true" : undefined} data-nse-style={item.showsLabel && snapshot.displayMode !== "icon-only" ? "labelled" : undefined} >
-              <NSEChromeSurface  state="normal" />
-              <NSEChromeBevel  state="normal" />
-              <NSEChromeGloss  state="normal" />
+              <ChromeSurface  state="normal" />
+              <ChromeBevel  state="normal" />
+              <ChromeGloss  state="normal" />
               {item.showsLabel && snapshot.displayMode !== "icon-only" ? <>
                 <span data-nse-part="content" className="nse-toolbar-custom-view">{item.render()}</span>
                 <span data-nse-part="title" className="nse-toolbar-item-label" aria-hidden="true">{item.label}</span>
@@ -256,7 +256,7 @@ function NSEConfiguredToolbar({
             </span>
           );
         }
-        const itemAppearanceState: NSEChromeVisualState = !item.enabled
+        const itemAppearanceState: ChromeVisualState = !item.enabled
           ? "disabled"
           : item.checked === "on" || item.checked === "mixed"
             ? "selected"
@@ -320,12 +320,12 @@ function NSEConfiguredToolbar({
               if (validation.status === "published") await controller.dispatch(entry.instanceId);
             }}
           >
-            <NSEChromeSurface  state={itemAppearanceState} />
-            <NSEChromeBevel  state={itemAppearanceState} />
-            <NSEChromeCap  state={itemAppearanceState} />
-            <NSEChromeSplice  state={itemAppearanceState} />
-            <NSEChromeGloss  state={itemAppearanceState} />
-            <NSEChromeInnerShadow  state={itemAppearanceState} />
+            <ChromeSurface  state={itemAppearanceState} />
+            <ChromeBevel  state={itemAppearanceState} />
+            <ChromeCap  state={itemAppearanceState} />
+            <ChromeSplice  state={itemAppearanceState} />
+            <ChromeGloss  state={itemAppearanceState} />
+            <ChromeInnerShadow  state={itemAppearanceState} />
             {snapshot.displayMode !== "label-only" ? <span data-nse-part="image" className="nse-toolbar-item-icon" aria-hidden="true">{item.icon}</span> : null}
             {snapshot.displayMode !== "icon-only" ? <span data-nse-part="title" className="nse-toolbar-item-label">{item.label}</span> : null}
           </button>

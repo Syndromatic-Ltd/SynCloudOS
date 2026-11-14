@@ -38,7 +38,7 @@ import {
 import { nseMenuModel } from "../NSE/NSE";
 import { ApplicationNavigationBackButton } from "./ApplicationNavigationBackButton";
 import { NSEButton } from "@syndromatic/syncloudos/nse/controls";
-import { createReactOwnedNSEMenu, NSETopBar, useNSEMenuLifetime } from "../NSE/hostComposition";
+import { createReactOwnedNSEMenu, TopBar, useNSEMenuLifetime } from "../NSE/hostComposition";
 import { SourceListFrameProvider, type SourceListFrameContextValue } from "../NSE/hostComposition";
 import { activateResponderHierarchy, clearOwnedResponderAnchor, QuickSwitchTriggerProvider, ResponderScope, useHostSiteBranding, useResolvedMode, useRuntimeNSEControlPort, useRuntimeNSEFocusPort, useRuntimeNSEMenuPort, useRuntimeNSEOverlayPort, useRuntimeSelector, useKernelSynCloudOS } from "../SynCloudOSReact";
 import type { SynCloudOSAppInfo } from "../SynCloudOS/SynCloudOS";
@@ -490,7 +490,7 @@ export function ApplicationStageView({
   );
 }
 
-type TopBarProps = Parameters<typeof NSETopBar>[0];
+type TopBarProps = Parameters<typeof TopBar>[0];
 
 /** The standard bar's right-hand control: what it draws and what it does when pressed. */
 interface RightSlotControl {
@@ -512,7 +512,7 @@ function ApplicationStageTopBar({
 }) {
   const menu = useApplicationMenuSnapshot(menuStore);
   return (
-    <NSETopBar
+    <TopBar
       {...props}
       trailingItems={rightSlot && props.trailing === undefined ? [{
           kind: rightSlot.kind,

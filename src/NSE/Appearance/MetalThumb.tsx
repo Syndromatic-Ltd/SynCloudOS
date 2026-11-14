@@ -45,7 +45,7 @@ export function NSEMaterialLightingProvider({
     </LightingContext.Provider>
   );
 }
-export function NSEMetalThumb({ disabled = false }: { disabled?: boolean }) {
+export function MetalThumb({ disabled = false }: { disabled?: boolean }) {
   const lighting = useContext(LightingContext),
     appearance = useNSEAppearance();
   const active =

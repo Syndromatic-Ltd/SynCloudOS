@@ -21,8 +21,8 @@
 export { MaterialProvider } from "./MaterialProvider";
 export { materialTokens } from "./tokens";
 export { GlassPanel, LinenSurface } from "./surfaces";
-export { NSEMetalSurface } from "./NSEMetalSurface";
-export type { NSEMetalSurfaceProps } from "./NSEMetalSurface";
+export { MetalSurface } from "./MetalSurface";
+export type { NSEMetalSurfaceProps } from "./MetalSurface";
 export {
   getSmoothSurfaceClassName,
   getSmoothSurfaceProps,

@@ -19,17 +19,17 @@
  */
 
 import { useNSEFeedback } from "../../Feedback";
-import { resolveNSETopBarGlyphStyle } from "./nseTopBarStyles";
-import type { NSETopBarItem, NSETopBarItemPosition, NSETopBarStyleDefinition } from "./nseTopBarTypes";
+import { resolveNSETopBarGlyphStyle } from "./topBarStyles";
+import type { TopBarItem, TopBarItemPosition, TopBarStyleDefinition } from "./topBarTypes";
 
-export function NSETopBarButton({
+export function TopBarButton({
   item,
   position,
   styleDefinition
 }: {
-  item: NSETopBarItem;
-  position: NSETopBarItemPosition;
-  styleDefinition: NSETopBarStyleDefinition;
+  item: TopBarItem;
+  position: TopBarItemPosition;
+  styleDefinition: TopBarStyleDefinition;
 }) {
   const feedback = useNSEFeedback();
 
