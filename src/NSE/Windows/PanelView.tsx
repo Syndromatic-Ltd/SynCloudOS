@@ -19,31 +19,34 @@
  */
 
 import React from "react";
-import { NSEWindowTitleBar } from "./NSEWindowTitleBar";
-import { NSEWindowView } from "./NSEWindowView";
-import { assertNSEWindowViewRole } from "./windowRoleViewHelpers";
-import type { NSEWindowViewProps } from "./windowViewTypes";
+import { WindowTitleBar } from "./WindowTitleBar";
+import { WindowView } from "./WindowView";
+import { assertNSEWindowViewRole, windowEscapeCloseHandler } from "./windowRoleViewHelpers";
+import type { WindowViewProps } from "./windowViewTypes";
 
-export function NSEModalWindowView(props: NSEWindowViewProps) {
-  assertNSEWindowViewRole("NSEModalWindowView", props.record, "modal");
+export function PanelView(props: WindowViewProps) {
+  assertNSEWindowViewRole("NSEPanelView", props.record, "panel");
+  if (props.record.level === "normal") throw new TypeError("NSEPanelView requires a floating panel level.");
   const titleBar = props.presentation.titleBarVisible && props.record.style.includes("titled") ? (
-    <NSEWindowTitleBar
+    <WindowTitleBar
       record={props.record}
       dirty={props.dirty}
       dispatchCommand={props.dispatchCommand}
       moveHandleProps={props.presentation.movable ? props.moveHandleProps : undefined}
       controls={["close"]}
+
+      variant="panel"
     />
   ) : null;
   return (
-    <NSEWindowView
+    <WindowView
       {...props}
       hasShadow
-      className="nse-window-view--modal"
+      className="nse-window-view--panel"
 
 
       titleBar={titleBar}
-      focusScope="modal"
+      onKeyDown={windowEscapeCloseHandler(props, props.record.style.includes("closable"))}
     />
   );
 }

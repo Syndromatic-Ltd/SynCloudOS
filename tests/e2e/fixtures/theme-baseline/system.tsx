@@ -7,11 +7,11 @@ import { defineWebspring } from "../../../../src/Webspring/public";
 import { WebspringBoardView } from "../../../../src/Webspring/Contents/Views/WebspringBoardView/WebspringBoardView";
 import { WebspringHost } from "../../../../src/Webspring/WebspringHost";
 import { NotificationCentrePresenter } from "../../../../src/Webspring/NotificationCentrePresenter";
-import { NSEStandardWindowView } from "../../../../src/NSE/Windows/NSEStandardWindowView";
-import { NSEHUDWindowView } from "../../../../src/NSE/Windows/NSEHUDWindowView";
+import { StandardWindowView } from "../../../../src/NSE/Windows/StandardWindowView";
+import { HUDWindowView } from "../../../../src/NSE/Windows/HUDWindowView";
 import { NSEAppearanceProvider } from "../../../../src/NSE/Appearance/NSEAppearanceProvider";
 import { atmoTheme } from "../../../../src/NSE/Appearance/atmo";
-import { NSEWindowTitlebarHostContext } from "../../../../src/NSE/Windows/windowTitlebarContext";
+import { WindowTitlebarHostContext } from "../../../../src/NSE/Windows/windowTitlebarContext";
 import type { WindowRecord } from "../../../../src/SynCloudOS/Windows";
 import type { NSEWindowToolbarStyle } from "../../../../src/NSE/Application/NSEWindowController";
 import type { ThemeBaselineSurface } from "./catalogue";
@@ -57,13 +57,13 @@ function WindowSurface({ chrome, isKey, toolbarStyle }: { chrome: "standard" | "
     level: chrome === "hud" ? "floating" : "normal", parentWindowControllerId: null, anchor: null, pinned: false, state: "open", isKey, isMain: isKey,
     zIndex: 1, mobilePolicy: "fullscreen", restorationKey: null, chromeMode: "system", smoothSurface: "off",
   };
-  const View = chrome === "hud" ? NSEHUDWindowView : NSEStandardWindowView;
+  const View = chrome === "hud" ? HUDWindowView : StandardWindowView;
   return <div style={{ position: "relative", width: 600, height: 280 }}><NSEAppearanceProvider theme={atmoTheme} chrome={chrome} colourScheme={scheme}>
     <View record={record} presentation={{ kind: "desktop-window", visible: true, bounds: record.bounds, safeAreaInsets: { blockStart: 0, inlineEnd: 0, blockEnd: 0, inlineStart: 0 }, movable: true, resizable: true, titleBarVisible: true }} blocked={false} dirty={false} dispatchCommand={async () => undefined}><WindowDocument toolbarStyle={toolbarStyle} /><p>Window content</p></View>
   </NSEAppearanceProvider></div>;
 }
 function WindowDocument({ toolbarStyle }: { toolbarStyle: NSEWindowToolbarStyle }) {
-  const host = useContext(NSEWindowTitlebarHostContext);
+  const host = useContext(WindowTitlebarHostContext);
   useLayoutEffect(() => { host?.setDocument({ title: "Documents", subtitle: "3 items", documentEdited: false, toolbarStyle }); return () => host?.setDocument(null); }, [host, toolbarStyle]);
   return null;
 }

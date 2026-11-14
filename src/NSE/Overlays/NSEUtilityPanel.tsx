@@ -20,7 +20,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type HTMLAttributes, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { NSEPanelView } from "../Windows/NSEPanelView";
+import { PanelView } from "../Windows/PanelView";
 import { createCanonicalWindowRecord, freezeWindowRecord } from "../../SynCloudOS/nseRuntimeContracts";
 import type { SynCloudOSRuntimeId, WindowPresentation, WindowRecord } from "../../SynCloudOS/SynCloudOS";
 import { useNSEAppearanceProjection } from "../Appearance";
@@ -308,9 +308,9 @@ function StandaloneUtilityPanel({ id, title, anchor, fitting, closing, onExited,
         visibility: frame ? undefined : "hidden",
       }}
     >
-      <NSEPanelView record={record} presentation={presentation} blocked={false} dirty={false} dispatchCommand={dispatchCommand} moveHandleProps={moveHandleProps}>
+      <PanelView record={record} presentation={presentation} blocked={false} dirty={false} dispatchCommand={dispatchCommand} moveHandleProps={moveHandleProps}>
         {children}
-      </NSEPanelView>
+      </PanelView>
     </div>,
     portalHost,
   );

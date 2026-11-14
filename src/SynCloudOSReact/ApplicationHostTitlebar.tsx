@@ -20,7 +20,7 @@
 
 import { useMemo, useState, type ReactNode } from "react";
 import { TopBar } from "../NSE/hostComposition";
-import { NSEWindowTitlebarHostContext, type NSEWindowTitlebarDocument, type NSEWindowTitlebarHost } from "../NSE/hostComposition";
+import { WindowTitlebarHostContext, type WindowTitlebarDocument, type WindowTitlebarHost } from "../NSE/hostComposition";
 import { useApplicationMenuSnapshot, type ApplicationMenuStore } from "./ApplicationMenuTrigger";
 
 interface ApplicationHostTitlebarProps {
@@ -42,10 +42,10 @@ interface ApplicationHostTitlebarProps {
  * subtitle and titlebar accessories centred), in flow above the application.
  */
 export function ApplicationHostTitlebar({ title, iconSrc, material, scheme, menuStore, menuLabel, children }: ApplicationHostTitlebarProps) {
-  const [document, setDocument] = useState<NSEWindowTitlebarDocument | null>(null);
+  const [document, setDocument] = useState<WindowTitlebarDocument | null>(null);
   const [leadingAccessories, setLeadingAccessories] = useState<HTMLSpanElement | null>(null);
   const [trailingAccessories, setTrailingAccessories] = useState<HTMLSpanElement | null>(null);
-  const host = useMemo<NSEWindowTitlebarHost>(() => Object.freeze({ setDocument, leadingAccessories, trailingAccessories }),
+  const host = useMemo<WindowTitlebarHost>(() => Object.freeze({ setDocument, leadingAccessories, trailingAccessories }),
     [leadingAccessories, trailingAccessories]);
   return (
     <div className="syncloudos-application-host-frame" style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column" }}>
@@ -62,7 +62,7 @@ export function ApplicationHostTitlebar({ title, iconSrc, material, scheme, menu
         )}
       />
       <div className="syncloudos-application-host-content" style={{ position: "relative", flex: "1 1 auto", minHeight: 0 }}>
-        <NSEWindowTitlebarHostContext.Provider value={host}>{children}</NSEWindowTitlebarHostContext.Provider>
+        <WindowTitlebarHostContext.Provider value={host}>{children}</WindowTitlebarHostContext.Provider>
       </div>
     </div>
   );

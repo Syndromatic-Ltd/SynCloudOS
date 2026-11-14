@@ -46,8 +46,8 @@ export { NSEPopup } from "./Overlays/NSEPopup";
 
 // Window chrome and transient surfaces are drawn by NSE for framework hosts.
 export { TopBar } from "./Windows/Chrome/TopBar";
-export { NSEWindowTitlebarHostContext } from "./Windows/windowTitlebarContext";
-export type { NSEWindowTitlebarDocument, NSEWindowTitlebarHost } from "./Windows/windowTitlebarContext";
+export { WindowTitlebarHostContext } from "./Windows/windowTitlebarContext";
+export type { WindowTitlebarDocument, WindowTitlebarHost } from "./Windows/windowTitlebarContext";
 export { NSEPopoverFrame } from "./Overlays/NSEPopoverFrame";
 export { applyNSEPopoverPosition, computeNSEPopoverPosition, nsePopoverEdgePlacement, nsePopoverReference } from "./Overlays/popoverPosition";
 export type { NSEPopoverPosition } from "./Overlays/popoverPosition";
@@ -68,4 +68,4 @@ export { useNSEThemeInteraction } from "./Theme/contract/useThemeInteraction";
 export type { NSETheme } from "./Theme/NSETheme";
 export type { NSEViewDrawingEnvironment } from "./Views/NSEViewDrawingEnvironment";
 
-export { NSEWindowTitleBar } from "./Windows/NSEWindowTitleBar";
+export { WindowTitleBar } from "./Windows/WindowTitleBar";

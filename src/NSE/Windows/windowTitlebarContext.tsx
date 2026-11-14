@@ -5,7 +5,7 @@ import type { NSEWindowToolbarStyle } from "../Application/NSEWindowController";
 import type { NSEViewController } from "../Application/NSEViewController";
 
 /** @internal A window's presentation in its host's title bar. */
-export interface NSEWindowTitlebarDocument {
+export interface WindowTitlebarDocument {
   readonly title: string;
   readonly subtitle: string;
   readonly documentEdited: boolean;
@@ -13,24 +13,24 @@ export interface NSEWindowTitlebarDocument {
 }
 
 /** @internal Accessory portals retain the application's context and responder chain. */
-export interface NSEWindowTitlebarHost {
-  setDocument(document: NSEWindowTitlebarDocument | null): void;
+export interface WindowTitlebarHost {
+  setDocument(document: WindowTitlebarDocument | null): void;
   readonly leadingAccessories: HTMLElement | null;
   readonly trailingAccessories: HTMLElement | null;
 }
 
-export const NSEWindowTitlebarDocumentContext = createContext<NSEWindowTitlebarDocument | null>(null);
+export const WindowTitlebarDocumentContext = createContext<WindowTitlebarDocument | null>(null);
 
-export const NSEWindowTitlebarHostContext = createContext<NSEWindowTitlebarHost | null>(null);
+export const WindowTitlebarHostContext = createContext<WindowTitlebarHost | null>(null);
 
 /** @internal The root split supplies a slot above its main content, outside its scroll view. */
-export const NSEWindowTitleSlotContext = createContext<{
+export const WindowTitleSlotContext = createContext<{
   readonly root: NSEViewController<unknown> | null;
   readonly setSlot: (element: HTMLDivElement | null) => void;
 } | null>(null);
 
 /** @internal Title-bar drawing shared by expanded windows and preference panels. */
-export function NSEWindowTitlebarContent({ toolbarStyle, title, subtitle, leading, trailing, mode, className = "" }: {
+export function WindowTitlebarContent({ toolbarStyle, title, subtitle, leading, trailing, mode, className = "" }: {
   readonly toolbarStyle: NSEWindowToolbarStyle;
   readonly title: ReactNode;
   readonly subtitle?: string;

@@ -19,18 +19,18 @@
  */
 
 import React from "react";
-import { NSEWindowTitleBar } from "./NSEWindowTitleBar";
-import { NSEWindowView } from "./NSEWindowView";
+import { WindowTitleBar } from "./WindowTitleBar";
+import { WindowView } from "./WindowView";
 import { assertNSEWindowViewRole, windowEscapeCloseHandler } from "./windowRoleViewHelpers";
-import type { NSEWindowViewProps } from "./windowViewTypes";
+import type { WindowViewProps } from "./windowViewTypes";
 
-export function NSEPopoverWindowView(props: NSEWindowViewProps) {
+export function PopoverWindowView(props: WindowViewProps) {
   assertNSEWindowViewRole("NSEPopoverWindowView", props.record, "popover");
   const { anchor } = props.record;
   if (!anchor) throw new TypeError("NSEPopoverWindowView requires window anchor provenance.");
   const titled = props.presentation.titleBarVisible && props.record.style.includes("titled");
   const titleBar = titled ? (
-    <NSEWindowTitleBar
+    <WindowTitleBar
       record={props.record}
       dirty={props.dirty}
       dispatchCommand={props.dispatchCommand}
@@ -40,7 +40,7 @@ export function NSEPopoverWindowView(props: NSEWindowViewProps) {
   ) : null;
   const outsideDismiss = !props.record.pinned;
   return (
-    <NSEWindowView
+    <WindowView
       {...props}
       className="nse-window-view--popover"
 

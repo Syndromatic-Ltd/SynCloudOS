@@ -10,7 +10,7 @@ import type { NSEWindowAlertRequest } from "../Application/NSEWindowController";
 import type { NSEWindowSurfaceRequest } from "../Overlays/NSEWindowSurfaceBridge";
 
 /** @internal NSE owns sheet drawing; the application host owns presentation and dismissal. */
-export function NSEControllerSheetSurface({ scopeId, attached, title, titleId, width, fullSizeContentView = false, onCancel, children }: {
+export function ControllerSheetSurface({ scopeId, attached, title, titleId, width, fullSizeContentView = false, onCancel, children }: {
   readonly scopeId: string;
   readonly attached: boolean;
   readonly title?: string;
@@ -36,7 +36,7 @@ export function NSEControllerSheetSurface({ scopeId, attached, title, titleId, w
 }
 
 /** @internal The panel host supplies geometry and dismissal; NSE draws the inherited appearance. */
-export function NSEOpenPanelSheetSurface({ request, compact, onClose, children }: {
+export function OpenPanelSheetSurface({ request, compact, onClose, children }: {
   readonly request: NSEWindowSurfaceRequest;
   readonly compact: boolean;
   readonly onClose: () => void;
@@ -52,7 +52,7 @@ export function NSEOpenPanelSheetSurface({ request, compact, onClose, children }
 }
 
 /** @internal Alert drawing consumes a request and callbacks, never an application queue or SDK. */
-export function NSEWindowAlertContent({ request, scopeId, onChoose }: {
+export function WindowAlertContent({ request, scopeId, onChoose }: {
   readonly request: NSEWindowAlertRequest;
   readonly scopeId: string;
   readonly onChoose: (buttonId?: string) => void;

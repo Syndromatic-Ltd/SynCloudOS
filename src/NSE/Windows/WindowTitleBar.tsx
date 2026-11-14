@@ -22,15 +22,15 @@ import { useNSEWindowChromeElement } from "../Layout/windowChromeObstructions";
 
 import React, { useState, type HTMLAttributes } from "react";
 import type { WindowRecord } from "../../SynCloudOS/SynCloudOS";
-import { NSEWindowTitlebarDocumentContext } from "./windowTitlebarContext";
-import type { NSEWindowViewProps } from "./windowViewTypes";
+import { WindowTitlebarDocumentContext } from "./windowTitlebarContext";
+import type { WindowViewProps } from "./windowViewTypes";
 
 import "./nse-windows.css";
 
-export interface NSEWindowTitleBarProps {
+export interface WindowTitleBarProps {
   readonly record: WindowRecord;
   readonly dirty: boolean;
-  readonly dispatchCommand: NSEWindowViewProps["dispatchCommand"];
+  readonly dispatchCommand: WindowViewProps["dispatchCommand"];
   readonly moveHandleProps?: HTMLAttributes<HTMLElement>;
   readonly controls?: readonly WindowControlKind[];
 
@@ -39,7 +39,7 @@ export interface NSEWindowTitleBarProps {
 
 export type WindowControlKind = "close" | "minimise" | "zoom";
 
-function NSEWindowControl({
+function WindowControl({
   kind,
   record,
   dirty,
@@ -48,7 +48,7 @@ function NSEWindowControl({
   readonly kind: WindowControlKind;
   readonly record: WindowRecord;
   readonly dirty: boolean;
-  readonly dispatchCommand: NSEWindowViewProps["dispatchCommand"];
+  readonly dispatchCommand: WindowViewProps["dispatchCommand"];
 }) {
   const [highlighted, setHighlighted] = useState(false);
   const ordinaryState = kind === "close"
@@ -82,25 +82,25 @@ function NSEWindowControl({
   );
 }
 
-export function NSEWindowTitleBar(props: NSEWindowTitleBarProps | { readonly title: string; readonly isKeyWindow: boolean }) {
+export function WindowTitleBar(props: WindowTitleBarProps | { readonly title: string; readonly isKeyWindow: boolean }) {
   const header = React.useRef<HTMLElement>(null);
   useNSEWindowChromeElement(header, "top", false, "title" in props);
   if ("title" in props) return <header data-nse-part="header" data-nse-key-window={props.isKeyWindow ? undefined : "false"} ref={header} className="nse-window__titlebar nse-window__titlebar--standard" data-window-titlebar="" data-window-host-titlebar="" style={{ height: "100%", minHeight: "100%" }} data-window-active={props.isKeyWindow ? "true" : "false"} >
     <h2 data-nse-part="title" className="nse-window__title">{props.title}</h2>
   </header>;
-  return <NSEManagedWindowTitleBar {...props} />;
+  return <ManagedWindowTitleBar {...props} />;
 }
-function NSEManagedWindowTitleBar({
+function ManagedWindowTitleBar({
   record,
   dirty,
   dispatchCommand,
   moveHandleProps,
   controls = ["close", "minimise", "zoom"],
   variant = "standard",
-}: NSEWindowTitleBarProps) {
+}: WindowTitleBarProps) {
   const header = React.useRef<HTMLElement>(null);
   useNSEWindowChromeElement(header, "top", false);
-  const document = React.useContext(NSEWindowTitlebarDocumentContext);
+  const document = React.useContext(WindowTitlebarDocumentContext);
   const { className: moveClassName, ...handleProps } = moveHandleProps ?? {};
   return (
     <header
@@ -118,13 +118,13 @@ function NSEManagedWindowTitleBar({
           first responder, as in AppKit. */}
       <div data-nse-part="accessory" className="nse-window__controls" data-syncloudos-focus-chrome="">
         {controls.includes("close") && record.style.includes("closable") ? (
-          <NSEWindowControl kind="close" record={record} dirty={dirty} dispatchCommand={dispatchCommand} />
+          <WindowControl kind="close" record={record} dirty={dirty} dispatchCommand={dispatchCommand} />
         ) : null}
         {controls.includes("minimise") && record.style.includes("minimisable") ? (
-          <NSEWindowControl kind="minimise" record={record} dirty={dirty} dispatchCommand={dispatchCommand} />
+          <WindowControl kind="minimise" record={record} dirty={dirty} dispatchCommand={dispatchCommand} />
         ) : null}
         {controls.includes("zoom") && record.style.includes("zoomable") ? (
-          <NSEWindowControl kind="zoom" record={record} dirty={dirty} dispatchCommand={dispatchCommand} />
+          <WindowControl kind="zoom" record={record} dirty={dirty} dispatchCommand={dispatchCommand} />
         ) : null}
       </div>
       <h2 id={`${record.id}-title`} data-window-title="" data-nse-part="title" className="nse-window__title">

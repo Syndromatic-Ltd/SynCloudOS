@@ -22,16 +22,16 @@
 import type { ReactNode } from "react";
 import type { WindowAnchor, WindowRecord, WindowRole } from "../../../../src/SynCloudOS/Windows";
 import {
-  NSEBorderlessWindowView,
-  NSEHUDWindowView,
-  NSEModalWindowView,
-  NSEPanelView,
-  NSEPopoverWindowView,
-  NSESheetView,
-  NSEStandardWindowView,
+  BorderlessWindowView,
+  HUDWindowView,
+  ModalWindowView,
+  PanelView,
+  PopoverWindowView,
+  SheetView,
+  StandardWindowView,
 } from "../../../../src/NSE/Windows";
 
-const views = { standard: NSEStandardWindowView, panel: NSEPanelView, sheet: NSESheetView, modal: NSEModalWindowView, popover: NSEPopoverWindowView, hud: NSEHUDWindowView, borderless: NSEBorderlessWindowView } as const;
+const views = { standard: StandardWindowView, panel: PanelView, sheet: SheetView, modal: ModalWindowView, popover: PopoverWindowView, hud: HUDWindowView, borderless: BorderlessWindowView } as const;
 
 interface WindowSpecimenOptions {
   readonly role: WindowRole;

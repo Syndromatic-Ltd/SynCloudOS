@@ -39,13 +39,13 @@ import { NSEUserDefaults } from "../../Foundation/NSEUserDefaults";
 
 const noSubscription = () => () => {};
 
-export { NSEWindowTitlebarHostContext } from "../../NSE/applicationHostInterop";
-export type { NSEWindowTitlebarDocument, NSEWindowTitlebarHost } from "../../NSE/applicationHostInterop";
-import { NSEWindowTitlebarHostContext, type NSEWindowTitlebarHost } from "../../NSE/applicationHostInterop";
+export { WindowTitlebarHostContext } from "../../NSE/applicationHostInterop";
+export type { WindowTitlebarDocument, WindowTitlebarHost } from "../../NSE/applicationHostInterop";
+import { WindowTitlebarHostContext, type WindowTitlebarHost } from "../../NSE/applicationHostInterop";
 import { nseWindowPresentedTitle } from "../../NSE/applicationHostInterop";
 
 /** Publishes the window's title, subtitle and edited state to the stage's title bar. */
-export function useNSEWindowTitlebarDocument(controller: NSEAnyWindowController, host: NSEWindowTitlebarHost | null): void {
+export function useNSEWindowTitlebarDocument(controller: NSEAnyWindowController, host: WindowTitlebarHost | null): void {
   useObserve(controller);
   const window = controller.isDisposed ? null : controller.window;
   const title = window ? nseWindowPresentedTitle(window) : "";
@@ -80,7 +80,7 @@ function AccessoryObserver({ accessory, children }: { readonly accessory: NSETit
  * its own every accessory, draw in the accessory row at the top of the window's content, under the toolbar.
  */
 export function NSEWindowTitlebarAccessories({ accessories, renderController, host, placement }: AccessoryProps & {
-  readonly host: NSEWindowTitlebarHost | null;
+  readonly host: WindowTitlebarHost | null;
   readonly placement: "titlebar" | "row";
 }) {
   const shown = accessories.filter((accessory) => {

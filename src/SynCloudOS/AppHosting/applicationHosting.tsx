@@ -23,7 +23,7 @@ import { nseUpdateSafeArea } from "../../NSE/applicationHostInterop";
 import { NSEWindowLayoutContext } from "../../NSE/applicationHostInterop";
 import { nativePresentations } from "../../NSE/applicationHostInterop";
 
-import { NSEWindowTitleSlotContext, NSEWindowTitlebarContent } from "../../NSE/applicationHostInterop";
+import { WindowTitleSlotContext, WindowTitlebarContent } from "../../NSE/applicationHostInterop";
 import { nseWindowPresentedTitle } from "../../NSE/applicationHostInterop";
 import {
   useContext,
@@ -42,7 +42,7 @@ import {
 import { NSEOpenPanelWindowHost } from "./openPanelHosting";
 import { createPortal } from "react-dom";
 import { useEnclosingFocusScopeId } from "../../SynCloudOSReact";
-import { NSEControllerSheetSurface } from "../../NSE/applicationHostInterop";
+import { ControllerSheetSurface } from "../../NSE/applicationHostInterop";
 import type { NSEAnyWindowController, NSEWindowMount } from "../../NSE/applicationHostInterop";
 import { nseSetKeyWindowModalPresenter, nseWindowInternals } from "../../NSE/applicationHostInterop";
 import { nseAttachView, nsePopoverPositioning, nsePresentationStyle, nseUpdateTraits, nseUpdateViewActivity, validateNSEViewControllerClass, type NSEViewController, type NSEViewControllerClass } from "../../NSE/applicationHostInterop";
@@ -60,7 +60,7 @@ import { NSEPopup } from "../../NSE/NSE";
 import type { SynWareContextValue } from "../AppSDK/appContextTypes";
 import { bindActionResponder, hasActions } from "../AppSDK/actions";
 import { trackLiveApplicationObject } from "./applicationHotReload";
-import { NSEWindowContentBorder, NSEWindowSheetFrame, NSEWindowSheetHostContext, NSEWindowTitlebarAccessories, nseContentBorderSize, NSEWindowTitlebarHostContext, useNSEWindowSheetHost, NSEWindowToolbar, useNSEWindowTitlebarDocument } from "./windowChrome";
+import { NSEWindowContentBorder, NSEWindowSheetFrame, NSEWindowSheetHostContext, NSEWindowTitlebarAccessories, nseContentBorderSize, WindowTitlebarHostContext, useNSEWindowSheetHost, NSEWindowToolbar, useNSEWindowTitlebarDocument } from "./windowChrome";
 import { applicationSessionFor } from "./applicationSession";
 import { createNSEWindowAlertQueue, NSEWindowAlertSheet, type NSEWindowAlertQueue } from "./windowAlertSheet";
 import { useNSEAnimationEnvironment, useNSEViewActivitySource } from "../../NSE/applicationHostInterop";
@@ -391,9 +391,9 @@ function NSEPresentedSheet({ controller }: { readonly controller: NSEViewControl
     if (typeof operation === "function") void operation.call(controller);
     else controller.dismiss();
   };
-  const sheet = <NSEControllerSheetSurface scopeId={`nse-sheet:${sheetKey(controller)}`} attached={Boolean(sheetHost)} title={controller.title} titleId={titleId} width={size?.width} fullSizeContentView={controller.sheetHasFullSizeContentView} onCancel={cancel}>
+  const sheet = <ControllerSheetSurface scopeId={`nse-sheet:${sheetKey(controller)}`} attached={Boolean(sheetHost)} title={controller.title} titleId={titleId} width={size?.width} fullSizeContentView={controller.sheetHasFullSizeContentView} onCancel={cancel}>
     <NSEViewControllerView controller={controller} />
-  </NSEControllerSheetSurface>;
+  </ControllerSheetSurface>;
   // A window attaches the sheet under its title bar and toolbar; outside a window it covers the page.
   if (!sheetHost) return sheet;
   return sheetHost.layer ? createPortal(<NSEWindowSheetFrame reducedMotion={reducedMotion} frozen={controller.isDisposed} holdsController>{sheet}</NSEWindowSheetFrame>, sheetHost.layer) : null;
@@ -459,7 +459,7 @@ export function NSEWindowControllerView({ controller }: NSEWindowControllerViewP
   const [loaded, setLoaded] = useState(false);
   const [titleSlot, setTitleSlot] = useState<HTMLDivElement | null>(null);
   const titleSlotHost = useMemo(() => ({ root: controller.contentViewController, setSlot: setTitleSlot }), [controller, controller.contentViewController]);
-  const titlebarHost = useContext(NSEWindowTitlebarHostContext);
+  const titlebarHost = useContext(WindowTitlebarHostContext);
   // Both standalone windows and stage hosts project the same window-owned chrome.
   const stageTitlebar = titlebarHost;
   const accessoryHost = mount?.windowId === null ? titlebarHost : null;
@@ -518,11 +518,11 @@ export function NSEWindowControllerView({ controller }: NSEWindowControllerViewP
   const bottomBorder = controller.window.contentBorderThickness("minY");
   const { toolbarStyle, subtitle } = controller.window;
   const title = nseWindowPresentedTitle(controller.window);
-  const ownTitle = toolbarStyle === "expanded" ? <NSEWindowTitlebarContent toolbarStyle={toolbarStyle} title={title} subtitle={subtitle} /> : null;
+  const ownTitle = toolbarStyle === "expanded" ? <WindowTitlebarContent toolbarStyle={toolbarStyle} title={title} subtitle={subtitle} /> : null;
   // Keep the content host permanent: showing chrome must not remount an editor or its draft.
   const hasBottomAccessory = bottomBorder > 0 && bottomBarAccessory != null;
   return (
-    <NSEWindowTitleSlotContext.Provider value={titleSlotHost}>
+    <WindowTitleSlotContext.Provider value={titleSlotHost}>
     <NSEActionScopeProvider appId={appRuntime.app.bundleIdentifier}>
       <NSEControllerResponder target={controller} kind="controller">
         {accessories.length ? <NSEWindowTitlebarAccessories accessories={accessories} renderController={renderAccessory} host={accessoryHost} placement="titlebar" /> : null}
@@ -539,6 +539,6 @@ export function NSEWindowControllerView({ controller }: NSEWindowControllerViewP
           </div>
       </NSEControllerResponder>
     </NSEActionScopeProvider>
-    </NSEWindowTitleSlotContext.Provider>
+    </WindowTitleSlotContext.Provider>
   );
 }

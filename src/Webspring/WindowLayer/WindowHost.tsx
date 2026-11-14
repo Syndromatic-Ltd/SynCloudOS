@@ -28,14 +28,14 @@ import {
   OverlayProvider,
   TooltipProvider,
   NSEWindowSurfaceBridgeProvider,
-  NSEBorderlessWindowView,
-  NSEHUDWindowView,
-  NSEModalWindowView,
-  NSEPanelView,
-  NSEPopoverWindowView,
-  NSESheetView,
-  NSEStandardWindowView,
-  type NSEWindowHost,
+  BorderlessWindowView,
+  HUDWindowView,
+  ModalWindowView,
+  PanelView,
+  PopoverWindowView,
+  SheetView,
+  StandardWindowView,
+  type WindowViewRenderer,
   useNSEDeferredDisposal,
 } from "../../NSE/NSE";
 import {
@@ -72,14 +72,14 @@ export interface WindowHostProps {
   readonly onDiagnostic?: (diagnostic: WindowLayerDiagnostic) => void;
 }
 
-const viewByRole: Readonly<Record<WindowRole, NSEWindowHost>> = Object.freeze({
-  standard: NSEStandardWindowView,
-  panel: NSEPanelView,
-  hud: NSEHUDWindowView,
-  modal: NSEModalWindowView,
-  sheet: NSESheetView,
-  popover: NSEPopoverWindowView,
-  borderless: NSEBorderlessWindowView,
+const viewByRole: Readonly<Record<WindowRole, WindowViewRenderer>> = Object.freeze({
+  standard: StandardWindowView,
+  panel: PanelView,
+  hud: HUDWindowView,
+  modal: ModalWindowView,
+  sheet: SheetView,
+  popover: PopoverWindowView,
+  borderless: BorderlessWindowView,
 });
 
 /** A closing window dissolves over 0.16 s. */

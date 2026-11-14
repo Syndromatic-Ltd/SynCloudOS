@@ -19,9 +19,9 @@
  */
 
 import React from "react";
-import { NSEWindowTitleBar } from "./NSEWindowTitleBar";
-import { NSEWindowView } from "./NSEWindowView";
-import type { NSEWindowViewProps, WindowResizeEdge } from "./windowViewTypes";
+import { WindowTitleBar } from "./WindowTitleBar";
+import { WindowView } from "./WindowView";
+import type { WindowViewProps, WindowResizeEdge } from "./windowViewTypes";
 import { assertNSEWindowViewRole } from "./windowRoleViewHelpers";
 
 const resizeEdges: readonly WindowResizeEdge[] = Object.freeze([
@@ -35,7 +35,7 @@ const resizeEdges: readonly WindowResizeEdge[] = Object.freeze([
   "block-end-inline-end",
 ]);
 
-export function NSEStandardWindowView(props: NSEWindowViewProps) {
+export function StandardWindowView(props: WindowViewProps) {
   assertNSEWindowViewRole("NSEStandardWindowView", props.record, "standard");
   const { record, presentation, dirty, dispatchCommand, moveHandleProps, resizeHandleProps } = props;
   // Explicit chrome decision: custom chrome suppresses the system bar only
@@ -49,7 +49,7 @@ export function NSEStandardWindowView(props: NSEWindowViewProps) {
   const showsResizeHandles = presentation.kind === "desktop-window" &&
     presentation.resizable && record.style.includes("resizable");
   const titleBar = showsTitleBar ? (
-    <NSEWindowTitleBar
+    <WindowTitleBar
       record={record}
       dirty={dirty}
       dispatchCommand={dispatchCommand}
@@ -68,7 +68,7 @@ export function NSEStandardWindowView(props: NSEWindowViewProps) {
     />
   )) : null;
   return (
-    <NSEWindowView
+    <WindowView
       {...props}
       hasShadow={paintsSystemChrome}
       className="nse-window-view--standard"

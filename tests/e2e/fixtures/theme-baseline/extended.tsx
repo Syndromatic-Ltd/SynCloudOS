@@ -6,7 +6,7 @@ import { NSEPopup } from "../../../../src/NSE/Overlays/NSEPopup";
 import { NSEPopover } from "../../../../src/NSE/Overlays/NSEPopover";
 import { TabBarController } from "../../../../src/NSE/Navigation/TabBarController";
 import { TabBar } from "../../../../src/NSE/Navigation/TabBar";
-import { NSEWindowTitlebarContent } from "../../../../src/NSE/Windows/windowTitlebarContext";
+import { WindowTitlebarContent } from "../../../../src/NSE/Windows/windowTitlebarContext";
 import { GFXColour } from "../../../../src/FX/GraphicsFX/GFXColour";
 import { NSEArrayController } from "../../../../src/NSE/Controllers/NSEArrayController";
 import { NSETreeController } from "../../../../src/NSE/Controllers/NSETreeController";
@@ -81,6 +81,6 @@ export function extendedThemeBaselineCatalogue(): ThemeBaselineSurface[] {
   add("menu", () => <NSEMenuView label="File" items={[{ value: "new", label: "New document" }, { value: "open", label: "Open…" }, { value: "close", label: "Close", disabled: true }]} />, { interaction: "open", fullPage: true });
   add("popover", () => <Overlay popover />, { fullPage: true });
   add("sheet", () => <Overlay popover={false} />, { fullPage: true });
-  for (const toolbarStyle of ["automatic", "expanded", "preference", "unified", "unifiedCompact"] as const) for (const mode of ["light", "dark"] as const) add(`titlebar-${toolbarStyle}-${mode}`, () => <NSEWindowTitlebarContent title="Documents" subtitle="3 items" toolbarStyle={toolbarStyle} mode={mode} leading={<NSE.NSEButton title="Back" />} trailing={<NSE.NSEButton title="Add" />} />);
+  for (const toolbarStyle of ["automatic", "expanded", "preference", "unified", "unifiedCompact"] as const) for (const mode of ["light", "dark"] as const) add(`titlebar-${toolbarStyle}-${mode}`, () => <WindowTitlebarContent title="Documents" subtitle="3 items" toolbarStyle={toolbarStyle} mode={mode} leading={<NSE.NSEButton title="Back" />} trailing={<NSE.NSEButton title="Add" />} />);
   return entries;
 }

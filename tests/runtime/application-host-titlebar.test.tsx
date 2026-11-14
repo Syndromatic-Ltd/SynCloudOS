@@ -5,13 +5,13 @@ import { useContext, useLayoutEffect } from "react";
 import { afterEach, describe, expect, it } from "vitest";
 import { createPortal } from "react-dom";
 import { ApplicationHostTitlebar } from "../../src/SynCloudOSReact/ApplicationHostTitlebar";
-import { NSEWindowTitlebarHostContext } from "../../src/SynCloudOS/AppHosting/windowChrome";
+import { WindowTitlebarHostContext } from "../../src/SynCloudOS/AppHosting/windowChrome";
 import { createApplicationMenuStore } from "../../src/SynCloudOSReact/ApplicationMenuTrigger";
 
 afterEach(cleanup);
 
 function Window({ title, subtitle = "" }: { readonly title: string; readonly subtitle?: string }) {
-  const host = useContext(NSEWindowTitlebarHostContext);
+  const host = useContext(WindowTitlebarHostContext);
   useLayoutEffect(() => {
     host?.setDocument({ title, subtitle, documentEdited: true });
     return () => host?.setDocument(null);
