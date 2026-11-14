@@ -84,3 +84,21 @@ it("does not contact host timing or state sources for an already revoked owner",
   expect(changed).not.toHaveBeenCalled();
   expect(frames.suspended).toBe(true);
 });
+
+it("revokes frames immediately and delivers the suspension notification after the current commit", async () => {
+  const { owner, state } = scope();
+  const listener = vi.fn();
+  const releasedListener = vi.fn();
+  const frames = createScopedAnimationFrames(owner.signal, state, { now: () => 0, requestFrame: () => () => {} });
+  frames.subscribeState!(listener);
+  const release = frames.subscribeState!(releasedListener);
+
+  owner.abort();
+
+  expect(frames.suspended).toBe(true);
+  expect(listener).not.toHaveBeenCalled();
+  release();
+  await Promise.resolve();
+  expect(listener).toHaveBeenCalledOnce();
+  expect(releasedListener).not.toHaveBeenCalled();
+});
