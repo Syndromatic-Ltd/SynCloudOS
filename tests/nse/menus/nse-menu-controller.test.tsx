@@ -37,7 +37,7 @@ import {
   type NSEMenuModel,
   type NSEMenuRuntimePort,
 } from "../../../src/NSE/Menus";
-import { NSEOverlayProvider } from "../../../src/NSE/Overlays";
+import { OverlayProvider } from "../../../src/NSE/Overlays";
 import { NSEView } from "../../../src/NSE/Views/NSEView";
 import { NSEMenuRuntimeProvider } from "../../../src/NSE/Menus/menuRuntimeContext";
 import { NSEAppearanceProvider } from "../../../src/NSE/Appearance";
@@ -313,7 +313,7 @@ function MenuOverlayHarness({
       return node;
     },
   }), [mode, onScope, signal]);
-  return <NSEOverlayProvider runtimePort={runtimePort}>{children}</NSEOverlayProvider>;
+  return <OverlayProvider runtimePort={runtimePort}>{children}</OverlayProvider>;
 }
 
 describe("NSEMenu", () => {

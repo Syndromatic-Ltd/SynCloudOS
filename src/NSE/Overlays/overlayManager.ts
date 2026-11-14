@@ -20,17 +20,17 @@
 
 import { SynCloudOSLifecycleRecord } from "../../SynCloudOS/nseRuntimeContracts";
 import type {
-  NSEOverlayDismissReason,
-  NSEOverlayId,
-  NSEOverlayManager,
-  NSEOverlayRegistration,
-  NSEOverlaySnapshot,
+  OverlayDismissReason,
+  OverlayId,
+  OverlayManager,
+  OverlayRegistration,
+  OverlaySnapshot,
 } from "./overlayTypes";
 
 function snapshotFor(
-  orderedIds: readonly NSEOverlayId[],
-  registrations: ReadonlyMap<NSEOverlayId, NSEOverlayRegistration>,
-): NSEOverlaySnapshot {
+  orderedIds: readonly OverlayId[],
+  registrations: ReadonlyMap<OverlayId, OverlayRegistration>,
+): OverlaySnapshot {
   return Object.freeze({
     orderedIds: Object.freeze([...orderedIds]),
     topmostId: orderedIds.at(-1) ?? null,
@@ -38,7 +38,7 @@ function snapshotFor(
   });
 }
 
-function registrationsEqual(left: NSEOverlayRegistration, right: NSEOverlayRegistration): boolean {
+function registrationsEqual(left: OverlayRegistration, right: OverlayRegistration): boolean {
   if (
     left === right ||
     (left.id === right.id &&
@@ -54,10 +54,10 @@ function registrationsEqual(left: NSEOverlayRegistration, right: NSEOverlayRegis
   return false;
 }
 
-export function createNSEOverlayManager(): NSEOverlayManager {
+export function createOverlayManager(): OverlayManager {
   const lifecycle = new SynCloudOSLifecycleRecord({ kind: "NSEOverlayManager" });
-  const registrations = new Map<NSEOverlayId, NSEOverlayRegistration>();
-  const orderedIds: NSEOverlayId[] = [];
+  const registrations = new Map<OverlayId, OverlayRegistration>();
+  const orderedIds: OverlayId[] = [];
   const listeners = new Set<() => void>();
   let snapshot = snapshotFor(orderedIds, registrations);
   let disposed = false;
@@ -67,7 +67,7 @@ export function createNSEOverlayManager(): NSEOverlayManager {
     for (const listener of [...listeners]) listener();
   };
 
-  const remove = (id: NSEOverlayId): NSEOverlayRegistration | null => {
+  const remove = (id: OverlayId): OverlayRegistration | null => {
     const registration = registrations.get(id) ?? null;
     if (!registration) return null;
     registrations.delete(id);
@@ -76,14 +76,14 @@ export function createNSEOverlayManager(): NSEOverlayManager {
     return registration;
   };
 
-  const dismissOne = (id: NSEOverlayId): NSEOverlayRegistration | null => remove(id);
+  const dismissOne = (id: OverlayId): OverlayRegistration | null => remove(id);
 
-  const assertParent = (registration: NSEOverlayRegistration) => {
+  const assertParent = (registration: OverlayRegistration) => {
     if (registration.parentId === registration.id) throw new Error(`NSE overlay "${registration.id}" cannot parent itself.`);
     if (registration.parentId !== null && !registrations.has(registration.parentId)) {
       throw new Error(`NSE overlay parent "${registration.parentId}" is missing for "${registration.id}".`);
     }
-    const visited = new Set<NSEOverlayId>([registration.id]);
+    const visited = new Set<OverlayId>([registration.id]);
     let current = registration.parentId;
     while (current !== null) {
       if (visited.has(current)) throw new Error(`NSE overlay parent cycle includes "${registration.id}".`);
@@ -93,9 +93,9 @@ export function createNSEOverlayManager(): NSEOverlayManager {
     }
   };
 
-  const branchIdsFor = (id: NSEOverlayId): NSEOverlayId[] => orderedIds.filter((candidateId) => {
-    const visited = new Set<NSEOverlayId>();
-    let currentId: NSEOverlayId | null = candidateId;
+  const branchIdsFor = (id: OverlayId): OverlayId[] => orderedIds.filter((candidateId) => {
+    const visited = new Set<OverlayId>();
+    let currentId: OverlayId | null = candidateId;
     while (currentId !== null && visited.size <= registrations.size) {
       if (currentId === id) return true;
       if (visited.has(currentId)) return false;
@@ -128,7 +128,7 @@ export function createNSEOverlayManager(): NSEOverlayManager {
         if (!registrations.has(registration.id)) return;
         const descendants = branchIdsFor(registration.id).filter((id) => id !== registration.id)
           .map((id) => ({ id, registration: remove(id) }))
-          .filter((entry): entry is { readonly id: NSEOverlayId; readonly registration: NSEOverlayRegistration } => entry.registration !== null);
+          .filter((entry): entry is { readonly id: OverlayId; readonly registration: OverlayRegistration } => entry.registration !== null);
         remove(registration.id);
         publish();
         for (const descendant of descendants) descendant.registration.onDismiss("parent-dismissed");
@@ -155,7 +155,7 @@ export function createNSEOverlayManager(): NSEOverlayManager {
       const branchIds = branchIdsFor(id);
       const dismissed = branchIds
         .map((branchId) => ({ id: branchId, registration: dismissOne(branchId) }))
-        .filter((entry): entry is { readonly id: NSEOverlayId; readonly registration: NSEOverlayRegistration } => entry.registration !== null);
+        .filter((entry): entry is { readonly id: OverlayId; readonly registration: OverlayRegistration } => entry.registration !== null);
       if (dismissed.length === 0) return [];
       publish();
       for (const { registration } of dismissed) registration.onDismiss(reason);
@@ -167,7 +167,7 @@ export function createNSEOverlayManager(): NSEOverlayManager {
       disposed = true;
       const dismissed = orderedIds.slice().reverse()
         .map((id) => ({ id, registration: remove(id) }))
-        .filter((entry): entry is { readonly id: NSEOverlayId; readonly registration: NSEOverlayRegistration } => entry.registration !== null);
+        .filter((entry): entry is { readonly id: OverlayId; readonly registration: OverlayRegistration } => entry.registration !== null);
       if (dismissed.length > 0) publish();
       for (const { registration } of dismissed) registration.onDismiss("programmatic");
       listeners.clear();

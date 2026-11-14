@@ -23,7 +23,7 @@ import React, { useMemo, useRef, useState } from "react";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEUserDefaultsController } from "../../../src/NSE/Controllers";
-import { NSEOverlayProvider, type NSEWindowSurfaceDismissResult, type NSEWindowSurfaceRequest } from "../../../src/NSE/Overlays";
+import { OverlayProvider, type NSEWindowSurfaceDismissResult, type NSEWindowSurfaceRequest } from "../../../src/NSE/Overlays";
 import { allocateNSEToolbarItems } from "../../../src/NSE/Toolbars/toolbarLayout";
 import { NSEToolbarView as NSEToolbar } from "../../../src/NSE/Toolbars/NSEToolbarView";
 import { NSEToolbarConfigurationSheet } from "../../../src/NSE/Toolbars/NSEToolbarConfigurationSheet";
@@ -187,7 +187,7 @@ function OverlayHarness({ children }: { readonly children: React.ReactNode }) {
     reportPlacementFailure: vi.fn(),
     wrapFocusScope: (_options: unknown, node: React.ReactNode) => node,
   }), []);
-  return <NSEOverlayProvider runtimePort={runtimePort}>{children}</NSEOverlayProvider>;
+  return <OverlayProvider runtimePort={runtimePort}>{children}</OverlayProvider>;
 }
 
 function hostedConfiguration(outcome: NSEWindowSurfaceDismissResult["outcome"] = "closed") {

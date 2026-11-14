@@ -19,7 +19,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { NSEOverlayDismissReason } from "../Overlays";
+import type { OverlayDismissReason } from "../Overlays";
 import type { FilePanelDocumentSaveBinding, FilePanelDocumentSaveResult, FilePanelResult, FilePanelSaveTarget, SavePanelRequest } from "../../SynCloudOS/SynCloudOS";
 import { saveFilePanelTarget } from "../../SynCloudOS/nseRuntimeContracts";
 import { NSEFilePanelView, type NSEFilePanelWindowBridge } from "./NSEFilePanelView";
@@ -42,7 +42,7 @@ export interface NSESavePanelProps {
   readonly documentSaveBinding?: FilePanelDocumentSaveBinding;
   onResult?(result: FilePanelResult<FilePanelSaveTarget>): void;
   onDocumentSaveResult?(result: FilePanelDocumentSaveResult): void;
-  onOpenChange(open: boolean, reason: NSEOverlayDismissReason): void;
+  onOpenChange(open: boolean, reason: OverlayDismissReason): void;
 }
 
 function retryRequestAfterChooseAnother(request: SavePanelRequest): SavePanelRequest {
@@ -155,7 +155,7 @@ export function NSESavePanel({
       if (active.current === controller) active.current = null;
     }
   }, [cancelActive, documentSaveBinding, onDocumentSaveResult, onOpenChange, onResult, request, service]);
-  const dismiss = useCallback((nextOpen: boolean, reason: NSEOverlayDismissReason) => {
+  const dismiss = useCallback((nextOpen: boolean, reason: OverlayDismissReason) => {
     if (!nextOpen) cancelActive();
     onOpenChange(nextOpen, reason);
   }, [cancelActive, onOpenChange]);

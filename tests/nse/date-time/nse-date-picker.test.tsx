@@ -28,7 +28,7 @@ import { NSEDateRangeEntry } from "../../../src/NSE/DateTime/Pickers/dateRangeEn
 import { NSEDateTimeEntry } from "../../../src/NSE/DateTime/Pickers/dateTimeEntry";
 import { NSETimeEntry } from "../../../src/NSE/DateTime/Pickers/timeEntry";
 import { NSEGraphicalClock } from "../../../src/NSE/DateTime/Calendar/graphicalClock";
-import { NSEOverlayProvider } from "../../../src/NSE/Overlays";
+import { OverlayProvider } from "../../../src/NSE/Overlays";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
 import { createSynCloudOS } from "../../../src/SynCloudOS/Runtime/createSynCloudOS";
 import { SynCloudOSProvider, useRuntimeNSEOverlayPort } from "../../../src/SynCloudOSReact";
@@ -40,11 +40,11 @@ const pickerWorkArea = Object.freeze({ width: 1280, height: 720, safeArea: Objec
 const pickerPresentation = createStaticPresentationPort({ width: 1280, height: 720 });
 function PickerOverlay({ children }: { readonly children: React.ReactNode }) {
   const runtimePort = useMemo(() => ({ runtimeId: "runtime:date-picker", signal: new AbortController().signal, environment: { browser: { getDocument: () => document, getWindow: () => window }, workArea: { getSnapshot: () => pickerWorkArea, subscribe: () => () => undefined }, visualViewport: { getSnapshot: () => null, subscribe: () => () => undefined }, presentation: pickerPresentation, setTimeout: (callback: () => void) => { callback(); return 0; }, clearTimeout: () => undefined }, restoreFocus: (_responderId: string, anchor: HTMLElement | null) => anchor?.focus(), reportPlacementFailure: () => undefined, wrapFocusScope: (_options: unknown, node: React.ReactNode) => node }), []);
-  return <NSEOverlayProvider runtimePort={runtimePort} defaultParentResponderId="workspace">{children}</NSEOverlayProvider>;
+  return <OverlayProvider runtimePort={runtimePort} defaultParentResponderId="workspace">{children}</OverlayProvider>;
 }
 function RuntimePickerOverlay({ children }: { readonly children: React.ReactNode }) {
   const runtimePort = useRuntimeNSEOverlayPort("workspace");
-  return <NSEOverlayProvider runtimePort={runtimePort} defaultParentResponderId="workspace">{children}</NSEOverlayProvider>;
+  return <OverlayProvider runtimePort={runtimePort} defaultParentResponderId="workspace">{children}</OverlayProvider>;
 }
 
 describe("civil date/time pickers", () => {

@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef } from "react";
 import { sampleSpring } from "../../FX/AnimationFX/AFXTimingFunction";
 import { updateNSEPopoverFrame } from "./popoverFrame";
-import { useNSEOverlayProvider } from "./NSEOverlayProvider";
+import { useNSEOverlayProvider } from "./OverlayProvider";
 
 // The same damped oscillator as AFXSpringAnimation, sampled once for CSS.
 // 320 ms, with a small overshoot (about 1% at the presented scale).

@@ -27,7 +27,7 @@ import type { NSETimeEntryEditorMode, NSETimeEntryProps } from "./datePickerType
 import { NSEButton } from "../../Controls/Buttons/NSEButton";
 import { NSEStepper } from "../../Controls/Values/NSEStepper";
 import { NSEPopUpButton } from "../../Menus/NSEPopUpButton";
-import { useOptionalNSEOverlayProvider } from "../../Overlays";
+import { useOptionalOverlayProvider } from "../../Overlays";
 import { NSEPopover } from "../../Overlays/NSEPopover";
 
 export const serializePlainTime = (value: NSEPlainTime | null) => value ? `${String(value.hour).padStart(2, "0")}:${String(value.minute).padStart(2, "0")}:${String(value.second).padStart(2, "0")}` : "";
@@ -192,7 +192,7 @@ function NSETimeFieldEditor({ value, minimum, maximum, locale, timeZone, date, h
   const typed = useRef<{ segment: NSETimeSegment; text: string } | null>(null);
   const clockButton = useRef<HTMLButtonElement>(null);
   const segmentRefs = useRef(new Map<NSETimeSegment, HTMLElement>());
-  const overlayProvider = useOptionalNSEOverlayProvider();
+  const overlayProvider = useOptionalOverlayProvider();
   const overlay = presentsClockOverlay ? overlayProvider : null;
   const instanceId = useId().replace(/:/g, "");
   const inert = disabled || readOnly;

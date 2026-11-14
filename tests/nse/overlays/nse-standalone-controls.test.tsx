@@ -23,7 +23,7 @@ import React, { StrictMode, useEffect, useRef, useState } from "react";
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEStandaloneControlHost, NSEPopup, NSEListboxPopup, createStandaloneNSEControlRuntime } from "../../../src/NSE/Overlays";
-import { NSEOverlayProvider, useNSEOverlayProvider, type NSEOverlayProviderContextValue } from "../../../src/NSE/Overlays/NSEOverlayProvider";
+import { OverlayProvider, useNSEOverlayProvider, type OverlayProviderContextValue } from "../../../src/NSE/Overlays/OverlayProvider";
 import { NSEMenuView, NSEPopUpButton } from "../../../src/NSE/Menus";
 import { NSEFeedbackProvider } from "../../../src/NSE/Feedback";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
@@ -37,7 +37,7 @@ function Host({ children }: React.PropsWithChildren) {
   return <NSEStandaloneControlHost document={document} window={window} presentation={presentation}>{children}</NSEStandaloneControlHost>;
 }
 
-function Probe({ publish }: { publish(context: NSEOverlayProviderContextValue): void }) {
+function Probe({ publish }: { publish(context: OverlayProviderContextValue): void }) {
   const context = useNSEOverlayProvider();
   useEffect(() => publish(context), [context, publish]);
   return null;
@@ -71,8 +71,8 @@ describe("standalone NSE host lifetime", () => {
   });
 
   it("keeps nested overlays and their authority across parent rerenders and Strict Mode replay", async () => {
-    let authority: NSEOverlayProviderContextValue | undefined;
-    const publish = (value: NSEOverlayProviderContextValue) => { authority = value; };
+    let authority: OverlayProviderContextValue | undefined;
+    const publish = (value: OverlayProviderContextValue) => { authority = value; };
     const fixture = (revision: number) => <StrictMode><Host>
       <output>{revision}</output><Probe publish={publish} />
       <NSEPopup id="outer" defaultOpen title="Outer"><button>Outer action</button>
@@ -96,9 +96,9 @@ describe("standalone NSE host lifetime", () => {
   });
 
   it("isolates simultaneous hosts even when their overlay ids are identical", async () => {
-    const managers: NSEOverlayProviderContextValue[] = [];
-    const first = (context: NSEOverlayProviderContextValue) => { managers[0] = context; };
-    const second = (context: NSEOverlayProviderContextValue) => { managers[1] = context; };
+    const managers: OverlayProviderContextValue[] = [];
+    const first = (context: OverlayProviderContextValue) => { managers[0] = context; };
+    const second = (context: OverlayProviderContextValue) => { managers[1] = context; };
     render(<>
       <Host><Probe publish={first} /><NSEPopup id="shared" defaultOpen><button>First host action</button></NSEPopup></Host>
       <Host><Probe publish={second} /><NSEPopup id="shared" defaultOpen><button>Second host action</button></NSEPopup></Host>
@@ -218,9 +218,9 @@ describe("standalone picker and menu keyboard contracts", () => {
       return (
         <>
           <div data-testid="clipped" style={{ clipPath: "inset(0)" }}>
-            <NSEOverlayProvider runtimePort={outer.runtime} defaultParentResponderId={outer.defaultParentResponderId} portalContainer={layer}>
+            <OverlayProvider runtimePort={outer.runtime} defaultParentResponderId={outer.defaultParentResponderId} portalContainer={layer}>
               {children}
-            </NSEOverlayProvider>
+            </OverlayProvider>
           </div>
           <div data-testid="overlay-layer" ref={setLayer} />
           <button type="button">Outside</button>
@@ -260,8 +260,8 @@ describe("standalone picker and menu keyboard contracts", () => {
   });
 
   it("clears a listbox type-ahead timer when the branch unmounts while its host remains", async () => {
-    let authority: NSEOverlayProviderContextValue | undefined;
-    const publish = (value: NSEOverlayProviderContextValue) => { authority = value; };
+    let authority: OverlayProviderContextValue | undefined;
+    const publish = (value: OverlayProviderContextValue) => { authority = value; };
     const options = [{ id: "alpha", label: "Alpha" }, { id: "beta", label: "Beta" }];
     const fixture = (show: boolean) => <Host><Probe publish={publish} />{show ? <NSEListboxPopup id="typeahead" defaultOpen options={options} /> : <span>Branch removed</span>}</Host>;
     const view = render(fixture(true));

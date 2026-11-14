@@ -24,7 +24,7 @@ import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
 import { nseControlHooks, nseStateHooks } from "../../Theme/contract/hooks";
 import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction";
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type MutableRefObject } from "react";
-import { NSEListboxPopup, useOptionalNSEOverlayProvider } from "../../Overlays";
+import { NSEListboxPopup, useOptionalOverlayProvider } from "../../Overlays";
 import { useNSEControlCommand } from "../Core";
 import { useNSEActionBinding } from "../Core/useNSEControlAction";
 import { useNSEControlFeedback } from "../Core/nseControlsShared";
@@ -118,7 +118,7 @@ function NSERoundedSegments(props: NSESegmentedControlProps) {
       return next;
     });
   }, []);
-  const overlay = useOptionalNSEOverlayProvider();
+  const overlay = useOptionalOverlayProvider();
   const selected = items.find((item) => props.selection.selectedIds.has(item.id) && item.isEnabled !== false)?.id ?? items.find((item) => item.isEnabled !== false)?.id;
   const maximumVisible = Math.max(1, Math.floor(props.maximumVisibleSegments ?? items.length));
   const initialVisible = items.slice(0, maximumVisible);

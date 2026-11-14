@@ -22,7 +22,7 @@
 import React, { useMemo, useState } from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { NSEOverlayProvider } from "../../../src/NSE/Overlays";
+import { OverlayProvider } from "../../../src/NSE/Overlays";
 import { NSELabelHelp } from "../../../src/NSE/Tooltips/NSELabelHelp";
 import { NSETooltipProvider, useNSETooltip } from "../../../src/NSE/Tooltips";
 
@@ -117,9 +117,9 @@ function TooltipHarness({
     };
   }, [reducedMotion, runtimeController, scheduler]);
   return (
-    <NSEOverlayProvider runtimePort={runtimePort}>
+    <OverlayProvider runtimePort={runtimePort}>
       <NSETooltipProvider leaveDelayMs={50}>{children}</NSETooltipProvider>
-    </NSEOverlayProvider>
+    </OverlayProvider>
   );
 }
 

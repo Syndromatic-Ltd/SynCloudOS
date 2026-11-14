@@ -35,15 +35,15 @@ import { nsePopoverSpringEasing, useNSEPopoverSurface } from "./useNSEPopoverSur
 import { NSEPopoverFrame } from "./NSEPopoverFrame";
 import { nseMenuChosenAttribute, nseMenuChosenFadeMs } from "../Menus/menuSelectionFlash";
 import { createPortal } from "react-dom";
-import type { NSEOverlayAnchorPoint } from "./computeNSEOverlayPosition";
+import type { OverlayAnchorPoint } from "./computeOverlayPosition";
 import { useNSEOverlay } from "./useNSEOverlay";
-import { useNSEOverlayProvider } from "./NSEOverlayProvider";
+import { useNSEOverlayProvider } from "./OverlayProvider";
 import { NSEActionResponderContext } from "../Controls/Core/useNSEControlAction";
 import { useNSEAppearanceProjection } from "../Appearance";
 import type {
   NSELogicalPlacement,
-  NSEOverlayDismissReason,
-  NSEOverlayKind,
+  OverlayDismissReason,
+  OverlayKind,
 } from "./overlayTypes";
 
 function classNames(...values: readonly (string | false | null | undefined)[]): string {
@@ -64,7 +64,7 @@ export interface NSEPopupProps extends Omit<HTMLAttributes<HTMLDivElement>, "tit
   readonly defaultOpen?: boolean;
   readonly anchor?: HTMLElement | null;
   /** @internal Place against this viewport point instead of the anchor's box (a context menu at the pointer). */
-  readonly anchorPoint?: NSEOverlayAnchorPoint | null;
+  readonly anchorPoint?: OverlayAnchorPoint | null;
   /** @internal NSEPopover's positioning rectangle in the anchor view. */
   readonly relativeTo?: Pick<DOMRectReadOnly, "x" | "y" | "width" | "height">;
   /** Defaults to the nearest class controller, then the branch's host responder. */
@@ -90,22 +90,22 @@ export interface NSEPopupProps extends Omit<HTMLAttributes<HTMLDivElement>, "tit
   /** The content is still arriving; the surface is not painted until it has. */
   readonly contentPending?: boolean;
   /** Internal family specialisation; callers should prefer family entry points. */
-  readonly overlayKind?: NSEOverlayKind;
+  readonly overlayKind?: OverlayKind;
   /** @internal NSEPopover owns the continuous plate and arrow frame. */
   readonly drawsBackground?: boolean;
-  onOpenChange?(open: boolean, reason: NSEOverlayDismissReason): void;
+  onOpenChange?(open: boolean, reason: OverlayDismissReason): void;
 }
 
 interface NSEPopupState {
   readonly open: boolean;
-  requestOpen(open: boolean, reason: NSEOverlayDismissReason): void;
+  requestOpen(open: boolean, reason: OverlayDismissReason): void;
 }
 
 function useNSEPopupState({ open, defaultOpen = false, onOpenChange }: Pick<NSEPopupProps, "open" | "defaultOpen" | "onOpenChange">): NSEPopupState {
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
   const controlled = open !== undefined;
   const resolvedOpen = controlled ? open : uncontrolledOpen;
-  const requestOpen = useCallback((nextOpen: boolean, reason: NSEOverlayDismissReason) => {
+  const requestOpen = useCallback((nextOpen: boolean, reason: OverlayDismissReason) => {
     if (!controlled) setUncontrolledOpen(nextOpen);
     onOpenChange?.(nextOpen, reason);
   }, [controlled, onOpenChange]);
@@ -116,7 +116,7 @@ function dismissalReasons({
   dismissOnEscape,
   dismissOnOutside,
   anchored,
-}: Pick<NSEPopupProps, "dismissOnEscape" | "dismissOnOutside"> & { readonly anchored: boolean }): readonly NSEOverlayDismissReason[] {
+}: Pick<NSEPopupProps, "dismissOnEscape" | "dismissOnOutside"> & { readonly anchored: boolean }): readonly OverlayDismissReason[] {
   return [
     ...(dismissOnEscape ? ["escape" as const] : []),
     ...(dismissOnOutside ? ["outside-pointer" as const, "focus-left" as const] : []),
@@ -180,7 +180,7 @@ export function NSEPopup({
   const hasPopoverFrame = drawsBackground !== undefined;
   const [surfaceElement, setSurfaceElement] = useState<HTMLElement | null>(null);
   const [arrow, setArrow] = useState<HTMLElement | null>(null);
-  const kind: NSEOverlayKind = overlayKind ?? (modal ? "action-sheet" : "popover");
+  const kind: OverlayKind = overlayKind ?? (modal ? "action-sheet" : "popover");
   const resolvedPresentation = presentation ?? { mode: kind === "action-sheet" ? "sheet" as const : "anchored" as const };
   const isModal = kind === "action-sheet" || modal;
   const overlay = useNSEOverlay({

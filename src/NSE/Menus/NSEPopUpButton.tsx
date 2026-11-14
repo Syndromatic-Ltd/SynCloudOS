@@ -21,7 +21,7 @@
 import { useNSEThemeInteraction } from "../Theme/contract/useThemeInteraction";
 import { nseControlHooks } from "../Theme/contract/hooks";
 import { useCallback, useContext, useEffect, useId, useMemo, useRef, useState, type HTMLAttributes, type ReactNode } from "react";
-import { useOptionalNSEOverlayProvider } from "../Overlays";
+import { useOptionalOverlayProvider } from "../Overlays";
 import { NSEListboxPopup, type NSEListboxOption } from "../Overlays/NSEListboxPopup";
 import type { NSEPopupPresentation } from "../Overlays/NSEPopup";
 import { NSEButton, type NSEButtonProps } from "../Controls/Buttons/NSEButton";
@@ -163,7 +163,7 @@ function NSEPopUpButtonControl(props: NSEPopUpButtonProps) {
   if (menu && !pullsDown) throw new TypeError("NSEPopUpButton takes a command menu only when it pullsDown.");
   if (menu && items.length) throw new TypeError("NSEPopUpButton takes either items or a command menu, not both.");
   const disabled = !isEnabled;
-  const provider = useOptionalNSEOverlayProvider();
+  const provider = useOptionalOverlayProvider();
   const nearestResponderId = useContext(NSEActionResponderContext);
   const hasActionPayload = Object.prototype.hasOwnProperty.call(props, "actionPayload");
   const [itemCommands, setItemCommands] = useState<ReadonlyMap<string, NSEControlCommandState<unknown>>>(() => new Map());

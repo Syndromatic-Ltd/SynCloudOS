@@ -34,8 +34,8 @@ import { NSEPreferencesToast } from "../../src/NSE/Components/NSEPreferencesToas
 import { NSERadioGroup, NSETextField } from "../../src/NSE/Controls/Fields/NSEFields";
 import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
 import { NSEPopUpButton } from "../../src/NSE/Menus";
-import { NSEOverlayProvider, NSEPopup as NSECanonicalPopup } from "../../src/NSE/Overlays";
-import type { NSEOverlayRuntimePort } from "../../src/NSE/Overlays/overlayTypes";
+import { OverlayProvider, NSEPopup as NSECanonicalPopup } from "../../src/NSE/Overlays";
+import type { OverlayRuntimePort } from "../../src/NSE/Overlays/overlayTypes";
 import { atmoTheme } from "../../src/NSE/Appearance/atmo";
 import { NSETooltip } from "../../src/NSE/Tooltips";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
@@ -66,7 +66,7 @@ function Probe({ id }: { readonly id: string }) {
 }
 
 
-function overlayRuntime(runtimeId = "runtime:p11"): NSEOverlayRuntimePort {
+function overlayRuntime(runtimeId = "runtime:p11"): OverlayRuntimePort {
   const controller = new AbortController();
   const workArea = { width: 1024, height: 768, safeArea: { top: 0, right: 0, bottom: 0, left: 0 } } as const;
   const visualViewport = { width: 1024, height: 768, offsetLeft: 0, offsetTop: 0 } as const;
@@ -249,10 +249,10 @@ describe("NSE appearance composition", () => {
         contrast="high"
         transparency="reduced"
       >
-        <NSEOverlayProvider runtimePort={overlayRuntime()}>
+        <OverlayProvider runtimePort={overlayRuntime()}>
           <span>Canonical owner</span>
           <CanonicalPortalSpecimens />
-        </NSEOverlayProvider>
+        </OverlayProvider>
       </NSEAppearanceProvider>,
     );
 

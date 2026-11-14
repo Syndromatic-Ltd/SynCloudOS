@@ -32,7 +32,7 @@ import type { NSEFontFamily, NSEFontPreset } from "../Text/fontDescriptors";
 import { useNSEDeferredDisposal, type NSEDisposalScheduler } from "../interactionLifecycle";
 import { NSEMenuView } from "../Menus/NSEMenuView";
 import type { NSEMenuItemDefinition } from "../Menus/menuTypes";
-import { useNSEOverlayProvider } from "../Overlays/NSEOverlayProvider";
+import { useNSEOverlayProvider } from "../Overlays/OverlayProvider";
 import { NSEUtilityPanel } from "../Overlays/NSEUtilityPanel";
 import { NSESegmentedControl } from "../Controls/Values/NSESegmentedControl";
 import { DocumentColourGlyph, GearGlyph, MinusGlyph, PlusGlyph, ShadowGlyph, StrikethroughGlyph, TextColourGlyph, UnderlineGlyph } from "./fontPanelIcons";

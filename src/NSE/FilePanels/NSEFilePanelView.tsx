@@ -19,7 +19,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { NSEPopup, reportNSEWindowSurfaceError, useNSEWindowSurfaceLifecycle, useOptionalNSEWindowSurfaceBridge, type NSEOverlayDismissReason, type NSEWindowSurfaceBridge } from "../Overlays";
+import { NSEPopup, reportNSEWindowSurfaceError, useNSEWindowSurfaceLifecycle, useOptionalNSEWindowSurfaceBridge, type OverlayDismissReason, type NSEWindowSurfaceBridge } from "../Overlays";
 import { useNSEPresentedContent } from "../Overlays/useNSEPresentedContent";
 import { NSEWindowFittingContent, centredWindowBounds, type NSEWindowFittingSize } from "../Overlays/NSEWindowFittingContent";
 import type { FilePanelResult, FilePanelSaveTarget } from "../../SynCloudOS/SynCloudOS";
@@ -54,7 +54,7 @@ export interface NSEFilePanelViewProps {
   readonly windowBridge?: NSEFilePanelWindowBridge;
   readonly result: FilePanelResult<unknown> | FilePanelResult<FilePanelSaveTarget> | null;
   readonly children: React.ReactNode;
-  onOpenChange(open: boolean, reason: NSEOverlayDismissReason): void;
+  onOpenChange(open: boolean, reason: OverlayDismissReason): void;
 }
 
 function resultMessage(result: NSEFilePanelViewProps["result"]): string | null {
@@ -108,7 +108,7 @@ export function NSEFilePanelView({
   }, [bridgeRequest, canonicalBridge, open, windowBridge]);
   const message = resultMessage(result);
   const status = result ? result.kind : "ready";
-  const dismiss = useCallback((nextOpen: boolean, reason: NSEOverlayDismissReason) => {
+  const dismiss = useCallback((nextOpen: boolean, reason: OverlayDismissReason) => {
     onOpenChange(nextOpen, reason);
   }, [onOpenChange]);
 

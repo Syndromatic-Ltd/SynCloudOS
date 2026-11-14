@@ -23,13 +23,13 @@ import type { NSEEdgeInsets } from "../Layout/NSEEdgeInsets";
 import { useCallback, useContext, useEffect, useId, useMemo, useRef, useState, type HTMLAttributes, type KeyboardEvent, type MouseEvent, type PointerEvent, type ReactNode, type Ref } from "react";
 import { NSEAppearanceProvider, useNSEAppearance } from "../Appearance/NSEAppearanceProvider";
 import type { NSEAppearance } from "../Appearance/NSEAppearance";
-import { useOptionalNSEOverlayProvider } from "../Overlays";
+import { useOptionalOverlayProvider } from "../Overlays";
 import { NSEActionResponderContext } from "../Controls/Core/useNSEControlAction";
 import { NSEMenuView } from "../Menus/NSEMenuView";
 import type { NSEMenu } from "../Menus/NSEMenu";
 import { NSEMenuOverlay } from "../Menus/NSEMenuOverlay";
 import type { NSEMenuOverlayOptions } from "../Menus/menuTypes";
-import type { NSEOverlayAnchorPoint } from "../Overlays/computeNSEOverlayPosition";
+import type { OverlayAnchorPoint } from "../Overlays/computeOverlayPosition";
 import { GFXContext } from "../../FX/GraphicsFX/GFXContext";
 import type { GFXRect } from "../../FX/GraphicsFX/GFXGeometry";
 import { useIFXImageBox } from "../../FX/ImageFX/IFXImageViewport";
@@ -148,7 +148,7 @@ function NSEViewAppearance({ appearance, children }: { readonly appearance: NSEA
 function NSEMenuHostView({ menu, toolTip, menuOverlay, longPressDelayMs, direction, children, className, ref, ...htmlAttributes }: NSEViewProps & { readonly menu: NSEMenu }) {
   const [open, setOpen] = useState(false);
   // NSMenu.popUpContextMenu(_:with:for:): a pointer opens the menu at its location; the keyboard opens it on the view.
-  const [anchorPoint, setAnchorPoint] = useState<NSEOverlayAnchorPoint | null>(null);
+  const [anchorPoint, setAnchorPoint] = useState<OverlayAnchorPoint | null>(null);
   const hostRef = useRef<HTMLDivElement>(null);
   const attachHost = useCallback((element: HTMLDivElement | null) => {
     hostRef.current = element;
@@ -157,7 +157,7 @@ function NSEMenuHostView({ menu, toolTip, menuOverlay, longPressDelayMs, directi
   }, [ref]);
   const longPressRef = useRef<unknown | null>(null);
   const instanceId = useId();
-  const provider = useOptionalNSEOverlayProvider();
+  const provider = useOptionalOverlayProvider();
   const nearestResponderId = useContext(NSEActionResponderContext);
   const viewId = htmlAttributes.id ?? `nse-view-${menu.identifier}-${instanceId}`;
   if (!provider) throw new Error("An NSEView with a menu needs an NSEOverlayProvider.");

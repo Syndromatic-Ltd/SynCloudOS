@@ -21,7 +21,7 @@ import { useInsertionEffect, useLayoutEffect, useMemo, useRef, useState, useSync
 import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { SynCloudOSAppInfo, SynCloudOSRuntime } from "../SynCloudOS";
 import { SynWareRuntimeContext, SynCloudOSRuntimeContext, useRuntimeNSEControlPort, useRuntimeNSEFocusPort, useRuntimeNSEOverlayPort } from "../../SynCloudOSReact";
-import { NSEControlRuntimeProvider, NSEFocusPortProvider, NSEOverlayProvider, NSEConformanceEvidenceProvider, type NSEConformanceEvidencePort } from "../../NSE/NSE";
+import { NSEControlRuntimeProvider, NSEFocusPortProvider, OverlayProvider, NSEConformanceEvidenceProvider, type NSEConformanceEvidencePort } from "../../NSE/NSE";
 import type { MountedSynWareRuntime } from "./appRuntimeFacade";
 import { createMountedSynWareRuntime } from "./appRuntimeFacade";
 import type { SynWareRuntime } from "./appRuntimeTypes";
@@ -136,13 +136,13 @@ function MountedAppPresentationBoundary({
     <NSEViewActivityProvider source={animationState}>
     <NSEAnimationEnvironmentProvider reducedMotion={reducedMotion} animator={animator} layers={appAnimations} frames={appFrames}>
     <NSEConformanceEvidenceProvider port={conformanceEvidencePort}>
-      <NSEOverlayProvider runtimePort={overlayPort} defaultParentResponderId={`application:${runtime.app.bundleIdentifier}`}>
+      <OverlayProvider runtimePort={overlayPort} defaultParentResponderId={`application:${runtime.app.bundleIdentifier}`}>
         <NSEControlRuntimeProvider port={controlPort}>
           <NSEMenuRuntimeProvider port={menuPort}>
             <NSEFocusPortProvider port={focusPort}>{children}</NSEFocusPortProvider>
           </NSEMenuRuntimeProvider>
         </NSEControlRuntimeProvider>
-      </NSEOverlayProvider>
+      </OverlayProvider>
     </NSEConformanceEvidenceProvider>
     </NSEAnimationEnvironmentProvider>
     </NSEViewActivityProvider>

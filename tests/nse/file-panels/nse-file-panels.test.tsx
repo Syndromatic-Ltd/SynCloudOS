@@ -22,7 +22,7 @@
 import React, { useMemo, useRef, useState } from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { NSEOverlayProvider } from "../../../src/NSE/Overlays";
+import { OverlayProvider } from "../../../src/NSE/Overlays";
 import { NSESavePanel, type NSEFilePanelService } from "../../../src/NSE/FilePanels";
 import { createBrowserFilePanelAdapter, createFilePanelService, FilePanelReferenceError } from "../../../src/SynCloudOS/FilePanels";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
@@ -48,7 +48,7 @@ function OverlayHarness({ children }: { readonly children: React.ReactNode }) {
     reportPlacementFailure: vi.fn(),
     wrapFocusScope: (_options: unknown, node: React.ReactNode) => node,
   }), []);
-  return <NSEOverlayProvider runtimePort={runtimePort}>{children}</NSEOverlayProvider>;
+  return <OverlayProvider runtimePort={runtimePort}>{children}</OverlayProvider>;
 }
 
 function service(): NSEFilePanelService {

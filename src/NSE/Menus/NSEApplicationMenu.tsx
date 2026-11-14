@@ -20,7 +20,7 @@
 
 import { useCallback } from "react";
 import { NSEAppMenuSurface } from "./NSEAppMenuSurface";
-import type { NSEOverlayDismissReason } from "../Overlays";
+import type { OverlayDismissReason } from "../Overlays";
 import { NSEMenuView } from "./NSEMenuView";
 import type { NSEMenu } from "./NSEMenu";
 import { NSEMenuOverlay } from "./NSEMenuOverlay";
@@ -36,12 +36,12 @@ export interface NSEApplicationMenuProps {
   readonly anchor: HTMLElement | null;
   readonly title?: string;
   readonly labelledBy?: string;
-  onOpenChange(open: boolean, reason?: NSEOverlayDismissReason): void;
+  onOpenChange(open: boolean, reason?: OverlayDismissReason): void;
 }
 
 /** Canonical command-backed application menu using the curated vector Atmo surface. */
 export function NSEApplicationMenu({ model, controller, overlay, open, anchor, title, labelledBy, onOpenChange }: NSEApplicationMenuProps) {
-  const handleMenuOpenChange = useCallback((nextOpen: boolean, reason?: NSEOverlayDismissReason) => {
+  const handleMenuOpenChange = useCallback((nextOpen: boolean, reason?: OverlayDismissReason) => {
     onOpenChange(nextOpen, reason);
     if (!nextOpen) {
       queueMicrotask(() => {

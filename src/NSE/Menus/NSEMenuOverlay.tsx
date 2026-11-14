@@ -20,8 +20,8 @@
 
 import { useCallback, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { NSEPopup, useNSEOverlayProvider } from "../Overlays";
-import type { NSEOverlayDismissReason } from "../Overlays";
-import type { NSEOverlayAnchorPoint } from "../Overlays/computeNSEOverlayPosition";
+import type { OverlayDismissReason } from "../Overlays";
+import type { OverlayAnchorPoint } from "../Overlays/computeOverlayPosition";
 import type { NSEMenu } from "./NSEMenu";
 import type { NSEMenuOverlayOptions } from "./menuTypes";
 import { NSEMenuOverlayPresentationScope } from "./menuPresentationContext";
@@ -33,7 +33,7 @@ export interface NSEMenuOverlayProps {
   readonly open: boolean;
   readonly anchor: HTMLElement | null;
   /** A context menu opened by the pointer opens at the pointer (NSMenu.popUpContextMenu(_:with:for:)). */
-  readonly anchorPoint?: NSEOverlayAnchorPoint | null;
+  readonly anchorPoint?: OverlayAnchorPoint | null;
   readonly labelledBy?: string;
   readonly kind?: "menu" | "context-menu" | "submenu";
   readonly presentationMode?: "responsive" | "anchored" | "viewport-block-start-inline-end";
@@ -46,7 +46,7 @@ export interface NSEMenuOverlayProps {
   /** Application menus can launch another surface from a command selection. */
   readonly restoreFocus?: boolean;
   readonly children: ReactNode;
-  onOpenChange(open: boolean, reason: NSEOverlayDismissReason): void;
+  onOpenChange(open: boolean, reason: OverlayDismissReason): void;
 }
 
 /**
@@ -102,7 +102,7 @@ export function NSEMenuOverlay({ overlay, controller, open, anchor, anchorPoint,
     if (wasOpen.current && !open && controller.snapshot.open) controller.dismiss("programmatic");
     wasOpen.current = open;
   }, [controller, open]);
-  const handleOpenChange = useCallback((nextOpen: boolean, reason: NSEOverlayDismissReason) => {
+  const handleOpenChange = useCallback((nextOpen: boolean, reason: OverlayDismissReason) => {
     onOpenChange(nextOpen, reason);
     if (!nextOpen && !restoreFocus) {
       // The application menu deliberately does not restore focus on command

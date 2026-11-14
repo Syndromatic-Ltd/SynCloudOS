@@ -28,7 +28,7 @@ import { GFXColour } from "../../../src/FX/GraphicsFX/public";
 import { NSEColourWell, NSEColourPanelProvider, NSEColourPanel, NSEColourPanelController, classifyEyeDropperError } from "../../../src/NSE/Colour";
 import { NSEColourSliderPicker, NSEColourSwatches, NSEColourWheelPicker } from "../../../src/NSE/Colour/Pickers";
 import type { NSEEyeDropperAdapter } from "../../../src/NSE/Colour/Pickers";
-import { NSEOverlayProvider } from "../../../src/NSE/Overlays";
+import { OverlayProvider } from "../../../src/NSE/Overlays";
 import { SynCloudOSProvider } from "../../../src/SynCloudOSReact";
 import { createSynCloudOS } from "../../../src/SynCloudOS/Runtime/createSynCloudOS";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
@@ -78,7 +78,7 @@ function HostedColourHarness({ runtime, eyeDropper, children }: { readonly runti
     reportPlacementFailure: vi.fn(),
     wrapFocusScope: (_options: unknown, node: React.ReactNode) => node,
   }), [presentation, runtime, workArea]);
-  return <SynCloudOSProvider runtime={runtime}><NSEOverlayProvider runtimePort={runtimePort} defaultParentResponderId="workspace"><NSEColourPanelProvider service={runtime.colourPanel}>{children}<NSEColourPanel eyeDropper={eyeDropper} /></NSEColourPanelProvider></NSEOverlayProvider></SynCloudOSProvider>;
+  return <SynCloudOSProvider runtime={runtime}><OverlayProvider runtimePort={runtimePort} defaultParentResponderId="workspace"><NSEColourPanelProvider service={runtime.colourPanel}>{children}<NSEColourPanel eyeDropper={eyeDropper} /></NSEColourPanelProvider></OverlayProvider></SynCloudOSProvider>;
 }
 
 describe("colour controls", () => {
@@ -112,11 +112,11 @@ describe("colour controls", () => {
     const anchor = document.createElement("button");
     anchor.id = "state-anchor";
     document.body.append(anchor);
-    const view = render(<NSEOverlayProvider runtimePort={colourOverlayPort(runtime)} defaultParentResponderId="workspace"><NSEColourPanel controller={controller} contentState="loading" /></NSEOverlayProvider>);
+    const view = render(<OverlayProvider runtimePort={colourOverlayPort(runtime)} defaultParentResponderId="workspace"><NSEColourPanel controller={controller} contentState="loading" /></OverlayProvider>);
     expect(screen.getByText(/loading colour choices/i)).not.toBeNull();
-    view.rerender(<NSEOverlayProvider runtimePort={colourOverlayPort(runtime)} defaultParentResponderId="workspace"><NSEColourPanel controller={controller} contentState="denied" /></NSEOverlayProvider>);
+    view.rerender(<OverlayProvider runtimePort={colourOverlayPort(runtime)} defaultParentResponderId="workspace"><NSEColourPanel controller={controller} contentState="denied" /></OverlayProvider>);
     expect(screen.getByRole("alert").textContent).toMatch(/permission/i);
-    view.rerender(<NSEOverlayProvider runtimePort={colourOverlayPort(runtime)} defaultParentResponderId="workspace"><NSEColourPanel controller={controller} contentState="invalid" /></NSEOverlayProvider>);
+    view.rerender(<OverlayProvider runtimePort={colourOverlayPort(runtime)} defaultParentResponderId="workspace"><NSEColourPanel controller={controller} contentState="invalid" /></OverlayProvider>);
     expect(screen.getByRole("alert").textContent).toMatch(/invalid/i);
     anchor.remove();
   });
@@ -208,7 +208,7 @@ describe("colour controls", () => {
   it("supports a supplied standalone controller without requiring colour provider context", () => {
     const runtime = createSynCloudOS({ id: "colour:standalone-panel", environment: createTestRuntimeEnvironment() });
     const controller = new NSEColourPanelController(runtime);
-    expect(() => render(<NSEOverlayProvider runtimePort={colourOverlayPort(runtime)} defaultParentResponderId="workspace"><NSEColourPanel controller={controller} /></NSEOverlayProvider>)).not.toThrow();
+    expect(() => render(<OverlayProvider runtimePort={colourOverlayPort(runtime)} defaultParentResponderId="workspace"><NSEColourPanel controller={controller} /></OverlayProvider>)).not.toThrow();
   });
 
   it("resolves the active well in the overlay owner document", () => {
@@ -225,7 +225,7 @@ describe("colour controls", () => {
     controller.activateTarget({ id: anchor.id, responderId: "workspace", read: () => GFXColour.parse("#336699"), preview: vi.fn(), commit: vi.fn(), cancel: vi.fn() });
     controller.open();
 
-    render(<NSEOverlayProvider runtimePort={colourOverlayPort(runtime, ownerDocument)} defaultParentResponderId="workspace"><NSEColourPanelProvider service={runtime.colourPanel}><NSEColourPanel controller={controller} /></NSEColourPanelProvider></NSEOverlayProvider>, { container: mount });
+    render(<OverlayProvider runtimePort={colourOverlayPort(runtime, ownerDocument)} defaultParentResponderId="workspace"><NSEColourPanelProvider service={runtime.colourPanel}><NSEColourPanel controller={controller} /></NSEColourPanelProvider></OverlayProvider>, { container: mount });
 
     expect(within(ownerDocument.body).getByRole("dialog", { name: "Colours" })).not.toBeNull();
     expect(document.querySelector("[data-nse-utility-panel]")).toBeNull();

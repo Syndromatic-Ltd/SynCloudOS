@@ -7,7 +7,7 @@ import { NSEView } from "../../src/NSE/Views/NSEView";
 import { NSEAppearance } from "../../src/NSE/Appearance/NSEAppearance";
 import { useNSEAppearance } from "../../src/NSE/Appearance/NSEAppearanceProvider";
 import { NSEMenu } from "../../src/NSE/Menus/NSEMenu";
-import { NSEOverlayProvider } from "../../src/NSE/Overlays";
+import { OverlayProvider } from "../../src/NSE/Overlays";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact/SynCloudOSProvider";
 import { RuntimeInputBoundary } from "../../src/SynCloudOSReact/RuntimeInputBoundary";
 import { useRuntimeNSEOverlayPort } from "../../src/SynCloudOSReact";
@@ -146,11 +146,11 @@ describe("NSEView.draw", () => {
     function AppearanceProbe() { return <output>{useNSEAppearance().resolvedColourScheme}</output>; }
     function Figure() {
       const overlayPort = useRuntimeNSEOverlayPort("runtime");
-      return <NSEOverlayProvider runtimePort={overlayPort} defaultParentResponderId="runtime">
+      return <OverlayProvider runtimePort={overlayPort} defaultParentResponderId="runtime">
         <NSEView menu={menu} toolTip="Figure details" appearance={new NSEAppearance("darkAqua")} draw={(rect, context) => context.fill(GFXPath.rect(rect))}>
           <AppearanceProbe />
         </NSEView>
-      </NSEOverlayProvider>;
+      </OverlayProvider>;
     }
     const view = render(<SynCloudOSProvider runtime={runtime}><RuntimeInputBoundary><Figure /></RuntimeInputBoundary></SynCloudOSProvider>);
     const host = screen.getByTitle("Figure details");

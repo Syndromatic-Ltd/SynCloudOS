@@ -29,50 +29,50 @@ import {
   type Padding,
   type Placement,
 } from "@floating-ui/dom";
-import type { NSEOverlayRegionBounds } from "./overlayRegion";
+import type { OverlayRegionBounds } from "./overlayRegion";
 import type { NSELogicalPlacement } from "./overlayTypes";
 import { updateNSEPopoverFrame } from "./popoverFrame";
 import { setNSEHook } from "../Theme/contract/hookMirrorDOM";
 import { applyNSEPopoverPosition, computeNSEPopoverPosition, nsePopoverReference } from "./popoverPosition";
 
-export type NSEOverlayDirection = "ltr" | "rtl";
-export type NSEOverlayCollisionPadding = Padding;
+export type OverlayDirection = "ltr" | "rtl";
+export type OverlayCollisionPadding = Padding;
 
 /**
  * Browser placement work must leave ResizeObserver delivery before it mutates
  * the floating surface. The owning runtime supplies this scheduler so overlay
  * code never acquires ambient timer authority.
  */
-export interface NSEOverlayPositionScheduler {
+export interface OverlayPositionScheduler {
   setTimeout(callback: () => void, delayMs: number): unknown;
   clearTimeout(handle: unknown): void;
 }
 
 /** A point in viewport coordinates. */
-export interface NSEOverlayAnchorPoint {
+export interface OverlayAnchorPoint {
   readonly x: number;
   readonly y: number;
 }
 
-export interface NSEOverlayPositionOptions {
+export interface OverlayPositionOptions {
   readonly anchor: HTMLElement;
   /**
    * Place against this point instead of the anchor's box, as
    * NSMenu.popUpContextMenu(_:with:for:) places a menu at the event's location.
    * The anchor still owns the surface's lifetime and focus.
    */
-  readonly anchorPoint?: NSEOverlayAnchorPoint | null;
+  readonly anchorPoint?: OverlayAnchorPoint | null;
   /** A rectangle in the positioning view's local coordinates. */
   readonly anchorRect?: Pick<DOMRectReadOnly, "x" | "y" | "width" | "height">;
   readonly floating: HTMLElement;
-  readonly boundary?: () => NSEOverlayRegionBounds | null;
+  readonly boundary?: () => OverlayRegionBounds | null;
   readonly arrow?: HTMLElement | null;
   readonly placement?: NSELogicalPlacement;
-  readonly direction?: NSEOverlayDirection;
+  readonly direction?: OverlayDirection;
   readonly offset?: number;
-  readonly collisionPadding?: NSEOverlayCollisionPadding;
+  readonly collisionPadding?: OverlayCollisionPadding;
   readonly signal?: AbortSignal;
-  readonly scheduler?: NSEOverlayPositionScheduler;
+  readonly scheduler?: OverlayPositionScheduler;
   readonly onAnchorRemoved?: () => void;
   /** Receives a bounded placement failure without exposing DOM or browser data. */
   onError?(): void;
@@ -81,12 +81,12 @@ export interface NSEOverlayPositionOptions {
 export interface NSEViewportCornerPositionOptions {
   readonly anchor: HTMLElement;
   readonly floating: HTMLElement;
-  readonly boundary?: NSEOverlayRegionBounds | null;
+  readonly boundary?: OverlayRegionBounds | null;
   readonly insetBlockStart: number;
   readonly insetInlineEnd: number;
   readonly availableInlineSize: number;
   readonly availableBlockSize: number;
-  readonly direction?: NSEOverlayDirection;
+  readonly direction?: OverlayDirection;
   readonly signal?: AbortSignal;
   readonly onAnchorRemoved?: () => void;
 }
@@ -104,12 +104,12 @@ const logicalPlacementMap: Readonly<Record<NSELogicalPlacement, readonly [Placem
 
 export function logicalPlacementToFloatingPlacement(
   placement: NSELogicalPlacement,
-  direction: NSEOverlayDirection = "ltr",
+  direction: OverlayDirection = "ltr",
 ): Placement {
   return logicalPlacementMap[placement][direction === "rtl" ? 1 : 0];
 }
 
-export function computeNSEOverlayPosition({
+export function computeOverlayPosition({
   anchor,
   anchorPoint = null,
   anchorRect,
@@ -124,7 +124,7 @@ export function computeNSEOverlayPosition({
   scheduler,
   onAnchorRemoved,
   onError,
-}: NSEOverlayPositionOptions): () => void {
+}: OverlayPositionOptions): () => void {
   let active = true;
   let generation = 0;
   let anchorRemovalReported = false;

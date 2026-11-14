@@ -3,8 +3,8 @@ import React, { useMemo, useState } from "react";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEPopover } from "../../../src/NSE/sdkPackageEntry";
-import { NSEOverlayProvider } from "../../../src/NSE/Overlays/NSEOverlayProvider";
-import { computeNSEOverlayPosition } from "../../../src/NSE/Overlays/computeNSEOverlayPosition";
+import { OverlayProvider } from "../../../src/NSE/Overlays/OverlayProvider";
+import { computeOverlayPosition } from "../../../src/NSE/Overlays/computeOverlayPosition";
 import { NSEAnimationEnvironmentProvider } from "../../../src/NSE/Animation/NSEAnimationEnvironment";
 import { NSEViewController, nsePopoverPositioning } from "../../../src/NSE/Application/NSEViewController";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
@@ -27,7 +27,7 @@ function Harness({ children, reducedMotion = false, compact = false }: { childre
     restoreFocus: () => undefined, reportPlacementFailure: () => { throw new Error("Placement failed"); },
     wrapFocusScope: (_options: unknown, node: React.ReactNode) => node,
   }), [compact]);
-  return <NSEAnimationEnvironmentProvider reducedMotion={reducedMotion}><NSEOverlayProvider runtimePort={runtimePort}>{children}</NSEOverlayProvider></NSEAnimationEnvironmentProvider>;
+  return <NSEAnimationEnvironmentProvider reducedMotion={reducedMotion}><OverlayProvider runtimePort={runtimePort}>{children}</OverlayProvider></NSEAnimationEnvironmentProvider>;
 }
 
 function Fixture({ drawsBackground = true, open = true }: { drawsBackground?: boolean; open?: boolean }) {
@@ -138,7 +138,7 @@ describe("real Floating UI popover geometry", () => {
     const anchor = document.createElement("button"), floating = document.createElement("div"), arrow = document.createElement("span");
     document.body.append(anchor, floating); floating.append(arrow);
     measured(anchor, 200, 200, 20, 20); measured(floating, 0, 0, 120, 60); measured(arrow, 0, 0, 8, 8);
-    const stop = computeNSEOverlayPosition({ anchor, floating, arrow, placement: "block-end", boundary: () => ({ x: 0, y: 0, width: 1000, height: 720 }) });
+    const stop = computeOverlayPosition({ anchor, floating, arrow, placement: "block-end", boundary: () => ({ x: 0, y: 0, width: 1000, height: 720 }) });
     try { await waitFor(() => expect(arrow.style.top).toBe("-4px")); }
     finally { stop(); anchor.remove(); floating.remove(); }
   });
@@ -146,7 +146,7 @@ describe("real Floating UI popover geometry", () => {
     const anchor = document.createElement("button"), floating = document.createElement("div"), arrow = document.createElement("span");
     document.body.append(anchor, floating); floating.append(arrow);
     measured(anchor, 380, 330, 20, 20); measured(floating, 0, 0, 240, 140); measured(arrow, 0, 0, 20, 20);
-    const stop = computeNSEOverlayPosition({ anchor, floating, arrow, placement: "block-end", offset: 12, boundary: () => ({ x: 100, y: 60, width: 320, height: 300 }) });
+    const stop = computeOverlayPosition({ anchor, floating, arrow, placement: "block-end", offset: 12, boundary: () => ({ x: 100, y: 60, width: 320, height: 300 }) });
     try {
       await waitFor(() => expect(floating.dataset.placement).toBe("top"));
       expect(Number.parseFloat(floating.style.left)).toBeLessThanOrEqual(172);
@@ -160,7 +160,7 @@ describe("real Floating UI popover geometry", () => {
     const anchor = document.createElement("button"), floating = document.createElement("div");
     document.body.append(anchor, floating);
     measured(anchor, 100, 100, 500, 400); measured(floating, 0, 0, 120, 80);
-    const stop = computeNSEOverlayPosition({ anchor, floating, anchorPoint: { x: 220, y: 210 }, placement: "block-end-inline-start", boundary: () => ({ x: 0, y: 0, width: 1000, height: 720 }) });
+    const stop = computeOverlayPosition({ anchor, floating, anchorPoint: { x: 220, y: 210 }, placement: "block-end-inline-start", boundary: () => ({ x: 0, y: 0, width: 1000, height: 720 }) });
     try { await waitFor(() => expect(floating.style.left).toBe("220px")); expect(floating.style.top).toBe("210px"); }
     finally { stop(); anchor.remove(); floating.remove(); }
   });
@@ -169,7 +169,7 @@ describe("real Floating UI popover geometry", () => {
     const anchor = document.createElement("button"), floating = document.createElement("div");
     document.body.append(anchor, floating);
     measured(anchor, 100, 100, 500, 400); measured(floating, 0, 0, 120, 80);
-    const stop = computeNSEOverlayPosition({ anchor, floating, anchorRect: { x: 40, y: 50, width: 20, height: 10 }, placement: "block-end-inline-start", boundary: () => ({ x: 0, y: 0, width: 1000, height: 720 }) });
+    const stop = computeOverlayPosition({ anchor, floating, anchorRect: { x: 40, y: 50, width: 20, height: 10 }, placement: "block-end-inline-start", boundary: () => ({ x: 0, y: 0, width: 1000, height: 720 }) });
     try {
       await waitFor(() => expect(floating.style.left).toBe("140px")); expect(floating.style.top).toBe("164px");
       measured(anchor, 200, 140, 500, 400);

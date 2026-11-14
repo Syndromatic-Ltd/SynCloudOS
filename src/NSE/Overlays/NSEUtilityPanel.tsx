@@ -24,7 +24,7 @@ import { NSEPanelView } from "../Windows/NSEPanelView";
 import { createCanonicalWindowRecord, freezeWindowRecord } from "../../SynCloudOS/nseRuntimeContracts";
 import type { SynCloudOSRuntimeId, WindowPresentation, WindowRecord } from "../../SynCloudOS/SynCloudOS";
 import { useNSEAppearanceProjection } from "../Appearance";
-import { useNSEOverlayProvider } from "./NSEOverlayProvider";
+import { useNSEOverlayProvider } from "./OverlayProvider";
 import { useOptionalNSEWindowSurfaceBridge } from "./NSEWindowSurfaceBridge";
 import { reportNSEWindowSurfaceError, useNSEWindowSurfaceLifecycle } from "./useNSEWindowSurfaceLifecycle";
 import { useNSEPresentedContent } from "./useNSEPresentedContent";

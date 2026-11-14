@@ -23,7 +23,7 @@ import React from "react";
 import { createPortal } from "react-dom";
 import { cleanup, render } from "@testing-library/react";
 import { afterEach, expect, it } from "vitest";
-import { NSEOverlayProvider, useNSEOverlayProvider } from "../../src/NSE/Overlays";
+import { OverlayProvider, useNSEOverlayProvider } from "../../src/NSE/Overlays";
 import { SynCloudOSProvider, useRuntimeNSEOverlayPort } from "../../src/SynCloudOSReact";
 import { createTestRuntime } from "./helpers";
 
@@ -41,11 +41,11 @@ it.each([undefined, null])("inherits an explicit destination only when a nested 
   }
   function Nested() {
     outer = useNSEOverlayProvider();
-    return <div data-clipped-frame="true"><NSEOverlayProvider runtimePort={outer.runtime} portalContainer={override}><Probe /></NSEOverlayProvider></div>;
+    return <div data-clipped-frame="true"><OverlayProvider runtimePort={outer.runtime} portalContainer={override}><Probe /></OverlayProvider></div>;
   }
   function Host() {
     const port = useRuntimeNSEOverlayPort("application:probe");
-    return <NSEOverlayProvider runtimePort={port} portalContainer={destination}><Nested /></NSEOverlayProvider>;
+    return <OverlayProvider runtimePort={port} portalContainer={destination}><Nested /></OverlayProvider>;
   }
   const rendered = render(<SynCloudOSProvider runtime={runtime}><Host /></SynCloudOSProvider>);
   expect(inner!.manager).not.toBe(outer!.manager);

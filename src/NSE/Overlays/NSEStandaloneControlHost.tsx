@@ -20,8 +20,8 @@
 
 import { useEffect, useRef, type PropsWithChildren } from "react";
 import { NSEFocusPortProvider } from "../Focus/NSEFocusPort";
-import { NSEOverlayProvider } from "./NSEOverlayProvider";
-import type { NSEOverlayRuntimePort } from "./overlayTypes";
+import { OverlayProvider } from "./OverlayProvider";
+import type { OverlayRuntimePort } from "./overlayTypes";
 import {
   createStandaloneNSEControlRuntime,
   type NSEStandaloneControlRuntime,
@@ -30,7 +30,7 @@ import {
 export interface NSEStandaloneControlHostProps extends PropsWithChildren {
   readonly document: Document;
   readonly window: Window;
-  readonly presentation: NSEOverlayRuntimePort["environment"]["presentation"];
+  readonly presentation: OverlayRuntimePort["environment"]["presentation"];
   readonly parentResponderId?: string;
 }
 
@@ -71,13 +71,13 @@ export function NSEStandaloneControlHost({
 
   return (
     <NSEFocusPortProvider port={standalone.focusPort}>
-      <NSEOverlayProvider
+      <OverlayProvider
         manager={standalone.manager}
         runtimePort={standalone.runtime}
         defaultParentResponderId={standalone.parentResponderId}
       >
         {children}
-      </NSEOverlayProvider>
+      </OverlayProvider>
     </NSEFocusPortProvider>
   );
 }

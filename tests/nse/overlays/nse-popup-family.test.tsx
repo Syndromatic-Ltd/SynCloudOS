@@ -24,7 +24,7 @@ installNSEScrollIntoViewFixture();
 import React, { useMemo, useState } from "react";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { NSEOverlayProvider, NSEActionSheet, NSEListboxPopup, NSEPopup } from "../../../src/NSE/Overlays";
+import { OverlayProvider, NSEActionSheet, NSEListboxPopup, NSEPopup } from "../../../src/NSE/Overlays";
 import { NSEPopover } from "../../../src/NSE/Overlays/NSEPopover";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
 import { NSEUtilityPanel } from "../../../src/NSE/Overlays/NSEUtilityPanel";
@@ -58,7 +58,7 @@ function OverlayHarness({ children, mode = "desktop", onWrapFocusScope }: { read
     reportPlacementFailure: vi.fn(),
     wrapFocusScope: (options: unknown, node: React.ReactNode) => { onWrapFocusScope?.(options); return node; },
   }), [mode, onWrapFocusScope]);
-  return <NSEOverlayProvider runtimePort={runtimePort}>{children}</NSEOverlayProvider>;
+  return <OverlayProvider runtimePort={runtimePort}>{children}</OverlayProvider>;
 }
 
 function PopupFixture({ defaultOpen = false }: { readonly defaultOpen?: boolean }) {

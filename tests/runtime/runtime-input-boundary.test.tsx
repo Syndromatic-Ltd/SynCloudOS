@@ -24,7 +24,7 @@ import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createPortal } from "react-dom";
 import React from "react";
-import { NSEFocusPortProvider, NSEOverlayProvider } from "../../src/NSE/NSE";
+import { NSEFocusPortProvider, OverlayProvider } from "../../src/NSE/NSE";
 import { NSEMenuView } from "../../src/NSE/Menus";
 import { FocusScope, RuntimeInputBoundary, SynCloudOSProvider, useRuntimeNSEFocusPort, useRuntimeNSEOverlayPort } from "../../src/SynCloudOSReact";
 import type { CommandDeclaration } from "../../src/SynCloudOS/Commands";
@@ -179,11 +179,11 @@ describe("RuntimeInputBoundary", () => {
     function RuntimeMenu() {
       const focusPort = useRuntimeNSEFocusPort("runtime");
       const overlayPort = useRuntimeNSEOverlayPort("runtime");
-      return <NSEOverlayProvider runtimePort={overlayPort} defaultParentResponderId="runtime">
+      return <OverlayProvider runtimePort={overlayPort} defaultParentResponderId="runtime">
         <NSEFocusPortProvider port={focusPort}>
           <NSEMenuView label="Scoped NSE menu" open items={[{ value: "one", label: "One" }]} />
         </NSEFocusPortProvider>
-      </NSEOverlayProvider>;
+      </OverlayProvider>;
     }
     render(
       <SynCloudOSProvider runtime={runtime}>
@@ -202,9 +202,9 @@ describe("RuntimeInputBoundary", () => {
     function InnerMenu() {
       const focusPort = useRuntimeNSEFocusPort("runtime");
       const overlayPort = useRuntimeNSEOverlayPort("runtime");
-      return <NSEOverlayProvider runtimePort={overlayPort} defaultParentResponderId="runtime">
+      return <OverlayProvider runtimePort={overlayPort} defaultParentResponderId="runtime">
         <NSEFocusPortProvider port={focusPort}><NSEMenuView label="Nested port menu" open items={[{ value: "one", label: "One" }]} /></NSEFocusPortProvider>
-      </NSEOverlayProvider>;
+      </OverlayProvider>;
     }
     function OuterHost() {
       const port = useRuntimeNSEFocusPort("runtime");

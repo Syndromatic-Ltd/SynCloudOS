@@ -23,7 +23,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-libra
 import { afterEach, describe, expect, it, vi } from "vitest";
 import React from "react";
 import { NSEMenuView } from "../../src/NSE/Menus/NSEMenuView";
-import { NSEOverlayProvider } from "../../src/NSE/Overlays";
+import { OverlayProvider } from "../../src/NSE/Overlays";
 import type { CommandDeclaration } from "../../src/SynCloudOS/Commands";
 import { SynCloudOSProvider, useCommandMenuItems, useRuntimeNSEOverlayPort } from "../../src/SynCloudOSReact";
 import { createTestRuntime } from "./helpers";
@@ -45,7 +45,7 @@ function TestMenu({ open }: { open: boolean }) {
 
 function RuntimeOverlayHost({ children }: { children: React.ReactNode }) {
   const runtimePort = useRuntimeNSEOverlayPort("runtime");
-  return <NSEOverlayProvider runtimePort={runtimePort} defaultParentResponderId="runtime">{children}</NSEOverlayProvider>;
+  return <OverlayProvider runtimePort={runtimePort} defaultParentResponderId="runtime">{children}</OverlayProvider>;
 }
 
 afterEach(cleanup);

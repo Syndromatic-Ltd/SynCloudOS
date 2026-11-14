@@ -570,7 +570,7 @@ export {
  * Use presentAsPopover for the view-controller presentation's adaptive policy. */
 export { NSEPopover } from "./Overlays/NSEPopover";
 export type { NSEPopoverProps } from "./Overlays/NSEPopover";
-export { useNSEOverlayProvider } from "./Overlays/NSEOverlayProvider";
+export { useNSEOverlayProvider } from "./Overlays/OverlayProvider";
 export type {
   NSEPopupProps,
 } from "./Overlays/NSEPopup";

@@ -32,7 +32,7 @@ import { NSETabView } from "../../../src/NSE/Navigation";
 import { NSESegmentedControl } from "../../../src/NSE/Controls/Values";
 import { NSEButton } from "../../../src/NSE/Controls/Buttons/NSEButton";
 import { NSEStackItem, NSEStackView } from "../../../src/NSE/Layout";
-import { NSEOverlayProvider } from "../../../src/NSE/Overlays";
+import { OverlayProvider } from "../../../src/NSE/Overlays";
 import { NSEControlRuntimeProvider } from "../../../src/NSE/Controls/Core";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
 
@@ -41,7 +41,7 @@ const navigationWorkArea = Object.freeze({ width: 1280, height: 720, safeArea: O
 const navigationPresentation = createStaticPresentationPort({ width: 1280, height: 720 });
 function NavigationOverlay({ children }: { readonly children: React.ReactNode }) {
   const runtimePort = { runtimeId: "runtime:navigation", signal: new AbortController().signal, environment: { browser: { getDocument: () => document, getWindow: () => window }, workArea: { getSnapshot: () => navigationWorkArea, subscribe: () => () => undefined }, visualViewport: { getSnapshot: () => null, subscribe: () => () => undefined }, presentation: navigationPresentation, setTimeout: (callback: () => void) => { callback(); return 0; }, clearTimeout: () => undefined }, restoreFocus: (_responderId: string, anchor: HTMLElement | null) => anchor?.focus(), reportPlacementFailure: () => undefined, wrapFocusScope: (_options: unknown, node: React.ReactNode) => node };
-  return <NSEOverlayProvider runtimePort={runtimePort} defaultParentResponderId="workspace">{children}</NSEOverlayProvider>;
+  return <OverlayProvider runtimePort={runtimePort} defaultParentResponderId="workspace">{children}</OverlayProvider>;
 }
 
 describe("scroll progress and navigation", () => {
