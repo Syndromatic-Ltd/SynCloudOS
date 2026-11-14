@@ -20,77 +20,77 @@
 
 import type { CSSProperties } from "react";
 import type {
-  NSEPageAxis,
-  NSEPageBookStripGeometry,
-  NSEPageBookStripGeometryInput,
-  NSEPageCompletionReason,
-  NSEPageTurnSnapshot,
-  NSEPageCorner,
-  NSEPageCurlCylinder,
-  NSEPageDirection,
-  NSEPageEdge,
-  NSEPageFoldLine,
-  NSEPageGeometry,
-  NSEPageGeometryInput,
-  NSEPageHinge,
-  NSEPageMode,
-  NSEPageMotionPreset,
-  NSEPagePhase,
-  NSEPagePoint,
-  NSEPageSize,
-  NSEPageStyle,
-  NSEPageTearPose
-} from "./nsePageTypes";
+  PageAxis,
+  PageBookStripGeometry,
+  PageBookStripGeometryInput,
+  PageCompletionReason,
+  PageTurnSnapshot,
+  PageCorner,
+  PageCurlCylinder,
+  PageDirection,
+  PageEdge,
+  PageFoldLine,
+  PageGeometry,
+  PageGeometryInput,
+  PageHinge,
+  PageMode,
+  PageMotionPreset,
+  PagePhase,
+  PagePoint,
+  PageSize,
+  PageStyle,
+  PageTearPose
+} from "./pageTypes";
 
 const DEFAULT_TURN_ID = 0;
 
-export function clampNSEPageProgress(value: number) {
+export function clampPageProgress(value: number) {
   if (!Number.isFinite(value)) return 0;
   return Math.min(1, Math.max(0, value));
 }
 
-export function lerpNSEPageValue(from: number, to: number, progress: number) {
-  return from + (to - from) * clampNSEPageProgress(progress);
+export function lerpPageValue(from: number, to: number, progress: number) {
+  return from + (to - from) * clampPageProgress(progress);
 }
 
-export function smoothNSEPageProgress(progress: number) {
-  const t = clampNSEPageProgress(progress);
+export function smoothPageProgress(progress: number) {
+  const t = clampPageProgress(progress);
   return t * t * (3 - 2 * t);
 }
 
-export function easeInOutNSEPageProgress(progress: number) {
-  const t = clampNSEPageProgress(progress);
+export function easeInOutPageProgress(progress: number) {
+  const t = clampPageProgress(progress);
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
-export function easeOutNSEPageProgress(progress: number) {
-  const t = clampNSEPageProgress(progress);
+export function easeOutPageProgress(progress: number) {
+  const t = clampPageProgress(progress);
   return 1 - Math.pow(1 - t, 3);
 }
 
-export function getNSEPageAxis(edge: NSEPageEdge): NSEPageAxis {
+export function getPageAxis(edge: PageEdge): PageAxis {
   return edge === "left" || edge === "right" ? "y" : "x";
 }
 
-export function getNSEPageTransformOrigin(edge: NSEPageEdge) {
+export function getPageTransformOrigin(edge: PageEdge) {
   if (edge === "left") return "0% 50%";
   if (edge === "right") return "100% 50%";
   if (edge === "top") return "50% 0%";
   return "50% 100%";
 }
 
-export function getNSEPageOppositeEdge(edge: NSEPageEdge): NSEPageEdge {
+export function getPageOppositeEdge(edge: PageEdge): PageEdge {
   if (edge === "left") return "right";
   if (edge === "right") return "left";
   if (edge === "top") return "bottom";
   return "top";
 }
 
-export function getNSEPageHingeEdge(edge: NSEPageEdge, hinge: NSEPageHinge = "edge") {
-  return hinge === "opposite-edge" ? getNSEPageOppositeEdge(edge) : edge;
+export function getPageHingeEdge(edge: PageEdge, hinge: PageHinge = "edge") {
+  return hinge === "opposite-edge" ? getPageOppositeEdge(edge) : edge;
 }
 
-export function getNSEPageSignedDirection(edge: NSEPageEdge, direction: NSEPageDirection) {
+export function getPageSignedDirection(edge: PageEdge, direction: PageDirection) {
   const edgeSign = edge === "right" || edge === "top" ? -1 : 1;
   const directionSign = direction === "backward" ? -1 : 1;
   return edgeSign * directionSign;
@@ -102,7 +102,7 @@ export function getNSEPageSignedDirection(edge: NSEPageEdge, direction: NSEPageD
  * must not invert the rotation a second time: right leaves rotate -Y and left
  * leaves +Y.
  */
-export function getNSEPageBookSignedDirection(edge: NSEPageEdge) {
+export function getPageBookSignedDirection(edge: PageEdge) {
   if (edge === "right") return -1;
   if (edge === "left") return 1;
   return edge === "top" ? -1 : 1;
@@ -123,13 +123,13 @@ function bookNumber(value: number) {
  * `hinge` and `outer` are in the page's X/Z plane. Geometry is returned from
  * the spine outward so neighbouring endpoints can be checked and chained.
  */
-export function resolveNSEPageBookStripGeometry(
-  input: NSEPageBookStripGeometryInput
-): NSEPageBookStripGeometry[] {
-  const progress = clampNSEPageProgress(input.progress);
+export function resolvePageBookStripGeometry(
+  input: PageBookStripGeometryInput
+): PageBookStripGeometry[] {
+  const progress = clampPageProgress(input.progress);
   const stripCount = Math.min(BOOK_MAX_STRIPS, Math.max(1, Math.round(input.stripCount ?? BOOK_DEFAULT_STRIPS)));
   const width = input.size.width / stripCount;
-  const sign = getNSEPageBookSignedDirection(input.edge);
+  const sign = getPageBookSignedDirection(input.edge);
   const rollWidth = Math.min(0.6, Math.max(0.08, Number.isFinite(input.rollWidth) ? input.rollWidth ?? 0.28 : 0.28));
   const endpoint = progress === 0 || progress === 1;
   // The free edge lifts first. A cylindrical fold travels inward, leaving
@@ -145,7 +145,7 @@ export function resolveNSEPageBookStripGeometry(
 
   return Array.from({ length: stripCount }, (_, chainIndex) => {
     const sample = (chainIndex + 0.5) / stripCount;
-    const angleRad = sign * Math.PI * clampNSEPageProgress((sample - foldStart) / rollWidth);
+    const angleRad = sign * Math.PI * clampPageProgress((sample - foldStart) / rollWidth);
     const angleDeg = bookNumber(endpoint
       ? sign * progress * 180
       : angleRad * (180 / Math.PI));
@@ -156,7 +156,7 @@ export function resolveNSEPageBookStripGeometry(
     const outer = { x: bookNumber(outerX), z: bookNumber(outerZ) };
     const translateX = hingeOnLeft ? hinge.x : hinge.x - width;
     const transformOrigin = hingeOnLeft ? "0% 50%" : "100% 50%";
-    const geometry: NSEPageBookStripGeometry = {
+    const geometry: PageBookStripGeometry = {
       chainIndex,
       visualIndex,
       width,
@@ -177,34 +177,34 @@ export function resolveNSEPageBookStripGeometry(
   });
 }
 
-export function isNSEPageBookSurfaceActive(
-  geometry: Pick<NSEPageGeometry, "bookTurn" | "phase" | "progress" | "reduced">
+export function isPageBookSurfaceActive(
+  geometry: Pick<PageGeometry, "bookTurn" | "phase" | "progress" | "reduced">
 ) {
   if (!geometry.bookTurn || geometry.reduced) return false;
   if (geometry.progress > 0 && geometry.progress < 1) return true;
   return geometry.phase === "dragging" || geometry.phase === "turning" || geometry.phase === "settling";
 }
 
-export function getNSEPageBackFaceTransform(axis: NSEPageAxis) {
+export function getPageBackFaceTransform(axis: PageAxis) {
   return axis === "y" ? "rotateY(180deg)" : "rotateX(180deg)";
 }
 
-export function getNSEPageDefaultCorner(edge: NSEPageEdge): NSEPageCorner {
+export function getPageDefaultCorner(edge: PageEdge): PageCorner {
   if (edge === "bottom") return "bottom-right";
   if (edge === "top") return "top-right";
   if (edge === "left") return "bottom-left";
   return "bottom-right";
 }
 
-export function getNSEPageProgressFromPoint(edge: NSEPageEdge, point: NSEPagePoint, bounds: DOMRect) {
-  if (edge === "right") return clampNSEPageProgress((bounds.right - point.x) / bounds.width);
-  if (edge === "left") return clampNSEPageProgress((point.x - bounds.left) / bounds.width);
-  if (edge === "bottom") return clampNSEPageProgress((bounds.bottom - point.y) / bounds.height);
-  return clampNSEPageProgress((point.y - bounds.top) / bounds.height);
+export function getPageProgressFromPoint(edge: PageEdge, point: PagePoint, bounds: DOMRect) {
+  if (edge === "right") return clampPageProgress((bounds.right - point.x) / bounds.width);
+  if (edge === "left") return clampPageProgress((point.x - bounds.left) / bounds.width);
+  if (edge === "bottom") return clampPageProgress((bounds.bottom - point.y) / bounds.height);
+  return clampPageProgress((point.y - bounds.top) / bounds.height);
 }
 
-export function getNSEPageNearestEdge(point: NSEPagePoint, bounds: DOMRect, allowedEdges: NSEPageEdge[] = ["right"]) {
-  const distances: Record<NSEPageEdge, number> = {
+export function getPageNearestEdge(point: PagePoint, bounds: DOMRect, allowedEdges: PageEdge[] = ["right"]) {
+  const distances: Record<PageEdge, number> = {
     left: Math.abs(point.x - bounds.left),
     right: Math.abs(bounds.right - point.x),
     top: Math.abs(point.y - bounds.top),
@@ -214,10 +214,10 @@ export function getNSEPageNearestEdge(point: NSEPagePoint, bounds: DOMRect, allo
   return allowedEdges.reduce((nearest, edge) => distances[edge] < distances[nearest] ? edge : nearest, allowedEdges[0] ?? "right");
 }
 
-export function isNSEPagePointNearEdge(
-  point: NSEPagePoint,
+export function isPagePointNearEdge(
+  point: PagePoint,
   bounds: DOMRect,
-  edge: NSEPageEdge,
+  edge: PageEdge,
   edgeActivationSize: number
 ) {
   if (edge === "left") return point.x - bounds.left <= edgeActivationSize;
@@ -226,21 +226,21 @@ export function isNSEPagePointNearEdge(
   return bounds.bottom - point.y <= edgeActivationSize;
 }
 
-function getModeAngle(mode: NSEPageMode, motion: NSEPageMotionPreset) {
+function getModeAngle(mode: PageMode, motion: PageMotionPreset) {
   if (mode === "curl") return Math.min(motion.maxAngle, 74);
   if (mode === "peel") return Math.min(motion.maxAngle, 112);
   if (mode === "tear") return Math.min(motion.maxAngle, 148);
   return motion.maxAngle;
 }
 
-function getModeVisualProgress(mode: NSEPageMode, progress: number) {
-  if (mode === "curl") return smoothNSEPageProgress(progress);
-  if (mode === "peel") return easeOutNSEPageProgress(progress);
-  if (mode === "tear") return smoothNSEPageProgress(progress);
+function getModeVisualProgress(mode: PageMode, progress: number) {
+  if (mode === "curl") return smoothPageProgress(progress);
+  if (mode === "peel") return easeOutPageProgress(progress);
+  if (mode === "tear") return smoothPageProgress(progress);
   return progress;
 }
 
-function getShadowTransform(edge: NSEPageEdge, progress: number) {
+function getShadowTransform(edge: PageEdge, progress: number) {
   const drift = Math.round(14 * Math.sin(progress * Math.PI));
   if (edge === "left" || edge === "right") {
     return `translate3d(${edge === "right" ? -drift : drift}px, 8px, 0) scale(${1 + progress * 0.04})`;
@@ -248,7 +248,7 @@ function getShadowTransform(edge: NSEPageEdge, progress: number) {
   return `translate3d(8px, ${edge === "bottom" ? -drift : drift}px, 0) scale(${1 + progress * 0.04})`;
 }
 
-function getCurlInset(edge: NSEPageEdge, progress: number) {
+function getCurlInset(edge: PageEdge, progress: number) {
   const inset = `${Math.round((1 - progress) * 72)}%`;
   if (edge === "left") return `0 ${inset} 0 0`;
   if (edge === "right") return `0 0 0 ${inset}`;
@@ -273,7 +273,7 @@ function pct(value: number) {
  * shadow, roll highlight, and the cast shadow on the layer underneath.
  */
 
-const CURL_DEFAULT_SIZE: NSEPageSize = { width: 480, height: 640 };
+const CURL_DEFAULT_SIZE: PageSize = { width: 480, height: 640 };
 const CURL_TRAVEL_OVERDRIVE = 1.55;
 const CURL_MAX_FOLD_RATIO = 0.6;
 const CURL_DIRECTION_DRIFT = 0.65;
@@ -326,23 +326,23 @@ interface CurlGeometryFields {
   curlShadowBackground: string;
   curlFlapShadowFilter: string;
   curlFlapDragShadowFilter: string;
-  foldLine: NSEPageFoldLine;
+  foldLine: PageFoldLine;
   foldAngleDeg: number;
-  curledCorner: NSEPagePoint;
+  curledCorner: PagePoint;
   shadowOpacity: number;
-  curlCylinder: NSEPageCurlCylinder | null;
+  curlCylinder: PageCurlCylinder | null;
 }
 
-function vecNormalize(v: NSEPagePoint): NSEPagePoint {
+function vecNormalize(v: PagePoint): PagePoint {
   const length = Math.hypot(v.x, v.y) || 1;
   return { x: v.x / length, y: v.y / length };
 }
 
-function vecDot(a: NSEPagePoint, b: NSEPagePoint) {
+function vecDot(a: PagePoint, b: PagePoint) {
   return a.x * b.x + a.y * b.y;
 }
 
-function getCurlCornerPoint(corner: NSEPageCorner, size: NSEPageSize): NSEPagePoint {
+function getCurlCornerPoint(corner: PageCorner, size: PageSize): PagePoint {
   return {
     x: corner.endsWith("left") ? 0 : size.width,
     y: corner.startsWith("top") ? 0 : size.height
@@ -367,11 +367,11 @@ function getCurlFrontOverlapPx(): number {
  * side and top edges, so the whole bottom edge lifts toward the far corner
  * (the iOS Maps pose).
  */
-function getCurlPeelDirection(corner: NSEPageCorner, size: NSEPageSize, progress: number): NSEPagePoint {
+function getCurlPeelDirection(corner: PageCorner, size: PageSize, progress: number): PagePoint {
   const sx = corner.endsWith("left") ? 1 : -1;
   const sy = corner.startsWith("top") ? 1 : -1;
   const diagonal = vecNormalize({ x: sx * size.width, y: sy * size.height });
-  const drift = CURL_DIRECTION_DRIFT * smoothNSEPageProgress(progress);
+  const drift = CURL_DIRECTION_DRIFT * smoothPageProgress(progress);
   return vecNormalize({
     x: diagonal.x * (1 - drift),
     y: diagonal.y + (sy - diagonal.y) * drift
@@ -379,20 +379,20 @@ function getCurlPeelDirection(corner: NSEPageCorner, size: NSEPageSize, progress
 }
 
 /** Maps a dragged pointer (page-local px) to the equivalent curl progress. */
-export function getNSEPageCurlDragProgress(
-  pointer: NSEPagePoint,
-  corner: NSEPageCorner,
-  size: NSEPageSize
+export function getPageCurlDragProgress(
+  pointer: PagePoint,
+  corner: PageCorner,
+  size: PageSize
 ) {
   const cornerPoint = getCurlCornerPoint(corner, size);
   const diagonal = Math.hypot(size.width, size.height) || 1;
   const distance = Math.hypot(pointer.x - cornerPoint.x, pointer.y - cornerPoint.y);
-  return clampNSEPageProgress(distance / (CURL_TRAVEL_OVERDRIVE * diagonal));
+  return clampPageProgress(distance / (CURL_TRAVEL_OVERDRIVE * diagonal));
 }
 
 /** Sutherland-Hodgman clip of a polygon against the half-plane dot(q - planePoint, normal) >= 0. */
-function clipPolygonHalfPlane(points: NSEPagePoint[], planePoint: NSEPagePoint, normal: NSEPagePoint): NSEPagePoint[] {
-  const result: NSEPagePoint[] = [];
+function clipPolygonHalfPlane(points: PagePoint[], planePoint: PagePoint, normal: PagePoint): PagePoint[] {
+  const result: PagePoint[] = [];
   for (let index = 0; index < points.length; index += 1) {
     const current = points[index];
     const next = points[(index + 1) % points.length];
@@ -408,8 +408,8 @@ function clipPolygonHalfPlane(points: NSEPagePoint[], planePoint: NSEPagePoint, 
 }
 
 /** Drops consecutive (and wrap-around) vertices closer than ~1/100 px — boundary clips emit duplicates. */
-function dedupePolygon(points: NSEPagePoint[]): NSEPagePoint[] {
-  const result: NSEPagePoint[] = [];
+function dedupePolygon(points: PagePoint[]): PagePoint[] {
+  const result: PagePoint[] = [];
   for (const point of points) {
     const previous = result[result.length - 1];
     if (previous && Math.abs(previous.x - point.x) < 0.01 && Math.abs(previous.y - point.y) < 0.01) continue;
@@ -436,11 +436,11 @@ function dedupePolygon(points: NSEPagePoint[]): NSEPagePoint[] {
  * clip.
  */
 function bulgeCreaseEdge(
-  points: NSEPagePoint[],
-  foldFoot: NSEPagePoint,
-  normal: NSEPagePoint,
+  points: PagePoint[],
+  foldFoot: PagePoint,
+  normal: PagePoint,
   bulgePx: number
-): NSEPagePoint[] {
+): PagePoint[] {
   if (bulgePx <= 0.5 || points.length < 3) return points;
   const onCrease = points.map((point) =>
     Math.abs(vecDot({ x: point.x - foldFoot.x, y: point.y - foldFoot.y }, normal)) < 0.5
@@ -455,7 +455,7 @@ function bulgeCreaseEdge(
       x: (start.x + end.x) / 2 + normal.x * 2 * bulgePx,
       y: (start.y + end.y) / 2 + normal.y * 2 * bulgePx
     };
-    const arc: NSEPagePoint[] = [];
+    const arc: PagePoint[] = [];
     for (let sample = 1; sample <= CURL_BULGE_SAMPLES; sample += 1) {
       const t = sample / (CURL_BULGE_SAMPLES + 1);
       const a = (1 - t) * (1 - t);
@@ -472,7 +472,7 @@ function bulgeCreaseEdge(
   return points;
 }
 
-function polygonToClipPath(points: NSEPagePoint[], size: NSEPageSize) {
+function polygonToClipPath(points: PagePoint[], size: PageSize) {
   if (points.length < 3) return "none";
   return `polygon(${points
     .map((point) => `${pct((point.x / size.width) * 100)} ${pct((point.y / size.height) * 100)}`)
@@ -490,9 +490,9 @@ interface CurlGradientStop {
  * crease, projected onto the CSS gradient line for this box.
  */
 function foldAlignedGradient(
-  size: NSEPageSize,
-  foldFoot: NSEPagePoint,
-  direction: NSEPagePoint,
+  size: PageSize,
+  foldFoot: PagePoint,
+  direction: PagePoint,
   stops: CurlGradientStop[]
 ): string {
   const angleRad = Math.atan2(direction.x, -direction.y);
@@ -511,7 +511,7 @@ function foldAlignedGradient(
   return `linear-gradient(${angleDeg}deg, ${cssStops})`;
 }
 
-function getCurlIdleFields(corner: NSEPagePoint): CurlGeometryFields {
+function getCurlIdleFields(corner: PagePoint): CurlGeometryFields {
   return {
     frontClipPath: "none",
     backstopClipPath: "none",
@@ -531,10 +531,10 @@ function getCurlIdleFields(corner: NSEPagePoint): CurlGeometryFields {
 
 function resolveCurlFold(
   progress: number,
-  corner: NSEPageCorner,
-  motion: NSEPageMotionPreset,
-  size: NSEPageSize,
-  pointer?: NSEPagePoint
+  corner: PageCorner,
+  motion: PageMotionPreset,
+  size: PageSize,
+  pointer?: PagePoint
 ): CurlGeometryFields {
   const cornerPoint = getCurlCornerPoint(corner, size);
   if (progress < CURL_MIN_PROGRESS) return getCurlIdleFields(cornerPoint);
@@ -553,7 +553,7 @@ function resolveCurlFold(
     const distance = Math.hypot(dx, dy);
     if (distance > 1) {
       travel = Math.min(distance, CURL_TRAVEL_OVERDRIVE * diagonal);
-      drive = clampNSEPageProgress(travel / (CURL_TRAVEL_OVERDRIVE * diagonal));
+      drive = clampPageProgress(travel / (CURL_TRAVEL_OVERDRIVE * diagonal));
       const sx = corner.endsWith("left") ? 1 : -1;
       const sy = corner.startsWith("top") ? 1 : -1;
       const canonical = getCurlPeelDirection(corner, size, drive);
@@ -585,7 +585,7 @@ function resolveCurlFold(
       // A leaf brought over the spine squares up to its binding, as a turned
       // page does, rather than lying across the facing page folded askew.
       const across = Math.abs(dx) / (2 * size.width);
-      dy *= 1 - CURL_BOOK_SQUARE * smoothNSEPageProgress(clampNSEPageProgress((across - 0.3) / 0.5));
+      dy *= 1 - CURL_BOOK_SQUARE * smoothPageProgress(clampPageProgress((across - 0.3) / 0.5));
     } else {
       const p = progress;
       const liftLimit = Math.min(size.height * .1, size.width * .2) * Math.sin(Math.PI * p);
@@ -593,7 +593,7 @@ function resolveCurlFold(
       dy = sy * liftLimit;
     }
     travel = Math.hypot(dx, dy);
-    drive = pointer ? clampNSEPageProgress(travel / (2 * size.width)) : progress;
+    drive = pointer ? clampPageProgress(travel / (2 * size.width)) : progress;
     peel = travel > .001 ? { x: dx / travel, y: dy / travel } : { x: sx, y: 0 };
   }
   const foldDistance = book ? travel / 2 : Math.min(travel / 2, CURL_MAX_FOLD_RATIO * diagonal);
@@ -606,12 +606,12 @@ function resolveCurlFold(
  * their shading and shadows, and the roll a 3D curl wraps the same fold round.
  */
 function getCurlFoldFields(
-  corner: NSEPageCorner,
-  peel: NSEPagePoint,
+  corner: PageCorner,
+  peel: PagePoint,
   foldDistance: number,
   drive: number,
-  motion: NSEPageMotionPreset,
-  size: NSEPageSize,
+  motion: PageMotionPreset,
+  size: PageSize,
   book: boolean
 ): CurlGeometryFields {
   const cornerPoint = getCurlCornerPoint(corner, size);
@@ -626,7 +626,7 @@ function getCurlFoldFields(
   const foldDirection = { x: -peel.y, y: peel.x };
   const foldAngleDeg = (Math.atan2(foldDirection.y, foldDirection.x) * 180) / Math.PI;
 
-  const rectPolygon: NSEPagePoint[] = [
+  const rectPolygon: PagePoint[] = [
     { x: 0, y: 0 },
     { x: size.width, y: 0 },
     { x: size.width, y: size.height },
@@ -661,10 +661,10 @@ function getCurlFoldFields(
   // radius is kept modest relative to the page — a small crisp dog-ear at
   // rest fattening to a soft roll as the page comes over, never a giant tube.
   const radius =
-    lerpNSEPageValue(
+    lerpPageValue(
       motion.curlRadiusMinPx ?? CURL_RADIUS_MIN_PX,
       motion.curlRadiusMaxPx ?? CURL_RADIUS_MAX_PX,
-      smoothNSEPageProgress(drive)
+      smoothPageProgress(drive)
     );
   const lift = Math.sin(Math.PI * Math.min(1, drive));
   const bulge = Math.min(radius * (book ? lift : (0.45 + 0.55 * lift)), foldDistance * 0.8);
@@ -753,7 +753,7 @@ function getCurlFoldFields(
   // the only grounding cue on visible surface — then eased back toward the
   // preset strength as the page opens, so the opened pose is grounded by the
   // shape-aware flap shadow that follows the curl, not a broad straight band.
-  const castBoost = lerpNSEPageValue(1.55, 0.9, smoothNSEPageProgress(Math.min(1, drive / 0.4)));
+  const castBoost = lerpPageValue(1.55, 0.9, smoothPageProgress(Math.min(1, drive / 0.4)));
   const shadowOpacity = Number(Math.min(1, motion.shadowStrength * castBoost * shadowRamp * (0.92 + 0.08 * shadowDepth)).toFixed(4));
   // Offsets are in the reflected flap's local coordinates: counter the
   // reflection so the shadow falls toward the receiving page, in either turn.
@@ -794,7 +794,7 @@ function getCurlFoldFields(
  * of radius r lands it there too when the bend line sits πr/2 inside the fold
  * line, so the 3D curl tracks the drag exactly as the flat one does.
  */
-function clampToCircle(point: NSEPagePoint, centre: NSEPagePoint, radius: number): NSEPagePoint {
+function clampToCircle(point: PagePoint, centre: PagePoint, radius: number): PagePoint {
   const dx = point.x - centre.x, dy = point.y - centre.y;
   const distance = Math.hypot(dx, dy);
   if (distance <= radius || distance < 1e-6) return point;
@@ -802,7 +802,7 @@ function clampToCircle(point: NSEPagePoint, centre: NSEPagePoint, radius: number
 }
 
 /** The bound edge of a book leaf: the side opposite the turning corner. */
-function getCurlSpine(corner: NSEPageCorner, size: NSEPageSize): readonly NSEPagePoint[] {
+function getCurlSpine(corner: PageCorner, size: PageSize): readonly PagePoint[] {
   const x = corner.endsWith("left") ? size.width : 0;
   return [{ x, y: 0 }, { x, y: size.height }];
 }
@@ -814,7 +814,7 @@ function getCurlSpine(corner: NSEPageCorner, size: NSEPageSize): readonly NSEPag
  * corner. The left side only grows as b does, so a bisection finds it.
  */
 function getCurlBendInset(foldDistance: number, radius: number, sweep: number): number {
-  const landing = (bend: number) => bend + getNSEPageCurlProfile(foldDistance - bend, radius, sweep).x + foldDistance;
+  const landing = (bend: number) => bend + getPageCurlProfile(foldDistance - bend, radius, sweep).x + foldDistance;
   let low = -foldDistance - radius * 4 - 1;
   for (let step = 0; step < 32 && landing(low) > 0; step += 1) low *= 2;
   let high = 0;
@@ -827,12 +827,12 @@ function getCurlBendInset(foldDistance: number, radius: number, sweep: number): 
 }
 
 function getCurlCylinder(
-  foldFoot: NSEPagePoint,
-  peel: NSEPagePoint,
+  foldFoot: PagePoint,
+  peel: PagePoint,
   foldDistance: number,
   roll: { radius: number; sweep: number },
-  spine: readonly NSEPagePoint[] | null
-): NSEPageCurlCylinder {
+  spine: readonly PagePoint[] | null
+): PageCurlCylinder {
   let { radius } = roll;
   const { sweep } = roll;
   let inset = getCurlBendInset(foldDistance, radius, sweep);
@@ -873,7 +873,7 @@ function getCurlCylinder(
  * while positive), the height above the page and the paper's turn angle. The
  * curl's vertex shader computes the same profile.
  */
-export function getNSEPageCurlProfile(length: number, radius: number, sweep: number) {
+export function getPageCurlProfile(length: number, radius: number, sweep: number) {
   if (radius <= 0.5) {
     return { x: length * Math.cos(sweep), z: Math.max(length * Math.sin(sweep), 0.5), angle: sweep };
   }
@@ -915,21 +915,21 @@ export function getNSEPageCurlProfile(length: number, radius: number, sweep: num
  * and the paper's turn angle (0 flat, π face down). The curl's vertex shader
  * computes the same mapping.
  */
-export function projectNSEPageCurlPoint(point: NSEPagePoint, cylinder: NSEPageCurlCylinder) {
+export function projectPageCurlPoint(point: PagePoint, cylinder: PageCurlCylinder) {
   const normal = { x: cylinder.normalX, y: cylinder.normalY };
   const along = vecDot({ x: point.x - cylinder.bendX, y: point.y - cylinder.bendY }, normal);
   if (along <= 0) return { x: point.x, y: point.y, z: 0, angle: 0 };
   const base = { x: point.x - normal.x * along, y: point.y - normal.y * along };
-  const profile = getNSEPageCurlProfile(along, cylinder.radius, cylinder.sweep);
+  const profile = getPageCurlProfile(along, cylinder.radius, cylinder.sweep);
   return { x: base.x + normal.x * profile.x, y: base.y + normal.y * profile.x, z: profile.z, angle: profile.angle };
 }
 
 /** Intersects the infinite fold line with the page bounds. */
 function getFoldLineEndpoints(
-  foldFoot: NSEPagePoint,
-  foldDirection: NSEPagePoint,
-  size: NSEPageSize
-): NSEPageFoldLine {
+  foldFoot: PagePoint,
+  foldDirection: PagePoint,
+  size: PageSize
+): PageFoldLine {
   const candidates: number[] = [];
   if (Math.abs(foldDirection.x) > 1e-6) {
     candidates.push((0 - foldFoot.x) / foldDirection.x, (size.width - foldFoot.x) / foldDirection.x);
@@ -955,12 +955,12 @@ function getFoldLineEndpoints(
 }
 
 
-export function resolveNSEPageGeometry(input: NSEPageGeometryInput): NSEPageGeometry {
-  const progress = clampNSEPageProgress(input.torn ? 1 : input.progress);
+export function resolvePageGeometry(input: PageGeometryInput): PageGeometry {
+  const progress = clampPageProgress(input.torn ? 1 : input.progress);
   const visualProgress = getModeVisualProgress(input.mode, progress);
-  const axis = getNSEPageAxis(input.edge);
+  const axis = getPageAxis(input.edge);
   const isTear = input.mode === "tear";
-  const corner = input.corner ?? (isTear ? getNSEPageTearDefaultCorner(input.edge) : getNSEPageDefaultCorner(input.edge));
+  const corner = input.corner ?? (isTear ? getPageTearDefaultCorner(input.edge) : getPageDefaultCorner(input.edge));
   const size = input.size ?? CURL_DEFAULT_SIZE;
   const isCurl = input.mode === "curl";
   const reduced = input.reducedMotion === true;
@@ -969,11 +969,11 @@ export function resolveNSEPageGeometry(input: NSEPageGeometryInput): NSEPageGeom
   const tearSheet = isTear && !reduced && progress > CURL_MIN_PROGRESS
     ? resolveTearSheet(progress, corner, input.edge, input.motion, size, input.tearSeed ?? 1, input.pointer)
     : null;
-  const hingeEdge = getNSEPageHingeEdge(input.edge, input.motion.hinge);
+  const hingeEdge = getPageHingeEdge(input.edge, input.motion.hinge);
   const isBookTurn = input.motion.hinge === "opposite-edge";
   const signedDirection = isBookTurn
-    ? getNSEPageBookSignedDirection(input.edge)
-    : getNSEPageSignedDirection(input.edge, input.direction);
+    ? getPageBookSignedDirection(input.edge)
+    : getPageSignedDirection(input.edge, input.direction);
   const curl = progress === 0 || progress === 1 ? 0 : Math.sin(progress * Math.PI);
   const unsignedAngle = getModeAngle(input.mode, input.motion) * visualProgress;
   const signedAngle = unsignedAngle * signedDirection;
@@ -994,7 +994,7 @@ export function resolveNSEPageGeometry(input: NSEPageGeometryInput): NSEPageGeom
   const shadowOpacity = isCurl || isTear
     ? fold.shadowOpacity
     : Number((curl * input.motion.shadowStrength).toFixed(4));
-  const crossfade = smoothNSEPageProgress(progress);
+  const crossfade = smoothPageProgress(progress);
   const frontOpacity = isCurl || isTear
     ? reduced
       ? Number((1 - crossfade).toFixed(4))
@@ -1006,11 +1006,11 @@ export function resolveNSEPageGeometry(input: NSEPageGeometryInput): NSEPageGeom
     ? reduced
       ? Number(crossfade.toFixed(4))
       : 1
-    : Number(lerpNSEPageValue(0.06, 1, smoothNSEPageProgress(progress)).toFixed(4));
+    : Number(lerpPageValue(0.06, 1, smoothPageProgress(progress)).toFixed(4));
   // The dog-ear is the resting fold itself; this signal only gates the
   // invisible corner hit-area, retiring it once the page is properly open.
   const dogEarOpacity = isCurl
-    ? reduced ? 1 : Number(clampNSEPageProgress(1 - Math.max(0, progress - CURL_DOG_EAR_RETIRE_START) / CURL_DOG_EAR_RETIRE_SPAN).toFixed(4))
+    ? reduced ? 1 : Number(clampPageProgress(1 - Math.max(0, progress - CURL_DOG_EAR_RETIRE_START) / CURL_DOG_EAR_RETIRE_SPAN).toFixed(4))
     : 0;
 
   const insideInteractive = isBookTurn
@@ -1042,9 +1042,9 @@ export function resolveNSEPageGeometry(input: NSEPageGeometryInput): NSEPageGeom
     insideOpacity,
     insideInteractive,
     torn: input.torn === true || phase === "torn",
-    transformOrigin: getNSEPageTransformOrigin(hingeEdge),
+    transformOrigin: getPageTransformOrigin(hingeEdge),
     sheetTransform,
-    backFaceTransform: getNSEPageBackFaceTransform(axis),
+    backFaceTransform: getPageBackFaceTransform(axis),
     shadowTransform: isBookTurn ? "none" : getShadowTransform(input.edge, progress),
     curlInset: getCurlInset(input.edge, progress),
     frontClipPath: isCurl || tearSheet?.fold ? fold.frontClipPath : "inset(0)",
@@ -1067,21 +1067,21 @@ export function resolveNSEPageGeometry(input: NSEPageGeometryInput): NSEPageGeom
   };
 }
 
-export function createNSEPageSnapshot(options: {
+export function createPageSnapshot(options: {
   progress?: number;
   targetProgress?: number;
-  phase?: NSEPagePhase;
-  mode: NSEPageMode;
-  edge: NSEPageEdge;
-  direction: NSEPageDirection;
+  phase?: PagePhase;
+  mode: PageMode;
+  edge: PageEdge;
+  direction: PageDirection;
   torn?: boolean;
-  reason?: NSEPageCompletionReason;
+  reason?: PageCompletionReason;
   turnId?: string | number;
-}): NSEPageTurnSnapshot {
-  const progress = clampNSEPageProgress(options.progress ?? 0);
+}): PageTurnSnapshot {
+  const progress = clampPageProgress(options.progress ?? 0);
   return {
     progress,
-    targetProgress: clampNSEPageProgress(options.targetProgress ?? progress),
+    targetProgress: clampPageProgress(options.targetProgress ?? progress),
     phase: options.phase ?? "idle",
     mode: options.mode,
     edge: options.edge,
@@ -1093,11 +1093,11 @@ export function createNSEPageSnapshot(options: {
   };
 }
 
-export function getNSEPageGeometryStyle(
-  geometry: NSEPageGeometry,
-  input: Pick<NSEPageGeometryInput, "motion" | "material">,
+export function getPageGeometryStyle(
+  geometry: PageGeometry,
+  input: Pick<PageGeometryInput, "motion" | "material">,
   style?: CSSProperties
-): NSEPageStyle {
+): PageStyle {
   return {
     "--nse-page-progress": geometry.progress,
     "--nse-page-visual-progress": geometry.visualProgress,
@@ -1188,11 +1188,11 @@ interface TearFrame {
   /** The binding's length and the page's extent across it. */
   readonly length: number;
   readonly extent: number;
-  readonly toPage: (s: number, n: number) => NSEPagePoint;
-  readonly toLocal: (point: NSEPagePoint) => { s: number; n: number };
+  readonly toPage: (s: number, n: number) => PagePoint;
+  readonly toLocal: (point: PagePoint) => { s: number; n: number };
 }
 
-function getTearFrame(binding: NSEPageEdge, size: NSEPageSize): TearFrame {
+function getTearFrame(binding: PageEdge, size: PageSize): TearFrame {
   const { width, height } = size;
   if (binding === "top") return { length: width, extent: height, toPage: (s, n) => ({ x: s, y: n }), toLocal: (p) => ({ s: p.x, n: p.y }) };
   if (binding === "bottom") return { length: width, extent: height, toPage: (s, n) => ({ x: s, y: height - n }), toLocal: (p) => ({ s: p.x, n: height - p.y }) };
@@ -1218,7 +1218,7 @@ function tearNoise(x: number, seed: number) {
  * line wandering about `depth`, coarse and fine at once, as torn paper is.
  * The curl's fragment shader computes the same line.
  */
-export function getNSEPageTearLine(s: number, depth: number, roughness: number, seed: number) {
+export function getPageTearLine(s: number, depth: number, roughness: number, seed: number) {
   return depth + roughness * (
     0.6 * tearNoise(s / 41, seed) +
     0.28 * tearNoise(s / 12.5, seed + 1.7) +
@@ -1227,7 +1227,7 @@ export function getNSEPageTearLine(s: number, depth: number, roughness: number, 
 }
 
 /** The corner a sheet bound along `binding` is torn from by default: the far one, on the right. */
-export function getNSEPageTearDefaultCorner(binding: NSEPageEdge): NSEPageCorner {
+export function getPageTearDefaultCorner(binding: PageEdge): PageCorner {
   if (binding === "top") return "bottom-right";
   if (binding === "bottom") return "top-right";
   if (binding === "left") return "bottom-right";
@@ -1251,7 +1251,7 @@ interface TearPull {
   readonly free: number;
 }
 
-function resolveTearPull(binding: NSEPageEdge, corner: NSEPageCorner, size: NSEPageSize, resist: number, pointer?: NSEPagePoint): TearPull {
+function resolveTearPull(binding: PageEdge, corner: PageCorner, size: PageSize, resist: number, pointer?: PagePoint): TearPull {
   const frame = getTearFrame(binding, size);
   const cornerLocal = frame.toLocal(getCurlCornerPoint(corner, size));
   const nearStart = cornerLocal.s < frame.length / 2;
@@ -1303,7 +1303,7 @@ function getTearProgress(pull: TearPull, travel: number) {
 }
 
 /** How far a finger has carried the corner along the pull. */
-function getFingerTravel(pull: TearPull, pointer: NSEPagePoint) {
+function getFingerTravel(pull: TearPull, pointer: PagePoint) {
   const finger = pull.frame.toLocal(pointer);
   const along = pull.nearStart ? finger.s : pull.frame.length - finger.s;
   const depth = pull.farCorner ? finger.n : Math.max(finger.n, pull.corner.n);
@@ -1311,15 +1311,15 @@ function getFingerTravel(pull: TearPull, pointer: NSEPagePoint) {
 }
 
 /** Maps a finger pulling a sheet's corner to the tear's progress. */
-export function getNSEPageTearDragProgress(
-  pointer: NSEPagePoint,
-  corner: NSEPageCorner,
-  size: NSEPageSize,
-  binding: NSEPageEdge,
-  _motion?: NSEPageMotionPreset
+export function getPageTearDragProgress(
+  pointer: PagePoint,
+  corner: PageCorner,
+  size: PageSize,
+  binding: PageEdge,
+  _motion?: PageMotionPreset
 ) {
   const pull = resolveTearPull(binding, corner, size, TEAR_RESIST_PX, pointer);
-  return clampNSEPageProgress(getTearProgress(pull, getFingerTravel(pull, pointer)));
+  return clampPageProgress(getTearProgress(pull, getFingerTravel(pull, pointer)));
 }
 
 /**
@@ -1327,7 +1327,7 @@ export function getNSEPageTearDragProgress(
  * corner it tears from, along either edge that meets there, out to half the
  * page.
  */
-export function isNSEPageTearGrab(point: NSEPagePoint, corner: NSEPageCorner, size: NSEPageSize, _binding: NSEPageEdge, reach: number) {
+export function isPageTearGrab(point: PagePoint, corner: PageCorner, size: PageSize, _binding: PageEdge, reach: number) {
   const held = getCurlCornerPoint(corner, size);
   const across = Math.abs(point.x - held.x), down = Math.abs(point.y - held.y);
   if (point.x < -reach || point.y < -reach || point.x > size.width + reach || point.y > size.height + reach) return false;
@@ -1339,11 +1339,11 @@ export function isNSEPageTearGrab(point: NSEPagePoint, corner: NSEPageCorner, si
  * sheet wherever it is seen: folded over and flying off, steered by any
  * finger, as the camera at `perspective` sees it.
  */
-export function getNSEPageTearMargin(binding: NSEPageEdge, corner: NSEPageCorner, size: NSEPageSize, perspective = 1600) {
+export function getPageTearMargin(binding: PageEdge, corner: PageCorner, size: PageSize, perspective = 1600) {
   const { width, height } = size;
   const focal = Math.max(perspective, Math.max(width, height) * 2.6);
   const held = getCurlCornerPoint(corner, size);
-  const fingers: Array<NSEPagePoint | undefined> = [
+  const fingers: Array<PagePoint | undefined> = [
     undefined,
     { x: width - held.x, y: height - held.y },
     { x: width - held.x, y: held.y },
@@ -1353,13 +1353,13 @@ export function getNSEPageTearMargin(binding: NSEPageEdge, corner: NSEPageCorner
   const reach = { left: 0, top: 0, right: 0, bottom: 0 };
   for (const finger of fingers) {
     for (let step = 1; step <= 40; step += 1) {
-      const sheet = resolveTearSheet(step / 40, corner, binding, { curlRadiusMaxPx: CURL_RADIUS_MAX_PX } as NSEPageMotionPreset, size, 1, finger);
+      const sheet = resolveTearSheet(step / 40, corner, binding, { curlRadiusMaxPx: CURL_RADIUS_MAX_PX } as PageMotionPreset, size, 1, finger);
       const { flight } = sheet.tear;
       if (!sheet.curlCylinder || flight.opacity <= 0.01) continue;
       const cos = Math.cos(flight.spin), sin = Math.sin(flight.spin);
       for (let u = 0; u <= 1.0001; u += 0.125) {
         for (const point of [{ x: u * width, y: 0 }, { x: u * width, y: height }, { x: 0, y: u * height }, { x: width, y: u * height }]) {
-          const curled = projectNSEPageCurlPoint(point, sheet.curlCylinder);
+          const curled = projectPageCurlPoint(point, sheet.curlCylinder);
           const rx = curled.x - flight.pivotX, ry = curled.y - flight.pivotY;
           const x = flight.pivotX + cos * rx - sin * ry + flight.x;
           const y = flight.pivotY + sin * rx + cos * ry + flight.y;
@@ -1385,11 +1385,11 @@ export function getNSEPageTearMargin(binding: NSEPageEdge, corner: NSEPageCorner
 }
 
 interface TearFields {
-  readonly curlCylinder: NSEPageCurlCylinder | null;
+  readonly curlCylinder: PageCurlCylinder | null;
   /** The 2D fold the page's own layers draw when the 3D sheet can't be. */
   readonly fold: CurlGeometryFields | null;
-  readonly tear: NSEPageTearPose;
-  readonly curledCorner: NSEPagePoint;
+  readonly tear: PageTearPose;
+  readonly curledCorner: PagePoint;
   readonly flat: TearFlatFields;
 }
 
@@ -1408,12 +1408,12 @@ const NSE_PAGE_TEAR_FLAT_IDLE: TearFlatFields = Object.freeze({
 });
 
 /** The tear line sampled every few px along the binding, from `from` to `to`. */
-function sampleTearLine(pose: NSEPageTearPose, from: number, to: number): Array<{ s: number; n: number }> {
+function sampleTearLine(pose: PageTearPose, from: number, to: number): Array<{ s: number; n: number }> {
   const points: Array<{ s: number; n: number }> = [];
   const steps = Math.max(1, Math.ceil(Math.abs(to - from) / 5));
   for (let step = 0; step <= steps; step += 1) {
     const s = from + ((to - from) * step) / steps;
-    points.push({ s, n: getNSEPageTearLine(s, pose.depth, pose.roughness, pose.seed) });
+    points.push({ s, n: getPageTearLine(s, pose.depth, pose.roughness, pose.seed) });
   }
   return points;
 }
@@ -1422,7 +1422,7 @@ function sampleTearLine(pose: NSEPageTearPose, from: number, to: number): Array<
  * The stub a tear leaves bound, in page px: its outline, and the ragged edge
  * it tore along, from the binding's start to its end.
  */
-export function getNSEPageTearStubOutline(pose: NSEPageTearPose, size: NSEPageSize) {
+export function getPageTearStubOutline(pose: PageTearPose, size: PageSize) {
   const frame = getTearFrame(pose.binding, size);
   const line = sampleTearLine(pose, pose.tornFrom, pose.tornTo).map(({ s, n }) => frame.toPage(s, n));
   return {
@@ -1435,8 +1435,8 @@ export function getNSEPageTearStubOutline(pose: NSEPageTearPose, size: NSEPageSi
  * The 2D tear's own parts: the ragged stub left bound where the sheet has
  * torn away, and the sheet carried off once it is free.
  */
-function getTearFlatFields(pose: NSEPageTearPose, frame: TearFrame, size: NSEPageSize): TearFlatFields {
-  const toPercent = (point: NSEPagePoint) => `${pct((point.x / size.width) * 100)} ${pct((point.y / size.height) * 100)}`;
+function getTearFlatFields(pose: PageTearPose, frame: TearFrame, size: PageSize): TearFlatFields {
+  const toPercent = (point: PagePoint) => `${pct((point.x / size.width) * 100)} ${pct((point.y / size.height) * 100)}`;
   const torn = pose.tornTo - pose.tornFrom > 0.5;
   const stub = torn
     ? [frame.toPage(pose.tornFrom, 0), frame.toPage(pose.tornTo, 0), ...sampleTearLine(pose, pose.tornFrom, pose.tornTo).reverse().map(({ s, n }) => frame.toPage(s, n))]
@@ -1458,12 +1458,12 @@ function getTearFlatFields(pose: NSEPageTearPose, frame: TearFrame, size: NSEPag
  */
 function resolveTearSheet(
   progress: number,
-  corner: NSEPageCorner,
-  binding: NSEPageEdge,
-  motion: NSEPageMotionPreset,
-  size: NSEPageSize,
+  corner: PageCorner,
+  binding: PageEdge,
+  motion: PageMotionPreset,
+  size: PageSize,
   seed: number,
-  pointer?: NSEPagePoint
+  pointer?: PagePoint
 ): TearFields {
   const pull = resolveTearPull(binding, corner, size, pointer ? TEAR_RESIST_PX : 0, pointer);
   const { frame } = pull;
@@ -1480,7 +1480,7 @@ function resolveTearSheet(
   // of it; bound points it has passed have given.
   const crossing = (travel - pull.resist - pull.reach) / (2 * pull.along);
   const front = Math.min(frame.length, Math.max(0, crossing * TEAR_RIP_LEAD));
-  const tear: NSEPageTearPose = {
+  const tear: PageTearPose = {
     binding,
     depth: pull.depth,
     roughness: TEAR_ROUGHNESS_PX,
@@ -1501,7 +1501,7 @@ function resolveTearSheet(
     target = clampToCircle(target, point, Math.max(0, Math.hypot(held.x - point.x, held.y - point.y) - CURL_SPINE_CLEARANCE_PX));
   }
   const cornerPage = toPage(held.x, held.y);
-  const flat = (pose: NSEPageTearPose) => getTearFlatFields(pose, frame, size);
+  const flat = (pose: PageTearPose) => getTearFlatFields(pose, frame, size);
   const offset = { x: target.x - held.x, y: target.y - held.y };
   const distance = Math.hypot(offset.x, offset.y);
   if (distance < 0.5) return { curlCylinder: null, fold: null, tear, curledCorner: cornerPage, flat: flat(tear) };
@@ -1512,7 +1512,7 @@ function resolveTearSheet(
   const peel = vecNormalize({ x: targetPage.x - cornerPage.x, y: targetPage.y - cornerPage.y });
   const foldDistance = distance / 2;
   const foldFoot = { x: cornerPage.x + peel.x * foldDistance, y: cornerPage.y + peel.y * foldDistance };
-  const lift = smoothNSEPageProgress(Math.min(1, travel / Math.max(pull.reach + pull.resist, 1)));
+  const lift = smoothPageProgress(Math.min(1, travel / Math.max(pull.reach + pull.resist, 1)));
   const fullRoll = Math.max(motion.curlRadiusMaxPx ?? CURL_RADIUS_MAX_PX, Math.min(size.width, size.height) * CURL_BOOK_ROLL);
   const radius = Math.max(CURL_ROLL_MIN_PX, fullRoll * Math.sqrt(lift));
   const sweep = Math.PI * (1 - TEAR_STAND * lift);
@@ -1532,23 +1532,23 @@ function resolveTearSheet(
   // It swings about the held corner the way the pull drags its far side.
   const centre = { x: size.width / 2 - targetPage.x, y: size.height / 2 - targetPage.y };
   const swing = Math.sign(heading.x * centre.y - heading.y * centre.x) || 1;
-  const flown: NSEPageTearPose = {
+  const flown: PageTearPose = {
     ...tear,
     flight: {
       x: heading.x * carry,
       y: heading.y * carry,
       z: Math.hypot(size.width, size.height) * 0.1 * flight,
-      spin: -swing * 0.3 * smoothNSEPageProgress(flight),
+      spin: -swing * 0.3 * smoothPageProgress(flight),
       pivotX: targetPage.x,
       pivotY: targetPage.y,
-      opacity: 1 - smoothNSEPageProgress((flight - 0.62) / 0.28)
+      opacity: 1 - smoothPageProgress((flight - 0.62) / 0.28)
     }
   };
   return {
     curlCylinder: {
       ...cylinder,
       radius: cylinder.radius * (1 + 0.8 * flight),
-      sweep: cylinder.sweep - (cylinder.sweep - Math.PI * 0.55) * smoothNSEPageProgress(flight)
+      sweep: cylinder.sweep - (cylinder.sweep - Math.PI * 0.55) * smoothPageProgress(flight)
     },
     curledCorner: targetPage,
     fold,

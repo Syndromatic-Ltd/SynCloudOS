@@ -9,7 +9,7 @@ import { useObserve } from "../../src/NSE/Objects/useObserve";
 import { NSEPageController } from "../../src/NSE/Page";
 import { pageCurlConnection } from "../../src/NSE/Page/pageCurlConnection";
 import { pageSurfaceKey } from "../../src/NSE/Page/pageSurfaceKey";
-import type { NSEPageEvent, NSEPageHandle } from "../../src/NSE/Page/nsePageTypes";
+import type { PageEvent, PageHandle } from "../../src/NSE/Page/pageTypes";
 import { createClassApplicationHost, type ClassApplicationHost } from "./fixtures/classApplicationHost";
 
 const hosts: ClassApplicationHost[] = [];
@@ -77,7 +77,7 @@ class Book extends NSEPageController<Entry> {
   override didTransitionToObject(entry: Entry) { this.transitions.push(entry.name); }
 }
 
-function curlEvent(progress: number, direction: "forward" | "backward" = "forward", phase: "dragging" | "turning" | "idle" = "turning", reason: NSEPageEvent["reason"] = "gesture"): NSEPageEvent {
+function curlEvent(progress: number, direction: "forward" | "backward" = "forward", phase: "dragging" | "turning" | "idle" = "turning", reason: PageEvent["reason"] = "gesture"): PageEvent {
   return { reason, snapshot: { progress, direction, phase, reason, targetProgress: 1, mode: "curl", edge: direction === "forward" ? "right" : "left", torn: false, turnId: 1, updatedAt: 0 } };
 }
 
@@ -120,7 +120,7 @@ it("turns spreads in both directions, gates overlapping commands, and cancels on
   const turns: string[] = [];
   const attach = (direction: "forward" | "backward") => engine.attach(direction, {
     reset() {}, setProgress() {}, getSnapshot: () => curlEvent(0, direction).snapshot, turnTo(progress, options) { turns.push(`${direction}:${progress}:${options?.edge}`); },
-  } as NSEPageHandle);
+  } as PageHandle);
   attach("forward"); attach("backward");
   book.navigateForward(); book.navigateForward();
   expect(turns).toEqual(["forward:1:right"]);
@@ -146,7 +146,7 @@ it("allows navigation to take over a cosmetic dog-ear peek", () => {
   const peek = curlEvent(.01);
   peek.snapshot.targetProgress = .025;
   const turns: number[] = [];
-  engine.attach("forward", { reset() {}, getSnapshot: () => peek.snapshot, turnTo(progress) { turns.push(progress); } } as NSEPageHandle);
+  engine.attach("forward", { reset() {}, getSnapshot: () => peek.snapshot, turnTo(progress) { turns.push(progress); } } as PageHandle);
   engine.progress(.01, peek);
   book.navigateForward();
   expect(turns).toEqual([1]);

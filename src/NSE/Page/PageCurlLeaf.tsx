@@ -31,10 +31,10 @@ import {
   type CSSProperties,
   type PointerEvent as ReactPointerEvent
 } from "react";
-import { getNSEPageTearStubOutline, isNSEPageBookSurfaceActive, resolveNSEPageBookStripGeometry } from "./nsePageGeometry";
-import { useNSEPage } from "./useNSEPage";
-import { useNSEPageCurlSurface } from "./useNSEPageCurlSurface";
-import type { NSEPageHandle, NSEPageProps } from "./nsePageTypes";
+import { getPageTearStubOutline, isPageBookSurfaceActive, resolvePageBookStripGeometry } from "./pageGeometry";
+import { usePage } from "./usePage";
+import { usePageCurlSurface } from "./usePageCurlSurface";
+import type { PageHandle, PageProps } from "./pageTypes";
 
 function classes(...values: Array<string | false | null | undefined>) {
   return values.filter(Boolean).join(" ");
@@ -55,7 +55,7 @@ function svgPath(points: ReadonlyArray<{ x: number; y: number }>, close: boolean
   return points.map((point, index) => `${index ? "L" : "M"}${point.x.toFixed(2)} ${point.y.toFixed(2)}`).join(" ") + (close ? " Z" : "");
 }
 
-export const NSEPageCurlLeaf = forwardRef<NSEPageHandle, NSEPageProps>(function NSEPageCurlLeaf(
+export const PageCurlLeaf = forwardRef<PageHandle, PageProps>(function PageCurlLeaf(
   {
     children,
     front,
@@ -107,7 +107,7 @@ export const NSEPageCurlLeaf = forwardRef<NSEPageHandle, NSEPageProps>(function 
     onLostPointerCapture,
     role,
     ...props
-  }: NSEPageProps,
+  }: PageProps,
   ref
 ) {
   // The curl surface is set up after the page hook it serves; turns reach it through this.
@@ -115,7 +115,7 @@ export const NSEPageCurlLeaf = forwardRef<NSEPageHandle, NSEPageProps>(function 
   const awaitSurface = useCallback(() => awaitSurfaceRef.current(), []);
   const surfacePendingRef = useRef<() => boolean>(() => false);
   const surfacePending = useCallback(() => surfacePendingRef.current(), []);
-  const page = useNSEPage({
+  const page = usePage({
     preset,
     presetOverrides,
     progress,
@@ -147,7 +147,7 @@ export const NSEPageCurlLeaf = forwardRef<NSEPageHandle, NSEPageProps>(function 
   const frontFaceRef = useRef<HTMLDivElement>(null);
   const curlFlapRef = useRef<HTMLDivElement>(null);
   const insideRef = useRef<HTMLDivElement>(null);
-  const curlSurface = useNSEPageCurlSurface({
+  const curlSurface = usePageCurlSurface({
     enabled: isRolled && !page.geometry.reduced,
     geometry: page.geometry,
     motion: page.preset.motion,
@@ -187,12 +187,12 @@ export const NSEPageCurlLeaf = forwardRef<NSEPageHandle, NSEPageProps>(function 
     : isCurl && !page.geometry.reduced && page.geometry.progress > restProgress + peekDelta + 0.03;
   const bookSurfaceActive = turnSurface != null &&
     (page.geometry.edge === "left" || page.geometry.edge === "right") &&
-    isNSEPageBookSurfaceActive(page.geometry);
+    isPageBookSurfaceActive(page.geometry);
   const bookStrips = useMemo(() => {
     if (!bookSurfaceActive || turnSurface == null || (page.geometry.edge !== "left" && page.geometry.edge !== "right")) {
       return [];
     }
-    return resolveNSEPageBookStripGeometry({
+    return resolvePageBookStripGeometry({
       progress: page.geometry.progress,
       edge: page.geometry.edge,
       direction: page.geometry.direction,
@@ -215,7 +215,7 @@ export const NSEPageCurlLeaf = forwardRef<NSEPageHandle, NSEPageProps>(function 
   useLayoutEffect(() => {
     const pose = tornPoseRef.current;
     if (tornKey === null || !pose) return;
-    const { outline, edge } = getNSEPageTearStubOutline(pose, page.geometry.size);
+    const { outline, edge } = getPageTearStubOutline(pose, page.geometry.size);
     const face = frontFaceRef.current ? getComputedStyle(frontFaceRef.current).backgroundColor : "";
     const colour = curlSurface.stubColour(pose.binding) ?? (face && !/rgba\([^)]*,\s*0\)|transparent/.test(face) ? face : "#fffdf5");
     setStubs((current) => current.some((stub) => stub.key === tornKey) ? current : [

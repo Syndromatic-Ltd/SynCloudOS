@@ -19,14 +19,14 @@
  */
 
 import type {
-  NSEPageMaterialPreset,
-  NSEPageMotionPreset,
-  NSEPagePreset,
-  NSEPagePresetName,
-  NSEPagePresetOverrides
-} from "./nsePageTypes";
+  PageMaterialPreset,
+  PageMotionPreset,
+  PagePreset,
+  PagePresetName,
+  PagePresetOverrides
+} from "./pageTypes";
 
-export const nsePageMaterialPresets = {
+export const pageMaterialPresets = {
   paper: {
     background: "linear-gradient(135deg, #fffdf5 0%, #f6f1e3 58%, #ede4cf 100%)",
     backBackground: "linear-gradient(135deg, #f8f4e8 0%, #e8dfc8 100%)",
@@ -75,9 +75,9 @@ export const nsePageMaterialPresets = {
     edgeColour: "rgba(112, 91, 61, 0.3)",
     grainOpacity: 0.08
   }
-} satisfies Record<string, NSEPageMaterialPreset>;
+} satisfies Record<string, PageMaterialPreset>;
 
-const standardMotion: NSEPageMotionPreset = {
+const standardMotion: PageMotionPreset = {
   durationMs: 720,
   reducedDurationMs: 120,
   easing: "cubic-bezier(.2,.86,.22,1)",
@@ -89,7 +89,7 @@ const standardMotion: NSEPageMotionPreset = {
   revealThreshold: 0.62
 };
 
-export const nsePagePresets = {
+export const pagePresets = {
   nseSheet: {
     name: "nseSheet",
     mode: "peel",
@@ -105,7 +105,7 @@ export const nsePagePresets = {
       shadowStrength: 0.42,
       revealThreshold: 0.48
     },
-    material: nsePageMaterialPresets.screenPaper,
+    material: pageMaterialPresets.screenPaper,
     interaction: {
       snapThreshold: 0.42,
       velocityThreshold: 0.24,
@@ -121,7 +121,7 @@ export const nsePagePresets = {
     direction: "forward",
     className: "nse-page-preset-paper-turn",
     motion: standardMotion,
-    material: nsePageMaterialPresets.paper,
+    material: pageMaterialPresets.paper,
     interaction: {
       snapThreshold: 0.5,
       velocityThreshold: 0.28,
@@ -148,7 +148,7 @@ export const nsePagePresets = {
       projection: "spread",
       rollWidth: 0.28
     },
-    material: nsePageMaterialPresets.bookPaper,
+    material: pageMaterialPresets.bookPaper,
     interaction: {
       snapThreshold: 0.5,
       velocityThreshold: 0.26,
@@ -161,7 +161,7 @@ export const nsePagePresets = {
     name: "bookCurl", mode: "curl", edge: "right", direction: "forward",
     className: "nse-page-preset-book-curl",
     motion: { ...standardMotion, durationMs: 560, curlPath: "book", projection: "spread", restProgress: 0, peekDelta: 0.025, revealThreshold: 1, shadowStrength: 0.22, curlRadiusMinPx: 2, curlRadiusMaxPx: 24 },
-    material: nsePageMaterialPresets.bookPaper,
+    material: pageMaterialPresets.bookPaper,
     interaction: { snapThreshold: 0.42, openProgress: 1, velocityThreshold: 0.26, edgeActivationSize: 72, preventScroll: true, haptics: false, dogEar: true, dogEarSizePx: 72 }
   },
   settingsPeel: {
@@ -185,7 +185,7 @@ export const nsePagePresets = {
       restProgress: 0.035,
       peekDelta: 0.03
     },
-    material: nsePageMaterialPresets.screenPaper,
+    material: pageMaterialPresets.screenPaper,
     interaction: {
       snapThreshold: 0.16,
       openProgress: 0.5,
@@ -211,7 +211,7 @@ export const nsePagePresets = {
       liftPx: 14,
       revealThreshold: 0.5
     },
-    material: nsePageMaterialPresets.screenPaper,
+    material: pageMaterialPresets.screenPaper,
     interaction: {
       snapThreshold: 0.45,
       velocityThreshold: 0.24,
@@ -237,7 +237,7 @@ export const nsePagePresets = {
       shadowStrength: 0.4,
       revealThreshold: 0.6
     },
-    material: nsePageMaterialPresets.paper,
+    material: pageMaterialPresets.paper,
     interaction: {
       // Let go once the corner has come well over, and the sheet tears away;
       // a rip once opened never settles back.
@@ -263,7 +263,7 @@ export const nsePagePresets = {
       shadowStrength: 0.34,
       revealThreshold: 0.5
     },
-    material: nsePageMaterialPresets.card,
+    material: pageMaterialPresets.card,
     interaction: {
       snapThreshold: 0.5,
       velocityThreshold: 0.22,
@@ -272,13 +272,13 @@ export const nsePagePresets = {
       haptics: true
     }
   }
-} satisfies Record<NSEPagePresetName, NSEPagePreset>;
+} satisfies Record<PagePresetName, PagePreset>;
 
-export function getNSEPagePreset(
-  nameOrPreset: NSEPagePresetName | NSEPagePreset = "paperTurn",
-  overrides: NSEPagePresetOverrides = {}
-): NSEPagePreset {
-  const preset = typeof nameOrPreset === "string" ? nsePagePresets[nameOrPreset] : nameOrPreset;
+export function getPagePreset(
+  nameOrPreset: PagePresetName | PagePreset = "paperTurn",
+  overrides: PagePresetOverrides = {}
+): PagePreset {
+  const preset = typeof nameOrPreset === "string" ? pagePresets[nameOrPreset] : nameOrPreset;
   return {
     ...preset,
     ...overrides,

@@ -21,10 +21,10 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { flushSync } from "react-dom";
 import { renderNSEViewSnapshot } from "../Graphics/snapshotNSEView";
-import { NSEPageCurlRenderer, type NSEPageCurlFrame, type NSEPageCurlMargin } from "./NSEPageCurlRenderer";
-import { getNSEPageTearMargin } from "./nsePageGeometry";
+import { PageCurlRenderer, type PageCurlFrame, type PageCurlMargin } from "./PageCurlRenderer";
+import { getPageTearMargin } from "./pageGeometry";
 import { pageSurfaceKey } from "./pageSurfaceKey";
-import type { NSEPageCurlCylinder, NSEPageEdge, NSEPageGeometry, NSEPageMotionPreset, NSEPageTearPose } from "./nsePageTypes";
+import type { PageCurlCylinder, PageEdge, PageGeometry, PageMotionPreset, PageTearPose } from "./pageTypes";
 
 /** How long the page's content must hold still before it is redrawn for the curl. */
 const SNAPSHOT_SETTLE_MS = 60;
@@ -35,42 +35,42 @@ const SURFACE_CACHE_LIMIT = 4;
 /** The longest the canvas covers a newly shown page while its images decode. */
 const HOLD_LIMIT_MS = 800;
 
-const NO_MARGIN: NSEPageCurlMargin = Object.freeze({ left: 0, top: 0, right: 0, bottom: 0 });
+const NO_MARGIN: PageCurlMargin = Object.freeze({ left: 0, top: 0, right: 0, bottom: 0 });
 
 /** A pose with nothing lifted: the whole page lies flat. */
-const FLAT: NSEPageCurlCylinder = Object.freeze({
+const FLAT: PageCurlCylinder = Object.freeze({
   bendX: Number.MAX_SAFE_INTEGER, bendY: 0, normalX: 1, normalY: 0, radius: 0, sweep: Math.PI,
 });
 
-export interface NSEPageCurlSurfaceOptions {
+export interface PageCurlSurfaceOptions {
   /** Curl or tear mode with motion allowed. */
   readonly enabled: boolean;
-  readonly geometry: NSEPageGeometry;
-  readonly motion: NSEPageMotionPreset;
+  readonly geometry: PageGeometry;
+  readonly motion: PageMotionPreset;
   readonly frontRef: RefObject<HTMLElement | null>;
   readonly backRef: RefObject<HTMLElement | null>;
   /** The page revealed beneath, drawn ahead of time: a forward turn makes it the front. */
   readonly insideRef: RefObject<HTMLElement | null>;
-  readonly underside: NSEPageCurlFrame["underside"];
-  readonly subscribeFrame: (listener: (geometry: NSEPageGeometry) => void) => () => void;
+  readonly underside: PageCurlFrame["underside"];
+  readonly subscribeFrame: (listener: (geometry: PageGeometry) => void) => () => void;
 }
 
 /** Which renderer owns a curl: the 3D roll, or the 2D fold as a fallback. */
-export type NSEPageCurlRendererKind = "webgl" | "css";
+export type PageCurlRendererKind = "webgl" | "css";
 
-export interface NSEPageCurlSurface {
+export interface PageCurlSurface {
   readonly canvasRef: (canvas: HTMLCanvasElement | null) => void;
   /**
    * The renderer that owns the page. It is chosen as a curl starts moving and
    * holds until the page rests, so a curl never switches renderer part-way;
    * only a curl that has not yet lifted may still move up to the 3D roll.
    */
-  readonly renderer: NSEPageCurlRendererKind;
+  readonly renderer: PageCurlRendererKind;
   /** True while the WebGL canvas is drawing the page. */
   readonly active: boolean;
   /** True once the page's surfaces are drawn and a curl can start in 3D. */
   readonly ready: boolean;
-  readonly margin: NSEPageCurlMargin;
+  readonly margin: PageCurlMargin;
   /**
    * Null when a curl can start now; otherwise settles once the page is drawn,
    * so the curl starts in 3D, or after a short wait, when this one falls back
@@ -83,7 +83,7 @@ export interface NSEPageCurlSurface {
    * The colour of the paper a tear's stub is made of, read from the page
    * midway along its binding; null where none of it is opaque.
    */
-  readonly stubColour: (binding: NSEPageEdge) => string | null;
+  readonly stubColour: (binding: PageEdge) => string | null;
 }
 
 type Rgb = readonly [number, number, number];
@@ -194,11 +194,11 @@ async function drawPage(
 }
 
 function frameFor(
-  geometry: NSEPageGeometry,
-  motion: NSEPageMotionPreset,
-  margin: NSEPageCurlFrame["margin"],
-  underside: NSEPageCurlFrame["underside"]
-): NSEPageCurlFrame {
+  geometry: PageGeometry,
+  motion: PageMotionPreset,
+  margin: PageCurlFrame["margin"],
+  underside: PageCurlFrame["underside"]
+): PageCurlFrame {
   return {
     // Before the leaf lifts, and after it lands, the page simply lies flat.
     cylinder: geometry.curlCylinder ?? FLAT,
@@ -220,8 +220,8 @@ function frameFor(
  * before the page is drawn waits briefly for it; only where WebGL is
  * unavailable or the page can't be drawn does the CSS fold stand in.
  */
-export function useNSEPageCurlSurface({ enabled, geometry, motion, frontRef, backRef, insideRef, underside, subscribeFrame }: NSEPageCurlSurfaceOptions): NSEPageCurlSurface {
-  const rendererRef = useRef<NSEPageCurlRenderer | null>(null);
+export function usePageCurlSurface({ enabled, geometry, motion, frontRef, backRef, insideRef, underside, subscribeFrame }: PageCurlSurfaceOptions): PageCurlSurface {
+  const rendererRef = useRef<PageCurlRenderer | null>(null);
   const canvasElementRef = useRef<HTMLCanvasElement | null>(null);
   const [ready, setReady] = useState(false);
   const readyRef = useRef(false);
@@ -231,7 +231,7 @@ export function useNSEPageCurlSurface({ enabled, geometry, motion, frontRef, bac
   const unavailableRef = useRef(false);
   const [unavailable, setUnavailable] = useState(false);
   const timedOutRef = useRef(false);
-  const rendererLockRef = useRef<NSEPageCurlRendererKind | null>(null);
+  const rendererLockRef = useRef<PageCurlRendererKind | null>(null);
   const liftedRef = useRef(false);
   const generationRef = useRef(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -250,7 +250,7 @@ export function useNSEPageCurlSurface({ enabled, geometry, motion, frontRef, bac
   const { width: pageWidth, height: pageHeight } = geometry.size;
   const tearing = geometry.mode === "tear";
   const tearMargin = useMemo(
-    () => tearing ? getNSEPageTearMargin(geometry.edge, geometry.corner, { width: pageWidth, height: pageHeight }, motion.perspective) : NO_MARGIN,
+    () => tearing ? getPageTearMargin(geometry.edge, geometry.corner, { width: pageWidth, height: pageHeight }, motion.perspective) : NO_MARGIN,
     [geometry.corner, geometry.edge, motion.perspective, pageHeight, pageWidth, tearing]
   );
   const nextMargin = geometry.projection === "spread"
@@ -267,7 +267,7 @@ export function useNSEPageCurlSurface({ enabled, geometry, motion, frontRef, bac
     prefetchAbortRef.current = null;
   }
   if (moving && curled) liftedRef.current = true;
-  let renderer: NSEPageCurlRendererKind;
+  let renderer: PageCurlRendererKind;
   if (!enabled || unavailable) {
     renderer = "css";
   } else if (moving) {
@@ -368,7 +368,7 @@ export function useNSEPageCurlSurface({ enabled, geometry, motion, frontRef, bac
     // Pages are drawn only while they rest, so the drawing shows settled content.
     if (phaseRef.current !== "idle") return;
     if (!rendererRef.current) {
-      rendererRef.current = NSEPageCurlRenderer.create(canvas);
+      rendererRef.current = PageCurlRenderer.create(canvas);
       if (!rendererRef.current) {
         giveUp();
         return;
@@ -503,7 +503,7 @@ export function useNSEPageCurlSurface({ enabled, geometry, motion, frontRef, bac
     return waitRef.current.promise;
   }, [enabled]);
 
-  const stubColour = useCallback((binding: NSEPageEdge): string | null => {
+  const stubColour = useCallback((binding: PageEdge): string | null => {
     const front = frontRef.current;
     if (!front) return null;
     const box = front.getBoundingClientRect();

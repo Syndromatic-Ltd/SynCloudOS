@@ -19,13 +19,13 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { getNSEPageCurlProfile, projectNSEPageCurlPoint, resolveNSEPageGeometry } from "../../src/NSE/Page/nsePageGeometry";
-import { getNSEPagePreset } from "../../src/NSE/Page/nsePagePresets";
-import type { NSEPageCurlCylinder } from "../../src/NSE/Page/nsePageTypes";
+import { getPageCurlProfile, projectPageCurlPoint, resolvePageGeometry } from "../../src/NSE/Page/pageGeometry";
+import { getPagePreset } from "../../src/NSE/Page/pagePresets";
+import type { PageCurlCylinder } from "../../src/NSE/Page/pageTypes";
 
 function curlGeometry(preset: "settingsPeel" | "bookCurl", progress: number, pointer?: { x: number; y: number }) {
-  const resolved = getNSEPagePreset(preset);
-  return resolveNSEPageGeometry({
+  const resolved = getPagePreset(preset);
+  return resolvePageGeometry({
     progress,
     mode: "curl",
     edge: resolved.edge,
@@ -39,39 +39,39 @@ function curlGeometry(preset: "settingsPeel" | "bookCurl", progress: number, poi
 }
 
 describe("NSEPage curl cylinder", () => {
-  const roll = (radius: number, sweep = Math.PI): NSEPageCurlCylinder => ({
+  const roll = (radius: number, sweep = Math.PI): PageCurlCylinder => ({
     bendX: 300, bendY: 0, normalX: 1, normalY: 0, radius, sweep,
   });
 
   it("leaves paper behind the bend line flat", () => {
     const cylinder = roll(30);
-    expect(projectNSEPageCurlPoint({ x: 120, y: 80 }, cylinder)).toEqual({ x: 120, y: 80, z: 0, angle: 0 });
+    expect(projectPageCurlPoint({ x: 120, y: 80 }, cylinder)).toEqual({ x: 120, y: 80, z: 0, angle: 0 });
   });
 
   it("rolls paper over a tight crest, opens out, then runs straight on", () => {
-    const crest = getNSEPageCurlProfile(30 * Math.PI * 0.5, 30, Math.PI);
+    const crest = getPageCurlProfile(30 * Math.PI * 0.5, 30, Math.PI);
     expect(crest.x).toBeCloseTo(30);
     expect(crest.z).toBeCloseTo(30);
     // Continuous where the crest hands over to the open turn and the straight run.
     for (const sweep of [Math.PI, Math.PI * 0.75]) {
       for (const at of [30 * Math.PI * 0.55, 30 * Math.PI * 0.55 + 90 * (sweep - Math.PI * 0.55)]) {
-        const before = getNSEPageCurlProfile(at - 0.01, 30, sweep);
-        const after = getNSEPageCurlProfile(at + 0.01, 30, sweep);
+        const before = getPageCurlProfile(at - 0.01, 30, sweep);
+        const after = getPageCurlProfile(at + 0.01, 30, sweep);
         expect(Math.hypot(after.x - before.x, after.z - before.z)).toBeLessThan(0.03);
       }
     }
-    const flat = projectNSEPageCurlPoint({ x: 300 + 2000, y: 50 }, roll(30));
+    const flat = projectPageCurlPoint({ x: 300 + 2000, y: 50 }, roll(30));
     expect(flat.angle).toBe(Math.PI);
-    const standing = getNSEPageCurlProfile(400, 30, Math.PI * 0.7);
+    const standing = getPageCurlProfile(400, 30, Math.PI * 0.7);
     expect(standing.angle).toBeCloseTo(Math.PI * 0.7);
     expect(standing.z).toBeGreaterThan(200);
   });
 
   // Every pose a finger can pull a book leaf into, from each corner it turns by.
   const bookPoses = () => {
-    const resolved = getNSEPagePreset("bookCurl");
+    const resolved = getPagePreset("bookCurl");
     const size = { width: 400, height: 600 };
-    const poses: Array<{ label: string; progress: number; cylinder: NSEPageCurlCylinder }> = [];
+    const poses: Array<{ label: string; progress: number; cylinder: PageCurlCylinder }> = [];
     const cases = [
       { corner: "bottom-right", edge: "right", direction: "forward" },
       { corner: "top-right", edge: "right", direction: "forward" },
@@ -82,7 +82,7 @@ describe("NSEPage curl cylinder", () => {
       for (let x = -400; x <= 800; x += 50) {
         for (let y = -100; y <= 700; y += 50) {
           const progress = Math.min(1, Math.max(0, (edge === "right" ? 400 - x : x) / 800));
-          const geometry = resolveNSEPageGeometry({
+          const geometry = resolvePageGeometry({
             progress, mode: "curl", edge, corner, direction,
             motion: resolved.motion, material: resolved.material, size, pointer: { x, y },
           });
@@ -90,7 +90,7 @@ describe("NSEPage curl cylinder", () => {
         }
       }
       for (let progress = 0.05; progress < 1; progress += 0.05) {
-        const geometry = resolveNSEPageGeometry({
+        const geometry = resolvePageGeometry({
           progress, mode: "curl", edge, corner, direction, motion: resolved.motion, material: resolved.material, size,
         });
         if (geometry.curlCylinder) poses.push({ label: `${corner} turn ${progress.toFixed(2)}`, progress, cylinder: geometry.curlCylinder });
@@ -104,9 +104,9 @@ describe("NSEPage curl cylinder", () => {
     for (const { label, cylinder } of bookPoses()) {
       for (let x = 0; x <= 400; x += 25) {
         for (let y = 0; y <= 600; y += 25) {
-          const here = projectNSEPageCurlPoint({ x, y }, cylinder);
+          const here = projectPageCurlPoint({ x, y }, cylinder);
           for (const [dx, dy] of [[2, 0], [0, 2]]) {
-            const next = projectNSEPageCurlPoint({ x: x + dx, y: y + dy }, cylinder);
+            const next = projectPageCurlPoint({ x: x + dx, y: y + dy }, cylinder);
             const stretch = Math.hypot(next.x - here.x, next.y - here.y, next.z - here.z) / 2;
             if (Math.abs(stretch - 1) > Math.abs(worst.stretch - 1)) worst = { stretch, where: `${label} at ${x},${y}` };
           }
@@ -127,7 +127,7 @@ describe("NSEPage curl cylinder", () => {
       const geometry = curlGeometry("settingsPeel", progress);
       const cylinder = geometry.curlCylinder!;
       expect(cylinder.radius).toBeGreaterThan(0);
-      const corner = projectNSEPageCurlPoint({ x: 400, y: 600 }, cylinder);
+      const corner = projectPageCurlPoint({ x: 400, y: 600 }, cylinder);
       expect(corner.x).toBeCloseTo(geometry.curledCorner.x, 0);
       expect(corner.y).toBeCloseTo(geometry.curledCorner.y, 0);
       expect(corner.angle).toBeGreaterThan(Math.PI / 2);
@@ -139,7 +139,7 @@ describe("NSEPage curl cylinder", () => {
     const geometry = curlGeometry("bookCurl", 0.4, pointer);
     const cylinder = geometry.curlCylinder!;
     expect(cylinder.sweep).toBeLessThan(Math.PI);
-    const corner = projectNSEPageCurlPoint({ x: 400, y: 600 }, cylinder);
+    const corner = projectPageCurlPoint({ x: 400, y: 600 }, cylinder);
     expect(corner.x).toBeCloseTo(geometry.curledCorner.x, 0);
     expect(corner.y).toBeCloseTo(geometry.curledCorner.y, 0);
     expect(corner.z).toBeGreaterThan(20);
@@ -147,13 +147,13 @@ describe("NSEPage curl cylinder", () => {
 
   it("keeps a book leaf's spine attached and lays it flat once turned", () => {
     const halfway = curlGeometry("bookCurl", 0.5).curlCylinder!;
-    expect(projectNSEPageCurlPoint({ x: 0, y: 300 }, halfway).z).toBe(0);
+    expect(projectPageCurlPoint({ x: 0, y: 300 }, halfway).z).toBe(0);
     const turned = curlGeometry("bookCurl", 1).curlCylinder!;
     expect(turned.radius).toBeCloseTo(0);
   });
 
   it("never lifts a book leaf at its spine, wherever the finger goes", () => {
-    const resolved = getNSEPagePreset("bookCurl");
+    const resolved = getPagePreset("bookCurl");
     const size = { width: 400, height: 600 };
     const cases = [
       { corner: "bottom-right", edge: "right", direction: "forward", spineX: 0 },
@@ -163,14 +163,14 @@ describe("NSEPage curl cylinder", () => {
     for (const { corner, edge, direction, spineX } of cases) {
       for (let x = -400; x <= 800; x += 50) {
         for (let y = -100; y <= 700; y += 50) {
-          const geometry = resolveNSEPageGeometry({
+          const geometry = resolvePageGeometry({
             progress: 0.5, mode: "curl", edge, corner, direction,
             motion: resolved.motion, material: resolved.material, size, pointer: { x, y },
           });
           const cylinder = geometry.curlCylinder;
           if (!cylinder) continue;
           for (let spineY = 0; spineY <= 600; spineY += 50) {
-            expect(projectNSEPageCurlPoint({ x: spineX, y: spineY }, cylinder).z, `${corner} finger ${x},${y} spine ${spineY}`).toBe(0);
+            expect(projectPageCurlPoint({ x: spineX, y: spineY }, cylinder).z, `${corner} finger ${x},${y} spine ${spineY}`).toBe(0);
           }
         }
       }
@@ -178,8 +178,8 @@ describe("NSEPage curl cylinder", () => {
   });
 
   it("has no cylinder at rest outside curl mode", () => {
-    const resolved = getNSEPagePreset("paperTurn");
-    const geometry = resolveNSEPageGeometry({
+    const resolved = getPagePreset("paperTurn");
+    const geometry = resolvePageGeometry({
       progress: 0.5, mode: "turn", edge: resolved.edge, direction: resolved.direction,
       motion: resolved.motion, material: resolved.material, size: { width: 400, height: 600 },
     });

@@ -18,15 +18,15 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { NSEPageCurlCylinder, NSEPageSize, NSEPageTearPose } from "./nsePageTypes";
+import type { PageCurlCylinder, PageSize, PageTearPose } from "./pageTypes";
 
 /** One frame of a 3D page curl. */
-export interface NSEPageCurlFrame {
-  readonly cylinder: NSEPageCurlCylinder;
+export interface PageCurlFrame {
+  readonly cylinder: PageCurlCylinder;
   /** The page's untransformed size, in CSS px. */
-  readonly size: NSEPageSize;
+  readonly size: PageSize;
   /** How far the canvas reaches past the page on each side, in CSS px. */
-  readonly margin: NSEPageCurlMargin;
+  readonly margin: PageCurlMargin;
   /** Camera distance for the roll's foreshortening, in CSS px. */
   readonly perspective: number;
   /** 0–1: how dark the lifted paper's shadow is. */
@@ -38,11 +38,11 @@ export interface NSEPageCurlFrame {
    */
   readonly underside: "print-through" | "back";
   /** A sheet tearing from its binding: its ragged stub and its flight. */
-  readonly tear?: NSEPageTearPose | null;
+  readonly tear?: PageTearPose | null;
 }
 
 /** How far a curl's canvas reaches past the page on each side, in CSS px. */
-export interface NSEPageCurlMargin {
+export interface PageCurlMargin {
   readonly left: number;
   readonly top: number;
   readonly right: number;
@@ -52,7 +52,7 @@ export interface NSEPageCurlMargin {
 // The page as a grid in page px, rolled over the curl. Paper past the bend
 // line follows the curl's profile: a tight crest, then an ever looser turn
 // to its tip, the same all along the bend line so the paper never stretches.
-// This mapping matches projectNSEPageCurlPoint in nsePageGeometry.
+// This mapping matches projectPageCurlPoint in pageGeometry.
 //
 // The same mesh draws the shadow mask (uPass 1): each lifted point is cast
 // onto the page from a light just above and behind the camera, so the shadow
@@ -195,7 +195,7 @@ float shadowAt(vec2 fragment) {
   return dot(texture(uShadow, fragment / uViewport).rgb, uShadowWeights);
 }
 // The ragged line a sheet tears along, below its binding: coarse and fine
-// wander at once, as torn paper has. tearLine in nsePageGeometry matches it.
+// wander at once, as torn paper has. tearLine in pageGeometry matches it.
 float tearHash(float i, float seed) {
   return fract(sin(i * 12.9898 + seed * 78.233) * 43758.5453);
 }
@@ -405,7 +405,7 @@ const SHADOW_LIGHT = Object.freeze({ x: 0, y: -0.06 });
  * cast onto whatever lies flat beneath. Areas the page has lifted away from
  * stay transparent, so the live content underneath shows through.
  */
-export class NSEPageCurlRenderer {
+export class PageCurlRenderer {
   readonly #canvas: HTMLCanvasElement;
   readonly #gl: WebGL2RenderingContext;
   readonly #paper: Program;
@@ -421,7 +421,7 @@ export class NSEPageCurlRenderer {
   /** Shadow mask, blur scratch and the blurred shadow. */
   readonly #shadowTextures: readonly [WebGLTexture, WebGLTexture, WebGLTexture];
   #shadowSize = { width: 0, height: 0 };
-  #meshSize: NSEPageSize | null = null;
+  #meshSize: PageSize | null = null;
   #indexCount = 0;
   #hasSurfaces = false;
   #paperColour: readonly [number, number, number] = [0.97, 0.96, 0.94];
@@ -430,12 +430,12 @@ export class NSEPageCurlRenderer {
   #disposed = false;
 
   /** Returns null where WebGL 2 is unavailable; the CSS curl then stands in. */
-  static create(canvas: HTMLCanvasElement): NSEPageCurlRenderer | null {
+  static create(canvas: HTMLCanvasElement): PageCurlRenderer | null {
     if (typeof WebGL2RenderingContext === "undefined") return null;
     const gl = canvas.getContext("webgl2", { alpha: true, premultipliedAlpha: true, antialias: true, depth: true });
     if (!gl) return null;
     try {
-      return new NSEPageCurlRenderer(canvas, gl);
+      return new PageCurlRenderer(canvas, gl);
     } catch {
       return null;
     }
@@ -505,7 +505,7 @@ export class NSEPageCurlRenderer {
     return this.#hasSurfaces && !this.#disposed && !this.#gl.isContextLost();
   }
 
-  #ensureMesh(size: NSEPageSize) {
+  #ensureMesh(size: PageSize) {
     if (this.#meshSize && this.#meshSize.width === size.width && this.#meshSize.height === size.height) return;
     const gl = this.#gl;
     // Dense enough that the roll stays round on a large page.
@@ -585,7 +585,7 @@ export class NSEPageCurlRenderer {
     }
   }
 
-  draw(frame: NSEPageCurlFrame): void {
+  draw(frame: PageCurlFrame): void {
     if (!this.ready) return;
     const gl = this.#gl;
     const { size, margin, cylinder } = frame;

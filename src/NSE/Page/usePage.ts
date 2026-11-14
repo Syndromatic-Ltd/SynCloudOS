@@ -32,41 +32,41 @@ import { nseUnowned } from "../Controllers/ownership";
 import { useNSEDeferredDisposal } from "../interactionLifecycle";
 import { PageTurnController } from "./pageTurnController";
 import {
-  clampNSEPageProgress,
-  easeInOutNSEPageProgress,
-  easeOutNSEPageProgress,
-  getNSEPageCurlDragProgress,
-  getNSEPageDefaultCorner,
-  getNSEPageGeometryStyle,
-  getNSEPageNearestEdge,
-  getNSEPageProgressFromPoint,
-  getNSEPageTearDefaultCorner,
-  getNSEPageTearDragProgress,
-  isNSEPagePointNearEdge,
-  isNSEPageTearGrab,
+  clampPageProgress,
+  easeInOutPageProgress,
+  easeOutPageProgress,
+  getPageCurlDragProgress,
+  getPageDefaultCorner,
+  getPageGeometryStyle,
+  getPageNearestEdge,
+  getPageProgressFromPoint,
+  getPageTearDefaultCorner,
+  getPageTearDragProgress,
+  isPagePointNearEdge,
+  isPageTearGrab,
   NSE_PAGE_TEAR_FREE_AT,
-  resolveNSEPageGeometry
-} from "./nsePageGeometry";
-import { getNSEPagePreset } from "./nsePagePresets";
+  resolvePageGeometry
+} from "./pageGeometry";
+import { getPagePreset } from "./pagePresets";
 import type {
-  NSEPageCompletionReason,
-  NSEPageTurnSnapshot,
-  NSEPageDogEarHandlers,
-  NSEPageEdge,
-  NSEPageEvent,
-  NSEPageGeometry,
-  NSEPageGestureOptions,
-  NSEPageHandle,
-  NSEPagePhase,
-  NSEPagePoint,
-  NSEPagePointerHandler,
-  NSEPageSize,
-  NSEPageTurnOptions,
-  UseNSEPageOptions,
-  UseNSEPageResult
-} from "./nsePageTypes";
+  PageCompletionReason,
+  PageTurnSnapshot,
+  PageDogEarHandlers,
+  PageEdge,
+  PageEvent,
+  PageGeometry,
+  PageGestureOptions,
+  PageHandle,
+  PagePhase,
+  PagePoint,
+  PagePointerHandler,
+  PageSize,
+  PageTurnOptions,
+  UsePageOptions,
+  UsePageResult
+} from "./pageTypes";
 
-const DEFAULT_PAGE_SIZE: NSEPageSize = { width: 480, height: 640 };
+const DEFAULT_PAGE_SIZE: PageSize = { width: 480, height: 640 };
 /** How far a finger must move before a book leaf lifts to follow it, in px. */
 const BOOK_DRAG_SLOP_PX = 6;
 
@@ -90,9 +90,9 @@ function cancelFrame(frame: number) {
 }
 
 function resolveGestureOptions(
-  interactive: boolean | NSEPageGestureOptions | undefined,
-  presetGesture: NSEPageGestureOptions
-): Required<NSEPageGestureOptions> {
+  interactive: boolean | PageGestureOptions | undefined,
+  presetGesture: PageGestureOptions
+): Required<PageGestureOptions> {
   const fallbackEdge = Array.isArray(presetGesture.edges) ? presetGesture.edges[0] ?? "right" : "right";
   if (interactive === false) {
     return {
@@ -118,25 +118,25 @@ function resolveGestureOptions(
   };
 }
 
-function getAllowedEdges(edges: NSEPageGestureOptions["edges"], fallback: NSEPageEdge): NSEPageEdge[] {
+function getAllowedEdges(edges: PageGestureOptions["edges"], fallback: PageEdge): PageEdge[] {
   if (edges === "all") return ["left", "right", "top", "bottom"];
   if (Array.isArray(edges) && edges.length > 0) return edges;
   return [fallback];
 }
 
-function pointFromPointer(event: { clientX: number; clientY: number }): NSEPagePoint {
+function pointFromPointer(event: { clientX: number; clientY: number }): PagePoint {
   return { x: event.clientX, y: event.clientY };
 }
 
 /** A tear gathers pace as the paper gives, and the sheet leaves at speed. */
 function easeTearProgress(progress: number) {
-  const t = clampNSEPageProgress(progress);
+  const t = clampPageProgress(progress);
   return t * t * (2.2 - 1.2 * t);
 }
 
 /** A tear let go mid-pull carries on at the finger's pace, quickening as the sheet comes free. */
 function easeReleasedTearProgress(progress: number) {
-  const t = clampNSEPageProgress(progress);
+  const t = clampPageProgress(progress);
   return t * (0.7 + 0.3 * t);
 }
 
@@ -144,11 +144,11 @@ function newTearSeed() {
   return 1 + Math.random() * 997;
 }
 
-export function useNSEPage(options: UseNSEPageOptions = {}): UseNSEPageResult {
+export function usePage(options: UsePageOptions = {}): UsePageResult {
   const feedback = useNSEFeedback();
   const { reducedMotion: environmentReducedMotion } = useNSEAnimationEnvironment();
   const reducedMotion = options.reducedMotion ?? environmentReducedMotion;
-  const preset = useMemo(() => getNSEPagePreset(options.preset, options.presetOverrides), [options.preset, options.presetOverrides]);
+  const preset = useMemo(() => getPagePreset(options.preset, options.presetOverrides), [options.preset, options.presetOverrides]);
   const controllerRef = useRef<PageTurnController | null>(null);
   const rootElementRef = useRef<HTMLElement | null>(null);
   const frameRef = useRef<number | null>(null);
@@ -156,16 +156,16 @@ export function useNSEPage(options: UseNSEPageOptions = {}): UseNSEPageResult {
   /** A turn waiting for the rendering surface before it starts. */
   /** A turn waiting for its renderer to be ready, and where it is headed. */
   const pendingTurnRef = useRef<{ targetProgress: number } | null>(null);
-  const draggingRef = useRef<{ pointerId: number; edge: NSEPageEdge; startedAt: number; startedProgress: number; origin: NSEPagePoint | null; peak: number } | null>(null);
+  const draggingRef = useRef<{ pointerId: number; edge: PageEdge; startedAt: number; startedProgress: number; origin: PagePoint | null; peak: number } | null>(null);
   /** Shapes the ragged line of the page's next tear. */
   const tearSeedRef = useRef(newTearSeed());
   const callbacksRef = useRef(options);
   callbacksRef.current = options;
-  const [pageSize, setPageSize] = useState<NSEPageSize>(DEFAULT_PAGE_SIZE);
+  const [pageSize, setPageSize] = useState<PageSize>(DEFAULT_PAGE_SIZE);
   const pageSizeRef = useRef(pageSize);
   pageSizeRef.current = pageSize;
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
-  const dragPointerRef = useRef<NSEPagePoint | null>(null);
+  const dragPointerRef = useRef<PagePoint | null>(null);
   const dragMovedRef = useRef(false);
   // Latest pointer sample + its scheduled rAF, so drag frames are coalesced to
   // one geometry apply per display frame (see onPointerMove).
@@ -174,8 +174,8 @@ export function useNSEPage(options: UseNSEPageOptions = {}): UseNSEPageResult {
 
   const resolvedMode = options.mode ?? preset.mode;
   const resolvedCorner = options.corner ?? preset.corner ?? (resolvedMode === "tear"
-    ? getNSEPageTearDefaultCorner(options.edge ?? preset.edge)
-    : getNSEPageDefaultCorner(options.edge ?? preset.edge));
+    ? getPageTearDefaultCorner(options.edge ?? preset.edge)
+    : getPageDefaultCorner(options.edge ?? preset.edge));
   // In curl mode "closed" is the resting fold — the real dog-ear.
   const restProgress = resolvedMode === "curl" ? preset.motion.restProgress ?? 0.06 : 0;
 
@@ -200,9 +200,9 @@ export function useNSEPage(options: UseNSEPageOptions = {}): UseNSEPageResult {
 
   const controller = controllerRef.current;
   useNSEDeferredDisposal(controller);
-  const [snapshot, setSnapshot] = useState<NSEPageTurnSnapshot>(() => controller.getSnapshot());
+  const [snapshot, setSnapshot] = useState<PageTurnSnapshot>(() => controller.getSnapshot());
   const snapshotRef = useRef(snapshot);
-  const lastPhaseRef = useRef<NSEPagePhase>(snapshot.phase);
+  const lastPhaseRef = useRef<PagePhase>(snapshot.phase);
   const lastOpenRef = useRef(snapshot.progress >= (preset.interaction.openProgress ?? 1));
   // A parent render may occur between coalesced drag samples. React's last
   // snapshot can be older than the controller; never overwrite live progress.
@@ -213,8 +213,8 @@ export function useNSEPage(options: UseNSEPageOptions = {}): UseNSEPageResult {
     const progress = options.progress ?? (options.open == null ? snapshot.progress : options.open ? openProgress : restProgress);
     return {
       ...snapshot,
-      progress: clampNSEPageProgress(progress),
-      targetProgress: clampNSEPageProgress(options.open == null ? snapshot.targetProgress : options.open ? openProgress : restProgress),
+      progress: clampPageProgress(progress),
+      targetProgress: clampPageProgress(options.open == null ? snapshot.targetProgress : options.open ? openProgress : restProgress),
       mode: options.mode ?? snapshot.mode ?? preset.mode,
       edge: options.edge ?? snapshot.edge ?? preset.edge,
       corner: options.corner ?? preset.corner,
@@ -223,7 +223,7 @@ export function useNSEPage(options: UseNSEPageOptions = {}): UseNSEPageResult {
     };
   }, [options.corner, options.direction, options.edge, options.mode, options.open, options.progress, options.torn, preset.corner, preset.direction, preset.edge, preset.interaction.openProgress, preset.mode, restProgress, snapshot]);
 
-  const geometry = useMemo(() => resolveNSEPageGeometry({
+  const geometry = useMemo(() => resolvePageGeometry({
     progress: effectiveSnapshot.progress,
     mode: effectiveSnapshot.mode,
     edge: effectiveSnapshot.edge,
@@ -239,8 +239,8 @@ export function useNSEPage(options: UseNSEPageOptions = {}): UseNSEPageResult {
     tearSeed: tearSeedRef.current
   }), [effectiveSnapshot, pageSize, preset.material, preset.motion, reducedMotion]);
 
-  const emit = useCallback((reason: NSEPageCompletionReason, nextSnapshot = controller.getSnapshot()) => {
-    const event: NSEPageEvent = { snapshot: nextSnapshot, reason };
+  const emit = useCallback((reason: PageCompletionReason, nextSnapshot = controller.getSnapshot()) => {
+    const event: PageEvent = { snapshot: nextSnapshot, reason };
     callbacksRef.current.onProgressChange?.(nextSnapshot.progress, event);
     if (nextSnapshot.phase !== lastPhaseRef.current) {
       lastPhaseRef.current = nextSnapshot.phase;
@@ -295,13 +295,13 @@ export function useNSEPage(options: UseNSEPageOptions = {}): UseNSEPageResult {
     }
   }, []);
 
-  const commitProgress = useCallback((progress: number, reason: NSEPageCompletionReason = "programmatic") => {
+  const commitProgress = useCallback((progress: number, reason: PageCompletionReason = "programmatic") => {
     const nextSnapshot = controller.setProgress(progress, reason);
     emit(reason, nextSnapshot);
     return nextSnapshot;
   }, [controller, emit]);
 
-  const cancelActiveTurn = useCallback((reason: Extract<NSEPageCompletionReason, "cancel" | "superseded"> = "superseded") => {
+  const cancelActiveTurn = useCallback((reason: Extract<PageCompletionReason, "cancel" | "superseded"> = "superseded") => {
     pendingTurnRef.current = null;
     clearAnimation();
     if (activeTurnRef.current == null) return false;
@@ -324,9 +324,9 @@ export function useNSEPage(options: UseNSEPageOptions = {}): UseNSEPageResult {
     if (endedActiveTurn) callbacksRef.current.onTurnEnd?.(restingEvent);
   }, [clearAnimation, controller, emit, restProgress]);
 
-  const startTurn = useCallback((targetProgress: number, turnOptions: NSEPageTurnOptions = {}) => {
+  const startTurn = useCallback((targetProgress: number, turnOptions: PageTurnOptions = {}) => {
     cancelActiveTurn();
-    const target = clampNSEPageProgress(targetProgress);
+    const target = clampPageProgress(targetProgress);
     const startSnapshot = controller.startTurn({
       ...turnOptions,
       targetProgress: target,
@@ -357,7 +357,7 @@ export function useNSEPage(options: UseNSEPageOptions = {}): UseNSEPageResult {
         : turnOptions.durationMs ?? options.durationMs ?? preset.motion.durationMs;
 
     if (reducedMotion || duration <= 0 || Math.abs(from - target) < 0.001) {
-      const phase: NSEPagePhase = turnOptions.reason === "tear" ? "torn" : "idle";
+      const phase: PagePhase = turnOptions.reason === "tear" ? "torn" : "idle";
       const nextSnapshot = turnOptions.reason === "tear"
         ? controller.tear({ ...turnOptions, progress: target })
         : controller.complete(target, turnOptions.reason ?? "programmatic");
@@ -376,13 +376,13 @@ export function useNSEPage(options: UseNSEPageOptions = {}): UseNSEPageResult {
       ? duration * Math.max(0.35, Math.abs(target - from))
       : releasedPointer ? duration * (0.55 + 0.45 * Math.abs(target - from)) : duration;
     const ease = tearing
-      ? target < from ? easeOutNSEPageProgress : tearPointer ? easeReleasedTearProgress : easeTearProgress
-      : releasedPointer ? easeOutNSEPageProgress : easeInOutNSEPageProgress;
+      ? target < from ? easeOutPageProgress : tearPointer ? easeReleasedTearProgress : easeTearProgress
+      : releasedPointer ? easeOutPageProgress : easeInOutPageProgress;
     const startedAt = getNow();
     const step = (now: number) => {
       if (activeTurnRef.current !== turnToken) return;
       const elapsed = now - startedAt;
-      const t = clampNSEPageProgress(elapsed / travelDuration);
+      const t = clampPageProgress(elapsed / travelDuration);
       const eased = ease(t);
       if (releasedPointer) {
         const left = (options.corner ?? preset.corner ?? "bottom-right").endsWith("left");
@@ -434,7 +434,7 @@ export function useNSEPage(options: UseNSEPageOptions = {}): UseNSEPageResult {
 
   // A turn waits for the page's rendering surface, so it runs in one renderer
   // from start to finish; anything that cancels the turn cancels the wait.
-  const animateTo = useCallback((targetProgress: number, turnOptions: NSEPageTurnOptions = {}) => {
+  const animateTo = useCallback((targetProgress: number, turnOptions: PageTurnOptions = {}) => {
     const surface = reducedMotion ? null : callbacksRef.current.awaitSurface?.() ?? null;
     if (!surface) {
       pendingTurnRef.current = null;
@@ -459,7 +459,7 @@ export function useNSEPage(options: UseNSEPageOptions = {}): UseNSEPageResult {
     haptics: preset.interaction.haptics
   }), [options.edge, options.interactive, preset.edge, preset.interaction.edgeActivationSize, preset.interaction.haptics, preset.interaction.openProgress, preset.interaction.preventScroll, preset.interaction.snapThreshold]);
 
-  const localPointFromEvent = useCallback((event: { clientX: number; clientY: number }, root: HTMLElement): NSEPagePoint => {
+  const localPointFromEvent = useCallback((event: { clientX: number; clientY: number }, root: HTMLElement): PagePoint => {
     // Map client coords into untransformed page-local px so dragging keeps
     // working while ancestors animate transforms.
     const rect = root.getBoundingClientRect();
@@ -470,7 +470,7 @@ export function useNSEPage(options: UseNSEPageOptions = {}): UseNSEPageResult {
     return { x: (event.clientX - rect.left) * scaleX, y: (event.clientY - rect.top) * scaleY };
   }, []);
 
-  const onPointerDown = useCallback<NSEPagePointerHandler>((event) => {
+  const onPointerDown = useCallback<PagePointerHandler>((event) => {
     if (options.disabled || !gestureOptions.enabled || event.button !== 0) return;
     const root = rootElementRef.current;
     if (!root) return;
@@ -491,10 +491,10 @@ export function useNSEPage(options: UseNSEPageOptions = {}): UseNSEPageResult {
     const tearing = resolvedMode === "tear";
     const allowedEdges = getAllowedEdges(gestureOptions.edges, options.edge ?? preset.edge);
     // A sheet is torn from its binding, held by the corner it tears from.
-    const edge = tearing ? options.edge ?? preset.edge : getNSEPageNearestEdge(point, bounds, allowedEdges);
+    const edge = tearing ? options.edge ?? preset.edge : getPageNearestEdge(point, bounds, allowedEdges);
     if (tearing
-      ? !isNSEPageTearGrab(localPointFromEvent(event, root), resolvedCorner, pageSizeRef.current, edge, gestureOptions.edgeActivationSize)
-      : !isNSEPagePointNearEdge(point, bounds, edge, gestureOptions.edgeActivationSize)) return;
+      ? !isPageTearGrab(localPointFromEvent(event, root), resolvedCorner, pageSizeRef.current, edge, gestureOptions.edgeActivationSize)
+      : !isPagePointNearEdge(point, bounds, edge, gestureOptions.edgeActivationSize)) return;
 
     if (gestureOptions.preventScroll) event.preventDefault();
     if (typeof event.currentTarget.setPointerCapture === "function") {
@@ -503,11 +503,11 @@ export function useNSEPage(options: UseNSEPageOptions = {}): UseNSEPageResult {
 
     const restingProgress = controller.getSnapshot().progress;
     cancelActiveTurn();
-    let progress = getNSEPageProgressFromPoint(edge, point, bounds);
-    let origin: NSEPagePoint | null = null;
+    let progress = getPageProgressFromPoint(edge, point, bounds);
+    let origin: PagePoint | null = null;
     if (tearing) {
       const local = localPointFromEvent(event, root);
-      progress = getNSEPageTearDragProgress(local, resolvedCorner, pageSizeRef.current, edge, preset.motion);
+      progress = getPageTearDragProgress(local, resolvedCorner, pageSizeRef.current, edge, preset.motion);
       dragPointerRef.current = local;
     } else if (resolvedMode === "curl") {
       const local = localPointFromEvent(event, root);
@@ -519,7 +519,7 @@ export function useNSEPage(options: UseNSEPageOptions = {}): UseNSEPageResult {
         progress = restingProgress;
         dragPointerRef.current = null;
       } else {
-        progress = getNSEPageCurlDragProgress(local, resolvedCorner, pageSizeRef.current);
+        progress = getPageCurlDragProgress(local, resolvedCorner, pageSizeRef.current);
         dragPointerRef.current = local;
       }
     }
@@ -559,7 +559,7 @@ export function useNSEPage(options: UseNSEPageOptions = {}): UseNSEPageResult {
       // Paper once torn stays torn: the rip holds however the finger wavers.
       const local = localPointFromEvent(pending, root);
       dragPointerRef.current = local;
-      progress = Math.max(drag.peak, getNSEPageTearDragProgress(local, resolvedCorner, pageSizeRef.current, drag.edge, preset.motion));
+      progress = Math.max(drag.peak, getPageTearDragProgress(local, resolvedCorner, pageSizeRef.current, drag.edge, preset.motion));
       drag.peak = progress;
     } else if (resolvedMode === "curl") {
       const local = localPointFromEvent(pending, root);
@@ -572,10 +572,10 @@ export function useNSEPage(options: UseNSEPageOptions = {}): UseNSEPageResult {
       }
       dragPointerRef.current = local;
       progress = preset.motion.curlPath === "book"
-        ? clampNSEPageProgress((resolvedCorner.endsWith("left") ? local.x : pageSizeRef.current.width - local.x) / (2 * pageSizeRef.current.width))
-        : getNSEPageCurlDragProgress(local, resolvedCorner, pageSizeRef.current);
+        ? clampPageProgress((resolvedCorner.endsWith("left") ? local.x : pageSizeRef.current.width - local.x) / (2 * pageSizeRef.current.width))
+        : getPageCurlDragProgress(local, resolvedCorner, pageSizeRef.current);
     } else {
-      progress = getNSEPageProgressFromPoint(drag.edge, pointFromPointer(pending), root.getBoundingClientRect());
+      progress = getPageProgressFromPoint(drag.edge, pointFromPointer(pending), root.getBoundingClientRect());
     }
     if (!drag.origin && Math.abs(progress - drag.startedProgress) > 0.03) dragMovedRef.current = true;
     commitProgress(progress, "gesture");
@@ -587,7 +587,7 @@ export function useNSEPage(options: UseNSEPageOptions = {}): UseNSEPageResult {
     }
   }, [animateTo, commitProgress, localPointFromEvent, preset.motion, reducedMotion, resolvedCorner, resolvedMode]);
 
-  const onPointerMove = useCallback<NSEPagePointerHandler>((event) => {
+  const onPointerMove = useCallback<PagePointerHandler>((event) => {
     const drag = draggingRef.current;
     const root = rootElementRef.current;
     if (!drag || !root || drag.pointerId !== event.pointerId) return;
@@ -599,7 +599,7 @@ export function useNSEPage(options: UseNSEPageOptions = {}): UseNSEPageResult {
     if (moveFrameRef.current == null) moveFrameRef.current = requestFrame(flushMove);
   }, [flushMove, gestureOptions.preventScroll]);
 
-  const finishDrag = useCallback<NSEPagePointerHandler>((event) => {
+  const finishDrag = useCallback<PagePointerHandler>((event) => {
     const drag = draggingRef.current;
     if (!drag || drag.pointerId !== event.pointerId) return;
 
@@ -640,7 +640,7 @@ export function useNSEPage(options: UseNSEPageOptions = {}): UseNSEPageResult {
     });
   }, [animateTo, controller, flushMove, gestureOptions.openProgress, gestureOptions.snapThreshold, preset.motion.curlPath, resolvedMode, restProgress]);
 
-  const cancelDrag = useCallback<NSEPagePointerHandler>((event) => {
+  const cancelDrag = useCallback<PagePointerHandler>((event) => {
     if (!draggingRef.current || draggingRef.current.pointerId !== event.pointerId) return;
     if (moveFrameRef.current != null) {
       cancelFrame(moveFrameRef.current);
@@ -652,7 +652,7 @@ export function useNSEPage(options: UseNSEPageOptions = {}): UseNSEPageResult {
     cancelToRest();
   }, [cancelToRest]);
 
-  const handle = useMemo<NSEPageHandle>(() => ({
+  const handle = useMemo<PageHandle>(() => ({
     getSnapshot: () => controller.getSnapshot(),
     setProgress: commitProgress,
     turnTo: animateTo,
@@ -685,7 +685,7 @@ export function useNSEPage(options: UseNSEPageOptions = {}): UseNSEPageResult {
     }
   }), [animateTo, cancelActiveTurn, cancelToRest, commitProgress, controller, emit, options.direction, options.edge, options.mode, preset.direction, preset.edge, preset.interaction.openProgress, preset.mode, restProgress]);
 
-  const dogEarHandlers = useMemo<NSEPageDogEarHandlers>(() => {
+  const dogEarHandlers = useMemo<PageDogEarHandlers>(() => {
     const peekDelta = preset.motion.peekDelta ?? 0.045;
     const openTarget = gestureOptions.openProgress ?? preset.interaction.openProgress ?? 1;
     // Peek targets are absolute poses, so repeated enter/leave events can
@@ -741,19 +741,19 @@ export function useNSEPage(options: UseNSEPageOptions = {}): UseNSEPageResult {
    * the truth the moment the gesture ends. Controlled progress keeps the
    * React path — the consumer owns the pose there.
    */
-  const reactPhaseRef = useRef<NSEPagePhase>(snapshot.phase);
-  const isFastFrame = useCallback((phase: NSEPagePhase) =>
+  const reactPhaseRef = useRef<PagePhase>(snapshot.phase);
+  const isFastFrame = useCallback((phase: PagePhase) =>
     phase === "dragging" ? draggingRef.current != null : phase === "turning" && activeTurnRef.current != null, []);
-  const frameListenersRef = useRef(new Set<(geometry: NSEPageGeometry) => void>());
-  const subscribeFrame = useCallback((listener: (geometry: NSEPageGeometry) => void) => {
+  const frameListenersRef = useRef(new Set<(geometry: PageGeometry) => void>());
+  const subscribeFrame = useCallback((listener: (geometry: PageGeometry) => void) => {
     frameListenersRef.current.add(listener);
     return () => { frameListenersRef.current.delete(listener); };
   }, []);
 
-  const applyDragFrame = useCallback((nextSnapshot: NSEPageTurnSnapshot) => {
+  const applyDragFrame = useCallback((nextSnapshot: PageTurnSnapshot) => {
     const root = rootElementRef.current;
     if (!root) return;
-    const frameGeometry = resolveNSEPageGeometry({
+    const frameGeometry = resolvePageGeometry({
       progress: nextSnapshot.progress,
       mode: nextSnapshot.mode,
       edge: nextSnapshot.edge,
@@ -768,7 +768,7 @@ export function useNSEPage(options: UseNSEPageOptions = {}): UseNSEPageResult {
       reducedMotion,
       tearSeed: tearSeedRef.current
     });
-    const style = getNSEPageGeometryStyle(frameGeometry, { motion: preset.motion, material: preset.material });
+    const style = getPageGeometryStyle(frameGeometry, { motion: preset.motion, material: preset.material });
     for (const [property, value] of Object.entries(style)) {
       if (property.startsWith("--")) root.style.setProperty(property, String(value));
     }
@@ -837,7 +837,7 @@ export function useNSEPage(options: UseNSEPageOptions = {}): UseNSEPageResult {
     preset,
     rootRef: setRootRef,
     interactive: gestureOptions.enabled && !options.disabled,
-    getStyle: (style) => getNSEPageGeometryStyle(geometry, {
+    getStyle: (style) => getPageGeometryStyle(geometry, {
       motion: preset.motion,
       material: preset.material
     }, style),

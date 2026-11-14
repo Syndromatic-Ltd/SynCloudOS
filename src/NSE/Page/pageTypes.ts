@@ -26,7 +26,7 @@ import type {
 } from "react";
 import type { NSEControllerOwnershipOptions } from "../Controllers/ownership";
 
-export type NSEPagePresetName =
+export type PagePresetName =
   | "nseSheet"
   | "paperTurn"
   | "bookTurn"
@@ -36,38 +36,38 @@ export type NSEPagePresetName =
   | "tearAway"
   | "cardFlip";
 
-export type NSEPageMode = "turn" | "peel" | "curl" | "flip" | "tear";
-export type NSEPageEdge = "left" | "right" | "top" | "bottom";
-export type NSEPageCorner = "top-left" | "top-right" | "bottom-left" | "bottom-right";
-export type NSEPageAxis = "x" | "y";
-export type NSEPageDirection = "forward" | "backward";
-export type NSEPagePhase = "idle" | "dragging" | "turning" | "settling" | "canceling" | "torn" | "reduced";
-export type NSEPageCompletionReason = "programmatic" | "gesture" | "controlled" | "tear" | "cancel" | "superseded" | "reset";
-export type NSEPageElement = "div" | "section" | "article" | "main" | "aside";
-export type NSEPageHinge = "edge" | "opposite-edge";
-export type NSEPageProjection = "contained" | "spread";
-export type NSEPageBookEdge = Extract<NSEPageEdge, "left" | "right">;
+export type PageMode = "turn" | "peel" | "curl" | "flip" | "tear";
+export type PageEdge = "left" | "right" | "top" | "bottom";
+export type PageCorner = "top-left" | "top-right" | "bottom-left" | "bottom-right";
+export type PageAxis = "x" | "y";
+export type PageDirection = "forward" | "backward";
+export type PagePhase = "idle" | "dragging" | "turning" | "settling" | "canceling" | "torn" | "reduced";
+export type PageCompletionReason = "programmatic" | "gesture" | "controlled" | "tear" | "cancel" | "superseded" | "reset";
+export type PageElement = "div" | "section" | "article" | "main" | "aside";
+export type PageHinge = "edge" | "opposite-edge";
+export type PageProjection = "contained" | "spread";
+export type PageBookEdge = Extract<PageEdge, "left" | "right">;
 
-export type NSEPageStyle = CSSProperties & Record<`--${string}`, string | number | undefined>;
+export type PageStyle = CSSProperties & Record<`--${string}`, string | number | undefined>;
 
-export interface NSEPagePoint {
+export interface PagePoint {
   x: number;
   y: number;
 }
 
-export interface NSEPageSize {
+export interface PageSize {
   width: number;
   height: number;
 }
 
-export interface NSEPageFoldLine {
+export interface PageFoldLine {
   x1: number;
   y1: number;
   x2: number;
   y2: number;
 }
 
-export interface NSEPageMotionPreset {
+export interface PageMotionPreset {
   durationMs: number;
   reducedDurationMs: number;
   easing: string;
@@ -87,14 +87,14 @@ export interface NSEPageMotionPreset {
   /** How much the resting fold lifts while hovered. */
   peekDelta?: number;
   /** Which side owns the rigid hinge relative to the gesture activation edge. */
-  hinge?: NSEPageHinge;
+  hinge?: PageHinge;
   /** Whether a turning surface may project outside the page's layout box. */
-  projection?: NSEPageProjection;
+  projection?: PageProjection;
   /** Width of the traveling book curl as a fraction of leaf width (0.08–0.6). */
   rollWidth?: number;
 }
 
-export interface NSEPageMaterialPreset {
+export interface PageMaterialPreset {
   background: string;
   backBackground: string;
   insideBackground: string;
@@ -107,7 +107,7 @@ export interface NSEPageMaterialPreset {
   grainOpacity: number;
 }
 
-export interface NSEPageInteractionPreset {
+export interface PageInteractionPreset {
   snapThreshold: number;
   openProgress?: number;
   velocityThreshold: number;
@@ -119,43 +119,43 @@ export interface NSEPageInteractionPreset {
   dogEarSizePx?: number;
 }
 
-export interface NSEPagePreset {
-  name: NSEPagePresetName;
-  mode: NSEPageMode;
-  edge: NSEPageEdge;
-  corner?: NSEPageCorner;
-  direction: NSEPageDirection;
+export interface PagePreset {
+  name: PagePresetName;
+  mode: PageMode;
+  edge: PageEdge;
+  corner?: PageCorner;
+  direction: PageDirection;
   className: string;
-  motion: NSEPageMotionPreset;
-  material: NSEPageMaterialPreset;
-  interaction: NSEPageInteractionPreset;
+  motion: PageMotionPreset;
+  material: PageMaterialPreset;
+  interaction: PageInteractionPreset;
 }
 
-export interface NSEPagePresetOverrides {
-  mode?: NSEPageMode;
-  edge?: NSEPageEdge;
-  corner?: NSEPageCorner;
-  direction?: NSEPageDirection;
+export interface PagePresetOverrides {
+  mode?: PageMode;
+  edge?: PageEdge;
+  corner?: PageCorner;
+  direction?: PageDirection;
   className?: string;
-  motion?: Partial<NSEPageMotionPreset>;
-  material?: Partial<NSEPageMaterialPreset>;
-  interaction?: Partial<NSEPageInteractionPreset>;
+  motion?: Partial<PageMotionPreset>;
+  material?: Partial<PageMaterialPreset>;
+  interaction?: Partial<PageInteractionPreset>;
 }
 
-export interface NSEPageGeometryInput {
+export interface PageGeometryInput {
   progress: number;
-  mode: NSEPageMode;
-  edge: NSEPageEdge;
-  corner?: NSEPageCorner;
-  direction: NSEPageDirection;
-  phase?: NSEPagePhase;
-  motion: NSEPageMotionPreset;
-  material: NSEPageMaterialPreset;
+  mode: PageMode;
+  edge: PageEdge;
+  corner?: PageCorner;
+  direction: PageDirection;
+  phase?: PagePhase;
+  motion: PageMotionPreset;
+  material: PageMaterialPreset;
   torn?: boolean;
   /** Measured page size in px; fold math needs real metrics to stay angle-true. */
-  size?: NSEPageSize;
+  size?: PageSize;
   /** Dragged pointer in page-local px; when present the fold tracks it. */
-  pointer?: NSEPagePoint;
+  pointer?: PagePoint;
   /** When true, curl mode collapses into a plain crossfade. */
   reducedMotion?: boolean;
   /** Shapes a tear's ragged line; each tear of a page may use its own. */
@@ -168,7 +168,7 @@ export interface NSEPageGeometryInput {
  * `radius`, then an ever looser turn up to `sweep`), so the paper bends without
  * ever stretching, as real paper must. A zero radius is a flat fold.
  */
-export interface NSEPageCurlCylinder {
+export interface PageCurlCylinder {
   /** A point on the bend line, where the paper leaves the page. */
   bendX: number;
   bendY: number;
@@ -188,7 +188,7 @@ export interface NSEPageCurlCylinder {
  * Where a sheet torn from its binding has been carried once it is free: moved
  * across and up off the page, turned about the corner it was held by.
  */
-export interface NSEPageTearFlight {
+export interface PageTearFlight {
   x: number;
   y: number;
   z: number;
@@ -204,9 +204,9 @@ export interface NSEPageTearFlight {
  * a ragged line a little below the binding, leaving a stub of it bound in
  * place, and the sheet itself rolls up off the page as a curl does.
  */
-export interface NSEPageTearPose {
+export interface PageTearPose {
   /** The bound edge. */
-  binding: NSEPageEdge;
+  binding: PageEdge;
   /** The tear line's mean depth below the binding and how far it wanders, in px. */
   depth: number;
   roughness: number;
@@ -214,23 +214,23 @@ export interface NSEPageTearPose {
   /** The stretch of the binding torn so far, in px along it from its start (left or top). */
   tornFrom: number;
   tornTo: number;
-  flight: NSEPageTearFlight;
+  flight: PageTearFlight;
 }
 
-export interface NSEPageGeometry {
+export interface PageGeometry {
   progress: number;
   visualProgress: number;
-  axis: NSEPageAxis;
-  edge: NSEPageEdge;
-  corner: NSEPageCorner;
-  direction: NSEPageDirection;
-  mode: NSEPageMode;
-  phase: NSEPagePhase;
+  axis: PageAxis;
+  edge: PageEdge;
+  corner: PageCorner;
+  direction: PageDirection;
+  mode: PageMode;
+  phase: PagePhase;
   reduced: boolean;
   bookTurn: boolean;
-  hingeEdge: NSEPageEdge;
-  projection: NSEPageProjection;
-  size: NSEPageSize;
+  hingeEdge: PageEdge;
+  projection: PageProjection;
+  size: PageSize;
   signedAngle: number;
   unsignedAngle: number;
   curl: number;
@@ -263,24 +263,24 @@ export interface NSEPageGeometry {
   /** Cheaper drag-time silhouette shadow for Retina pointer tracking. */
   curlFlapDragShadowFilter: string;
   /** Crease segment endpoints in page space. */
-  foldLine: NSEPageFoldLine;
+  foldLine: PageFoldLine;
   /** Fold line direction in degrees (atan2 of the crease vector). */
   foldAngleDeg: number;
   /** Where the page corner currently sits, in page space. */
-  curledCorner: NSEPagePoint;
+  curledCorner: PagePoint;
   /** 1 while the resting dog-ear trigger should show, fading to 0 as the curl takes over. */
   dogEarOpacity: number;
   /** The roll for a 3D-rendered curl; null when the page is not curling. */
-  curlCylinder: NSEPageCurlCylinder | null;
+  curlCylinder: PageCurlCylinder | null;
   /** The rip, stub and flight of a page tearing from its binding; null otherwise. */
-  tear: NSEPageTearPose | null;
+  tear: PageTearPose | null;
   /** The 2D tear: the stub it leaves, and the sheet's flight. */
   tearStubClipPath: string;
   tearSheetTransform: string;
   tearSheetOpacity: number;
 }
 
-export interface NSEPageTurnSurface {
+export interface PageTurnSurface {
   /** Static snapshot data URL for the semantic front tree. */
   front: string;
   /** Static snapshot data URL for the semantic back tree. */
@@ -289,28 +289,28 @@ export interface NSEPageTurnSurface {
   strips?: number;
 }
 
-export interface NSEPageBookStripPoint {
+export interface PageBookStripPoint {
   x: number;
   z: number;
 }
 
-export interface NSEPageBookStripGeometryInput {
+export interface PageBookStripGeometryInput {
   progress: number;
-  edge: NSEPageBookEdge;
-  direction: NSEPageDirection;
-  size: NSEPageSize;
+  edge: PageBookEdge;
+  direction: PageDirection;
+  size: PageSize;
   stripCount?: number;
   rollWidth?: number;
 }
 
-export interface NSEPageBookStripGeometry {
+export interface PageBookStripGeometry {
   chainIndex: number;
   visualIndex: number;
   width: number;
   renderWidth: number;
   angleDeg: number;
-  hinge: NSEPageBookStripPoint;
-  outer: NSEPageBookStripPoint;
+  hinge: PageBookStripPoint;
+  outer: PageBookStripPoint;
   transformOrigin: string;
   transform: string;
   frontFaceTransform: string;
@@ -319,42 +319,42 @@ export interface NSEPageBookStripGeometry {
   backBackgroundOffsetX: number;
 }
 
-export interface NSEPageTurnSnapshot {
+export interface PageTurnSnapshot {
   progress: number;
   targetProgress: number;
-  phase: NSEPagePhase;
-  mode: NSEPageMode;
-  edge: NSEPageEdge;
-  direction: NSEPageDirection;
+  phase: PagePhase;
+  mode: PageMode;
+  edge: PageEdge;
+  direction: PageDirection;
   torn: boolean;
   turnId: string | number;
-  reason: NSEPageCompletionReason;
+  reason: PageCompletionReason;
   updatedAt: number;
 }
 
-export interface NSEPageTurnControllerOptions extends NSEControllerOwnershipOptions {
+export interface PageTurnControllerOptions extends NSEControllerOwnershipOptions {
   progress?: number;
-  mode?: NSEPageMode;
-  edge?: NSEPageEdge;
-  direction?: NSEPageDirection;
-  phase?: NSEPagePhase;
+  mode?: PageMode;
+  edge?: PageEdge;
+  direction?: PageDirection;
+  phase?: PagePhase;
   torn?: boolean;
 }
 
-export interface NSEPageTurnOptions {
+export interface PageTurnOptions {
   progress?: number;
   targetProgress?: number;
   durationMs?: number;
-  mode?: NSEPageMode;
-  edge?: NSEPageEdge;
-  direction?: NSEPageDirection;
-  reason?: NSEPageCompletionReason;
+  mode?: PageMode;
+  edge?: PageEdge;
+  direction?: PageDirection;
+  reason?: PageCompletionReason;
   turnId?: string | number;
 }
 
-export interface NSEPageGestureOptions {
+export interface PageGestureOptions {
   enabled?: boolean;
-  edges?: NSEPageEdge[] | "all";
+  edges?: PageEdge[] | "all";
   snapThreshold?: number;
   openProgress?: number;
   edgeActivationSize?: number;
@@ -362,46 +362,46 @@ export interface NSEPageGestureOptions {
   haptics?: boolean;
 }
 
-export interface NSEPageEvent {
-  snapshot: NSEPageTurnSnapshot;
-  reason: NSEPageCompletionReason;
+export interface PageEvent {
+  snapshot: PageTurnSnapshot;
+  reason: PageCompletionReason;
 }
 
-export interface NSEPageHandle {
-  getSnapshot: () => NSEPageTurnSnapshot;
-  setProgress: (progress: number, reason?: NSEPageCompletionReason) => NSEPageTurnSnapshot;
-  turnTo: (progress: number, options?: NSEPageTurnOptions) => void;
-  turnForward: (options?: NSEPageTurnOptions) => void;
-  turnBackward: (options?: NSEPageTurnOptions) => void;
-  open: (options?: NSEPageTurnOptions) => void;
-  close: (options?: NSEPageTurnOptions) => void;
-  tear: (options?: NSEPageTurnOptions) => void;
+export interface PageHandle {
+  getSnapshot: () => PageTurnSnapshot;
+  setProgress: (progress: number, reason?: PageCompletionReason) => PageTurnSnapshot;
+  turnTo: (progress: number, options?: PageTurnOptions) => void;
+  turnForward: (options?: PageTurnOptions) => void;
+  turnBackward: (options?: PageTurnOptions) => void;
+  open: (options?: PageTurnOptions) => void;
+  close: (options?: PageTurnOptions) => void;
+  tear: (options?: PageTurnOptions) => void;
   cancel: () => void;
   reset: () => void;
 }
 
-export interface UseNSEPageOptions {
-  preset?: NSEPagePresetName | NSEPagePreset;
-  presetOverrides?: NSEPagePresetOverrides;
+export interface UsePageOptions {
+  preset?: PagePresetName | PagePreset;
+  presetOverrides?: PagePresetOverrides;
   progress?: number;
   defaultProgress?: number;
   open?: boolean;
   defaultOpen?: boolean;
-  mode?: NSEPageMode;
-  edge?: NSEPageEdge;
-  corner?: NSEPageCorner;
-  direction?: NSEPageDirection;
+  mode?: PageMode;
+  edge?: PageEdge;
+  corner?: PageCorner;
+  direction?: PageDirection;
   torn?: boolean;
   disabled?: boolean;
-  interactive?: boolean | NSEPageGestureOptions;
+  interactive?: boolean | PageGestureOptions;
   durationMs?: number;
   reducedMotion?: boolean;
-  onProgressChange?: (progress: number, event: NSEPageEvent) => void;
-  onPhaseChange?: (phase: NSEPagePhase, event: NSEPageEvent) => void;
-  onOpenChange?: (open: boolean, event: NSEPageEvent) => void;
-  onTurnStart?: (event: NSEPageEvent) => void;
-  onTurnEnd?: (event: NSEPageEvent) => void;
-  onTear?: (event: NSEPageEvent) => void;
+  onProgressChange?: (progress: number, event: PageEvent) => void;
+  onPhaseChange?: (phase: PagePhase, event: PageEvent) => void;
+  onOpenChange?: (open: boolean, event: PageEvent) => void;
+  onTurnStart?: (event: PageEvent) => void;
+  onTurnEnd?: (event: PageEvent) => void;
+  onTear?: (event: PageEvent) => void;
   /**
    * Null when the page's rendering surface can show a turn now; otherwise a
    * promise that settles once it can. Turns and drag lifts wait for it, so a
@@ -416,31 +416,31 @@ export interface UseNSEPageOptions {
   surfacePending?: () => boolean;
 }
 
-export interface NSEPageDogEarHandlers {
+export interface PageDogEarHandlers {
   onPointerEnter: (event: ReactPointerEvent<HTMLElement>) => void;
   onPointerLeave: (event: ReactPointerEvent<HTMLElement>) => void;
   onPointerDown: (event: ReactPointerEvent<HTMLElement>) => void;
   onClick: () => void;
 }
 
-export interface UseNSEPageResult {
-  snapshot: NSEPageTurnSnapshot;
-  geometry: NSEPageGeometry;
-  preset: NSEPagePreset;
+export interface UsePageResult {
+  snapshot: PageTurnSnapshot;
+  geometry: PageGeometry;
+  preset: PagePreset;
   rootRef: (node: HTMLElement | null) => void;
   interactive: boolean;
-  getStyle: (style?: CSSProperties) => NSEPageStyle;
-  handle: NSEPageHandle;
-  dogEarHandlers: NSEPageDogEarHandlers;
+  getStyle: (style?: CSSProperties) => PageStyle;
+  handle: PageHandle;
+  dogEarHandlers: PageDogEarHandlers;
   /** Calls `listener` with each drag frame's geometry, which bypasses React renders. */
-  subscribeFrame: (listener: (geometry: NSEPageGeometry) => void) => () => void;
+  subscribeFrame: (listener: (geometry: PageGeometry) => void) => () => void;
   pointerHandlers: Pick<
     HTMLAttributes<HTMLElement>,
     "onPointerDown" | "onPointerMove" | "onPointerUp" | "onPointerCancel" | "onLostPointerCapture"
   >;
 }
 
-export interface NSEPageProps extends Omit<HTMLAttributes<HTMLElement>, "children" | "style"> {
+export interface PageProps extends Omit<HTMLAttributes<HTMLElement>, "children" | "style"> {
   children?: ReactNode;
   front?: ReactNode;
   back?: ReactNode;
@@ -468,21 +468,21 @@ export interface NSEPageProps extends Omit<HTMLAttributes<HTMLElement>, "childre
    */
   tearStubs?: boolean;
   /** Static front/back snapshots used for a flexible book leaf during the turn. */
-  turnSurface?: NSEPageTurnSurface;
-  as?: NSEPageElement;
-  preset?: NSEPagePresetName | NSEPagePreset;
-  presetOverrides?: NSEPagePresetOverrides;
+  turnSurface?: PageTurnSurface;
+  as?: PageElement;
+  preset?: PagePresetName | PagePreset;
+  presetOverrides?: PagePresetOverrides;
   progress?: number;
   defaultProgress?: number;
   open?: boolean;
   defaultOpen?: boolean;
-  mode?: NSEPageMode;
-  edge?: NSEPageEdge;
-  corner?: NSEPageCorner;
-  direction?: NSEPageDirection;
+  mode?: PageMode;
+  edge?: PageEdge;
+  corner?: PageCorner;
+  direction?: PageDirection;
   torn?: boolean;
   disabled?: boolean;
-  interactive?: boolean | NSEPageGestureOptions;
+  interactive?: boolean | PageGestureOptions;
   durationMs?: number;
   reducedMotion?: boolean;
   className?: string;
@@ -496,12 +496,12 @@ export interface NSEPageProps extends Omit<HTMLAttributes<HTMLElement>, "childre
   frontStyle?: CSSProperties;
   backStyle?: CSSProperties;
   insideStyle?: CSSProperties;
-  onProgressChange?: (progress: number, event: NSEPageEvent) => void;
-  onPhaseChange?: (phase: NSEPagePhase, event: NSEPageEvent) => void;
-  onOpenChange?: (open: boolean, event: NSEPageEvent) => void;
-  onTurnStart?: (event: NSEPageEvent) => void;
-  onTurnEnd?: (event: NSEPageEvent) => void;
-  onTear?: (event: NSEPageEvent) => void;
+  onProgressChange?: (progress: number, event: PageEvent) => void;
+  onPhaseChange?: (phase: PagePhase, event: PageEvent) => void;
+  onOpenChange?: (open: boolean, event: PageEvent) => void;
+  onTurnStart?: (event: PageEvent) => void;
+  onTurnEnd?: (event: PageEvent) => void;
+  onTear?: (event: PageEvent) => void;
 }
 
-export type NSEPagePointerHandler = (event: ReactPointerEvent<HTMLElement>) => void;
+export type PagePointerHandler = (event: ReactPointerEvent<HTMLElement>) => void;
