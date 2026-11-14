@@ -598,7 +598,7 @@ Ordering guarantees:
 
 ## Material lighting
 
-NSE uses MotionFX for the light direction on metallic materials. Sliders and toggles accept `thumbMaterial="metal"`, and `NSEMaterialLightingProvider` from `@syndromatic/syncloudos/nse/appearance` binds one shared, passive lighting controller. The controller requests device motion at 30 samples per second in the `"xArbitraryZVertical"` frame and maps the rotation away from a slowly following rest pose to a light offset with a short smoothing time. It never calls `requestAuthorization()`. Reduced motion, hidden pages, disabled controls and missing or stale samples all give a static light. See [Appearance](../appearance.md).
+NSE uses MotionFX for the light direction on metallic materials. Sliders and toggles accept `thumbMaterial="metal"`, and the runtime supplies one shared, passive lighting controller. The controller requests device motion at 30 samples per second in the `"xArbitraryZVertical"` frame and maps the rotation away from a slowly following rest pose to a light offset with a short smoothing time. It never calls `requestAuthorization()`. Reduced motion, hidden pages, disabled controls and missing or stale samples all give a static light. See [Appearance](../appearance.md).
 
 ## Related
 
