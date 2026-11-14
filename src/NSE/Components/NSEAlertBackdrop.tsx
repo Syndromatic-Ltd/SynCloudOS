@@ -31,7 +31,7 @@ import { nseOverlayRegionInsets, type OverlayPresentationSource } from "../Overl
 
 type InertHTMLElement = HTMLElement & { inert?: boolean };
 
-interface NSEAlertBackdropProps {
+interface AlertBackdropProps {
   readonly children: ReactNode;
   readonly presentation?: OverlayPresentationSource;
   readonly onSafeDismiss?: () => void;
@@ -44,7 +44,7 @@ interface NSEAlertBackdropProps {
   readonly "data-syncloudos-focus-scope"?: string;
 }
 
-export function NSEAlertBackdrop({
+export function AlertBackdrop({
   children,
   presentation,
   onSafeDismiss,
@@ -54,7 +54,7 @@ export function NSEAlertBackdrop({
   motion = "alert",
   "data-syncloudos-runtime-owner": runtimeOwner,
   "data-syncloudos-focus-scope": focusScope,
-}: NSEAlertBackdropProps) {
+}: AlertBackdropProps) {
   const appearanceProjection = useNSEAppearanceProjection();
   const provider = useOptionalOverlayProvider();
   const { region, hostViewport } = useNSEOverlayRegion({ source: presentation ?? provider?.runtime.environment.presentation ?? null, open: true, purpose: "alert", document: typeof document === "undefined" ? null : document });

@@ -23,7 +23,7 @@ import React, { useState, useSyncExternalStore } from "react";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { SynCloudOSAppInfo } from "../../src/SynCloudOS/AppInfo/appInfoTypes";
-import { NSEAlertBackdrop } from "../../src/NSE/Components/NSEAlertBackdrop";
+import { AlertBackdrop } from "../../src/NSE/Components/NSEAlertBackdrop";
 import { MenuView } from "../../src/NSE/Menus";
 import { StandaloneControlHost } from "../../src/NSE/Overlays";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
@@ -82,11 +82,11 @@ describe("command, focus, undo, and overlay accessibility", () => {
       const [open, setOpen] = useState(false);
       return <>
         <button onClick={() => setOpen(true)}>Open alert</button>
-        {open ? <NSEAlertBackdrop onSafeDismiss={() => setOpen(false)}>
+        {open ? <AlertBackdrop onSafeDismiss={() => setOpen(false)}>
           <div role="dialog" aria-modal="true" aria-label="Confirm action">
             <button>Cancel</button><button>Continue</button>
           </div>
-        </NSEAlertBackdrop> : null}
+        </AlertBackdrop> : null}
       </>;
     }
     render(<Harness />);

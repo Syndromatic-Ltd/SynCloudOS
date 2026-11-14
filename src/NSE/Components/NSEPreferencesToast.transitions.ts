@@ -27,24 +27,24 @@ import {
   type TranslationUnit,
 } from "../Animation";
 
-export type NSEPreferencesPaneDirection = "forward" | "back";
+export type PreferencesPaneDirection = "forward" | "back";
 
 /** A view's AnimationFX presentations into and out of the panel. */
-export interface NSEPreferencesPresentation {
+export interface PreferencesPresentation {
   readonly enter: PresentationSpec;
   readonly exit: PresentationSpec;
 }
 
-export interface NSEPreferencesTransitions {
+export interface PreferencesTransitions {
   /** The panel glides up from the lower screen and back down. */
-  readonly toast: NSEPreferencesPresentation;
+  readonly toast: PreferencesPresentation;
   /** The desk's dim and blur. */
-  readonly veil: NSEPreferencesPresentation;
+  readonly veil: PreferencesPresentation;
   /** Header titles pass through each other, vertically, with the navigation. */
-  readonly title: (direction: NSEPreferencesPaneDirection) => NSEPreferencesPresentation;
+  readonly title: (direction: PreferencesPaneDirection) => PreferencesPresentation;
   /** Panes push and pop horizontally with the navigation. */
-  readonly pane: (direction: NSEPreferencesPaneDirection) => NSEPreferencesPresentation;
-  readonly back: NSEPreferencesPresentation;
+  readonly pane: (direction: PreferencesPaneDirection) => PreferencesPresentation;
+  readonly back: PreferencesPresentation;
   /** How the panel's body grows and shrinks to the pane it shows. */
   readonly resize: LayoutTransitionTiming;
 }
@@ -70,20 +70,20 @@ function move(from: Pose, to: Pose, duration: number, timing: AFXAnimationTiming
 
 const shown: Pose = Object.freeze({ opacity: 1 });
 const hidden: Pose = Object.freeze({ opacity: 0 });
-const presentation = (enter: PresentationSpec, exit: PresentationSpec): NSEPreferencesPresentation => Object.freeze({ enter, exit });
+const presentation = (enter: PresentationSpec, exit: PresentationSpec): PreferencesPresentation => Object.freeze({ enter, exit });
 
 /** Enters from `from` and leaves toward `to`, whichever way the stack moves. */
 function directional(forward: { from: Pose; to: Pose }, back: { from: Pose; to: Pose }, duration: number, unit: TranslationUnit) {
   const forwards = presentation(move(forward.from, shown, duration, emphasized, unit), move(shown, forward.to, duration, emphasized, unit));
   const backwards = presentation(move(back.from, shown, duration, emphasized, unit), move(shown, back.to, duration, emphasized, unit));
-  return (direction: NSEPreferencesPaneDirection) => direction === "back" ? backwards : forwards;
+  return (direction: PreferencesPaneDirection) => direction === "back" ? backwards : forwards;
 }
 
 const lowered: Pose = Object.freeze({ opacity: 0, transform: Object.freeze({ y: 34, scale: 0.94 }) });
 const fade = (duration: number) => presentation(move(hidden, shown, duration, framerTween), move(shown, hidden, duration, framerTween));
 const reducedFade = fade(0.1);
 
-const standard: NSEPreferencesTransitions = Object.freeze({
+const standard: PreferencesTransitions = Object.freeze({
   toast: presentation(move(lowered, shown, 0.36, glideOut, "vh"), move(shown, lowered, 0.26, glideIn, "vh")),
   veil: presentation(move(hidden, shown, 0.34, glideOut), move(shown, hidden, 0.24, glideIn)),
   title: directional(
@@ -102,7 +102,7 @@ const standard: NSEPreferencesTransitions = Object.freeze({
   resize: Object.freeze({ duration: Math.log(10000) / (28 / 2), timing: Object.freeze({ kind: "spring", stiffness: 210, damping: 28, mass: 1 }) as AFXAnimationTiming }),
 });
 
-const reduced: NSEPreferencesTransitions = Object.freeze({
+const reduced: PreferencesTransitions = Object.freeze({
   toast: presentation(move(hidden, shown, 0.14, framerTween), move(shown, hidden, 0.1, framerTween)),
   veil: reducedFade,
   title: () => reducedFade,
@@ -111,6 +111,6 @@ const reduced: NSEPreferencesTransitions = Object.freeze({
   resize: Object.freeze({ duration: 0.12, timing: framerTween }),
 });
 
-export function resolveNSEPreferencesTransitions(reducedMotion: boolean): NSEPreferencesTransitions {
+export function resolveNSEPreferencesTransitions(reducedMotion: boolean): PreferencesTransitions {
   return reducedMotion ? reduced : standard;
 }

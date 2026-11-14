@@ -21,7 +21,7 @@
 import { AnimationDefaults, type PresentationSpec } from "../Animation";
 
 /** Enter and exit presentations, played through AnimationFX. */
-export interface NSEAlertMotion {
+export interface AlertMotion {
   readonly enter: PresentationSpec;
   readonly exit: PresentationSpec;
 }
@@ -33,7 +33,7 @@ const fade = (from: number, to: number, duration: number, timing: PresentationSp
 
 // The standard alert pops in with a damped overshoot. As with a CAKeyframe
 // timing function per segment, the decelerate curve eases every segment.
-const alertStandard: NSEAlertMotion = Object.freeze({
+const alertStandard: AlertMotion = Object.freeze({
   enter: Object.freeze({
     duration: 0.58,
     timing: decelerate,
@@ -52,23 +52,23 @@ const alertStandard: NSEAlertMotion = Object.freeze({
   }),
 });
 
-const alertReduced: NSEAlertMotion = Object.freeze({
+const alertReduced: AlertMotion = Object.freeze({
   enter: fade(0, 1, AnimationDefaults.durationSeconds.quick),
   exit: fade(1, 0, AnimationDefaults.durationSeconds.quick),
 });
 
-const backdropStandard: NSEAlertMotion = Object.freeze({
+const backdropStandard: AlertMotion = Object.freeze({
   enter: fade(0, 1, AnimationDefaults.durationSeconds.standard),
   exit: fade(1, 0, AnimationDefaults.durationSeconds.standard),
 });
 
-const backdropReduced: NSEAlertMotion = Object.freeze({
+const backdropReduced: AlertMotion = Object.freeze({
   enter: fade(0, 1, 0.08),
   exit: fade(1, 0, 0.08),
 });
 
 // A sheet slides down out of the window's top content edge and back up into it.
-const sheetStandard: NSEAlertMotion = Object.freeze({
+const sheetStandard: AlertMotion = Object.freeze({
   // An even, ease-out travel over the whole height: the bottom edge shows first, under the toolbar.
   enter: Object.freeze({
     duration: 0.36,
@@ -83,24 +83,24 @@ const sheetStandard: NSEAlertMotion = Object.freeze({
 });
 
 /** A window sheet's motion: a slide from the window's top content edge, or a fade with reduced motion. */
-export function resolveNSESheetMotion(reducedMotion: boolean): NSEAlertMotion {
+export function resolveNSESheetMotion(reducedMotion: boolean): AlertMotion {
   return reducedMotion ? alertReduced : sheetStandard;
 }
 
-export function resolveNSEAlertMotion(reducedMotion: boolean): NSEAlertMotion {
+export function resolveNSEAlertMotion(reducedMotion: boolean): AlertMotion {
   return reducedMotion ? alertReduced : alertStandard;
 }
 
 // A sheet's backdrop is not drawn and does not fade: it only holds the sheet while it slides in and out.
 const hold = (duration: number): PresentationSpec =>
   Object.freeze({ duration, timing: "linear" as const, tracks: Object.freeze([Object.freeze({ keyPath: "opacity" as const, values: Object.freeze([1, 1]) })]) });
-const sheetBackdrop: NSEAlertMotion = Object.freeze({ enter: hold(0.36), exit: hold(0.3) });
+const sheetBackdrop: AlertMotion = Object.freeze({ enter: hold(0.36), exit: hold(0.3) });
 
 /** The motion of a window sheet's (undrawn) backdrop: it holds the sheet for the length of its slide. */
-export function resolveNSESheetBackdropMotion(reducedMotion: boolean): NSEAlertMotion {
+export function resolveNSESheetBackdropMotion(reducedMotion: boolean): AlertMotion {
   return reducedMotion ? backdropReduced : sheetBackdrop;
 }
 
-export function resolveNSEAlertBackdropMotion(reducedMotion: boolean): NSEAlertMotion {
+export function resolveNSEAlertBackdropMotion(reducedMotion: boolean): AlertMotion {
   return reducedMotion ? backdropReduced : backdropStandard;
 }

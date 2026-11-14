@@ -22,7 +22,7 @@ import { useId, useRef, useState, type ReactNode } from "react";
 import { Presence, useNSEAnimationEnvironment, useNSEPresentation } from "../NSE/Animation";
 import { resolveSystemAlertDetailsMotion } from "./SystemAlert.transitions";
 import { NSEButton, type NSEAppearanceName } from "../NSE/public/controls";
-import { NSEAlertSurface } from "../NSE/hostComposition";
+import { AlertSurface } from "../NSE/hostComposition";
 import cautionIcon from "./Resources/AlertCautionIcon.png?url&no-inline";
 import { synCloudOSLogoUrl as synCloudOSLogo } from "../SynCloudOS/Resources/frameworkAssets";
 import type { ResolvedSiteBranding } from "../SynCloudOS/SynCloudOS";
@@ -163,7 +163,7 @@ export function SystemAlert({
   const icon = getSystemAlertIcon(error, useHostSiteBranding(), appearance, applicationIcon);
 
   return (
-    <NSEAlertSurface className="syncloudos-system-alert" appearance={appearance} labelledBy={titleId} describedBy={messageId}>
+    <AlertSurface className="syncloudos-system-alert" appearance={appearance} labelledBy={titleId} describedBy={messageId}>
       <div className="nse-system-alert-content">
         <div className={`syncloudos-alert-artwork${icon.src ? "" : " is-caution-only"}`} data-alert-icon={icon.kind} aria-hidden="true">
           {icon.src ? <img data-nse-part="image" className="syncloudos-alert-logo" data-alert-logo={icon.src === synCloudOSLogo ? "syncloudos" : ""} src={icon.src} alt="" /> : null}
@@ -200,6 +200,6 @@ export function SystemAlert({
         ) : null}
         {!isSessionMismatch && actions.includes("dismiss") ? <ActionButton appearance={actionAppearance} onClick={onDismiss}>{isNotResponding ? "Continue" : "Close"}</ActionButton> : null}
       </div>
-    </NSEAlertSurface>
+    </AlertSurface>
   );
 }

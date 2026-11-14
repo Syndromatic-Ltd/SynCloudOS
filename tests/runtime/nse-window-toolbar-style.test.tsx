@@ -3,7 +3,7 @@ import React from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, expect, it } from "vitest";
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
-import { NSEPreferencesToast } from "../../src/NSE/Components/NSEPreferencesToast";
+import { PreferencesToast } from "../../src/NSE/Components/NSEPreferencesToast";
 import { WindowTitlebarContent } from "../../src/NSE/Windows/windowTitlebarContext";
 import { useNSEWindowTitlebarDocument, WindowTitlebarHostContext } from "../../src/SynCloudOS/AppHosting/windowChrome";
 import { StandardWindowView } from "../../src/NSE/Windows/StandardWindowView";
@@ -28,7 +28,7 @@ it("keeps the host's Home and Account controls alongside window titlebar accesso
 
 it("owns the Preferences panel and Back accessory while a class application is running", async () => {
   class Content extends NSEViewController {
-    static override view = () => <NSEPreferencesToast open title="Preferences" backLabel="Back" onClose={() => {}}
+    static override view = () => <PreferencesToast open title="Preferences" backLabel="Back" onClose={() => {}}
       panes={[{ id: "appearance", label: "Appearance", render: () => <p>Appearance settings</p> }]} />;
   }
   class Window extends NSEWindowController { constructor() { super(); this.contentViewController = new Content(); } }
@@ -96,7 +96,7 @@ it("defaults to automatic and observes every NSWindow.ToolbarStyle value", () =>
 });
 
 it("gives Preferences its own preference title bar, following the pane and leading Back", () => {
-  render(<NSEPreferencesToast open title="Preferences" backLabel="Back to Preferences" onClose={() => {}}
+  render(<PreferencesToast open title="Preferences" backLabel="Back to Preferences" onClose={() => {}}
     panes={[{ id: "appearance", label: "Appearance", render: () => <p>Appearance settings</p> }]} />);
   const bar = document.querySelector('[data-toolbar-style="preference"]');
   expect(bar).not.toBeNull();

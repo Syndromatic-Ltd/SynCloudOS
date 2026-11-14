@@ -29,8 +29,8 @@ import React, { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { NSEAppearanceProvider, useNSEAppearance, type NSEAppearanceServicePort } from "../../src/NSE/Appearance";
-import { NSEAboutDialog } from "../../src/NSE/Components/NSESystemDialogs";
-import { NSEPreferencesToast } from "../../src/NSE/Components/NSEPreferencesToast";
+import { AboutDialog } from "../../src/NSE/Components/NSESystemDialogs";
+import { PreferencesToast } from "../../src/NSE/Components/NSEPreferencesToast";
 import { RadioGroup, NSETextField } from "../../src/NSE/Controls/Fields/NSEFields";
 import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
 import { NSEPopUpButton } from "../../src/NSE/Menus";
@@ -274,12 +274,12 @@ describe("NSE appearance composition", () => {
         contrast="high"
         transparency="reduced"
       >
-        <NSEAboutDialog
+        <AboutDialog
           open
           info={{ name: "Notes", version: "1", copyright: "Copyright", trademark: "Trademark" }}
           onDismiss={() => undefined}
         />
-        <NSEPreferencesToast
+        <PreferencesToast
           open
           title="Preferences"
           backLabel="Back"

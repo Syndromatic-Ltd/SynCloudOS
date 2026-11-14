@@ -34,11 +34,11 @@ export {
 } from "./Feedback";
 export { resolveNSEFocusReturnTarget, isWithinNSEFocusOrigin } from "./Focus/focusOrigin";
 
-export { NSEAlertSurface } from "./Components/NSEAlertSurface";
+export { AlertSurface } from "./Components/NSEAlertSurface";
 export { SourceListFrameProvider } from "./Navigation/SourceList/sourceListFrameContext";
 export type { SourceListFrameContextValue } from "./Navigation/SourceList/sourceListFrameContext";
 
-export { NSEAlertBackdrop } from "./SystemUI";
+export { AlertBackdrop } from "./SystemUI";
 export { nseTopBarHeightCssValue } from "./Windows/Chrome/topBarStyles";
 export { NSEFocusScope } from "./Focus";
 export { NSEPopover } from "./Overlays/NSEPopover";

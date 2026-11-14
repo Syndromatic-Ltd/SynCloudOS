@@ -17,8 +17,8 @@ import { NSEScrollView } from "../../../../src/NSE/Scroll/NSEScrollView";
 import { NSEView } from "../../../../src/NSE/Views/NSEView";
 import { TopBar } from "../../../../src/NSE/Windows/Chrome/TopBar";
 import { LoginWindow } from "../../../../src/NSE/SystemUI/LoginWindow";
-import { NSEAboutDialog, NSEConfirmDialog } from "../../../../src/NSE/Components/NSESystemDialogs";
-import { NSEPreferencesToast } from "../../../../src/NSE/Components/NSEPreferencesToast";
+import { AboutDialog, NSEConfirmDialog } from "../../../../src/NSE/Components/NSESystemDialogs";
+import { PreferencesToast } from "../../../../src/NSE/Components/NSEPreferencesToast";
 import { extendedThemeBaselineCatalogue } from "./extended";
 import { systemThemeBaselineCatalogue } from "./system";
 import { panelThemeBaselineCatalogue } from "./panels";
@@ -120,9 +120,9 @@ for (const variant of ["atmoCumulus", "atmoMetal"] as const) for (const scheme o
   add(`top-bar-${variant}-${scheme}`, () => <TopBar title="Documents" variant={variant} scheme={scheme} leadingItems={[{ kind: "webspring", label: "Home" }]} trailingItems={[{ kind: "settings", label: "Settings" }]} />);
 }
 for (const state of ["normal", "error", "loading"] as const) add(`login-window-${state}`, () => <LoginWindow title="SynCloudOS" methods={[{ id: "example", label: "Continue" }]} authenticationStatus={state === "loading" ? "authenticating" : "signedOut"} error={state === "error" ? "Sign-in failed. Try again." : undefined} />, { fullPage: true });
-add("about", () => <NSEAboutDialog open info={{ name: "SynCloudOS", version: "1.0.0", build: "Beta 2", tagline: "Your workspace", copyright: "© 2026 Syndromatic Ltd.", trademark: "SynCloudOS" }} onDismiss={noop} />, { fullPage: true });
+add("about", () => <AboutDialog open info={{ name: "SynCloudOS", version: "1.0.0", build: "Beta 2", tagline: "Your workspace", copyright: "© 2026 Syndromatic Ltd.", trademark: "SynCloudOS" }} onDismiss={noop} />, { fullPage: true });
 add("confirm-dialog", () => <NSEConfirmDialog open title="Delete document?" message="This action cannot be undone." confirmLabel="Delete" cancelLabel="Cancel" onConfirm={noop} onCancel={noop} />, { fullPage: true });
-add("settings", () => <NSEPreferencesToast open title="Settings" backLabel="Back" onClose={noop} panes={[
+add("settings", () => <PreferencesToast open title="Settings" backLabel="Back" onClose={noop} panes={[
   { id: "appearance", label: "Appearance", meta: "Automatic", render: () => <NSESwitch aria-label="Dark appearance" /> },
   { id: "notifications", label: "Notifications", meta: "Enabled", render: () => <NSESwitch aria-label="Allow notifications" state="on" /> },
 ]} />, { fullPage: true });

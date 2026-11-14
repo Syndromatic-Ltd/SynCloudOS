@@ -2,8 +2,8 @@
 
 import { useId, type ReactNode } from "react";
 import { useNSEAppearance } from "../Appearance";
-import { NSEAlertBackdrop } from "../Components/NSEAlertBackdrop";
-import { NSEAlertSurface } from "../Components/NSEAlertSurface";
+import { AlertBackdrop } from "../Components/NSEAlertBackdrop";
+import { AlertSurface } from "../Components/NSEAlertSurface";
 import { NSEButton } from "../Controls/Buttons/NSEButton";
 import { NSEFocusScope } from "../Focus";
 import type { WindowAlertRequest } from "../Application/NSEWindowController";
@@ -23,15 +23,15 @@ export function ControllerSheetSurface({ scopeId, attached, title, titleId, widt
 }) {
   const colourScheme = useNSEAppearance().resolvedColourScheme;
   return <NSEFocusScope options={{ scopeId, kind: "modal", modal: true, trapFocus: true, asChild: true }}>
-    <NSEAlertBackdrop onSafeDismiss={onCancel} className={attached ? "nse-window-sheet-backdrop" : undefined} motion={attached ? "sheet" : "alert"}>
-      <NSEAlertSurface role="dialog" labelledBy={title && !fullSizeContentView ? titleId : undefined} aria-label={title && fullSizeContentView ? title : undefined}
+    <AlertBackdrop onSafeDismiss={onCancel} className={attached ? "nse-window-sheet-backdrop" : undefined} motion={attached ? "sheet" : "alert"}>
+      <AlertSurface role="dialog" labelledBy={title && !fullSizeContentView ? titleId : undefined} aria-label={title && fullSizeContentView ? title : undefined}
         data-nse-full-size-content-view={fullSizeContentView ? "" : undefined} className="nse-sheet" motion={attached ? "sheet" : "alert"}
         appearance={attached ? colourScheme : "dark"}
         style={width === undefined ? undefined : { width: `min(${width}px, calc(100% - 32px))` }}>
         {title && !fullSizeContentView ? <h2 id={titleId} className="nse-sheet-title">{title}</h2> : null}
         {children}
-      </NSEAlertSurface>
-    </NSEAlertBackdrop>
+      </AlertSurface>
+    </AlertBackdrop>
   </NSEFocusScope>;
 }
 
@@ -63,8 +63,8 @@ export function WindowAlertContent({ request, scopeId, onChoose }: {
   const messageId = useId();
   const primary = request.buttons.find((button) => button.role === "default" || button.role === "destructive") ?? request.buttons[0];
   return <NSEFocusScope options={{ scopeId: scopeId, kind: "modal", modal: true, trapFocus: true, asChild: true }}>
-    <NSEAlertBackdrop className="nse-window-sheet-backdrop" motion="sheet" onSafeDismiss={() => onChoose()}>
-      <NSEAlertSurface appearance={appearance} className="nse-sheet nse-alert-sheet" motion="sheet"
+    <AlertBackdrop className="nse-window-sheet-backdrop" motion="sheet" onSafeDismiss={() => onChoose()}>
+      <AlertSurface appearance={appearance} className="nse-sheet nse-alert-sheet" motion="sheet"
         labelledBy={titleId} describedBy={request.message ? messageId : undefined} initialFocusSelector="[data-nse-alert-primary]">
         <div className="nse-system-alert-content nse-confirm-content-textonly">
           <div className="nse-system-alert-copy">
@@ -84,7 +84,7 @@ export function WindowAlertContent({ request, scopeId, onChoose }: {
             onClick={() => onChoose(button.id)}
           />)}
         </div>
-      </NSEAlertSurface>
-    </NSEAlertBackdrop>
+      </AlertSurface>
+    </AlertBackdrop>
   </NSEFocusScope>;
 }

@@ -18,5 +18,5 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { NSEAlertSurface } from "./NSEAlertSurface";
-export { NSEAlertBackdrop } from "./NSEAlertBackdrop";
+export { AlertSurface } from "./NSEAlertSurface";
+export { AlertBackdrop } from "./NSEAlertBackdrop";

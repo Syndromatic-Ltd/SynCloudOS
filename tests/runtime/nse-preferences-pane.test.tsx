@@ -23,7 +23,7 @@ import React from "react";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { AnimationEnvironmentProvider, type Animator } from "../../src/NSE/Animation";
-import { NSEPreferencesToast } from "../../src/NSE/Components/NSEPreferencesToast";
+import { PreferencesToast } from "../../src/NSE/Components/NSEPreferencesToast";
 import type { AFXAnimationDefinition, AFXAnimationSettlement } from "../../src/FX/AnimationFX/animationTypes";
 
 afterEach(cleanup);
@@ -69,7 +69,7 @@ function paneProps(open = true) {
 describe("NSE Preferences choreography", () => {
   it("removes outgoing pane actions from interaction while an interrupted push/pop is still animating", () => {
     const {animator}=recordingAnimator();const props=paneProps();
-    render(<AnimationEnvironmentProvider animator={animator} reducedMotion={false}><NSEPreferencesToast {...props} panes={[{id:"display",label:"Display",render:()=> <button>Live pane action</button>},{id:"sound",label:"Sound",render:()=>null}]} /></AnimationEnvironmentProvider>);
+    render(<AnimationEnvironmentProvider animator={animator} reducedMotion={false}><PreferencesToast {...props} panes={[{id:"display",label:"Display",render:()=> <button>Live pane action</button>},{id:"sound",label:"Sound",render:()=>null}]} /></AnimationEnvironmentProvider>);
     fireEvent.click(screen.getByRole("button",{name:"Display",exact:true}));
     expect(screen.queryByRole("button",{name:"Display",exact:true})).toBeNull();
     const live=screen.getByRole("button",{name:"Live pane action"});live.focus();fireEvent.keyDown(live,{key:"Escape"});
@@ -81,7 +81,7 @@ describe("NSE Preferences choreography", () => {
   it("exposes pane navigation as a native button separate from row accessories", () => {
     const { animator } = recordingAnimator();
     render(<AnimationEnvironmentProvider animator={animator} reducedMotion>
-      <NSEPreferencesToast {...paneProps()} panes={[
+      <PreferencesToast {...paneProps()} panes={[
         { id: "display", label: "Display", accessory: <button>Independent accessory</button>, render: () => <p>Display pane</p> },
       ]} />
     </AnimationEnvironmentProvider>);
@@ -101,7 +101,7 @@ describe("NSE Preferences choreography", () => {
     const { animator, played, on, endpoints } = recordingAnimator();
     render(
       <AnimationEnvironmentProvider animator={animator} reducedMotion={false}>
-        <NSEPreferencesToast {...paneProps()} />
+        <PreferencesToast {...paneProps()} />
       </AnimationEnvironmentProvider>,
     );
     // The panel glides up from the lower screen over a dimming desk.
@@ -137,7 +137,7 @@ describe("NSE Preferences choreography", () => {
     const props = paneProps();
     const view = (open: boolean) => (
       <AnimationEnvironmentProvider animator={animator} reducedMotion={false}>
-        <NSEPreferencesToast {...props} open={open} />
+        <PreferencesToast {...props} open={open} />
       </AnimationEnvironmentProvider>
     );
     const rendered = render(view(true));
@@ -161,7 +161,7 @@ describe("NSE Preferences choreography", () => {
     const { animator, on, endpoints } = recordingAnimator();
     render(
       <AnimationEnvironmentProvider animator={animator} reducedMotion>
-        <NSEPreferencesToast {...paneProps()} />
+        <PreferencesToast {...paneProps()} />
       </AnimationEnvironmentProvider>,
     );
     expect(endpoints(on(".nse-prefs-toast")[0])).toEqual({ opacity: [0, 1] });
