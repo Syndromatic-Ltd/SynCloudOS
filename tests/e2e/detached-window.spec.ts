@@ -60,3 +60,26 @@ test("moves the mounted Webspring window through a browser popup and returns on 
   await page.getByRole("button", { name: "Enter Full Screen Transfer editor" }).click();
   await expect(page.locator(".webspring-app-view-fullbleed-content").getByRole("textbox", { name: "Draft" })).toHaveValue("edited in popup");
 });
+
+test("presents the populated floating window before the stage exit hides its editor", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto(fixture);
+  const draft = page.getByRole("textbox", { name: "Draft" });
+  await draft.fill("An unsaved draft");
+  const exit = page.getByRole("button", { name: "Exit Full Screen" });
+  const frames = await exit.evaluateHandle(button => ({ completed: new Promise<readonly boolean[]>(resolve => {
+    button.addEventListener("click", () => {
+      const captured: boolean[] = [];
+      const sample = () => {
+        const editor = button.ownerDocument.querySelector<HTMLInputElement>('input[aria-label="Draft"]');
+        captured.push(Boolean(editor?.closest("[data-window-id]") && editor.getBoundingClientRect().width > 0));
+        if (captured.length === 4) resolve(captured);
+        else requestAnimationFrame(sample);
+      };
+      requestAnimationFrame(sample);
+    }, { once: true });
+  }) }));
+  await exit.click();
+  expect(await frames.evaluate(result => result.completed)).toEqual([true, true, true, true]);
+  await expect(draft).toHaveValue("An unsaved draft");
+});

@@ -286,7 +286,7 @@ export function ApplicationStageView({
             >
               <WindowTitlebarHostContext.Provider value={titlebarHost}>
               {sharedPresentation && stage.windowId
-                ? <WindowPresentationSlot windowId={stage.windowId} priority={2}
+                ? <WindowPresentationSlot windowId={stage.windowId} priority={exiting ? 0 : 2}
                     overlay={overlayDestination} bridge={stageWindowSurfaceBridge}
                     navigation={navigationChromeController} standardChrome={usesStandardTopBar} />
                 : !sharedPresentation || isLoading ? <SynWareEntryRenderer
