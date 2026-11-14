@@ -4,13 +4,13 @@ import { describe, expect, it } from "vitest";
 import { nextState } from "../../src/Foundation/internal/StateMachine";
 import { pageTurnPhaseAfter, pageTurnPhaseMachine, type PageTurnEvent } from "../../src/NSE/Page/pageTurnPhaseMachine";
 import { PageTurnController } from "../../src/NSE/Page/pageTurnController";
-import type { NSEPagePhase } from "../../src/NSE/Page/nsePageTypes";
+import type { PagePhase } from "../../src/NSE/Page/pageTypes";
 import { dragPhaseMachine, type DragPhaseEvent } from "../../src/SynCloudOS/Drag/dragPhaseMachine";
 import type { DragPhase } from "../../src/SynCloudOS/Drag/dragTypes";
 
 describe("page turn phase machine", () => {
-  const lands: Record<PageTurnEvent, NSEPagePhase> = { startTurn: "turning", startDrag: "dragging", settle: "settling", complete: "idle", cancel: "canceling", tear: "torn", reset: "idle" };
-  const phases: NSEPagePhase[] = ["idle", "dragging", "turning", "settling", "canceling", "torn", "reduced"];
+  const lands: Record<PageTurnEvent, PagePhase> = { startTurn: "turning", startDrag: "dragging", settle: "settling", complete: "idle", cancel: "canceling", tear: "torn", reset: "idle" };
+  const phases: PagePhase[] = ["idle", "dragging", "turning", "settling", "canceling", "torn", "reduced"];
 
   it("honours every call from every phase", () => {
     expect(Object.keys(pageTurnPhaseMachine.definition.states).sort()).toEqual([...phases].sort());

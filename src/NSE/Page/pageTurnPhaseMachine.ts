@@ -19,16 +19,16 @@
  */
 
 import { defineStateMachine, nextState } from "../../Foundation/internal/StateMachine";
-import type { NSEPagePhase } from "./nsePageTypes";
+import type { PagePhase } from "./pageTypes";
 
 export type PageTurnEvent = "startTurn" | "startDrag" | "settle" | "complete" | "cancel" | "tear" | "reset";
 
 const anyPhase = { startTurn: "turning", startDrag: "dragging", settle: "settling", complete: "idle", cancel: "canceling", tear: "torn", reset: "idle" } as const;
 
 /** A page turn's phases. Every call is honoured from every phase, so each row is the same; "reduced" is only ever a starting phase. */
-export const pageTurnPhaseMachine = defineStateMachine<NSEPagePhase, PageTurnEvent>({
+export const pageTurnPhaseMachine = defineStateMachine<PagePhase, PageTurnEvent>({
   initial: "idle",
   states: { idle: anyPhase, dragging: anyPhase, turning: anyPhase, settling: anyPhase, canceling: anyPhase, torn: anyPhase, reduced: anyPhase },
 });
 
-export const pageTurnPhaseAfter = (phase: NSEPagePhase, event: PageTurnEvent): NSEPagePhase => nextState(pageTurnPhaseMachine.definition, phase, event) ?? phase;
+export const pageTurnPhaseAfter = (phase: PagePhase, event: PageTurnEvent): PagePhase => nextState(pageTurnPhaseMachine.definition, phase, event) ?? phase;

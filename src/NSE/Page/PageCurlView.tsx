@@ -5,8 +5,8 @@ import type { NSEPageController } from "./NSEPageController";
 import { pageCurlConnection } from "./pageCurlConnection";
 import { rememberPagePrintSource } from "./pageSurfaceKey";
 import { NSEUntransitionedChildView } from "../Application/viewControllerRenderer";
-import { NSEPageCurlLeaf } from "./NSEPageCurlLeaf";
-import type { NSEPageCorner, NSEPageHandle } from "./nsePageTypes";
+import { PageCurlLeaf } from "./PageCurlLeaf";
+import type { PageCorner, PageHandle } from "./pageTypes";
 import "./pageCurlController.css";
 
 type Direction = "forward" | "backward";
@@ -59,7 +59,7 @@ function PrintReplica({ source, name }: { source: () => HTMLElement | undefined;
 }
 
 /** @internal The existing book-curl leaves, composed from child controller views. */
-export function NSEPageCurlView({ controller }: { readonly controller: NSEPageController<unknown> }) {
+export function PageCurlView({ controller }: { readonly controller: NSEPageController<unknown> }) {
   useObserve(controller);
   const state = controller.getSnapshot();
   const bridge = pageCurlConnection(controller);
@@ -67,7 +67,7 @@ export function NSEPageCurlView({ controller }: { readonly controller: NSEPageCo
   const spread = controller.spineLocation === "mid";
   const index = controller.selectedIndex;
   const base = spread ? index - index % 2 : index;
-  const [corners, setCorners] = useState<{ forward: NSEPageCorner; backward: NSEPageCorner }>({ forward: "bottom-right", backward: "bottom-left" });
+  const [corners, setCorners] = useState<{ forward: PageCorner; backward: PageCorner }>({ forward: "bottom-right", backward: "bottom-left" });
   const sources = useRef(new Map<unknown, HTMLElement>());
   const swipe = useRef<{ pointerId: number; x: number; y: number } | null>(null);
   // A surface keeps its source callback across progress renders, so replicas
@@ -99,8 +99,8 @@ export function NSEPageCurlView({ controller }: { readonly controller: NSEPageCo
       {Page ? <NSEUntransitionedChildView key={page} controller={Page} /> : null}
     </div>;
   }
-  const attachForward = useCallback((leaf: NSEPageHandle | null) => bridge.attach("forward", leaf), [bridge]);
-  const attachBackward = useCallback((leaf: NSEPageHandle | null) => bridge.attach("backward", leaf), [bridge]);
+  const attachForward = useCallback((leaf: PageHandle | null) => bridge.attach("forward", leaf), [bridge]);
+  const attachBackward = useCallback((leaf: PageHandle | null) => bridge.attach("backward", leaf), [bridge]);
   useLayoutEffect(() => () => bridge.reset(), [bridge]);
   // The engine first paints the endpoint, then the controller changes the
   // print. Lay the retained leaves flat after that DOM commit, as Portfolio
@@ -109,7 +109,7 @@ export function NSEPageCurlView({ controller }: { readonly controller: NSEPageCo
   const captureCorner = (direction: Direction, event: PointerEvent<HTMLElement>) => {
     if (state.turnDirection) return;
     const box = event.currentTarget.getBoundingClientRect();
-    const corner: NSEPageCorner = `${event.clientY < box.top + box.height / 2 ? "top" : "bottom"}-${direction === "forward" ? "right" : "left"}`;
+    const corner: PageCorner = `${event.clientY < box.top + box.height / 2 ? "top" : "bottom"}-${direction === "forward" ? "right" : "left"}`;
     flushSync(() => setCorners(current => current[direction] === corner ? current : { ...current, [direction]: corner }));
   };
   function leaf(direction: Direction) {
@@ -118,7 +118,7 @@ export function NSEPageCurlView({ controller }: { readonly controller: NSEPageCo
     const front = forward ? frontForward : frontBack;
     const inside = spread ? base + (forward ? 3 : -2) : index + (forward ? 1 : -1);
     const back = spread ? base + (forward ? 2 : -1) : inside;
-    return <NSEPageCurlLeaf
+    return <PageCurlLeaf
       ref={forward ? attachForward : attachBackward}
       preset="bookCurl"
       curlUnderside={spread ? "back" : "print-through"}

@@ -1,11 +1,11 @@
 import type { NSEPageController } from "./NSEPageController";
-import type { NSEPageEvent, NSEPageHandle } from "./nsePageTypes";
+import type { PageEvent, PageHandle } from "./pageTypes";
 
 /** Private renderer connection; no engine types appear on the public controller. */
 export interface PageCurlConnection {
-  attach(direction: "forward" | "backward", leaf: NSEPageHandle | null): void;
-  progress(progress: number, event: NSEPageEvent): void;
-  end(event: NSEPageEvent): void;
+  attach(direction: "forward" | "backward", leaf: PageHandle | null): void;
+  progress(progress: number, event: PageEvent): void;
+  end(event: PageEvent): void;
   layFlat(): void;
   reset(): void;
 }
