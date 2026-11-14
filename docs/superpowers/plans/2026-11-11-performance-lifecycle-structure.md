@@ -15,6 +15,24 @@
 
 **Worktrees:** framework `SynCloudOS-Workspace/.worktrees/webspring-folders/framework` (branch `fix/blind-rewrite-friction`, plan written at `90e7fbf9`); site `…/webspring-folders/site` (branch `prerelease`, vendoring `90e7fbf9` with a `dirty` receipt).
 
+## Beta 2 remaining work (14 November 2026)
+
+The framework update is on [public master at 556cb260](https://github.com/Syndromatic-Ltd/SynCloudOS/commit/556cb26090230b37842064f9f51bab964dcac642). Beta 2 is still unpublished. Task 23 and both 22-family installed FX gates are complete. The previous build and timings are recorded in the [verification report](../evidence/2026-11-11-performance/REPORT.md#integrated-verification-on-14-november).
+
+### Release checklist
+
+- [ ] Triage [the first master CI run](https://github.com/Syndromatic-Ltd/SynCloudOS/actions/runs/43573719573). The quality job failed at `npm audit` on advisories in Hono and `@hono/node-server`. The browser job reported focus, blob URL, and Linux screenshot failures. Compare the individual failures against the preceding public revision, fix the confirmed causes, and rerun CI.
+- [ ] Complete site adoption. Local site commit `0472a7c` vendors the verified SDK, but its tests passed with existing local caller migrations for removed SDK exports such as `atmoMotion` and `atmoAppearance`. Review the caller changes, commit the migration separately from Opus's design work, and run site typecheck, boundaries, tests and a Chromium launch against the committed state.
+- [ ] Close the local verification failures. On `478f1bd1` full Vitest passed 9,968/9,969, with a Chromium IndexedDB document-asset timeout. The installed Developer MCP check reports Atmo `theme.undrawn-part` warnings. The local frozen run passed 111/177 with 66 known metal-thumb differences across 11 surfaces. All 2,648 hashes matched. Keep the frozen references intact during diagnosis and record any remaining differences.
+- [ ] Verify the final public revision. Run the framework checks, full Vitest and frozen baseline serially. Build the matching SDK and Developer MCP archives from that revision, verify clean consumer installs and both FX modes, record checksums, and cut the release with the owner's go-ahead.
+
+### Engineering follow-ups
+
+- [ ] Recheck About heap in a warmed production build and trace retained growth. The ten-cycle dev run was +2.59 MiB against a 2 MiB target, with DOM nodes and listeners flat. Keep detached-node queries out of the cycle loop.
+- [ ] Diagnose About and QuickSwitch timing separately from the gallery. The gallery style targets passed. About launch and QuickSwitch still miss their timing targets.
+- [ ] Review Task 21's system-worker proposal before moving ImageFX, VideoFX, PDF or Lumina. The installed tests verify app worker dispatch. Framework adoption requires its own worker entry, input ownership, cooperative cancellation and measurable improvements on representative workloads.
+- [ ] Review the MotionFX naming proposal, physical-device acceptance, the login plate treatment and Workstream G restructuring before implementing them.
+
 ## Global Constraints
 
 - Do not push. No `Co-Authored-By` trailers. One commit per slice (each `### Task` below is one slice unless it says otherwise).
