@@ -66,6 +66,7 @@ test("presents the populated floating window before the stage exit hides its edi
   await page.goto(fixture);
   const draft = page.getByRole("textbox", { name: "Draft" });
   await draft.fill("An unsaved draft");
+  await draft.evaluate(node => { node.setAttribute("data-transfer-test-editor", ""); });
   const exit = page.getByRole("button", { name: "Exit Full Screen" });
   await page.evaluate(() => {
     const sampleExit = (event: MouseEvent) => {
@@ -74,7 +75,7 @@ test("presents the populated floating window before the stage exit hides its edi
       document.removeEventListener("click", sampleExit, true);
       const captured: boolean[] = [];
       const sample = () => {
-        const editor = document.querySelector<HTMLInputElement>('input[aria-label="Draft"]');
+        const editor = document.querySelector<HTMLInputElement>('input[data-transfer-test-editor]');
         captured.push(Boolean(editor?.closest("[data-window-id]") && editor.getBoundingClientRect().width > 0));
         if (captured.length === 4) document.documentElement.dataset.transferFrames = captured.join(",");
         else requestAnimationFrame(sample);
