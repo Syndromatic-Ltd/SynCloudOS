@@ -5,7 +5,7 @@ import { useNSEAppearance } from "../Appearance";
 import { AlertBackdrop } from "../Components/NSEAlertBackdrop";
 import { AlertSurface } from "../Components/NSEAlertSurface";
 import { NSEButton } from "../Controls/Buttons/NSEButton";
-import { NSEFocusScope } from "../Focus";
+import { FocusScope } from "../Focus";
 import type { WindowAlertRequest } from "../Application/NSEWindowController";
 import type { WindowSurfaceRequest } from "../Overlays/NSEWindowSurfaceBridge";
 
@@ -22,7 +22,7 @@ export function ControllerSheetSurface({ scopeId, attached, title, titleId, widt
   readonly children: ReactNode;
 }) {
   const colourScheme = useNSEAppearance().resolvedColourScheme;
-  return <NSEFocusScope options={{ scopeId, kind: "modal", modal: true, trapFocus: true, asChild: true }}>
+  return <FocusScope options={{ scopeId, kind: "modal", modal: true, trapFocus: true, asChild: true }}>
     <AlertBackdrop onSafeDismiss={onCancel} className={attached ? "nse-window-sheet-backdrop" : undefined} motion={attached ? "sheet" : "alert"}>
       <AlertSurface role="dialog" labelledBy={title && !fullSizeContentView ? titleId : undefined} aria-label={title && fullSizeContentView ? title : undefined}
         data-nse-full-size-content-view={fullSizeContentView ? "" : undefined} className="nse-sheet" motion={attached ? "sheet" : "alert"}
@@ -32,7 +32,7 @@ export function ControllerSheetSurface({ scopeId, attached, title, titleId, widt
         {children}
       </AlertSurface>
     </AlertBackdrop>
-  </NSEFocusScope>;
+  </FocusScope>;
 }
 
 /** @internal The panel host supplies geometry and dismissal; NSE draws the inherited appearance. */
@@ -43,12 +43,12 @@ export function OpenPanelSheetSurface({ request, compact, onClose, children }: {
   readonly children: ReactNode;
 }) {
   const appearance = useNSEAppearance();
-  return <NSEFocusScope options={{ scopeId: request.id, kind: "modal", modal: true, trapFocus: true, asChild: true }}>
+  return <FocusScope options={{ scopeId: request.id, kind: "modal", modal: true, trapFocus: true, asChild: true }}>
     <div className="nse-open-sheet-backdrop nse-window-sheet-backdrop" data-compact={compact || undefined} onKeyDown={event => { if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); onClose(); } }}>
       <section role="dialog" aria-modal="true" aria-label={request.title} data-nse-colour-scheme-resolved={appearance.resolvedColourScheme} className="nse-open-sheet nse-sheet" data-compact={compact || undefined}
         style={{ width: compact ? "100%" : `min(${request.bounds.width}px, calc(100% - 32px))`, height: `min(${request.bounds.height}px, 100%)` }}>{children}</section>
     </div>
-  </NSEFocusScope>;
+  </FocusScope>;
 }
 
 /** @internal Alert drawing consumes a request and callbacks, never an application queue or SDK. */
@@ -62,7 +62,7 @@ export function WindowAlertContent({ request, scopeId, onChoose }: {
   const titleId = useId();
   const messageId = useId();
   const primary = request.buttons.find((button) => button.role === "default" || button.role === "destructive") ?? request.buttons[0];
-  return <NSEFocusScope options={{ scopeId: scopeId, kind: "modal", modal: true, trapFocus: true, asChild: true }}>
+  return <FocusScope options={{ scopeId: scopeId, kind: "modal", modal: true, trapFocus: true, asChild: true }}>
     <AlertBackdrop className="nse-window-sheet-backdrop" motion="sheet" onSafeDismiss={() => onChoose()}>
       <AlertSurface appearance={appearance} className="nse-sheet nse-alert-sheet" motion="sheet"
         labelledBy={titleId} describedBy={request.message ? messageId : undefined} initialFocusSelector="[data-nse-alert-primary]">
@@ -86,5 +86,5 @@ export function WindowAlertContent({ request, scopeId, onChoose }: {
         </div>
       </AlertSurface>
     </AlertBackdrop>
-  </NSEFocusScope>;
+  </FocusScope>;
 }

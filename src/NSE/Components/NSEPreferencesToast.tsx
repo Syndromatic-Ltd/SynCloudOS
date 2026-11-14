@@ -28,7 +28,7 @@ import {
   type PreferencesTransitions,
 } from "./NSEPreferencesToast.transitions";
 import { GroupedRow } from "../Controls/Selection/GroupedRow";
-import { NSEFocusScope, resolveNSEFocusReturnTarget } from "../Focus";
+import { FocusScope, resolveNSEFocusReturnTarget } from "../Focus";
 import { NSEWindowController } from "../Application/NSEWindowController";
 import { NSETitlebarAccessoryViewController } from "../Application/NSETitlebarAccessoryViewController";
 import { WindowTitlebarContent } from "../Windows/windowTitlebarContext";
@@ -262,7 +262,7 @@ export function PreferencesToast({ open, focusScopeId, title, panes, initialPane
   return createPortal(
     <Presence onExitComplete={() => setActiveId(null)}>
       {open ? (
-        <NSEFocusScope options={{ scopeId: focusScopeId ?? "nse-preferences-toast", kind: "modal", modal: true, trapFocus: true, asChild: true }}>
+        <FocusScope options={{ scopeId: focusScopeId ?? "nse-preferences-toast", kind: "modal", modal: true, trapFocus: true, asChild: true }}>
           <div
             className="nse-prefs-backdrop"
             {...appearanceProjection}
@@ -375,7 +375,7 @@ export function PreferencesToast({ open, focusScopeId, title, panes, initialPane
             </PaneDirectionContext.Provider>
           </PreferencesPanel>
           </div>
-        </NSEFocusScope>
+        </FocusScope>
       ) : null}
     </Presence>,
     document.body

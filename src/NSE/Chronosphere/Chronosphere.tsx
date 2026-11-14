@@ -22,7 +22,7 @@ import { useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNod
 import { createPortal } from "react-dom";
 import { LoadingSpinner } from "../Components/LoadingSpinner";
 import { NSEButton } from "../Controls/Buttons/NSEButton";
-import { NSEFocusScope } from "../Focus/NSEFocusPort";
+import { FocusScope } from "../Focus/NSEFocusPort";
 import { useNSEOverlayProvider } from "../Overlays/OverlayProvider";
 import { useChronosphereEnvironment } from "./chronosphereEnvironment";
 import { ChronosphereVortexView } from "./ChronosphereVortexView";
@@ -183,9 +183,9 @@ export function Chronosphere<TPrepared = unknown, TDetail = unknown>({ subject, 
     return portalHost ? createPortal(bezel, portalHost) : bezel;
   }
   const View = view;
-  return createPortal(<NSEFocusScope options={{ scopeId: `chronosphere:${scopeId}`, kind: "modal", modal: true, trapFocus: true }}>
+  return createPortal(<FocusScope options={{ scopeId: `chronosphere:${scopeId}`, kind: "modal", modal: true, trapFocus: true }}>
     <div className="chronosphere-presentation" role="dialog" aria-modal="true" aria-label={`Chronosphere — ${subject.label}`}>
       <View model={model} actions={actions} renderFace={renderFace} renderDetail={renderDetail} />
     </div>
-  </NSEFocusScope>, portalHost);
+  </FocusScope>, portalHost);
 }

@@ -22,7 +22,7 @@ import { NSEControllerLifetime } from "../Controllers/controllerLifetime";
 import type { NSEControllerOwnershipOptions } from "../Controllers/ownership";
 import { NSEEdgeInsetsZero, type NSEEdgeInsets } from "../Layout/NSEEdgeInsets";
 
-export type NSEScrollerPolicy = "automatic" | "always" | "hidden";
+export type ScrollerPolicy = "automatic" | "always" | "hidden";
 
 export interface NSEScrollRect {
   readonly x: number;
@@ -39,9 +39,9 @@ export interface NSEClipViewHandle {
   observeBoundsChanges(observer: (bounds: NSEScrollRect) => void): () => void;
 }
 
-export type NSERTLScrollModel = "negative" | "reverse" | "default";
+export type RTLScrollModel = "negative" | "reverse" | "default";
 
-export interface NSEScrollGeometry {
+export interface ScrollGeometry {
   readonly position: { readonly left: number; readonly top: number };
   readonly viewport: { readonly width: number; readonly height: number };
   readonly content: { readonly width: number; readonly height: number };
@@ -52,10 +52,10 @@ export interface NSEScrollGeometry {
 const finite = (value: number) => Number.isFinite(value) ? value : 0;
 const clamp = (value: number, minimum: number, maximum: number) => Math.min(maximum, Math.max(minimum, value));
 
-export const normalizeRTLScrollLeft = (value: number, maximum: number, model: NSERTLScrollModel) =>
+export const normalizeRTLScrollLeft = (value: number, maximum: number, model: RTLScrollModel) =>
   model === "negative" ? -value : model === "reverse" ? maximum - value : value;
 
-export function computeScrollRectTarget(geometry: NSEScrollGeometry) {
+export function computeScrollRectTarget(geometry: ScrollGeometry) {
   const insets = geometry.insets ?? NSEEdgeInsetsZero;
   const viewportWidth = Math.max(0, finite(geometry.viewport.width));
   const viewportHeight = Math.max(0, finite(geometry.viewport.height));

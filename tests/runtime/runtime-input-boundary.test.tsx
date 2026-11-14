@@ -24,7 +24,7 @@ import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createPortal } from "react-dom";
 import React from "react";
-import { NSEFocusPortProvider, OverlayProvider } from "../../src/NSE/NSE";
+import { FocusPortProvider, OverlayProvider } from "../../src/NSE/NSE";
 import { MenuView } from "../../src/NSE/Menus";
 import { FocusScope, RuntimeInputBoundary, SynCloudOSProvider, useRuntimeNSEFocusPort, useRuntimeNSEOverlayPort } from "../../src/SynCloudOSReact";
 import type { CommandDeclaration } from "../../src/SynCloudOS/Commands";
@@ -180,9 +180,9 @@ describe("RuntimeInputBoundary", () => {
       const focusPort = useRuntimeNSEFocusPort("runtime");
       const overlayPort = useRuntimeNSEOverlayPort("runtime");
       return <OverlayProvider runtimePort={overlayPort} defaultParentResponderId="runtime">
-        <NSEFocusPortProvider port={focusPort}>
+        <FocusPortProvider port={focusPort}>
           <MenuView label="Scoped NSE menu" open items={[{ value: "one", label: "One" }]} />
-        </NSEFocusPortProvider>
+        </FocusPortProvider>
       </OverlayProvider>;
     }
     render(
@@ -203,14 +203,14 @@ describe("RuntimeInputBoundary", () => {
       const focusPort = useRuntimeNSEFocusPort("runtime");
       const overlayPort = useRuntimeNSEOverlayPort("runtime");
       return <OverlayProvider runtimePort={overlayPort} defaultParentResponderId="runtime">
-        <NSEFocusPortProvider port={focusPort}><MenuView label="Nested port menu" open items={[{ value: "one", label: "One" }]} /></NSEFocusPortProvider>
+        <FocusPortProvider port={focusPort}><MenuView label="Nested port menu" open items={[{ value: "one", label: "One" }]} /></FocusPortProvider>
       </OverlayProvider>;
     }
     function OuterHost() {
       const port = useRuntimeNSEFocusPort("runtime");
-      return <NSEFocusPortProvider port={port}>
+      return <FocusPortProvider port={port}>
         <SynCloudOSProvider runtime={inner}><RuntimeInputBoundary><InnerMenu /></RuntimeInputBoundary></SynCloudOSProvider>
-      </NSEFocusPortProvider>;
+      </FocusPortProvider>;
     }
     render(<SynCloudOSProvider runtime={outer}><RuntimeInputBoundary><OuterHost /></RuntimeInputBoundary></SynCloudOSProvider>);
 

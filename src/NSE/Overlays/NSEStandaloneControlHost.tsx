@@ -19,7 +19,7 @@
  */
 
 import { useEffect, useRef, type PropsWithChildren } from "react";
-import { NSEFocusPortProvider } from "../Focus/NSEFocusPort";
+import { FocusPortProvider } from "../Focus/NSEFocusPort";
 import { OverlayProvider } from "./OverlayProvider";
 import type { OverlayRuntimePort } from "./overlayTypes";
 import {
@@ -70,7 +70,7 @@ export function StandaloneControlHost({
   }, [standalone]);
 
   return (
-    <NSEFocusPortProvider port={standalone.focusPort}>
+    <FocusPortProvider port={standalone.focusPort}>
       <OverlayProvider
         manager={standalone.manager}
         runtimePort={standalone.runtime}
@@ -78,6 +78,6 @@ export function StandaloneControlHost({
       >
         {children}
       </OverlayProvider>
-    </NSEFocusPortProvider>
+    </FocusPortProvider>
   );
 }

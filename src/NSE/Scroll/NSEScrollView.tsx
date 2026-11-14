@@ -21,7 +21,7 @@
 import { forwardRef, useImperativeHandle, useLayoutEffect, useRef, useState, type CSSProperties, type HTMLAttributes, type ReactNode } from "react";
 import { useNSERubberBandScroll } from "./index";
 import { NSEScroller } from "./NSEScroller";
-import { NSEScrollViewController, type NSEScrollerPolicy } from "./scrollTypes";
+import { NSEScrollViewController, type ScrollerPolicy } from "./scrollTypes";
 import { NSEEdgeInsetsZero, type NSEEdgeInsets } from "../Layout/NSEEdgeInsets";
 import { ViewSafeAreaContext, useNSEViewSafeArea } from "../Layout/useNSESafeArea";
 import { nseUnowned } from "../Controllers/ownership";
@@ -35,7 +35,7 @@ export interface NSEScrollViewHandle {
   scrollRectToVisible(rect: NSEScrollRect, behavior?: ScrollBehavior): void;
 }
 
-export interface NSEScrollViewGeometrySnapshot {
+export interface ScrollViewGeometrySnapshot {
   readonly viewport: { readonly width: number; readonly height: number };
   readonly content: { readonly width: number; readonly height: number };
   readonly position: { readonly left: number; readonly top: number };
@@ -47,13 +47,13 @@ export interface NSEScrollViewProps extends HTMLAttributes<HTMLDivElement> {
   rubberBand?: boolean;
   rubberBandCoeff?: number;
   axis?: "y" | "x" | "both";
-  horizontalScrollerPolicy?: NSEScrollerPolicy;
-  verticalScrollerPolicy?: NSEScrollerPolicy;
+  horizontalScrollerPolicy?: ScrollerPolicy;
+  verticalScrollerPolicy?: ScrollerPolicy;
   automaticallyAdjustsContentInsets?: boolean;
   contentInsets?: NSEEdgeInsets;
   scrollerInsets?: NSEEdgeInsets;
   onScrollSnapshot?(): void;
-  onGeometryChange?(snapshot: NSEScrollViewGeometrySnapshot): void;
+  onGeometryChange?(snapshot: ScrollViewGeometrySnapshot): void;
   controllerRef?(controller: NSEScrollViewController | null): void;
 }
 
@@ -82,7 +82,7 @@ export const NSEScrollView = forwardRef<NSEScrollViewHandle, NSEScrollViewProps>
   const safeArea = useNSEViewSafeArea(scrollRef, undefined, undefined, () => publishGeometry(), contentRef);
   const controller = useRef<NSEScrollViewController | null>(null);
   const callbacks = useRef({ onScrollSnapshot, onGeometryChange });
-  const [geometry, setGeometry] = useState<NSEScrollViewGeometrySnapshot>(() => ({ viewport: { width: 0, height: 0 }, content: { width: 0, height: 0 }, position: { left: 0, top: 0 }, insets: { top: 0, right: 0, bottom: 0, left: 0 } }));
+  const [geometry, setGeometry] = useState<ScrollViewGeometrySnapshot>(() => ({ viewport: { width: 0, height: 0 }, content: { width: 0, height: 0 }, position: { left: 0, top: 0 }, insets: { top: 0, right: 0, bottom: 0, left: 0 } }));
   callbacks.current = { onScrollSnapshot, onGeometryChange };
   const insets = automaticallyAdjustsContentInsets ? safeArea.value.safeAreaInsets : contentInsets;
   const trackInsets = {
@@ -126,7 +126,7 @@ export const NSEScrollView = forwardRef<NSEScrollViewHandle, NSEScrollViewProps>
     controllerRef?.(controller.current);
     return () => controllerRef?.(null);
   }, [controllerRef]);
-  const overflow = (policy: NSEScrollerPolicy, enabled: boolean): CSSProperties["overflowX"] => !enabled || policy === "hidden" ? "hidden" : policy === "always" ? "scroll" : "auto";
+  const overflow = (policy: ScrollerPolicy, enabled: boolean): CSSProperties["overflowX"] => !enabled || policy === "hidden" ? "hidden" : policy === "always" ? "scroll" : "auto";
   const hostStyle: CSSProperties = { ...safeArea.properties, ...style, overflowX: overflow(horizontalScrollerPolicy, axis !== "y"), overflowY: overflow(verticalScrollerPolicy, axis !== "x") };
   const contentStyle: CSSProperties = { padding: `${insets.top}px ${insets.right}px ${insets.bottom}px ${insets.left}px` };
 

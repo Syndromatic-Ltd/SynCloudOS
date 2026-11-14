@@ -31,7 +31,7 @@ import type {
   OverlayManager,
   OverlayRuntimePort,
 } from "./overlayTypes";
-import type { NSEFocusPort, NSEFocusScopeOptions } from "../Focus/NSEFocusPort";
+import type { FocusPort, FocusScopeOptions } from "../Focus/NSEFocusPort";
 import type { SynCloudOSPresentationTraits } from "../../SynCloudOS/SynCloudOS";
 
 export interface StandaloneControlRuntimeOptions {
@@ -47,7 +47,7 @@ export interface StandaloneControlRuntime {
   readonly runtime: OverlayRuntimePort;
   readonly runtimePort: OverlayRuntimePort;
   readonly manager: OverlayManager;
-  readonly focusPort: NSEFocusPort;
+  readonly focusPort: FocusPort;
   readonly parentResponderId: string;
   start(): void;
   dispose(reason?: unknown): void;
@@ -55,7 +55,7 @@ export interface StandaloneControlRuntime {
 
 interface LocalFocusScopeOptions {
   readonly scopeId: string;
-  readonly kind: NSEFocusScopeOptions["kind"] | OverlayFocusScopeOptions["kind"];
+  readonly kind: FocusScopeOptions["kind"] | OverlayFocusScopeOptions["kind"];
   readonly parentResponderId?: string;
   readonly parentScopeId?: string;
   readonly modal?: boolean;
@@ -73,7 +73,7 @@ interface LocalFocusScopeRecord {
 
 interface LocalFocusAuthority {
   readonly runtimeId: string;
-  readonly focusPort: NSEFocusPort;
+  readonly focusPort: FocusPort;
   start(): void;
   restoreFocus(responderId: string, anchor: HTMLElement | null): void;
   enter(options: LocalFocusScopeOptions, root: HTMLElement | null): () => void;
@@ -169,7 +169,7 @@ function responderMarker(element: EventTarget | null): string | null {
 
 class LocalFocusAuthorityImpl implements LocalFocusAuthority {
   readonly runtimeId: string;
-  readonly focusPort: NSEFocusPort;
+  readonly focusPort: FocusPort;
   #document: Document;
   #scopes = new Map<string, LocalFocusScopeRecord>();
   #lastFocusedByResponder = new Map<string, HTMLElement>();
@@ -189,7 +189,7 @@ class LocalFocusAuthorityImpl implements LocalFocusAuthority {
     this.runtimeId = runtimeId;
     this.focusPort = {
       runtimeId,
-      wrapFocusScope: (options: NSEFocusScopeOptions, children: ReactNode) => createElement(StandaloneFocusScope, {
+      wrapFocusScope: (options: FocusScopeOptions, children: ReactNode) => createElement(StandaloneFocusScope, {
         authority: this,
         options,
         children,
@@ -265,7 +265,7 @@ function StandaloneFocusScope({
   children,
 }: {
   readonly authority: LocalFocusAuthorityImpl;
-  readonly options: NSEFocusScopeOptions;
+  readonly options: FocusScopeOptions;
   readonly children: ReactNode;
 }) {
   const rootRef = useRef<HTMLDivElement | null>(null);

@@ -22,7 +22,7 @@ import { useId, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import "./components.css";
 import "./nseSystemDialogs.css";
-import { NSEFocusScope } from "../Focus";
+import { FocusScope } from "../Focus";
 import { NSEButton, nseButtonToneProps, type ButtonTone } from "../Controls/Buttons/NSEButton";
 import { AlertSurface } from "./NSEAlertSurface";
 import { AlertBackdrop } from "./NSEAlertBackdrop";
@@ -98,7 +98,7 @@ export function AboutDialog({
     : `Version ${info.version}${info.build ? ` (${info.build})` : ""}`;
 
   return createPortal(
-    <NSEFocusScope options={{ scopeId: focusScopeId ?? `nse-system-about:${titleId}`, kind: "modal", modal: true, trapFocus: true, asChild: true }}>
+    <FocusScope options={{ scopeId: focusScopeId ?? `nse-system-about:${titleId}`, kind: "modal", modal: true, trapFocus: true, asChild: true }}>
     <AlertBackdrop presentation={presentation} onSafeDismiss={onDismiss}>
       <AlertSurface
         appearance={appearance}
@@ -135,7 +135,7 @@ export function AboutDialog({
         </div>
       </AlertSurface>
     </AlertBackdrop>
-    </NSEFocusScope>,
+    </FocusScope>,
     document.body
   );
 }
@@ -182,7 +182,7 @@ export function NSEConfirmDialog({
   return createPortal(
     // Escape and a backdrop click both CANCEL, never confirm — the safe choice
     // is the one that happens by accident.
-    <NSEFocusScope options={{ scopeId: focusScopeId ?? `nse-system-confirm:${titleId}`, kind: "modal", modal: true, trapFocus: true, asChild: true }}>
+    <FocusScope options={{ scopeId: focusScopeId ?? `nse-system-confirm:${titleId}`, kind: "modal", modal: true, trapFocus: true, asChild: true }}>
     <AlertBackdrop presentation={presentation} onSafeDismiss={onCancel}>
       <AlertSurface
         appearance={appearance}
@@ -214,7 +214,7 @@ export function NSEConfirmDialog({
         </div>
       </AlertSurface>
     </AlertBackdrop>
-    </NSEFocusScope>,
+    </FocusScope>,
     document.body
   );
 }

@@ -37,6 +37,7 @@
     "NSEColourPicker": "NSColorPicker",
     "NSEPopoverBehavior": "NSPopover.Behavior",
     "NSEPreferencePane": "NSPreferencePane",
+    "NSEScroller": "NSScroller",
     "NSETableHeaderView": "NSTableHeaderView",
     "NSETrackingOption": "NSTrackingArea.Options"
   },
