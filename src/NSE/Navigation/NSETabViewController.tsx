@@ -29,7 +29,7 @@ import type { NSENavigationIcon } from "./navigationTypes";
 import { registerNSEAuthoringFinalizer } from "../Application/authoringLifecycle";
 import { connectNSENavigationRestoration, type NSENavigationRestorationDescriptor } from "./navigationRestoration";
 import { NSETreeController } from "../Controllers/NSETreeController";
-import { NSEAdaptiveTabView, type NSEAdaptiveTabOutlineItem } from "./adaptiveTabView";
+import { AdaptiveTabView, type AdaptiveTabOutlineItem } from "./adaptiveTabView";
 import { useTabToolbar } from "./tabToolbarView";
 import { registerTabViewProjection, tabViewProjection } from "./tabViewInternals";
 
@@ -113,7 +113,7 @@ export class NSETabViewController extends NSEViewController<NSETabViewController
   #tabStyle: NSETabViewControllerTabStyle;
   #model: TabBarController<ReactNode> | null = null;
   #unsubscribeModel: (() => void) | null = null;
-  #outline: NSETreeController<NSEAdaptiveTabOutlineItem, string> | null = null;
+  #outline: NSETreeController<AdaptiveTabOutlineItem, string> | null = null;
 
   constructor(options: NSETabViewControllerOptions = {}) {
     super(options);
@@ -203,7 +203,7 @@ export class NSETabViewController extends NSEViewController<NSETabViewController
   /** `tabView(_:didSelect:)`. */
   didSelect(_tabViewItem: NSETabViewItem): void {}
 
-  #tabOutlineModel(): NSETreeController<NSEAdaptiveTabOutlineItem, string> {
+  #tabOutlineModel(): NSETreeController<AdaptiveTabOutlineItem, string> {
     if (!this.#outline) this.#outline = new NSETreeController({
       owner: this, id: `${this.constructor.name}:tab-outline`,
       content: this.#outlineItems(), getId: item => item.identifier,
@@ -213,7 +213,7 @@ export class NSETabViewController extends NSEViewController<NSETabViewController
     return this.#outline;
   }
 
-  #outlineItems(): NSEAdaptiveTabOutlineItem[] {
+  #outlineItems(): AdaptiveTabOutlineItem[] {
     return this.#items.map(item => ({ identifier: item.identifier, label: item.label, image: item.image }));
   }
 
@@ -287,7 +287,7 @@ function TabViewControllerView({ controller }: { readonly controller: NSETabView
   // Keeping these two styles in one projection preserves the selected item's DOM when an outer
   // split supplies the regular sidebar and hands compact navigation back to this tab controller.
   if (controller.tabStyle === "sidebarAdaptable" || controller.tabStyle === "unspecified" || controller.tabStyle === "toolbar") return <div className="nse-tab-view-controller" data-tab-style={controller.tabStyle}>
-    <NSEAdaptiveTabView controller={controller} scope={scope} />
+    <AdaptiveTabView controller={controller} scope={scope} />
   </div>;
   const model = tabViewProjection(controller).control();
   const selected = controller.selectedTabViewItem;

@@ -20,10 +20,10 @@
 
 import { describe, expect, it, vi } from "vitest";
 import {
-  NSENavigationStackController,
+  NavigationStackController,
   TabBarController,
   TabBarMoreDestinationId,
-  type NSENavigationDestination,
+  type NavigationDestination,
 } from "../../src/NSE/Navigation";
 import { NSEViewController, nseUpdateTraits } from "../../src/NSE/Application/NSEViewController";
 import { NSETabViewController, NSETabViewItem } from "../../src/NSE/Navigation/NSETabViewController";
@@ -55,7 +55,7 @@ function traits(horizontalSizeClass: SynCloudOSPresentationTraits["horizontalSiz
   });
 }
 
-function destinations(created: string[]): readonly NSENavigationDestination[] {
+function destinations(created: string[]): readonly NavigationDestination[] {
   return Object.freeze([
     "home", "library", "search", "settings", "sharing", "activity",
   ].map((id, index) => Object.freeze({
@@ -141,7 +141,7 @@ describe("semantic presentation-navigation controllers", () => {
     expect(publicationCount).toEqual([]);
 
     let resolvePush: (() => void) | null = null;
-    const stack = new NSENavigationStackController({
+    const stack = new NavigationStackController({
       id: "details-stack",
       rootDestinationId: "home",
       destinationIds: ["home", "details", "advanced"],
@@ -207,7 +207,7 @@ describe("semantic presentation-navigation controllers", () => {
   it("invalidates a pending stack push before root back and equal-path restoration intents", async () => {
     const createPendingStack = () => {
       let resolvePush: (() => void) | null = null;
-      const stack = new NSENavigationStackController({
+      const stack = new NavigationStackController({
         id: `pending-stack-${Math.random()}`,
         rootDestinationId: "home",
         destinationIds: ["home", "details"],
@@ -247,7 +247,7 @@ describe("semantic presentation-navigation controllers", () => {
 
   it("makes a newer stack push supersede an older unresolved intent", async () => {
     const resolvers = new Map<string, () => void>();
-    const stack = new NSENavigationStackController({
+    const stack = new NavigationStackController({
       id: "newer-stack-intent",
       rootDestinationId: "home",
       destinationIds: ["home", "details", "advanced"],
@@ -294,7 +294,7 @@ describe("semantic presentation-navigation controllers", () => {
   });
 
   it("retains stack restoration internals while public split and tab controllers retain real child state", async () => {
-    const stack = new NSENavigationStackController({ id: "restore-stack", rootDestinationId: "library", destinationIds: ["library", "detail", "nested"] });
+    const stack = new NavigationStackController({ id: "restore-stack", rootDestinationId: "library", destinationIds: ["library", "detail", "nested"] });
     await stack.push("detail"); await stack.push("nested");
     expect(stack.getSnapshot()).toMatchObject({ path: ["detail", "nested"], backDestinationId: "detail" });
     stack.pop(); expect(stack.getSnapshot()).toMatchObject({ path: ["detail"], backDestinationId: "library" });

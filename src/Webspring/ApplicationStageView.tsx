@@ -28,8 +28,8 @@ import { WEBSPRING_MULTI_SWITCH_ROLES, WEBSPRING_PRESENTATION_ROLES, type Webspr
 import {
   NSEFocusPortProvider,
   NSEControlRuntimeProvider,
-  NSEApplicationNavigationChromeController,
-  NSEApplicationNavigationChromeProvider,
+  ApplicationNavigationChromeController,
+  ApplicationNavigationChromeProvider,
   OverlayProvider,
   TooltipProvider,
   WindowSurfaceBridgeProvider,
@@ -124,7 +124,7 @@ export function ApplicationStageView({
   const resolvedMode = useResolvedMode();
   const usesStandardTopBar = frame.topBar === "standard";
   const siteBranding = useHostSiteBranding();
-  const navigationChromeController = useMemo(() => new NSEApplicationNavigationChromeController({ owner: nseUnowned }), [stage.id]);
+  const navigationChromeController = useMemo(() => new ApplicationNavigationChromeController({ owner: nseUnowned }), [stage.id]);
   const navigationChromeSnapshot = useSyncExternalStore(
     navigationChromeController.subscribe,
     navigationChromeController.getSnapshot,
@@ -408,7 +408,7 @@ export function ApplicationStageView({
     <TooltipProvider>
     <WindowSurfaceBridgeProvider bridge={stageWindowSurfaceBridge}>
     <NSEControlRuntimeProvider port={nseControlPort}>
-    <NSEApplicationNavigationChromeProvider controller={navigationChromeController} standardChromeAvailable={usesStandardTopBar}>
+    <ApplicationNavigationChromeProvider controller={navigationChromeController} standardChromeAvailable={usesStandardTopBar}>
     <ResponderScope asChild responderId={applicationResponderId} kind="application" parentResponderId="workspace" scopeId={applicationResponderId} undoOwner={applicationUndoOwner} diagnosticsLabel={appName}>
     <AppViewChrome.Root
       safeAreaInsets={presentationTraits.safeAreaInsets}
@@ -477,7 +477,7 @@ export function ApplicationStageView({
       </AppViewChrome.Surface>
     </AppViewChrome.Root>
     </ResponderScope>
-    </NSEApplicationNavigationChromeProvider>
+    </ApplicationNavigationChromeProvider>
     </NSEControlRuntimeProvider>
     </WindowSurfaceBridgeProvider>
     <div ref={overlayRootRef} className="webspring-app-overlay-destination" data-multiswitch-role={multiSwitchRole ?? undefined}

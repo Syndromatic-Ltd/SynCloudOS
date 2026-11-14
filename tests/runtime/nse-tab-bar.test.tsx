@@ -31,8 +31,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEAppearanceProvider } from "../../src/NSE/Appearance";
 import { atmoTheme } from "../../src/NSE/Appearance/atmo";
 import {
-  NSEApplicationNavigationChromeController,
-  NSEApplicationNavigationChromeProvider,
+  ApplicationNavigationChromeController,
+  ApplicationNavigationChromeProvider,
   TabBar,
   TabBarController,
   TabBarOverflowList,
@@ -57,7 +57,7 @@ function destinations(count: number, options: { disabled?: string; badge?: strin
   });
 }
 
-function SharedChromeBack({ controller }: { readonly controller: NSEApplicationNavigationChromeController }) {
+function SharedChromeBack({ controller }: { readonly controller: ApplicationNavigationChromeController }) {
   const snapshot = React.useSyncExternalStore(controller.subscribe, controller.getSnapshot, controller.getSnapshot);
   if (!snapshot.active?.back) return null;
   return <button type="button" aria-label={snapshot.active.back.label} onClick={snapshot.active.back.onActivate}>Back</button>;
@@ -101,9 +101,9 @@ describe("NSETabBar", () => {
       id: "overflow-page-tabs",
       destinations: destinations(6),
     });
-    const chromeController = new NSEApplicationNavigationChromeController();
+    const chromeController = new ApplicationNavigationChromeController();
     const { unmount } = render(
-      <NSEApplicationNavigationChromeProvider controller={chromeController}>
+      <ApplicationNavigationChromeProvider controller={chromeController}>
         <TabBar controller={controller} aria-label="Primary destinations" idScope="overflow-page-tabs" />
         <TabBarOverflowList
           controller={controller}
@@ -112,7 +112,7 @@ describe("NSETabBar", () => {
           applicationChrome={{ ownerId: "fixture:overflow-page-application" }}
         />
         <SharedChromeBack controller={chromeController} />
-      </NSEApplicationNavigationChromeProvider>,
+      </ApplicationNavigationChromeProvider>,
     );
     const tabList = screen.getByRole("tablist", { name: "Primary destinations" });
     const more = screen.getByRole("tab", { name: "More destinations" });
@@ -304,9 +304,9 @@ describe("NSETabBar", () => {
       id: "overflow-scroll-restoration-tabs",
       destinations: destinations(10),
     });
-    const chromeController = new NSEApplicationNavigationChromeController();
+    const chromeController = new ApplicationNavigationChromeController();
     const { unmount } = render(
-      <NSEApplicationNavigationChromeProvider controller={chromeController}>
+      <ApplicationNavigationChromeProvider controller={chromeController}>
         <TabBar controller={controller} aria-label="Scroll restoration destinations" idScope="overflow-scroll-restoration-tabs" />
         <TabBarOverflowList
           controller={controller}
@@ -315,7 +315,7 @@ describe("NSETabBar", () => {
           applicationChrome={{ ownerId: "fixture:scroll-restoration-application" }}
         />
         <SharedChromeBack controller={chromeController} />
-      </NSEApplicationNavigationChromeProvider>,
+      </ApplicationNavigationChromeProvider>,
     );
 
     fireEvent.click(screen.getByRole("tab", { name: "More destinations" }));
@@ -644,9 +644,9 @@ describe("NSETabBar", () => {
       id: "more-keyboard-activation-focus-tabs",
       destinations: destinations(6, { disabled: "sharing" }),
     });
-    const chromeController = new NSEApplicationNavigationChromeController();
+    const chromeController = new ApplicationNavigationChromeController();
     const { unmount } = render(
-      <NSEApplicationNavigationChromeProvider controller={chromeController}>
+      <ApplicationNavigationChromeProvider controller={chromeController}>
         <TabBar controller={controller} aria-label="More keyboard activation focus" idScope="more-keyboard-activation-focus-tabs" />
         <TabBarOverflowList
           controller={controller}
@@ -655,7 +655,7 @@ describe("NSETabBar", () => {
           applicationChrome={{ ownerId: "fixture:keyboard-more-application" }}
         />
         <SharedChromeBack controller={chromeController} />
-      </NSEApplicationNavigationChromeProvider>,
+      </ApplicationNavigationChromeProvider>,
     );
     const more = screen.getByRole("tab", { name: "More destinations" });
 

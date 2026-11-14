@@ -34,7 +34,7 @@ export function getNSETabBarPanelId(idScope: string, destinationId: string): str
   return `nse-tab-bar-${idToken(idScope)}-panel-${idToken(destinationId)}`;
 }
 
-export interface NSENavigationDestinationHostProps {
+export interface NavigationDestinationHostProps {
   /** Semantic content owner. It is intentionally shared with surrounding chrome. */
   readonly controller: TabBarController<ReactNode>;
   /** Shared with the tab strip so tabs and panels keep truthful relationships. */
@@ -50,13 +50,13 @@ export interface NSENavigationDestinationHostProps {
  * The one mounted parent for lazy destination content. Renderer changes may
  * hide destinations, but must not relocate or recreate their React trees.
  */
-export function NSENavigationDestinationHost({
+export function NavigationDestinationHost({
   controller,
   idScope,
   tabSemantics = true,
   snapshot: suppliedSnapshot,
   className,
-}: NSENavigationDestinationHostProps) {
+}: NavigationDestinationHostProps) {
   const subscribe = useCallback((listener: () => void) => (
     suppliedSnapshot ? () => undefined : controller.subscribe(listener)
   ), [controller, suppliedSnapshot]);

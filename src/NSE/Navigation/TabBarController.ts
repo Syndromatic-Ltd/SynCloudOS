@@ -19,37 +19,37 @@
  */
 
 import { NSEViewController, type NSEViewControllerOptions } from "../Application/NSEViewController";
-import { NSENavigationStackController } from "./NSENavigationStackController";
+import { NavigationStackController } from "./NSENavigationStackController";
 import { registerNSEAuthoringFinalizer } from "../Application/authoringLifecycle";
 import { connectNSENavigationRestoration, type NSENavigationRestorationDescriptor } from "./navigationRestoration";
 import { observe } from "../Objects/observable";
 import type {
-  NSENavigationDestination,
-  NSENavigationSection,
-  NSENavigationSelectionOptions,
+  NavigationDestination,
+  NavigationSection,
+  NavigationSelectionOptions,
   TabBarControllerSnapshot,
   TabBarRestorationSnapshot,
 } from "./navigationTypes";
 
 export interface TabBarControllerOptions<TContent = unknown> extends NSEViewControllerOptions {
   readonly id: string;
-  readonly destinations: readonly NSENavigationDestination<TContent>[];
+  readonly destinations: readonly NavigationDestination<TContent>[];
   /** Explicit source-list grouping. Omit to derive stable groups from `groupId`. */
-  readonly sections?: readonly NSENavigationSection[];
+  readonly sections?: readonly NavigationSection[];
   readonly initialSelectedId?: string;
   /** @internal Tab view controllers show every item directly; the legacy model defaults to five. */
   readonly maximumDirectTabs?: number;
   readonly restoration?: NSENavigationRestorationDescriptor<TabBarController<TContent>, unknown>;
   readonly onSelect?: (
-    destination: NSENavigationDestination<TContent>,
+    destination: NavigationDestination<TContent>,
     options: { readonly signal: AbortSignal; readonly source?: string },
   ) => void | Promise<void>;
 }
 
 /** Replacement copy for existing destinations and sections, keyed by id. */
 export interface TabBarTitles {
-  readonly destinations?: Readonly<Record<string, Pick<NSENavigationDestination, "label" | "compactLabel" | "accessibleLabel">>>;
-  readonly sections?: Readonly<Record<string, NSENavigationSection["label"]>>;
+  readonly destinations?: Readonly<Record<string, Pick<NavigationDestination, "label" | "compactLabel" | "accessibleLabel">>>;
+  readonly sections?: Readonly<Record<string, NavigationSection["label"]>>;
 }
 
 const moreDestinationId = "__nse-more";
@@ -70,7 +70,7 @@ function requireId(value: string, label: string): string {
   return value;
 }
 
-function validateIcon(destination: NSENavigationDestination): void {
+function validateIcon(destination: NavigationDestination): void {
   if (destination.icon.kind === "template" && !destination.icon.name.trim()) {
     throw new TypeError(`Navigation destination "${destination.id}" requires a template icon name.`);
   }
@@ -79,7 +79,7 @@ function validateIcon(destination: NSENavigationDestination): void {
   }
 }
 
-function freezeDestination<TContent>(source: NSENavigationDestination<TContent>): NSENavigationDestination<TContent> {
+function freezeDestination<TContent>(source: NavigationDestination<TContent>): NavigationDestination<TContent> {
   const id = requireId(source.id, "Navigation destination id");
   validateIcon(source);
   if (source.sidebarItem?.glyph !== undefined && !source.sidebarItem.glyph.trim()) {
@@ -102,9 +102,9 @@ function freezeDestination<TContent>(source: NSENavigationDestination<TContent>)
 }
 
 function freezeSections(
-  destinations: readonly NSENavigationDestination[],
-  supplied: readonly NSENavigationSection[] | undefined,
-): readonly NSENavigationSection[] {
+  destinations: readonly NavigationDestination[],
+  supplied: readonly NavigationSection[] | undefined,
+): readonly NavigationSection[] {
   const destinationIds = new Set(destinations.map(({ id }) => id));
   const sections = supplied ?? (() => {
     const groups = new Map<string, { label?: string; destinationIds: string[] }>();
@@ -175,12 +175,12 @@ export class TabBarController<TContent = unknown> extends NSEViewController<TabB
   /** Semantic snapshots never publish a fabricated navigation change on disposal. */
   override readonly subscribe = (listener: () => void): (() => void) => observe(this, () => { if (!this.isDisposed) listener(); });
   readonly id: string;
-  readonly moreStack: NSENavigationStackController | null;
-  #destinations: readonly NSENavigationDestination<TContent>[];
-  #sections: readonly NSENavigationSection[];
-  readonly #destinationById: Map<string, NSENavigationDestination<TContent>>;
-  readonly #overflowRootDestination: NSENavigationDestination<TContent>;
-  readonly #moreDestination: NSENavigationDestination<TContent>;
+  readonly moreStack: NavigationStackController | null;
+  #destinations: readonly NavigationDestination<TContent>[];
+  #sections: readonly NavigationSection[];
+  readonly #destinationById: Map<string, NavigationDestination<TContent>>;
+  readonly #overflowRootDestination: NavigationDestination<TContent>;
+  readonly #moreDestination: NavigationDestination<TContent>;
   readonly #directDestinationIds: readonly string[];
   readonly #overflowDestinationIds: readonly string[];
   readonly #onSelect: TabBarControllerOptions<TContent>["onSelect"];
@@ -231,7 +231,7 @@ export class TabBarController<TContent = unknown> extends NSEViewController<TabB
     this.#initialSelectedId = initial;
     this.moreStack = overflow.length === 0
       ? null
-      : new NSENavigationStackController({
+      : new NavigationStackController({
         id: `${this.id}:more`,
         rootDestinationId: overflowRootDestinationId,
         // More is a real hierarchy, not a one-screen sentinel. Its declared
@@ -249,11 +249,11 @@ export class TabBarController<TContent = unknown> extends NSEViewController<TabB
     if (options.restoration) registerNSEAuthoringFinalizer(this, () => connectNSENavigationRestoration(this, options.restoration!), 15);
   }
 
-  get destinations(): readonly NSENavigationDestination<TContent>[] { return this.#destinations; }
+  get destinations(): readonly NavigationDestination<TContent>[] { return this.#destinations; }
 
-  get sections(): readonly NSENavigationSection[] { return this.#sections; }
+  get sections(): readonly NavigationSection[] { return this.#sections; }
 
-  getDestination(destinationId: string): NSENavigationDestination<TContent> | null {
+  getDestination(destinationId: string): NavigationDestination<TContent> | null {
     if (destinationId === overflowRootDestinationId) return this.#overflowRootDestination;
     if (destinationId === moreDestinationId && this.moreStack) return this.#moreDestination;
     return this.#destinationById.get(destinationId) ?? null;
@@ -271,7 +271,7 @@ export class TabBarController<TContent = unknown> extends NSEViewController<TabB
     return content;
   }
 
-  async select(destinationId: string, options: NSENavigationSelectionOptions = {}): Promise<void> {
+  async select(destinationId: string, options: NavigationSelectionOptions = {}): Promise<void> {
     this.#assertLive();
     const destination = this.#destinationById.get(destinationId);
     if (!destination) throw new RangeError(`Unknown tab destination "${destinationId}".`);
@@ -303,7 +303,7 @@ export class TabBarController<TContent = unknown> extends NSEViewController<TabB
   }
 
   /** Pushes the semantic More destination without selecting a hidden peer. */
-  async openOverflow(options: NSENavigationSelectionOptions = {}): Promise<void> {
+  async openOverflow(options: NavigationSelectionOptions = {}): Promise<void> {
     this.#assertLive();
     const intentRevision = this.#beginIntent();
     if (!this.moreStack) return;

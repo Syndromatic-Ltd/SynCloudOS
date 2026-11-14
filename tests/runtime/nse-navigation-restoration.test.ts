@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { TabBarController } from "../../src/NSE/Navigation/TabBarController";
-import { NSENavigationStackController } from "../../src/NSE/Navigation/NSENavigationStackController";
+import { NavigationStackController } from "../../src/NSE/Navigation/NSENavigationStackController";
 import { createNSETabSelectionRestoration, type NSENavigationRestorationDescriptor } from "../../src/NSE/Navigation/navigationRestoration";
 import { finalizeNSEAuthoringOwner } from "../../src/NSE/Application/authoringLifecycle";
 import { attachNSEAuthoringContext, type NSEAuthoringContext } from "../../src/NSE/Application/authoringContext";
@@ -52,12 +52,12 @@ describe("navigation restoration descriptors", () => {
   });
   it("projects valid canonical stack paths without retaining a competing route snapshot", async () => {
     const storage = ports(["syncloudos:nse-preferences:v1", 1, ["a", "removed", "a", "b"]]);
-    const descriptor: NSENavigationRestorationDescriptor<NSENavigationStackController, readonly string[]> = {
+    const descriptor: NSENavigationRestorationDescriptor<NavigationStackController, readonly string[]> = {
       key: "navigation", version: 1, migrations: [],
       parse: value => Array.isArray(value) && value.every(item => typeof item === "string") ? { ok: true, value } : { ok: false, issues: ["path"] },
       capture: snapshot => snapshot.path, restore: (controller, value) => controller.restore({ version: 1, path: value }),
     };
-    const stack = connect(new NSENavigationStackController({ owner: nseUnowned, id: "stack", destinationIds: ["root", "a", "b", "c"], rootDestinationId: "root", restoration: descriptor }), storage.context);
+    const stack = connect(new NavigationStackController({ owner: nseUnowned, id: "stack", destinationIds: ["root", "a", "b", "c"], rootDestinationId: "root", restoration: descriptor }), storage.context);
     expect(stack.getSnapshot().path).toEqual(["a", "b"]);
     await stack.push("c"); expect(storage.values.get("navigation")).toEqual(["syncloudos:nse-preferences:v1", 1, ["a", "b", "c"]]);
   });

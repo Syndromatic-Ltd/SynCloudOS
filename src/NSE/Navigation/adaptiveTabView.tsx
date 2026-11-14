@@ -24,7 +24,7 @@ import "./adaptiveTabView.css";
 import { useNSECompactMoreTitle } from "./compactMoreTitle";
 
 /** @internal Plain source-list data; view controllers stay with the tab view items. */
-export interface NSEAdaptiveTabOutlineItem {
+export interface AdaptiveTabOutlineItem {
   readonly identifier: string;
   readonly label: string;
   readonly image: NSENavigationIcon | undefined;
@@ -41,7 +41,7 @@ const maximumRailHeight = 480;
 const sidebarMinimumWidth = 768;
 
 /** @internal The sidebar-adaptable theme projection of NSTabViewController's items. */
-export function NSEAdaptiveTabView({ controller, scope }: { readonly controller: NSETabViewController; readonly scope: string }) {
+export function AdaptiveTabView({ controller, scope }: { readonly controller: NSETabViewController; readonly scope: string }) {
   const frame = useSourceListFrame();
   const { theme } = useNSEAppearance();
   const root = useRef<HTMLDivElement>(null);

@@ -20,7 +20,7 @@
 
 import { useCallback, useLayoutEffect, useRef, useSyncExternalStore, type ReactNode } from "react";
 import { useNSEApplicationNavigationChrome } from "./NSEApplicationNavigationChrome";
-import { NSENavigationStackController } from "./NSENavigationStackController";
+import { NavigationStackController } from "./NSENavigationStackController";
 import { TabBarController } from "./TabBarController";
 
 function destinationLabel(destination: { readonly accessibleLabel?: string; readonly label: ReactNode } | null): string {
@@ -31,9 +31,9 @@ function destinationLabel(destination: { readonly accessibleLabel?: string; read
     : "destination";
 }
 
-export interface NSEHierarchyStackProps {
+export interface HierarchyStackProps {
   readonly controller: TabBarController<ReactNode>;
-  readonly stackController: NSENavigationStackController;
+  readonly stackController: NavigationStackController;
   readonly "aria-label": string;
   readonly className?: string;
   /** App-owned root title for the shared application stage chrome. */
@@ -49,7 +49,7 @@ export interface NSEHierarchyStackProps {
 }
 
 /** Compact hierarchy state bridge. The application stage owns visible chrome. */
-export function NSEHierarchyStack({
+export function HierarchyStack({
   controller,
   stackController,
   className,
@@ -58,7 +58,7 @@ export function NSEHierarchyStack({
   backLabel,
   onBack,
   applicationChrome,
-}: NSEHierarchyStackProps) {
+}: HierarchyStackProps) {
   const subscribe = useCallback((listener: () => void) => stackController.subscribe(listener), [stackController]);
   const snapshot = useSyncExternalStore(subscribe, stackController.getSnapshot, stackController.getSnapshot);
   const previousPathLength = useRef(snapshot.path.length);
