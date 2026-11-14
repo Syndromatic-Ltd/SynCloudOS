@@ -19,8 +19,8 @@
  */
 
 import { useCallback, useEffect, useState, useSyncExternalStore, type ReactNode } from "react";
-import { NSETabBarMoreDestinationId, NSETabBarController } from "./NSETabBarController";
-import type { NSETabBarControllerSnapshot } from "./navigationTypes";
+import { TabBarMoreDestinationId, TabBarController } from "./TabBarController";
+import type { TabBarControllerSnapshot } from "./navigationTypes";
 
 function idToken(value: string): string {
   return encodeURIComponent(value).replaceAll("%", "_");
@@ -36,13 +36,13 @@ export function getNSETabBarPanelId(idScope: string, destinationId: string): str
 
 export interface NSENavigationDestinationHostProps {
   /** Semantic content owner. It is intentionally shared with surrounding chrome. */
-  readonly controller: NSETabBarController<ReactNode>;
+  readonly controller: TabBarController<ReactNode>;
   /** Shared with the tab strip so tabs and panels keep truthful relationships. */
   readonly idScope: string;
   /** False when a source list or hierarchy, rather than tabs, is the active chrome. */
   readonly tabSemantics?: boolean;
   /** Reuse a surrounding renderer's subscription instead of creating another lease. */
-  readonly snapshot?: NSETabBarControllerSnapshot;
+  readonly snapshot?: TabBarControllerSnapshot;
   readonly className?: string;
 }
 
@@ -86,9 +86,9 @@ export function NSENavigationDestinationHost({
       ? controller.getContent(destinationId)
       : null
   );
-  const morePanelId = getNSETabBarPanelId(idScope, NSETabBarMoreDestinationId);
-  const overflowPageOpen = snapshot.moreStack?.currentDestinationId === NSETabBarMoreDestinationId;
-  const moreSelected = snapshot.activeTabId === NSETabBarMoreDestinationId;
+  const morePanelId = getNSETabBarPanelId(idScope, TabBarMoreDestinationId);
+  const overflowPageOpen = snapshot.moreStack?.currentDestinationId === TabBarMoreDestinationId;
+  const moreSelected = snapshot.activeTabId === TabBarMoreDestinationId;
 
   return (
     <div className={["nse-navigation-destination-host", className].filter(Boolean).join(" ")} data-nse-navigation-destination-host="true">
@@ -122,11 +122,11 @@ export function NSENavigationDestinationHost({
           id={morePanelId}
           role={tabSemantics ? "tabpanel" : undefined} data-nse-role={tabSemantics ? "tabpanel" : undefined}
           aria-label={tabSemantics ? "More destinations" : undefined}
-          aria-labelledby={tabSemantics ? getNSETabBarTabId(idScope, NSETabBarMoreDestinationId) : undefined}
+          aria-labelledby={tabSemantics ? getNSETabBarTabId(idScope, TabBarMoreDestinationId) : undefined}
           aria-hidden={!moreSelected || undefined}
           inert={!moreSelected}
           hidden={!moreSelected}
-          data-nse-tab-panel={NSETabBarMoreDestinationId}
+          data-nse-tab-panel={TabBarMoreDestinationId}
         >
           <div
             className="nse-tab-bar-more-stack"

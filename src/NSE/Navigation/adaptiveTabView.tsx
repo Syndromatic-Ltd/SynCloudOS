@@ -12,8 +12,8 @@ import { useContext, useCallback, useLayoutEffect, useRef, useState, useSyncExte
 import { NSEOutlineView } from "../DataViews/Outline/NSEOutlineView";
 import { NSESplitView } from "../DataViews/Split/NSESplitView";
 import { NSETableCellView } from "../DataViews/Table/NSETableCellView";
-import { NSETabBar, NSETabBarOverflowList } from "./NSETabBar";
-import { NSETabBarMoreDestinationId } from "./NSETabBarController";
+import { TabBar, TabBarOverflowList } from "./TabBar";
+import { TabBarMoreDestinationId } from "./TabBarController";
 import { getNSETabBarPanelId, getNSETabBarTabId } from "./NSENavigationDestinationHost";
 import { resolveNSEBookRegions } from "./bookRegions";
 import { useSourceListFrame } from "./SourceList/sourceListFrameContext";
@@ -78,8 +78,8 @@ export function NSEAdaptiveTabView({ controller, scope }: { readonly controller:
   // The compact bar's More list stands in for the selected panel while it is open.
   const subscribeModel = useCallback((listener: () => void) => model?.subscribe(listener) ?? (() => undefined), [model]);
   const modelSnapshot = useSyncExternalStore(subscribeModel, () => model?.getSnapshot() ?? null, () => model?.getSnapshot() ?? null);
-  const moreListOpen = compact && modelSnapshot?.activeTabId === NSETabBarMoreDestinationId
-    && modelSnapshot.moreStack?.currentDestinationId === NSETabBarMoreDestinationId;
+  const moreListOpen = compact && modelSnapshot?.activeTabId === TabBarMoreDestinationId
+    && modelSnapshot.moreStack?.currentDestinationId === TabBarMoreDestinationId;
   useNSECompactMoreTitle(controller.view.window, Boolean(moreListOpen), root);
   const visited = useRef(new Set<string>());
   if (selected) visited.current.add(selected.identifier);
@@ -159,14 +159,14 @@ export function NSEAdaptiveTabView({ controller, scope }: { readonly controller:
           <item.viewController.view />
         </div>)}
         {model && compact && modelSnapshot && modelSnapshot.overflowDestinationIds.length > 0
-          ? <NSETabBarOverflowList controller={model} aria-label={controller.title ?? "Tabs"} idScope={scope} />
+          ? <TabBarOverflowList controller={model} aria-label={controller.title ?? "Tabs"} idScope={scope} />
           : null}
       </div>
     </NSESplitView>
     <div ref={chrome} className={`nse-adaptive-tab-chrome${renderer === "tabs" && placement === "block-end" && flow === "overlay" ? " nse-compact-bottom-chrome-mount" : ""}`}
       hidden={!showsCompactChrome} inert={!showsCompactChrome} data-nse-adaptive-tabs-chrome="true"
       data-nse-compact-bottom-chrome={renderer === "tabs" && placement === "block-end" && flow === "overlay" ? "tabs-only" : undefined}>
-      {model ? <NSETabBar controller={model} aria-label={controller.title ?? "Tabs"} renderPanels={false}
+      {model ? <TabBar controller={model} aria-label={controller.title ?? "Tabs"} renderPanels={false}
         orientation={renderer === "rail" ? "vertical" : "horizontal"} reducedMotion={controller.traitCollection.reducedMotion} idScope={scope} /> : null}
     </div>
   </div>;

@@ -1,11 +1,11 @@
 import type { ReactNode } from "react";
 import type { NSETreeController } from "../Controllers/NSETreeController";
 import type { NSETabViewController } from "./NSETabViewController";
-import type { NSETabBarController } from "./NSETabBarController";
+import type { TabBarController } from "./TabBarController";
 import type { NSEAdaptiveTabOutlineItem } from "./adaptiveTabView";
 
 interface TabViewProjection {
-  control(): NSETabBarController<ReactNode> | null;
+  control(): TabBarController<ReactNode> | null;
   outline(): NSETreeController<NSEAdaptiveTabOutlineItem, string>;
 }
 

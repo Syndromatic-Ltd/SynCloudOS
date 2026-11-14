@@ -14,7 +14,7 @@ import type { NSETabViewController } from "./NSETabViewController";
 import "./tabToolbarView.css";
 
 /** @internal Installs toolbar-style tabs into the actual window toolbar, retaining app-owned items. */
-export function useNSETabToolbar(controller: NSETabViewController): void {
+export function useTabToolbar(controller: NSETabViewController): void {
   const enabled = controller.tabStyle === "toolbar";
   const window = controller.view.window;
   const generated = useRef<NSEToolbar | null>(null);
@@ -24,7 +24,7 @@ export function useNSETabToolbar(controller: NSETabViewController): void {
     if (!enabled || !window) return undefined;
     const toolbar = currentToolbar ?? new NSEToolbar({ identifier: `${controller.constructor.name}:tabs`, items: [], defaultItemIdentifiers: [] });
     if (!currentToolbar) { generated.current = toolbar; window.toolbar = toolbar; }
-    const release = toolbar[nseRegisterToolbarTabView](controller, <NSETabToolbarView controller={controller} toolbar={toolbar} />);
+    const release = toolbar[nseRegisterToolbarTabView](controller, <TabToolbarView controller={controller} toolbar={toolbar} />);
     return release;
   }, [controller, enabled, window, currentToolbar]);
   useLayoutEffect(() => () => {
@@ -35,7 +35,7 @@ export function useNSETabToolbar(controller: NSETabViewController): void {
 }
 
 /** Selectable NSToolbar items in the preferences-window presentation of NSTabViewController. */
-function NSETabToolbarView({ controller, toolbar }: { readonly controller: NSETabViewController; readonly toolbar: NSEToolbar }) {
+function TabToolbarView({ controller, toolbar }: { readonly controller: NSETabViewController; readonly toolbar: NSEToolbar }) {
   useObserve(controller);
   useObserve(toolbar);
 

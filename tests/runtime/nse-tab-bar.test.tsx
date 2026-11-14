@@ -33,9 +33,9 @@ import { atmoTheme } from "../../src/NSE/Appearance/atmo";
 import {
   NSEApplicationNavigationChromeController,
   NSEApplicationNavigationChromeProvider,
-  NSETabBar,
-  NSETabBarController,
-  NSETabBarOverflowList,
+  TabBar,
+  TabBarController,
+  TabBarOverflowList,
 } from "../../src/NSE/Navigation";
 
 const customAppearance = createTestTheme("com.example.custom-test", "Custom test");
@@ -65,8 +65,8 @@ function SharedChromeBack({ controller }: { readonly controller: NSEApplicationN
 
 describe("NSETabBar", () => {
   it("requests visible focus for keyboard roving independently of selection paint", () => {
-    const controller = new NSETabBarController<React.ReactNode>({ id: "keyboard-visible-tabs", destinations: destinations(3) });
-    const { unmount } = render(<NSETabBar controller={controller} aria-label="Keyboard visible tabs" />);
+    const controller = new TabBarController<React.ReactNode>({ id: "keyboard-visible-tabs", destinations: destinations(3) });
+    const { unmount } = render(<TabBar controller={controller} aria-label="Keyboard visible tabs" />);
     const home = screen.getByRole("tab", { name: "Home destination" });
     const library = screen.getByRole("tab", { name: "Library destination" });
     const focus = vi.spyOn(library, "focus");
@@ -83,8 +83,8 @@ describe("NSETabBar", () => {
     [5, 5, 0],
     [6, 4, 2],
   ])("keeps %i declared destinations as %i direct tabs and %i overflow destinations", (count, direct, overflow) => {
-    const controller = new NSETabBarController<React.ReactNode>({ id: `tab-boundary-${count}`, destinations: destinations(count) });
-    const { unmount } = render(<NSETabBar controller={controller} aria-label="Boundary tabs" />);
+    const controller = new TabBarController<React.ReactNode>({ id: `tab-boundary-${count}`, destinations: destinations(count) });
+    const { unmount } = render(<TabBar controller={controller} aria-label="Boundary tabs" />);
 
     expect(controller.getSnapshot().directDestinationIds).toHaveLength(direct);
     expect(controller.getSnapshot().overflowDestinationIds).toHaveLength(overflow);
@@ -97,15 +97,15 @@ describe("NSETabBar", () => {
   });
 
   it("caps a six-plus bar at four destinations plus semantic More, pushes a semantic overflow page, and restores the tab root through shared Back", async () => {
-    const controller = new NSETabBarController<React.ReactNode>({
+    const controller = new TabBarController<React.ReactNode>({
       id: "overflow-page-tabs",
       destinations: destinations(6),
     });
     const chromeController = new NSEApplicationNavigationChromeController();
     const { unmount } = render(
       <NSEApplicationNavigationChromeProvider controller={chromeController}>
-        <NSETabBar controller={controller} aria-label="Primary destinations" idScope="overflow-page-tabs" />
-        <NSETabBarOverflowList
+        <TabBar controller={controller} aria-label="Primary destinations" idScope="overflow-page-tabs" />
+        <TabBarOverflowList
           controller={controller}
           aria-label="Primary destinations"
           idScope="overflow-page-tabs"
@@ -178,14 +178,14 @@ describe("NSETabBar", () => {
   });
 
   it("keeps More aria-controls bound to one present tabpanel through root, list, detail, Back, and programmatic selection", async () => {
-    const controller = new NSETabBarController<React.ReactNode>({
+    const controller = new TabBarController<React.ReactNode>({
       id: "stable-more-panel-tabs",
       destinations: destinations(6),
     });
     const { unmount } = render(
       <>
-        <NSETabBar controller={controller} aria-label="Stable More panel" idScope="stable-more-panel" />
-        <NSETabBarOverflowList controller={controller} aria-label="Stable More panel" idScope="stable-more-panel" />
+        <TabBar controller={controller} aria-label="Stable More panel" idScope="stable-more-panel" />
+        <TabBarOverflowList controller={controller} aria-label="Stable More panel" idScope="stable-more-panel" />
       </>,
     );
     const more = screen.getByRole("tab", { name: "More destinations" });
@@ -252,19 +252,19 @@ describe("NSETabBar", () => {
   });
 
   it("owns one stable More panel when an app renderer delegates destination content", async () => {
-    const controller = new NSETabBarController<React.ReactNode>({
+    const controller = new TabBarController<React.ReactNode>({
       id: "owned-more-panel-tabs",
       destinations: destinations(6),
     });
     const { unmount } = render(
       <>
-        <NSETabBar
+        <TabBar
           controller={controller}
           aria-label="Owned More panel"
           idScope="owned-more-panel"
           renderPanels={false}
         />
-        <NSETabBarOverflowList controller={controller} aria-label="Owned More panel" idScope="owned-more-panel" />
+        <TabBarOverflowList controller={controller} aria-label="Owned More panel" idScope="owned-more-panel" />
       </>,
     );
     const more = screen.getByRole("tab", { name: "More destinations" });
@@ -300,15 +300,15 @@ describe("NSETabBar", () => {
   });
 
   it("restores the More list scroll position with its focused row after a destination Back transition", async () => {
-    const controller = new NSETabBarController<React.ReactNode>({
+    const controller = new TabBarController<React.ReactNode>({
       id: "overflow-scroll-restoration-tabs",
       destinations: destinations(10),
     });
     const chromeController = new NSEApplicationNavigationChromeController();
     const { unmount } = render(
       <NSEApplicationNavigationChromeProvider controller={chromeController}>
-        <NSETabBar controller={controller} aria-label="Scroll restoration destinations" idScope="overflow-scroll-restoration-tabs" />
-        <NSETabBarOverflowList
+        <TabBar controller={controller} aria-label="Scroll restoration destinations" idScope="overflow-scroll-restoration-tabs" />
+        <TabBarOverflowList
           controller={controller}
           aria-label="Scroll restoration destinations"
           idScope="overflow-scroll-restoration-tabs"
@@ -343,14 +343,14 @@ describe("NSETabBar", () => {
   });
 
   it.each(["light", "dark"] as const)("projects the More hierarchy through the shared %s Metal surface and Preferences-derived grouped-list seam composition", async (mode) => {
-    const controller = new NSETabBarController<React.ReactNode>({
+    const controller = new TabBarController<React.ReactNode>({
       id: `metal-overflow-${mode}`,
       destinations: destinations(7),
     });
     const { unmount } = render(
       <NSEAppearanceProvider theme={atmoTheme} colourScheme={mode}>
-        <NSETabBar controller={controller} aria-label="Metal More destinations" idScope={`metal-overflow-${mode}`} />
-        <NSETabBarOverflowList controller={controller} aria-label="Metal More destinations" idScope={`metal-overflow-${mode}`} />
+        <TabBar controller={controller} aria-label="Metal More destinations" idScope={`metal-overflow-${mode}`} />
+        <TabBarOverflowList controller={controller} aria-label="Metal More destinations" idScope={`metal-overflow-${mode}`} />
       </NSEAppearanceProvider>,
     );
 
@@ -394,14 +394,14 @@ describe("NSETabBar", () => {
   });
 
   it("owns accessible direct and More interactions, keyboard roving, RTL direction, touch, disabled tabs, and badges", async () => {
-    const controller = new NSETabBarController<React.ReactNode>({
+    const controller = new TabBarController<React.ReactNode>({
       id: "interaction-tabs",
       destinations: destinations(6, { disabled: "settings", badge: "activity" }),
     });
     const { unmount } = render(
       <>
-        <NSETabBar controller={controller} aria-label="Primary destinations" dir="rtl" reducedMotion idScope="interaction-tabs" />
-        <NSETabBarOverflowList controller={controller} aria-label="Primary destinations" idScope="interaction-tabs" />
+        <TabBar controller={controller} aria-label="Primary destinations" dir="rtl" reducedMotion idScope="interaction-tabs" />
+        <TabBarOverflowList controller={controller} aria-label="Primary destinations" idScope="interaction-tabs" />
       </>,
     );
     const home = screen.getByRole("tab", { name: "Home destination" });
@@ -436,11 +436,11 @@ describe("NSETabBar", () => {
   });
 
   it("publishes selected tab parts while retaining icon readiness and controller ownership", () => {
-    const controller = new NSETabBarController<React.ReactNode>({
+    const controller = new TabBarController<React.ReactNode>({
       id: "atmo-tab-skin",
       destinations: destinations(6, { disabled: "settings", badge: "library" }),
     });
-    const { unmount } = render(<NSEAppearanceProvider theme={atmoTheme}><NSETabBar controller={controller} aria-label="Atmo tab skin" /></NSEAppearanceProvider>);
+    const { unmount } = render(<NSEAppearanceProvider theme={atmoTheme}><TabBar controller={controller} aria-label="Atmo tab skin" /></NSEAppearanceProvider>);
     const home = screen.getByRole("tab", { name: "Home destination" });
     const library = screen.getByRole("tab", { name: "Library destination" });
     const settings = screen.getByRole("tab", { name: "Settings destination" });
@@ -506,14 +506,14 @@ describe("NSETabBar", () => {
   });
 
   it("projects one app-owned vector path as a state-managed mask while retaining a visible template diagnostic", () => {
-    const controller = new NSETabBarController<React.ReactNode>({
+    const controller = new TabBarController<React.ReactNode>({
       id: "vector-tab-icons",
       destinations: [
         { id: "home", label: "Home", accessibleLabel: "Home destination", icon: { kind: "vector", path: "/fixture/home.svg" } },
         { id: "template", label: "Template", accessibleLabel: "Template destination", icon: { kind: "template", name: "template" } },
       ],
     });
-    const { unmount } = render(<NSETabBar controller={controller} aria-label="Vector tab icons" />);
+    const { unmount } = render(<TabBar controller={controller} aria-label="Vector tab icons" />);
 
     const homeIcon = screen.getByRole("tab", { name: "Home destination" }).querySelector<HTMLElement>(".nse-tab-bar-icon");
     const templateIcon = screen.getByRole("tab", { name: "Template destination" }).querySelector<HTMLElement>(".nse-tab-bar-icon");
@@ -534,8 +534,8 @@ describe("NSETabBar", () => {
   });
 
   it("switches explicit themes without replacing the controller, selected tab or focus", async () => {
-    const controller = new NSETabBarController<React.ReactNode>({ id: "theme-switch-tabs", destinations: destinations(2) });
-    const fixture = (appearance: typeof atmoTheme) => <NSEAppearanceProvider theme={appearance}><NSETabBar controller={controller} aria-label="Theme tabs" /></NSEAppearanceProvider>;
+    const controller = new TabBarController<React.ReactNode>({ id: "theme-switch-tabs", destinations: destinations(2) });
+    const fixture = (appearance: typeof atmoTheme) => <NSEAppearanceProvider theme={appearance}><TabBar controller={controller} aria-label="Theme tabs" /></NSEAppearanceProvider>;
     const view = render(fixture(atmoTheme));
     const library = screen.getByRole("tab", { name: "Library destination" });
     fireEvent.click(library);
@@ -556,12 +556,12 @@ describe("NSETabBar", () => {
   it("keeps canonical Atmo density-independent at DPR2 without adding a compact chrome diagnostic", () => {
     const originalDpr = Object.getOwnPropertyDescriptor(window, "devicePixelRatio");
     Object.defineProperty(window, "devicePixelRatio", { configurable: true, value: 2 });
-    const controller = new NSETabBarController<React.ReactNode>({
+    const controller = new TabBarController<React.ReactNode>({
       id: "high-density-source-gap-tabs",
       destinations: destinations(2),
     });
     try {
-      const { unmount } = render(<NSEAppearanceProvider theme={atmoTheme}><NSETabBar controller={controller} aria-label="High density source gap" /></NSEAppearanceProvider>);
+      const { unmount } = render(<NSEAppearanceProvider theme={atmoTheme}><TabBar controller={controller} aria-label="High density source gap" /></NSEAppearanceProvider>);
       const tabBar = screen.getByRole("tablist", { name: "High density source gap" })
         .closest<HTMLElement>("[data-nse-tab-bar='true']");
       expect(tabBar).not.toBeNull();
@@ -578,8 +578,8 @@ describe("NSETabBar", () => {
   });
 
   it("retains custom theme selection and reachable interaction states with Atmo fallback", () => {
-    const controller = new NSETabBarController<React.ReactNode>({ id: "custom-tabs", destinations: destinations(2) });
-    const view = render(<NSEAppearanceProvider theme={customAppearance}><NSETabBar controller={controller} aria-label="custom appearance tabs" /></NSEAppearanceProvider>);
+    const controller = new TabBarController<React.ReactNode>({ id: "custom-tabs", destinations: destinations(2) });
+    const view = render(<NSEAppearanceProvider theme={customAppearance}><TabBar controller={controller} aria-label="custom appearance tabs" /></NSEAppearanceProvider>);
     const library = screen.getByRole("tab", { name: "Library destination" });
     fireEvent.pointerEnter(library);
 
@@ -596,22 +596,22 @@ describe("NSETabBar", () => {
     const css = withoutScopeTwins(readFileSync("src/NSE/Navigation/nse-navigation.css", "utf8"));
     expect(css).toContain(".nse-tab-bar-label {");
     expect(css).toContain(".nse-tab-bar-badge {");
-    const controller = new NSETabBarController<React.ReactNode>({ id: "neutral-tabs", destinations: destinations(2, { badge: "library" }) });
-    const view = render(<NSETabBar controller={controller} aria-label="Neutral tabs" />);
+    const controller = new TabBarController<React.ReactNode>({ id: "neutral-tabs", destinations: destinations(2, { badge: "library" }) });
+    const view = render(<TabBar controller={controller} aria-label="Neutral tabs" />);
     expect(screen.getByText("Library")).not.toBeNull();
     expect(screen.getByText("3").getAttribute("data-nse-tab-badge")).toBe("true");
     view.unmount(); controller.dispose();
   });
 
   it("moves keyboard focus through the More hierarchy page and restores More focus after Escape", async () => {
-    const controller = new NSETabBarController<React.ReactNode>({
+    const controller = new TabBarController<React.ReactNode>({
       id: "more-listbox-tabs",
       destinations: destinations(6, { disabled: "sharing" }),
     });
     const { unmount } = render(
       <>
-        <NSETabBar controller={controller} aria-label="More hierarchy destinations" idScope="more-hierarchy-tabs" />
-        <NSETabBarOverflowList controller={controller} aria-label="More hierarchy destinations" idScope="more-hierarchy-tabs" />
+        <TabBar controller={controller} aria-label="More hierarchy destinations" idScope="more-hierarchy-tabs" />
+        <TabBarOverflowList controller={controller} aria-label="More hierarchy destinations" idScope="more-hierarchy-tabs" />
       </>,
     );
     const more = screen.getByRole("tab", { name: "More destinations" });
@@ -640,15 +640,15 @@ describe("NSETabBar", () => {
   });
 
   it("pushes keyboard activation through shared More chrome and restores the overflow-row focus on Back", async () => {
-    const controller = new NSETabBarController<React.ReactNode>({
+    const controller = new TabBarController<React.ReactNode>({
       id: "more-keyboard-activation-focus-tabs",
       destinations: destinations(6, { disabled: "sharing" }),
     });
     const chromeController = new NSEApplicationNavigationChromeController();
     const { unmount } = render(
       <NSEApplicationNavigationChromeProvider controller={chromeController}>
-        <NSETabBar controller={controller} aria-label="More keyboard activation focus" idScope="more-keyboard-activation-focus-tabs" />
-        <NSETabBarOverflowList
+        <TabBar controller={controller} aria-label="More keyboard activation focus" idScope="more-keyboard-activation-focus-tabs" />
+        <TabBarOverflowList
           controller={controller}
           aria-label="More keyboard activation focus"
           idScope="more-keyboard-activation-focus-tabs"
@@ -693,7 +693,7 @@ describe("NSETabBar", () => {
         </section>
       );
     }
-    const controller = new NSETabBarController<React.ReactNode>({
+    const controller = new TabBarController<React.ReactNode>({
       id: "retained-more-host-tabs",
       destinations: destinations(6).map((destination) => (
         destination.id === "activity" ? { ...destination, createContent: () => <ActivityForm /> } : destination
@@ -701,8 +701,8 @@ describe("NSETabBar", () => {
     });
     const { unmount } = render(
       <>
-        <NSETabBar controller={controller} aria-label="Retained More destinations" idScope="retained-more-host-tabs" />
-        <NSETabBarOverflowList controller={controller} aria-label="Retained More destinations" idScope="retained-more-host-tabs" />
+        <TabBar controller={controller} aria-label="Retained More destinations" idScope="retained-more-host-tabs" />
+        <TabBarOverflowList controller={controller} aria-label="Retained More destinations" idScope="retained-more-host-tabs" />
       </>,
     );
 
@@ -733,7 +733,7 @@ describe("NSETabBar", () => {
       const [draft, setDraft] = useState("initial");
       return <label>Draft<input aria-label="Draft" value={draft} onChange={(event) => setDraft(event.target.value)} /></label>;
     }
-    const controller = new NSETabBarController<React.ReactNode>({
+    const controller = new TabBarController<React.ReactNode>({
       id: "retained-tabs",
       destinations: [
         { id: "form", label: "Form", icon: { kind: "template", name: "form" }, createContent: () => <FormDestination /> },
@@ -749,7 +749,7 @@ describe("NSETabBar", () => {
         unsubscribe();
       };
     };
-    const { unmount } = render(<NSETabBar controller={controller} aria-label="Retained destinations" />);
+    const { unmount } = render(<TabBar controller={controller} aria-label="Retained destinations" />);
 
     fireEvent.change(screen.getByRole("textbox", { name: "Draft" }), { target: { value: "retained draft" } });
     fireEvent.click(screen.getByRole("tab", { name: "Other" }));

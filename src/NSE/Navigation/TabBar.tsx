@@ -45,7 +45,7 @@ import { NSEMetalSurface } from "../Material/NSEMetalSurface";
 import { GroupedRows } from "../Controls/Selection/GroupedRows";
 import { GroupedRow } from "../Controls/Selection/GroupedRow";
 import { NSEHierarchyStack } from "./NSEHierarchyStack";
-import { NSETabBarMoreDestinationId, NSETabBarController } from "./NSETabBarController";
+import { TabBarMoreDestinationId, TabBarController } from "./TabBarController";
 import {
   projectNSENavigationIcon,
   type NSENavigationIcon,
@@ -85,25 +85,25 @@ function tabPresentationState({
   return "normal";
 }
 
-type NSETabChromeSegment = "only" | "first" | "middle" | "last";
+type TabChromeSegment = "only" | "first" | "middle" | "last";
 
-function tabChromeSegment(index: number, count: number): NSETabChromeSegment {
+function tabChromeSegment(index: number, count: number): TabChromeSegment {
   if (count <= 1) return "only";
   if (index === 0) return "first";
   if (index === count - 1) return "last";
   return "middle";
 }
 
-type NSETabIconStyle = CSSProperties & {
+type TabIconStyle = CSSProperties & {
   readonly "--nse-tab-icon-source": string;
 };
 
-function tabIconStyle(icon: NSENavigationIcon): NSETabIconStyle | undefined {
+function tabIconStyle(icon: NSENavigationIcon): TabIconStyle | undefined {
   if (icon.kind !== "vector") return undefined;
   const source = `url("${icon.path.replaceAll('"', '\\"')}")`;
   // The stylesheet masks with the source; an inline mask would outrank an
   // appearance that paints the icon in layers of its own (Atmo's ring).
-  return { "--nse-tab-icon-source": source } as NSETabIconStyle;
+  return { "--nse-tab-icon-source": source } as TabIconStyle;
 }
 
 function tabVisualState(
@@ -114,13 +114,13 @@ function tabVisualState(
   return selected && pressed ? "selected-pressed" : state;
 }
 
-type NSETabChromeState = "up" | "down" | "sel" | "seldown" | "dis";
+type TabChromeState = "up" | "down" | "sel" | "seldown" | "dis";
 
 function tabChromeState(
   state: NSENavigationPresentationState,
   selected: boolean,
   pressed: boolean,
-): NSETabChromeState {
+): TabChromeState {
   if (state === "disabled") return "dis";
   if (selected && pressed) return "seldown";
   if (selected) return "sel";
@@ -129,8 +129,8 @@ function tabChromeState(
 }
 
 function tabChromeMetadata(
-  segment: NSETabChromeSegment,
-  state: NSETabChromeState,
+  segment: TabChromeSegment,
+  state: TabChromeState,
 ) {
   return {
     "data-nse-tab-chrome-family": "grouped-toolbutton",
@@ -148,7 +148,7 @@ function tabChromeMetadata(
  * shows through rather than the shadow). CSS masks can paint the body but not
  * an inner rim, so Atmo reaches this filter through `--nse-tab-icon-material`.
  */
-function NSETabIconMaterial({ id }: { readonly id: string }) {
+function TabIconMaterial({ id }: { readonly id: string }) {
   return (
     <svg className="nse-tab-bar-icon-material" aria-hidden="true" focusable="false" width="0" height="0">
       <filter id={id} x="-20%" y="-20%" width="140%" height="150%" colorInterpolationFilters="sRGB">
@@ -172,9 +172,9 @@ function NSETabIconMaterial({ id }: { readonly id: string }) {
   );
 }
 
-export interface NSETabBarProps {
+export interface TabBarProps {
   /** The semantic owner. This renderer never creates or disposes it. */
-  readonly controller: NSETabBarController<ReactNode>;
+  readonly controller: TabBarController<ReactNode>;
   readonly "aria-label": string;
   readonly className?: string;
   readonly dir?: "ltr" | "rtl";
@@ -193,7 +193,7 @@ export interface NSETabBarProps {
  * optional paint layers; navigation, retention, safe-area and accessibility
  * contracts remain controller-owned.
  */
-export function NSETabBar({
+export function TabBar({
   controller,
   "aria-label": ariaLabel,
   className,
@@ -202,7 +202,7 @@ export function NSETabBar({
   reducedMotion = false,
   renderPanels = true,
   idScope,
-}: NSETabBarProps) {
+}: TabBarProps) {
   const subscribe = useCallback((listener: () => void) => controller.subscribe(listener), [controller]);
   const snapshot = useSyncExternalStore(subscribe, controller.getSnapshot, controller.getSnapshot);
 
@@ -218,9 +218,9 @@ export function NSETabBar({
   });
   const controls = [
     ...directDestinations.map(({ id }) => id),
-    ...(overflowDestinations.length > 0 ? [NSETabBarMoreDestinationId] : []),
+    ...(overflowDestinations.length > 0 ? [TabBarMoreDestinationId] : []),
   ];
-  const overflowOpen = snapshot.moreStack?.currentDestinationId === NSETabBarMoreDestinationId;
+  const overflowOpen = snapshot.moreStack?.currentDestinationId === TabBarMoreDestinationId;
   const tooltips = useOptionalTooltipProvider();
   const [focusedTabId, setFocusedTabId] = useState(snapshot.activeTabId);
   const [paintFocusedTabId, setPaintFocusedTabId] = useState<string | null>(null);
@@ -241,7 +241,7 @@ export function NSETabBar({
 
   const openOverflow = useCallback((source: string) => {
     tooltips?.dismissActive();
-    setFocusedTabId(NSETabBarMoreDestinationId);
+    setFocusedTabId(TabBarMoreDestinationId);
     void controller.openOverflow({ source }).catch(() => undefined);
   }, [controller, tooltips]);
 
@@ -257,7 +257,7 @@ export function NSETabBar({
     control?.focus({ focusVisible: true } as FocusOptions);
     if (orientation === "vertical") control?.scrollIntoView?.({ block: "nearest", inline: "nearest" });
     if (!activate) return;
-    if (controlId === NSETabBarMoreDestinationId) {
+    if (controlId === TabBarMoreDestinationId) {
       openOverflow(source);
       return;
     }
@@ -266,7 +266,7 @@ export function NSETabBar({
 
   const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>, controlId: string) => {
     const enabledControls = controls.filter((id) => {
-      if (id === NSETabBarMoreDestinationId) return true;
+      if (id === TabBarMoreDestinationId) return true;
       return !controller.getDestination(id)?.disabled;
     });
     const currentIndex = enabledControls.indexOf(controlId);
@@ -288,13 +288,13 @@ export function NSETabBar({
       if (target) focusControl(target, "keyboard", true);
       return;
     }
-    if (controlId === NSETabBarMoreDestinationId && (event.key === "ArrowDown" || event.key === "Enter" || event.key === " ")) {
+    if (controlId === TabBarMoreDestinationId && (event.key === "ArrowDown" || event.key === "Enter" || event.key === " ")) {
       event.preventDefault();
       if (overflowOpen) closeOverflow();
       else openOverflow("keyboard");
       return;
     }
-    if (event.key === "Escape" && controlId === NSETabBarMoreDestinationId && overflowOpen) {
+    if (event.key === "Escape" && controlId === TabBarMoreDestinationId && overflowOpen) {
       event.preventDefault();
       closeOverflow();
     }
@@ -305,7 +305,7 @@ export function NSETabBar({
     event.preventDefault();
     selectDestination(destinationId, "touch");
   };
-  const morePanelId = getNSETabBarPanelId(resolvedIdScope, NSETabBarMoreDestinationId);
+  const morePanelId = getNSETabBarPanelId(resolvedIdScope, TabBarMoreDestinationId);
   const stateForTab = (
     controlId: string,
     selected: boolean,
@@ -318,9 +318,9 @@ export function NSETabBar({
     hovered: hoveredTabId === controlId,
   });
   const moreTitle = useNSEMoreTitle();
-  const moreSelected = snapshot.activeTabId === NSETabBarMoreDestinationId;
-  const morePressed = pressedTabId === NSETabBarMoreDestinationId;
-  const moreState = stateForTab(NSETabBarMoreDestinationId, moreSelected, false);
+  const moreSelected = snapshot.activeTabId === TabBarMoreDestinationId;
+  const morePressed = pressedTabId === TabBarMoreDestinationId;
+  const moreState = stateForTab(TabBarMoreDestinationId, moreSelected, false);
 
 
   const moreIcon = projectNSENavigationIcon(nseTabBarMoreIcon, moreState);
@@ -346,7 +346,7 @@ export function NSETabBar({
         dir={dir}
         style={tabListStyle}
       >
-        {usesTallTabChrome ? <NSETabIconMaterial id={iconMaterialId} /> : null}
+        {usesTallTabChrome ? <TabIconMaterial id={iconMaterialId} /> : null}
         <div className="nse-tab-bar-scroll-viewport" data-nse-part="viewport" data-nse-tab-scroll-viewport="true">
         <div
           className={classes("nse-tab-bar", usesTallTabChrome && "nse-control-toolbar")}
@@ -453,17 +453,17 @@ export function NSETabBar({
             className={classes("nse-tab-bar-tab", "nse-tab-bar-more", usesTallTabChrome && "nse-control-button")}
             type="button"
             role="tab"
-            id={getNSETabBarTabId(resolvedIdScope, NSETabBarMoreDestinationId)}
+            id={getNSETabBarTabId(resolvedIdScope, TabBarMoreDestinationId)}
             ref={(node) => {
-              if (node) tabRefs.current.set(NSETabBarMoreDestinationId, node);
-              else tabRefs.current.delete(NSETabBarMoreDestinationId);
+              if (node) tabRefs.current.set(TabBarMoreDestinationId, node);
+              else tabRefs.current.delete(TabBarMoreDestinationId);
             }}
             aria-label="More destinations"
             aria-controls={morePanelId}
             aria-expanded={overflowOpen}
-            data-nse-part="cell" data-nse-role="tab" data-nse-control-size={usesTallTabChrome ? "large" : "regular"} data-nse-position={tabChromeSegment(controls.length - 1, orientation === "vertical" ? 1 : controls.length)} data-nse-selected={moreSelected ? "" : undefined} data-nse-highlighted={morePressed ? "" : undefined} data-nse-hovered={hoveredTabId === NSETabBarMoreDestinationId ? "" : undefined} data-nse-focused={paintFocusedTabId === NSETabBarMoreDestinationId ? "" : undefined}
+            data-nse-part="cell" data-nse-role="tab" data-nse-control-size={usesTallTabChrome ? "large" : "regular"} data-nse-position={tabChromeSegment(controls.length - 1, orientation === "vertical" ? 1 : controls.length)} data-nse-selected={moreSelected ? "" : undefined} data-nse-highlighted={morePressed ? "" : undefined} data-nse-hovered={hoveredTabId === TabBarMoreDestinationId ? "" : undefined} data-nse-focused={paintFocusedTabId === TabBarMoreDestinationId ? "" : undefined}
             aria-selected={moreSelected}
-            tabIndex={focusedTabId === NSETabBarMoreDestinationId ? 0 : -1}
+            tabIndex={focusedTabId === TabBarMoreDestinationId ? 0 : -1}
             data-selected={moreSelected ? "true" : "false"}
             data-pressed={morePressed ? "true" : "false"}
             data-nse-tab-presentation-state={moreState}
@@ -474,23 +474,23 @@ export function NSETabBar({
             )}
 
             onFocus={() => {
-              setFocusedTabId(NSETabBarMoreDestinationId);
-              setPaintFocusedTabId(NSETabBarMoreDestinationId);
+              setFocusedTabId(TabBarMoreDestinationId);
+              setPaintFocusedTabId(TabBarMoreDestinationId);
             }}
-            onBlur={() => setPaintFocusedTabId((current) => current === NSETabBarMoreDestinationId ? null : current)}
-            onPointerEnter={() => setHoveredTabId(NSETabBarMoreDestinationId)}
+            onBlur={() => setPaintFocusedTabId((current) => current === TabBarMoreDestinationId ? null : current)}
+            onPointerEnter={() => setHoveredTabId(TabBarMoreDestinationId)}
             onPointerLeave={() => {
-              setHoveredTabId((current) => current === NSETabBarMoreDestinationId ? null : current);
-              setPressedTabId((current) => current === NSETabBarMoreDestinationId ? null : current);
+              setHoveredTabId((current) => current === TabBarMoreDestinationId ? null : current);
+              setPressedTabId((current) => current === TabBarMoreDestinationId ? null : current);
             }}
-            onPointerDown={() => setPressedTabId(NSETabBarMoreDestinationId)}
-            onPointerUp={() => setPressedTabId((current) => current === NSETabBarMoreDestinationId ? null : current)}
-            onPointerCancel={() => setPressedTabId((current) => current === NSETabBarMoreDestinationId ? null : current)}
+            onPointerDown={() => setPressedTabId(TabBarMoreDestinationId)}
+            onPointerUp={() => setPressedTabId((current) => current === TabBarMoreDestinationId ? null : current)}
+            onPointerCancel={() => setPressedTabId((current) => current === TabBarMoreDestinationId ? null : current)}
             onClick={() => {
               if (overflowOpen) closeOverflow();
               else openOverflow("pointer");
             }}
-            onKeyDown={(event) => handleKeyDown(event, NSETabBarMoreDestinationId)}
+            onKeyDown={(event) => handleKeyDown(event, TabBarMoreDestinationId)}
           >
             {usesTallTabChrome ? (
               <span
@@ -525,9 +525,9 @@ export function NSETabBar({
   );
 }
 
-export interface NSETabBarOverflowListProps {
+export interface TabBarOverflowListProps {
   /** The same tab controller that owns the semantic More stack. */
-  readonly controller: NSETabBarController<ReactNode>;
+  readonly controller: TabBarController<ReactNode>;
   /** Names both the parent tab system and the return target in shared chrome. */
   readonly "aria-label": string;
   /** Must match the companion NSETabBar scope when one is supplied. */
@@ -543,13 +543,13 @@ export interface NSETabBarOverflowListProps {
  * transition stage-owned, and leaves all real destinations under the original
  * NSETabBarController.
  */
-export function NSETabBarOverflowList({
+export function TabBarOverflowList({
   controller,
   "aria-label": ariaLabel,
   idScope,
   className,
   applicationChrome,
-}: NSETabBarOverflowListProps) {
+}: TabBarOverflowListProps) {
   const subscribe = useCallback((listener: () => void) => controller.subscribe(listener), [controller]);
   const snapshot = useSyncExternalStore(subscribe, controller.getSnapshot, controller.getSnapshot);
   const appearance = useNSEAppearance();
@@ -559,7 +559,7 @@ export function NSETabBarOverflowList({
     const destination = controller.getDestination(id);
     return destination ? [destination] : [];
   });
-  const overflowOpen = snapshot.moreStack?.currentDestinationId === NSETabBarMoreDestinationId;
+  const overflowOpen = snapshot.moreStack?.currentDestinationId === TabBarMoreDestinationId;
   const moreHierarchyActive = Boolean(snapshot.moreStack?.path.length);
   const [focusedDestinationId, setFocusedDestinationId] = useState<string | null>(null);
   const [paintFocusedDestinationId, setPaintFocusedDestinationId] = useState<string | null>(null);
@@ -571,8 +571,8 @@ export function NSETabBarOverflowList({
   const optionRefs = useRef(new Map<string, HTMLDivElement>());
   const overflowScrollTopRef = useRef(0);
   const moreStack = controller.moreStack;
-  const morePanelId = getNSETabBarPanelId(resolvedIdScope, NSETabBarMoreDestinationId);
-  const moreTabId = getNSETabBarTabId(resolvedIdScope, NSETabBarMoreDestinationId);
+  const morePanelId = getNSETabBarPanelId(resolvedIdScope, TabBarMoreDestinationId);
+  const moreTabId = getNSETabBarTabId(resolvedIdScope, TabBarMoreDestinationId);
   const enabledOverflowDestinationIds = overflowDestinations
     .filter((destination) => !destination.disabled)
     .map((destination) => destination.id);
@@ -607,7 +607,7 @@ export function NSETabBarOverflowList({
 
   const restoreMoreFocus = useCallback(() => {
     controller.closeOverflow();
-    queueMicrotask(() => document.getElementById(getNSETabBarTabId(resolvedIdScope, NSETabBarMoreDestinationId))?.focus());
+    queueMicrotask(() => document.getElementById(getNSETabBarTabId(resolvedIdScope, TabBarMoreDestinationId))?.focus());
   }, [controller, resolvedIdScope]);
 
   const selectOverflowDestination = useCallback((destinationId: string, source: string) => {
@@ -615,7 +615,7 @@ export function NSETabBarOverflowList({
     if (!destination || destination.disabled) return;
     void controller.select(destinationId, { source })
       .then(() => queueMicrotask(() => document.getElementById(
-        getNSETabBarTabId(resolvedIdScope, NSETabBarMoreDestinationId),
+        getNSETabBarTabId(resolvedIdScope, TabBarMoreDestinationId),
       )?.focus()))
       .catch(() => undefined);
   }, [controller, resolvedIdScope]);
@@ -776,10 +776,10 @@ export function NSETabBarOverflowList({
           data-nse-role="tabpanel"
           aria-label="More destinations"
           aria-labelledby={moreTabId}
-          aria-hidden={snapshot.activeTabId !== NSETabBarMoreDestinationId || undefined}
-          inert={snapshot.activeTabId !== NSETabBarMoreDestinationId}
-          hidden={snapshot.activeTabId !== NSETabBarMoreDestinationId}
-          data-nse-tab-panel={NSETabBarMoreDestinationId}
+          aria-hidden={snapshot.activeTabId !== TabBarMoreDestinationId || undefined}
+          inert={snapshot.activeTabId !== TabBarMoreDestinationId}
+          hidden={snapshot.activeTabId !== TabBarMoreDestinationId}
+          data-nse-tab-panel={TabBarMoreDestinationId}
           data-nse-tab-overflow-owned-panel="true"
           data-nse-tab-overflow-page-open={overflowOpen || undefined}
         >

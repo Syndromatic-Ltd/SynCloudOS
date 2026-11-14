@@ -27,11 +27,11 @@ import type {
   NSENavigationDestination,
   NSENavigationSection,
   NSENavigationSelectionOptions,
-  NSETabBarControllerSnapshot,
-  NSETabBarRestorationSnapshot,
+  TabBarControllerSnapshot,
+  TabBarRestorationSnapshot,
 } from "./navigationTypes";
 
-export interface NSETabBarControllerOptions<TContent = unknown> extends NSEViewControllerOptions {
+export interface TabBarControllerOptions<TContent = unknown> extends NSEViewControllerOptions {
   readonly id: string;
   readonly destinations: readonly NSENavigationDestination<TContent>[];
   /** Explicit source-list grouping. Omit to derive stable groups from `groupId`. */
@@ -39,7 +39,7 @@ export interface NSETabBarControllerOptions<TContent = unknown> extends NSEViewC
   readonly initialSelectedId?: string;
   /** @internal Tab view controllers show every item directly; the legacy model defaults to five. */
   readonly maximumDirectTabs?: number;
-  readonly restoration?: NSENavigationRestorationDescriptor<NSETabBarController<TContent>, unknown>;
+  readonly restoration?: NSENavigationRestorationDescriptor<TabBarController<TContent>, unknown>;
   readonly onSelect?: (
     destination: NSENavigationDestination<TContent>,
     options: { readonly signal: AbortSignal; readonly source?: string },
@@ -47,7 +47,7 @@ export interface NSETabBarControllerOptions<TContent = unknown> extends NSEViewC
 }
 
 /** Replacement copy for existing destinations and sections, keyed by id. */
-export interface NSETabBarTitles {
+export interface TabBarTitles {
   readonly destinations?: Readonly<Record<string, Pick<NSENavigationDestination, "label" | "compactLabel" | "accessibleLabel">>>;
   readonly sections?: Readonly<Record<string, NSENavigationSection["label"]>>;
 }
@@ -144,7 +144,7 @@ function freezeSections(
   return Object.freeze(frozen);
 }
 
-function freezeSnapshot(input: NSETabBarControllerSnapshot): NSETabBarControllerSnapshot {
+function freezeSnapshot(input: TabBarControllerSnapshot): TabBarControllerSnapshot {
   return Object.freeze({
     ...input,
     directDestinationIds: Object.freeze([...input.directDestinationIds]),
@@ -171,7 +171,7 @@ function awaitAbortable<T>(value: Promise<T>, signal: AbortSignal): Promise<T> {
 
 /** A semantic tab owner. Physical tab bars and source-list projections consume
  * this controller; it never infers destinations from panes or visual tabs. */
-export class NSETabBarController<TContent = unknown> extends NSEViewController<NSETabBarControllerSnapshot> {
+export class TabBarController<TContent = unknown> extends NSEViewController<TabBarControllerSnapshot> {
   /** Semantic snapshots never publish a fabricated navigation change on disposal. */
   override readonly subscribe = (listener: () => void): (() => void) => observe(this, () => { if (!this.isDisposed) listener(); });
   readonly id: string;
@@ -183,17 +183,17 @@ export class NSETabBarController<TContent = unknown> extends NSEViewController<N
   readonly #moreDestination: NSENavigationDestination<TContent>;
   readonly #directDestinationIds: readonly string[];
   readonly #overflowDestinationIds: readonly string[];
-  readonly #onSelect: NSETabBarControllerOptions<TContent>["onSelect"];
+  readonly #onSelect: TabBarControllerOptions<TContent>["onSelect"];
   readonly #contentByDestinationId = new Map<string, TContent>();
   #selectedDestinationId: string;
   readonly #initialSelectedId: string;
   #revision = 0;
-  #snapshot: NSETabBarControllerSnapshot;
+  #snapshot: TabBarControllerSnapshot;
   #pending: AbortController | null = null;
   #intentRevision = 0;
   #unsubscribeMore: (() => void) | null = null;
 
-  constructor(options: NSETabBarControllerOptions<TContent>) {
+  constructor(options: TabBarControllerOptions<TContent>) {
     super(options);
     this.id = requireId(options.id, "Tab bar controller id");
     if (options.destinations.length === 0) throw new TypeError("Tab bar controllers require at least one destination.");
@@ -331,7 +331,7 @@ export class NSETabBarController<TContent = unknown> extends NSEViewController<N
     this.moreStack?.popToRoot();
   }
 
-  restore(snapshot: NSETabBarRestorationSnapshot): void {
+  restore(snapshot: TabBarRestorationSnapshot): void {
     this.#assertLive();
     this.#invalidatePendingIntent();
     const legacyMorePath = snapshot?.more?.path ?? [];
@@ -363,7 +363,7 @@ export class NSETabBarController<TContent = unknown> extends NSEViewController<N
   /** Replaces the copy of existing destinations and sections, as a localised
    * UITabBarItem title changes in place. Identity, order, selection,
    * restoration and cached content are untouched. */
-  retitle(titles: NSETabBarTitles): void {
+  retitle(titles: TabBarTitles): void {
     this.#assertLive();
     const destinationTitles = titles.destinations ?? {};
     const sectionTitles = titles.sections ?? {};
@@ -427,7 +427,7 @@ export class NSETabBarController<TContent = unknown> extends NSEViewController<N
     pending?.abort(abortError());
   }
 
-  #makeSnapshot(): NSETabBarControllerSnapshot {
+  #makeSnapshot(): TabBarControllerSnapshot {
     const overflowOpen = this.moreStack?.getSnapshot().currentDestinationId === moreDestinationId;
     const activeTabId = overflowOpen || this.#overflowDestinationIds.includes(this.#selectedDestinationId)
       ? moreDestinationId
@@ -451,6 +451,6 @@ export class NSETabBarController<TContent = unknown> extends NSEViewController<N
   }
 }
 
-export const NSETabBarMoreDestinationId = moreDestinationId;
+export const TabBarMoreDestinationId = moreDestinationId;
 /** Internal root used only to make the semantic More destination a real hierarchy push. */
-export const NSETabBarOverflowRootDestinationId = overflowRootDestinationId;
+export const TabBarOverflowRootDestinationId = overflowRootDestinationId;

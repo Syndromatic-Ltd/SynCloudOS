@@ -28,7 +28,7 @@ import {
   NSEApplicationNavigationChromeProvider,
   NSEHierarchyStack,
   NSENavigationStackController,
-  NSETabBarController,
+  TabBarController,
   useNSEApplicationNavigationChrome,
   type NSEApplicationNavigationChromeState,
 } from "../../src/NSE/Navigation";
@@ -83,7 +83,7 @@ describe("NSE application navigation chrome", () => {
   });
 
   it("keeps an unclaimed hierarchy local even inside an application chrome provider", async () => {
-    const tabs = new NSETabBarController<React.ReactNode>({
+    const tabs = new TabBarController<React.ReactNode>({
       id: "unclaimed-hierarchy-tabs",
       destinations: [
         { id: "home", label: "Home", icon: { kind: "template", name: "home" } },
@@ -135,7 +135,7 @@ describe("NSE application navigation chrome", () => {
   });
 
   it("bridges compact hierarchy Back and title state to shared chrome without a second visible strip", async () => {
-    const tabs = new NSETabBarController<React.ReactNode>({
+    const tabs = new TabBarController<React.ReactNode>({
       id: "hierarchy-chrome-tabs",
       destinations: [
         { id: "home", label: "Home", accessibleLabel: "Home destination", icon: { kind: "template", name: "home" } },

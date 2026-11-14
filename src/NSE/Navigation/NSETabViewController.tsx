@@ -22,15 +22,15 @@ import { useId, type ReactNode } from "react";
 import { NSEViewController, type NSEViewControllerOptions } from "../Application/NSEViewController";
 import { useObserve } from "../Objects/useObserve";
 import { NSEChildViewControllerView } from "../Application/viewControllerRenderer";
-import { NSETabBar } from "./NSETabBar";
-import { NSETabBarController } from "./NSETabBarController";
+import { TabBar } from "./TabBar";
+import { TabBarController } from "./TabBarController";
 import { getNSETabBarPanelId, getNSETabBarTabId } from "./NSENavigationDestinationHost";
 import type { NSENavigationIcon } from "./navigationTypes";
 import { registerNSEAuthoringFinalizer } from "../Application/authoringLifecycle";
 import { connectNSENavigationRestoration, type NSENavigationRestorationDescriptor } from "./navigationRestoration";
 import { NSETreeController } from "../Controllers/NSETreeController";
 import { NSEAdaptiveTabView, type NSEAdaptiveTabOutlineItem } from "./adaptiveTabView";
-import { useNSETabToolbar } from "./tabToolbarView";
+import { useTabToolbar } from "./tabToolbarView";
 import { registerTabViewProjection, tabViewProjection } from "./tabViewInternals";
 
 /**
@@ -111,7 +111,7 @@ export class NSETabViewController extends NSEViewController<NSETabViewController
   readonly #items: NSETabViewItem[] = [];
   #selectedIndex = -1;
   #tabStyle: NSETabViewControllerTabStyle;
-  #model: NSETabBarController<ReactNode> | null = null;
+  #model: TabBarController<ReactNode> | null = null;
   #unsubscribeModel: (() => void) | null = null;
   #outline: NSETreeController<NSEAdaptiveTabOutlineItem, string> | null = null;
 
@@ -242,7 +242,7 @@ export class NSETabViewController extends NSEViewController<NSETabViewController
     this.#model = null;
     if (this.#items.length > 0) {
       const selected = this.#items[this.#selectedIndex]!;
-      const model = new NSETabBarController<ReactNode>({
+      const model = new TabBarController<ReactNode>({
         owner: this,
         id: `${this.constructor.name || "NSETabViewController"}:tabs`,
         initialSelectedId: selected.identifier,
@@ -277,13 +277,13 @@ export class NSETabViewController extends NSEViewController<NSETabViewController
     super.didDispose?.();
   }
 
-  static override view = NSETabViewControllerView;
+  static override view = TabViewControllerView;
 }
 
-function NSETabViewControllerView({ controller }: { readonly controller: NSETabViewController }) {
+function TabViewControllerView({ controller }: { readonly controller: NSETabViewController }) {
   useObserve(controller);
   const scope = useId().replace(/[^\w-]/g, "");
-  useNSETabToolbar(controller);
+  useTabToolbar(controller);
   // Keeping these two styles in one projection preserves the selected item's DOM when an outer
   // split supplies the regular sidebar and hands compact navigation back to this tab controller.
   if (controller.tabStyle === "sidebarAdaptable" || controller.tabStyle === "unspecified" || controller.tabStyle === "toolbar") return <div className="nse-tab-view-controller" data-tab-style={controller.tabStyle}>
@@ -293,7 +293,7 @@ function NSETabViewControllerView({ controller }: { readonly controller: NSETabV
   const selected = controller.selectedTabViewItem;
   const Selected = selected?.viewController;
   const bar = model
-    ? <NSETabBar controller={model} aria-label={controller.title ?? "Tabs"} renderPanels={false} idScope={scope} className="nse-tab-view-controller-tabs" />
+    ? <TabBar controller={model} aria-label={controller.title ?? "Tabs"} renderPanels={false} idScope={scope} className="nse-tab-view-controller-tabs" />
     : null;
   return <div className="nse-tab-view-controller" data-tab-style={controller.tabStyle}>
     {controller.tabStyle === "segmentedControlOnTop" ? bar : null}

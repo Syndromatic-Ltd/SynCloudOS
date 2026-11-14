@@ -4,8 +4,8 @@ import { NSEPathControl } from "../../../../src/NSE/Controls/Values/NSEPathContr
 import { NSEMenuView } from "../../../../src/NSE/Menus/NSEMenuView";
 import { NSEPopup } from "../../../../src/NSE/Overlays/NSEPopup";
 import { NSEPopover } from "../../../../src/NSE/Overlays/NSEPopover";
-import { NSETabBarController } from "../../../../src/NSE/Navigation/NSETabBarController";
-import { NSETabBar } from "../../../../src/NSE/Navigation/NSETabBar";
+import { TabBarController } from "../../../../src/NSE/Navigation/TabBarController";
+import { TabBar } from "../../../../src/NSE/Navigation/TabBar";
 import { NSEWindowTitlebarContent } from "../../../../src/NSE/Windows/windowTitlebarContext";
 import { GFXColour } from "../../../../src/FX/GraphicsFX/GFXColour";
 import { NSEArrayController } from "../../../../src/NSE/Controllers/NSEArrayController";
@@ -36,9 +36,9 @@ function DataView({ kind, selected, sourceList = false, state = { kind: "ready" 
     : <NSE.NSECollectionView aria-label="Files" adapter={adapter} layout={NSE.createListCollectionLayout(48)} renderItem={({ item }) => <span>{item.label}</span>} viewportBlockSize={200} state={state} />;
 }
 function Tabs({ orientation }: { orientation: "horizontal" | "vertical" }) {
-  const [controller] = useState(() => new NSETabBarController<ReactNode>({ owner: nseUnowned, id: "baseline-tabs", destinations: ["Documents", "Pictures", "Music", "Movies", "Downloads", "Settings"].map((label, index) => ({ id: `tab-${index}`, label, icon: { kind: "vector" as const, path: "/src/NSE/Navigation/nse-tab-bar-more.svg" }, render: () => <p>{label}</p> })) }));
+  const [controller] = useState(() => new TabBarController<ReactNode>({ owner: nseUnowned, id: "baseline-tabs", destinations: ["Documents", "Pictures", "Music", "Movies", "Downloads", "Settings"].map((label, index) => ({ id: `tab-${index}`, label, icon: { kind: "vector" as const, path: "/src/NSE/Navigation/nse-tab-bar-more.svg" }, render: () => <p>{label}</p> })) }));
   useEffect(() => () => controller.dispose(), [controller]);
-  return <NSETabBar controller={controller} aria-label="Workspace" orientation={orientation} />;
+  return <TabBar controller={controller} aria-label="Workspace" orientation={orientation} />;
 }
 function Overlay({ popover }: { popover: boolean }) {
   const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null);

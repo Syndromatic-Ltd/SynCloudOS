@@ -2471,7 +2471,7 @@
     background: Highlight;
   }
 }
-/* === END NSETabBar Atmo state treatment === */
+/* === END TabBar Atmo state treatment === */
 
 /* === Generic menu engine: Atmo vector paint (hand-authored) ===
    The NSEMenu / NSEListboxPopup surfaces wear the same measured recipes as
