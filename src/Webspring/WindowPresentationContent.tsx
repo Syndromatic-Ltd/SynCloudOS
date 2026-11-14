@@ -93,7 +93,7 @@ export function WindowPresentationContent({ children }: PropsWithChildren) {
     const app = record.applicationId ? runtime.apps.getApp(record.applicationId) : null;
     if (!document || !app || record.role !== "standard" || record.content.rendererId !== "application") return [];
     const slot = [...slots.current.get(id) ?? []].reduce<Slot | null>((best, candidate) =>
-      !best || candidate.priority > best.priority ? candidate : best, null);
+      candidate.node.isConnected && (!best || candidate.priority > best.priority) ? candidate : best, null);
     return [{ controller, app, slot }];
   }), [document, revision, runtime, snapshot]);
   return <SlotRegistration.Provider value={register}>
@@ -135,7 +135,9 @@ function PresentedApplicationWindow({ controller, app, slot, document }: {
     if (presentIn && node.parentNode !== presentIn) {
       const active = node.ownerDocument.activeElement;
       const focused = isNSEHTMLElement(active) && node.contains(active) ? active
-        : !node.isConnected && active === node.ownerDocument.body ? lastFocused.current : null;
+        : (node.ownerDocument !== presentIn.ownerDocument || !node.isConnected) &&
+          (!active || active === node.ownerDocument.body || active.closest("[data-window-transfer]"))
+          ? lastFocused.current : null;
       presentIn.append(node);
       if (focused && node.contains(focused)) focused.focus({ preventScroll: true });
     } else if (!presentIn) {

@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { WindowFullScreenState } from "./windowTypes";
+import type { WindowBounds, WindowFullScreenState } from "./windowTypes";
 
 export interface WindowHostCapabilities {
   readonly nativeWindowControls: null | { readonly side: "leading" | "trailing" };
@@ -28,12 +28,28 @@ export interface WindowHostCapabilities {
 }
 
 export type WindowHostEvent =
-  | { readonly kind: "activated" | "deactivated" | "closeRequested" | "surfaceLost"; readonly windowId: string }
+  | { readonly kind: "activated" | "deactivated" | "closeRequested"; readonly windowId: string; readonly generation?: number }
+  | { readonly kind: "surfaceLost"; readonly windowId: string; readonly generation: number }
   | { readonly kind: "fullScreenChanged"; readonly windowId: string; readonly state: WindowFullScreenState | "refused" }
   | { readonly kind: "titlebarAreaChanged"; readonly windowId: string; readonly rect: DOMRectReadOnly | null };
 
+export interface WindowSurfaceRequest {
+  readonly generation: number;
+  readonly title: string;
+  readonly bounds: WindowBounds;
+}
+
+export interface WindowSurfaceBinding {
+  readonly windowId: string;
+  readonly generation: number;
+  readonly element: HTMLElement;
+}
+
 export interface WindowHostEnvironment {
   readonly capabilities: WindowHostCapabilities;
+  /** These operations are supplied together by hosts that support separate surfaces. */
+  bind?(windowId: string, surface: WindowSurfaceRequest): Promise<WindowSurfaceBinding | null>;
+  unbind?(windowId: string, generation: number): Promise<void>;
   requestFullScreen(windowId: string, enter: boolean): void;
   subscribe(listener: (event: WindowHostEvent) => void): () => void;
 }

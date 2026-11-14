@@ -19,6 +19,7 @@
  */
 
 import { useNSEScreenSafeAreaProperties } from "../NSE/applicationHostInterop";
+import { isNSEHTMLElement } from "../NSE/hostComposition";
 import { useSyncExternalStore, useRef, type CSSProperties, type FocusEvent, type KeyboardEvent as ReactKeyboardEvent, type PropsWithChildren } from "react";
 import { useAppearance, useResolvedMode } from "./serviceHooks";
 import { useKernelSynCloudOS } from "./SynCloudOSProvider";
@@ -40,11 +41,11 @@ export function RuntimeInputBoundary({ children }: PropsWithChildren) {
     if (restoringBlockedFocus.current) return;
     if (!protocol.owns(event.nativeEvent, event.target)) return;
     const path = typeof event.nativeEvent.composedPath === "function" ? event.nativeEvent.composedPath() : [event.target];
-    const responder = path.find((target): target is HTMLElement => target instanceof HTMLElement && Boolean(target.dataset.syncloudosResponderId));
+    const responder = path.find((target): target is HTMLElement => isNSEHTMLElement(target) && Boolean(target.dataset.syncloudosResponderId));
     if (!responder?.dataset.syncloudosResponderId) return;
     const result = runtime.focus.requestFocus(responder.dataset.syncloudosResponderId);
     if (result.status === "focused") {
-      if (event.target instanceof HTMLElement) lastAcceptedFocusTarget.current = event.target;
+      if (isNSEHTMLElement(event.target)) lastAcceptedFocusTarget.current = event.target;
       return;
     }
     const trappedModal = runtime.focus.inspect().scopes.filter((scope) => scope.modal && scope.trapFocus).at(-1);

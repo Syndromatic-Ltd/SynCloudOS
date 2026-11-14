@@ -19,7 +19,7 @@
  */
 
 import { WindowPresentationSlot, useWindowPresentationContent } from "../WindowPresentationContent";
-import { isNSEDOMElement, WindowLayoutContext, WindowLayoutModel } from "../../NSE/hostComposition";
+import { isNSEDOMElement, PresentingDocumentContext, WindowLayoutContext, WindowLayoutModel } from "../../NSE/hostComposition";
 
 import React, { useCallback, useLayoutEffect, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useNSEPresenceExiting, useNSEPresentation, type PresentationSpec } from "../../NSE/Animation";
@@ -70,6 +70,7 @@ export interface WindowHostProps {
   readonly commands: CommandSystem;
   readonly renderers: WindowContentRendererRegistry;
   readonly onDiagnostic?: (diagnostic: WindowLayerDiagnostic) => void;
+  readonly detached?: boolean;
 }
 
 const viewByRole: Readonly<Record<WindowRole, WindowViewRenderer>> = Object.freeze({
@@ -108,9 +109,11 @@ export function WindowHost({
   commands,
   renderers,
   onDiagnostic,
+  detached = false,
 }: WindowHostProps) {
   const runtime = useKernelSynCloudOS();
   const sharedPresentation = useWindowPresentationContent();
+  const presentingDocument = React.useContext(PresentingDocumentContext);
   const record = useSyncExternalStore(controller.subscribe, () => controller.record, () => controller.record);
   const contentState = useSyncExternalStore(controller.subscribe, () => controller.contentState, () => controller.contentState);
   useSyncExternalStore(renderers.subscribe, () => renderers.revision, () => renderers.revision);
@@ -119,7 +122,16 @@ export function WindowHost({
   const popoverSurface = surface && (record.role === "popover" || record.role === "sheet" && surface.request.drawsBackground !== undefined) ? surface : null;
   const wasPopoverSurface = useRef(false);
   if (popoverSurface) wasPopoverSurface.current = true;
-  const presentation = resolveWindowPresentation(record, screen, controller.geometryState);
+  const presentation = detached ? {
+    kind: "desktop-window" as const,
+    visible: true,
+    bounds: { x: 0, y: 0, width: presentingDocument?.defaultView?.innerWidth ?? record.bounds.width,
+      height: presentingDocument?.defaultView?.innerHeight ?? record.bounds.height },
+    safeAreaInsets: { blockStart: 0, blockEnd: 0, inlineStart: 0, inlineEnd: 0 },
+    movable: false,
+    resizable: false,
+    titleBarVisible: true,
+  } : resolveWindowPresentation(record, screen, controller.geometryState);
   const compactPopover = Boolean(popoverSurface && (presentation.kind === "mobile-sheet" || popoverSurface.request.presentation?.mode === "sheet"));
   const ownsPopoverFocus = record.role === "popover" && popoverSurface !== null;
   const focusPort = useRuntimeNSEFocusPort(controller.windowResponderId);
@@ -184,7 +196,10 @@ export function WindowHost({
   const layout = useMemo(() => new WindowLayoutModel(), [controller.id]);
   useNSEDeferredDisposal(layout);
   // A host with invalid geometry is omitted and reported, so it has no bounds to lay out against.
-  useLayoutEffect(() => { layout.setLogicalScreenInsets(screen.safeAreaInsets, screen.layoutViewport); if (geometryIsValid) layout.setBounds(presentation.bounds); }, [layout, screen.safeAreaInsets, screen.layoutViewport, presentation.bounds, geometryIsValid]);
+  useLayoutEffect(() => {
+    layout.setLogicalScreenInsets(presentation.safeAreaInsets, detached ? undefined : screen.layoutViewport);
+    if (geometryIsValid) layout.setBounds(presentation.bounds);
+  }, [detached, layout, screen.layoutViewport, presentation.safeAreaInsets, presentation.bounds, geometryIsValid]);
   useLayoutEffect(() => hostRef.current ? layout.connectRoot(hostRef.current) : undefined, [layout, record.state, contentRendererAvailable]);
   // The window surface clips to its rounded outline, and a fixed-position
   // popup does not escape a clip-path. Menus and popovers opened from the
@@ -296,7 +311,7 @@ export function WindowHost({
     ? `window:${parentController.id}`
     : undefined;
   const hostedContent = sharedPresentation && record.role === "standard" && record.content.rendererId === "application"
-    ? <WindowPresentationSlot windowId={record.id} priority={1} bridge={childTransientBridge} overlay={overlayLayerNode} />
+    ? <WindowPresentationSlot windowId={record.id} priority={detached ? 3 : 1} bridge={childTransientBridge} overlay={overlayLayerNode} />
     : renderers.render(contentState.mountKey, {
     mountKey: contentState.mountKey,
     window: record,
@@ -339,6 +354,13 @@ export function WindowHost({
       blocked={blocked}
       dirty={dirty}
       dispatchCommand={(commandId, payload) => commands.dispatch(commandId, payload, { source: "toolbar" })}
+      presentationControl={sharedPresentation && record.role === "standard" && record.content.rendererId === "application" &&
+        manager.host.capabilities.separateSurfaces && presentation.kind === "desktop-window" &&
+        !record.parentWindowControllerId ? <button type="button" className="nse-window__transfer-control"
+          aria-label={detached ? "Reattach to Webspring" : "Detach Window"} data-window-transfer="" data-window-no-drag=""
+          onClick={() => { if (detached) void manager.reattach(record.id); else void manager.detach(record.id); }}>
+          {detached ? "↙" : "↗"}
+        </button> : undefined}
       moveHandleProps={moveHandleProps}
       resizeHandleProps={resizeHandleProps}
     >
@@ -358,7 +380,7 @@ export function WindowHost({
     width: Math.min(presentation.bounds.width, screen.visualViewport.width - Math.max(8, presentation.safeAreaInsets.inlineStart) - Math.max(8, presentation.safeAreaInsets.inlineEnd)),
     height: presentation.bounds.height,
   } : presentation.bounds;
-  const hostStyle: React.CSSProperties = {
+  const hostStyle: React.CSSProperties = detached ? { position: "absolute", inset: 0, zIndex: record.zIndex } : {
     position: "absolute",
     left: sheetBounds.x,
     top: sheetBounds.y,

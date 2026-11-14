@@ -32,6 +32,7 @@ export interface WindowTitlebarControlsProps {
   readonly dirty: boolean;
   readonly dispatchCommand: WindowViewProps["dispatchCommand"];
   readonly moveHandleProps?: HTMLAttributes<HTMLElement>;
+  readonly presentationControl?: React.ReactNode;
   readonly controls?: readonly WindowControlKind[];
 
   readonly variant?: "standard" | "panel" | "hud";
@@ -89,6 +90,7 @@ export function WindowTitlebarControls({
   dirty,
   dispatchCommand,
   moveHandleProps,
+  presentationControl,
   controls = ["close", "minimise", "zoom", "fullScreen"],
   variant = "standard",
 }: WindowTitlebarControlsProps) {
@@ -98,7 +100,7 @@ export function WindowTitlebarControls({
     <WindowTitlebarView document={document ?? { title: record.title, subtitle: "", documentEdited: dirty }}
       material={document?.texturedBackground ? "metal" : document?.titlebarPresentation === "floating" ? "cumulus" : "standard"} isKeyWindow={record.isKey} titleId={`${record.id}-title`} variant={variant} moveHandleProps={moveHandleProps}
       onSlotsChange={host?.setSlots}
-      controls={<div data-nse-part="accessory" className="nse-window__controls" data-syncloudos-focus-chrome="">
+      controls={<><div data-nse-part="accessory" className="nse-window__controls" data-syncloudos-focus-chrome="">
         {controls.includes("close") && record.style.includes("closable") ? (
           <WindowControl hud={variant === "hud"} kind="close" record={record} dirty={dirty} dispatchCommand={dispatchCommand} />
         ) : null}
@@ -109,6 +111,6 @@ export function WindowTitlebarControls({
           <WindowControl kind="zoom" record={record} dirty={dirty} dispatchCommand={dispatchCommand} />
         ) : null}
         {controls.includes("fullScreen") && record.collectionBehavior === "fullScreenPrimary" ? <WindowControl kind="fullScreen" record={record} dirty={dirty} dispatchCommand={dispatchCommand} /> : null}
-      </div>} />
+      </div>{presentationControl}</>} />
   );
 }

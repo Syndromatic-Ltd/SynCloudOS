@@ -30,6 +30,17 @@
   pointer-events: auto;
 }
 
+.nse-window__transfer-control {
+  margin-inline: 6px;
+  min-inline-size: 28px;
+  min-block-size: 24px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
 .webspring-window-host > [data-syncloudos-focus-scope] {
   height: 100%;
   min-height: 0;

@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createStageWindowHost } from "../Windows/WindowHostEnvironment";
+import { createBrowserWindowHost } from "./BrowserWindowHost";
 import { associateXRAdapter } from "../../FX/XRFX/internal/xrPort";
 import { associateBluetoothAdapter } from "../../FX/BluetoothFX/internal/bluetoothPort";
 import { associateNFCAdapter } from "../../FX/NFCFX/internal/nfcPort";
@@ -694,15 +694,11 @@ export function createBrowserRuntimeEnvironment(options: { readonly cursorImages
   const videoPresentation = new BrowserVideoPresentationAdapter(browserWindow?.document ?? null,
     (browserWindow ?? {}) as unknown as BrowserElementCapturePlatform);
   const isNativeProxy = nativeProxyProbe();
-  const stageHost = createStageWindowHost();
-  const windowHost = {
-    ...stageHost,
-    get capabilities() {
-      const overlay = readWindowControlsOverlay();
-      const rect = overlay?.visible ? overlay.getTitlebarAreaRect() : null;
-      return { ...stageHost.capabilities, nativeWindowControls: rect ? { side: rect.x > 0 ? "leading" as const : "trailing" as const } : null };
-    },
-  };
+  const windowHost = createBrowserWindowHost(browserWindow, () => {
+    const overlay = readWindowControlsOverlay();
+    const rect = overlay?.visible ? overlay.getTitlebarAreaRect() : null;
+    return rect ? { side: rect.x > 0 ? "leading" : "trailing" } : null;
+  });
   const environment: SynCloudOSRuntimeEnvironment = {
     windowHost,
     navigation,

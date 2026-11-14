@@ -42,6 +42,7 @@ export interface WindowViewProps {
     payload: { readonly windowControllerId: string },
   ) => Promise<unknown>;
   readonly moveHandleProps?: React.HTMLAttributes<HTMLElement>;
+  readonly presentationControl?: React.ReactNode;
   readonly resizeHandleProps?: Readonly<Partial<Record<WindowResizeEdge, React.HTMLAttributes<HTMLElement>>>>;
   readonly children: React.ReactNode;
 }

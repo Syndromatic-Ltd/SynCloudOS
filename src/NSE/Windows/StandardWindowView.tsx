@@ -46,6 +46,7 @@ export function StandardWindowView(props: WindowViewProps) {
       record={record}
       dirty={dirty}
       dispatchCommand={dispatchCommand}
+      presentationControl={props.presentationControl}
       moveHandleProps={presentation.movable ? moveHandleProps : undefined}
     />
   ) : null;

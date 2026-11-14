@@ -19,8 +19,11 @@
  */
 
 import React, { useEffect, useRef, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import { Presence } from "../../NSE/Animation";
 import { useNSEAppearanceProjection } from "../../NSE/Appearance";
+import { PresentingDocumentContext } from "../../NSE/hostComposition";
+import type { WindowSurfaceBinding } from "../../SynCloudOS/Windows/WindowHostEnvironment";
 import { useKernelSynCloudOS } from "../../SynCloudOSReact";
 import { useWindowPresentationContent } from "../WindowPresentationContent";
 import { WindowHost, type WindowLayerDiagnostic } from "./WindowHost";
@@ -58,7 +61,26 @@ function PopoverModalBackdrop({ zIndex }: { readonly zIndex: number }) {
   </div>;
 }
 
-export function WindowLayer({ contentRegistry, onDiagnostic }: WindowLayerProps) {
+export function WindowLayer(props: WindowLayerProps) {
+  const runtime = useKernelSynCloudOS();
+  const snapshot = useSyncExternalStore(runtime.windows.subscribe, runtime.windows.snapshot, runtime.windows.snapshot);
+  const appearance = useNSEAppearanceProjection();
+  return <>
+    <WindowSurfaceLayer {...props} binding={null} />
+    {snapshot.windowControllerIds.flatMap(id => {
+      const binding = runtime.windows.detachedSurface(id);
+      return binding ? [createPortal(
+        <PresentingDocumentContext.Provider value={binding.element.ownerDocument}>
+          <div {...appearance} data-syncloudos-runtime-owner={runtime.runtimeId}>
+            <WindowSurfaceLayer {...props} binding={binding} />
+          </div>
+        </PresentingDocumentContext.Provider>, binding.element, String(binding.generation))]
+        : [];
+    })}
+  </>;
+}
+
+function WindowSurfaceLayer({ contentRegistry, onDiagnostic, binding }: WindowLayerProps & { readonly binding: WindowSurfaceBinding | null }) {
   const runtime = useKernelSynCloudOS();
   const sharedPresentation = useWindowPresentationContent();
   const layerRef = useRef<HTMLDivElement>(null);
@@ -72,8 +94,9 @@ export function WindowLayer({ contentRegistry, onDiagnostic }: WindowLayerProps)
     runtime.screen.getSnapshot,
     runtime.screen.getSnapshot,
   );
-  const documentPort = runtime.environment.browser.getDocument();
-  const transientAnchors = managerSnapshot.windowControllerIds.flatMap((windowControllerId) => {
+  const documentPort = binding?.element.ownerDocument ?? runtime.environment.browser.getDocument();
+  const windowIds = managerSnapshot.windowControllerIds.filter(id => runtime.windows.presentingSurface(id) === binding);
+  const transientAnchors = windowIds.flatMap((windowControllerId) => {
     const record = runtime.windows.select(windowControllerId).record;
     return record.role === "popover" && !record.pinned && record.anchor ? [record.anchor.id] : [];
   });
@@ -87,7 +110,8 @@ export function WindowLayer({ contentRegistry, onDiagnostic }: WindowLayerProps)
         const state = controller.contentState;
         return state.status === "loaded" && contentRegistry.surface(state.mountKey)?.request.drawsBackground !== undefined;
       });
-      const candidates = [...runtime.windows.list({ role: "popover" }), ...popoverSheets].filter(({ record }) => !record.pinned && record.id !== except);
+      const candidates = [...runtime.windows.list({ role: "popover" }), ...popoverSheets].filter(({ record }) =>
+        !record.pinned && record.id !== except && runtime.windows.presentingSurface(record.id) === binding);
       const eligible = candidates.filter(controller => {
         const state = controller.contentState;
         const request = state.status === "loaded" ? contentRegistry.surface(state.mountKey)?.request : null;
@@ -96,7 +120,8 @@ export function WindowLayer({ contentRegistry, onDiagnostic }: WindowLayerProps)
           : controller.record.anchor && !hasOwnedAnchor(ownerRoot, runtime.runtimeId, controller.record.anchor.id);
         return !request?.behavior || request.behavior === "transient";
       });
-      if (eligible.length === candidates.length && candidates.every(({ record }) => record.role === "popover")) {
+      if (eligible.length === candidates.length && candidates.every(({ record }) => record.role === "popover") &&
+          !runtime.windows.list({ role: "popover" }).some(({ id }) => runtime.windows.presentingSurface(id) !== binding)) {
         void runtime.windows.dismissTransientWindows({ reason, ...(except ? { except } : {}) }).catch(() => undefined);
       } else {
         for (const controller of eligible) void runtime.windows.requestClose(controller.id, { reason: "command" }).catch(() => undefined);
@@ -118,7 +143,7 @@ export function WindowLayer({ contentRegistry, onDiagnostic }: WindowLayerProps)
           // this observer was installed. Inspect the current records so releasing
           // an old generated identity cannot dismiss the replacement surface.
           const currentAnchors = runtime.windows.list({ role: "popover" }).flatMap(({ record }) => (
-            !record.pinned && record.anchor ? [record.anchor.id] : []
+            !record.pinned && record.anchor && runtime.windows.presentingSurface(record.id) === binding ? [record.anchor.id] : []
           ));
           if (currentAnchors.some((anchorId) => !hasOwnedAnchor(ownerRoot, runtime.runtimeId, anchorId))) {
             dismissTransients("anchor-removed");
@@ -130,9 +155,9 @@ export function WindowLayer({ contentRegistry, onDiagnostic }: WindowLayerProps)
       ownerRoot.removeEventListener("pointerdown", dismissOutside, true);
       observer?.disconnect();
     };
-  }, [contentRegistry, documentPort, managerSnapshot.generation, runtime, transientAnchors.join("\u0000")]);
+  }, [binding, contentRegistry, documentPort, managerSnapshot.generation, runtime, transientAnchors.join("\u0000")]);
 
-  const modalControllers = managerSnapshot.windowControllerIds
+  const modalControllers = windowIds
     .map((id) => runtime.windows.select(id))
     .filter(controller => {
       const { record, contentState } = controller;
@@ -159,7 +184,7 @@ export function WindowLayer({ contentRegistry, onDiagnostic }: WindowLayerProps)
         />
       ) : null}
       <Presence>
-        {managerSnapshot.windowControllerIds.filter(id => {
+        {windowIds.filter(id => {
           if (!sharedPresentation) return true;
           const { record } = runtime.windows.select(id);
           if (record.role !== "standard" || (record.fullScreen !== "on" && record.fullScreen !== "exiting")) return true;
@@ -175,6 +200,7 @@ export function WindowLayer({ contentRegistry, onDiagnostic }: WindowLayerProps)
             commands={runtime.commands}
             renderers={contentRegistry}
             onDiagnostic={onDiagnostic}
+            detached={binding !== null && binding.windowId === windowControllerId}
           />
         ))}
       </Presence>

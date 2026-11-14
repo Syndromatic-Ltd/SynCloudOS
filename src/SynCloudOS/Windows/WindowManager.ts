@@ -37,7 +37,7 @@ import type { UndoManagerRegistry } from "../Undo";
 import type { ScreenService } from "./ScreenService";
 import { WindowBoundsScheduler } from "./WindowBoundsScheduler";
 import { WindowController } from "./WindowController";
-import { createStageWindowHost, type WindowHostEnvironment, type WindowHostEvent } from "./WindowHostEnvironment";
+import { createStageWindowHost, type WindowHostEnvironment, type WindowHostEvent, type WindowSurfaceBinding } from "./WindowHostEnvironment";
 import { WindowContentFactoryUnavailableError, type WindowContentRegistry } from "./WindowContentRegistry";
 import { WindowDocumentPresentationCloseCoordinator } from "./WindowDocumentPresentationCloseCoordinator";
 import {
@@ -203,6 +203,8 @@ export class WindowManager {
   readonly host: WindowHostEnvironment;
   readonly #unsubscribeHost: () => void;
   readonly #fullScreenIntents = new Map<string, boolean>();
+  readonly #surfaceTransfers = new Map<string, { readonly generation: number; binding: WindowSurfaceBinding | null }>();
+  #surfaceGeneration = 0;
 
   constructor(readonly dependencies: WindowManagerDependencies) {
     this.runtimeId = dependencies.runtimeId;
@@ -1023,6 +1025,80 @@ export class WindowManager {
     this.#publish(false);
   }
 
+  /** Opens the destination during the initiating browser gesture and commits the acknowledged binding. */
+  async detach(windowId: string): Promise<boolean> {
+    this.#assertMutable();
+    this.#assertControllerTransitionAvailable(windowId);
+    const controller = this.select(windowId);
+    const { record } = controller;
+    if (!this.host.capabilities.separateSurfaces || !this.host.bind || !this.host.unbind ||
+        record.role !== "standard" || !record.applicationId || record.parentWindowControllerId ||
+        record.state !== "open" || (record.fullScreen ?? "off") !== "off" ||
+        this.#snapshot.blockedWindowControllerIds.includes(windowId) || this.#surfaceTransfers.has(windowId)) return false;
+    const generation = ++this.#surfaceGeneration;
+    const transfer = { generation, binding: null as WindowSurfaceBinding | null };
+    this.#surfaceTransfers.set(windowId, transfer);
+    try {
+      const binding = await this.host.bind(windowId, { generation, title: record.title, bounds: record.bounds });
+      if (this.#surfaceTransfers.get(windowId) !== transfer) {
+        if (binding) await this.#unbindSurface(windowId, generation);
+        return false;
+      }
+      if (!binding) {
+        this.#surfaceTransfers.delete(windowId);
+        return false;
+      }
+      if (binding.windowId !== windowId || binding.generation !== generation ||
+          controller.record.state !== "open" || (controller.record.fullScreen ?? "off") !== "off" ||
+          this.#closeReservations.has(windowId) || this.#snapshot.blockedWindowControllerIds.includes(windowId)) {
+        await this.reattach(windowId);
+        return false;
+      }
+      transfer.binding = binding;
+      this.#makeKey(windowId, false);
+      this.#publish(false);
+      return true;
+    } catch (error) {
+      if (this.#surfaceTransfers.get(windowId) === transfer) await this.reattach(windowId);
+      this.#reportError(error, "window-host-bind");
+      return false;
+    }
+  }
+
+  detachedSurface(windowId: string): WindowSurfaceBinding | null {
+    return this.#surfaceTransfers.get(windowId)?.binding ?? null;
+  }
+
+  /** Descendants with a window parent stay on the same surface as that parent. */
+  presentingSurface(windowId: string): WindowSurfaceBinding | null {
+    const controller = this.#controllers.get(windowId);
+    if (!controller) return null;
+    const parent = controller.record.parentWindowControllerId;
+    return this.detachedSurface(windowId) ?? (parent ? this.presentingSurface(parent) : null);
+  }
+
+  async reattach(windowId: string): Promise<void> {
+    const transfer = this.#retireSurface(windowId);
+    if (transfer?.binding) this.#publish(false);
+    if (transfer) await this.#unbindSurface(windowId, transfer.generation);
+  }
+
+  #retireSurface(windowId: string) {
+    const transfer = this.#surfaceTransfers.get(windowId);
+    this.#surfaceTransfers.delete(windowId);
+    return transfer;
+  }
+
+  async #unbindSurface(windowId: string, generation: number): Promise<void> {
+    try { await this.host.unbind?.(windowId, generation); }
+    catch (error) { this.#reportError(error, "window-host-unbind"); }
+  }
+
+  #discardSurface(windowId: string): void {
+    const transfer = this.#retireSurface(windowId);
+    if (transfer) void this.#unbindSurface(windowId, transfer.generation);
+  }
+
   toggleFullScreen(windowId: string): void {
     this.#assertMutable();
     this.#assertControllerTransitionAvailable(windowId);
@@ -1030,6 +1106,7 @@ export class WindowManager {
     const { record } = controller;
     if (record.state !== "open" || record.role !== "standard" ||
         record.collectionBehavior !== "fullScreenPrimary" || this.#blockedWindowIds().has(windowId)) return;
+    if (this.#surfaceTransfers.has(windowId)) void this.reattach(windowId);
     const proposed = this.#fullScreenIntents.get(windowId) ?? (record.fullScreen === "entering" || record.fullScreen === "on");
     this.#fullScreenIntents.set(windowId, !proposed);
     this.#drainFullScreenIntent(controller);
@@ -1066,6 +1143,15 @@ export class WindowManager {
 
   #handleHostEvent(event: WindowHostEvent): void {
     if (this.#disposed) return;
+    if ("generation" in event && event.generation !== undefined) {
+      const transfer = this.#surfaceTransfers.get(event.windowId);
+      if (transfer?.generation !== event.generation) return;
+      if (event.kind === "surfaceLost") {
+        void this.reattach(event.windowId);
+        return;
+      }
+      if (!transfer.binding || this.#closeReservations.has(event.windowId)) return;
+    }
     const controller = this.#controllers.get(event.windowId);
     if (!controller || controller.record.state !== "open") return;
     if (event.kind === "activated") {
@@ -1755,6 +1841,7 @@ export class WindowManager {
     const controller = this.#controllers.get(id);
     if (!controller) return;
     const record = controller.record;
+    this.#discardSurface(id);
     this.#fullScreenIntents.delete(id);
     const orderIndex = this.#order.indexOf(id);
     const wasOpen = orderIndex >= 0;
@@ -1875,6 +1962,7 @@ export class WindowManager {
         this.#tryCleanup("window-undo-dispose", () => this.dependencies.undo.remove({ kind: "window", id: controller.id }));
       }
       this.#fullScreenIntents.delete(controller.id);
+      this.#discardSurface(controller.id);
       controller.replaceRecord({ ...record, state: "closed", isKey: false, isMain: false, zIndex: 0, fullScreen: "off", style: effectiveWindowStyle(record.style, "off") });
       if (record.role === "sheet") {
         const hasData = this.#sheetEndData.has(controller.id);
