@@ -18,7 +18,7 @@ beforeAll(async () => {
       import { createRoot } from "react-dom/client";
       import { NSEView } from "./src/NSE/Views/NSEView";
       import { NSEAppearance } from "./src/NSE/Appearance/NSEAppearance";
-      import { NSEViewDrawingEnvironmentContext } from "./src/NSE/Views/NSEViewDrawingEnvironment";
+      import { ViewDrawingEnvironmentContext } from "./src/NSE/Views/NSEViewDrawingEnvironment";
       import { createOwnedGFXIdentifierIssuer } from "./src/FX/GraphicsFX/identifierAuthority";
       import { GFXColour } from "./src/FX/GraphicsFX/GFXColour";
       import { GFXPath } from "./src/FX/GraphicsFX/GFXPath";
@@ -34,14 +34,14 @@ beforeAll(async () => {
       window.drawnBounds = [];
       function Figures() {
         const [updated, setUpdated] = useState(false);
-        return <NSEViewDrawingEnvironmentContext.Provider value={environment}>
+        return <ViewDrawingEnvironmentContext.Provider value={environment}>
           <button id="redraw" onClick={() => setUpdated(value => !value)}>Redraw</button>
           {['aqua', 'darkAqua'].map((name, index) => <NSEView key={name} id={name} className="figure" appearance={new NSEAppearance(name)}
             aria-label={name + ' figure'} style={{ top: 60 + index * 180 }} draw={(rect, context) => {
               window.drawnBounds.push({ name, ...rect });
               context.setFill(GFXColour.parse(updated ? '#008844' : '#0055aa')); context.fill(GFXPath.rect(rect));
             }}><span className="foreground">Subview</span></NSEView>)}
-        </NSEViewDrawingEnvironmentContext.Provider>;
+        </ViewDrawingEnvironmentContext.Provider>;
       }
       createRoot(document.getElementById('root')).render(<Figures />);
     ` },

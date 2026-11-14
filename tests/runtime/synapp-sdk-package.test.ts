@@ -349,7 +349,7 @@ for (const removed of ["NSERoundedBox", "NSEShadowView", "NSESmoothSurface", "NS
   assert.equal(removed in controls, false);
 }
 for (const removed of ["NSEGraphicsView", "convertPointToGFXDisplayList"]) assert.equal(removed in nse, false);
-for (const internal of ["NSEViewDrawingEnvironmentContext", "NSEViewDisplayList"]) assert.equal(internal in nse, false);
+for (const internal of ["NSEViewDrawingEnvironmentContext", "NSEViewDisplayList", "ViewDrawingEnvironmentContext", "ViewDisplayList"]) assert.equal(internal in nse, false);
 assert.equal("AnimationFX" in appearance, false);
 assert.equal("useAnimationFX" in appearance, false);
 assert.equal(typeof nse.NSEStackView, "function");
