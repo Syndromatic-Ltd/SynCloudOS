@@ -23,8 +23,8 @@ import React from "react";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { AnimationDefaults, AnimationEnvironmentProvider, type Animator } from "../../src/NSE/Animation";
-import { NSEAlertSurface } from "../../src/NSE/Components/NSEAlertSurface";
-import { NSEAlertBackdrop } from "../../src/NSE/Components/NSEAlertBackdrop";
+import { AlertSurface } from "../../src/NSE/Components/NSEAlertSurface";
+import { AlertBackdrop } from "../../src/NSE/Components/NSEAlertBackdrop";
 import { SystemAlert } from "../../src/SynCloudOSReact/SystemAlert";
 import type { AFXAnimationDefinition, AFXAnimationSettlement } from "../../src/FX/AnimationFX/animationTypes";
 
@@ -98,7 +98,7 @@ describe("NSE alert choreography on AnimationFX", () => {
       const [shown, setShown] = React.useState(false);
       return <div>
         <div data-testid="focus-background" aria-hidden="false"><button onClick={() => setShown(true)}>Alert origin</button></div>
-        {shown ? <NSEAlertBackdrop onSafeDismiss={() => setShown(false)}><button onClick={() => setShown(false)}>Cancel</button></NSEAlertBackdrop> : null}
+        {shown ? <AlertBackdrop onSafeDismiss={() => setShown(false)}><button onClick={() => setShown(false)}>Cancel</button></AlertBackdrop> : null}
       </div>;
     }
     const view = render(strict ? <React.StrictMode><Fixture /></React.StrictMode> : <Fixture />);
@@ -131,7 +131,7 @@ describe("NSE alert choreography on AnimationFX", () => {
     const { animator, played } = recordingAnimator();
     const standard = render(
       <AnimationEnvironmentProvider reducedMotion={false} animator={animator}>
-        <NSEAlertSurface labelledBy="title"><h2 id="title">Notice</h2></NSEAlertSurface>
+        <AlertSurface labelledBy="title"><h2 id="title">Notice</h2></AlertSurface>
       </AnimationEnvironmentProvider>,
     );
     const alert = screen.getByRole("alertdialog");
@@ -159,7 +159,7 @@ describe("NSE alert choreography on AnimationFX", () => {
     const reduced = recordingAnimator();
     render(
       <AnimationEnvironmentProvider reducedMotion animator={reduced.animator}>
-        <NSEAlertSurface labelledBy="title"><h2 id="title">Notice</h2></NSEAlertSurface>
+        <AlertSurface labelledBy="title"><h2 id="title">Notice</h2></AlertSurface>
       </AnimationEnvironmentProvider>,
     );
     const [fade] = reduced.played as [Played];
@@ -172,7 +172,7 @@ describe("NSE alert choreography on AnimationFX", () => {
       const { animator, played } = recordingAnimator();
       const view = render(
         <AnimationEnvironmentProvider reducedMotion={reducedMotion} animator={animator}>
-          <NSEAlertBackdrop><NSEAlertSurface labelledBy="title"><h2 id="title">Notice</h2></NSEAlertSurface></NSEAlertBackdrop>
+          <AlertBackdrop><AlertSurface labelledBy="title"><h2 id="title">Notice</h2></AlertSurface></AlertBackdrop>
         </AnimationEnvironmentProvider>,
       );
       const backdrop = document.querySelector<HTMLElement>(".nse-control-alert-backdrop")!;

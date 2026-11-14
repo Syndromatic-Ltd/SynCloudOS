@@ -24,8 +24,8 @@ import "./nsePreferencesToast.css";
 import { Presence, useNSEAnimationEnvironment, useNSEPresentation, useNSEPresenceExiting } from "../Animation";
 import {
   resolveNSEPreferencesTransitions,
-  type NSEPreferencesPaneDirection,
-  type NSEPreferencesTransitions,
+  type PreferencesPaneDirection,
+  type PreferencesTransitions,
 } from "./NSEPreferencesToast.transitions";
 import { GroupedRow } from "../Controls/Selection/GroupedRow";
 import { NSEFocusScope, resolveNSEFocusReturnTarget } from "../Focus";
@@ -62,7 +62,7 @@ export interface NSEPreferencePane {
   render: () => ReactNode;
 }
 
-export interface NSEPreferencesToastProps {
+export interface PreferencesToastProps {
   open: boolean;
   /** Runtime hosts can provide a stable logical scope identity. */
   focusScopeId?: string;
@@ -79,14 +79,14 @@ export interface NSEPreferencesToastProps {
   onClose: () => void;
 }
 
-type PaneDirection = NSEPreferencesPaneDirection;
+type PaneDirection = PreferencesPaneDirection;
 
 /** The way the pane stack last moved. A context rather than a prop, so a title
  * or pane already leaving takes its exit from the navigation that removed it
  * (as Framer Motion's AnimatePresence `custom` did). */
 const PaneDirectionContext = createContext<PaneDirection>("forward");
 
-function usePreferencesTransitions(): NSEPreferencesTransitions {
+function usePreferencesTransitions(): PreferencesTransitions {
   return resolveNSEPreferencesTransitions(useNSEAnimationEnvironment().reducedMotion);
 }
 
@@ -171,7 +171,7 @@ function PreferencesTitlebar({ title, titleView, leading }: { title: ReactNode; 
     leading={<PreferencesBackAccessory.view controller={back} />} className="nse-prefs-header" />;
 }
 
-export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialPane, backLabel, appearance, resolvedMode, runtimeOwner, onClose }: NSEPreferencesToastProps) {
+export function PreferencesToast({ open, focusScopeId, title, panes, initialPane, backLabel, appearance, resolvedMode, runtimeOwner, onClose }: PreferencesToastProps) {
   const inheritedAppearance = useNSEAppearance();
   const requestedAppearance = appearance ?? inheritedAppearance.requestedColourScheme;
   const projectedMode = resolvedMode ?? inheritedAppearance.resolvedColourScheme;

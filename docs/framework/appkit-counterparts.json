@@ -36,6 +36,7 @@
     "NSEColourList": "NSColorList",
     "NSEColourPicker": "NSColorPicker",
     "NSEPopoverBehavior": "NSPopover.Behavior",
+    "NSEPreferencePane": "NSPreferencePane",
     "NSETableHeaderView": "NSTableHeaderView"
   },
   "members": {

@@ -33,7 +33,7 @@ import { createApplicationHostHome, type ApplicationHostHome } from "./applicati
 import { NSEAppearanceProvider, type NSETheme } from "../NSE/Appearance";
 import { atmoTheme } from "../NSE/Appearance/atmo";
 import { NSERubberBandProvider } from "../NSE/Scroll";
-import { NSEAlertBackdrop } from "../NSE/SystemUI";
+import { AlertBackdrop } from "../NSE/SystemUI";
 import { SystemAlert } from "./SystemAlert";
 import { SCOSAlertPresenter } from "./SCOSAlertPresenter";
 import { HostSiteBrandingProvider } from "./siteBrandingContext";
@@ -356,12 +356,12 @@ function RootRecoveryBoundary({ runtime, options, fontCatalogue, children }: Pro
       if (!error) return null;
       const browserWindow = runtime.environment.browser.getWindow();
       return <FocusScope scopeId={`root-system-alert:${error.id}`} kind="modal" parentResponderId="runtime" trapFocus>
-        <div className="syncloudos-root-error-shell"><NSEAlertBackdrop><SystemAlert
+        <div className="syncloudos-root-error-shell"><AlertBackdrop><SystemAlert
           error={options.application ? applicationRecoveryError(error) : error} appearance={appearance}
           onDismiss={() => browserWindow?.location.reload()} onReload={() => browserWindow?.location.reload()}
           onReturn={() => options.shell ? browserWindow?.location.assign("/") : browserWindow?.location.reload()}
           onOpenMailClient={(destination) => { browserWindow?.location.assign(destination); }}
-        /></NSEAlertBackdrop></div>
+        /></AlertBackdrop></div>
       </FocusScope>;
     }}>{children}</SynCloudOSWatchdog>
   </HostFontsProvider></HostSiteBrandingProvider>;
@@ -520,12 +520,12 @@ function renderBootstrapRecovery(element: Element, attempt: BrowserMountAttempt,
   // NSE backdrop owns physical focus; no disposed kernel provider is retained.
   root.render(<HostSiteBrandingProvider value={recovery.branding}>
     <NSEAppearanceProvider theme={appearance} colourScheme={recovery.appearance}>
-      <NSERubberBandProvider><div className="syncloudos-root-error-shell"><NSEAlertBackdrop>
+      <NSERubberBandProvider><div className="syncloudos-root-error-shell"><AlertBackdrop>
         <SystemAlert error={recovery.error}
           appearance={recovery.appearance} applicationIcon={recovery.applicationIcon}
           onDismiss={() => navigate(home)} onReturn={() => navigate(home)} onReload={() => navigate()}
           onOpenMailClient={(destination) => navigate(destination)} />
-      </NSEAlertBackdrop></div></NSERubberBandProvider>
+      </AlertBackdrop></div></NSERubberBandProvider>
     </NSEAppearanceProvider>
   </HostSiteBrandingProvider>);
 }

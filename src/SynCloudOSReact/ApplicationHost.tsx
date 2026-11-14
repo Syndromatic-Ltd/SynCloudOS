@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { TooltipProvider } from "../NSE/Tooltips";
-import { NSEAlertBackdrop } from "../NSE/SystemUI";
+import { AlertBackdrop } from "../NSE/SystemUI";
 import { SCOSAlertPresenter } from "./SCOSAlertPresenter";
 import { OverlayProvider, WindowSurfaceBridgeProvider, useNSEDeferredDisposal } from "../NSE/NSE";
 import { createReactOwnedNSEMenu } from "../NSE/Menus/NSEMenu";
@@ -239,12 +239,12 @@ export function ApplicationHost({ applicationId, authentication, home }: Applica
     />
     <SCOSAlertPresenter center={runtime.alerts} presentation={runtime.presentationTraits} appearance={appearance} />
     {error ? <FocusScope asChild key={error.id} scopeId={`application-host-error:${error.id}`} kind="modal" parentResponderId="runtime" trapFocus>
-      <NSEAlertBackdrop presentation={runtime.presentationTraits} onSafeDismiss={error.recoverable === false ? undefined : () => runtime.errors.dismiss(error.id)}>
+      <AlertBackdrop presentation={runtime.presentationTraits} onSafeDismiss={error.recoverable === false ? undefined : () => runtime.errors.dismiss(error.id)}>
         <SystemAlert error={error} appearance={appearance} applicationIcon={app?.icon.src ?? null}
           onDismiss={() => runtime.errors.dismiss(error.id)} onReload={() => browserWindow?.location.reload()}
           onReturn={() => browserWindow?.location.reload()}
           onOpenMailClient={destination => browserWindow?.location.assign(destination)} />
-      </NSEAlertBackdrop>
+      </AlertBackdrop>
     </FocusScope> : null}
   </>;
 }

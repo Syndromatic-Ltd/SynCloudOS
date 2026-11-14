@@ -20,7 +20,7 @@
 
 import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
 import { Presence } from "../NSE/Animation";
-import { NSEAlertBackdrop } from "../NSE/NSE";
+import { AlertBackdrop } from "../NSE/NSE";
 import { SystemAlert, SystemAlertAssetCache, useResolvedMode } from "../SynCloudOSReact";
 import { FocusScope, useKernelSynCloudOS, useRuntimeSelector } from "../SynCloudOSReact";
 import type { CapturedSynCloudOSError } from "../SynCloudOS/SynCloudOS";
@@ -61,7 +61,7 @@ export function WebspringStatusLayer({ errors }: { errors: CapturedSynCloudOSErr
       <Presence>
         {latest ? (
           <FocusScope asChild key={latest.id} scopeId={`system-alert:${latest.id}`} kind="modal" parentResponderId="workspace" trapFocus>
-            <NSEAlertBackdrop
+            <AlertBackdrop
               presentation={runtime.presentationTraits}
               onSafeDismiss={latest.recoverable === false ? undefined : () => runtime.errors.dismiss(latest.id)}
             >
@@ -74,7 +74,7 @@ export function WebspringStatusLayer({ errors }: { errors: CapturedSynCloudOSErr
                 onReturn={() => { void returnLatestToWebspring(); }}
                 onOpenMailClient={(destination) => runtime.environment.browser.getWindow()?.location.assign(destination)}
               />
-            </NSEAlertBackdrop>
+            </AlertBackdrop>
           </FocusScope>
         ) : null}
       </Presence>

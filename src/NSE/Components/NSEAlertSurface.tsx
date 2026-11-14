@@ -30,7 +30,7 @@ import {
 
 
 /** The alert panel surface hosts draw alerts in. Apps present alerts with the NSEAlert object. */
-export function NSEAlertSurface({
+export function AlertSurface({
   children,
   className = "",
   appearance = "dark",
