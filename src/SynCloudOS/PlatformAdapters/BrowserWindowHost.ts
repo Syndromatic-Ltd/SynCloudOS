@@ -23,13 +23,15 @@ function projectStyles(source: Document, target: Document): () => void {
       mirror.remove();
       mirrors.delete(original);
     }
+    let previousMirror: Element | null = null;
     for (const original of originals) {
       const previous = mirrors.get(original);
-      if (previous && !changed.has(original)) continue;
-      const mirror = copy(original);
-      if (previous) previous.replaceWith(mirror);
-      else target.head.append(mirror);
+      const mirror = previous && !changed.has(original) ? previous : copy(original);
+      if (previous && previous !== mirror) previous.replaceWith(mirror);
+      const next: ChildNode | null = previousMirror ? previousMirror.nextSibling : target.head.firstChild;
+      if (next !== mirror) target.head.insertBefore(mirror, next);
       mirrors.set(original, mirror);
+      previousMirror = mirror;
     }
     for (const attribute of ["dir", "lang", "style"]) {
       const value = source.documentElement.getAttribute(attribute);
@@ -56,6 +58,7 @@ function projectStyles(source: Document, target: Document): () => void {
 interface BrowserBinding {
   readonly surface: WindowSurfaceBinding;
   readonly release: (close: boolean) => void;
+  readonly unbind: () => Promise<void>;
 }
 
 /** Browser popups are opened with an inherited origin and share one runtime. */
@@ -89,13 +92,20 @@ export function createBrowserWindowHost(
       // This runs before the first await so browser user activation is live.
       const popup = browser.open("about:blank", "_blank", `popup,width=${Math.round(bounds.width)},height=${Math.round(bounds.height)}`);
       if (!popup || popup.closed) return null;
-      const destination = popup.document;
-      destination.title = title;
-      destination.body.style.margin = "0";
-      const element = destination.createElement("div");
-      element.dataset.detachedWindow = windowId;
-      destination.body.append(element);
-      const releaseStyles = projectStyles(browser.document, destination);
+      let element: HTMLElement;
+      let releaseStyles: () => void;
+      try {
+        const destination = popup.document;
+        destination.title = title;
+        destination.body.style.margin = "0";
+        element = destination.createElement("div");
+        element.dataset.detachedWindow = windowId;
+        destination.body.append(element);
+        releaseStyles = projectStyles(browser.document, destination);
+      } catch (error) {
+        popup.close();
+        throw error;
+      }
       const surface = Object.freeze({ windowId, generation, element });
       const current = () => bindings.get(windowId)?.surface === surface;
       const activate = () => { if (current()) publish({ kind: "activated", windowId, generation }); };
@@ -109,35 +119,53 @@ export function createBrowserWindowHost(
       const check = browser.setInterval(() => {
         if (popup.closed || !element.isConnected) lost();
       }, 250);
+      let releaseObserver: MutationObserver | undefined;
+      let released!: () => void;
+      const releaseAcknowledgement = new Promise<void>(resolve => { released = resolve; });
       const release = (close: boolean) => {
         if (!current()) return;
         bindings.delete(windowId);
         browser.clearInterval(check);
         releaseStyles();
+        releaseObserver?.disconnect();
         popup.removeEventListener("focus", activate);
         popup.removeEventListener("blur", deactivate);
         popup.removeEventListener("pagehide", lost);
         browser.removeEventListener("pagehide", openerLost);
         if (close && !popup.closed) popup.close();
+        released();
+      };
+      const unbind = () => {
+        // The renderer retires its portal in the React commit. A child may
+        // still be showing an editor while that update is queued.
+        const closeWhenEmpty = () => {
+          if (!element.isConnected || !element.hasChildNodes()) release(true);
+        };
+        if (current() && !releaseObserver) {
+          releaseObserver = new element.ownerDocument.defaultView!.MutationObserver(closeWhenEmpty);
+          releaseObserver.observe(element, { childList: true });
+          closeWhenEmpty();
+        }
+        return releaseAcknowledgement;
       };
       const openerLost = () => release(true);
-      bindings.set(windowId, { surface, release });
+      bindings.set(windowId, { surface, release, unbind });
       popup.addEventListener("focus", activate);
       popup.addEventListener("blur", deactivate);
       // Browsers cannot await a veto when the user closes their native caption.
       // Treat disposal of that document as loss of presentation, never loss of data.
       popup.addEventListener("pagehide", lost);
       browser.addEventListener("pagehide", openerLost);
-      // A destination closed during preparation must never become authoritative.
-      await new Promise<void>(resolve => browser.setTimeout(resolve, 0));
-      return current() && !popup.closed && element.isConnected ? surface : null;
+      // Acknowledge a connected destination with style projection installed.
+      if (popup.closed || !element.isConnected) {
+        lost();
+        return null;
+      }
+      return surface;
     },
     async unbind(windowId, generation) {
-      // The manager publishes reattachment first. Allow React to move the
-      // retained portal before disposing its old document.
-      await new Promise<void>(resolve => browser.setTimeout(resolve, 0));
       const binding = bindings.get(windowId);
-      if (binding?.surface.generation === generation) binding.release(true);
+      if (binding?.surface.generation === generation) await binding.unbind();
     },
   };
 }

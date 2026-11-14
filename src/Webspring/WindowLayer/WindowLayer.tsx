@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useEffect, useRef, useSyncExternalStore } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useReducer, useRef, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { Presence } from "../../NSE/Animation";
 import { useNSEAppearanceProjection } from "../../NSE/Appearance";
@@ -28,6 +28,7 @@ import { useKernelSynCloudOS } from "../../SynCloudOSReact";
 import { useWindowPresentationContent } from "../WindowPresentationContent";
 import { WindowHost, type WindowLayerDiagnostic } from "./WindowHost";
 import type { WindowContentRendererRegistry } from "./WindowContentRendererRegistry";
+import { readWindowSurfaceScreen, subscribeWindowSurfaceViewport } from "./windowSurfaceScreen";
 import "./window-layer.css";
 
 export interface WindowLayerProps {
@@ -89,12 +90,17 @@ function WindowSurfaceLayer({ contentRegistry, onDiagnostic, binding }: WindowLa
     runtime.windows.snapshot,
     runtime.windows.snapshot,
   );
-  const screen = useSyncExternalStore(
+  const openerScreen = useSyncExternalStore(
     runtime.screen.subscribe,
     runtime.screen.getSnapshot,
     runtime.screen.getSnapshot,
   );
   const documentPort = binding?.element.ownerDocument ?? runtime.environment.browser.getDocument();
+  const childView = binding ? documentPort?.defaultView ?? null : null;
+  const [viewportRevision, viewportChanged] = useReducer(revision => revision + 1, 0);
+  useLayoutEffect(() => childView ? subscribeWindowSurfaceViewport(childView, viewportChanged) : undefined, [childView]);
+  const childScreen = useMemo(() => childView ? readWindowSurfaceScreen(childView) : null, [childView, viewportRevision]);
+  const screen = childScreen ?? openerScreen;
   const windowIds = managerSnapshot.windowControllerIds.filter(id => runtime.windows.presentingSurface(id) === binding);
   const transientAnchors = windowIds.flatMap((windowControllerId) => {
     const record = runtime.windows.select(windowControllerId).record;

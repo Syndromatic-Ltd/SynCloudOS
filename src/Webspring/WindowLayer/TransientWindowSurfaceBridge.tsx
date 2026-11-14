@@ -33,6 +33,7 @@ import type { WindowSurfaceRequest } from "../../NSE/hostComposition";
 import { computeNSEPopoverPosition, nsePopoverEdgePlacement, nsePopoverReference, type NSEPopoverPosition } from "../../NSE/hostComposition";
 import { logicalPlacementToFloatingPlacement } from "../../NSE/hostComposition";
 import type { WindowContentRendererRegistry } from "./WindowContentRendererRegistry";
+import { readWindowSurfaceScreen, subscribeWindowSurfaceViewport } from "./windowSurfaceScreen";
 
 export type TransientWindowSurfaceRequest = WindowSurfaceRequest;
 
@@ -118,8 +119,15 @@ function boundsEqual(left: WindowBounds, right: WindowBounds): boolean {
   return left.x === right.x && left.y === right.y && left.width === right.width && left.height === right.height;
 }
 
+function presentingView(runtime: SynCloudOSRuntime, request: TransientWindowSurfaceRequest) {
+  return request.parentWindowControllerId
+    ? runtime.windows.presentingSurface(request.parentWindowControllerId)?.element.ownerDocument.defaultView
+    : null;
+}
+
 function placementViewport(runtime: SynCloudOSRuntime, request: TransientWindowSurfaceRequest): { bounds: WindowBounds | null; bookRegion: boolean } {
-  const screen = runtime.screen.getCurrentSnapshot();
+  const view = presentingView(runtime, request);
+  const screen = view ? readWindowSurfaceScreen(view) : runtime.screen.getCurrentSnapshot();
   if (screen.geometryState !== "current") return { bounds: null, bookRegion: false };
   const { visualViewport, workArea } = screen;
   for (const bounds of [visualViewport, workArea]) {
@@ -249,16 +257,17 @@ export function createTransientWindowSurfaceBridge({
   let contentRegistration: WindowContentRegistration | null = null;
   let geometryFrame: unknown = null;
   const geometryDisposers: Array<() => void> = [];
-  let anchorResizeObserver: ResizeObserver | null = null;
-  let observedAnchors = new Set<HTMLElement>();
+  const surfaceGeometryDisposers: Array<() => void> = [];
+  let observedAnchors = new Map<HTMLElement, Document>();
+  let observedViews = new Set<Window>();
 
   function stopGeometryObservation() {
     if (geometryFrame !== null) runtime.environment.cancelAnimationFrame(geometryFrame);
     geometryFrame = null;
     for (const dispose of geometryDisposers.splice(0)) dispose();
-    anchorResizeObserver?.disconnect();
-    anchorResizeObserver = null;
+    for (const dispose of surfaceGeometryDisposers.splice(0)) dispose();
     observedAnchors.clear();
+    observedViews.clear();
   }
 
   function scheduleGeometry() {
@@ -273,10 +282,8 @@ export function createTransientWindowSurfaceBridge({
   }
 
   function refreshGeometryObservation() {
-    const anchors = new Set([...entries.values()]
-      .filter(entry => entry.phase !== "closed" && ["popover", "sheet", "modal"].includes(entry.request.role))
-      .flatMap(entry => entry.request.anchor?.isConnected ? [entry.request.anchor] : []));
-    if (disposed || runtime.signal.aborted || ![...entries.values()].some(entry => entry.phase !== "closed" && ["popover", "sheet", "modal"].includes(entry.request.role))) {
+    const surfaces = [...entries.values()].filter(entry => entry.phase !== "closed" && ["popover", "sheet", "modal"].includes(entry.request.role));
+    if (disposed || runtime.signal.aborted || !surfaces.length) {
       stopGeometryObservation();
       return;
     }
@@ -289,13 +296,36 @@ export function createTransientWindowSurfaceBridge({
         runtime.windows.subscribe(scheduleGeometry),
         runtime.environment.addWindowListener("scroll", scheduleGeometry, { capture: true, passive: true }),
       );
-      const view = runtime.environment.browser.getWindow() as (Window & { ResizeObserver?: typeof ResizeObserver }) | null;
-      anchorResizeObserver = view?.ResizeObserver ? new view.ResizeObserver(scheduleGeometry) : null;
     }
-    if (anchors.size !== observedAnchors.size || [...anchors].some(anchor => !observedAnchors.has(anchor))) {
-      anchorResizeObserver?.disconnect();
-      for (const anchor of anchors) anchorResizeObserver?.observe(anchor);
+    const anchors = new Map<HTMLElement, Document>();
+    const views = new Set<Window>();
+    for (const { request } of surfaces) {
+      const view = presentingView(runtime, request);
+      if (view) views.add(view);
+      if (request.anchor?.isConnected) anchors.set(request.anchor, request.anchor.ownerDocument);
+    }
+    if (anchors.size !== observedAnchors.size || [...anchors].some(([anchor, document]) => observedAnchors.get(anchor) !== document) ||
+        views.size !== observedViews.size || [...views].some(view => !observedViews.has(view))) {
+      for (const dispose of surfaceGeometryDisposers.splice(0)) dispose();
+      for (const view of views) {
+        surfaceGeometryDisposers.push(subscribeWindowSurfaceViewport(view, scheduleGeometry));
+        view.addEventListener("scroll", scheduleGeometry, { capture: true, passive: true });
+        surfaceGeometryDisposers.push(() => view.removeEventListener("scroll", scheduleGeometry, true));
+      }
+      const observers = new Map<Document, ResizeObserver>();
+      for (const [anchor, document] of anchors) {
+        const Observer = document.defaultView?.ResizeObserver;
+        if (!Observer) continue;
+        let observer = observers.get(document);
+        if (!observer) {
+          observer = new Observer(scheduleGeometry);
+          observers.set(document, observer);
+        }
+        observer.observe(anchor);
+      }
+      for (const observer of observers.values()) surfaceGeometryDisposers.push(() => observer.disconnect());
       observedAnchors = anchors;
+      observedViews = views;
     }
   }
 

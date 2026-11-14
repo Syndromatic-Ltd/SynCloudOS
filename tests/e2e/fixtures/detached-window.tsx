@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { NSEAlert, NSEApplication, NSEWindowController, useNSEWindow } from "../../../src/NSE/Application";
 import { NSEAppearanceProvider } from "../../../src/NSE/Appearance";
 import { atmoTheme } from "../../../src/NSE/Appearance/atmo";
+import { useNSEWindowLayoutSnapshot } from "../../../src/NSE/Layout/windowObstructions";
 import { createSynWareDefinitionFromApplicationClass } from "../../../src/SynCloudOS/AppHosting/applicationClass";
 import { createSynWareBundle } from "../../../src/SynCloudOS/AppSDK/createSynWare";
 import { createBrowserRuntimeEnvironment } from "../../../src/SynCloudOS/PlatformAdapters/BrowserRuntimeEnvironment";
@@ -16,6 +17,7 @@ import "../../../src/SynCloudOS/styles/runtime.css";
 import "../../../src/Webspring/WebspringHost.css";
 
 const appId = "com.example.transfer-native";
+const parameters = new URLSearchParams(location.search);
 let windowLoads = 0;
 let allowClose = false;
 let closeAttempts = 0;
@@ -24,6 +26,7 @@ function Editor() {
   const [draft, setDraft] = useState("");
   const [response, setResponse] = useState("");
   const window = useNSEWindow();
+  const layout = useNSEWindowLayoutSnapshot();
   return <>
     <label>Draft <input value={draft} onChange={event => setDraft(event.currentTarget.value)} /></label>
     <button type="button" onClick={() => {
@@ -38,12 +41,18 @@ function Editor() {
     <output aria-label="Last sheet response">{response}</output>
     <output aria-label="Window loads">{windowLoads}</output>
     <output aria-label="Window identity">{window?.id}</output>
+    <span hidden data-local-window-width={layout.bounds?.width} />
   </>;
 }
 
 class MainWindow extends NSEWindowController {
   static override view = Editor;
-  override windowDidLoad() { windowLoads += 1; }
+  override windowDidLoad() {
+    windowLoads += 1;
+    if (parameters.get("material") === "metal") {
+      this.window.styleMask = [...this.window.styleMask, "texturedBackground"];
+    }
+  }
   override windowShouldClose() { closeAttempts += 1; return allowClose; }
 }
 class EditorApp extends NSEApplication {
@@ -80,6 +89,8 @@ Object.defineProperty(document, "transferProbe", { value: {
   keyWindow: () => runtime.windows.snapshot().keyWindowControllerId,
 } });
 await runtime.boot({ initialPathname: "/" });
+const appearance = parameters.get("appearance");
+if (appearance === "dark" || appearance === "light") runtime.appearance.set(appearance);
 createRoot(document.getElementById("root")!).render(
   <SynCloudOSProvider runtime={runtime}>
     <NSEAppearanceProvider theme={atmoTheme} appearanceService={runtime.appearance}>

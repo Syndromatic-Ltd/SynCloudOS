@@ -19,7 +19,7 @@
  */
 
 import { WindowPresentationSlot, useWindowPresentationContent } from "../WindowPresentationContent";
-import { isNSEDOMElement, PresentingDocumentContext, WindowLayoutContext, WindowLayoutModel } from "../../NSE/hostComposition";
+import { isNSEDOMElement, WindowLayoutContext, WindowLayoutModel } from "../../NSE/hostComposition";
 
 import React, { useCallback, useLayoutEffect, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useNSEPresenceExiting, useNSEPresentation, type PresentationSpec } from "../../NSE/Animation";
@@ -113,7 +113,6 @@ export function WindowHost({
 }: WindowHostProps) {
   const runtime = useKernelSynCloudOS();
   const sharedPresentation = useWindowPresentationContent();
-  const presentingDocument = React.useContext(PresentingDocumentContext);
   const record = useSyncExternalStore(controller.subscribe, () => controller.record, () => controller.record);
   const contentState = useSyncExternalStore(controller.subscribe, () => controller.contentState, () => controller.contentState);
   useSyncExternalStore(renderers.subscribe, () => renderers.revision, () => renderers.revision);
@@ -125,9 +124,8 @@ export function WindowHost({
   const presentation = detached ? {
     kind: "desktop-window" as const,
     visible: true,
-    bounds: { x: 0, y: 0, width: presentingDocument?.defaultView?.innerWidth ?? record.bounds.width,
-      height: presentingDocument?.defaultView?.innerHeight ?? record.bounds.height },
-    safeAreaInsets: { blockStart: 0, blockEnd: 0, inlineStart: 0, inlineEnd: 0 },
+    bounds: screen.workArea,
+    safeAreaInsets: screen.safeAreaInsets,
     movable: false,
     resizable: false,
     titleBarVisible: true,

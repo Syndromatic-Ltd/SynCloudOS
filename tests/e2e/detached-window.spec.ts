@@ -27,6 +27,9 @@ test("moves the mounted Webspring window through a browser popup and returns on 
   await expect(childEditor).toBeFocused();
   expect(await child.locator("[data-window-id]").count()).toBe(1);
   expect(await child.locator("head style, head link[rel~='stylesheet']").count()).toBeGreaterThan(0);
+  await child.setViewportSize({ width: 420, height: 600 });
+  await expect(child.locator("[data-local-window-width]")).toHaveAttribute("data-local-window-width", "420");
+  expect(await page.evaluate(() => innerWidth)).toBeGreaterThan(420);
 
   await child.getByRole("button", { name: "Open sheet" }).click();
   const sheet = child.getByRole("alertdialog", { name: "Keep draft?" });
