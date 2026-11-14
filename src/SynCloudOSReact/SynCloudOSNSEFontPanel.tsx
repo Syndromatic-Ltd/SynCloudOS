@@ -19,7 +19,7 @@
  */
 
 import { useEffect, useMemo, useRef } from "react";
-import { NSEFontPanel, type NSEFontPanelCommandPort, type NSEFontPanelProps } from "../NSE/NSE";
+import { NSEFontPanel, type FontPanelCommandPort, type NSEFontPanelProps } from "../NSE/NSE";
 import { useLocaleServicesSnapshot, useKernelSynCloudOS } from "./index";
 
 export type SynCloudOSNSEFontPanelProps = Omit<NSEFontPanelProps, "commandPort">;
@@ -44,7 +44,7 @@ export function SynCloudOSNSEFontPanel(props: SynCloudOSNSEFontPanelProps) {
       if (lifecycle.current.active) abort();
     };
   }, [runtime]);
-  const commandPort = useMemo<NSEFontPanelCommandPort>(() => ({
+  const commandPort = useMemo<FontPanelCommandPort>(() => ({
     async execute(commandId, payload, signal) {
       if (!lifecycle.current.active) return { status: "cancelled" };
       const generation = lifecycle.current.generation;

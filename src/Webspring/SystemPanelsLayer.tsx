@@ -27,7 +27,7 @@ import {
   OverlayProvider,
   WindowSurfaceBridgeProvider,
   useNSEDeferredDisposal,
-  type NSEFontPanelCommandPort,
+  type FontPanelCommandPort,
 } from "../NSE/NSE";
 import type { CommandPayloadSchema } from "../SynCloudOS/SynCloudOS";
 import { useKernelSynCloudOS, useRuntimeNSEControlPort, useRuntimeNSEOverlayPort } from "../SynCloudOSReact";
@@ -104,7 +104,7 @@ export function SystemPanelsLayer({ windowContentRegistry }: { readonly windowCo
   }, [runtime]);
 
   const fontManager = useHostFontManager();
-  const fontCommandPort = useMemo(() => Object.freeze<NSEFontPanelCommandPort>({
+  const fontCommandPort = useMemo(() => Object.freeze<FontPanelCommandPort>({
     async execute(commandId, payload, signal) {
       signal.throwIfAborted();
       const responderId = textResponderId.current && runtime.responders.has(textResponderId.current) ? textResponderId.current : undefined;

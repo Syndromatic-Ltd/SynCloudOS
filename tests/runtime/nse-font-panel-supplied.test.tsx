@@ -24,9 +24,9 @@ import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testi
 import { afterEach, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { NSEFontLibrary } from "../../src/NSE/Typography/NSEFontLibrary";
+import { FontLibrary } from "../../src/NSE/Typography/NSEFontLibrary";
 import { NSEFontManager } from "../../src/NSE/Typography/NSEFontManager";
-import { NSEFontPanel, type NSEFontPanelCommandPort } from "../../src/NSE/Typography/NSEFontPanel";
+import { NSEFontPanel, type FontPanelCommandPort } from "../../src/NSE/Typography/NSEFontPanel";
 import { OverlayProvider } from "../../src/NSE/Overlays/OverlayProvider";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact/SynCloudOSProvider";
 import { useRuntimeNSEOverlayPort } from "../../src/SynCloudOSReact/nseFocusPort";
@@ -42,7 +42,7 @@ function Harness({ children }: { children: React.ReactNode }) {
 }
 function mountPanel(manager: NSEFontManager) {
   const runtime = createTestRuntime(); runtimes.push(runtime);
-  const execute = vi.fn<NSEFontPanelCommandPort["execute"]>(async () => ({ status: "executed" as const }));
+  const execute = vi.fn<FontPanelCommandPort["execute"]>(async () => ({ status: "executed" as const }));
   render(<SynCloudOSProvider runtime={runtime}><Harness><NSEFontPanel open anchor={null} manager={manager} commandPort={{ execute }} onOpenChange={() => undefined} /></Harness></SynCloudOSProvider>);
   return execute;
 }
@@ -72,7 +72,7 @@ it("emits canonical shadow coordinates at a cardinal angle without negative zero
 });
 it("updates an initially empty panel after a font is registered and tolerates removing its last face", async () => {
   const release = vi.fn();
-  const library = new NSEFontLibrary({ storage: null, preferences: null, faceHost: { register: async () => release } });
+  const library = new FontLibrary({ storage: null, preferences: null, faceHost: { register: async () => release } });
   const execute = mountPanel(new NSEFontManager({ library }));
   expect((screen.getByRole("spinbutton", { name: "Font size" }) as HTMLInputElement).disabled).toBe(true);
   const bytes = readFileSync(resolve("tests/fixtures/fx/fonts/notosans-NotoSans[wdth,wght].ttf"));
