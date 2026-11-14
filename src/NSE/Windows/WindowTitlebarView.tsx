@@ -85,13 +85,15 @@ export function WindowTitlebarView({ document, isKeyWindow, titleId, material = 
   const { className: moveClassName, style: moveStyle, onPointerDown, onDoubleClick, ...handleProps } = moveHandleProps ?? {};
   const toolbarSlot = <div ref={setToolbar} data-window-toolbar-slot="" data-window-no-drag=""
     className="nse-window-titlebar-view__toolbar">{toolbar}</div>;
-  const headerStyle = { ...nseWindowFrameStyle(document.frameViewClass), ...moveStyle, ...style, "--nse-titlebar-native-left": `${exclusion.left}px`, "--nse-titlebar-native-right": `${exclusion.right}px` } as CSSProperties;
+  const sidebarWidth = sidebar?.width ?? document.sidebarWidth;
+  const metalRail = material === "metal" && sidebarWidth !== undefined;
+  const headerStyle = { "--nse-window-titlebar-sidebar-width": sidebarWidth === undefined ? undefined : `${sidebarWidth}px`, ...nseWindowFrameStyle(document.frameViewClass), ...moveStyle, ...style, "--nse-titlebar-native-left": `${exclusion.left}px`, "--nse-titlebar-native-right": `${exclusion.right}px` } as CSSProperties;
   return <header {...handleProps} ref={header}
     className={["nse-window-titlebar-view", material === "standard" ? `nse-window__titlebar nse-window__titlebar--${variant}` : `nse-app-topbar${material === "metal" ? " nse-app-topbar-metal" : ""}`, variant === "hud" ? "nse-window__hud-titlebar" : "", moveClassName, className].filter(Boolean).join(" ")}
     style={headerStyle} data-nse-control="window" data-nse-part="header" data-nse-style={variant}
     data-nse-chrome={material === "metal" ? "metal" : "standard"} data-nse-toolbar-style={toolbarStyle}
     data-toolbar-style={toolbarStyle} data-titlebar-layout={resolvedStyle} data-titlebar-material={material}
-    data-titlebar-presentation={presentation} data-window-frame-view={document.frameViewClass ? "" : undefined}
+    data-titlebar-presentation={presentation} data-has-rail={material === "metal" ? String(metalRail) : undefined} data-window-frame-view={document.frameViewClass ? "" : undefined}
     data-titlebar-transparent={document.titlebarAppearsTransparent ? "true" : undefined} data-has-toolbar={hasToolbar ? "true" : "false"}
     data-window-titlebar="" data-window-hud-titlebar={variant === "hud" ? "" : undefined} data-window-panel-titlebar={variant === "panel" ? "" : undefined}
     data-window-active={isKeyWindow ? "true" : "false"} data-nse-key-window={isKeyWindow ? undefined : "false"}
@@ -101,7 +103,9 @@ export function WindowTitlebarView({ document, isKeyWindow, titleId, material = 
     {presentation === "floating" ? <div data-nse-part="floating-titlebar" className="nse-window-titlebar-view__floating-surface" aria-hidden="true" />
       : material === "cumulus" ? <div className="nse-app-topbar-base" aria-hidden="true"><span className="nse-app-topbar-base-glass" /></div> : null}
     <div ref={setMenu} data-nse-part="menu" data-window-menu-slot="" className="nse-window-titlebar-view__menu" data-window-no-drag="">{menuBar}</div>
-    <div className={`nse-window-titlebar-view__row${material === "metal" ? " nse-app-topbar-metal-main" : ""}`} data-window-titlebar-row="">
+    <div className={`nse-window-titlebar-view__row${material === "metal" && !metalRail ? " nse-app-topbar-metal-main" : ""}`} data-window-titlebar-row="">
+      {metalRail ? <span data-nse-part="sidebar" className="nse-window-titlebar-view__metal-rail nse-app-topbar-metal-rail" aria-hidden="true"><span className="nse-app-topbar-metal-grain" /></span> : null}
+      {metalRail ? <span className="nse-window-titlebar-view__metal-body nse-app-topbar-metal-main" aria-hidden="true" /> : null}
       {material === "metal" ? <span className="nse-app-topbar-metal-grain" aria-hidden="true" /> : null}
       {controls ? <div className="nse-window-titlebar-view__controls" data-window-no-drag="" data-syncloudos-focus-chrome="">{controls}</div> : null}
       {sidebar ? <div className="nse-window-titlebar-view__sidebar" data-window-no-drag="" style={{ width: sidebar.width }}>{sidebar.content}</div> : null}

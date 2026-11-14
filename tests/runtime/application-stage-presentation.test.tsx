@@ -159,7 +159,7 @@ describe("mounted content presentation", () => {
       return <div data-content="true">{overlay.portalHost ? createPortal(<div data-viewport-overlay="true" />, overlay.portalHost) : null}</div>;
     }
     const app = registerTestSynWare(runtime, createSynWare({
-      manifest: { schemaVersion: 1, bundleIdentifier: "com.example.content-plane", version: "1.0.0", displayName: "Content Plane", frame: { topBar: "none", presentationMotion: "content" } },
+      manifest: { schemaVersion: 1, bundleIdentifier: "com.example.content-plane", version: "1.0.0", displayName: "Content Plane", frame: { presentationMotion: "content" } },
       root: Content,
     }));
     await runtime.bundles.loadBundle(app.bundleIdentifier);
@@ -215,7 +215,7 @@ describe("stage overlay ownership", () => {
       return overlay.portalHost ? createPortal(<button data-viewport-overlay="true">Overlay action</button>, overlay.portalHost) : null;
     }
     const app = registerTestSynWare(runtime, createSynWare({
-      manifest: { schemaVersion: 1, bundleIdentifier: "com.example.overlay-owner", version: "1.0.0", displayName: "Overlay Owner", frame: { topBar: "none" } },
+      manifest: { schemaVersion: 1, bundleIdentifier: "com.example.overlay-owner", version: "1.0.0", displayName: "Overlay Owner" },
       root: Content,
     }));
     await runtime.bundles.loadBundle(app.bundleIdentifier);

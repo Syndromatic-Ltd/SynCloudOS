@@ -19,6 +19,7 @@
  */
 
 import { WindowLayoutContext, useNSEWindowChromeElement } from "../../NSE/applicationHostInterop";
+import { NSESplitViewController } from "../../NSE/DataViews/Split/NSESplitViewController";
 import { contentInlineSize } from "./contentInlineSize";
 import { useNSEWindowChromeObstruction } from "../../NSE/NSE";
 
@@ -38,6 +39,7 @@ import "./window-chrome.css";
 import { NSEUserDefaults } from "../../Foundation/NSEUserDefaults";
 
 const noSubscription = () => () => {};
+const noSplit = () => null;
 
 export { WindowTitlebarHostContext } from "../../NSE/applicationHostInterop";
 export type { WindowTitlebarDocument, WindowTitlebarHost } from "../../NSE/applicationHostInterop";
@@ -64,11 +66,18 @@ export function useNSEWindowTitlebarDocument(controller: NSEAnyWindowController,
   const isOpaque = window?.isOpaque;
   const cornerRadius = window?.cornerRadius;
   const claims = Boolean(window);
+  const root = controller.contentViewController;
+  const split = root instanceof NSESplitViewController ? root : null;
+  const splitSnapshot = useSyncExternalStore(split?.subscribe ?? noSubscription, split?.getSnapshot ?? noSplit, noSplit);
+  const pane = splitSnapshot?.items[0];
+  const sidebarWidth = splitSnapshot?.isVertical && splitSnapshot.presentation === "split"
+    && split?.splitViewItems[0]?.behavior === "sidebar" && pane && !pane.isCollapsed && pane.thickness > 0
+    ? pane.thickness : undefined;
   useLayoutEffect(() => {
     if (!host || !claims) return undefined;
-    host.setDocument(Object.freeze({ title, subtitle, documentEdited, toolbarStyle, titleVisibility, titlebarPresentation, titlebarAppearsTransparent, hasToolbar, frameViewClass, texturedBackground, fullSizeContentView, backgroundColor, isOpaque, cornerRadius }));
+    host.setDocument(Object.freeze({ title, subtitle, documentEdited, toolbarStyle, titleVisibility, titlebarPresentation, titlebarAppearsTransparent, hasToolbar, frameViewClass, texturedBackground, sidebarWidth, fullSizeContentView, backgroundColor, isOpaque, cornerRadius }));
     return undefined;
-  }, [backgroundColor, claims, cornerRadius, documentEdited, frameViewClass, fullSizeContentView, hasToolbar, host, isOpaque, subtitle, texturedBackground, title, titlebarAppearsTransparent, titlebarPresentation, titleVisibility, toolbarStyle]);
+  }, [backgroundColor, claims, cornerRadius, documentEdited, frameViewClass, fullSizeContentView, hasToolbar, host, isOpaque, sidebarWidth, subtitle, texturedBackground, title, titlebarAppearsTransparent, titlebarPresentation, titleVisibility, toolbarStyle]);
   useLayoutEffect(() => {
     if (!host || !claims) return undefined;
     return () => { host.setDocument(null); };

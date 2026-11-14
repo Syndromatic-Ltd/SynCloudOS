@@ -15,6 +15,7 @@ export interface WindowTitlebarDocument {
   readonly hasToolbar?: boolean;
   readonly frameViewClass?: import("../Application/NSEWindowFrameView").NSEWindowFrameViewClass | null;
   readonly texturedBackground?: boolean;
+  readonly sidebarWidth?: number;
   readonly fullSizeContentView?: boolean;
   readonly backgroundColor?: string | null;
   readonly isOpaque?: boolean;

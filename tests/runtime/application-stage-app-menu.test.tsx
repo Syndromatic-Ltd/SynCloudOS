@@ -66,18 +66,13 @@ vi.mock("../../src/Webspring/webspringLocale", () => ({
   })
 }));
 
-function createAppInfo(topBar: "standard" | "custom" | "none" = "standard"): SynCloudOSAppInfo {
+function createAppInfo(presentationMotion: "content" | "host" = "host"): SynCloudOSAppInfo {
   return {
     bundleIdentifier: "com.example.test-app",
     displayName: "Test App",
     shortName: "Test",
     packageName: "com.test.app",
-    frame: {
-      material: "standard",
-      background: "system",
-      smoothSurface: "off",
-      topBar
-    },
+    frame: { presentationMotion },
     icon: { src: "/test.png" },
     version: "1.0.0",
     about: { copyright: "© Test", trademark: "", tagline: "A test app" },
@@ -183,7 +178,7 @@ describe("ApplicationStageView app menu", () => {
       <HostSiteBrandingProvider value={stageSiteBranding}>
       <SynCloudOSProvider runtime={runtime}>
         <ApplicationStageView
-          app={createAppInfo("custom")}
+          app={createAppInfo("content")}
           lifecycle="active"
           quickSwitchOpen={open}
           onQuickSwitchRequest={onQuickSwitchRequest}
@@ -235,7 +230,7 @@ describe("ApplicationStageView app menu", () => {
     const back = await screen.findByRole("button", { name: "Back to Home destination" });
     expect(document.querySelectorAll(".nse-app-topbar")).toHaveLength(1);
     expect(screen.queryByText("Back", { selector: ".nse-hierarchy-stack button" })).toBeNull();
-    expect(screen.queryByRole("button", { name: "Return to Webspring" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Return to Webspring" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: "User Info" })).toBeNull();
     expect(screen.getByRole("heading", { name: "Library destination" })).toBeTruthy();
 
@@ -271,7 +266,7 @@ describe("ApplicationStageView app menu", () => {
     expect(await screen.findByRole("button", { name: "Back to Home destination" })).toBeTruthy();
   });
 
-  it.each(["custom", "none"] as const)("does not synthesise stage chrome for a %s-frame application claim", async (topBar) => {
+  it("lets a content-owned presentation keep its own navigation chrome", async () => {
     const runtime = createTestRuntime();
     runtime.apps.registerBundle(createTestBundle(
       { version: "1.0.0", bundleIdentifier: "com.example.test-app", displayName: "Test App", route: "/test" },
@@ -284,9 +279,9 @@ describe("ApplicationStageView app menu", () => {
       <SynCloudOSProvider runtime={runtime}>
         <HostSiteBrandingProvider value={stageSiteBranding}>
         <ApplicationStageView
-          app={createAppInfo(topBar)}
+          app={createAppInfo("content")}
           lifecycle="active"
-          stage={{ appId: "com.example.test-app", id: `application-stage:test-app:${topBar}`, title: "Test App", isFocused: true, zIndex: 10 }}
+          stage={{ appId: "com.example.test-app", id: "application-stage:test-app:content", title: "Test App", isFocused: true, zIndex: 10 }}
         />
         </HostSiteBrandingProvider>
       </SynCloudOSProvider>,

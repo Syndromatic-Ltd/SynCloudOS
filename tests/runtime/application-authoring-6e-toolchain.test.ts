@@ -88,13 +88,11 @@ describe("6E scaffolds", () => {
     expect(files.get("Contents/Views/SearchView.tsx")).toContain("<NSEButton");
     expect(scaffoldProjectFiles({ name: "Search", kind: "application", authoring: "function" }).get("Contents/index.tsx")).toContain("export default function");
   });
-  it.each(["separate", "inline", "function"] as const)("renders the %s content application-menu trigger as an NSEButton", authoring => {
-    const files = scaffoldProjectFiles({ name: "Search", kind: "application", authoring, contentApplicationMenu: true });
-    expect(files.get("Contents/Info.ts")).toContain('applicationMenu: { trigger: "content" }');
-    const source = [...files].filter(([path]) => path.endsWith(".tsx") && !path.includes("__tests__")).map(([, text]) => text).join("\n");
-    expect(source).toContain("useApplicationMenuTrigger()");
-    expect(source).toMatch(/<NSEButton ref=\{element => menu\?\.setAnchor\(element\)\}/);
-    expect(source).not.toMatch(/<(button|input|select|table)\b/);
+  it.each(["separate", "inline"] as const)("scaffolds a %s application-menu toolbar", authoring => {
+    const files = scaffoldProjectFiles({ name: "Search", kind: "application", authoring, applicationMenuToolbar: true });
+    const entry = files.get("Contents/index.tsx");
+    expect(entry).toContain("static override mainWindow = MainWindow");
+    expect(entry).toContain('NSEToolbarItem.applicationMenu("gear")');
   });
   it.each(["inline", "separate"])("lowers the %s decorated scaffold using the shared standard-decorator transform", async authoring => {
     const files = scaffoldProjectFiles({ name: "Search", kind: "application", authoring });
