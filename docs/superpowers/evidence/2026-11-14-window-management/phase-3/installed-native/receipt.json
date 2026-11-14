@@ -1,0 +1,46 @@
+{
+  "sdk": "45735824",
+  "site": "a71074c with existing local edits",
+  "captures": [
+    {
+      "scheme": "light",
+      "material": "cumulus",
+      "app": "about",
+      "windowId": "window:faf28ad3-6f5c-41f0-abc9-108283689147",
+      "before": "before-desktop-light-cumulus.png",
+      "childId": "window:faf28ad3-6f5c-41f0-abc9-108283689147",
+      "after": "after-desktop-light-cumulus.png",
+      "returned": true
+    },
+    {
+      "scheme": "dark",
+      "material": "metal",
+      "app": "software",
+      "windowId": "window:fd35604d-a917-4b92-867c-216b592d334e",
+      "before": "before-desktop-dark-metal.png",
+      "childId": "window:fd35604d-a917-4b92-867c-216b592d334e",
+      "after": "after-desktop-dark-metal.png",
+      "returned": true
+    },
+    {
+      "scheme": "dark",
+      "material": "cumulus",
+      "app": "about",
+      "windowId": "window:9b138d08-8e83-4531-b43a-b43ad528dbfb",
+      "before": "before-desktop-dark-cumulus.png",
+      "childId": "window:9b138d08-8e83-4531-b43a-b43ad528dbfb",
+      "after": "after-desktop-dark-cumulus.png",
+      "returned": true
+    },
+    {
+      "scheme": "light",
+      "material": "metal",
+      "app": "software",
+      "windowId": "window:345095d2-63cf-4bed-bdd4-d3b6380466cc",
+      "before": "before-desktop-light-metal.png",
+      "childId": "window:345095d2-63cf-4bed-bdd4-d3b6380466cc",
+      "after": "after-desktop-light-metal.png",
+      "returned": true
+    }
+  ]
+}
