@@ -19,7 +19,7 @@
  */
 
 import type { PasteboardRepresentation, DragEndpoint, TransferDragOperation } from "../../../SynCloudOS/SynCloudOS";
-import type { NSEDragSessionPort } from "../../Drag/dragSessionPort";
+import type { DragSessionPort } from "../../Drag/dragSessionPort";
 
 type TransferKey = string | number;
 
@@ -101,7 +101,7 @@ export interface NSEDataViewDragBinding<TId extends TransferKey> {
 }
 
 export function createNSEDataViewDragBinding<TId extends TransferKey>(options: {
-  readonly manager: Pick<NSEDragSessionPort, "begin" | "updateDestination" | "claimDrop" | "cancelUnclaimed" | "performDrop" | "cancel">;
+  readonly manager: Pick<DragSessionPort, "begin" | "updateDestination" | "claimDrop" | "cancelUnclaimed" | "performDrop" | "cancel">;
   readonly ownerSignal?: AbortSignal;
   readonly operations?: readonly TransferDragOperation[];
   readonly representations: (ids: readonly TId[]) => readonly PasteboardRepresentation[];

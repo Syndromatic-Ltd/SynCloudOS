@@ -19,24 +19,24 @@
  */
 
 import { useCallback, useLayoutEffect, useRef, useState, type RefObject } from "react";
-import type { NSECursorDescriptor, NSETrackingEvent, NSETrackingOption } from "./cursorTypes";
+import type { CursorDescriptor, NSETrackingEvent, NSETrackingOption } from "./cursorTypes";
 
 /** A tracking region needs only registration and a releasable handle. This
  * remains deliberately narrower than a kernel tracking manager so portable
  * SynWare can supply their scoped tracking client directly. */
-export interface NSETrackingRegionPort {
+export interface TrackingRegionPort {
   register(input: Readonly<Record<string, unknown>>): Readonly<{
     dispose(reason?: string): void;
   }>;
 }
 
 export function useNSETrackingRegion(options: {
-  readonly manager: NSETrackingRegionPort;
+  readonly manager: TrackingRegionPort;
   readonly ownerId: string;
   readonly windowControllerId?: string;
   readonly root: RefObject<object | null>;
   readonly options: readonly NSETrackingOption[];
-  readonly cursor?: NSECursorDescriptor;
+  readonly cursor?: CursorDescriptor;
   readonly onEvent?: (event: NSETrackingEvent) => void;
 }) {
   const [element, setElement] = useState<HTMLElement | null>(null);

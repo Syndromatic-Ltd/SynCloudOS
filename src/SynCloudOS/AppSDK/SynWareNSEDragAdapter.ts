@@ -27,19 +27,19 @@ import type { PasteboardRepresentation } from "../SynCloudOS";
 import type { AppDragClient, AppDragOperation, AppDragRepresentation, AppDragSession } from "./appClientTypes";
 
 type TransferKey = string | number;
-type NSEDragSessionPort = NonNullable<NSEColourPanelProviderProps["drag"]>["manager"];
-type NSEDragSessionHandle = ReturnType<NSEDragSessionPort["begin"]>;
+type DragSessionPort = NonNullable<NSEColourPanelProviderProps["drag"]>["manager"];
+type DragSessionHandle = ReturnType<DragSessionPort["begin"]>;
 
 /**
  * Binds NSE's private lookup handles to opaque AppSDK sessions. The mounted
  * client remains authoritative for every operation receipt and payload read;
  * application code receives neither a manager nor a manager session record.
  */
-function createNSEDragSessionPort(drag: AppDragClient, ownerToken: unknown = Object.freeze({})): NSEDragSessionPort {
-  const issuedBySession = new WeakMap<object, NSEDragSessionHandle>();
+function createNSEDragSessionPort(drag: AppDragClient, ownerToken: unknown = Object.freeze({})): DragSessionPort {
+  const issuedBySession = new WeakMap<object, DragSessionHandle>();
   const sessionsById = new Map<string, AppDragSession>();
   let sequence = 0;
-  const issue = (session: AppDragSession): NSEDragSessionHandle => {
+  const issue = (session: AppDragSession): DragSessionHandle => {
     const existing = issuedBySession.get(session as object);
     if (existing) return existing;
     const id = `synapp:nse-drag:${++sequence}`;
@@ -53,7 +53,7 @@ function createNSEDragSessionPort(drag: AppDragClient, ownerToken: unknown = Obj
     if (!session) throw new DOMException("The NSE drag session is not current for this application.", "SecurityError");
     return session;
   };
-  return Object.freeze<NSEDragSessionPort>({
+  return Object.freeze<DragSessionPort>({
     ownerToken,
     begin(input) {
       const session = drag.begin(input);

@@ -24,7 +24,7 @@
  * these two operations, while the owner decides how responder authority is
  * resolved.
  */
-export interface NSEDragCommandPort {
+export interface DragCommandPort {
   register(declaration: object): { dispose(): boolean };
   dispatch(commandId: string, payload?: unknown, options?: unknown): Promise<{ readonly status: string }>;
 }
