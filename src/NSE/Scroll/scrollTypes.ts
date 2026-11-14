@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEControllerLifetime } from "../Controllers/controllerLifetime";
+import { ControllerLifetime } from "../Controllers/controllerLifetime";
 import type { NSEControllerOwnershipOptions } from "../Controllers/ownership";
 import { NSEEdgeInsetsZero, type NSEEdgeInsets } from "../Layout/NSEEdgeInsets";
 
@@ -104,12 +104,12 @@ function cancel(frame: number) {
 }
 
 export class NSEScrollViewController {
-  readonly #lifetime: NSEControllerLifetime;
+  readonly #lifetime: ControllerLifetime;
   readonly #connections = new Set<() => void>();
   readonly contentView: NSEClipViewHandle;
 
   constructor(readonly host: HTMLElement, readonly insets: NSEEdgeInsets = NSEEdgeInsetsZero, options: NSEControllerOwnershipOptions = {}) {
-    this.#lifetime = new NSEControllerLifetime(options, { kind: "NSEScrollViewController", id: host.id || "scroll-view" });
+    this.#lifetime = new ControllerLifetime(options, { kind: "NSEScrollViewController", id: host.id || "scroll-view" });
     this.#lifetime.bind(() => this.dispose());
     const controller = this;
     this.contentView = {

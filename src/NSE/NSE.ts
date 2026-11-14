@@ -198,7 +198,7 @@ export const NSE = {
   NSEObjectController: NSEControllers.NSEObjectController,
   NSEUserDefaultsController: NSEControllers.NSEUserDefaultsController,
   NSETreeController: NSEControllers.NSETreeController,
-  NSEUpdateReadinessController: NSEControllers.NSEUpdateReadinessController,
+  NSEUpdateReadinessController: NSEControllers.UpdateReadinessController,
   useNSEController: NSEControllers.useNSEController,
   AlertSurface,
   AlertBackdrop,

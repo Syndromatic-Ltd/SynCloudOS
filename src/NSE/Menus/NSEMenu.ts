@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEControllerLifetime } from "../Controllers/controllerLifetime";
+import { ControllerLifetime } from "../Controllers/controllerLifetime";
 import { nseActionReferenceName } from "../Controls/Core/actionReference";
 import type { CommandDispatchResult, CommandPresentation, CommandValidationRequest } from "../../SynCloudOS/SynCloudOS";
 import { commandValidationRequestKey } from "../../SynCloudOS/nseRuntimeContracts";
@@ -251,7 +251,7 @@ export class NSEMenu<const Items extends readonly NSEMenuItem[] = readonly NSEMe
   readonly model: MenuModel;
   readonly items: Items;
   readonly runtime: NSEMenuRuntimePort;
-  readonly #ownership: NSEControllerLifetime;
+  readonly #ownership: ControllerLifetime;
   #snapshot: NSEMenuSnapshot = initialSnapshot;
   #listeners = new Set<() => void>();
   #validation: AbortLease | null = null;
@@ -278,7 +278,7 @@ export class NSEMenu<const Items extends readonly NSEMenuItem[] = readonly NSEMe
     };
     if (!model.id.trim()) throw new TypeError("NSE menu identifiers must not be empty.");
     this.items = ("items" in options ? options.items : []) as Items;
-    this.#ownership = new NSEControllerLifetime(options, { kind: "NSEMenu", id: model.id }, runtime.signal);
+    this.#ownership = new ControllerLifetime(options, { kind: "NSEMenu", id: model.id }, runtime.signal);
     const sectionIds = new Set<string>();
     for (const section of model.sections ?? []) {
       if (!section.id.trim()) throw new TypeError(`NSE menu section IDs must not be empty (${model.id}).`);

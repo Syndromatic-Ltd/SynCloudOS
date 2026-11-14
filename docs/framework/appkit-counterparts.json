@@ -35,6 +35,7 @@
     "NSECollectionLayoutItem": "NSCollectionLayoutItem",
     "NSEColourList": "NSColorList",
     "NSEColourPicker": "NSColorPicker",
+    "NSEController": "NSController",
     "NSEPopoverBehavior": "NSPopover.Behavior",
     "NSEPreferencePane": "NSPreferencePane",
     "NSEScroller": "NSScroller",

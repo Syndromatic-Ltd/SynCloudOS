@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { nseMenuModel } from "../../src/NSE/Menus/menuTypes";
 import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { NSEUserDefaultsController, nseUnowned, type NSEControllerOwnershipOptions } from "../../src/NSE/Controllers";
-import { enterClassApplication, instantiateInOwnerScope, NSEOwnershipScope } from "../../src/NSE/Controllers/ownership";
+import { enterClassApplication, instantiateInOwnerScope, OwnershipScope } from "../../src/NSE/Controllers/ownership";
 import { NSEMenu } from "../../src/NSE/Menus/NSEMenu";
 import { PageTurnController } from "../../src/NSE/Page/pageTurnController";
 import { NSEColourPanelController } from "../../src/NSE/Colour/ColourPanel/NSEColourPanelController";
@@ -74,7 +74,7 @@ const factories = {
 
 describe.each(Object.entries(factories))("%s controller ownership", (name, create) => {
   it("adopts an ambient owner and is disposed when that owner is released", () => {
-    const scope = new NSEOwnershipScope("application", "ambient");
+    const scope = new OwnershipScope("application", "ambient");
     const controller = instantiateInOwnerScope(scope, () => create({}));
     expect(controller.isDisposed).toBe(false);
     scope.release("application-closed");

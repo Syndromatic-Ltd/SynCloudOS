@@ -12,7 +12,7 @@ export { WindowLayoutContext, useNSEWindowChromeElement } from "./Layout/windowC
 export { useNSEScreenSafeAreaProperties } from "./Layout/screenSafeAreaProperties";
 export type { NSEViewController, NSEViewControllerClass } from "./Application/NSEViewController";
 export { nseAnimatePresentation, nseIsDismissing } from "./Application/NSEViewController";
-export { enterClassApplication, instantiateInOwnerScope, nseDisposeFor, NSEOwnershipScope } from "./Controllers/ownership";
+export { enterClassApplication, instantiateInOwnerScope, nseDisposeFor, OwnershipScope } from "./Controllers/ownership";
 export { attachNSEAuthoringContext } from "./Application/authoringContext";
 export { finalizeNSEAuthoringOwner } from "./Application/authoringLifecycle";
 export { getNSEObjectOwners } from "./Application/objectLifetime";

@@ -8,7 +8,7 @@ import { SynCloudOSLifecycleRecord, synCloudOSLifecycleSignalReason, type SynClo
 import { resolveOwnership, type NSEControllerOwnershipOptions } from "./ownership";
 
 /** Ownership for presentation controllers that do not hold an NSEController model. */
-export class NSEControllerLifetime {
+export class ControllerLifetime {
   readonly record: SynCloudOSLifecycleRecord;
   readonly #signal: AbortSignal | undefined;
   #release: (() => void) | undefined;

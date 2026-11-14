@@ -69,11 +69,11 @@ export const nseUnowned: NSEOwner = Object.freeze({ ownerSignal: undefined });
  * dispose it in order. */
 export const nseDisposeFor: unique symbol = Symbol("nse.disposeFor");
 
-export interface NSEOwnedObject {
+export interface OwnedObject {
   [nseDisposeFor](reason: SynCloudOSLifecycleDisposalReason): void;
 }
 
-const scopesBySignal = new WeakMap<AbortSignal, NSEOwnershipScope>();
+const scopesBySignal = new WeakMap<AbortSignal, OwnershipScope>();
 
 /**
  * The lifetime of one application, window controller or view controller.
@@ -81,10 +81,10 @@ const scopesBySignal = new WeakMap<AbortSignal, NSEOwnershipScope>();
  * signal; view controllers created the same way are disposed with it, before
  * the object itself.
  */
-export class NSEOwnershipScope {
+export class OwnershipScope {
   readonly #abort = new AbortController();
   readonly #authority = new AbortController();
-  readonly #adopted = new Set<NSEOwnedObject>();
+  readonly #adopted = new Set<OwnedObject>();
   readonly #resources = new Map<object, (reason: SynCloudOSLifecycleDisposalReason) => void>();
   #released = false;
   #disposing = false;
@@ -104,7 +104,7 @@ export class NSEOwnershipScope {
   /** @internal Revoked before child/owner/resource teardown begins. */
   get authoritySignal(): AbortSignal { return this.#authority.signal; }
   /** @internal Construction finalization follows the existing ownership tree. */
-  get adoptedObjects(): readonly NSEOwnedObject[] { return [...this.#adopted]; }
+  get adoptedObjects(): readonly OwnedObject[] { return [...this.#adopted]; }
 
   /** @internal Keep resource disposal separate from structural children. */
   registerResource(object: object, dispose: (reason: SynCloudOSLifecycleDisposalReason) => void): () => void {
@@ -127,7 +127,7 @@ export class NSEOwnershipScope {
   }
 
   /** Disposes `object` with this scope. Returns a function that stops doing so. */
-  adopt(object: NSEOwnedObject): () => void {
+  adopt(object: OwnedObject): () => void {
     this.assertLive();
     this.#adopted.add(object);
     return () => { this.#adopted.delete(object); };
@@ -162,27 +162,27 @@ export class NSEOwnershipScope {
   }
 }
 
-let ambientScope: NSEOwnershipScope | null = null;
+let ambientScope: OwnershipScope | null = null;
 interface PendingSelf {
-  readonly scope: NSEOwnershipScope;
+  readonly scope: OwnershipScope;
   readonly context: unknown;
   /** The base constructor registers itself for rollback if a derived constructor throws. */
-  object?: NSEOwnedObject;
+  object?: OwnedObject;
 }
 let pendingSelf: PendingSelf | null = null;
 /** @internal Nested owner finalization waits until the synchronous construction boundary. */
 export function hasNSEConstructionOwner(): boolean { return ambientScope !== null; }
 let classApplicationsLive = 0;
 
-const scopesByOwner = new WeakMap<object, NSEOwnershipScope>();
+const scopesByOwner = new WeakMap<object, OwnershipScope>();
 
 /** Associates the scope that `owner.ownerSignal` belongs to. */
-export function registerOwnerScope(owner: object, scope: NSEOwnershipScope): void {
+export function registerOwnerScope(owner: object, scope: OwnershipScope): void {
   scopesByOwner.set(owner, scope);
 }
 
 /** @internal Recorded scopes only; never evaluates application getters. */
-export function getNSEOwnerScope(owner: object): NSEOwnershipScope | undefined { return scopesByOwner.get(owner); }
+export function getNSEOwnerScope(owner: object): OwnershipScope | undefined { return scopesByOwner.get(owner); }
 
 interface ResourceRegistration {
   readonly signal: AbortSignal | undefined;
@@ -236,7 +236,7 @@ export function isNSEOwnedResource(object: object, signal: AbortSignal): boolean
 }
 
 /** @internal Synchronous construction slot, deliberately separate from pendingSelf. */
-export function constructNSEOwnedResource<T>(scope: NSEOwnershipScope, construct: () => T): T {
+export function constructNSEOwnedResource<T>(scope: OwnershipScope, construct: () => T): T {
   scope.assertLive();
   const previousAmbient = ambientScope;
   const previousSelf = pendingSelf;
@@ -262,7 +262,7 @@ export function constructNSEOwnedResource<T>(scope: NSEOwnershipScope, construct
  * `scope` as its own, together with `context` (the framework's hand-off to
  * the object it is constructing).
  */
-export function instantiateInOwnerScope<T>(scope: NSEOwnershipScope, construct: () => T, context?: unknown): T {
+export function instantiateInOwnerScope<T>(scope: OwnershipScope, construct: () => T, context?: unknown): T {
   scope.assertLive();
   const previousAmbient = ambientScope;
   const previousSelf = pendingSelf;
@@ -310,7 +310,7 @@ export function enterClassApplication(): () => void {
 export interface ResolvedOwnership {
   readonly signal: AbortSignal | undefined;
   /** The scope of the owning object, when it is one of the framework's. */
-  readonly scope: NSEOwnershipScope | undefined;
+  readonly scope: OwnershipScope | undefined;
 }
 
 /**
