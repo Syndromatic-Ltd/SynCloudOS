@@ -31,8 +31,8 @@ import { NSEButton, NSEImageView, NSESearchField, NSESegmentedControl } from "..
 import { NSEStandaloneControlHost } from "../../src/NSE/Overlays";
 import { HFXHapticEngine } from "../../src/FX/HapticsFX/HFXHapticEngine";
 import { NSEFeedbackProvider } from "../../src/NSE/Feedback";
-import { NSEDateEntry } from "../../src/NSE/DateTime/Pickers/dateEntry";
-import { NSETimeEntry } from "../../src/NSE/DateTime/Pickers/timeEntry";
+import { DateEntry } from "../../src/NSE/DateTime/Pickers/dateEntry";
+import { TimeEntry } from "../../src/NSE/DateTime/Pickers/timeEntry";
 import { MenuView } from "../../src/NSE/Menus/MenuView";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 
@@ -60,8 +60,8 @@ describe("NSE extended wrapper controls", () => {
         <NSEButton bezelStyle="texturedRounded" title="Back" image="/icons/back.png" imagePosition="imageOnly" />
         <NSESegmentedControl aria-label="Tools" segmentStyle="texturedRounded" selection={{ mode: "momentary", selectedIds: new Set() }} items={[{ id: "refresh", label: "Refresh", image: "/icons/refresh.png" }]} />
         <NSESegmentedControl aria-label="Calendar view" segmentStyle="texturedRounded" selection={{ mode: "select-one", selectedIds: new Set(["day"]), allowsEmpty: false }} items={[{ id: "day", label: "Day" }, { id: "week", label: "Week" }]} />
-        <NSEDateEntry aria-label="Due date" value={{ year: 2026, month: 6, day: 18 }} minimum={{ year: 2026, month: 6, day: 1 }} maximum={{ year: 2026, month: 6, day: 30 }} locale="en-GB"  timeZone="Europe/London" mode="text" editor="segments"/>
-        <NSETimeEntry aria-label="Start time" value={{ hour: 9, minute: 30, second: 0 }} minimum={{ hour: 8, minute: 0, second: 0 }} maximum={{ hour: 10, minute: 0, second: 0 }} minuteStep={15}  locale="en-GB" timeZone="Europe/London" editor="segments"/>
+        <DateEntry aria-label="Due date" value={{ year: 2026, month: 6, day: 18 }} minimum={{ year: 2026, month: 6, day: 1 }} maximum={{ year: 2026, month: 6, day: 30 }} locale="en-GB"  timeZone="Europe/London" mode="text" editor="segments"/>
+        <TimeEntry aria-label="Start time" value={{ hour: 9, minute: 30, second: 0 }} minimum={{ hour: 8, minute: 0, second: 0 }} maximum={{ hour: 10, minute: 0, second: 0 }} minuteStep={15}  locale="en-GB" timeZone="Europe/London" editor="segments"/>
       </div>
     );
 
@@ -99,7 +99,7 @@ describe("NSE extended wrapper controls", () => {
 
     renderWithAppearance(
       <div>
-        <NSEDateEntry
+        <DateEntry
           aria-label="Ship date"
           value={{ year: 2026, month: 6, day: 18 }}
           minimum={{ year: 2026, month: 6, day: 1 }}
@@ -107,7 +107,7 @@ describe("NSE extended wrapper controls", () => {
           locale="en-US"
           onValueChange={onDateChange}
          timeZone="Europe/London" mode="text" editor="segments"/>
-        <NSETimeEntry
+        <TimeEntry
           aria-label="Alarm"
           value={{ hour: 9, minute: 0, second: 0 }}
           minimum={{ hour: 8, minute: 0, second: 0 }}
@@ -191,7 +191,7 @@ describe("NSE extended wrapper controls", () => {
   it("renders a 12-hour TimePicker with an AM/PM field when is24HrMode is false", () => {
     // 12-hour time picker mode: hours 1–12 + AM/PM; 13:30 → 1:30 PM. The committed
     // value stays 24-hour "13:30". See controls/picker/TimePicker.js (is24HrMode + ampm field).
-    renderWithAppearance(<NSETimeEntry aria-label="Alarm" value={{ hour: 13, minute: 30, second: 0 }} hourCycle="h12"  locale="en-GB" timeZone="Europe/London" editor="segments"/>);
+    renderWithAppearance(<TimeEntry aria-label="Alarm" value={{ hour: 13, minute: 30, second: 0 }} hourCycle="h12"  locale="en-GB" timeZone="Europe/London" editor="segments"/>);
 
     expect(screen.getByRole("group", { name: "Alarm" }).getAttribute("data-value")).toBe("13:30:00");
     expect(screen.getByRole("group", { name: "Alarm" }).getAttribute("data-hour-mode")).toBe("12");
@@ -201,7 +201,7 @@ describe("NSE extended wrapper controls", () => {
 
   it("hides DatePicker fields via hideMonth/hideDay/hideYear", () => {
     // DatePicker can omit individual fields.
-    renderWithAppearance(<NSEDateEntry aria-label="Due" value={{ year: 2026, month: 6, day: 18 }}  locale="en-GB"  hiddenFields={["year"]} timeZone="Europe/London" mode="text" editor="segments"/>);
+    renderWithAppearance(<DateEntry aria-label="Due" value={{ year: 2026, month: 6, day: 18 }}  locale="en-GB"  hiddenFields={["year"]} timeZone="Europe/London" mode="text" editor="segments"/>);
 
     expect(screen.getByRole("button", { name: "Day 18" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: /^Year / })).toBeNull();

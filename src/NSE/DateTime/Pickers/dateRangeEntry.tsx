@@ -22,12 +22,12 @@ import { useNSEDatePickerDrawing } from "./datePickerDrawing";
 import { useEffect, useId, useReducer, useRef, useState } from "react";
 import { useOptionalOverlayProvider } from "../../Overlays";
 import { NSEPopover } from "../../Overlays/NSEPopover";
-import { NSEGraphicalCalendar } from "../Calendar/graphicalCalendar";
-import type { NSECalendarSelection } from "../Calendar/calendarTypes";
+import { GraphicalCalendar } from "../Calendar/graphicalCalendar";
+import type { CalendarSelection } from "../Calendar/calendarTypes";
 import { comparePlainDates, validateDateRange } from "../calendarArithmetic";
 import { formatPlainDate, parsePlainDate, plainDatePlaceholder, plainDateToday } from "../dateTimeFormatting";
-import type { NSECalendarMonth, NSEDateRange } from "../dateTimeTypes";
-import type { NSEDateRangeEntryProps } from "./datePickerTypes";
+import type { CalendarMonth, NSEDateRange } from "../dateTimeTypes";
+import type { DateRangeEntryProps } from "./datePickerTypes";
 import { createPickerTransaction, reducePickerTransaction } from "./pickerTransaction";
 import { NSEButton } from "../../Controls/Buttons/NSEButton";
 import { NSETextField } from "../../Controls/Fields/NSEFields";
@@ -42,7 +42,7 @@ const displayRange = (value: NSEDateRange, locale: string) => {
 };
 const sameRange = (left: NSEDateRange | null, right: NSEDateRange | null) => left === right || Boolean(left && right && comparePlainDates(left.start, right.start) === 0 && comparePlainDates(left.end, right.end) === 0);
 
-export function NSEDateRangeEntry({ value, defaultValue = null, onValueChange, ...props }: NSEDateRangeEntryProps) {
+export function DateRangeEntry({ value, defaultValue = null, onValueChange, ...props }: DateRangeEntryProps) {
   const drawing = useNSEDatePickerDrawing("date-range", props.isEnabled !== false);
   const disabled = props.isEnabled === false;
   const controlled = value !== undefined;
@@ -54,7 +54,7 @@ export function NSEDateRangeEntry({ value, defaultValue = null, onValueChange, .
   const [startText, setStartText] = useState(draft ? formatPlainDate(draft.start, props.locale) : "");
   const [endText, setEndText] = useState(draft ? formatPlainDate(draft.end, props.locale) : "");
   const [invalid, setInvalid] = useState(false);
-  const [visibleMonth, setVisibleMonth] = useState<NSECalendarMonth>(() => { const seed = current?.start ?? props.minimum ?? plainDateToday(props.timeZone); return { year: seed.year, month: seed.month }; });
+  const [visibleMonth, setVisibleMonth] = useState<CalendarMonth>(() => { const seed = current?.start ?? props.minimum ?? plainDateToday(props.timeZone); return { year: seed.year, month: seed.month }; });
   const triggerRef = useRef<HTMLButtonElement>(null);
   const hostRef = useRef<HTMLElement>(null);
   const selectionStartRef = useRef<NSEDateRange["start"] | null>(null);
@@ -141,7 +141,7 @@ export function NSEDateRangeEntry({ value, defaultValue = null, onValueChange, .
     publish(reversed && props.reversePolicy === "restart" ? { start: date, end: date } : reversed ? { start: date, end: anchor } : { start: anchor, end: date }, "preview");
   };
   const titleId = `date-range-picker-title-${instanceId}`;
-  const selectedDateFromCalendar = (selection: Extract<NSECalendarSelection, { kind: "range" }>) => {
+  const selectedDateFromCalendar = (selection: Extract<CalendarSelection, { kind: "range" }>) => {
     const openingAnchor = transaction.hasOpening ? transaction.opening?.start ?? null : null;
     if (openingAnchor && comparePlainDates(selection.value.start, openingAnchor) < 0 && comparePlainDates(selection.value.end, openingAnchor) === 0) return selection.value.start;
     return selection.value.end;
@@ -159,7 +159,7 @@ export function NSEDateRangeEntry({ value, defaultValue = null, onValueChange, .
     selectionStartRef.current = selected;
     publish(reversedFromOpening && props.reversePolicy !== "restart" ? { start: selected, end: openingAnchor! } : { start: selected, end: selected }, "preview");
   };
-  const calendar = <NSEGraphicalCalendar aria-label={`${props["aria-label"]} calendar`} locale={props.locale} timeZone={props.timeZone} visibleMonth={visibleMonth} selection={draft ? { kind: "range", value: draft } : { kind: "none" }} isDateDisabled={(date) => Boolean((props.minimum && comparePlainDates(date, props.minimum) < 0) || (props.maximum && comparePlainDates(date, props.maximum) > 0))} onDatePreview={previewDate} onVisibleMonthChange={setVisibleMonth} onSelectionChange={(selection) => {
+  const calendar = <GraphicalCalendar aria-label={`${props["aria-label"]} calendar`} locale={props.locale} timeZone={props.timeZone} visibleMonth={visibleMonth} selection={draft ? { kind: "range", value: draft } : { kind: "none" }} isDateDisabled={(date) => Boolean((props.minimum && comparePlainDates(date, props.minimum) < 0) || (props.maximum && comparePlainDates(date, props.maximum) > 0))} onDatePreview={previewDate} onVisibleMonthChange={setVisibleMonth} onSelectionChange={(selection) => {
     if (disabled || props.readOnly) return;
     if (selection.kind === "range") selectDate(selectedDateFromCalendar(selection));
     else if (selection.kind === "single") selectDate(selection.value);

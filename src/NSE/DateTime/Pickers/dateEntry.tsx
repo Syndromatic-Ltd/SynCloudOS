@@ -24,11 +24,11 @@ import { useOptionalOverlayProvider } from "../../Overlays";
 import { NSEPopover } from "../../Overlays/NSEPopover";
 import { clampPlainDate, comparePlainDates, daysInMonth } from "../calendarArithmetic";
 import { formatPlainDate, parsePlainDate, plainDatePlaceholder, plainDateToday } from "../dateTimeFormatting";
-import type { NSECalendarMonth, NSEPlainDate } from "../dateTimeTypes";
-import { NSEGraphicalCalendar } from "../Calendar/graphicalCalendar";
+import type { CalendarMonth, NSEPlainDate } from "../dateTimeTypes";
+import { GraphicalCalendar } from "../Calendar/graphicalCalendar";
 import { NSEPopUpButton } from "../../Menus/NSEPopUpButton";
 
-import type { NSEDateEntryEditorMode, NSEDateEntryField, NSEDateEntryProps } from "./datePickerTypes";
+import type { DateEntryEditorMode, DateEntryField, DateEntryProps } from "./datePickerTypes";
 
 export const serializePlainDate = (value: NSEPlainDate | null) => value ? `${String(value.year).padStart(4, "0")}-${String(value.month).padStart(2, "0")}-${String(value.day).padStart(2, "0")}` : "";
 const range = (minimum: number, maximum: number) => {
@@ -37,12 +37,12 @@ const range = (minimum: number, maximum: number) => {
   return values;
 };
 
-const datePartOrder = (locale: string): readonly NSEDateEntryField[] => {
+const datePartOrder = (locale: string): readonly DateEntryField[] => {
   try {
     const parts = new Intl.DateTimeFormat(locale, { year: "numeric", month: "numeric", day: "numeric", timeZone: "UTC", calendar: "gregory" })
       .formatToParts(Date.UTC(2026, 10, 22))
       .map((part) => part.type)
-      .filter((part): part is NSEDateEntryField => part === "month" || part === "day" || part === "year");
+      .filter((part): part is DateEntryField => part === "month" || part === "day" || part === "year");
     const unique = [...new Set(parts)];
     return unique.length === 3 ? unique : ["month", "day", "year"];
   } catch {
@@ -50,20 +50,20 @@ const datePartOrder = (locale: string): readonly NSEDateEntryField[] => {
   }
 };
 
-interface NSEDateSegmentEditorProps {
+interface DateSegmentEditorProps {
   readonly value: NSEPlainDate | null;
   readonly fallback: NSEPlainDate;
   readonly minimum?: NSEPlainDate;
   readonly maximum?: NSEPlainDate;
   readonly locale: string;
-  readonly hiddenFields: readonly NSEDateEntryField[];
+  readonly hiddenFields: readonly DateEntryField[];
   readonly label: string;
   readonly disabled: boolean;
   readonly readOnly: boolean;
   onCommit(value: NSEPlainDate): void;
 }
 
-function NSEDateSegmentEditor({
+function DateSegmentEditor({
   value,
   fallback,
   minimum,
@@ -74,7 +74,7 @@ function NSEDateSegmentEditor({
   disabled,
   readOnly,
   onCommit,
-}: NSEDateSegmentEditorProps) {
+}: DateSegmentEditorProps) {
   const active = value ?? fallback;
   const parts = datePartOrder(locale);
   const hidden = new Set(hiddenFields);
@@ -82,7 +82,7 @@ function NSEDateSegmentEditor({
   const minimumYear = minimum?.year ?? 1900;
   const maximumYear = maximum?.year ?? 2099;
   const yearValues = range(Math.min(minimumYear, active.year), Math.max(maximumYear, active.year));
-  const editors: Record<NSEDateEntryField, ReactNode> = {
+  const editors: Record<DateEntryField, ReactNode> = {
     month: <NSEPopUpButton key="month" className="nse-extended-inline-picker" label="Month" labelHidden value={String(active.month)} isEnabled={!(disabled || readOnly)}
       items={range(1, 12).map((month) => ({ value: String(month), title: monthFormatter.format(Date.UTC(active.year, month - 1, 1)) }))}
       onValueChange={(next) => { const month = Number(next); onCommit({ ...active, month, day: Math.min(active.day, daysInMonth(active.year, month)) }); }} />,
@@ -101,11 +101,11 @@ function NSEDateSegmentEditor({
   );
 }
 
-export function NSEDateEntry({
+export function DateEntry({
   value, defaultValue = null, mode = "automatic", parentResponderId, onValueChange,
   name, editor, hiddenFields, locale, timeZone, minimum, maximum, isEnabled = true, readOnly, required, renderEditor, normalizeValue,
   "aria-label": label, onFocusCapture, onBlurCapture, ...hostProps
-}: NSEDateEntryProps) {
+}: DateEntryProps) {
   const drawing = useNSEDatePickerDrawing("date", isEnabled, undefined, hostProps);
   const disabled = !isEnabled;
   const controlled = value !== undefined;
@@ -151,8 +151,8 @@ export function NSEDateEntry({
   const calendarValue = calendarDraft ?? current;
   // The calendar pages freely (header, PageUp/PageDown); it re-seeds to the
   // value's month when the value moves or the popover opens.
-  const seedMonth = (): NSECalendarMonth => { const seed = calendarValue ?? minimum ?? plainDateToday(timeZone); return { year: seed.year, month: seed.month }; };
-  const [visibleMonth, setVisibleMonth] = useState<NSECalendarMonth>(seedMonth);
+  const seedMonth = (): CalendarMonth => { const seed = calendarValue ?? minimum ?? plainDateToday(timeZone); return { year: seed.year, month: seed.month }; };
+  const [visibleMonth, setVisibleMonth] = useState<CalendarMonth>(seedMonth);
   useEffect(() => { setVisibleMonth(seedMonth()); }, [calendarValue?.year, calendarValue?.month, open]);
   const closeCalendar = () => {
     setOpen(false);
@@ -168,7 +168,7 @@ export function NSEDateEntry({
     setOpen(false);
     queueMicrotask(() => triggerRef.current?.focus({ preventScroll: true }));
   };
-  const calendar = <NSEGraphicalCalendar aria-label={`${label} calendar`} locale={locale} timeZone={timeZone} visibleMonth={visibleMonth} onVisibleMonthChange={setVisibleMonth} selection={calendarValue ? { kind: "single", value: calendarValue } : { kind: "none" }} isDateDisabled={(date) => Boolean((minimum && comparePlainDates(date, minimum) < 0) || (maximum && comparePlainDates(date, maximum) > 0))} onSelectionChange={(selection) => {
+  const calendar = <GraphicalCalendar aria-label={`${label} calendar`} locale={locale} timeZone={timeZone} visibleMonth={visibleMonth} onVisibleMonthChange={setVisibleMonth} selection={calendarValue ? { kind: "single", value: calendarValue } : { kind: "none" }} isDateDisabled={(date) => Boolean((minimum && comparePlainDates(date, minimum) < 0) || (maximum && comparePlainDates(date, maximum) > 0))} onSelectionChange={(selection) => {
     if (selection.kind !== "single" || disabled || readOnly) return;
     const next = clampPlainDate(selection.value, minimum, maximum);
     // Inline (graphical) calendars are live, as NSDatePicker's are. In the
@@ -186,9 +186,9 @@ export function NSEDateEntry({
     setDraft(formatPlainDate(normalized, locale));
     setInvalid(false);
   };
-  const editorMode: NSEDateEntryEditorMode = editor ?? "text";
+  const editorMode: DateEntryEditorMode = editor ?? "text";
   const segmentEditor = editorMode === "segments" ? (
-    <NSEDateSegmentEditor
+    <DateSegmentEditor
       value={current}
       fallback={minimum ?? plainDateToday(timeZone)}
       minimum={minimum}

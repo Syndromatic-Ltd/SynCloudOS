@@ -20,9 +20,9 @@
 
 import { useNSEDatePickerDrawing } from "./datePickerDrawing";
 import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
-import { NSEGraphicalClock } from "../Calendar/graphicalClock";
+import { GraphicalClock } from "../Calendar/graphicalClock";
 import type { NSEPlainDate, NSEPlainTime } from "../dateTimeTypes";
-import type { NSETimeEntryEditorMode, NSETimeEntryProps } from "./datePickerTypes";
+import type { TimeEntryEditorMode, TimeEntryProps } from "./datePickerTypes";
 
 import { NSEButton } from "../../Controls/Buttons/NSEButton";
 import { NSEStepper } from "../../Controls/Values/NSEStepper";
@@ -67,7 +67,7 @@ const nearestMinuteForHour = (hour: number, minute: number, minimum: NSEPlainTim
   return values.reduce((nearest, candidate) => Math.abs(candidate - minute) < Math.abs(nearest - minute) ? candidate : nearest, values[0] ?? 0);
 };
 
-interface NSEInlineSelectProps {
+interface InlineSelectProps {
   readonly label: string;
   readonly value: number | string;
   readonly values: readonly (number | string)[];
@@ -76,14 +76,14 @@ interface NSEInlineSelectProps {
   onChange(value: string): void;
 }
 
-function NSEInlineSelect({ label, value, values, disabled, format, onChange }: NSEInlineSelectProps) {
+function InlineSelect({ label, value, values, disabled, format, onChange }: InlineSelectProps) {
   return <NSEPopUpButton className="nse-extended-inline-picker" label={label} labelHidden value={String(value)} isEnabled={!disabled}
     items={values.map((option) => ({ value: String(option), title: format?.(option) ?? String(option) }))} onValueChange={onChange} />;
 }
 
-type NSETimeSegment = "hour" | "minute" | "ampm";
+type TimeSegment = "hour" | "minute" | "ampm";
 
-interface NSETimeSegmentEditorProps {
+interface TimeSegmentEditorProps {
   readonly value: NSEPlainTime | null;
   readonly fallback: NSEPlainTime;
   readonly minimum: NSEPlainTime;
@@ -97,7 +97,7 @@ interface NSETimeSegmentEditorProps {
   onCommit(value: NSEPlainTime): void;
 }
 
-function NSETimeSegmentEditor({
+function TimeSegmentEditor({
   value,
   fallback,
   minimum,
@@ -109,7 +109,7 @@ function NSETimeSegmentEditor({
   disabled,
   readOnly,
   onCommit,
-}: NSETimeSegmentEditorProps) {
+}: TimeSegmentEditorProps) {
   const active = value ?? fallback;
   const parts = timePartOrder(locale);
   const validHours = range(minimum.hour, maximum.hour);
@@ -131,12 +131,12 @@ function NSETimeSegmentEditor({
       ? active.minute
       : nearestMinuteForHour(nextHour, active.minute, minimum, maximum, minuteStep),
   });
-  const editors: Record<NSETimeSegment, ReactNode> = {
-    hour: <NSEInlineSelect key="hour" label="Hour" value={displayHour} values={hourValues} disabled={disabled || readOnly} onChange={(hour) => commitHour(hourCycle === "h12" ? Number(hour) % 12 + (period === "pm" ? 12 : 0) : Number(hour))} />,
-    minute: <NSEInlineSelect key="minute" label="Minute" value={active.minute} values={minuteValues} disabled={disabled || readOnly} format={(minute) => String(minute).padStart(2, "0")} onChange={(minute) => onCommit({ ...active, minute: Number(minute) })} />,
-    ampm: <NSEInlineSelect key="ampm" label="AM/PM" value={period} values={periodValues} disabled={disabled || readOnly} format={(next) => String(next).toUpperCase()} onChange={(next) => commitHour(hourForPeriod(next as "am" | "pm"))} />,
+  const editors: Record<TimeSegment, ReactNode> = {
+    hour: <InlineSelect key="hour" label="Hour" value={displayHour} values={hourValues} disabled={disabled || readOnly} onChange={(hour) => commitHour(hourCycle === "h12" ? Number(hour) % 12 + (period === "pm" ? 12 : 0) : Number(hour))} />,
+    minute: <InlineSelect key="minute" label="Minute" value={active.minute} values={minuteValues} disabled={disabled || readOnly} format={(minute) => String(minute).padStart(2, "0")} onChange={(minute) => onCommit({ ...active, minute: Number(minute) })} />,
+    ampm: <InlineSelect key="ampm" label="AM/PM" value={period} values={periodValues} disabled={disabled || readOnly} format={(next) => String(next).toUpperCase()} onChange={(next) => commitHour(hourForPeriod(next as "am" | "pm"))} />,
   };
-  const fieldOrder: readonly NSETimeSegment[] = hourCycle === "h12" ? [...parts, "ampm"] : parts;
+  const fieldOrder: readonly TimeSegment[] = hourCycle === "h12" ? [...parts, "ampm"] : parts;
 
   return (
     <span role="group" aria-label={label} data-value={serializePlainTime(active)} data-locale-order={parts.join("-")} data-hour-mode={hourCycle === "h12" ? "12" : "24"} data-nse-part="segments" data-field-editor="segments">
@@ -164,7 +164,7 @@ const dayPeriodLabels = (locale: string) => {
   return { am: label(9), pm: label(15) };
 };
 
-interface NSETimeFieldEditorProps {
+interface TimeFieldEditorProps {
   readonly value: NSEPlainTime;
   readonly minimum: NSEPlainTime;
   readonly maximum: NSEPlainTime;
@@ -186,12 +186,12 @@ interface NSETimeFieldEditorProps {
  * (and a day period on 12-hour clocks) as keyboard segments, a stepper that
  * steps the segment last focused, and the analogue clock in a popover.
  */
-function NSETimeFieldEditor({ value, minimum, maximum, locale, timeZone, date, hourCycle, minuteStep, label, disabled, readOnly, parentResponderId, presentsClockOverlay, onChange }: NSETimeFieldEditorProps) {
-  const [segment, setSegment] = useState<NSETimeSegment>("minute");
+function TimeFieldEditor({ value, minimum, maximum, locale, timeZone, date, hourCycle, minuteStep, label, disabled, readOnly, parentResponderId, presentsClockOverlay, onChange }: TimeFieldEditorProps) {
+  const [segment, setSegment] = useState<TimeSegment>("minute");
   const [open, setOpen] = useState(false);
-  const typed = useRef<{ segment: NSETimeSegment; text: string } | null>(null);
+  const typed = useRef<{ segment: TimeSegment; text: string } | null>(null);
   const clockButton = useRef<HTMLButtonElement>(null);
-  const segmentRefs = useRef(new Map<NSETimeSegment, HTMLElement>());
+  const segmentRefs = useRef(new Map<TimeSegment, HTMLElement>());
   const overlayProvider = useOptionalOverlayProvider();
   const overlay = presentsClockOverlay ? overlayProvider : null;
   const instanceId = useId().replace(/:/g, "");
@@ -207,19 +207,19 @@ function NSETimeFieldEditor({ value, minimum, maximum, locale, timeZone, date, h
   };
   const periods = dayPeriodLabels(locale);
   const displayHour = hourCycle === "h12" ? value.hour % 12 || 12 : value.hour;
-  const order: readonly NSETimeSegment[] = hourCycle === "h12" ? [...timePartOrder(locale), "ampm"] : timePartOrder(locale);
+  const order: readonly TimeSegment[] = hourCycle === "h12" ? [...timePartOrder(locale), "ampm"] : timePartOrder(locale);
   // Segments step within their own unit, as AppKit's do: minutes wrap inside
   // the hour and hours inside the day; the result is then held to the bounds.
-  const step = (part: NSETimeSegment, direction: 1 | -1) => {
+  const step = (part: TimeSegment, direction: 1 | -1) => {
     if (part === "hour") commit(((value.hour + direction + 24) % 24) * 60 + value.minute);
     else if (part === "minute") commit(value.hour * 60 + ((value.minute + direction * minuteStep + 60) % 60));
     else commit((minutes + 720) % 1440);
   };
-  const move = (from: NSETimeSegment, direction: 1 | -1) => {
+  const move = (from: TimeSegment, direction: 1 | -1) => {
     const next = order[order.indexOf(from) + direction];
     if (next) segmentRefs.current.get(next)?.focus();
   };
-  const type = (part: NSETimeSegment, digit: string) => {
+  const type = (part: TimeSegment, digit: string) => {
     const buffer = typed.current?.segment === part ? typed.current.text + digit : digit;
     const number = Number(buffer);
     if (part === "minute") {
@@ -235,14 +235,14 @@ function NSETimeFieldEditor({ value, minimum, maximum, locale, timeZone, date, h
     typed.current = buffer.length >= 2 || number * 10 > top ? null : { segment: part, text: buffer };
     if (!typed.current) move(part, 1);
   };
-  const keyDown = (part: NSETimeSegment) => (event: KeyboardEvent<HTMLElement>) => {
+  const keyDown = (part: TimeSegment) => (event: KeyboardEvent<HTMLElement>) => {
     if (inert) return;
     if (event.key === "ArrowUp" || event.key === "ArrowDown") { event.preventDefault(); typed.current = null; step(part, event.key === "ArrowUp" ? 1 : -1); }
     else if (event.key === "ArrowRight" || event.key === "ArrowLeft") { event.preventDefault(); typed.current = null; move(part, event.key === "ArrowRight" ? 1 : -1); }
     else if (part !== "ampm" && /^\d$/.test(event.key)) { event.preventDefault(); type(part, event.key); }
     else if (part === "ampm" && /^[ap]$/i.test(event.key)) { event.preventDefault(); const pm = event.key.toLowerCase() === "p"; if (pm !== value.hour >= 12) step("ampm", 1); }
   };
-  const segmentProps = (part: NSETimeSegment, now: number, min: number, max: number, text: string, name: string) => ({
+  const segmentProps = (part: TimeSegment, now: number, min: number, max: number, text: string, name: string) => ({
     ref: (node: HTMLElement | null) => { if (node) segmentRefs.current.set(part, node); else segmentRefs.current.delete(part); },
     role: "spinbutton" as const,
     tabIndex: disabled ? -1 : 0,
@@ -257,7 +257,7 @@ function NSETimeFieldEditor({ value, minimum, maximum, locale, timeZone, date, h
     onFocus: () => { setSegment(part); typed.current = null; },
     onKeyDown: keyDown(part),
   });
-  const segments: Record<NSETimeSegment, ReactNode> = {
+  const segments: Record<TimeSegment, ReactNode> = {
     hour: <span key="hour" {...segmentProps("hour", displayHour, hourCycle === "h12" ? 1 : 0, hourCycle === "h12" ? 12 : 23, String(displayHour), "Hour")}>{hourCycle === "h12" ? String(displayHour) : String(displayHour).padStart(2, "0")}</span>,
     minute: <span key="minute" {...segmentProps("minute", value.minute, 0, 59, String(value.minute).padStart(2, "0"), "Minute")}>{String(value.minute).padStart(2, "0")}</span>,
     ampm: <span key="ampm" {...segmentProps("ampm", value.hour >= 12 ? 1 : 0, 0, 1, value.hour >= 12 ? periods.pm : periods.am, "AM/PM")}>{value.hour >= 12 ? periods.pm : periods.am}</span>,
@@ -279,18 +279,18 @@ function NSETimeFieldEditor({ value, minimum, maximum, locale, timeZone, date, h
       {overlay ? <button ref={clockButton} type="button" data-nse-part="clock-affix" aria-label={`Show ${label.toLowerCase()} clock`} aria-expanded={open} disabled={inert} onClick={() => setOpen(true)} /> : null}
       {overlay ? <NSEPopover id={`time-field-${instanceId}`} open={open} anchor={clockButton.current} parentWindowControllerId="time-picker-window" parentResponderId={parentResponderId} presentation={{ mode: "automatic" }} surface="overlay" labelledBy={titleId} onOpenChange={(next) => { if (!next) { setOpen(false); queueMicrotask(() => clockButton.current?.focus({ preventScroll: true })); } }}>
         <section data-nse-part="clock-sheet"><h2 data-nse-part="title" id={titleId} className="nse-control-visually-hidden">{label} clock</h2>
-          <NSEGraphicalClock aria-label={label} locale={locale} timeZone={timeZone} date={date ?? { year: 1970, month: 1, day: 1 }} value={value} isEnabled={!inert} minuteStep={minuteStep} hourCycle={hourCycle} onValueChange={(next, phase) => commit(next.hour * 60 + next.minute, phase)} />
+          <GraphicalClock aria-label={label} locale={locale} timeZone={timeZone} date={date ?? { year: 1970, month: 1, day: 1 }} value={value} isEnabled={!inert} minuteStep={minuteStep} hourCycle={hourCycle} onValueChange={(next, phase) => commit(next.hour * 60 + next.minute, phase)} />
         </section>
       </NSEPopover> : null}
     </span>
   );
 }
 
-export function NSETimeEntry({
+export function TimeEntry({
   value, defaultValue = null, onValueChange,
   name, editor: requestedEditor, locale, timeZone, date, minimum: requestedMinimum, maximum: requestedMaximum, minuteStep: requestedMinuteStep, hourCycle: requestedHourCycle, isEnabled = true, readOnly, required, renderEditor, parentResponderId, presentsClockOverlay = true,
   "aria-label": label, onFocusCapture, onBlurCapture, ...hostProps
-}: NSETimeEntryProps) {
+}: TimeEntryProps) {
   const drawing = useNSEDatePickerDrawing("time", isEnabled, undefined, hostProps);
   const disabled = !isEnabled;
   const controlled = value !== undefined;
@@ -322,10 +322,10 @@ export function NSETimeEntry({
   const localeHourCycle = new Intl.DateTimeFormat(locale, { hour: "numeric" }).resolvedOptions().hourCycle;
   const hourCycle = requestedHourCycle ?? (localeHourCycle === "h11" || localeHourCycle === "h12" ? "h12" : "h24");
   const minuteStep = Math.max(1, Math.min(60, Math.floor(requestedMinuteStep ?? 1)));
-  const editorMode: NSETimeEntryEditorMode = requestedEditor ?? "field";
+  const editorMode: TimeEntryEditorMode = requestedEditor ?? "field";
   const customEditor = renderEditor?.({ value: current, isEnabled: !disabled, readOnly: Boolean(readOnly), commit: (next) => change(next, "commit") });
   const editor = customEditor ?? (editorMode === "segments" ? (
-    <NSETimeSegmentEditor
+    <TimeSegmentEditor
       value={current}
       fallback={fallback}
       minimum={minimum}
@@ -339,9 +339,9 @@ export function NSETimeEntry({
       onCommit={(next) => change(next, "commit")}
     />
   ) : current && editorMode === "field" ? (
-    <NSETimeFieldEditor presentsClockOverlay={presentsClockOverlay} value={current} minimum={minimum} maximum={maximum} locale={locale} timeZone={timeZone} date={date} hourCycle={hourCycle} minuteStep={minuteStep} label={label} disabled={Boolean(disabled)} readOnly={Boolean(readOnly)} parentResponderId={parentResponderId} onChange={change} />
+    <TimeFieldEditor presentsClockOverlay={presentsClockOverlay} value={current} minimum={minimum} maximum={maximum} locale={locale} timeZone={timeZone} date={date} hourCycle={hourCycle} minuteStep={minuteStep} label={label} disabled={Boolean(disabled)} readOnly={Boolean(readOnly)} parentResponderId={parentResponderId} onChange={change} />
   ) : current ? (
-    <NSEGraphicalClock aria-label={label} locale={locale} timeZone={timeZone} date={date ?? { year: 1970, month: 1, day: 1 }} value={current} isEnabled={!(disabled || readOnly)} minuteStep={minuteStep} hourCycle={hourCycle} onValueChange={change} />
+    <GraphicalClock aria-label={label} locale={locale} timeZone={timeZone} date={date ?? { year: 1970, month: 1, day: 1 }} value={current} isEnabled={!(disabled || readOnly)} minuteStep={minuteStep} hourCycle={hourCycle} onValueChange={change} />
   ) : (
     <NSEButton
       appearance="aqua"

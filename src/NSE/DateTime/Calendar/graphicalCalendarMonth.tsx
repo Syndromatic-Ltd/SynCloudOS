@@ -18,11 +18,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { NSEGraphicalCalendarProps } from "./calendarTypes";
-import { NSEGraphicalCalendar } from "./graphicalCalendar";
+import type { GraphicalCalendarProps } from "./calendarTypes";
+import { GraphicalCalendar } from "./graphicalCalendar";
 
 export { buildCalendarMonthGrid } from "./graphicalCalendar";
 
-export function NSEGraphicalCalendarMonth(props: NSEGraphicalCalendarProps) {
-  return <NSEGraphicalCalendar {...props} variant="month" />;
+export function GraphicalCalendarMonth(props: GraphicalCalendarProps) {
+  return <GraphicalCalendar {...props} variant="month" />;
 }

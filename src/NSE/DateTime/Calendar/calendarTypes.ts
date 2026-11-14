@@ -18,23 +18,23 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { NSECalendarMonth, NSEDateRange, NSEPlainDate, NSEPlainTime } from "../dateTimeTypes";
+import type { CalendarMonth, NSEDateRange, NSEPlainDate, NSEPlainTime } from "../dateTimeTypes";
 
-export type NSECalendarSelectionMode = "none" | "single" | "range" | "multiple";
-export type NSECalendarSelection =
+export type CalendarSelectionMode = "none" | "single" | "range" | "multiple";
+export type CalendarSelection =
   | Readonly<{ kind: "none" }>
   | Readonly<{ kind: "single"; value: NSEPlainDate }>
   | Readonly<{ kind: "range"; value: NSEDateRange }>
   | Readonly<{ kind: "multiple"; value: readonly NSEPlainDate[] }>;
-export type NSECalendarNavigationUnit = "month" | "year" | "decade";
-export interface NSECalendarNavigationRequest { readonly unit: NSECalendarNavigationUnit; readonly direction: -1 | 1; readonly reason: "button" | "keyboard" | "swipe" }
+export type CalendarNavigationUnit = "month" | "year" | "decade";
+export interface CalendarNavigationRequest { readonly unit: CalendarNavigationUnit; readonly direction: -1 | 1; readonly reason: "button" | "keyboard" | "swipe" }
 export interface NSECalendarEventIndicator { readonly id: string; readonly label: string; readonly tone?: "neutral" | "accent" | "warning" | "critical"; readonly count?: number }
-export interface NSEGraphicalCalendarProps {
+export interface GraphicalCalendarProps {
   readonly "aria-label": string;
   readonly locale: string;
   readonly timeZone: string;
-  readonly visibleMonth: NSECalendarMonth;
-  readonly selection: NSECalendarSelection;
+  readonly visibleMonth: CalendarMonth;
+  readonly selection: CalendarSelection;
   readonly enableSwipeNavigation?: boolean;
   readonly reducedMotion?: boolean;
   readonly dir?: "ltr" | "rtl";
@@ -45,10 +45,10 @@ export interface NSEGraphicalCalendarProps {
   isDateDisabled(date: NSEPlainDate): boolean;
   eventIndicatorsForDate?(date: NSEPlainDate): readonly NSECalendarEventIndicator[];
   onDatePreview?(date: NSEPlainDate, reason: "hover" | "focus"): void;
-  onVisibleMonthChange?(month: NSECalendarMonth, request: NSECalendarNavigationRequest): void;
-  onSelectionChange?(selection: NSECalendarSelection & { readonly reason?: string }): void;
+  onVisibleMonthChange?(month: CalendarMonth, request: CalendarNavigationRequest): void;
+  onSelectionChange?(selection: CalendarSelection & { readonly reason?: string }): void;
 }
-export interface NSEGraphicalClockProps {
+export interface GraphicalClockProps {
   readonly "aria-label": string;
   readonly locale: string;
   readonly timeZone: string;

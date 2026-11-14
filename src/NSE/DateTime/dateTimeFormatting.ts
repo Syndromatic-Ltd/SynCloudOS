@@ -19,7 +19,7 @@
  */
 
 import { civilToEpochDay, validatePlainDate, validatePlainTime } from "./calendarArithmetic";
-import type { NSEDateParseResult, NSEPlainDate, NSEPlainTime } from "./dateTimeTypes";
+import type { DateParseResult, NSEPlainDate, NSEPlainTime } from "./dateTimeTypes";
 
 export function formatPlainDate(value: NSEPlainDate, locale: string, options: Intl.DateTimeFormatOptions = {}): string {
   const date = validatePlainDate(value);
@@ -58,7 +58,7 @@ function digitMap(locale: string): Map<string, string> {
   return new Map(Array.from({ length: 10 }, (_, value) => [formatter.format(value), String(value)]));
 }
 
-export function parsePlainDate(text: string, locale: string): NSEDateParseResult {
+export function parsePlainDate(text: string, locale: string): DateParseResult {
   const map = digitMap(locale);
   let normalized = "";
   for (const character of text.normalize("NFKC")) normalized += map.get(character) ?? character;
