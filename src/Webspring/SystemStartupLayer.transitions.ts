@@ -19,7 +19,7 @@
  */
 
 import { useMemo } from "react";
-import { NSEAnimationDefaults, useNSEAnimationEnvironment, type PresentationSpec, type TransformComponents } from "../NSE/Animation";
+import { AnimationDefaults, useNSEAnimationEnvironment, type PresentationSpec, type TransformComponents } from "../NSE/Animation";
 
 /** AnimationFX presentations for one part of the boot screen. */
 export interface SystemStartupMotionPreset {
@@ -35,8 +35,8 @@ export interface SystemStartupMotion {
   readonly bootOverlayReveal: SystemStartupMotionPreset;
 }
 
-const { emphasized } = NSEAnimationDefaults.easing;
-const reducedFade = NSEAnimationDefaults.durationSeconds.reducedFade;
+const { emphasized } = AnimationDefaults.easing;
+const reducedFade = AnimationDefaults.durationSeconds.reducedFade;
 // Framer tweens given only a duration ease with easeInOut (CSS ease-in-out).
 const framerTween = "ease-in-out";
 

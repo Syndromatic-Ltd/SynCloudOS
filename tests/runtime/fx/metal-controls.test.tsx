@@ -22,8 +22,8 @@
 import React, { StrictMode } from "react";
 import { render, fireEvent, cleanup } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { NSEMaterialLighting } from "../../../src/NSE/Appearance/NSEMaterialLighting";
-import { NSEMaterialLightingProvider } from "../../../src/NSE/Appearance/MetalThumb";
+import { MaterialLighting } from "../../../src/NSE/Appearance/NSEMaterialLighting";
+import { MaterialLightingProvider } from "../../../src/NSE/Appearance/MetalThumb";
 import { NSESlider } from "../../../src/NSE/Controls/Values/NSESlider";
 import { NSESwitch } from "../../../src/NSE/Controls/Fields/NSEFields";
 import { MFXAttitude } from "../../../src/FX/MotionFX/MFXAttitude";
@@ -84,7 +84,7 @@ function harness() {
     frames,
     states,
     samples,
-    store: new NSEMaterialLighting(create, scheduler),
+    store: new MaterialLighting(create, scheduler),
     sample: (roll: number, pitch: number) => {
       for (const callback of samples)
         callback({
@@ -116,7 +116,7 @@ describe("metal material controls", () => {
   it("keeps standard and disabled-only control trees entirely passive", () => {
     const h = harness(),
       view = render(
-        <NSEMaterialLightingProvider value={h.store}>
+        <MaterialLightingProvider value={h.store}>
           <NSESlider aria-label="Standard" value={20} />
           <NSESlider
             thumbMaterial="metal"
@@ -130,7 +130,7 @@ describe("metal material controls", () => {
             thumbMaterial="metal"
             aria-label="Disabled switch"
           />
-        </NSEMaterialLightingProvider>,
+        </MaterialLightingProvider>,
       );
     expect(h.create).not.toHaveBeenCalled();
     expect(h.states.size).toBe(0);
@@ -206,7 +206,7 @@ describe("metal material controls", () => {
       volume = vi.fn(),
       toggle = vi.fn();
     const view = render(
-      <NSEMaterialLightingProvider value={h.store}>
+      <MaterialLightingProvider value={h.store}>
         <NSESlider aria-label="Standard" value={50} />
         <NSESlider
           thumbMaterial="metal"
@@ -226,7 +226,7 @@ describe("metal material controls", () => {
           thumbMaterial="metal"
           aria-label="Sound"
         />
-      </NSEMaterialLightingProvider>,
+      </MaterialLightingProvider>,
     );
     expect(h.create).toHaveBeenCalledTimes(1);
     fireEvent.keyDown(view.getByRole("slider", { name: "Volume" }), {
@@ -250,10 +250,10 @@ describe("metal material controls", () => {
     const h = harness(),
       view = render(
         <StrictMode>
-          <NSEMaterialLightingProvider value={h.store}>
+          <MaterialLightingProvider value={h.store}>
             <NSESlider thumbMaterial="metal" aria-label="Volume" value={40} />
             <NSESwitch state="on" thumbMaterial="metal" aria-label="Sound" />
-          </NSEMaterialLightingProvider>
+          </MaterialLightingProvider>
         </StrictMode>,
       );
     expect(h.samples.size).toBe(1);

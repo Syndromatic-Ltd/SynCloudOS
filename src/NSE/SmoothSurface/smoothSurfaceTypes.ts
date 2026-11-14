@@ -170,7 +170,7 @@ export interface SmoothSurfaceProps {
   readonly style: SmoothSurfaceStyle;
 }
 
-export interface NSEOptionalSmoothSurfaceProps {
+export interface OptionalSmoothSurfaceProps {
   readonly className?: string;
   readonly style?: SmoothSurfaceStyle;
 }

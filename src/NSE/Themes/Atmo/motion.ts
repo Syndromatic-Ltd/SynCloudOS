@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEAnimationDefaults } from "../../Appearance/NSEAnimationDefaults";
+import { AnimationDefaults } from "../../Appearance/NSEAnimationDefaults";
 
 /**
  * Atmo's motion: the timing curves and durations its views animate with. NSEAnimationContext.current
@@ -26,6 +26,6 @@ import { NSEAnimationDefaults } from "../../Appearance/NSEAnimationDefaults";
  * emphasised entrances (`emphasized`), arrivals (`decelerate`) or exits (`accelerate`).
  */
 export const atmoMotion = Object.freeze({
-  timingFunctions: NSEAnimationDefaults.easing,
-  durations: NSEAnimationDefaults.durationSeconds,
+  timingFunctions: AnimationDefaults.easing,
+  durations: AnimationDefaults.durationSeconds,
 });

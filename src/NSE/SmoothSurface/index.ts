@@ -80,5 +80,5 @@ export type {
   SmoothSurfaceShadowConfig,
   SmoothSurfaceStyle,
   SmoothSurfaceStyleValue,
-  NSEOptionalSmoothSurfaceProps
+  OptionalSmoothSurfaceProps
 } from "./smoothSurfaceTypes";

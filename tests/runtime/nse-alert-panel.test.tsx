@@ -22,7 +22,7 @@
 import React from "react";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { NSEAnimationDefaults, AnimationEnvironmentProvider, type Animator } from "../../src/NSE/Animation";
+import { AnimationDefaults, AnimationEnvironmentProvider, type Animator } from "../../src/NSE/Animation";
 import { NSEAlertSurface } from "../../src/NSE/Components/NSEAlertSurface";
 import { NSEAlertBackdrop } from "../../src/NSE/Components/NSEAlertBackdrop";
 import { SystemAlert } from "../../src/SynCloudOSReact/SystemAlert";
@@ -153,7 +153,7 @@ describe("NSE alert choreography on AnimationFX", () => {
     expect(valueAt(pop, "opacity", 1)).toBe(1);
     // Decelerate is front-loaded: past halfway in opacity at the midpoint.
     expect(valueAt(pop, "opacity", 0.5)).toBeGreaterThan(0.5);
-    expect(bezier(NSEAnimationDefaults.easing.decelerate)).toEqual([0.16, 0.94, 0.18, 1]);
+    expect(bezier(AnimationDefaults.easing.decelerate)).toEqual([0.16, 0.94, 0.18, 1]);
     standard.unmount();
 
     const reduced = recordingAnimator();

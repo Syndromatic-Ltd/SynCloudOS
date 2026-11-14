@@ -22,7 +22,7 @@ import { useNSEAppearance } from "../Appearance/NSEAppearanceProvider";
 import { useNSEContentLayoutProperties } from "../Layout/windowChromeObstructions";
 
 import React, { type KeyboardEventHandler, type ReactNode } from "react";
-import { NSEAppearanceNineSlice } from "../Appearance/NSEAppearanceNineSlice";
+import { AppearanceNineSlice } from "../Appearance/NSEAppearanceNineSlice";
 import { getOptionalSmoothSurfaceProps, useSmoothSurface } from "../SmoothSurface";
 
 import type { SmoothSurfaceRequest } from "../SmoothSurface";
@@ -147,7 +147,7 @@ export function WindowView({
       }}
     >
       {hasShadow ? (
-        <NSEAppearanceNineSlice
+        <AppearanceNineSlice
           kind="window-shadow"
           className="nse-window__shadow-layer"
           data-window-shadow-layer="" data-nse-part="shadow"

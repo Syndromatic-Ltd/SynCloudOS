@@ -22,7 +22,7 @@ import type { ResolvedKeyBinding } from "../../SynCloudOS/SynCloudOS";
 import { nseFlashMenuSelection } from "./menuSelectionFlash";
 import { Children, isValidElement, useCallback, useContext, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore, type HTMLAttributes, type KeyboardEvent, type ReactNode } from "react";
 import type { CommandDispatchAcceptance, CommandPresentation } from "../../SynCloudOS/SynCloudOS";
-import { NSEAppearanceNineSlice } from "../Appearance/NSEAppearanceNineSlice";
+import { AppearanceNineSlice } from "../Appearance/NSEAppearanceNineSlice";
 import { useNSEAppearanceProjection } from "../Appearance";
 import { sizedControlStyle, useNSEControlFeedback } from "../Controls/Core/nseControlsShared";
 import { NSEButton, nseButtonToneProps, type ButtonTone, type NSEButtonProps } from "../Controls/Buttons/NSEButton";
@@ -429,7 +429,7 @@ function CommandMenuSurface({
       dir={direction}
       onKeyDown={handleKeyDown}
     >
-      <NSEAppearanceNineSlice kind="menu-surface" className="nse-menu__surface-layer" />
+      <AppearanceNineSlice kind="menu-surface" className="nse-menu__surface-layer" />
       {view.branchPath.length > 0 ? (
         <button
           data-nse-control="menu-item" data-nse-part="cell" className={`nse-menu-item nse-menu-back${applicationAppearance ? " nse-control-list-item" : ""}`}

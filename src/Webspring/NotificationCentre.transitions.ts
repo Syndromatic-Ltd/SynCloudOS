@@ -20,7 +20,7 @@
 
 import { useMemo, type CSSProperties } from "react";
 import {
-  NSEAnimationDefaults,
+  AnimationDefaults,
   nseFilterStyle,
   nseTransformStyle,
   useNSEAnimationEnvironment,
@@ -53,8 +53,8 @@ export interface NotificationMotion {
   readonly group: Readonly<{ enter: PresentationSpec; exit: PresentationSpec }>;
 }
 
-const { standard: material, emphasized, accelerate } = NSEAnimationDefaults.easing;
-const reducedFade = NSEAnimationDefaults.durationSeconds.reducedFade;
+const { standard: material, emphasized, accelerate } = AnimationDefaults.easing;
+const reducedFade = AnimationDefaults.durationSeconds.reducedFade;
 const bezier = (x1: number, y1: number, x2: number, y2: number): AFXAnimationTiming =>
   Object.freeze({ kind: "cubic-bezier", x1, y1, x2, y2 });
 const bannerPresentEase = bezier(0.2, 0, 0.12, 1);

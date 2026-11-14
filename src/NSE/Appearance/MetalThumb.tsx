@@ -28,17 +28,17 @@ import {
 import { useNSEAppearance } from "./useNSEAppearance";
 import {
   staticNSEMaterialLight,
-  type NSEMaterialLightingPort,
+  type MaterialLightingPort,
 } from "./NSEMaterialLighting";
 import "./metal-thumb.css";
 export type NSEThumbMaterial = "standard" | "metal";
-const LightingContext = createContext<NSEMaterialLightingPort | null>(null);
+const LightingContext = createContext<MaterialLightingPort | null>(null);
 const subscribeStatic = () => () => {};
 const getStatic = () => staticNSEMaterialLight;
-export function NSEMaterialLightingProvider({
+export function MaterialLightingProvider({
   value,
   children,
-}: PropsWithChildren<{ value: NSEMaterialLightingPort | null }>) {
+}: PropsWithChildren<{ value: MaterialLightingPort | null }>) {
   return (
     <LightingContext.Provider value={value}>
       {children}

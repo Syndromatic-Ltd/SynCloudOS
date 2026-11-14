@@ -19,7 +19,7 @@
  */
 
 import { useRef } from "react";
-import { NSEAnimationDefaults, Presence, useNSEPresentation, type PresentationSpec } from "../NSE/Animation";
+import { AnimationDefaults, Presence, useNSEPresentation, type PresentationSpec } from "../NSE/Animation";
 
 /** The launch dim's resting opacity (its model value) and the AnimationFX
  * presentations that bring it in over the Board or Dial and take it away. */
@@ -36,7 +36,7 @@ const dim = (opacity: number, duration: number, timing: PresentationSpec["timing
   Object.freeze({ opacity, enter: fade(0, opacity, duration, timing), exit: fade(opacity, 0, duration, timing) });
 
 const standard = dim(0.78, 0.56, "linear");
-const reduced = dim(0.72, NSEAnimationDefaults.durationSeconds.reducedFade, "ease-in-out");
+const reduced = dim(0.72, AnimationDefaults.durationSeconds.reducedFade, "ease-in-out");
 
 export function resolveWebspringLaunchDimMotion(reducedMotion: boolean): WebspringLaunchDimMotion {
   return reducedMotion ? reduced : standard;
