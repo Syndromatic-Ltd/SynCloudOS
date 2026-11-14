@@ -22,12 +22,12 @@ export { NSECollectionView } from "./NSECollectionView";
 export { calculateCollectionLayout, collectionColumnCount, createAdaptiveCollectionLayout, createListCollectionLayout } from "./collectionLayout";
 export { coverFlowItemAttributes, coverFlowLayoutAttributes, createCoverFlowCollectionLayout, type NSECollectionViewCoverFlowLayout, type NSECollectionViewCoverFlowLayoutOptions, coverFlowReflectionBrightness, coverFlowReflectionFadeMask, coverFlowReflectionFrameY, coverFlowReflectionOpacity, type NSECoverFlowLayoutAttributes } from "./coverFlowLayout";
 export type {
-  NSECollectionDropProposal,
+  CollectionDropProposal,
   NSECollectionLayout,
   NSECollectionLayoutInput,
   NSECollectionLayoutItem,
-  NSECollectionViewItemProps,
+  CollectionViewItemProps,
   NSECollectionViewProps,
-  NSECollectionViewGridProps,
-  NSECollectionViewCoverFlowProps,
+  CollectionViewGridProps,
+  CollectionViewCoverFlowProps,
 } from "./collectionTypes";

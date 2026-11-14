@@ -23,7 +23,7 @@ export { NSERuleEditor } from "./NSERuleEditor";
 export {
   PREDICATE_OPERATOR_OPTIONS,
   compilePredicateExpression,
-  NSEPredicateCompilationError,
+  PredicateCompilationError,
   mergePredicateTemplates,
   normalisePredicateOperator,
   ruleRowFromExpression,
@@ -31,10 +31,10 @@ export {
 } from "./predicateTemplates";
 export type {
   NSEPredicateEditorProps,
-  NSEPredicateOperatorOption,
-  NSEPredicateTemplate,
+  PredicateOperatorOption,
+  PredicateTemplate,
   NSERuleEditorProps,
-  NSERuleEditorValidation,
-  NSERuleEditorValue,
-  NSERuleRow,
+  RuleEditorValidation,
+  RuleEditorValue,
+  RuleRow,
 } from "./ruleEditorTypes";

@@ -63,7 +63,7 @@ function PaneSlot({ host }: { readonly host: HTMLDivElement }) {
 const labelOf = (item: NSESplitViewItem) => item.viewController.title ?? item.identifier;
 
 /** @internal The view an `NSESplitViewController` renders. */
-export function NSESplitViewControllerView({ controller }: { readonly controller: NSESplitViewController }) {
+export function SplitViewControllerView({ controller }: { readonly controller: NSESplitViewController }) {
   const snapshot = useSyncExternalStore(controller.subscribe, controller.getSnapshot, controller.getSnapshot);
   const titleSlot = useContext(WindowTitleSlotContext);
   const ownsTitleSlot = titleSlot?.root === controller && controller.splitViewItems[0]?.behavior === "sidebar";

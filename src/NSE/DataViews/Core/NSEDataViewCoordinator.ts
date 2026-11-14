@@ -68,16 +68,16 @@ const dataViewObservers = new WeakMap<object, () => () => void>();
 export function createReactOwnedDataViewCoordinator<T, TId extends NSEDataViewKey>(
   adapter: NSEDataViewAdapter<T, TId>,
   options: NSEDataViewCoordinatorOptions<T, TId>,
-): NSEDataViewCoordinator<T, TId> {
+): DataViewCoordinator<T, TId> {
   const deferred = { ...options, [deferDataViewObservation]: true };
-  return new NSEDataViewCoordinator(adapter, deferred);
+  return new DataViewCoordinator(adapter, deferred);
 }
 
 export function observeReactOwnedDataViewCoordinator(coordinator: object): (() => void) | undefined {
   return dataViewObservers.get(coordinator)?.();
 }
 
-export class NSEDataViewCoordinator<T, TId extends NSEDataViewKey> {
+export class DataViewCoordinator<T, TId extends NSEDataViewKey> {
   #adapter: NSEDataViewAdapter<T, TId>;
   #options: NSEDataViewCoordinatorOptions<T, TId>;
   readonly #listeners = new Set<() => void>();

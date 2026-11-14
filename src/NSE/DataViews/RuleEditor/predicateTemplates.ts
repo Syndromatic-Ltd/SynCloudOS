@@ -19,9 +19,9 @@
  */
 
 import type { NSEFormatter, NSEPredicateComparisonOperator, NSEPredicateExpression, NSEPredicateField, NSEPredicateLiteral, NSEPredicateSchema } from "../../../Foundation/public";
-import type { NSEPredicateOperatorOption, NSEPredicateTemplate, NSERuleEditorValue, NSERuleRow } from "./ruleEditorTypes";
+import type { PredicateOperatorOption, PredicateTemplate, RuleEditorValue, RuleRow } from "./ruleEditorTypes";
 
-export const PREDICATE_OPERATOR_OPTIONS: readonly NSEPredicateOperatorOption[] = Object.freeze([
+export const PREDICATE_OPERATOR_OPTIONS: readonly PredicateOperatorOption[] = Object.freeze([
   { operator: "equals", label: "equals", arity: 1 },
   { operator: "notEquals", label: "does not equal", arity: 1 },
   { operator: "lessThan", label: "is less than", arity: 1 },
@@ -55,14 +55,14 @@ export function normalisePredicateOperator(value: unknown): NSEPredicateComparis
 
 function comparisonOptions(value: unknown): { readonly caseInsensitive?: boolean; readonly diacriticInsensitive?: boolean } | undefined {
   if (value === undefined) return undefined;
-  if (!value || typeof value !== "object") throw new NSEPredicateCompilationError("shape", "NSEPredicate comparison options must be an object.");
+  if (!value || typeof value !== "object") throw new PredicateCompilationError("shape", "NSEPredicate comparison options must be an object.");
   let descriptors: PropertyDescriptorMap;
-  try { descriptors = Object.getOwnPropertyDescriptors(value); } catch { throw new NSEPredicateCompilationError("shape", "NSEPredicate comparison options must expose own data properties."); }
+  try { descriptors = Object.getOwnPropertyDescriptors(value); } catch { throw new PredicateCompilationError("shape", "NSEPredicate comparison options must expose own data properties."); }
   const result: { caseInsensitive?: boolean; diacriticInsensitive?: boolean } = {};
   for (const key of Object.keys(descriptors)) {
-    if (key !== "caseInsensitive" && key !== "diacriticInsensitive") throw new NSEPredicateCompilationError("shape", "NSEPredicate comparison options contain an unsupported property.");
+    if (key !== "caseInsensitive" && key !== "diacriticInsensitive") throw new PredicateCompilationError("shape", "NSEPredicate comparison options contain an unsupported property.");
     const descriptor = descriptors[key]!;
-    if (!("value" in descriptor) || typeof descriptor.value !== "boolean") throw new NSEPredicateCompilationError("shape", "NSEPredicate comparison options must be boolean data properties.");
+    if (!("value" in descriptor) || typeof descriptor.value !== "boolean") throw new PredicateCompilationError("shape", "NSEPredicate comparison options must be boolean data properties.");
     result[key] = descriptor.value;
   }
   return Object.freeze(result);
@@ -89,7 +89,7 @@ function formatterFor(type: NSEPredicateField<unknown>["type"]): NSEFormatter<un
   });
 }
 
-export function templatesFromPredicateSchema<T>(schema: NSEPredicateSchema<T>): readonly NSEPredicateTemplate<T>[] {
+export function templatesFromPredicateSchema<T>(schema: NSEPredicateSchema<T>): readonly PredicateTemplate<T>[] {
   return Object.freeze(Object.entries(schema.fields).map(([field, definition]) => {
     const formatter = formatterFor(definition.type);
     return Object.freeze({
@@ -104,7 +104,7 @@ export function templatesFromPredicateSchema<T>(schema: NSEPredicateSchema<T>): 
   }));
 }
 
-export function mergePredicateTemplates<T>(schema: NSEPredicateSchema<T>, explicit: readonly NSEPredicateTemplate<T>[] = []): readonly NSEPredicateTemplate<T>[] {
+export function mergePredicateTemplates<T>(schema: NSEPredicateSchema<T>, explicit: readonly PredicateTemplate<T>[] = []): readonly PredicateTemplate<T>[] {
   const generated = templatesFromPredicateSchema(schema);
   const overrides = new Map(explicit.map((template) => [template.id, template]));
   const merged = generated.map((template) => {
@@ -116,30 +116,30 @@ export function mergePredicateTemplates<T>(schema: NSEPredicateSchema<T>, explic
   return Object.freeze(merged.map((template) => Object.freeze({ ...template, operators: Object.freeze([...template.operators]) })));
 }
 
-export class NSEPredicateCompilationError extends TypeError {
+export class PredicateCompilationError extends TypeError {
   readonly code: "cycle" | "depth" | "nodes" | "shape";
-  constructor(code: NSEPredicateCompilationError["code"], message: string) { super(message); this.name = "NSEPredicateCompilationError"; this.code = code; }
+  constructor(code: PredicateCompilationError["code"], message: string) { super(message); this.name = "NSEPredicateCompilationError"; this.code = code; }
 }
 
 function ownDataDescriptors(value: unknown, label: string): PropertyDescriptorMap {
-  if (!value || typeof value !== "object") throw new NSEPredicateCompilationError("shape", `${label} must be an object.`);
+  if (!value || typeof value !== "object") throw new PredicateCompilationError("shape", `${label} must be an object.`);
   let descriptors: PropertyDescriptorMap;
-  try { descriptors = Object.getOwnPropertyDescriptors(value); } catch { throw new NSEPredicateCompilationError("shape", `${label} must expose own data properties.`); }
-  for (const [name, descriptor] of Object.entries(descriptors)) if (!("value" in descriptor)) throw new NSEPredicateCompilationError("shape", `${label} property ${name} must be a data property.`);
+  try { descriptors = Object.getOwnPropertyDescriptors(value); } catch { throw new PredicateCompilationError("shape", `${label} must expose own data properties.`); }
+  for (const [name, descriptor] of Object.entries(descriptors)) if (!("value" in descriptor)) throw new PredicateCompilationError("shape", `${label} property ${name} must be a data property.`);
   return descriptors;
 }
 
 function requiredData(descriptors: PropertyDescriptorMap, name: string, label: string): unknown {
   const descriptor = descriptors[name];
-  if (!descriptor || !("value" in descriptor)) throw new NSEPredicateCompilationError("shape", `${label} requires an own ${name} data property.`);
+  if (!descriptor || !("value" in descriptor)) throw new PredicateCompilationError("shape", `${label} requires an own ${name} data property.`);
   return descriptor.value;
 }
 
 function denseArrayValues(value: unknown, label: string): readonly unknown[] {
-  if (!Array.isArray(value)) throw new NSEPredicateCompilationError("shape", `${label} must be an array.`);
+  if (!Array.isArray(value)) throw new PredicateCompilationError("shape", `${label} must be an array.`);
   const descriptors = ownDataDescriptors(value, label);
   const length = requiredData(descriptors, "length", label);
-  if (!Number.isSafeInteger(length) || (length as number) < 0) throw new NSEPredicateCompilationError("shape", `${label} has an invalid length.`);
+  if (!Number.isSafeInteger(length) || (length as number) < 0) throw new PredicateCompilationError("shape", `${label} has an invalid length.`);
   const result: unknown[] = [];
   for (let index = 0; index < (length as number); index += 1) result.push(requiredData(descriptors, String(index), label));
   return result;
@@ -148,22 +148,22 @@ function denseArrayValues(value: unknown, label: string): readonly unknown[] {
 function validateLiteral(value: unknown, allowArray: boolean): void {
   if (value === undefined) return;
   if (value === null || typeof value === "string" || typeof value === "boolean" || typeof value === "number" && Number.isFinite(value)) return;
-  if (!allowArray) throw new NSEPredicateCompilationError("shape", "NSEPredicate values must contain finite scalar literals.");
+  if (!allowArray) throw new PredicateCompilationError("shape", "NSEPredicate values must contain finite scalar literals.");
   for (const item of denseArrayValues(value, "NSEPredicate value arrays")) validateLiteral(item, false);
 }
 
 function compileRow(row: unknown, ancestors: Set<object>, depth: number, count: { value: number }): NSEPredicateExpression {
   const descriptors = ownDataDescriptors(row, "NSEPredicate rule rows");
-  if (depth > 64) throw new NSEPredicateCompilationError("depth", "NSEPredicate rule depth exceeds the supported limit.");
-  if (++count.value > 10_000) throw new NSEPredicateCompilationError("nodes", "NSEPredicate rule count exceeds the supported limit.");
+  if (depth > 64) throw new PredicateCompilationError("depth", "NSEPredicate rule depth exceeds the supported limit.");
+  if (++count.value > 10_000) throw new PredicateCompilationError("nodes", "NSEPredicate rule count exceeds the supported limit.");
   const object = row as object;
-  if (ancestors.has(object)) throw new NSEPredicateCompilationError("cycle", "NSEPredicate rule graph contains a cycle.");
+  if (ancestors.has(object)) throw new PredicateCompilationError("cycle", "NSEPredicate rule graph contains a cycle.");
   const id = requiredData(descriptors, "id", "NSEPredicate rule rows");
-  if (typeof id !== "string" || !id) throw new NSEPredicateCompilationError("shape", "NSEPredicate rule ids must be non-empty strings.");
+  if (typeof id !== "string" || !id) throw new PredicateCompilationError("shape", "NSEPredicate rule ids must be non-empty strings.");
   const kind = requiredData(descriptors, "kind", "NSEPredicate rule rows");
   if (kind === "group") {
     const operator = requiredData(descriptors, "operator", "NSEPredicate groups");
-    if (operator !== "all" && operator !== "any" && operator !== "none") throw new NSEPredicateCompilationError("shape", "NSEPredicate groups require an all, any, or none operator.");
+    if (operator !== "all" && operator !== "any" && operator !== "none") throw new PredicateCompilationError("shape", "NSEPredicate groups require an all, any, or none operator.");
     const childValues = denseArrayValues(requiredData(descriptors, "children", "NSEPredicate groups"), "NSEPredicate group child arrays");
     ancestors.add(object);
     try { return Object.freeze({ kind: "compound", operator, children: Object.freeze(childValues.map((child) => compileRow(child, ancestors, depth + 1, count))) }); }
@@ -171,16 +171,16 @@ function compileRow(row: unknown, ancestors: Set<object>, depth: number, count: 
   }
   if (kind === "constant") {
     const constant = requiredData(descriptors, "value", "NSEPredicate constants");
-    if (typeof constant !== "boolean") throw new NSEPredicateCompilationError("shape", "NSEPredicate constants require a boolean value.");
+    if (typeof constant !== "boolean") throw new PredicateCompilationError("shape", "NSEPredicate constants require a boolean value.");
     return Object.freeze({ kind: "constant", value: constant });
   }
-  if (kind !== "comparison") throw new NSEPredicateCompilationError("shape", "NSEPredicate rules require a supported row kind.");
+  if (kind !== "comparison") throw new PredicateCompilationError("shape", "NSEPredicate rules require a supported row kind.");
   const field = requiredData(descriptors, "field", "NSEPredicate comparisons");
-  if (typeof field !== "string") throw new NSEPredicateCompilationError("shape", "NSEPredicate comparisons require a string field.");
+  if (typeof field !== "string") throw new PredicateCompilationError("shape", "NSEPredicate comparisons require a string field.");
   const operator = normalisePredicateOperator(requiredData(descriptors, "operator", "NSEPredicate comparisons"));
   const option = PREDICATE_OPERATOR_OPTIONS.find((candidate) => candidate.operator === operator)!;
   const value = descriptors.value && "value" in descriptors.value ? descriptors.value.value : undefined;
-  if (operator === "between" && denseArrayValues(value, "Between bounds").length !== 2) throw new NSEPredicateCompilationError("shape", "Between requires exactly two bounds.");
+  if (operator === "between" && denseArrayValues(value, "Between bounds").length !== 2) throw new PredicateCompilationError("shape", "Between requires exactly two bounds.");
   if (operator === "in") denseArrayValues(value, "In values");
   validateLiteral(value, operator === "between" || operator === "in");
   const options = descriptors.options && "value" in descriptors.options ? comparisonOptions(descriptors.options.value) : undefined;
@@ -190,23 +190,23 @@ function compileRow(row: unknown, ancestors: Set<object>, depth: number, count: 
   return Object.freeze(expression);
 }
 
-export function compilePredicateExpression(value: NSERuleEditorValue): NSEPredicateExpression {
-  if (!value || typeof value !== "object") throw new NSEPredicateCompilationError("shape", "NSEPredicate editor values must be objects.");
+export function compilePredicateExpression(value: RuleEditorValue): NSEPredicateExpression {
+  if (!value || typeof value !== "object") throw new PredicateCompilationError("shape", "NSEPredicate editor values must be objects.");
   const root = Object.getOwnPropertyDescriptor(value, "root");
-  if (!root || root.get || root.set) throw new NSEPredicateCompilationError("shape", "NSEPredicate editor roots must be data properties.");
-  return compileRow(root.value as NSERuleRow, new Set(), 0, { value: 0 });
+  if (!root || root.get || root.set) throw new PredicateCompilationError("shape", "NSEPredicate editor roots must be data properties.");
+  return compileRow(root.value as RuleRow, new Set(), 0, { value: 0 });
 }
 
-function rowFromExpression(expression: unknown, id: string, ancestors: Set<object>, depth: number, count: { value: number }): NSERuleRow {
+function rowFromExpression(expression: unknown, id: string, ancestors: Set<object>, depth: number, count: { value: number }): RuleRow {
   const descriptors = ownDataDescriptors(expression, "NSEPredicate expressions");
-  if (depth > 64) throw new NSEPredicateCompilationError("depth", "NSEPredicate expression depth exceeds the supported limit.");
-  if (++count.value > 10_000) throw new NSEPredicateCompilationError("nodes", "NSEPredicate expression count exceeds the supported limit.");
+  if (depth > 64) throw new PredicateCompilationError("depth", "NSEPredicate expression depth exceeds the supported limit.");
+  if (++count.value > 10_000) throw new PredicateCompilationError("nodes", "NSEPredicate expression count exceeds the supported limit.");
   const object = expression as object;
-  if (ancestors.has(object)) throw new NSEPredicateCompilationError("cycle", "NSEPredicate expression graph contains a cycle.");
+  if (ancestors.has(object)) throw new PredicateCompilationError("cycle", "NSEPredicate expression graph contains a cycle.");
   const kind = requiredData(descriptors, "kind", "NSEPredicate expressions");
   if (kind === "compound") {
     const operator = requiredData(descriptors, "operator", "Compound predicates");
-    if (operator !== "all" && operator !== "any" && operator !== "none") throw new NSEPredicateCompilationError("shape", "Compound predicates require an all, any, or none operator.");
+    if (operator !== "all" && operator !== "any" && operator !== "none") throw new PredicateCompilationError("shape", "Compound predicates require an all, any, or none operator.");
     const childValues = denseArrayValues(requiredData(descriptors, "children", "Compound predicates"), "Compound predicate child arrays");
     ancestors.add(object);
     try { return Object.freeze({ id, kind: "group", operator, children: Object.freeze(childValues.map((child, index) => rowFromExpression(child, `${id}-${index + 1}`, ancestors, depth + 1, count))) }); }
@@ -214,18 +214,18 @@ function rowFromExpression(expression: unknown, id: string, ancestors: Set<objec
   }
   if (kind === "constant") {
     const constant = requiredData(descriptors, "value", "NSEPredicate constants");
-    if (typeof constant !== "boolean") throw new NSEPredicateCompilationError("shape", "NSEPredicate constants require a boolean value.");
+    if (typeof constant !== "boolean") throw new PredicateCompilationError("shape", "NSEPredicate constants require a boolean value.");
     return Object.freeze({ id, kind: "constant", value: constant });
   }
-  if (kind !== "comparison") throw new NSEPredicateCompilationError("shape", "NSEPredicate expressions require a supported kind.");
+  if (kind !== "comparison") throw new PredicateCompilationError("shape", "NSEPredicate expressions require a supported kind.");
   const field = requiredData(descriptors, "field", "NSEPredicate comparisons");
-  if (typeof field !== "string") throw new NSEPredicateCompilationError("shape", "NSEPredicate comparisons require a string field.");
+  if (typeof field !== "string") throw new PredicateCompilationError("shape", "NSEPredicate comparisons require a string field.");
   const operator = normalisePredicateOperator(requiredData(descriptors, "operator", "NSEPredicate comparisons"));
   const value = descriptors.value && "value" in descriptors.value ? descriptors.value.value as NSEPredicateLiteral : undefined;
   const options = descriptors.options && "value" in descriptors.options ? comparisonOptions(descriptors.options.value) : undefined;
   return Object.freeze({ id, kind: "comparison", field, operator, value, ...(options === undefined ? {} : { options }) });
 }
 
-export function ruleRowFromExpression(expression: NSEPredicateExpression, id = "rule-1"): NSERuleRow {
+export function ruleRowFromExpression(expression: NSEPredicateExpression, id = "rule-1"): RuleRow {
   return rowFromExpression(expression, id, new Set(), 0, { value: 0 });
 }

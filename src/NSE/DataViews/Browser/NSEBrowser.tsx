@@ -21,9 +21,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 
 import { dataViewAllowsMutation, dataViewAllowsNavigation, dataViewIsBusy, dataViewIsDisabled, encodeNSEDataViewKey } from "../Core";
-import { NSEBrowserColumn } from "./NSEBrowserColumn";
-import { NSEBrowserRequestGate } from "./browserRequestGate";
-import { NSEBrowserDataError, type NSEBrowserColumnState, type NSEBrowserDataSource, type NSEBrowserItemPresentation, type NSEBrowserPathItem, type NSEBrowserProps } from "./browserTypes";
+import { BrowserColumn } from "./NSEBrowserColumn";
+import { BrowserRequestGate } from "./browserRequestGate";
+import { BrowserDataError, type BrowserColumnState, type NSEBrowserDataSource, type BrowserItemPresentation, type BrowserPathItem, type NSEBrowserProps } from "./browserTypes";
 import "./nse-browser.css";
 
 function ownData(error: unknown, name: string): unknown {
@@ -32,7 +32,7 @@ function ownData(error: unknown, name: string): unknown {
   catch { return undefined; }
 }
 
-function errorState<T, TId extends string | number>(error: unknown, owner?: { readonly signal: AbortSignal; accepts(): boolean }): NSEBrowserColumnState<T, TId> {
+function errorState<T, TId extends string | number>(error: unknown, owner?: { readonly signal: AbortSignal; accepts(): boolean }): BrowserColumnState<T, TId> {
   const candidate = ownData(error, "message");
   const message = typeof candidate === "string" && candidate.length > 0 ? candidate.slice(0, 512) : "Browser data could not be loaded.";
   const retryValue = ownData(error, "retry");
@@ -49,38 +49,38 @@ function errorState<T, TId extends string | number>(error: unknown, owner?: { re
 interface ValidatedBrowserItems<T, TId extends string | number> {
   readonly items: readonly T[];
   readonly ids: readonly TId[];
-  readonly presentation: readonly NSEBrowserItemPresentation<T, TId>[];
+  readonly presentation: readonly BrowserItemPresentation<T, TId>[];
 }
 
 function validatedItems<T, TId extends string | number>(value: unknown, dataSource: NSEBrowserDataSource<T, TId>): ValidatedBrowserItems<T, TId> {
-  if (!Array.isArray(value)) throw new NSEBrowserDataError("shape", "Browser columns must load a dense array.");
+  if (!Array.isArray(value)) throw new BrowserDataError("shape", "Browser columns must load a dense array.");
   let descriptors: PropertyDescriptorMap;
-  try { descriptors = Object.getOwnPropertyDescriptors(value) as unknown as PropertyDescriptorMap; } catch { throw new NSEBrowserDataError("shape", "Browser columns must expose own data entries."); }
+  try { descriptors = Object.getOwnPropertyDescriptors(value) as unknown as PropertyDescriptorMap; } catch { throw new BrowserDataError("shape", "Browser columns must expose own data entries."); }
   const length = descriptors.length && "value" in descriptors.length ? descriptors.length.value : undefined;
-  if (typeof length !== "number" || !Number.isSafeInteger(length) || length < 0) throw new NSEBrowserDataError("shape", "Browser columns must have a supported array length.");
-  const items: T[] = []; const ids: TId[] = []; const presentation: NSEBrowserItemPresentation<T, TId>[] = []; const seen = new Set<string>();
+  if (typeof length !== "number" || !Number.isSafeInteger(length) || length < 0) throw new BrowserDataError("shape", "Browser columns must have a supported array length.");
+  const items: T[] = []; const ids: TId[] = []; const presentation: BrowserItemPresentation<T, TId>[] = []; const seen = new Set<string>();
   for (let index = 0; index < length; index += 1) {
     const descriptor = descriptors[String(index)];
-    if (!descriptor || !("value" in descriptor)) throw new NSEBrowserDataError("shape", "Browser columns must be dense data arrays.");
+    if (!descriptor || !("value" in descriptor)) throw new BrowserDataError("shape", "Browser columns must be dense data arrays.");
     const item = descriptor.value as T;
     if ((typeof item === "object" || typeof item === "function") && item !== null) {
       let prototype: object | null;
-      try { prototype = Object.getPrototypeOf(item) as object | null; } catch { throw new NSEBrowserDataError("shape", "Browser items must expose own data properties."); }
-      if (prototype !== Object.prototype && prototype !== null) throw new NSEBrowserDataError("shape", "Browser items must use own data properties without inherited prototypes.");
+      try { prototype = Object.getPrototypeOf(item) as object | null; } catch { throw new BrowserDataError("shape", "Browser items must expose own data properties."); }
+      if (prototype !== Object.prototype && prototype !== null) throw new BrowserDataError("shape", "Browser items must use own data properties without inherited prototypes.");
       let itemDescriptors: PropertyDescriptorMap;
-      try { itemDescriptors = Object.getOwnPropertyDescriptors(item); } catch { throw new NSEBrowserDataError("shape", "Browser items must expose own data properties."); }
-      if (Object.values(itemDescriptors).some((property) => !("value" in property))) throw new NSEBrowserDataError("shape", "Browser item properties must be own data properties.");
+      try { itemDescriptors = Object.getOwnPropertyDescriptors(item); } catch { throw new BrowserDataError("shape", "Browser items must expose own data properties."); }
+      if (Object.values(itemDescriptors).some((property) => !("value" in property))) throw new BrowserDataError("shape", "Browser item properties must be own data properties.");
     }
     let id: TId; let key: string; let label: string; let leaf: boolean; let icon;
     id = dataSource.idForItem(item);
     try { key = encodeNSEDataViewKey(id); }
-    catch { throw new NSEBrowserDataError("identity", "Browser item identity must be a supported finite string or number."); }
+    catch { throw new BrowserDataError("identity", "Browser item identity must be a supported finite string or number."); }
     label = dataSource.labelForItem(item);
     leaf = dataSource.isLeaf(item);
     icon = dataSource.iconForItem?.(item);
-    if (typeof label !== "string") throw new NSEBrowserDataError("shape", "Browser item labels must be strings.");
-    if (typeof leaf !== "boolean") throw new NSEBrowserDataError("shape", "Browser leaf projections must be booleans.");
-    if (seen.has(key)) throw new NSEBrowserDataError("duplicate", "Browser item identities must be unique within each column.");
+    if (typeof label !== "string") throw new BrowserDataError("shape", "Browser item labels must be strings.");
+    if (typeof leaf !== "boolean") throw new BrowserDataError("shape", "Browser leaf projections must be booleans.");
+    if (seen.has(key)) throw new BrowserDataError("duplicate", "Browser item identities must be unique within each column.");
     seen.add(key); items.push(item); ids.push(id); presentation.push(Object.freeze({ item, id, label, leaf, icon }));
   }
   return Object.freeze({ items: Object.freeze(items), ids: Object.freeze(ids), presentation: Object.freeze(presentation) });
@@ -107,18 +107,18 @@ export function NSEBrowser<T, TId extends string | number>({
   const allowsMutation = dataViewAllowsMutation(state);
   const disabled = dataViewIsDisabled(state);
   const label = String(props["aria-label"] ?? "Browser");
-  const [internalPath, setInternalPath] = useState<readonly NSEBrowserPathItem<T, TId>[]>(defaultPath);
+  const [internalPath, setInternalPath] = useState<readonly BrowserPathItem<T, TId>[]>(defaultPath);
   const effectivePath = path ?? internalPath;
-  const [columns, setColumns] = useState<readonly NSEBrowserColumnState<T, TId>[]>([
+  const [columns, setColumns] = useState<readonly BrowserColumnState<T, TId>[]>([
     { parentId: null, items: [], presentation: [], activeId: null, status: "loading", message: "Loading" },
   ]);
   const [rootItems, setRootItems] = useState<ValidatedBrowserItems<T, TId> | null>(null);
   const browserRef = useRef<HTMLDivElement>(null);
   const [focusColumn, setFocusColumn] = useState<number | null>(null);
-  const rootGate = useMemo(() => new NSEBrowserRequestGate(), [dataSource]);
-  const pathGate = useMemo(() => new NSEBrowserRequestGate(), [dataSource]);
+  const rootGate = useMemo(() => new BrowserRequestGate(), [dataSource]);
+  const pathGate = useMemo(() => new BrowserRequestGate(), [dataSource]);
 
-  const publishPath = useCallback((next: readonly NSEBrowserPathItem<T, TId>[]) => {
+  const publishPath = useCallback((next: readonly BrowserPathItem<T, TId>[]) => {
     if (path === undefined) setInternalPath(Object.freeze([...next]));
     onPathChange?.(Object.freeze([...next]));
   }, [onPathChange, path]);
@@ -146,7 +146,7 @@ export function NSEBrowser<T, TId extends string | number>({
     if (rootItems === null) return;
     const request = pathGate.begin();
     const hydrate = async () => {
-      const next: NSEBrowserColumnState<T, TId>[] = [];
+      const next: BrowserColumnState<T, TId>[] = [];
       try {
         let { items, ids, presentation: itemPresentation } = rootItems;
         for (let columnIndex = 0; ; columnIndex += 1) {
@@ -201,7 +201,7 @@ export function NSEBrowser<T, TId extends string | number>({
     setColumns((current) => current.map((column, index) => index === columnIndex ? { ...column, activeId: id } : column));
   };
 
-  const choose = (columnIndex: number, selected: NSEBrowserItemPresentation<T, TId>) => {
+  const choose = (columnIndex: number, selected: BrowserItemPresentation<T, TId>) => {
     if (!allowsNavigation) return;
     const { id, item, leaf } = selected;
     if (leaf) {
@@ -241,7 +241,7 @@ export function NSEBrowser<T, TId extends string | number>({
           const column = columns[columnIndex]!;
           return (
             <div key={`${columnIndex}-${column.parentId === null ? "root" : encodeNSEDataViewKey(column.parentId)}`} data-nse-part="group" className="nse-browser-column-shell" style={{ inlineSize: widths[columnIndex] }}>
-              <NSEBrowserColumn
+              <BrowserColumn
                 label={`${label} column ${columnIndex + 1}`}
                 index={columnIndex}
                 state={column}

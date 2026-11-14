@@ -53,7 +53,7 @@ export interface NSECollectionLayout {
   indexInDirection(fromIndex: number, direction: "up" | "down" | "left" | "right", input: NSECollectionLayoutInput): number | null;
 }
 
-export interface NSECollectionViewItemProps<T, TId> {
+export interface CollectionViewItemProps<T, TId> {
   readonly item: T;
   readonly id: TId;
   readonly selected: boolean;
@@ -61,7 +61,7 @@ export interface NSECollectionViewItemProps<T, TId> {
   readonly editing: boolean;
 }
 
-export interface NSECollectionDropProposal<TId> {
+export interface CollectionDropProposal<TId> {
   readonly sessionId: string;
   readonly generation: number;
   readonly signal: AbortSignal;
@@ -70,7 +70,7 @@ export interface NSECollectionDropProposal<TId> {
   readonly insertionIndex: number;
 }
 
-interface NSECollectionViewCommonProps<T, TId extends NSEDataViewKey>
+interface CollectionViewCommonProps<T, TId extends NSEDataViewKey>
   extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
   readonly adapter: NSEDataViewAdapter<T, TId>;
   readonly state?: NSEDataViewState;
@@ -80,9 +80,9 @@ interface NSECollectionViewCommonProps<T, TId extends NSEDataViewKey>
 }
 
 /** A collection view laid out in a grid or list (`NSCollectionViewGridLayout`, `NSCollectionViewFlowLayout`). */
-export interface NSECollectionViewGridProps<T, TId extends NSEDataViewKey> extends NSECollectionViewCommonProps<T, TId> {
+export interface CollectionViewGridProps<T, TId extends NSEDataViewKey> extends CollectionViewCommonProps<T, TId> {
   readonly layout: NSECollectionLayout;
-  readonly renderItem: (props: NSECollectionViewItemProps<T, TId>) => ReactNode;
+  readonly renderItem: (props: CollectionViewItemProps<T, TId>) => ReactNode;
   /** Whether a primary pointer click activates after NSE has made the item active and selected. */
   readonly pointerActivation?: "double-click" | "single-click";
   readonly viewportInlineSize?: number;
@@ -92,8 +92,8 @@ export interface NSECollectionViewGridProps<T, TId extends NSEDataViewKey> exten
   readonly canvasRef?: Ref<HTMLDivElement>;
   readonly editableLabels?: boolean;
   readonly onRequestReorder?: (ids: readonly TId[], insertionIndex: number) => void;
-  readonly onValidateDrop?: (proposal: NSECollectionDropProposal<TId>) => boolean | Promise<boolean>;
-  readonly onAcceptDrop?: (proposal: NSECollectionDropProposal<TId>) => void | Promise<void>;
+  readonly onValidateDrop?: (proposal: CollectionDropProposal<TId>) => boolean | Promise<boolean>;
+  readonly onAcceptDrop?: (proposal: CollectionDropProposal<TId>) => void | Promise<void>;
   readonly dragBinding?: NSEDataViewDragBinding<TId>;
   readonly dragEndpoint?: DragEndpoint;
 }
@@ -102,7 +102,7 @@ export interface NSECollectionViewGridProps<T, TId extends NSEDataViewKey> exten
  * A collection view in Cover Flow: the selected item faces the viewer and the others turn inward on either side,
  * mirrored on the floor. AnimationFX draws it; each item's picture comes from ImageFX.
  */
-export interface NSECollectionViewCoverFlowProps<T, TId extends NSEDataViewKey> extends NSECollectionViewCommonProps<T, TId> {
+export interface CollectionViewCoverFlowProps<T, TId extends NSEDataViewKey> extends CollectionViewCommonProps<T, TId> {
   readonly layout: NSECollectionViewCoverFlowLayout;
   /** The item's picture, after `IKImageBrowserItem.imageRepresentation`; undefined while it has none. */
   readonly imageForItem: (item: T) => IFXImageResource | undefined;
@@ -115,5 +115,5 @@ export interface NSECollectionViewCoverFlowProps<T, TId extends NSEDataViewKey> 
 }
 
 export type NSECollectionViewProps<T, TId extends NSEDataViewKey> =
-  | NSECollectionViewGridProps<T, TId>
-  | NSECollectionViewCoverFlowProps<T, TId>;
+  | CollectionViewGridProps<T, TId>
+  | CollectionViewCoverFlowProps<T, TId>;
