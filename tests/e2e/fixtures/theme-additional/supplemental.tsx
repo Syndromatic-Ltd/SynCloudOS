@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { NSEBox, NSEInputBox, NSETextField, NSERadioGroup } from "../../../../src/NSE/Controls/Fields/NSEFields";
+import { NSEBox, InputBox, NSETextField, RadioGroup } from "../../../../src/NSE/Controls/Fields/NSEFields";
 import { NSEArrayController } from "../../../../src/NSE/Controllers/NSEArrayController";
 import { NSETreeController } from "../../../../src/NSE/Controllers/NSETreeController";
 import { nseUnowned } from "../../../../src/NSE/Controllers/ownership";
@@ -82,13 +82,13 @@ export const supplementalThemeCatalogue: readonly { id: string; ready?: string; 
   { id: "box-overrides", render: () => <NSEBox boxType="custom" borderType="grooveBorder" isTransparent fillColour="#123" borderColour="#456" borderWidth={2} shadow={new NSEShadow()}>Content</NSEBox> },
   { id: "token-menu", render: () => <NSETokenField aria-label="Tags" values={[{ id: "work", label: "Work", representedObject: "work" }]} createToken={label => ({ id: label, label, representedObject: label })} onValuesChange={noop} tokenMenu={() => [{ id: "remove", label: "Remove" }]} /> },
   { id: "field-affixes", render: () => <NSETextField label="Amount" prefix="$" suffix="units" defaultValue="10" /> },
-  ...[true, false].map(highlighted => ({ id: `input-group-${highlighted}`, render: () => <NSEInputBox label="Export" invalid={highlighted} alwaysLooksFocused={highlighted}><input aria-label="Export value" /></NSEInputBox> })),
+  ...[true, false].map(highlighted => ({ id: `input-group-${highlighted}`, render: () => <InputBox label="Export" invalid={highlighted} alwaysLooksFocused={highlighted}><input aria-label="Export value" /></InputBox> })),
   { id: "segment-menu", render: () => <NSESegmentedControl selection={{ mode: "select-one", selectedIds: new Set<string>(), allowsEmpty: true }} aria-label="Actions" height={40} name="actions" items={[{ id: "save", label: "Save", menu: [{ id: "copy", label: "Save copy" }] }, { id: "open", label: "Open" }]} /> },
   { id: "segment-overflow", render: () => <NSESegmentedControl selection={{ mode: "select-one", selectedIds: new Set<string>(), allowsEmpty: true }} aria-label="Views" maximumVisibleSegments={1} items={[{ id: "list", label: "List" }, { id: "grid", label: "Grid" }]} /> },
   { id: "plain-login", render: () => <NSEAppearanceProvider theme={plainTheme}><LoginWindow title="Sign in" methods={[{ id: "account", label: "Continue" }]} /></NSEAppearanceProvider> },
   { id: "plain-notification", render: () => <NSEAppearanceProvider theme={plainTheme}><SystemSurface kind="notifications" /></NSEAppearanceProvider> },
   ...(["compact", "regular"] as const).flatMap(widthClass => (widthClass === "compact" ? ["block-start", "block-end"] : ["source-list", "block-start"]).flatMap(placement => (["in-flow", "overlay"] as const).map(flow => ({ id: `navigation-${widthClass}-${placement}-${flow}`, render: () => <ThemeNavigation widthClass={widthClass} placement={placement} flow={flow} /> })))),
-  ...[true, false].map(isEnabled => ({ id: `matrix-${isEnabled}`, render: () => <NSERadioGroup label="Layout" options={[{ label: "List", value: "list" }, { label: "Grid", value: "grid" }]} defaultValue="list" isEnabled={isEnabled} /> })),
+  ...[true, false].map(isEnabled => ({ id: `matrix-${isEnabled}`, render: () => <RadioGroup label="Layout" options={[{ label: "List", value: "list" }, { label: "Grid", value: "grid" }]} defaultValue="list" isEnabled={isEnabled} /> })),
   { id: "colour-swatches", render: () => <ColourSwatches colours={[colour]} selected={colour} onSelect={noop} /> },
   { id: "virtual-viewport", render: () => <Virtual /> },
   { id: "tooltip", render: () => <TooltipSpecimen /> },

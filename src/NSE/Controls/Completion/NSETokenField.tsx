@@ -28,10 +28,10 @@ import { readNSEClipboardText, writeNSEClipboardText, writeNSEDragRepresentation
 import type { NSETokenFieldProps, NSETokenValue } from "./completionTypes";
 
 export function NSETokenField<T, TId extends string | number>(props: NSEBoundValueProps<readonly NSETokenValue<TId,T>[],NSETokenFieldProps<T,TId>,'value'|'defaultValue'|'onValueChange'|'undoManager'|'values'|'onValuesChange'|'onRequestReorder'>) {
-  return <NSETokenFieldControl {...useNSEValueBinding<readonly NSETokenValue<TId,T>[],NSETokenFieldProps<T,TId>,'value'|'defaultValue'|'onValueChange'|'undoManager'|'values'|'onValuesChange'|'onRequestReorder'>(props,{value:'values',change:'onValuesChange',excludes:['onRequestReorder'],fallback:[]})} />;
+  return <TokenFieldControl {...useNSEValueBinding<readonly NSETokenValue<TId,T>[],NSETokenFieldProps<T,TId>,'value'|'defaultValue'|'onValueChange'|'undoManager'|'values'|'onValuesChange'|'onRequestReorder'>(props,{value:'values',change:'onValuesChange',excludes:['onRequestReorder'],fallback:[]})} />;
 }
 
-function NSETokenFieldControl<T, TId extends string | number>(props: NSETokenFieldProps<T, TId>) {
+function TokenFieldControl<T, TId extends string | number>(props: NSETokenFieldProps<T, TId>) {
   const theme = useNSEThemeInteraction<HTMLDivElement>(props.isEnabled !== false);
   const disabled = props.isEnabled === false;
   const [draft, setDraft] = useState("");

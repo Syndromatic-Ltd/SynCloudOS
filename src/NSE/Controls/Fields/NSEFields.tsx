@@ -167,7 +167,7 @@ export interface NSELabelTextFieldProps extends Omit<HTMLAttributes<HTMLSpanElem
 /** NSView.BackgroundStyle. */
 export type NSELabelBackgroundStyle = "normal" | "emphasised" | "raised" | "lowered";
 
-function NSELabelTextField({ isEditable: _isEditable, font = "body", textColour = "labelColour", monospacedDigits = false, lineBreakMode = "byWordWrapping", backgroundStyle = "normal", className = "", children, ...props }: NSELabelTextFieldProps) {
+function LabelTextField({ isEditable: _isEditable, font = "body", textColour = "labelColour", monospacedDigits = false, lineBreakMode = "byWordWrapping", backgroundStyle = "normal", className = "", children, ...props }: NSELabelTextFieldProps) {
   return (
     <span
       {...props}
@@ -185,18 +185,18 @@ function NSELabelTextField({ isEditable: _isEditable, font = "body", textColour 
   );
 }
 
-type NSEEditableTextFieldProps<T> = NSEBoundValueProps<T, NSETextFieldProps<T>, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>;
+type EditableTextFieldProps<T> = NSEBoundValueProps<T, NSETextFieldProps<T>, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>;
 
-export function NSETextField<T = string>(props: NSELabelTextFieldProps | NSEEditableTextFieldProps<T>) {
-  if ((props as { readonly isEditable?: boolean }).isEditable === false) return <NSELabelTextField {...props as NSELabelTextFieldProps} />;
-  return <NSEEditableTextField<T> {...props as NSEEditableTextFieldProps<T>} />;
+export function NSETextField<T = string>(props: NSELabelTextFieldProps | EditableTextFieldProps<T>) {
+  if ((props as { readonly isEditable?: boolean }).isEditable === false) return <LabelTextField {...props as NSELabelTextFieldProps} />;
+  return <EditableTextField<T> {...props as EditableTextFieldProps<T>} />;
 }
 
-function NSEEditableTextField<T>(props: NSEEditableTextFieldProps<T>) {
-  return <NSETextFieldControl {...useNSEValueBinding<T, NSETextFieldProps<T>, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>(props, {fallback: '' as T})} />;
+function EditableTextField<T>(props: EditableTextFieldProps<T>) {
+  return <TextFieldControl {...useNSEValueBinding<T, NSETextFieldProps<T>, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>(props, {fallback: '' as T})} />;
 }
 
-function NSETextFieldControl<T = string>(props: NSETextFieldProps<T>) {
+function TextFieldControl<T = string>(props: NSETextFieldProps<T>) {
   const {
     label,
     controlSize = "regular",
@@ -410,7 +410,7 @@ function NSETextFieldControl<T = string>(props: NSETextFieldProps<T>) {
   );
 }
 
-export interface NSEInputBoxProps extends HTMLAttributes<HTMLDivElement> {
+export interface InputBoxProps extends HTMLAttributes<HTMLDivElement> {
   label?: ReactNode;
   invalid?: boolean;
   /** NSControl.isEnabled (default true). */
@@ -440,7 +440,7 @@ A box styled like a single input that wraps a set of controls — an icon, the t
 so they appear to live inside one field. It takes on the focused look whenever any
 child is focused, or always when `alwaysLooksFocused` is set.
 */
-export function NSEInputBox({
+export function InputBox({
   label,
   invalid = false,
   isEnabled = true,
@@ -448,7 +448,7 @@ export function NSEInputBox({
   className = "",
   children,
   ...props
-}: NSEInputBoxProps) {
+}: InputBoxProps) {
   return (
     <div
       {...props}
@@ -482,7 +482,7 @@ export interface NSESwitchProps extends Omit<ButtonHTMLAttributes<HTMLButtonElem
   selectionHaptic?: HFXFeedbackRequest;
 }
 
-type NSESwitchControlProps = Omit<NSESwitchProps, "state" | "defaultState" | "onStateChange"> & {
+type SwitchControlProps = Omit<NSESwitchProps, "state" | "defaultState" | "onStateChange"> & {
   checked?: boolean;
   defaultChecked?: boolean;
   onCheckedChange?: (checked: boolean) => void;
@@ -490,15 +490,15 @@ type NSESwitchControlProps = Omit<NSESwitchProps, "state" | "defaultState" | "on
 
 /** NSSwitch: an on/off switch. Bound through Cocoa Bindings' `value`, it reads and writes a Boolean. */
 export function NSESwitch(props: NSEBoundValueProps<boolean, NSESwitchProps, 'state' | 'defaultState' | 'onStateChange'>) {
-  const bound = useNSEValueBinding<boolean, NSESwitchControlProps & { binding?: unknown }, 'checked' | 'onCheckedChange'>(
+  const bound = useNSEValueBinding<boolean, SwitchControlProps & { binding?: unknown }, 'checked' | 'onCheckedChange'>(
     toSwitchControlProps(props) as never,
     { value: 'checked', change: 'onCheckedChange', excludes: ['defaultChecked'], fallback: false },
-  ) as NSESwitchControlProps & { disabled?: boolean };
+  ) as SwitchControlProps & { disabled?: boolean };
   const { disabled, ...rest } = bound;
-  return <NSESwitchControl {...rest} isEnabled={(rest.isEnabled ?? true) && !disabled} />;
+  return <SwitchControl {...rest} isEnabled={(rest.isEnabled ?? true) && !disabled} />;
 }
 
-function toSwitchControlProps(props: NSESwitchProps & { binding?: unknown }): NSESwitchControlProps & { binding?: unknown } {
+function toSwitchControlProps(props: NSESwitchProps & { binding?: unknown }): SwitchControlProps & { binding?: unknown } {
   const { state, defaultState, onStateChange, ...rest } = props;
   return {
     ...rest,
@@ -508,7 +508,7 @@ function toSwitchControlProps(props: NSESwitchProps & { binding?: unknown }): NS
   };
 }
 
-function NSESwitchControl({
+function SwitchControl({
   thumbMaterial = "standard",
   checked,
   defaultChecked,
@@ -524,7 +524,7 @@ function NSESwitchControl({
   style,
   type = "button",
   ...props
-}: NSESwitchControlProps) {
+}: SwitchControlProps) {
   const disabled = !isEnabled;
   const theme = useNSEThemeInteraction<HTMLButtonElement>(isEnabled, true, props);
   const { triggerNSEControlHaptic, triggerNSEControlHapticForEvent } = useNSEControlFeedback();
@@ -674,15 +674,15 @@ function NSESwitchControl({
   );
 }
 
-export interface NSERadioOption {
+export interface RadioOption {
   value: string;
   label: ReactNode;
   isEnabled?: boolean;
   command?: ControlCommandBinding<{ readonly value: string }>;
 }
 
-export interface NSERadioGroupProps extends Omit<HTMLAttributes<HTMLDivElement>, "onChange"> {
-  options: NSERadioOption[];
+export interface RadioGroupProps extends Omit<HTMLAttributes<HTMLDivElement>, "onChange"> {
+  options: RadioOption[];
   value?: string;
   defaultValue?: string;
   onValueChange?: (value: string, phase: "commit") => void;
@@ -695,8 +695,8 @@ export interface NSERadioGroupProps extends Omit<HTMLAttributes<HTMLDivElement>,
   selectionHaptic?: HFXFeedbackRequest;
 }
 
-interface NSERadioOptionControlProps {
-  readonly option: NSERadioOption;
+interface RadioOptionControlProps {
+  readonly option: RadioOption;
   readonly selected: boolean;
   readonly position: "single" | "first" | "middle" | "last";
   readonly name: string;
@@ -709,7 +709,7 @@ interface NSERadioOptionControlProps {
   readonly onKeyDown: (event: KeyboardEvent<HTMLInputElement>) => void;
 }
 
-function NSERadioOptionControl({ option, selected, position, name, required, disabled, tabStop, onAvailabilityChange, inputRef, onCommit, onKeyDown }: NSERadioOptionControlProps) {
+function RadioOptionControl({ option, selected, position, name, required, disabled, tabStop, onAvailabilityChange, inputRef, onCommit, onKeyDown }: RadioOptionControlProps) {
   const command = useNSEControlCommand(option.command);
   const presentation = command.presentation;
   const theme = useNSEThemeInteraction<HTMLLabelElement>(!disabled && option.isEnabled !== false, true);
@@ -760,11 +760,11 @@ function NSERadioOptionControl({ option, selected, position, name, required, dis
   );
 }
 
-export function NSERadioGroup(props: NSEBoundValueProps<string, NSERadioGroupProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>) {
-  return <NSERadioGroupControl {...useNSEValueBinding<string, NSERadioGroupProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>(props, {fallback:''})} />;
+export function RadioGroup(props: NSEBoundValueProps<string, RadioGroupProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>) {
+  return <RadioGroupControl {...useNSEValueBinding<string, RadioGroupProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>(props, {fallback:''})} />;
 }
 
-function NSERadioGroupControl({
+function RadioGroupControl({
   options,
   value,
   defaultValue,
@@ -779,7 +779,7 @@ function NSERadioGroupControl({
   onKeyDown,
   dir,
   ...props
-}: NSERadioGroupProps) {
+}: RadioGroupProps) {
   const disabled = !isEnabled;
   const { triggerNSEControlHaptic, triggerNSEControlHapticForEvent } = useNSEControlFeedback();
 
@@ -859,7 +859,7 @@ function NSERadioGroupControl({
               ? "last"
               : "middle";
         return (
-          <NSERadioOptionControl
+          <RadioOptionControl
             key={option.value}
             option={option}
             selected={selected}

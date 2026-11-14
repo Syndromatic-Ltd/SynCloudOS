@@ -31,7 +31,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEAppearanceProvider, useNSEAppearance, type NSEAppearanceServicePort } from "../../src/NSE/Appearance";
 import { NSEAboutDialog } from "../../src/NSE/Components/NSESystemDialogs";
 import { NSEPreferencesToast } from "../../src/NSE/Components/NSEPreferencesToast";
-import { NSERadioGroup, NSETextField } from "../../src/NSE/Controls/Fields/NSEFields";
+import { RadioGroup, NSETextField } from "../../src/NSE/Controls/Fields/NSEFields";
 import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
 import { NSEPopUpButton } from "../../src/NSE/Menus";
 import { OverlayProvider, NSEPopup as NSECanonicalPopup } from "../../src/NSE/Overlays";
@@ -310,7 +310,7 @@ describe("NSE appearance composition", () => {
 
   it("keeps native radio focus and exposes reachable disabled paint state", () => {
     render(
-      <NSERadioGroup
+      <RadioGroup
         label="Mode"
         value="standard"
         options={[

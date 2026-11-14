@@ -31,7 +31,7 @@ import {
   type ReactNode,
   type RefAttributes,
 } from "react";
-import { NSEControlImage } from "../Images/NSEControlImage";
+import { ControlImage } from "../Images/NSEControlImage";
 import type { NSEThemeControlName } from "../../Theme/contract/vocabulary";
 import { nseControlHooks, nseMinimumControlProperties } from "../../Theme/contract/hooks";
 import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction";
@@ -222,7 +222,7 @@ const PushButtonCell = forwardRef<HTMLButtonElement, NSEButtonProps>(function Pu
   const on = (alternates && state === "on") || presentation?.state === "on";
   const drawnPressed = on || isHighlighted;
   const position = imagePosition ?? (image ? "imageLeading" : "noImage");
-  const shownImage = position === "noImage" || image == null ? null : <NSEControlImage image={image} />;
+  const shownImage = position === "noImage" || image == null ? null : <ControlImage image={image} />;
   const label = accessibleTitle(title);
   const disclosure = bezelStyle === "disclosure";
 

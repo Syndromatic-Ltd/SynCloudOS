@@ -43,7 +43,7 @@ import { useNSEAnimationEnvironment } from "../../Animation/NSEAnimationEnvironm
 import type { AFXLayer } from "../../../FX/AnimationFX/AFXLayer";
 
 /** @internal Zoom control for NSEImageView's +/− buttons. */
-export interface NSESizeableImageHandle {
+export interface SizeableImageHandle {
   getZoom: () => number;
   isZoomIn: () => boolean;
   zoomIn: () => void;
@@ -52,7 +52,7 @@ export interface NSESizeableImageHandle {
 }
 
 /** @internal */
-export interface NSESizeableImageProps extends Omit<HTMLAttributes<HTMLDivElement>, "onChange"> {
+export interface SizeableImageProps extends Omit<HTMLAttributes<HTMLDivElement>, "onChange"> {
   src: string | RuntimeImageResource;
   geometry?: IFXImageGeometryPort;
   /**
@@ -79,8 +79,8 @@ export interface NSESizeableImageProps extends Omit<HTMLAttributes<HTMLDivElemen
  * @internal NSEImageView's drawing: an NSImage-like resource (template tint, cap insets, resizing mode)
  * or a leased string source, on ImageFX's zoom and pan viewport.
  */
-export const NSESizeableImage = forwardRef<NSESizeableImageHandle, NSESizeableImageProps>(
-  function NSESizeableImage(
+export const SizeableImage = forwardRef<SizeableImageHandle, SizeableImageProps>(
+  function SizeableImage(
     {
       src,
       geometry,
@@ -236,7 +236,7 @@ export const NSESizeableImage = forwardRef<NSESizeableImageHandle, NSESizeableIm
  */
 export type NSEImageScaling = "proportionallyUpOrDown" | "none";
 
-export interface NSEImageViewProps extends Omit<NSESizeableImageProps, "ref" | "autoSize"> {
+export interface NSEImageViewProps extends Omit<SizeableImageProps, "ref" | "autoSize"> {
   /** NSView.wantsLayer. The backing layer belongs to this mounted view. */
   wantsLayer?: boolean;
   /** NSImageView.imageScaling. Default `proportionallyUpOrDown`. */
@@ -266,7 +266,7 @@ export const NSEImageView = forwardRef<NSEImageViewHandle, NSEImageViewProps>(fu
   className = "",
   ...props
 }: NSEImageViewProps, ref) {
-  const imageRef = useRef<NSESizeableImageHandle>(null);
+  const imageRef = useRef<SizeableImageHandle>(null);
   const host = useRef<HTMLDivElement>(null);
   const { layers } = useNSEAnimationEnvironment();
   const backing = useRef<{
@@ -317,7 +317,7 @@ export const NSEImageView = forwardRef<NSEImageViewHandle, NSEImageViewProps>(fu
 
   return (
     <div data-nse-control="image-view" data-nse-part="background" data-nse-image-scaling={imageScaling} ref={host} className={classes("nse-control-image-view", className)} data-image-scaling={imageScaling}>
-      <NSESizeableImage data-nse-part="image" ref={imageRef} autoSize={imageScaling !== "none"} {...props} />
+      <SizeableImage data-nse-part="image" ref={imageRef} autoSize={imageScaling !== "none"} {...props} />
       {controls ? (
         <div data-nse-part="accessory" className="nse-control-image-view-controls" role="group" aria-label="Zoom">
           <button

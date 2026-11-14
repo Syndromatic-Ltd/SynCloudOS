@@ -35,7 +35,7 @@ import { ActionResponderContext } from "../Core/useNSEControlAction";
 import { NSEButton } from "../Buttons/NSEButton";
 import { ToolButtonGroup } from "../Buttons/NSEButtonFamilies";
 import { sizedControlStyle } from "../Core/nseControlsShared";
-import { NSERadioGroup } from "../Fields/NSEFields";
+import { RadioGroup } from "../Fields/NSEFields";
 import type { NSESegmentedControlProps, NSESegmentedItem, NSESegmentedSelection } from "./valueControlTypes";
 
 /**
@@ -73,7 +73,7 @@ function TexturedRadioSegments({ props }: { readonly props: NSESegmentedControlP
   const theme = useNSEThemeInteraction<HTMLDivElement>(props.isEnabled !== false, true);
   const selected = props.items.find((item) => props.selection.selectedIds.has(item.id))?.id ?? "";
   return (
-    <NSERadioGroup
+    <RadioGroup
       {...theme.events}
       {...nseControlHooks({ control: "segmented-control", enabled: props.isEnabled !== false, highlighted: theme.highlighted, hovered: theme.hovered, focused: theme.focused, variants: { "segment-style": "texturedRounded", "control-size": props.controlSize ?? "regular" } })}
       className={["nse-extended-radio-tool-button-group", props.className].filter(Boolean).join(" ")}

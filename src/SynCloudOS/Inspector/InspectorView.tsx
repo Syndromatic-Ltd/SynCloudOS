@@ -21,7 +21,7 @@
 import { useEffect, useRef, useState } from "react";
 import { NSEButton } from "../../NSE/public/inspector-controls";
 import { ContainerPane } from "../../NSE/public/inspector-controls";
-import { NSEInputBox } from "../../NSE/public/inspector-controls";
+import { InputBox } from "../../NSE/public/inspector-controls";
 import { translateSynWareText } from "../AppSDK/useStrings";
 import type { InspectorLocalization } from "./inspectorLocalization";
 import "./inspector.css";
@@ -143,6 +143,6 @@ export function InspectorView({ client, localization, pageSize = 25 }: { readonl
         onClick={() => setOffset(offset + size)}
       />
     </div>
-    {content && <NSEInputBox><label className="syncloudos-inspector__export">{t("inspector.snapshotJSON", "Sanitized snapshot JSON")}<textarea readOnly value={content} /></label></NSEInputBox>}
+    {content && <InputBox><label className="syncloudos-inspector__export">{t("inspector.snapshotJSON", "Sanitized snapshot JSON")}<textarea readOnly value={content} /></label></InputBox>}
   </ContainerPane>;
 }
