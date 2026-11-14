@@ -1,0 +1,262 @@
+{
+  "scene": "Stage status-bar fixture from each commit, inside the shared AppViewChrome.Surface with the material selected and constrained to the viewport. The title uses the corresponding frozen Atmo TopBar catalogue specimen in both versions.",
+  "browser": "149.0.7827.55",
+  "captures": [
+    {
+      "filename": "before-desktop-light-cumulus.png",
+      "commit": "1bfc47e9",
+      "viewport": {
+        "width": 1280,
+        "height": 850
+      },
+      "scheme": "light",
+      "material": "cumulus",
+      "frame": {
+        "x": 190,
+        "y": 30,
+        "width": 900,
+        "height": 116
+      }
+    },
+    {
+      "filename": "before-desktop-light-metal.png",
+      "commit": "1bfc47e9",
+      "viewport": {
+        "width": 1280,
+        "height": 850
+      },
+      "scheme": "light",
+      "material": "metal",
+      "frame": {
+        "x": 190,
+        "y": 30,
+        "width": 900,
+        "height": 116
+      }
+    },
+    {
+      "filename": "before-desktop-dark-cumulus.png",
+      "commit": "1bfc47e9",
+      "viewport": {
+        "width": 1280,
+        "height": 850
+      },
+      "scheme": "dark",
+      "material": "cumulus",
+      "frame": {
+        "x": 190,
+        "y": 30,
+        "width": 900,
+        "height": 116
+      }
+    },
+    {
+      "filename": "before-desktop-dark-metal.png",
+      "commit": "1bfc47e9",
+      "viewport": {
+        "width": 1280,
+        "height": 850
+      },
+      "scheme": "dark",
+      "material": "metal",
+      "frame": {
+        "x": 190,
+        "y": 30,
+        "width": 900,
+        "height": 116
+      }
+    },
+    {
+      "filename": "before-phone-light-cumulus.png",
+      "commit": "1bfc47e9",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scheme": "light",
+      "material": "cumulus",
+      "frame": {
+        "x": 16,
+        "y": 30,
+        "width": 358,
+        "height": 116
+      }
+    },
+    {
+      "filename": "before-phone-light-metal.png",
+      "commit": "1bfc47e9",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scheme": "light",
+      "material": "metal",
+      "frame": {
+        "x": 16,
+        "y": 30,
+        "width": 358,
+        "height": 116
+      }
+    },
+    {
+      "filename": "before-phone-dark-cumulus.png",
+      "commit": "1bfc47e9",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scheme": "dark",
+      "material": "cumulus",
+      "frame": {
+        "x": 16,
+        "y": 30,
+        "width": 358,
+        "height": 116
+      }
+    },
+    {
+      "filename": "before-phone-dark-metal.png",
+      "commit": "1bfc47e9",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scheme": "dark",
+      "material": "metal",
+      "frame": {
+        "x": 16,
+        "y": 30,
+        "width": 358,
+        "height": 116
+      }
+    },
+    {
+      "filename": "after-desktop-light-cumulus.png",
+      "commit": "170b71c6",
+      "viewport": {
+        "width": 1280,
+        "height": 850
+      },
+      "scheme": "light",
+      "material": "cumulus",
+      "frame": {
+        "x": 190,
+        "y": 30,
+        "width": 900,
+        "height": 180
+      }
+    },
+    {
+      "filename": "after-desktop-light-metal.png",
+      "commit": "170b71c6",
+      "viewport": {
+        "width": 1280,
+        "height": 850
+      },
+      "scheme": "light",
+      "material": "metal",
+      "frame": {
+        "x": 190,
+        "y": 30,
+        "width": 900,
+        "height": 180
+      }
+    },
+    {
+      "filename": "after-desktop-dark-cumulus.png",
+      "commit": "170b71c6",
+      "viewport": {
+        "width": 1280,
+        "height": 850
+      },
+      "scheme": "dark",
+      "material": "cumulus",
+      "frame": {
+        "x": 190,
+        "y": 30,
+        "width": 900,
+        "height": 180
+      }
+    },
+    {
+      "filename": "after-desktop-dark-metal.png",
+      "commit": "170b71c6",
+      "viewport": {
+        "width": 1280,
+        "height": 850
+      },
+      "scheme": "dark",
+      "material": "metal",
+      "frame": {
+        "x": 190,
+        "y": 30,
+        "width": 900,
+        "height": 180
+      }
+    },
+    {
+      "filename": "after-phone-light-cumulus.png",
+      "commit": "170b71c6",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scheme": "light",
+      "material": "cumulus",
+      "frame": {
+        "x": 32,
+        "y": 32,
+        "width": 326,
+        "height": 180
+      }
+    },
+    {
+      "filename": "after-phone-light-metal.png",
+      "commit": "170b71c6",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scheme": "light",
+      "material": "metal",
+      "frame": {
+        "x": 32,
+        "y": 32,
+        "width": 326,
+        "height": 180
+      }
+    },
+    {
+      "filename": "after-phone-dark-cumulus.png",
+      "commit": "170b71c6",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scheme": "dark",
+      "material": "cumulus",
+      "frame": {
+        "x": 32,
+        "y": 32,
+        "width": 326,
+        "height": 180
+      }
+    },
+    {
+      "filename": "after-phone-dark-metal.png",
+      "commit": "170b71c6",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scheme": "dark",
+      "material": "metal",
+      "frame": {
+        "x": 32,
+        "y": 32,
+        "width": 326,
+        "height": 180
+      }
+    }
+  ]
+}

@@ -3,7 +3,7 @@
 Framework baseline is 1bfc47e9 in the Webspring framework worktree. Site baseline is 0472a7c with its then-installed Beta 2 SDK and existing local edits.
 
 - Phase 0 established [framework fixture](captures/) and [site](site/) references. Phase 0b selected shared authority using four Chromium transfer tests. The production Webspring integration test verified window and controller identity, one content mount, draft and DOM focus when moving from stage to floating and back. The [plan records the boundary](../../plans/2026-11-14-window-management.md#transfer-prototype-results-sol) and the verified child-document handoff.
-- [Phase 1](phase-1/) replaced the retired frame component with window content borders and preserved sheet-focus and sidebar behavior.
+- [Phase 1](phase-1/) replaced the retired frame component with window content borders and preserved sheet-focus and sidebar behavior. The [paired status-bar captures](phase-1/paired/) show the change from normal-flow status text to a bottom content border under the same frozen Cumulus and Metal titlebars, at desktop and phone widths in light and dark.
 - Phase 2 added confirmed fullscreen transitions, scoped focus and restoration migration. This changes window state and authority.
 - [Phase 3](phase-3/) gave Webspring and the single-app host real stage windows so one controller can move between frames. The production site captures pair the Phase 0 stage with the current stage and its floating destination at both sizes, both schemes and both materials. The captures show settled states. Launch, return, QuickSwitch and MultiSwitch motion review remains open.
 - [Phase 4](phase-4/titlebar/) placed title, controls, toolbar and accessories in shared chrome. The captures compare source-backed fixture scenes. The titlebar browser tests measure placement, overflow, drag exclusions and floating geometry. [Site captures](phase-4/site/) show About, Software and Journal through the installed SDK. The Metal rail follows the root split sidebar.
@@ -29,6 +29,7 @@ Framework baseline is 1bfc47e9 in the Webspring framework worktree. Site baselin
 - Pending design | Journal and JournalOld frame-view art for the Mountain Lion and leather variants. Both use metric and token placeholders.
 - Compare the shared titlebar's inline toolbar, controls, dark accessory paint, and desktop/phone layout with the reference captures. The titlebar and menu fixtures include their source hashes and geometry.
 - The production site captures include both Journal variants, MemoJournal and SynCal. Same-scene baseline pairs and complete launch, return, QuickSwitch and MultiSwitch motion comparisons remain open.
+- Phase 1 status-bar placement and bright dark-scheme border paint are visible in the [paired status captures](phase-1/paired/).
 - Window-controls-overlay verification remains open. Chrome accepted a temporary-profile PWA installation, but the test could not obtain a live native titlebar rectangle.
 
 ## Engineering follow-up
