@@ -23,11 +23,11 @@
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import React, { useMemo } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { NSEDateEntry } from "../../../src/NSE/DateTime/Pickers/dateEntry";
-import { NSEDateRangeEntry } from "../../../src/NSE/DateTime/Pickers/dateRangeEntry";
-import { NSEDateTimeEntry } from "../../../src/NSE/DateTime/Pickers/dateTimeEntry";
-import { NSETimeEntry } from "../../../src/NSE/DateTime/Pickers/timeEntry";
-import { NSEGraphicalClock } from "../../../src/NSE/DateTime/Calendar/graphicalClock";
+import { DateEntry } from "../../../src/NSE/DateTime/Pickers/dateEntry";
+import { DateRangeEntry } from "../../../src/NSE/DateTime/Pickers/dateRangeEntry";
+import { DateTimeEntry } from "../../../src/NSE/DateTime/Pickers/dateTimeEntry";
+import { TimeEntry } from "../../../src/NSE/DateTime/Pickers/timeEntry";
+import { GraphicalClock } from "../../../src/NSE/DateTime/Calendar/graphicalClock";
 import { OverlayProvider } from "../../../src/NSE/Overlays";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
 import { createSynCloudOS } from "../../../src/SynCloudOS/Runtime/createSynCloudOS";
@@ -54,7 +54,7 @@ describe("civil date/time pickers", () => {
     const changes: Array<{ value: typeof baseline | null; phase: string }> = [];
     function Harness() {
       const [range, setRange] = React.useState<typeof baseline | null>(baseline);
-      return <PickerOverlay><NSEDateRangeEntry aria-label="Travel" locale="en-GB" timeZone="UTC" value={range} onValueChange={(next, phase) => { changes.push({ value: next, phase }); setRange(next); }} /></PickerOverlay>;
+      return <PickerOverlay><DateRangeEntry aria-label="Travel" locale="en-GB" timeZone="UTC" value={range} onValueChange={(next, phase) => { changes.push({ value: next, phase }); setRange(next); }} /></PickerOverlay>;
     }
     render(<Harness />);
     fireEvent.click(screen.getByRole("button", { name: "Choose travel dates" }));
@@ -74,7 +74,7 @@ describe("civil date/time pickers", () => {
     const changes: Array<{ value: typeof baseline | null; phase: string }> = [];
     function Harness() {
       const [range, setRange] = React.useState<typeof baseline | null>(baseline);
-      return <PickerOverlay><NSEDateRangeEntry aria-label="Travel" locale="en-GB" timeZone="UTC" value={range} onValueChange={(next, phase) => { changes.push({ value: next, phase }); setRange(next); }} /></PickerOverlay>;
+      return <PickerOverlay><DateRangeEntry aria-label="Travel" locale="en-GB" timeZone="UTC" value={range} onValueChange={(next, phase) => { changes.push({ value: next, phase }); setRange(next); }} /></PickerOverlay>;
     }
     render(<Harness />);
     fireEvent.click(screen.getByRole("button", { name: "Choose travel dates" }));
@@ -87,7 +87,7 @@ describe("civil date/time pickers", () => {
 
   it("parses the current text draft when Apply is clicked and refuses invalid drafts", () => {
     const change = vi.fn();
-    render(<NSEDateTimeEntry aria-label="Appointment" locale="en-GB" timeZone="UTC" mode="text" defaultValue={{ date: date(2026, 7, 12), time: { hour: 9, minute: 15, second: 0 }, timeZone: "UTC", disambiguation: "earlier" }} onValueChange={change} />);
+    render(<DateTimeEntry aria-label="Appointment" locale="en-GB" timeZone="UTC" mode="text" defaultValue={{ date: date(2026, 7, 12), time: { hour: 9, minute: 15, second: 0 }, timeZone: "UTC", disambiguation: "earlier" }} onValueChange={change} />);
     const input = screen.getByRole("textbox", { name: "Appointment date and time" });
     fireEvent.change(input, { target: { value: "18/07/2026 14:45" } });
     fireEvent.click(screen.getByRole("button", { name: "Apply appointment" }));
@@ -100,7 +100,7 @@ describe("civil date/time pickers", () => {
   });
 
   it("offers an explicit nullable clear path and restores the empty form value on reset", () => {
-    const { container } = render(<form><NSEDateTimeEntry aria-label="Appointment" name="appointment" locale="en-GB" timeZone="UTC" mode="text" defaultValue={null} /><button type="reset">Reset appointment</button></form>);
+    const { container } = render(<form><DateTimeEntry aria-label="Appointment" name="appointment" locale="en-GB" timeZone="UTC" mode="text" defaultValue={null} /><button type="reset">Reset appointment</button></form>);
     fireEvent.click(screen.getByRole("button", { name: "Clear appointment" }));
     expect(container.querySelector<HTMLInputElement>('input[name="appointment"]')?.value).toBe("");
     fireEvent.change(screen.getByRole("textbox", { name: "Appointment date and time" }), { target: { value: "18/07/2026 14:45" } });
@@ -111,7 +111,7 @@ describe("civil date/time pickers", () => {
   });
 
   it("paints value-derived clock hands with nonzero semantic geometry", () => {
-    render(<NSEGraphicalClock aria-label="Clock" locale="en-GB" timeZone="UTC" date={date(2026, 7, 12)} value={{ hour: 1, minute: 30, second: 15 }} showSeconds onValueChange={vi.fn()} />);
+    render(<GraphicalClock aria-label="Clock" locale="en-GB" timeZone="UTC" date={date(2026, 7, 12)} value={{ hour: 1, minute: 30, second: 15 }} showSeconds onValueChange={vi.fn()} />);
     const face = screen.getByRole("img", { name: "Analogue clock" });
     const hour = face.querySelector<HTMLElement>('[data-nse-part="hour-hand"]')!;
     const minute = face.querySelector<HTMLElement>('[data-nse-part="minute-hand"]')!;
@@ -127,7 +127,7 @@ describe("civil date/time pickers", () => {
     const changes: Array<{ value: typeof baseline | null; phase: string }> = [];
     function Harness() {
       const [range, setRange] = React.useState<typeof baseline | null>(baseline);
-      return <PickerOverlay><NSEDateRangeEntry aria-label="Travel" locale="en-GB" timeZone="UTC" value={range} onValueChange={(next, phase) => { changes.push({ value: next, phase }); setRange(next); }} /></PickerOverlay>;
+      return <PickerOverlay><DateRangeEntry aria-label="Travel" locale="en-GB" timeZone="UTC" value={range} onValueChange={(next, phase) => { changes.push({ value: next, phase }); setRange(next); }} /></PickerOverlay>;
     }
     render(<React.StrictMode><Harness /></React.StrictMode>);
     fireEvent.click(screen.getByRole("button", { name: "Choose travel dates" }));
@@ -143,9 +143,9 @@ describe("civil date/time pickers", () => {
   it("replaces an open controlled range transaction with external authority and uses it on reopen", () => {
     const first = { start: date(2026, 3, 28), end: date(2026, 3, 30) };
     const second = { start: date(2026, 4, 8), end: date(2026, 4, 10) };
-    const view = render(<PickerOverlay><NSEDateRangeEntry aria-label="Travel" locale="en-GB" timeZone="UTC" value={first} /></PickerOverlay>);
+    const view = render(<PickerOverlay><DateRangeEntry aria-label="Travel" locale="en-GB" timeZone="UTC" value={first} /></PickerOverlay>);
     fireEvent.click(screen.getByRole("button", { name: "Choose travel dates" }));
-    view.rerender(<PickerOverlay><NSEDateRangeEntry aria-label="Travel" locale="en-GB" timeZone="UTC" value={second} /></PickerOverlay>);
+    view.rerender(<PickerOverlay><DateRangeEntry aria-label="Travel" locale="en-GB" timeZone="UTC" value={second} /></PickerOverlay>);
     expect(within(screen.getByRole("dialog", { name: "Travel calendar" })).getByText("April 2026")).not.toBeNull();
     fireEvent.click(within(screen.getByRole("dialog", { name: "Travel calendar" })).getByRole("button", { name: "Cancel" }));
     fireEvent.click(screen.getByRole("button", { name: "Choose travel dates" }));
@@ -153,7 +153,7 @@ describe("civil date/time pickers", () => {
   });
 
   it("renders text mode as a text editor without calendar or clock surfaces", () => {
-    render(<NSEDateTimeEntry aria-label="Appointment" locale="en-GB" timeZone="UTC" mode="text" value={{ date: date(2026, 7, 12), time: { hour: 13, minute: 30, second: 0 }, timeZone: "UTC", disambiguation: "earlier" }} />);
+    render(<DateTimeEntry aria-label="Appointment" locale="en-GB" timeZone="UTC" mode="text" value={{ date: date(2026, 7, 12), time: { hour: 13, minute: 30, second: 0 }, timeZone: "UTC", disambiguation: "earlier" }} />);
     expect(screen.getByRole("textbox", { name: "Appointment date and time" })).not.toBeNull();
     expect(screen.queryByRole("grid", { name: "Appointment calendar" })).toBeNull();
     expect(screen.queryByRole("img", { name: "Analogue clock" })).toBeNull();
@@ -161,10 +161,10 @@ describe("civil date/time pickers", () => {
 
   it("renders calendar mode without a clock and clock mode without a calendar", () => {
     const initial = { date: date(2026, 7, 12), time: { hour: 13, minute: 30, second: 0 }, timeZone: "UTC", disambiguation: "earlier" as const };
-    const view = render(<NSEDateTimeEntry aria-label="Appointment" locale="en-GB" timeZone="UTC" mode={"calendar" as never} value={initial} />);
+    const view = render(<DateTimeEntry aria-label="Appointment" locale="en-GB" timeZone="UTC" mode={"calendar" as never} value={initial} />);
     expect(screen.getByRole("grid", { name: "Appointment calendar" })).not.toBeNull();
     expect(screen.queryByRole("img", { name: "Analogue clock" })).toBeNull();
-    view.rerender(<NSEDateTimeEntry aria-label="Appointment" locale="en-GB" timeZone="UTC" mode={"clock" as never} value={initial} />);
+    view.rerender(<DateTimeEntry aria-label="Appointment" locale="en-GB" timeZone="UTC" mode={"clock" as never} value={initial} />);
     expect(screen.getByRole("img", { name: "Analogue clock" })).not.toBeNull();
     expect(screen.queryByRole("grid", { name: "Appointment calendar" })).toBeNull();
   });
@@ -172,7 +172,7 @@ describe("civil date/time pickers", () => {
   it("marks combined mode distinctly and enforces constraints before preview", () => {
     const change = vi.fn();
     const minimum = { epochMilliseconds: Date.UTC(2026, 6, 10), timeZone: "UTC", calendar: "gregory" as const };
-    render(<NSEDateTimeEntry aria-label="Appointment" locale="en-GB" timeZone="UTC" mode="combined" value={{ date: date(2026, 7, 12), time: { hour: 13, minute: 30, second: 0 }, timeZone: "UTC", disambiguation: "earlier" }} minimum={minimum} onValueChange={change} />);
+    render(<DateTimeEntry aria-label="Appointment" locale="en-GB" timeZone="UTC" mode="combined" value={{ date: date(2026, 7, 12), time: { hour: 13, minute: 30, second: 0 }, timeZone: "UTC", disambiguation: "earlier" }} minimum={minimum} onValueChange={change} />);
     expect(screen.getByTestId("date-time-editor").getAttribute("data-editor-mode")).toBe("combined");
     fireEvent.click(screen.getByRole("gridcell", { name: /^8 July 2026$/ }));
     expect(change).not.toHaveBeenCalledWith(expect.objectContaining({ date: date(2026, 7, 8) }), "preview");
@@ -182,7 +182,7 @@ describe("civil date/time pickers", () => {
     const change = vi.fn();
     function Harness() {
       const [range, setRange] = React.useState<ReturnType<typeof date> extends never ? never : { start: ReturnType<typeof date>; end: ReturnType<typeof date> } | null>(null);
-      return <PickerOverlay><form><NSEDateRangeEntry aria-label="Travel" name="travel" locale="en-GB" timeZone="UTC" value={range} minimum={date(2026, 3, 1)} onValueChange={(next, phase) => { change(next, phase); setRange(next); }} /></form></PickerOverlay>;
+      return <PickerOverlay><form><DateRangeEntry aria-label="Travel" name="travel" locale="en-GB" timeZone="UTC" value={range} minimum={date(2026, 3, 1)} onValueChange={(next, phase) => { change(next, phase); setRange(next); }} /></form></PickerOverlay>;
     }
     const { container } = render(<Harness />);
     fireEvent.click(screen.getByRole("button", { name: "Choose travel dates" }));
@@ -196,7 +196,7 @@ describe("civil date/time pickers", () => {
 
   it("resets an uncontrolled combined transaction to its form opening value", () => {
     const initial = { date: date(2026, 7, 12), time: { hour: 9, minute: 15, second: 0 }, timeZone: "UTC", disambiguation: "earlier" as const };
-    const { container } = render(<form><NSEDateTimeEntry aria-label="Appointment" name="appointment" locale="en-GB" timeZone="UTC" defaultValue={initial} /><button type="reset">Reset appointment</button></form>);
+    const { container } = render(<form><DateTimeEntry aria-label="Appointment" name="appointment" locale="en-GB" timeZone="UTC" defaultValue={initial} /><button type="reset">Reset appointment</button></form>);
     fireEvent.change(screen.getByRole("spinbutton", { name: "Hour" }), { target: { value: "17" } });
     fireEvent.click(screen.getByRole("button", { name: "Apply appointment" }));
     expect(container.querySelector<HTMLInputElement>('input[name="appointment"]')?.value).toContain("T17:15:00");
@@ -205,50 +205,50 @@ describe("civil date/time pickers", () => {
   });
   it("opens an empty combined date-time transaction and can create its first value", () => {
     const change = vi.fn();
-    render(<PickerOverlay><NSEDateTimeEntry aria-label="Appointment" locale="en-GB" timeZone="Europe/London" value={null} mode="automatic" onValueChange={change} /></PickerOverlay>);
+    render(<PickerOverlay><DateTimeEntry aria-label="Appointment" locale="en-GB" timeZone="Europe/London" value={null} mode="automatic" onValueChange={change} /></PickerOverlay>);
     fireEvent.click(screen.getByRole("button", { name: "Appointment" }));
     expect(screen.getByRole("grid", { name: "Appointment calendar" })).not.toBeNull();
     expect(screen.getByRole("spinbutton", { name: "Hour" })).not.toBeNull();
   });
 
   it("renders date, time, zone, and disambiguation in calendar-clock mode", () => {
-    render(<PickerOverlay><NSEDateTimeEntry aria-label="Appointment" locale="en-GB" timeZone="Europe/London" mode="calendar-clock" value={{ date: date(2026, 7, 12), time: { hour: 13, minute: 30, second: 0 }, timeZone: "Europe/London", disambiguation: "later" }} /></PickerOverlay>);
+    render(<PickerOverlay><DateTimeEntry aria-label="Appointment" locale="en-GB" timeZone="Europe/London" mode="calendar-clock" value={{ date: date(2026, 7, 12), time: { hour: 13, minute: 30, second: 0 }, timeZone: "Europe/London", disambiguation: "later" }} /></PickerOverlay>);
     expect(screen.getByRole("grid", { name: "Appointment calendar" })).not.toBeNull();
     expect(screen.getByRole("button", { name: "Appointment time zone Europe/London" })).not.toBeNull();
     expect(screen.getByRole("button", { name: "Appointment disambiguation Later" })).not.toBeNull();
   });
 
   it("hosts range selection in a calendar transaction instead of only text fields", () => {
-    render(<PickerOverlay><NSEDateRangeEntry aria-label="Stay" locale="en-GB" timeZone="UTC" value={{ start: date(2026, 7, 10), end: date(2026, 7, 12) }} /></PickerOverlay>);
+    render(<PickerOverlay><DateRangeEntry aria-label="Stay" locale="en-GB" timeZone="UTC" value={{ start: date(2026, 7, 10), end: date(2026, 7, 12) }} /></PickerOverlay>);
     fireEvent.click(screen.getByRole("button", { name: "Choose stay dates" }));
     expect(screen.getByRole("grid", { name: "Stay calendar" })).not.toBeNull();
     expect(screen.getByRole("gridcell", { name: /10 July 2026/ }).getAttribute("aria-selected")).toBe("true");
   });
 
   it("opens a range calendar from the keyboard trigger", () => {
-    render(<PickerOverlay><NSEDateRangeEntry aria-label="Stay" locale="en-GB" timeZone="UTC" value={{ start: date(2026, 7, 10), end: date(2026, 7, 12) }} /></PickerOverlay>);
+    render(<PickerOverlay><DateRangeEntry aria-label="Stay" locale="en-GB" timeZone="UTC" value={{ start: date(2026, 7, 10), end: date(2026, 7, 12) }} /></PickerOverlay>);
     fireEvent.keyDown(screen.getByRole("button", { name: "Choose stay dates" }), { key: "Enter" });
     expect(screen.getByRole("dialog", { name: "Stay calendar" })).not.toBeNull();
   });
 
   it("resynchronizes the open automatic calendar when a controlled value is replaced", () => {
-    const view = render(<PickerOverlay><NSEDateEntry aria-label="Departure" locale="en-GB" timeZone="UTC" value={date(2026, 7, 12)} /></PickerOverlay>);
+    const view = render(<PickerOverlay><DateEntry aria-label="Departure" locale="en-GB" timeZone="UTC" value={date(2026, 7, 12)} /></PickerOverlay>);
     fireEvent.click(screen.getByRole("button", { name: "Choose departure" }));
     expect(screen.getByText("July 2026")).not.toBeNull();
-    view.rerender(<PickerOverlay><NSEDateEntry aria-label="Departure" locale="en-GB" timeZone="UTC" value={date(2026, 8, 19)} /></PickerOverlay>);
+    view.rerender(<PickerOverlay><DateEntry aria-label="Departure" locale="en-GB" timeZone="UTC" value={date(2026, 8, 19)} /></PickerOverlay>);
     expect(screen.getByText("August 2026")).not.toBeNull();
     expect(screen.getByRole("gridcell", { name: /19 August 2026/ }).getAttribute("tabindex")).toBe("0");
   });
   it("opens an automatic calendar under a live runtime responder", () => {
     const runtime = createSynCloudOS({ id: "runtime:live-date-picker", environment: createTestRuntimeEnvironment() });
-    render(<SynCloudOSProvider runtime={runtime}><RuntimePickerOverlay><NSEDateEntry aria-label="Departure" locale="en-GB" timeZone="UTC" value={date(2026, 7, 12)} /></RuntimePickerOverlay></SynCloudOSProvider>);
+    render(<SynCloudOSProvider runtime={runtime}><RuntimePickerOverlay><DateEntry aria-label="Departure" locale="en-GB" timeZone="UTC" value={date(2026, 7, 12)} /></RuntimePickerOverlay></SynCloudOSProvider>);
     fireEvent.click(screen.getByRole("button", { name: "Choose departure" }));
     expect(screen.getByRole("dialog", { name: "Departure calendar" })).not.toBeNull();
   });
 
   it("parses localized text and serializes unambiguous form values", () => {
     const change = vi.fn();
-    const { container } = render(<form><NSEDateEntry aria-label="Date" name="date" locale="en-GB" timeZone="Europe/London" defaultValue={date(2026, 7, 12)} mode="text" onValueChange={change} /></form>);
+    const { container } = render(<form><DateEntry aria-label="Date" name="date" locale="en-GB" timeZone="Europe/London" defaultValue={date(2026, 7, 12)} mode="text" onValueChange={change} /></form>);
     const input = screen.getByRole("textbox", { name: "Date" });
     fireEvent.change(input, { target: { value: "13/07/2026" } }); fireEvent.keyDown(input, { key: "Enter" });
     expect(change).toHaveBeenCalledWith(date(2026, 7, 13), "commit");
@@ -257,7 +257,7 @@ describe("civil date/time pickers", () => {
 
   it("rolls invalid text back with Escape and respects min/max", () => {
     const change = vi.fn();
-    render(<NSEDateEntry aria-label="Date" locale="en-GB" timeZone="UTC" value={date(2026, 7, 12)} minimum={date(2026, 7, 10)} maximum={date(2026, 7, 20)} mode="text" onValueChange={change} />);
+    render(<DateEntry aria-label="Date" locale="en-GB" timeZone="UTC" value={date(2026, 7, 12)} minimum={date(2026, 7, 10)} maximum={date(2026, 7, 20)} mode="text" onValueChange={change} />);
     const input = screen.getByRole("textbox", { name: "Date" }) as HTMLInputElement;
     fireEvent.change(input, { target: { value: "31/02/2026" } }); fireEvent.keyDown(input, { key: "Enter" });
     expect(input.getAttribute("aria-invalid")).toBe("true");
@@ -268,7 +268,7 @@ describe("civil date/time pickers", () => {
 
   it("commits combined date-time atomically and rejects DST gaps", () => {
     const change = vi.fn();
-    render(<NSEDateTimeEntry aria-label="Appointment" locale="en-GB" timeZone="Europe/London" defaultValue={{ date: date(2026, 3, 29), time: { hour: 0, minute: 30, second: 0 }, timeZone: "Europe/London", disambiguation: "reject" }} onValueChange={change} />);
+    render(<DateTimeEntry aria-label="Appointment" locale="en-GB" timeZone="Europe/London" defaultValue={{ date: date(2026, 3, 29), time: { hour: 0, minute: 30, second: 0 }, timeZone: "Europe/London", disambiguation: "reject" }} onValueChange={change} />);
     fireEvent.change(screen.getByRole("spinbutton", { name: "Hour" }), { target: { value: "1" } });
     fireEvent.click(screen.getByRole("button", { name: "Apply appointment" }));
     expect(screen.getByRole("alert").textContent).toMatch(/does not exist/i);
@@ -277,7 +277,7 @@ describe("civil date/time pickers", () => {
 
   it("cancels range drafts back to the opening value", () => {
     const change = vi.fn();
-    render(<NSEDateRangeEntry aria-label="Stay" locale="en-GB" timeZone="UTC" defaultValue={{ start: date(2026, 7, 10), end: date(2026, 7, 12) }} onValueChange={change} />);
+    render(<DateRangeEntry aria-label="Stay" locale="en-GB" timeZone="UTC" defaultValue={{ start: date(2026, 7, 10), end: date(2026, 7, 12) }} onValueChange={change} />);
     fireEvent.change(screen.getByRole("textbox", { name: "Stay end" }), { target: { value: "15/07/2026" } });
     fireEvent.click(screen.getByRole("button", { name: "Cancel stay" }));
     expect((screen.getByRole("textbox", { name: "Stay end" }) as HTMLInputElement).value).toMatch(/12.*07.*2026/);
@@ -286,14 +286,14 @@ describe("civil date/time pickers", () => {
 
   it("provides a time-only form control", () => {
     const change = vi.fn();
-    render(<NSETimeEntry aria-label="Time" locale="en-GB" timeZone="UTC" defaultValue={{ hour: 13, minute: 5, second: 0 }} onValueChange={change} />);
+    render(<TimeEntry aria-label="Time" locale="en-GB" timeZone="UTC" defaultValue={{ hour: 13, minute: 5, second: 0 }} onValueChange={change} />);
     fireEvent.keyDown(screen.getByRole("spinbutton", { name: "Minute" }), { key: "ArrowUp" });
     expect(change).toHaveBeenCalledWith({ hour: 13, minute: 6, second: 0 }, "commit");
   });
 
   it("edits the default time field by typing, arrows and day period, one stepper tab stop", () => {
     const change = vi.fn();
-    render(<NSETimeEntry aria-label="Time" locale="en-US" timeZone="UTC" defaultValue={{ hour: 9, minute: 5, second: 0 }} onValueChange={change} />);
+    render(<TimeEntry aria-label="Time" locale="en-US" timeZone="UTC" defaultValue={{ hour: 9, minute: 5, second: 0 }} onValueChange={change} />);
     const hour = screen.getByRole("spinbutton", { name: "Hour", exact: true });
     const minute = screen.getByRole("spinbutton", { name: "Minute", exact: true });
     fireEvent.keyDown(hour, { key: "1" });
@@ -307,15 +307,15 @@ describe("civil date/time pickers", () => {
   });
 
   it("preserves an empty time as empty form truth", () => {
-    const { container } = render(<form><NSETimeEntry aria-label="Time" name="time" locale="en-GB" timeZone="UTC" value={null} onValueChange={vi.fn()} /></form>);
+    const { container } = render(<form><TimeEntry aria-label="Time" name="time" locale="en-GB" timeZone="UTC" value={null} onValueChange={vi.fn()} /></form>);
     expect(container.querySelector<HTMLInputElement>('input[name="time"]')?.value).toBe("");
     expect(screen.queryByRole("spinbutton", { name: "Hour" })).toBeNull();
   });
 
   it("resynchronizes controlled date values", () => {
     const change = vi.fn();
-    const { rerender } = render(<NSEDateEntry aria-label="Date" locale="en-GB" timeZone="UTC" value={date(2026, 7, 12)} mode="text" onValueChange={change} />);
-    rerender(<NSEDateEntry aria-label="Date" locale="en-GB" timeZone="UTC" value={date(2026, 7, 18)} mode="text" onValueChange={change} />);
+    const { rerender } = render(<DateEntry aria-label="Date" locale="en-GB" timeZone="UTC" value={date(2026, 7, 12)} mode="text" onValueChange={change} />);
+    rerender(<DateEntry aria-label="Date" locale="en-GB" timeZone="UTC" value={date(2026, 7, 18)} mode="text" onValueChange={change} />);
     expect((screen.getByRole("textbox", { name: "Date" }) as HTMLInputElement).value).toMatch(/18.*07.*2026/);
   });
 
@@ -323,9 +323,9 @@ describe("civil date/time pickers", () => {
     const timeChange = vi.fn();
     render(
       <>
-        <NSEDateEntry aria-label="Date" locale="en-GB" timeZone="UTC" mode="text" defaultValue={date(2026, 7, 12)} />
-        <NSEDateTimeEntry aria-label="Appointment" locale="en-GB" timeZone="UTC" mode="text" defaultValue={{ date: date(2026, 7, 12), time: { hour: 9, minute: 15, second: 0 }, timeZone: "UTC", disambiguation: "earlier" }} />
-        <NSETimeEntry aria-label="Time" locale="en-GB" timeZone="UTC" defaultValue={{ hour: 13, minute: 5, second: 0 }} onValueChange={timeChange} />
+        <DateEntry aria-label="Date" locale="en-GB" timeZone="UTC" mode="text" defaultValue={date(2026, 7, 12)} />
+        <DateTimeEntry aria-label="Appointment" locale="en-GB" timeZone="UTC" mode="text" defaultValue={{ date: date(2026, 7, 12), time: { hour: 9, minute: 15, second: 0 }, timeZone: "UTC", disambiguation: "earlier" }} />
+        <TimeEntry aria-label="Time" locale="en-GB" timeZone="UTC" defaultValue={{ hour: 13, minute: 5, second: 0 }} onValueChange={timeChange} />
       </>,
     );
 
@@ -344,7 +344,7 @@ describe("civil date/time pickers", () => {
 
   it("never commits a reversed or invalid range", () => {
     const change = vi.fn();
-    render(<NSEDateRangeEntry aria-label="Stay" locale="en-GB" timeZone="UTC" defaultValue={{ start: date(2026, 7, 10), end: date(2026, 7, 12) }} onValueChange={change} />);
+    render(<DateRangeEntry aria-label="Stay" locale="en-GB" timeZone="UTC" defaultValue={{ start: date(2026, 7, 10), end: date(2026, 7, 12) }} onValueChange={change} />);
     fireEvent.change(screen.getByRole("textbox", { name: "Stay end" }), { target: { value: "08/07/2026" } });
     fireEvent.click(screen.getByRole("button", { name: "Apply stay" }));
     expect(screen.getByRole("alert").textContent).toMatch(/range|before/i);
@@ -353,7 +353,7 @@ describe("civil date/time pickers", () => {
 
   it("previews hover and focus ranges and applies the declared reverse restart policy", () => {
     const change = vi.fn();
-    render(<PickerOverlay><NSEDateRangeEntry aria-label="Stay" locale="en-GB" timeZone="UTC" reversePolicy="restart" value={{ start: date(2026, 7, 10), end: date(2026, 7, 12) }} onValueChange={change} /></PickerOverlay>);
+    render(<PickerOverlay><DateRangeEntry aria-label="Stay" locale="en-GB" timeZone="UTC" reversePolicy="restart" value={{ start: date(2026, 7, 10), end: date(2026, 7, 12) }} onValueChange={change} /></PickerOverlay>);
     fireEvent.click(screen.getByRole("button", { name: "Choose stay dates" }));
     const earlier = screen.getByRole("gridcell", { name: "8 July 2026" });
     fireEvent.pointerEnter(earlier);
@@ -366,7 +366,7 @@ describe("civil date/time pickers", () => {
 
   it("blocks every range mutation route while read-only", () => {
     const change = vi.fn();
-    render(<NSEDateRangeEntry aria-label="Stay" locale="en-GB" timeZone="UTC" defaultValue={{ start: date(2026, 7, 10), end: date(2026, 7, 12) }} readOnly onValueChange={change} />);
+    render(<DateRangeEntry aria-label="Stay" locale="en-GB" timeZone="UTC" defaultValue={{ start: date(2026, 7, 10), end: date(2026, 7, 12) }} readOnly onValueChange={change} />);
     expect((screen.getByRole("button", { name: "Apply stay" }) as HTMLButtonElement).disabled).toBe(true);
     fireEvent.change(screen.getByRole("textbox", { name: "Stay end" }), { target: { value: "15/07/2026" } });
     fireEvent.click(screen.getByRole("button", { name: "Apply stay" }));
@@ -375,7 +375,7 @@ describe("civil date/time pickers", () => {
 
   it("commits a clicked day and closes, while arrows only move and Escape cancels", () => {
     const change = vi.fn();
-    render(<PickerOverlay><NSEDateEntry aria-label="Departure" locale="en-GB" timeZone="Europe/London" value={date(2026, 7, 12)} onValueChange={change} /></PickerOverlay>);
+    render(<PickerOverlay><DateEntry aria-label="Departure" locale="en-GB" timeZone="Europe/London" value={date(2026, 7, 12)} onValueChange={change} /></PickerOverlay>);
     const trigger = screen.getByRole("button", { name: "Choose departure" });
     trigger.focus();
     fireEvent.click(trigger);
@@ -395,28 +395,28 @@ describe("civil date/time pickers", () => {
 
   it("publishes an inline calendar selection immediately", () => {
     const change = vi.fn();
-    render(<NSEDateEntry aria-label="Departure" locale="en-GB" timeZone="UTC" mode="calendar" value={date(2026, 7, 12)} onValueChange={change} />);
+    render(<DateEntry aria-label="Departure" locale="en-GB" timeZone="UTC" mode="calendar" value={date(2026, 7, 12)} onValueChange={change} />);
     fireEvent.click(screen.getByRole("gridcell", { name: /^14 July 2026$/ }));
     expect(change).toHaveBeenCalledWith(date(2026, 7, 14), "commit");
   });
 
   it("blocks automatic calendar opening while read-only", () => {
-    render(<PickerOverlay><NSEDateEntry aria-label="Departure" locale="en-GB" timeZone="UTC" value={date(2026, 7, 12)} readOnly /></PickerOverlay>);
+    render(<PickerOverlay><DateEntry aria-label="Departure" locale="en-GB" timeZone="UTC" value={date(2026, 7, 12)} readOnly /></PickerOverlay>);
     expect((screen.getByRole("button", { name: "Choose departure" }) as HTMLButtonElement).disabled).toBe(true);
   });
 
   it("resynchronizes a controlled combined date-time draft", () => {
     const first = { date: date(2026, 7, 12), time: { hour: 9, minute: 15, second: 0 }, timeZone: "UTC", disambiguation: "earlier" as const };
     const second = { date: date(2026, 7, 13), time: { hour: 17, minute: 45, second: 0 }, timeZone: "UTC", disambiguation: "earlier" as const };
-    const { rerender } = render(<NSEDateTimeEntry aria-label="Appointment" locale="en-GB" timeZone="UTC" value={first} />);
-    rerender(<NSEDateTimeEntry aria-label="Appointment" locale="en-GB" timeZone="UTC" value={second} />);
+    const { rerender } = render(<DateTimeEntry aria-label="Appointment" locale="en-GB" timeZone="UTC" value={first} />);
+    rerender(<DateTimeEntry aria-label="Appointment" locale="en-GB" timeZone="UTC" value={second} />);
     expect((screen.getByRole("spinbutton", { name: "Hour" }) as HTMLInputElement).value).toBe("17");
     expect((screen.getByRole("spinbutton", { name: "Minute" }) as HTMLInputElement).value).toBe("45");
   });
 
   it("blocks every combined date-time mutation route while read-only", () => {
     const change = vi.fn();
-    render(<NSEDateTimeEntry aria-label="Appointment" locale="en-GB" timeZone="UTC" value={{ date: date(2026, 7, 12), time: { hour: 9, minute: 15, second: 0 }, timeZone: "UTC", disambiguation: "earlier" }} readOnly onValueChange={change} />);
+    render(<DateTimeEntry aria-label="Appointment" locale="en-GB" timeZone="UTC" value={{ date: date(2026, 7, 12), time: { hour: 9, minute: 15, second: 0 }, timeZone: "UTC", disambiguation: "earlier" }} readOnly onValueChange={change} />);
     expect((screen.getByRole("button", { name: "Apply appointment" }) as HTMLButtonElement).disabled).toBe(true);
     fireEvent.click(screen.getByRole("button", { name: "Apply appointment" }));
     expect(change).not.toHaveBeenCalled();
@@ -424,7 +424,7 @@ describe("civil date/time pickers", () => {
 
   it("pages the popover calendar without moving the chosen date", () => {
     const change = vi.fn();
-    render(<PickerOverlay><NSEDateEntry aria-label="Leap" locale="en-GB" timeZone="UTC" value={date(2028, 2, 29)} onValueChange={change} /></PickerOverlay>);
+    render(<PickerOverlay><DateEntry aria-label="Leap" locale="en-GB" timeZone="UTC" value={date(2028, 2, 29)} onValueChange={change} /></PickerOverlay>);
     fireEvent.click(screen.getByRole("button", { name: "Choose leap" }));
     const sheet = screen.getByRole("dialog", { name: "Leap calendar" });
     fireEvent.click(within(sheet).getByRole("button", { name: "Next year" }));
@@ -436,7 +436,7 @@ describe("civil date/time pickers", () => {
   it("pages the date-time calendar as a view, leaving the date alone", () => {
     const change = vi.fn();
     const value = { date: date(2026, 10, 25), time: { hour: 1, minute: 30, second: 0 }, timeZone: "Europe/London", disambiguation: "earlier" as const };
-    render(<PickerOverlay><NSEDateTimeEntry aria-label="Meeting" mode="calendar" locale="en-GB" timeZone="Europe/London" value={value} onValueChange={change} /></PickerOverlay>);
+    render(<PickerOverlay><DateTimeEntry aria-label="Meeting" mode="calendar" locale="en-GB" timeZone="Europe/London" value={value} onValueChange={change} /></PickerOverlay>);
     fireEvent.click(screen.getByRole("button", { name: "Next month" }));
     expect(screen.getByText(/November 2026/)).toBeTruthy();
     expect(change).not.toHaveBeenCalled();
@@ -447,7 +447,7 @@ describe("civil date/time pickers", () => {
     vi.setSystemTime(new Date("2026-09-28T12:00:00Z"));
     try {
       const change = vi.fn();
-      render(<PickerOverlay><NSEDateRangeEntry aria-label="Holiday" locale="en-GB" timeZone="Europe/London" value={null} onValueChange={change} /></PickerOverlay>);
+      render(<PickerOverlay><DateRangeEntry aria-label="Holiday" locale="en-GB" timeZone="Europe/London" value={null} onValueChange={change} /></PickerOverlay>);
       expect(screen.getByRole("button", { name: "Choose holiday dates" }).textContent).toBe("dd/mm/yyyy – dd/mm/yyyy");
       fireEvent.click(screen.getByRole("button", { name: "Choose holiday dates" }));
       const sheet = screen.getByRole("dialog", { name: "Holiday calendar" });
@@ -463,7 +463,7 @@ describe("civil date/time pickers", () => {
   });
 
   it("hints the locale's date shape in an empty date field", () => {
-    render(<NSEDateEntry aria-label="Due" mode="text" locale="en-GB" timeZone="UTC" value={null} />);
+    render(<DateEntry aria-label="Due" mode="text" locale="en-GB" timeZone="UTC" value={null} />);
     expect(screen.getByRole("textbox", { name: "Due" }).getAttribute("placeholder")).toBe("dd/mm/yyyy");
   });
 });

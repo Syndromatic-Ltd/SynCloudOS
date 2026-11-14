@@ -20,26 +20,26 @@
 
 import type { HTMLAttributes, ReactNode } from "react";
 import type { NSECalendarEventIndicator } from "../Calendar/calendarTypes"
-import type { NSEDateRange, NSEPlainDate, NSEPlainTime, NSEZonedDateTime } from "../dateTimeTypes";
-export type NSEDateEntryMode = "automatic" | "text" | "calendar";
-export type NSEDateEntryField = "month" | "day" | "year";
-export type NSEDateEntryEditorMode = "text" | "segments";
-export interface NSEDateEntryEditorContext { readonly value: NSEPlainDate | null; readonly isEnabled: boolean; readonly readOnly: boolean; commit(value: NSEPlainDate | null): void }
-export interface NSETimeEntryEditorContext { readonly value: NSEPlainTime | null; readonly isEnabled: boolean; readonly readOnly: boolean; commit(value: NSEPlainTime | null): void }
+import type { NSEDateRange, NSEPlainDate, NSEPlainTime, ZonedDateTime } from "../dateTimeTypes";
+export type DateEntryMode = "automatic" | "text" | "calendar";
+export type DateEntryField = "month" | "day" | "year";
+export type DateEntryEditorMode = "text" | "segments";
+export interface DateEntryEditorContext { readonly value: NSEPlainDate | null; readonly isEnabled: boolean; readonly readOnly: boolean; commit(value: NSEPlainDate | null): void }
+export interface TimeEntryEditorContext { readonly value: NSEPlainTime | null; readonly isEnabled: boolean; readonly readOnly: boolean; commit(value: NSEPlainTime | null): void }
 /** "field" (default): AppKit's textual time field with a stepper and a clock popover; "clock": the analogue clock inline; "segments": hour and minute pickers. */
-export type NSETimeEntryEditorMode = "field" | "clock" | "segments";
-export interface NSEDateEntryProps extends Omit<HTMLAttributes<HTMLSpanElement>, "children" | "defaultValue" | "onChange"> { readonly name?: string; readonly value?: NSEPlainDate | null; readonly defaultValue?: NSEPlainDate | null; readonly mode?: NSEDateEntryMode; readonly editor?: NSEDateEntryEditorMode; readonly hiddenFields?: readonly NSEDateEntryField[]; readonly locale: string; readonly timeZone: string; readonly minimum?: NSEPlainDate; readonly maximum?: NSEPlainDate; readonly isEnabled?: boolean; readonly readOnly?: boolean; readonly required?: boolean; readonly parentResponderId?: string; readonly "aria-label": string; readonly renderEditor?: (context: NSEDateEntryEditorContext) => ReactNode; normalizeValue?(value: NSEPlainDate, current: NSEPlainDate | null): NSEPlainDate; onValueChange?(value: NSEPlainDate | null, phase: "preview" | "commit"): void }
-export interface NSETimeEntryProps extends Omit<HTMLAttributes<HTMLSpanElement>, "children" | "defaultValue" | "onChange"> { readonly name?: string; readonly value?: NSEPlainTime | null; readonly defaultValue?: NSEPlainTime | null; readonly editor?: NSETimeEntryEditorMode; readonly locale: string; readonly timeZone: string; readonly date?: NSEPlainDate; readonly minimum?: NSEPlainTime; readonly maximum?: NSEPlainTime; readonly minuteStep?: number; readonly hourCycle?: "h12" | "h24"; readonly isEnabled?: boolean; readonly readOnly?: boolean; readonly required?: boolean; readonly "aria-label": string; readonly parentResponderId?: string; readonly renderEditor?: (context: NSETimeEntryEditorContext) => ReactNode
+export type TimeEntryEditorMode = "field" | "clock" | "segments";
+export interface DateEntryProps extends Omit<HTMLAttributes<HTMLSpanElement>, "children" | "defaultValue" | "onChange"> { readonly name?: string; readonly value?: NSEPlainDate | null; readonly defaultValue?: NSEPlainDate | null; readonly mode?: DateEntryMode; readonly editor?: DateEntryEditorMode; readonly hiddenFields?: readonly DateEntryField[]; readonly locale: string; readonly timeZone: string; readonly minimum?: NSEPlainDate; readonly maximum?: NSEPlainDate; readonly isEnabled?: boolean; readonly readOnly?: boolean; readonly required?: boolean; readonly parentResponderId?: string; readonly "aria-label": string; readonly renderEditor?: (context: DateEntryEditorContext) => ReactNode; normalizeValue?(value: NSEPlainDate, current: NSEPlainDate | null): NSEPlainDate; onValueChange?(value: NSEPlainDate | null, phase: "preview" | "commit"): void }
+export interface TimeEntryProps extends Omit<HTMLAttributes<HTMLSpanElement>, "children" | "defaultValue" | "onChange"> { readonly name?: string; readonly value?: NSEPlainTime | null; readonly defaultValue?: NSEPlainTime | null; readonly editor?: TimeEntryEditorMode; readonly locale: string; readonly timeZone: string; readonly date?: NSEPlainDate; readonly minimum?: NSEPlainTime; readonly maximum?: NSEPlainTime; readonly minuteStep?: number; readonly hourCycle?: "h12" | "h24"; readonly isEnabled?: boolean; readonly readOnly?: boolean; readonly required?: boolean; readonly "aria-label": string; readonly parentResponderId?: string; readonly renderEditor?: (context: TimeEntryEditorContext) => ReactNode
  /** Whether the field opens the clock in a popover. @internal */ readonly presentsClockOverlay?: boolean; onValueChange?(value: NSEPlainTime | null, phase: "preview" | "commit"): void }
 export interface NSEDateTimeValue { readonly date: NSEPlainDate; readonly time: NSEPlainTime; readonly timeZone: string; readonly disambiguation: "earlier" | "later" | "reject" }
-export type NSEDateTimeEntryMode = "automatic" | "text" | "calendar" | "clock" | "calendar-clock" | "combined";
-export interface NSEDateTimeEntryProps { readonly name?: string; readonly value?: NSEDateTimeValue | null; readonly defaultValue?: NSEDateTimeValue | null; readonly mode?: NSEDateTimeEntryMode; readonly locale: string; readonly timeZone: string; readonly hourCycle?: "h12" | "h24"; readonly minimum?: NSEZonedDateTime; readonly maximum?: NSEZonedDateTime; readonly isEnabled?: boolean; readonly readOnly?: boolean; readonly required?: boolean; readonly "aria-label": string; onValueChange?(value: NSEDateTimeValue | null, phase: "preview" | "commit"): void }
-export interface NSEDateRangeEntryProps { readonly name?: string; readonly value?: NSEDateRange | null; readonly defaultValue?: NSEDateRange | null; readonly locale: string; readonly timeZone: string; readonly minimum?: NSEPlainDate; readonly maximum?: NSEPlainDate; readonly reversePolicy?: "normalize" | "restart"; readonly isEnabled?: boolean; readonly readOnly?: boolean; readonly required?: boolean; readonly parentResponderId?: string; readonly "aria-label": string; onValueChange?(value: NSEDateRange | null, phase: "preview" | "commit"): void }
+export type DateTimeEntryMode = "automatic" | "text" | "calendar" | "clock" | "calendar-clock" | "combined";
+export interface DateTimeEntryProps { readonly name?: string; readonly value?: NSEDateTimeValue | null; readonly defaultValue?: NSEDateTimeValue | null; readonly mode?: DateTimeEntryMode; readonly locale: string; readonly timeZone: string; readonly hourCycle?: "h12" | "h24"; readonly minimum?: ZonedDateTime; readonly maximum?: ZonedDateTime; readonly isEnabled?: boolean; readonly readOnly?: boolean; readonly required?: boolean; readonly "aria-label": string; onValueChange?(value: NSEDateTimeValue | null, phase: "preview" | "commit"): void }
+export interface DateRangeEntryProps { readonly name?: string; readonly value?: NSEDateRange | null; readonly defaultValue?: NSEDateRange | null; readonly locale: string; readonly timeZone: string; readonly minimum?: NSEPlainDate; readonly maximum?: NSEPlainDate; readonly reversePolicy?: "normalize" | "restart"; readonly isEnabled?: boolean; readonly readOnly?: boolean; readonly required?: boolean; readonly parentResponderId?: string; readonly "aria-label": string; onValueChange?(value: NSEDateRange | null, phase: "preview" | "commit"): void }
 
 /** NSDatePicker.Style. */
 export type NSEDatePickerStyle = "textFieldAndStepper" | "textField" | "clockAndCalendar"
 
-interface NSEDatePickerBaseProps {
+interface DatePickerBaseProps {
   readonly "aria-label": string
   readonly locale: string
   readonly timeZone: string
@@ -58,7 +58,7 @@ interface NSEDatePickerBaseProps {
 }
 
 /** A date (datePickerElements yearMonthDay, the default). */
-export interface NSEDatePickerDateProps extends NSEDatePickerBaseProps {
+export interface NSEDatePickerDateProps extends DatePickerBaseProps {
   readonly datePickerElements?: readonly ["yearMonthDay"]
   readonly datePickerMode?: "single"
   readonly value?: NSEPlainDate | null
@@ -75,7 +75,7 @@ export interface NSEDatePickerDateProps extends NSEDatePickerBaseProps {
 }
 
 /** A date range (NSDatePicker.datePickerMode range). */
-export interface NSEDatePickerRangeProps extends NSEDatePickerBaseProps {
+export interface NSEDatePickerRangeProps extends DatePickerBaseProps {
   readonly datePickerElements?: readonly ["yearMonthDay"]
   readonly datePickerMode: "range"
   readonly value?: NSEDateRange | null
@@ -87,7 +87,7 @@ export interface NSEDatePickerRangeProps extends NSEDatePickerBaseProps {
 }
 
 /** A time of day (datePickerElements hourMinute). */
-export interface NSEDatePickerTimeProps extends NSEDatePickerBaseProps {
+export interface NSEDatePickerTimeProps extends DatePickerBaseProps {
   readonly datePickerElements: readonly ["hourMinute"]
   readonly value?: NSEPlainTime | null
   readonly defaultValue?: NSEPlainTime | null
@@ -101,12 +101,12 @@ export interface NSEDatePickerTimeProps extends NSEDatePickerBaseProps {
 }
 
 /** A date and time in a time zone (datePickerElements yearMonthDay and hourMinute). */
-export interface NSEDatePickerDateTimeProps extends NSEDatePickerBaseProps {
+export interface NSEDatePickerDateTimeProps extends DatePickerBaseProps {
   readonly datePickerElements: readonly ["yearMonthDay", "hourMinute"]
   readonly value?: NSEDateTimeValue | null
   readonly defaultValue?: NSEDateTimeValue | null
-  readonly minimum?: NSEZonedDateTime
-  readonly maximum?: NSEZonedDateTime
+  readonly minimum?: ZonedDateTime
+  readonly maximum?: ZonedDateTime
   readonly hourCycle?: "h12" | "h24"
   onValueChange?(value: NSEDateTimeValue | null, phase: "preview" | "commit"): void
 }

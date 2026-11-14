@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { NSEDateRange, NSEPlainDate, NSEPlainTime, NSEZonedDateTimeResolution } from "./dateTimeTypes";
+import type { NSEDateRange, NSEPlainDate, NSEPlainTime, ZonedDateTimeResolution } from "./dateTimeTypes";
 
 const integer = (value: number, label: string) => {
   if (!Number.isSafeInteger(value)) throw new TypeError(`${label} must be a safe integer.`);
@@ -109,7 +109,7 @@ export function resolveZonedDateTime(
   input: Readonly<{ date: NSEPlainDate; time: NSEPlainTime }>,
   timeZone: string,
   disambiguation: "earlier" | "later" | "reject",
-): NSEZonedDateTimeResolution {
+): ZonedDateTimeResolution {
   const date = validatePlainDate(input.date), time = validatePlainTime(input.time);
   try { formatterForZone(timeZone).format(0); } catch { return Object.freeze({ kind: "invalid-time-zone", timeZone }); }
   const naive = civilToEpochDay(date) * 86_400_000 + time.hour * 3_600_000 + time.minute * 60_000 + time.second * 1_000;
