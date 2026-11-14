@@ -24,11 +24,7 @@ import type { FocusCloseResult, FocusManager, FocusScopeHandle, FocusScopeRegist
 
 export class FocusScopeError extends Error { constructor(message: string) { super(message); this.name = "FocusScopeError"; } }
 
-interface RuntimeFocusManager extends FocusManager {
-  modalScopeForResponder(responderId: string | null): Pick<FocusScopeRegistration, "id" | "parentResponderId"> | undefined;
-}
-
-export function createFocusManager(options: { readonly runtimeId: SynCloudOSRuntimeId; readonly responders: ResponderGraph }): RuntimeFocusManager {
+export function createFocusManager(options: { readonly runtimeId: SynCloudOSRuntimeId; readonly responders: ResponderGraph }) {
   const scopes = new Map<string, Omit<FocusScopeRegistration, "restoreResponderId"> & { restoreResponderId: string | null }>();
   const modalDomains = new Map<string, (responderId: string) => boolean>();
   const stack: string[] = [];
@@ -87,20 +83,21 @@ export function createFocusManager(options: { readonly runtimeId: SynCloudOSRunt
     return options.responders.isEnabled(runtimeId) && allowedByModal(runtimeId) ? runtimeId : null;
   };
 
-  const manager: RuntimeFocusManager = {
+  const modalScopeForResponder = (responderId: string | null) => {
+    const responder = responderId === null ? null : options.responders.get(responderId);
+    for (const scopeId of [...stack].reverse()) {
+      const scope = scopes.get(scopeId);
+      if (!scope?.modal) continue;
+      const blocks = modalDomains.get(scopeId);
+      if (!blocks || (responder && (
+        blocks(responder.id) || responder.id === scope.parentResponderId || isScopeWithin(responder.scopeId, scopeId)
+      ))) return scope;
+    }
+    return undefined;
+  };
+
+  const manager: FocusManager = {
     runtimeId: options.runtimeId,
-    modalScopeForResponder(responderId) {
-      const responder = responderId === null ? null : options.responders.get(responderId);
-      for (const scopeId of [...stack].reverse()) {
-        const scope = scopes.get(scopeId);
-        if (!scope?.modal) continue;
-        const blocks = modalDomains.get(scopeId);
-        if (!blocks || (responder && (
-          blocks(responder.id) || responder.id === scope.parentResponderId || isScopeWithin(responder.scopeId, scopeId)
-        ))) return scope;
-      }
-      return undefined;
-    },
     openScope(registration, blocksResponder): FocusScopeHandle {
       if (disposed) throw new FocusScopeError("Focus manager is disposed.");
       if (scopes.has(registration.id)) throw new FocusScopeError(`Focus scope ${registration.id} is already open.`);
@@ -176,5 +173,5 @@ export function createFocusManager(options: { readonly runtimeId: SynCloudOSRunt
     },
     dispose() { disposed = true; scopes.clear(); modalDomains.clear(); stack.length = 0; focusedResponderId = null; generation += 1; listeners.clear(); },
   };
-  return manager;
+  return { manager, modalScopeForResponder };
 }

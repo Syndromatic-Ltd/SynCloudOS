@@ -281,7 +281,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
   let appearance!: SynCloudOSRuntime["appearance"];
   let locale!: SynCloudOSRuntime["locale"];
   let responders!: SynCloudOSRuntime["responders"];
-  let focus!: ReturnType<typeof createFocusManager>;
+  let focus!: SynCloudOSRuntime["focus"];
   let commands!: SynCloudOSRuntime["commands"];
   let keyBindings!: SynCloudOSRuntime["keyBindings"];
   let documents!: DocumentController;
@@ -787,17 +787,20 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     );
     return linkExternalSignal(handle, options.signal);
   };
+  let resolveModalScope: ReturnType<typeof createFocusManager>["modalScopeForResponder"] | undefined;
   responders = createResponderGraph({
     runtimeId,
     getFocusedResponderId: () => focus?.getFocusedResponderId() ?? null,
     getActiveAnchors: () => focus?.getActiveAnchors() ?? { runtimeResponderId: "runtime" },
     getActiveModalScope: (responderId) => {
-      const modal = focus?.modalScopeForResponder(responderId);
+      const modal = resolveModalScope?.(responderId);
       return modal ? { scopeId: modal.id, parentResponderId: modal.parentResponderId, isScopeWithin: (scopeId: string) => focus.isScopeWithin(scopeId, modal.id) } : null;
     },
     onRemoved: (ids) => focus?.handleRespondersRemoved(ids),
   });
-  focus = createFocusManager({ runtimeId, responders });
+  const focusHost = createFocusManager({ runtimeId, responders });
+  focus = focusHost.manager;
+  resolveModalScope = focusHost.modalScopeForResponder;
   responders.register({ id: "runtime", kind: "runtime", scopeId: "root", diagnosticsLabel: "SynCloudOS runtime" });
   responders.register({ id: "webspring", kind: "webspring", parentId: "runtime", scopeId: "root", diagnosticsLabel: "Webspring" });
   responders.register({ id: "workspace", kind: "workspace", parentId: "webspring", scopeId: "root", diagnosticsLabel: "Active workspace" });
