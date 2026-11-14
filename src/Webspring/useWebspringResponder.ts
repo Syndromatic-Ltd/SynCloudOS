@@ -25,7 +25,6 @@ import { useKernelSynCloudOS } from "../SynCloudOSReact";
 
 export interface WebspringResponderOptions {
   readonly onNotificationCentreRequest?: (notificationId?: string) => void;
-  readonly onApplicationMenuToggle?: () => void;
 }
 
 interface NotificationCentrePayload {
@@ -59,7 +58,6 @@ const notificationCentrePayload: CommandPayloadSchema<NotificationCentrePayload>
 
 const shellCommands = {
   notificationCentreOpen: "webspring.notificationCentre.open",
-  applicationMenuToggle: "webspring.applicationMenu.toggle",
 } as const;
 
 function hasCommand(runtime: ReturnType<typeof useKernelSynCloudOS>, commandId: string) {
@@ -76,9 +74,7 @@ function hasCommand(runtime: ReturnType<typeof useKernelSynCloudOS>, commandId: 
 export function useWebspringResponder(options: WebspringResponderOptions = {}) {
   const runtime = useKernelSynCloudOS();
   const notificationCentreRequestRef = useRef(options.onNotificationCentreRequest);
-  const applicationMenuToggleRef = useRef(options.onApplicationMenuToggle);
   notificationCentreRequestRef.current = options.onNotificationCentreRequest;
-  applicationMenuToggleRef.current = options.onApplicationMenuToggle;
 
   useEffect(() => {
     const previous = runtime.focus.getActiveAnchors();
@@ -110,23 +106,6 @@ export function useWebspringResponder(options: WebspringResponderOptions = {}) {
           disabledReason: "Notification Centre is not available right now.",
         }),
         execute: ({ payload }) => { notificationCentreRequestRef.current?.(payload.notificationId); },
-      };
-      registrations.push(runtime.commands.register(declaration));
-    }
-    if (!hasCommand(runtime, shellCommands.applicationMenuToggle)) {
-      const declaration: CommandDeclaration<undefined, void> = {
-        id: shellCommands.applicationMenuToggle,
-        responderId: "webspring",
-        title: { key: "command.webspring.applicationMenu.toggle", fallback: "Toggle Application Menu" },
-        payload: noPayload,
-        scope: "webspring",
-        defaultKeyBindings: [],
-        undo: { kind: "none" },
-        validate: () => ({
-          enabled: runtime.disposalState === "running",
-          disabledReason: "The application menu is not available right now.",
-        }),
-        execute: () => { applicationMenuToggleRef.current?.(); },
       };
       registrations.push(runtime.commands.register(declaration));
     }

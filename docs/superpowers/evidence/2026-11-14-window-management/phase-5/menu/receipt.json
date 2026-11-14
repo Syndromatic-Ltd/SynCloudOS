@@ -1,0 +1,375 @@
+{
+  "capturedAt": "2026-11-14T19:07:15.091Z",
+  "after": {
+    "root": "C:\\Users\\Kavish Krishnakumar\\Developer\\SynCloudOS-Workspace\\.worktrees\\webspring-folders\\framework",
+    "head": "9673c3f1824c5b8f06c5736b483fb3695dd6748b",
+    "status": "M docs/superpowers/plans/2026-11-14-window-management.md\n M src/FrameworkTests/Navigation/AdaptiveNavigationFixture.tsx\n M src/NSE/Application/NSEApplication.ts\nA  src/NSE/Application/NSEWindowContext.tsx\n M src/NSE/Application/NSEWindowController.ts\n M src/NSE/Application/index.ts\n M src/NSE/DataViews/Split/splitViewController.css\n M src/NSE/DataViews/Split/splitViewControllerView.tsx\n M src/NSE/Layout/index.ts\n M src/NSE/Layout/useNSESafeArea.ts\n D src/NSE/Layout/windowChromeObstructions.ts\n M src/NSE/Menus/ApplicationMenu.tsx\n M src/NSE/Menus/MenuOverlay.tsx\n M src/NSE/NSE.ts\n M src/NSE/Navigation/NSEApplicationNavigationChrome.tsx\n M src/NSE/Navigation/SourceList/index.ts\n D src/NSE/Navigation/SourceList/sourceListFrameContext.tsx\n M src/NSE/Navigation/adaptiveTabView.tsx\n M src/NSE/Overlays/NSEUtilityPanel.tsx\n M src/NSE/Overlays/NSEWindowSurfaceBridge.tsx\n M src/NSE/Theme/contract/vocabulary.ts\nA  src/NSE/Toolbars/ApplicationMenuToolbarButton.tsx\n M src/NSE/Toolbars/NSEToolbar.ts\n M src/NSE/Toolbars/index.ts\n M src/NSE/Toolbars/nse-toolbars.css\n D src/NSE/Windows/Chrome/TopBar.tsx\n D src/NSE/Windows/Chrome/TopBarButton.tsx\n D src/NSE/Windows/Chrome/index.ts\n M src/NSE/Windows/Chrome/nse-chrome.css\n D src/NSE/Windows/Chrome/topBarStyles.ts\n D src/NSE/Windows/Chrome/topBarTypes.ts\n M src/NSE/Windows/HUDWindowView.tsx\n M src/NSE/Windows/StandardWindowView.tsx\n M src/NSE/Windows/WindowTitleBar.tsx\n M src/NSE/Windows/WindowView.tsx\n M src/NSE/Windows/nse-windows.css\n M src/NSE/Windows/windowTitlebarContext.tsx\n M src/NSE/Windows/windowViewTypes.ts\n M src/NSE/applicationHostInterop.ts\n M src/NSE/hostComposition.ts\n M src/NSE/public/controls.ts\n M src/NSE/public/layout.ts\n M src/NSE/sdkPackageEntry.ts\n M src/SynCloudOS/AppAuthoring/index.ts\n M src/SynCloudOS/AppHosting/applicationClass.ts\n M src/SynCloudOS/AppHosting/applicationHosting.tsx\n M src/SynCloudOS/AppHosting/applicationSession.ts\n M src/SynCloudOS/AppHosting/openPanelHosting.tsx\n M src/SynCloudOS/AppHosting/windowAlertSheet.tsx\nAM src/SynCloudOS/AppHosting/windowApplicationMenu.tsx\n D src/SynCloudOS/AppHosting/windowChrome.tsx\n M src/SynCloudOS/AppInfo/appInfoTypes.ts\n M src/SynCloudOS/AppInfo/createAppInfo.ts\n M src/SynCloudOS/AppRegistry/appRegistryTypes.ts\n M src/SynCloudOS/AppSDK/SynWareRuntimeMount.tsx\n M src/SynCloudOS/AppSDK/appClientTypes.ts\n M src/SynCloudOS/AppSDK/appContextTypes.ts\n M src/SynCloudOS/AppSDK/appDefinitionTypes.ts\n M src/SynCloudOS/AppSDK/appRuntimeFacade.ts\n M src/SynCloudOS/AppSDK/createSynWare.ts\n M src/SynCloudOS/AppSDK/createSynWareContextValue.ts\n M src/SynCloudOS/AppSDK/hooks/index.ts\n D src/SynCloudOS/AppSDK/hooks/useWindow.ts\n M src/SynCloudOS/AppSDK/index.ts\n M src/SynCloudOS/AppSDK/manifest/index.ts\n M src/SynCloudOS/AppSDK/manifest/manifestTypes.ts\n M src/SynCloudOS/AppSDK/manifest/synapp-manifest.schema.json\n M src/SynCloudOS/AppSDK/manifest/synappManifestValidator.generated.mjs\n M src/SynCloudOS/AppSDK/mountedEnvironmentClientRegistry.ts\n M src/SynCloudOS/AppSDK/projectRuntimeManifest.ts\n M src/SynCloudOS/AppSDK/rootPackageEntry.ts\n M src/SynCloudOS/AppSDK/scos/scosFacade.ts\n M src/SynCloudOS/AppSDK/sdkPackageEntry.ts\n M src/SynCloudOS/AppSDK/testing/createSynWareTestHost.tsx\n M src/SynCloudOS/AppSDK/testing/fakeClients.ts\n D src/SynCloudOS/AppSDK/windowChromeContexts.tsx\n M src/SynCloudOS/BundleLoader/definitionModule.ts\n M src/SynCloudOS/Commands/standardCommands.ts\n M src/SynCloudOS/PlatformAdapters/BrowserRuntimeEnvironment.ts\n M src/SynCloudOS/Runtime/createSynCloudOS.ts\n M src/SynCloudOS/SynCloudOS.ts\n M src/SynCloudOS/Windows/WindowManager.ts\n M src/SynCloudOS/Windows/WindowRestoration.ts\n M src/SynCloudOS/Windows/windowTypes.ts\n M src/SynCloudOSReact/ApplicationHost.tsx\n D src/SynCloudOSReact/ApplicationHostTitlebar.tsx\n D src/SynCloudOSReact/InstalledApplicationTitleBar.tsx\n M src/SynCloudOSReact/appRuntimeTypes.ts\n M src/SynCloudOSReact/browserRuntime.tsx\n M src/Webspring/AppViewChrome.tsx\n M src/Webspring/AppViewContent.tsx\n M src/Webspring/ApplicationStageHost.tsx\n M src/Webspring/ApplicationStageLayer.tsx\n M src/Webspring/ApplicationStageView.tsx\n M src/Webspring/SynWareEntryRenderer.tsx\n M src/Webspring/WebspringHost.tsx\n D src/Webspring/WindowLayer/WindowChromeBridge.tsx\n M src/Webspring/WindowLayer/WindowHost.tsx\n M src/Webspring/WindowLayer/WindowLayer.tsx\n D src/Webspring/WindowLayer/windowChromeResults.ts\n D src/Webspring/WindowLayer/windowChromeSlotContext.ts\nAM src/Webspring/WindowPresentationContent.tsx\n M src/Webspring/stage.ts\n M tests/e2e/fixtures/host-font-inheritance.tsx\n M tests/e2e/fixtures/theme-additional/catalogue.tsx\n M tests/e2e/fixtures/theme-additional/supplemental.tsx\n M tests/e2e/fixtures/theme-additional/windowSpecimens.tsx\n M tests/e2e/fixtures/theme-baseline/catalogue.tsx\n M tests/e2e/fixtures/theme-baseline/system.tsx\n M tests/e2e/fixtures/theme-nesting/host.tsx\n M tests/e2e/fixtures/theme-port-parity/catalogue.tsx\n D tests/runtime/application-host-titlebar.test.tsx\n M tests/runtime/application-module-definition.test.ts\n M tests/runtime/application-stage-app-menu.test.tsx\n D tests/runtime/application-stage-right-slot.test.tsx\n D tests/runtime/application-stage-top-bar-inset.test.tsx\nA  tests/runtime/application-stage-transfer.test.tsx\n M tests/runtime/nse-layout-guide-adoption.test.tsx\n M tests/runtime/nse-scroll-content-insets.test.tsx\n M tests/runtime/nse-standard-window.test.tsx\n M tests/runtime/nse-theme-system-surface-coverage.test.tsx\n D tests/runtime/nse-topbar-glyphs.test.tsx\n M tests/runtime/nse-view-safe-area.test.tsx\n D tests/runtime/nse-window-chrome-mode.test.ts\n M tests/runtime/nse-window-content-layout.test.tsx\n M tests/runtime/nse-window-toolbar-style.test.tsx\n M tests/runtime/open-panel-sheet-attachment.test.tsx\n M tests/runtime/theme-navigation.test.tsx\n D tests/runtime/webspring-app-menu.test.tsx\n M tests/runtime/webspring-window-layer.test.tsx\n D tests/runtime/window-chrome-integration.test.tsx\n M tests/runtime/window-content-border.test.tsx\n M tests/runtime/window-restoration.test.ts",
+    "sourceHashes": {
+      "src/NSE/Windows/WindowTitlebarView.tsx": "86d73ada0865e5e8ec65c061e0c8ecda8eb27aace8a12438c5d0dd7d9b280874",
+      "src/NSE/Windows/WindowTitlebarView.css": "c3e0ce53fa1db7a901d63c3eebe201d66d599320020f95ea880d25e4cd08bd9a",
+      "src/NSE/Toolbars/nse-toolbars.css": "5ad84110e7343942a3e4849d9752538c20625a349e29537014689fb7981ac7e3",
+      "src/Themes/Atmo.scostheme/Contents/Resources/atmo.window-titlebar.css": "de2cb0217507f45253a4d63ba68c6112ccc27513e96b20833b198fd08fb16659"
+    }
+  },
+  "before": {
+    "root": "C:/Users/Kavish Krishnakumar/.codex/worktrees/window-transfer-spike/framework",
+    "head": "1bfc47e9111270069b9f3e99a940e5fd4b231ebb",
+    "status": "M src/NSE/Focus/focusOrigin.ts\n M src/NSE/Overlays/OverlayProvider.tsx\n M src/NSE/Overlays/overlayEventOwnership.ts",
+    "titlebarAndThemeDiff": ""
+  },
+  "matrix": {
+    "viewports": [
+      {
+        "name": "desktop",
+        "width": 1280,
+        "height": 850
+      },
+      {
+        "name": "phone",
+        "width": 390,
+        "height": 844
+      }
+    ],
+    "schemes": [
+      "light",
+      "dark"
+    ],
+    "materials": [
+      "cumulus",
+      "metal"
+    ],
+    "deviceScaleFactor": 1
+  },
+  "comparisonLimit": "Current-source NSEMenuBar semantic fixture, not the production runtime-owned application menu or compact-collapse acceptance. Menu admission is recorded without executing app commands; Redo is intentionally disabled.",
+  "baselineFramingCSS": "#theme-baseline-surface { margin:20px; padding:0; width:calc(100% - 40px); min-height:300px; position:relative; }",
+  "browserVersion": "149.0.7827.55",
+  "finalSourceHashes": {
+    "src/NSE/Windows/WindowTitlebarView.tsx": "86d73ada0865e5e8ec65c061e0c8ecda8eb27aace8a12438c5d0dd7d9b280874",
+    "src/NSE/Windows/WindowTitlebarView.css": "c3e0ce53fa1db7a901d63c3eebe201d66d599320020f95ea880d25e4cd08bd9a",
+    "src/NSE/Toolbars/nse-toolbars.css": "5ad84110e7343942a3e4849d9752538c20625a349e29537014689fb7981ac7e3",
+    "src/Themes/Atmo.scostheme/Contents/Resources/atmo.window-titlebar.css": "de2cb0217507f45253a4d63ba68c6112ccc27513e96b20833b198fd08fb16659"
+  },
+  "sourceStableDuringCapture": true,
+  "captures": [
+    {
+      "viewport": {
+        "name": "desktop",
+        "width": 1280,
+        "height": 850
+      },
+      "scheme": "light",
+      "material": "cumulus",
+      "state": "closed",
+      "errors": [],
+      "file": "closed-desktop-light-cumulus.png",
+      "url": "http://127.0.0.1:5418/tests/e2e/fixtures/window-titlebar-layout.html?style=unified&width=1240&scheme=light&cumulus&menu",
+      "geometry": {
+        "x": 20,
+        "y": 20,
+        "width": 1240,
+        "height": 28.1875
+      },
+      "sha256": "7b806e08cffec57f8bed779385ac3df56e6f4f537b2df90110646351d8a25b3f"
+    },
+    {
+      "viewport": {
+        "name": "desktop",
+        "width": 1280,
+        "height": 850
+      },
+      "scheme": "light",
+      "material": "cumulus",
+      "state": "edit-open",
+      "errors": [],
+      "file": "open-desktop-light-cumulus.png",
+      "url": "http://127.0.0.1:5418/tests/e2e/fixtures/window-titlebar-layout.html?style=unified&width=1240&scheme=light&cumulus&menu",
+      "geometry": {
+        "x": 180.5,
+        "y": 66.1875,
+        "width": 220,
+        "height": 84
+      },
+      "sha256": "63996b8f24bc1067c592b34eac249cc5c6673597db2c471672d9ab875edcd78c"
+    },
+    {
+      "viewport": {
+        "name": "desktop",
+        "width": 1280,
+        "height": 850
+      },
+      "scheme": "light",
+      "material": "metal",
+      "state": "closed",
+      "errors": [],
+      "file": "closed-desktop-light-metal.png",
+      "url": "http://127.0.0.1:5418/tests/e2e/fixtures/window-titlebar-layout.html?style=unified&width=1240&scheme=light&menu",
+      "geometry": {
+        "x": 20,
+        "y": 20,
+        "width": 1240,
+        "height": 28.1875
+      },
+      "sha256": "76453f02389d3a7532a3a4c768bb965ce9bb387bc03bde75a6cbdf81414ff12c"
+    },
+    {
+      "viewport": {
+        "name": "desktop",
+        "width": 1280,
+        "height": 850
+      },
+      "scheme": "light",
+      "material": "metal",
+      "state": "edit-open",
+      "errors": [],
+      "file": "open-desktop-light-metal.png",
+      "url": "http://127.0.0.1:5418/tests/e2e/fixtures/window-titlebar-layout.html?style=unified&width=1240&scheme=light&menu",
+      "geometry": {
+        "x": 180.5,
+        "y": 66.1875,
+        "width": 220,
+        "height": 84
+      },
+      "sha256": "d7b65a668f31f7c4d5d0eba4b76668351b95279fa0ebb035fea730b7cfc7d085"
+    },
+    {
+      "viewport": {
+        "name": "desktop",
+        "width": 1280,
+        "height": 850
+      },
+      "scheme": "dark",
+      "material": "cumulus",
+      "state": "closed",
+      "errors": [],
+      "file": "closed-desktop-dark-cumulus.png",
+      "url": "http://127.0.0.1:5418/tests/e2e/fixtures/window-titlebar-layout.html?style=unified&width=1240&scheme=dark&cumulus&menu",
+      "geometry": {
+        "x": 20,
+        "y": 20,
+        "width": 1240,
+        "height": 28.1875
+      },
+      "sha256": "ce452f4f27cf41de2f11df19400c470e554f51a255a8bb672e921ca5369da486"
+    },
+    {
+      "viewport": {
+        "name": "desktop",
+        "width": 1280,
+        "height": 850
+      },
+      "scheme": "dark",
+      "material": "cumulus",
+      "state": "edit-open",
+      "errors": [],
+      "file": "open-desktop-dark-cumulus.png",
+      "url": "http://127.0.0.1:5418/tests/e2e/fixtures/window-titlebar-layout.html?style=unified&width=1240&scheme=dark&cumulus&menu",
+      "geometry": {
+        "x": 180.5,
+        "y": 66.1875,
+        "width": 220,
+        "height": 84
+      },
+      "sha256": "9a70c9f69fdb9019d677ee07745293b867a43c356648cd82f823bf5830463796"
+    },
+    {
+      "viewport": {
+        "name": "desktop",
+        "width": 1280,
+        "height": 850
+      },
+      "scheme": "dark",
+      "material": "metal",
+      "state": "closed",
+      "errors": [],
+      "file": "closed-desktop-dark-metal.png",
+      "url": "http://127.0.0.1:5418/tests/e2e/fixtures/window-titlebar-layout.html?style=unified&width=1240&scheme=dark&menu",
+      "geometry": {
+        "x": 20,
+        "y": 20,
+        "width": 1240,
+        "height": 28.1875
+      },
+      "sha256": "9e0e3cf503982510e809d12934a283ecba20f94f7df198dd2b52ccd47edaf3d0"
+    },
+    {
+      "viewport": {
+        "name": "desktop",
+        "width": 1280,
+        "height": 850
+      },
+      "scheme": "dark",
+      "material": "metal",
+      "state": "edit-open",
+      "errors": [],
+      "file": "open-desktop-dark-metal.png",
+      "url": "http://127.0.0.1:5418/tests/e2e/fixtures/window-titlebar-layout.html?style=unified&width=1240&scheme=dark&menu",
+      "geometry": {
+        "x": 180.5,
+        "y": 66.1875,
+        "width": 220,
+        "height": 84
+      },
+      "sha256": "9406bb04cd8ba095184b041f858f8418e22efa157a6dd6afa502f543cd6508f6"
+    },
+    {
+      "viewport": {
+        "name": "phone",
+        "width": 390,
+        "height": 844
+      },
+      "scheme": "light",
+      "material": "cumulus",
+      "state": "closed",
+      "errors": [],
+      "file": "closed-phone-light-cumulus.png",
+      "url": "http://127.0.0.1:5418/tests/e2e/fixtures/window-titlebar-layout.html?style=unified&width=350&scheme=light&cumulus&menu",
+      "geometry": {
+        "x": 20,
+        "y": 20,
+        "width": 350,
+        "height": 28.1875
+      },
+      "sha256": "b2891a39b4ac47d2bf1c32b018589cedbf61bbf2c67740f3448c7a77f5ccdaed"
+    },
+    {
+      "viewport": {
+        "name": "phone",
+        "width": 390,
+        "height": 844
+      },
+      "scheme": "light",
+      "material": "cumulus",
+      "state": "edit-open",
+      "errors": [],
+      "file": "open-phone-light-cumulus.png",
+      "url": "http://127.0.0.1:5418/tests/e2e/fixtures/window-titlebar-layout.html?style=unified&width=350&scheme=light&cumulus&menu",
+      "geometry": {
+        "x": 16,
+        "y": 733,
+        "width": 358,
+        "height": 84
+      },
+      "sha256": "874050c7226cbf734528e08c8f4d4dd27b04f8d9329372a741cddfba41844b35"
+    },
+    {
+      "viewport": {
+        "name": "phone",
+        "width": 390,
+        "height": 844
+      },
+      "scheme": "light",
+      "material": "metal",
+      "state": "closed",
+      "errors": [],
+      "file": "closed-phone-light-metal.png",
+      "url": "http://127.0.0.1:5418/tests/e2e/fixtures/window-titlebar-layout.html?style=unified&width=350&scheme=light&menu",
+      "geometry": {
+        "x": 20,
+        "y": 20,
+        "width": 350,
+        "height": 28.1875
+      },
+      "sha256": "546afef96b0eefe82b3bf8043d78d9f42f27a8ebcf29b8e4f7c1101a4d16e353"
+    },
+    {
+      "viewport": {
+        "name": "phone",
+        "width": 390,
+        "height": 844
+      },
+      "scheme": "light",
+      "material": "metal",
+      "state": "edit-open",
+      "errors": [],
+      "file": "open-phone-light-metal.png",
+      "url": "http://127.0.0.1:5418/tests/e2e/fixtures/window-titlebar-layout.html?style=unified&width=350&scheme=light&menu",
+      "geometry": {
+        "x": 16,
+        "y": 733,
+        "width": 358,
+        "height": 84
+      },
+      "sha256": "78aeeaa1652d60cd50417a15b913fef1a866c667edc87172eeb00e10a10af2d8"
+    },
+    {
+      "viewport": {
+        "name": "phone",
+        "width": 390,
+        "height": 844
+      },
+      "scheme": "dark",
+      "material": "cumulus",
+      "state": "closed",
+      "errors": [],
+      "file": "closed-phone-dark-cumulus.png",
+      "url": "http://127.0.0.1:5418/tests/e2e/fixtures/window-titlebar-layout.html?style=unified&width=350&scheme=dark&cumulus&menu",
+      "geometry": {
+        "x": 20,
+        "y": 20,
+        "width": 350,
+        "height": 28.1875
+      },
+      "sha256": "45dda9330f3a033cda568e293ac299de0a1e64146bcd660df1a7e6446bf4097c"
+    },
+    {
+      "viewport": {
+        "name": "phone",
+        "width": 390,
+        "height": 844
+      },
+      "scheme": "dark",
+      "material": "cumulus",
+      "state": "edit-open",
+      "errors": [],
+      "file": "open-phone-dark-cumulus.png",
+      "url": "http://127.0.0.1:5418/tests/e2e/fixtures/window-titlebar-layout.html?style=unified&width=350&scheme=dark&cumulus&menu",
+      "geometry": {
+        "x": 16,
+        "y": 733,
+        "width": 358,
+        "height": 84
+      },
+      "sha256": "c3bdecd983a63e3c76a5eb7413b6537f28b3ebbd2aa9d3a616ddcf792437d31d"
+    },
+    {
+      "viewport": {
+        "name": "phone",
+        "width": 390,
+        "height": 844
+      },
+      "scheme": "dark",
+      "material": "metal",
+      "state": "closed",
+      "errors": [],
+      "file": "closed-phone-dark-metal.png",
+      "url": "http://127.0.0.1:5418/tests/e2e/fixtures/window-titlebar-layout.html?style=unified&width=350&scheme=dark&menu",
+      "geometry": {
+        "x": 20,
+        "y": 20,
+        "width": 350,
+        "height": 28.1875
+      },
+      "sha256": "d6c1ae643f068ae94fe21b57d3fb566f3b36e8b1bc80e9194bac6591d7b8b7f0"
+    },
+    {
+      "viewport": {
+        "name": "phone",
+        "width": 390,
+        "height": 844
+      },
+      "scheme": "dark",
+      "material": "metal",
+      "state": "edit-open",
+      "errors": [],
+      "file": "open-phone-dark-metal.png",
+      "url": "http://127.0.0.1:5418/tests/e2e/fixtures/window-titlebar-layout.html?style=unified&width=350&scheme=dark&menu",
+      "geometry": {
+        "x": 16,
+        "y": 733,
+        "width": 358,
+        "height": 84
+      },
+      "sha256": "bd895a7fc9cb9e67f5ef7b6bcf39c2e128228b0d8dba40e002fec94cb6b1f187"
+    }
+  ]
+}

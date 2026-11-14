@@ -111,6 +111,7 @@ export function MenuOverlay({ overlay, controller, open, anchor, anchorPoint, la
       queueMicrotask(() => {
         globalThis.setTimeout(() => {
           if (!anchor?.isConnected) return;
+          const document = anchor.ownerDocument;
           const active = document.activeElement;
           if (active && active !== document.body && active !== document.documentElement) return;
           anchor.focus({ preventScroll: true });

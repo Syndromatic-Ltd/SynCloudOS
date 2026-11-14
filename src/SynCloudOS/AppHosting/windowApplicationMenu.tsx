@@ -24,7 +24,6 @@ import { NSEMenuBar, createApplicationMenuModel, type MenuSection } from "../../
 import { createReactOwnedNSEMenu, orderMenuEntries } from "../../NSE/Menus/NSEMenu";
 import { nseMenuModel, type MenuEntryInput } from "../../NSE/Menus/menuTypes";
 import { useMenuLifetime } from "../../NSE/Menus/useMenuLifetime";
-import { ApplicationMenuTriggerProvider } from "../../SynCloudOSReact/ApplicationMenuTrigger";
 import { WindowApplicationMenuContext } from "../../NSE/Toolbars/ApplicationMenuToolbarButton";
 import { ActionResponderContext, useObserve } from "../../NSE/applicationHostInterop";
 import type { NSEApplication } from "../../NSE/Application";
@@ -55,18 +54,21 @@ export function WindowApplicationMenu({ app, destination, children }: PropsWithC
   const instance = useId();
   const model = useMemo(() => {
     const labels = applicationMenuLabels(name, (_key, fallback, values) => fallback.replace("{app}", String(values?.app ?? name)));
+    const createPayload = runtime?.commands.createPayload;
     const entries: MenuEntryInput[] = [
       { kind: "separator", id: "quit-divider" },
-      { kind: "command", id: "quit", commandId: "application.quit", payload: { appId }, labelOverride: `Quit ${name}` },
+      { kind: "command", id: "quit", commandId: "application.quit", payload: createPayload?.("appId", appId), labelOverride: `Quit ${name}` },
     ];
+    const dock = app.delegate?.applicationDockMenu?.(app);
     const extensions: MenuSection[] = [
+      ...(dock ? [{ id: "dock-menu", beforeId: "preferences", entries: dock.model.entries }] : []),
       ...(current && context?.sessionId === null ? [{ id: "sign-in", entries: [
         { kind: "command" as const, id: "sign-in", commandId: "session.requestSignIn", labelOverride: "Sign In" },
       ] }] : []),
       { id: "quit", entries, weight: 100 },
     ];
-    return createApplicationMenuModel({ appId, labels, includeLogOut: Boolean(context?.sessionId), extensions });
-  }, [appId, context?.sessionId, Boolean(current), name]);
+    return createApplicationMenuModel({ appId, labels, includeLogOut: Boolean(context?.sessionId), extensions, createPayload });
+  }, [app, appId, context?.sessionId, Boolean(current), name, runtime]);
   const menu = useMemo(() => createReactOwnedNSEMenu({ ownerSignal: port.signal, runtime: port, [nseMenuModel]: model }), [model, port]);
   const composed = useMemo(() => {
     if (!mainMenu) return null;
@@ -84,14 +86,13 @@ export function WindowApplicationMenu({ app, destination, children }: PropsWithC
   useMenuLifetime(barMenus);
   const activate = useCallback((anchor: HTMLElement) => {
     store.setAnchor(anchor);
-    store.toggle();
+    const opening = !store.getSnapshot().open;
+    store.setOpen(opening);
   }, [store]);
   const value = useMemo(() => ({ open: state.open, activate }), [activate, state.open]);
-  const legacyTrigger = useMemo(() => ({ label: name, open: state.open, setAnchor: store.setAnchor, toggle: store.toggle }),
-    [name, state.open, store]);
   return <WindowApplicationMenuContext.Provider value={value}>
-    <ApplicationMenuTriggerProvider port={legacyTrigger}>{children}</ApplicationMenuTriggerProvider>
-    {state.open && responder ? <ApplicationMenuOverlayHost menuStore={store} model={model} controller={menu}
+    {children}
+    {responder ? <ApplicationMenuOverlayHost menuStore={store} model={model} controller={menu}
       overlay={{ id: `window-application-menu:${instance}`, parentResponderId: responder }} anchorTitle={name} /> : null}
     {destination && composed && (current?.isKey ?? true) && responder ? createPortal(
       <NSEMenuBar menu={composed} overlay={{ parentResponderId: responder }} />, destination) : null}

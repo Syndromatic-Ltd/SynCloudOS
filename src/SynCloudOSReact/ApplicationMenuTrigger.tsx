@@ -18,28 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createContext, useContext, useSyncExternalStore, type ReactNode } from "react";
+import { useSyncExternalStore } from "react";
 
-export interface ApplicationMenuTriggerPort {
-  readonly label: string;
-  readonly open: boolean;
-  setAnchor(element: HTMLElement | null): void;
-  toggle(): void;
-}
-
-const ApplicationMenuTriggerContext = createContext<ApplicationMenuTriggerPort | null>(null);
-
-export function ApplicationMenuTriggerProvider({ port, children }: { port: ApplicationMenuTriggerPort | null; children: ReactNode }) {
-  return <ApplicationMenuTriggerContext.Provider value={port}>{children}</ApplicationMenuTriggerContext.Provider>;
-}
-
-export function useApplicationMenuTrigger(): ApplicationMenuTriggerPort | null {
-  return useContext(ApplicationMenuTriggerContext);
-}
-
-/** The open state and anchor of one application's menu, shared by whichever
- * control triggers it (the top bar's User Info item or the app's own content
- * trigger) and the overlay that presents it. */
+/** Open state and anchor for one window application menu. */
 export interface ApplicationMenuSnapshot {
   readonly open: boolean;
   readonly anchor: HTMLElement | null;

@@ -47,6 +47,7 @@ export function ApplicationMenu({ model, controller, overlay, open, anchor, titl
       queueMicrotask(() => {
         globalThis.setTimeout(() => {
           if (!anchor?.isConnected) return;
+          const document = anchor.ownerDocument;
           const active = document.activeElement;
           if (active && active !== document.body && active !== document.documentElement) return;
           anchor.focus({ preventScroll: true });

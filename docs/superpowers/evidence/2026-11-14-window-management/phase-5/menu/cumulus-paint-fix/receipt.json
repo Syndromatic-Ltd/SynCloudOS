@@ -1,0 +1,270 @@
+{
+  "capturedAt": "2026-11-14T19:13:30.306Z",
+  "root": "C:\\Users\\Kavish Krishnakumar\\Developer\\SynCloudOS-Workspace\\.worktrees\\webspring-folders\\framework",
+  "head": "9673c3f1824c5b8f06c5736b483fb3695dd6748b",
+  "browserVersion": "149.0.7827.55",
+  "deviceScaleFactor": 1,
+  "sourceFile": "src/NSE/Windows/WindowTitlebarView.css",
+  "sourceHash": "6844db76823beef8e18c98a926adb482994e25f169462ec8efa0c87208d591be",
+  "sourceStableDuringCapture": true,
+  "issueReceipt": "../receipt.json",
+  "change": "Only the attached Cumulus paint geometry: a grid cell anchors glass and shadow to the actual title row after the menu. Palette unchanged.",
+  "captures": [
+    {
+      "viewport": {
+        "name": "desktop",
+        "width": 1280,
+        "height": 850
+      },
+      "scheme": "light",
+      "material": "cumulus",
+      "state": "closed",
+      "errors": [],
+      "file": "closed-desktop-light-cumulus.png",
+      "url": "http://127.0.0.1:5418/tests/e2e/fixtures/window-titlebar-layout.html?style=unified&width=1240&scheme=light&cumulus&menu",
+      "row": {
+        "x": 20,
+        "y": 48.1875,
+        "width": 1240,
+        "height": 58
+      },
+      "glass": {
+        "x": 19,
+        "y": 47.1875,
+        "width": 1242,
+        "height": 60
+      },
+      "menu": null,
+      "menuItems": [],
+      "sha256": "8f7cfcb457d371d03ae1a4e2a9b4d12b08f93fd8f7c1ccd70a4dc4e4d9e0d6dd"
+    },
+    {
+      "viewport": {
+        "name": "desktop",
+        "width": 1280,
+        "height": 850
+      },
+      "scheme": "light",
+      "material": "cumulus",
+      "state": "edit-open",
+      "errors": [],
+      "file": "open-desktop-light-cumulus.png",
+      "url": "http://127.0.0.1:5418/tests/e2e/fixtures/window-titlebar-layout.html?style=unified&width=1240&scheme=light&cumulus&menu",
+      "row": {
+        "x": 20,
+        "y": 48.1875,
+        "width": 1240,
+        "height": 58
+      },
+      "glass": {
+        "x": 19,
+        "y": 47.1875,
+        "width": 1242,
+        "height": 60
+      },
+      "menu": {
+        "x": 180.5,
+        "y": 66.1875,
+        "width": 220,
+        "height": 84
+      },
+      "menuItems": [
+        "Undo",
+        "Redo"
+      ],
+      "sha256": "d2ebb736fe92d0d7deec4444766d4e78675cc8b5498e37e38f9edbe8d45fa6e6"
+    },
+    {
+      "viewport": {
+        "name": "desktop",
+        "width": 1280,
+        "height": 850
+      },
+      "scheme": "dark",
+      "material": "cumulus",
+      "state": "closed",
+      "errors": [],
+      "file": "closed-desktop-dark-cumulus.png",
+      "url": "http://127.0.0.1:5418/tests/e2e/fixtures/window-titlebar-layout.html?style=unified&width=1240&scheme=dark&cumulus&menu",
+      "row": {
+        "x": 20,
+        "y": 48.1875,
+        "width": 1240,
+        "height": 58
+      },
+      "glass": {
+        "x": 19,
+        "y": 47.1875,
+        "width": 1242,
+        "height": 60
+      },
+      "menu": null,
+      "menuItems": [],
+      "sha256": "e94388297a7747b3220c316cb5d100839eb0cbb084e412896f425dc769a35519"
+    },
+    {
+      "viewport": {
+        "name": "desktop",
+        "width": 1280,
+        "height": 850
+      },
+      "scheme": "dark",
+      "material": "cumulus",
+      "state": "edit-open",
+      "errors": [],
+      "file": "open-desktop-dark-cumulus.png",
+      "url": "http://127.0.0.1:5418/tests/e2e/fixtures/window-titlebar-layout.html?style=unified&width=1240&scheme=dark&cumulus&menu",
+      "row": {
+        "x": 20,
+        "y": 48.1875,
+        "width": 1240,
+        "height": 58
+      },
+      "glass": {
+        "x": 19,
+        "y": 47.1875,
+        "width": 1242,
+        "height": 60
+      },
+      "menu": {
+        "x": 180.5,
+        "y": 66.1875,
+        "width": 220,
+        "height": 84
+      },
+      "menuItems": [
+        "Undo",
+        "Redo"
+      ],
+      "sha256": "85111c3947eb307e78565901b66e4fc732f4e54cf3433b8f4339a1a458c26122"
+    },
+    {
+      "viewport": {
+        "name": "phone",
+        "width": 390,
+        "height": 844
+      },
+      "scheme": "light",
+      "material": "cumulus",
+      "state": "closed",
+      "errors": [],
+      "file": "closed-phone-light-cumulus.png",
+      "url": "http://127.0.0.1:5418/tests/e2e/fixtures/window-titlebar-layout.html?style=unified&width=350&scheme=light&cumulus&menu",
+      "row": {
+        "x": 20,
+        "y": 48.1875,
+        "width": 350,
+        "height": 58
+      },
+      "glass": {
+        "x": 19,
+        "y": 47.1875,
+        "width": 352,
+        "height": 60
+      },
+      "menu": null,
+      "menuItems": [],
+      "sha256": "df221f10a614ff5859ee08534b056c92d1e19a4362bd9e5f0a7fc043f271e789"
+    },
+    {
+      "viewport": {
+        "name": "phone",
+        "width": 390,
+        "height": 844
+      },
+      "scheme": "light",
+      "material": "cumulus",
+      "state": "edit-open",
+      "errors": [],
+      "file": "open-phone-light-cumulus.png",
+      "url": "http://127.0.0.1:5418/tests/e2e/fixtures/window-titlebar-layout.html?style=unified&width=350&scheme=light&cumulus&menu",
+      "row": {
+        "x": 20,
+        "y": 48.1875,
+        "width": 350,
+        "height": 58
+      },
+      "glass": {
+        "x": 19,
+        "y": 47.1875,
+        "width": 352,
+        "height": 60
+      },
+      "menu": {
+        "x": 16,
+        "y": 733,
+        "width": 358,
+        "height": 84
+      },
+      "menuItems": [
+        "Undo",
+        "Redo"
+      ],
+      "sha256": "3b86c7cef0853cfec8944d7e47f95f3ffdd46fdf43c0f47f2deb372d916b757c"
+    },
+    {
+      "viewport": {
+        "name": "phone",
+        "width": 390,
+        "height": 844
+      },
+      "scheme": "dark",
+      "material": "cumulus",
+      "state": "closed",
+      "errors": [],
+      "file": "closed-phone-dark-cumulus.png",
+      "url": "http://127.0.0.1:5418/tests/e2e/fixtures/window-titlebar-layout.html?style=unified&width=350&scheme=dark&cumulus&menu",
+      "row": {
+        "x": 20,
+        "y": 48.1875,
+        "width": 350,
+        "height": 58
+      },
+      "glass": {
+        "x": 19,
+        "y": 47.1875,
+        "width": 352,
+        "height": 60
+      },
+      "menu": null,
+      "menuItems": [],
+      "sha256": "7dce73fbe4275bf50ffdb2628a9dfaa15cd22825555def31b4dbf42119f48713"
+    },
+    {
+      "viewport": {
+        "name": "phone",
+        "width": 390,
+        "height": 844
+      },
+      "scheme": "dark",
+      "material": "cumulus",
+      "state": "edit-open",
+      "errors": [],
+      "file": "open-phone-dark-cumulus.png",
+      "url": "http://127.0.0.1:5418/tests/e2e/fixtures/window-titlebar-layout.html?style=unified&width=350&scheme=dark&cumulus&menu",
+      "row": {
+        "x": 20,
+        "y": 48.1875,
+        "width": 350,
+        "height": 58
+      },
+      "glass": {
+        "x": 19,
+        "y": 47.1875,
+        "width": 352,
+        "height": 60
+      },
+      "menu": {
+        "x": 16,
+        "y": 733,
+        "width": 358,
+        "height": 84
+      },
+      "menuItems": [
+        "Undo",
+        "Redo"
+      ],
+      "sha256": "3c364f57b600b7d4f314bb0f53da4834f334be255494c6a634d046168e6d205b"
+    }
+  ]
+}

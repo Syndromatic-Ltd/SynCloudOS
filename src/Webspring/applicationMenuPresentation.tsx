@@ -18,27 +18,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useMemo, type ReactNode } from "react";
-import { ApplicationMenu, type MenuModel } from "../NSE/NSE";
-import { ApplicationMenuTriggerProvider, useApplicationMenuSnapshot, type ApplicationMenuStore } from "../SynCloudOSReact";
-import type { SynCloudOSAppAboutManifest } from "../SynCloudOS/SynCloudOS";
+import { ApplicationMenu } from "../NSE/NSE";
+import { useApplicationMenuSnapshot, type ApplicationMenuStore } from "../SynCloudOSReact";
 import type { SynCloudOSTranslationParams } from "../SynCloudOS/LocaleServices";
 import type { WebspringAppMenuLabels } from "./webspringAppMenu";
 
 /** The Webspring locale's text lookup (`useWebspringLocale().t`). */
 export type ApplicationMenuText = (key: string, fallback: string, params?: SynCloudOSTranslationParams) => string;
-
-/** Whether the app declares anything for its About box beyond the version every app has. */
-export function applicationDeclaresAbout(about: SynCloudOSAppAboutManifest | undefined): boolean {
-  return Boolean(about?.copyright || about?.trademark || about?.tagline);
-}
-
-/** True when System Preferences is the menu's only command, so its control opens System Preferences itself. */
-export function menuOpensSystemPreferencesDirectly(model: MenuModel): boolean {
-  const commandIds = [...model.entries, ...(model.sections ?? []).flatMap((section) => section.entries)]
-    .flatMap((entry) => entry.kind === "command" && "commandId" in entry ? [entry.commandId] : []);
-  return commandIds.length === 1 && commandIds[0] === "system.showPreferences";
-}
 
 /** The system labels every application menu shares, for the app's localised name. */
 export function applicationMenuLabels(appName: string, t: ApplicationMenuText): WebspringAppMenuLabels {
@@ -81,29 +67,4 @@ export function ApplicationMenuOverlayHost({
       onOpenChange={(nextOpen) => menuStore.setOpen(nextOpen)}
     />
   );
-}
-
-/** Publishes the menu to `useApplicationMenuTrigger()` so an app that
- * declares `applicationMenu.trigger: "content"` can open it from its own control.
- * `onActivate` replaces the toggle when the menu has nothing to show but System
- * Preferences, which the control then opens directly. */
-export function ApplicationMenuTriggerBridge({
-  menuStore,
-  label,
-  onActivate,
-  children,
-}: {
-  readonly menuStore: ApplicationMenuStore;
-  readonly label: string;
-  readonly onActivate?: () => void;
-  readonly children: ReactNode;
-}) {
-  const menu = useApplicationMenuSnapshot(menuStore);
-  const port = useMemo(() => ({
-    label,
-    open: menu.open,
-    setAnchor: menuStore.setAnchor,
-    toggle: onActivate ?? menuStore.toggle,
-  }), [label, menu.open, menuStore, onActivate]);
-  return <ApplicationMenuTriggerProvider port={port}>{children}</ApplicationMenuTriggerProvider>;
 }
