@@ -43,7 +43,7 @@ export { ToolbarView } from "./Toolbars/ToolbarView";
 export { ToolbarConfigurationSheet } from "./Toolbars/ToolbarConfigurationSheet";
 export { NSEPopover } from "./Overlays/NSEPopover";
 export { registerNSEOpenPanelHost } from "./FilePanels/openPanelHost";
-export type { NSEOpenPanelHost } from "./FilePanels/openPanelHost";
+export type { OpenPanelHost } from "./FilePanels/openPanelHost";
 export { PresentedContentProvider } from "./Overlays/useNSEPresentedContent";
 export { MenuRuntimeProvider } from "./Menus/menuRuntimeContext";
 export { ControllerSheetSurface, WindowAlertContent, OpenPanelSheetSurface } from "./Windows/windowSheetSurfaces";

@@ -13,12 +13,12 @@ import { referenceForOpenPanelHandle } from "../../SynCloudOS/nseRuntimeContract
 import type { MediaPanelItem } from "../../SynCloudOS/nseRuntimeContracts";
 import type { FilePanelReference } from "../../SynCloudOS/nseRuntimeContracts";
 import type { OpenPanelSession } from "./NSEOpenPanel";
-import { NSEOpenPanelSources, type OpenPanelSource } from "./NSEOpenPanelSources";
-import { NSEOpenPanelCollection, type OpenPanelItem } from "./NSEOpenPanelCollection";
+import { OpenPanelSources, type OpenPanelSource } from "./NSEOpenPanelSources";
+import { OpenPanelCollection, type OpenPanelItem } from "./NSEOpenPanelCollection";
 
 interface Location { readonly source: string; readonly title: string; readonly path: readonly FilePanelDirectory[] }
 
-export function NSEOpenPanelContent({ session }: { readonly session: OpenPanelSession }) {
+export function OpenPanelContent({ session }: { readonly session: OpenPanelSession }) {
   const { host, compact } = session;
   const fs = host.fileSystem;
   const [folders, setFolders] = useState<readonly OpenPanelFolder[]>([]);
@@ -167,7 +167,7 @@ export function NSEOpenPanelContent({ session }: { readonly session: OpenPanelSe
   const noun = commonKind === "image" ? "picture" : commonKind === "video" ? "movie" : commonKind === "audio" ? "track" : "item";
   const summary = chosen.length ? `${chosen.length} ${noun}${chosen.length === 1 ? "" : "s"} selected${!compact && chosen.length === 1 ? ` — ${chosen[0]!.name}` : ""}` : directory && session.canChooseDirectories ? "Open this folder, or choose an item." : "Choose an item to open.";
   const sourcePage = <nav aria-label="Open panel sources" className="nse-open-sources">
-    <NSEOpenPanelSources id={`${session.id}:sources`} groups={groups} selectedId={location?.source ?? null} onSelect={id => { void chooseSource(id); }} />
+    <OpenPanelSources id={`${session.id}:sources`} groups={groups} selectedId={location?.source ?? null} onSelect={id => { void chooseSource(id); }} />
     <NSEButton bezelStyle="texturedRounded" controlSize="small" title="System Chooser…" className="nse-open-system" onClick={system} />
   </nav>;
   const openButton = <NSEButton controlSize="small" title={session.prompt || "Open"} keyEquivalent={"\r"} isEnabled={canOpen} onClick={() => void openItems(chosen)} />;
@@ -198,7 +198,7 @@ export function NSEOpenPanelContent({ session }: { readonly session: OpenPanelSe
           {busy ? <p role="status">Loading…</p> : null}
           {status ? <p role="status" className="nse-open-status">{status}</p> : null}
           {!busy && !status && !visibleItems.length ? <p className="nse-open-empty">{location ? "No matching items." : "Choose a source, add a folder, or use the system chooser."}</p> : null}
-          {visibleItems.length ? <NSEOpenPanelCollection items={visibleItems} selectedIds={selected} multiple={session.allowsMultipleSelection} compact={compact} width={size.width} height={size.height} title={title} images={host.images}
+          {visibleItems.length ? <OpenPanelCollection items={visibleItems} selectedIds={selected} multiple={session.allowsMultipleSelection} compact={compact} width={size.width} height={size.height} title={title} images={host.images}
             onSelect={setSelected} onActivate={activate} /> : null}
         </div>
         {cursor ? <NSEButton controlSize="small" title="Load more" isEnabled={!busy} onClick={() => void loadMedia(location!.source.slice(6), cursor, false)} /> : null}

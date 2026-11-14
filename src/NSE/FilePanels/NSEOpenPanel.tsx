@@ -24,10 +24,10 @@ import { matchesOpenPanelContentType, openPanelAcceptTypes, type FilePanelDirect
 import type { MediaPanelItem, MediaPanelProvider } from "../../SynCloudOS/nseRuntimeContracts";
 import { NSEModalResponse } from "../Application/NSEAlert";
 import { nseEndSheet, type Sheet, type NSEWindow } from "../Application/NSEWindowController";
-import { resolveNSEOpenPanelHost, type NSEOpenPanelHost } from "./openPanelHost";
-import { NSEOpenPanelContent } from "./NSEOpenPanelContent";
+import { resolveNSEOpenPanelHost, type OpenPanelHost } from "./openPanelHost";
+import { OpenPanelContent } from "./NSEOpenPanelContent";
 
-export type NSEFilePanelService = Pick<FilePanelService, "open" | "save" | "release" | "dispose">;
+export type OpenPanelService = Pick<FilePanelService, "open" | "save" | "release" | "dispose">;
 /** Browser file references and provider media identities; no synthetic OS paths. */
 export type NSEOpenPanelURL = FilePanelReference | MediaPanelItem;
 
@@ -35,7 +35,7 @@ export type NSEOpenPanelURL = FilePanelReference | MediaPanelItem;
 export interface OpenPanelSession {
   readonly id: string;
   readonly panel: NSEOpenPanel;
-  readonly host: NSEOpenPanelHost;
+  readonly host: OpenPanelHost;
   readonly signal: AbortSignal;
   readonly compact: boolean;
   readonly anchor: HTMLElement | null;
@@ -165,7 +165,7 @@ export class NSEOpenPanel implements Sheet {
     shown = host.bridge.present({ id, role: window ? "sheet" : "modal", title: this.prompt || "Open", parentWindowControllerId: window?.id ?? null,
       parentResponderId: host.responderId, anchor, bounds: { x: frame.x + (frame.width - width) / 2, y: frame.y + (window ? 0 : (frame.height - height) / 2), width, height },
       onDidClose: () => { if (!closing) complete({ kind: "cancelled" }); },
-    }, <NSEOpenPanelContent session={session} />);
+    }, <OpenPanelContent session={session} />);
     void shown.catch(cause => complete({ kind: "error", message: "The Open panel could not be presented.", cause }));
     return pending;
   }

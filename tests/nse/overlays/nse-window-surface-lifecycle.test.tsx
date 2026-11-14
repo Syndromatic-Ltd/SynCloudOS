@@ -22,7 +22,7 @@
 import React, { useMemo, useState } from "react";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { NSEFilePanelView } from "../../../src/NSE/FilePanels/NSEFilePanelView";
+import { FilePanelView } from "../../../src/NSE/FilePanels/NSEFilePanelView";
 import { NSEPopover } from "../../../src/NSE/Overlays/NSEPopover";
 import { ActionSheet, OverlayProvider, useNSEWindowSurfaceLifecycle, type WindowSurfaceBridge } from "../../../src/NSE/Overlays";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
@@ -131,9 +131,9 @@ describe("canonical window-surface lifecycle", () => {
       return <>
         <button type="button" onClick={() => setOpen(false)}>Close file source</button>
         <output aria-label="file source">{open ? "open" : "closed"}</output>
-        <NSEFilePanelView id="refused-file" open={open} anchor={null} parentResponderId="window:parent" parentWindowControllerId="window:parent" title="Choose file" windowBridge={bridge} result={null} onOpenChange={setOpen}>
+        <FilePanelView id="refused-file" open={open} anchor={null} parentResponderId="window:parent" parentWindowControllerId="window:parent" title="Choose file" windowBridge={bridge} result={null} onOpenChange={setOpen}>
           <p>Files</p>
-        </NSEFilePanelView>
+        </FilePanelView>
       </>;
     }
     render(<Fixture />);
@@ -194,9 +194,9 @@ describe("canonical window-surface lifecycle", () => {
       return <>
         <button type="button" onClick={() => setOpen(false)}>Reject file close</button>
         <output aria-label="rejected file source">{open ? "open" : "closed"}</output>
-        <NSEFilePanelView id="rejected-file" open={open} anchor={null} parentResponderId="window:parent" parentWindowControllerId="window:parent" title="Choose file" windowBridge={bridge} result={null} onOpenChange={setOpen}>
+        <FilePanelView id="rejected-file" open={open} anchor={null} parentResponderId="window:parent" parentWindowControllerId="window:parent" title="Choose file" windowBridge={bridge} result={null} onOpenChange={setOpen}>
           <p>Files</p>
-        </NSEFilePanelView>
+        </FilePanelView>
       </>;
     }
     render(<Fixture />);

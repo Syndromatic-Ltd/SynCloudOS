@@ -10,10 +10,10 @@ import { WindowSheetFrame, WindowSheetHostContext } from "./windowChrome";
 import type { NSEWindow } from "../../NSE/NSE";
 import type { SynWareContextValue } from "../AppSDK/appContextTypes";
 import { openPanelFileSystemFor } from "../FilePanels";
-import { registerNSEOpenPanelHost, type NSEOpenPanelHost } from "../../NSE/applicationHostInterop";
+import { registerNSEOpenPanelHost, type OpenPanelHost } from "../../NSE/applicationHostInterop";
 import { NSEPopup } from "../../NSE/NSE";
 
-const Context = createContext<NSEOpenPanelHost | null>(null);
+const Context = createContext<OpenPanelHost | null>(null);
 export function OpenPanelApplicationHost({ value, children }: PropsWithChildren<{ value: SynWareContextValue }>) {
   const bridge = useOptionalNSEWindowSurfaceBridge();
   const runtime = useContext(SynCloudOSRuntimeContext);
@@ -31,7 +31,7 @@ export function OpenPanelApplicationHost({ value, children }: PropsWithChildren<
       return Promise.resolve({ outcome: "closed" });
     },
   } : null, [bridge, value.presentation]);
-  const host = useMemo<NSEOpenPanelHost | null>(() => bridge ? {
+  const host = useMemo<OpenPanelHost | null>(() => bridge ? {
     bridge: presentationBridge!, images: value.images, signal: value.signal, service: value.filePanels, fileSystem: openPanelFileSystemFor(value.filePanels), responderId: value.responderId,
     isKey: () => { if (runtime && runtime.store.getSnapshot().application.activeAppId !== value.appId) return false; const snapshot = value.windows.getSnapshot(); return snapshot.surface !== "window" || snapshot.current?.isKey === true; },
     // Availability and activation are facts projected by the mounted client.
