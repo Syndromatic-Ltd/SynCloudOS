@@ -466,15 +466,20 @@ Chromium captures through the site’s installed SDK show About (Cumulus) and So
 leaving the Webspring stage for a floating window at desktop and phone sizes, in both colour schemes.
 The [Phase 3 receipt](../evidence/2026-11-14-window-management/phase-3/receipt.json) records the visible destinations.
 
-The production host port handles full-screen intent, close requests and activation events. The stable
-container moves between same-document slots. Generation-fenced child-document transfer and rollback are
-verified in the prototype. The production bind/unbind acknowledgement, cross-document surface-loss recovery
-and launch/return motion acceptance remain open. Electron remains a separate phase.
+The production Webspring browser adapter opens a same-origin child during the initiating gesture. The
+window manager commits a connected destination with the current generation. The same mounted
+window moves into that destination and takes its child viewport, focus responder, command domain and
+overlays with it. Explicit reattach releases the old outlet after React has moved its content.
+If the OS closes the popup, the adapter treats the event as loss of the presentation and returns
+the still-live window to Webspring. The window's own Close button goes through the close delegate.
 
-The current production port exposes capabilities, `requestFullScreen` and the event subscription. The
-browser reports `separateSurfaces: false`. Production child-window work still needs an acknowledged,
-generation-scoped binding, stylesheet and overlay roots in the destination document, and paired close/loss
-handling. The prototype's lifecycle and focus tests are the acceptance cases for that extension.
+The [production-host browser test](../../../tests/e2e/detached-window.spec.ts) exercised stage to
+floating to child and back, preserving the exact input, draft, window id and one controller load.
+It also exercised child resize, sheet Tab and Escape, focus return, a close veto and native popup
+loss. The [host runtime regression](../../../tests/runtime/window-host-surfaces.test.ts) covers
+refused and interrupted binds, stale events and activation when a modal child is key. Desktop
+popup pictures and phone-width emulation are labelled in the [Phase 3 native receipt](../evidence/2026-11-14-window-management/phase-3/native/receipt.json).
+The Electron adapter and installed window-controls-overlay measurement have their own acceptance.
 
 ### Phase 1: dead code and dead fields (Codex)
 
@@ -599,12 +604,12 @@ See [Electron window host](2026-11-14-electron-window-host.md).
 The framework's own fixtures (`src/FrameworkTests/`, `tests/e2e/fixtures/`, `tests/runtime/fixtures/`) migrate
 in the same commits as the API they use.
 
-## Decisions still open
+## Builder decisions
 
-1. **(Builder)** Drag regions for `fullSizeContentView` content (not frame views, which the system drags):
-   `isMovableByWindowBackground` plus the existing chrome-element registration, or a documented drag-region view.
-2. **(Builder)** Whether `appView` vs `windowedView` should remain separate manifest values or become one
-   `initialWindowState` field. Keep the current values unless the change is free.
+1. The shared titlebar supplies the system drag area and excludes interactive descendants. Full-size
+   content can register safe-area obstructions with the window layout context.
+2. Keep the existing `appView` and `windowedView` manifest values. A stage application begins in the
+   full-screen presentation of its window, which can move to another host.
 
 ## Acceptance
 

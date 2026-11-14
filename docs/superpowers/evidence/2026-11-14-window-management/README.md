@@ -2,7 +2,7 @@
 
 Framework baseline is 1bfc47e9 in the Webspring framework worktree. Site baseline is 0472a7c with its then-installed Beta 2 SDK and existing local edits.
 
-- Phase 0 established [framework fixture](captures/) and [site](site/) references. Phase 0b selected shared authority using four Chromium transfer tests. The production Webspring integration test verified window and controller identity, one content mount, draft and DOM focus when moving from stage to floating and back. The [plan records the boundary](../../plans/2026-11-14-window-management.md#transfer-prototype-results-sol) between that handoff and the child-document prototype.
+- Phase 0 established [framework fixture](captures/) and [site](site/) references. Phase 0b selected shared authority using four Chromium transfer tests. The production Webspring integration test verified window and controller identity, one content mount, draft and DOM focus when moving from stage to floating and back. The [plan records the boundary](../../plans/2026-11-14-window-management.md#transfer-prototype-results-sol) and the verified child-document handoff.
 - [Phase 1](phase-1/) replaced the retired frame component with window content borders and preserved sheet-focus and sidebar behavior.
 - Phase 2 added confirmed fullscreen transitions, scoped focus and restoration migration. This changes window state and authority.
 - [Phase 3](phase-3/) gave Webspring and the single-app host real stage windows so one controller can move between frames. The production site captures pair the Phase 0 stage with the current stage and its floating destination at both sizes, both schemes and both materials. The captures show settled states. Launch, return, QuickSwitch and MultiSwitch motion review remains open.
@@ -11,6 +11,11 @@ Framework baseline is 1bfc47e9 in the Webspring framework worktree. Site baselin
 - [Phase 5](phase-5/menu/) added independent menu bar and toolbar opt-ins using the same application menu. The Cumulus recaptures show the glass aligned with the title row beneath the menu. [Site captures](phase-5/site/) pair Phase 0 scenes with the new toolbar menu in closed and open states across the matrix. Software's phone layout places the menu button in toolbar overflow.
 - Phase 6 documents window state, frame appearance and opt-in menus.
 - [Phase 7](phase-7/split-layout/) added three-pane seams and animated sidebar and inspector collapse. The scoped before/after fixture verifies retained content and focus during geometry changes.
+- [Phase 3 native](phase-3/native/) shows the retained Webspring editor in floating and child windows. Phone-width captures use a 390 CSS-pixel desktop popup. The browser test confirms sheet focus return, an app-close veto and recovery after native popup loss.
+- [Phase 3 motion probes](phase-3/production-motion/) include launch and return samples and the QuickSwitch surface where available. The receipt records failed routes and incomplete transition sequences.
+- [Phase 4 scoped frame paint](phase-4/frame-scope/) compares the same fixture with the scoped stylesheet off and on. A separate window keeps its own paint and a rejected stylesheet falls back to built-in tokens.
+- [Phase 4 site apps](phase-4/site-apps/) shows both Journal variants in Journal and JournalOld, and the MemoJournal and SynCal layouts on desktop and phone. These are candidate captures. The original site's vendored SDK could not load Journal because its Atmo entry lacked the motion export required by that source.
+- [Phase 7 tracked separator](phase-7/sidebar-tracking/) compares the same split with and without a tracking separator. It follows rendered sidebar thickness through resize and collapse, including in floating Cumulus.
 - Phase 8 is a [written Electron plan](../../plans/2026-11-14-electron-window-host.md).
 
 ## Pending design review
@@ -20,14 +25,15 @@ Framework baseline is 1bfc47e9 in the Webspring framework worktree. Site baselin
 - Pending design | Floating Cumulus titlebar art. The window opts in through titlebarPresentation, with a semantic floating surface and existing-token paint. Metal stays attached.
 - Pending design | Journal and JournalOld frame-view art for the Mountain Lion and leather variants. Both use metric and token placeholders.
 - Compare the shared titlebar's inline toolbar, controls, dark accessory paint, and desktop/phone layout with the reference captures. The titlebar and menu fixtures include their source hashes and geometry.
-- The production site captures include the current Journal phone layout. Same-scene comparisons for Journal and JournalOld, MemoJournal and SynCal remain open, alongside production launch, return, QuickSwitch and MultiSwitch motion.
+- The production site captures include both Journal variants, MemoJournal and SynCal. Same-scene baseline pairs and complete launch, return, QuickSwitch and MultiSwitch motion comparisons remain open. During a desktop stage-to-floating handoff, the new frame can appear before its retained content becomes visible.
 - Window-controls-overlay verification remains open. Chrome accepted a temporary-profile PWA installation, but the test could not obtain a live native titlebar rectangle.
 
-## Remaining implementation and evidence
+## Engineering follow-up
 
-- Production Webspring moves the same mounted window between the stage and the in-page floating layer. Native detach and reattach still need host binding acknowledgements, generation-scoped activation, and recovery when a child document closes or disappears. The same-origin Chromium prototype exercised those cases separately.
-- `standardWindowButton`, app-facing full-screen delegate callbacks, sidebar separator tracking, and scoped theme-validated frame-view stylesheets remain open. The frame views supply metrics and existing theme tokens. The Preferences surface and the expanded fallback retain a separate titlebar content component.
-- The system-drawn menu bar has a fixture matrix. The production About and Software captures verify the independently enabled toolbar application menu. The Phase 3 evidence shows the settled stage and window states. The motion sequence is still open.
+- Browser surfaces now bind and unbind with generation checks. The same mounted window and its auxiliaries follow the acknowledged destination. Child activation selects the eligible modal descendant and deactivation clears its key state while preserving the main window.
+- App-facing standard button lookup and full-screen callbacks are wired. Class sheets restore focus after releasing inertness, preserve close vetoes, and keep unrelated window responders and commands available. Journal frame paint runs through validated, window-scoped stylesheets.
+- Publisher consumes the incoming post route without rewriting it during window admission. Its transient anchors follow responsive toolbar replacement and its sheet titles supply accessible names.
+- The system menu bar has a fixture matrix. About and Software provide production checks of the independently enabled application-menu toolbar item.
 
 ## Frozen screenshot results
 
