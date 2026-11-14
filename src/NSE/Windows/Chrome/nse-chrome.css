@@ -949,69 +949,6 @@
   }
 }
 
-.nse-app-frame,
-:where(:scope):is(.nse-app-frame) {
-  position: relative;
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
-  width: 100%;
-  height: 100%;
-  min-height: 0;
-  overflow: hidden;
-  font-family: inherit;
-  isolation: isolate;
-}
-
-.nse-app-frame-body,
-:where(:scope):is(.nse-app-frame-body) {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  min-height: 0;
-}
-
-.nse-app-frame-topbar>.nse-app-topbar,
-:where(:scope):is(.nse-app-frame-topbar)>.nse-app-topbar {
-  position: relative;
-  inset: auto;
-}
-
-.nse-app-frame-sidebar+.nse-app-frame-content,
-:where(:scope):is(.nse-app-frame-sidebar)+.nse-app-frame-content {
-  min-width: 0;
-}
-
-.nse-app-frame-content,
-:where(:scope):is(.nse-app-frame-content),
-.nse-app-frame-sidebar,
-:where(:scope):is(.nse-app-frame-sidebar) {
-  min-height: 0;
-  min-width: 0;
-}
-
-.nse-app-frame-statusbar,
-:where(:scope):is(.nse-app-frame-statusbar) {
-  min-width: 0;
-  min-height: 0;
-  height: var(--nse-status-bar-size, auto);
-}
-
-.nse-app-frame-statusbar>.nse-statusbar,
-:where(:scope):is(.nse-app-frame-statusbar)>.nse-statusbar {
-  height: 100%;
-}
-
-.nse-app-frame[data-variant="canvas"] .nse-app-frame-content,
-:where(:scope):is(.nse-app-frame[data-variant="canvas"]) .nse-app-frame-content {
-  overflow: hidden;
-}
-
-.nse-app-frame[data-variant="document"] .nse-app-frame-content,
-:where(:scope):is(.nse-app-frame[data-variant="document"]) .nse-app-frame-content,
-.nse-app-frame[data-variant="standard"] .nse-app-frame-content,
-:where(:scope):is(.nse-app-frame[data-variant="standard"]) .nse-app-frame-content {
-  overflow: auto;
-}
-
 .nse-split-view,
 :where(:scope):is(.nse-split-view) {
   position: relative;

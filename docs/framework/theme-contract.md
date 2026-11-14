@@ -6,7 +6,7 @@ A theme draws controls through these hooks only: `[data-nse-control]`, `[data-ns
 
 Each hook is also mirrored on its element as a class token beginning `nse:`, and the build rewrites hook selectors to those classes so the browser can index them. The classes are private and may change without notice: write the attributes, and never select on the classes.
 
-Contract version 1: 73 controls, 48 colours.
+Contract version 1: 72 controls, 48 colours.
 
 ## Controls
 
@@ -19,8 +19,10 @@ Contract version 1: 73 controls, 48 colours.
 
 ### `app-view-chrome`
 
-- Parts: `background`
+- Parts: `background`, `content-border`, `content-view`
 - States: `key-window=false`
+- Variants:
+  - `data-nse-content-border`: `small`
 
 ### `badge`
 
@@ -429,11 +431,6 @@ Contract version 1: 73 controls, 48 colours.
 - Variants:
   - `data-nse-alignment`: `centre`
   - `data-nse-orientation`: `horizontal`
-
-### `status-bar`
-
-- Parts: `background`
-- States: none
 
 ### `stepper`
 

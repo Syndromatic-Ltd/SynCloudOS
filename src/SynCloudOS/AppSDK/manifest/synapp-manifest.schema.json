@@ -37,14 +37,6 @@
       "type": "array",
       "items": { "$ref": "#/$defs/documentType" }
     },
-    "commands": {
-      "type": "array",
-      "items": { "$ref": "#/$defs/command" }
-    },
-    "menus": {
-      "type": "array",
-      "items": { "$ref": "#/$defs/menu" }
-    },
     "applicationMenu": { "$ref": "#/$defs/applicationMenu" },
     "services": {
       "type": "array",
@@ -278,31 +270,6 @@
           "items": { "type": "string", "pattern": "^[A-Za-z0-9]+$" }
         },
         "displayName": { "type": "string", "minLength": 1, "maxLength": 256 }
-      }
-    },
-    "command": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["id", "title"],
-      "properties": {
-        "id": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*(?:[.-][A-Za-z0-9]+)*$" },
-        "title": { "type": "string", "minLength": 1, "maxLength": 256 },
-        "menu": { "type": "string", "minLength": 1, "maxLength": 128 },
-        "shortcut": { "type": "string", "minLength": 1, "maxLength": 64 }
-      }
-    },
-    "menu": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["id", "title"],
-      "properties": {
-        "id": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*(?:[.-][A-Za-z0-9]+)*$" },
-        "title": { "type": "string", "minLength": 1, "maxLength": 256 },
-        "commandIds": {
-          "type": "array",
-          "uniqueItems": true,
-          "items": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*(?:[.-][A-Za-z0-9]+)*$" }
-        }
       }
     },
     "service": {

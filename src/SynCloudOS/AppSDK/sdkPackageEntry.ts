@@ -148,7 +148,6 @@ export type {
 export type {
   SynWareAppearanceManifest,
   SynWareBackgroundManifest,
-  SynWareCommandManifest,
   SynWareDocumentTypeManifest,
   SynWareLifecycleManifest,
   SynWareApplicationAvailability,
@@ -159,7 +158,6 @@ export type {
   SynWareManifestValidationFailure,
   SynWareManifestValidationSuccess,
   SynWareManifestV1,
-  SynWareMenuManifest,
   SynWareMinimumViewportManifest,
   SynWarePresentation,
   SynWareRouteManifest,

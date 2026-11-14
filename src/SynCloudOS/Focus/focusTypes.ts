@@ -42,7 +42,7 @@ export interface FocusScopeHandle {
 }
 export interface FocusManager {
   readonly runtimeId: SynCloudOSRuntimeId;
-  openScope(registration: FocusScopeRegistration): FocusScopeHandle;
+  openScope(registration: FocusScopeRegistration, blocksResponder?: (responderId: string) => boolean): FocusScopeHandle;
   requestFocus(responderId: string, options?: { readonly force?: boolean }): FocusRequestResult;
   closeScope(scopeId: string, options?: { readonly restore?: boolean }): FocusCloseResult;
   isScopeWithin(scopeId: string, ancestorScopeId: string): boolean;

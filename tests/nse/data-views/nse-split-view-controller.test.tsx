@@ -178,16 +178,16 @@ describe("NSESplitViewController", () => {
   });
   it("shares its sidebar seam and compact handoff with a source-list window's frame", () => {
     const setRailWidth = vi.fn(), setCompactNavigation = vi.fn();
-    const controller = new NSESplitViewController({ id: "source-list", splitViewItems: [
+    const controller = new NSESplitViewController({ id: "source-list", preferences: createPreferences({ sizes: { sidebar: 340, content: 560 }, collapsedPaneIds: [], activePaneId: "content" }), splitViewItems: [
       item("sidebar", "Sources", () => <p>Sources</p>, { behavior: "sidebar", minimumThickness: 208, maximumThickness: 460 }),
       item("content", "Content", () => <p>Content</p>, { minimumThickness: 320 }),
     ] });
     render(<SourceListFrameProvider value={{ railWidth: 264, setRailWidth, setCompactNavigation, minWidth: 208, maxWidth: 460, defaultWidth: 264, railLabel: "Library", scheme: "light" }}><ViewControllerView controller={controller} /></SourceListFrameProvider>);
     setWidth(controller, 900);
     const divider = screen.getByRole("separator");
-    expect(divider.getAttribute("aria-valuenow")).toBe("264");
+    expect(divider.getAttribute("aria-valuenow")).toBe("340");
     fireEvent.keyDown(divider, { key: "ArrowRight" });
-    expect(setRailWidth).toHaveBeenLastCalledWith(280);
+    expect(setRailWidth).toHaveBeenLastCalledWith(356);
     setWidth(controller, 390);
     expect(setCompactNavigation).toHaveBeenLastCalledWith(true);
   });

@@ -26,6 +26,7 @@ export class FocusScopeError extends Error { constructor(message: string) { supe
 
 export function createFocusManager(options: { readonly runtimeId: SynCloudOSRuntimeId; readonly responders: ResponderGraph }): FocusManager {
   const scopes = new Map<string, Omit<FocusScopeRegistration, "restoreResponderId"> & { restoreResponderId: string | null }>();
+  const modalDomains = new Map<string, (responderId: string) => boolean>();
   const stack: string[] = [];
   const restorations: Array<{ scopeId: string; responderId: string | null }> = [];
   const listeners = new Set<() => void>();
@@ -57,12 +58,20 @@ export function createFocusManager(options: { readonly runtimeId: SynCloudOSRunt
     }
     return false;
   };
-  const activeModal = () => [...stack].reverse().map((id) => scopes.get(id)).find((scope) => scope?.modal);
   const allowedByModal = (responderId: string) => {
-    const modal = activeModal();
-    if (!modal) return true;
     const responder = options.responders.get(responderId);
-    return Boolean(responder && (isScopeWithin(responder.scopeId, modal.id) || responderId === modal.parentResponderId));
+    if (!responder) return false;
+    for (const scopeId of [...stack].reverse()) {
+      const modal = scopes.get(scopeId);
+      if (!modal?.modal) continue;
+      const blocks = modalDomains.get(scopeId);
+      if (blocks) {
+        if (blocks(responderId)) return false;
+        continue;
+      }
+      return isScopeWithin(responder.scopeId, modal.id) || responderId === modal.parentResponderId;
+    }
+    return true;
   };
   const nearestLive = (responderId: string | null | undefined) => {
     let current = responderId ? options.responders.get(responderId) : null;
@@ -76,13 +85,14 @@ export function createFocusManager(options: { readonly runtimeId: SynCloudOSRunt
 
   const manager: FocusManager = {
     runtimeId: options.runtimeId,
-    openScope(registration): FocusScopeHandle {
+    openScope(registration, blocksResponder): FocusScopeHandle {
       if (disposed) throw new FocusScopeError("Focus manager is disposed.");
       if (scopes.has(registration.id)) throw new FocusScopeError(`Focus scope ${registration.id} is already open.`);
       if (!options.responders.has(registration.parentResponderId)) throw new FocusScopeError(`Parent responder ${registration.parentResponderId} is not registered.`);
       if (registration.parentScopeId && !scopes.has(registration.parentScopeId)) throw new FocusScopeError(`Parent focus scope ${registration.parentScopeId} is not open.`);
       let ownedScope = { ...registration, restoreResponderId: registration.restoreResponderId ?? focusedResponderId };
       scopes.set(registration.id, ownedScope);
+      if (blocksResponder) modalDomains.set(registration.id, blocksResponder);
       stack.push(registration.id);
       generation += 1;
       publish();
@@ -115,7 +125,10 @@ export function createFocusManager(options: { readonly runtimeId: SynCloudOSRunt
       const scope = scopes.get(scopeId);
       if (!scope) return { status: "missing", scopeId, restoredResponderId: null };
       const closingScopes = new Set(stack.filter((candidate) => candidate === scopeId || isScopeWithin(candidate, scopeId)));
-      for (const candidate of [...stack].reverse()) if (closingScopes.has(candidate)) scopes.delete(candidate);
+      for (const candidate of closingScopes) {
+        scopes.delete(candidate);
+        modalDomains.delete(candidate);
+      }
       for (let index = stack.length - 1; index >= 0; index -= 1) if (closingScopes.has(stack[index]!)) stack.splice(index, 1);
       const restorationTarget = scope.restoreResponderId && options.responders.has(scope.restoreResponderId)
         ? scope.restoreResponderId
@@ -145,7 +158,7 @@ export function createFocusManager(options: { readonly runtimeId: SynCloudOSRunt
       generation += 1;
       publish();
     },
-    dispose() { disposed = true; scopes.clear(); stack.length = 0; focusedResponderId = null; generation += 1; listeners.clear(); },
+    dispose() { disposed = true; scopes.clear(); modalDomains.clear(); stack.length = 0; focusedResponderId = null; generation += 1; listeners.clear(); },
   };
   return manager;
 }

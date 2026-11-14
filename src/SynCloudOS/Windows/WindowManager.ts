@@ -1956,6 +1956,10 @@ export class WindowManager {
       modal: true,
       trapFocus: true,
       restoreResponderId,
+    }, responderId => {
+      const window = this.dependencies.responders.resolveChain(responderId).find(responder => responder.kind === "window");
+      const candidate = window ? this.#controllers.get(window.id.slice("window:".length)) : undefined;
+      return candidate !== undefined && this.#windowBlocksWindow(controller, candidate);
     });
     this.#modalScopes.set(controller.id, handle);
   }
@@ -2064,28 +2068,28 @@ export class WindowManager {
     });
   }
 
+  #windowBlocksWindow(blocker: WindowController, candidate: WindowController): boolean {
+    if (blocker === candidate || blocker.record.state !== "open" || candidate.record.state !== "open") return false;
+    if (blocker.record.role === "sheet") return blocker.record.parentWindowControllerId === candidate.id;
+    if (blocker.record.role !== "modal") return false;
+    if (blocker.record.parentWindowControllerId) {
+      return this.#relationshipRoot(candidate.id) === this.#relationshipRoot(blocker.id)
+        && !this.#isDescendantOf(candidate.id, blocker.id)
+        && candidate.record.zIndex < blocker.record.zIndex;
+    }
+    const inDomain = blocker.record.applicationSessionId
+      ? candidate.record.applicationSessionId === blocker.record.applicationSessionId
+      : candidate.record.workspaceId === blocker.record.workspaceId;
+    return inDomain && levelRank[candidate.record.level] < levelRank[blocker.record.level];
+  }
+
   #blockedWindowIds(): Set<string> {
     const blocked = new Set<string>();
-    const open = this.#order.map((id) => this.#controllers.get(id)!).filter(Boolean);
+    const open = this.#order.map(id => this.#controllers.get(id)!).filter(controller => controller.record.state === "open");
     for (const blocker of open) {
-      if (blocker.record.state !== "open") continue;
-      if (blocker.record.role === "sheet" && blocker.record.parentWindowControllerId) {
-        blocked.add(blocker.record.parentWindowControllerId);
-        continue;
-      }
-      if (blocker.record.role !== "modal") continue;
-      const root = blocker.record.parentWindowControllerId ? this.#relationshipRoot(blocker.id) : null;
+      if (blocker.record.role !== "sheet" && blocker.record.role !== "modal") continue;
       for (const candidate of open) {
-        if (candidate.id === blocker.id || candidate.record.state !== "open") continue;
-        const inDomain = root
-          ? this.#relationshipRoot(candidate.id) === root && !this.#isDescendantOf(candidate.id, blocker.id)
-          : blocker.record.applicationSessionId
-            ? candidate.record.applicationSessionId === blocker.record.applicationSessionId
-            : candidate.record.workspaceId === blocker.record.workspaceId;
-        const isLower = root
-          ? candidate.record.zIndex < blocker.record.zIndex
-          : levelRank[candidate.record.level] < levelRank[blocker.record.level];
-        if (inDomain && isLower) blocked.add(candidate.id);
+        if (this.#windowBlocksWindow(blocker, candidate)) blocked.add(candidate.id);
       }
     }
     return blocked;
@@ -2096,6 +2100,7 @@ export class WindowManager {
     const target = this.select(windowControllerId);
     if (target.record.state !== "open") return;
     if (this.#blockedWindowIds().has(windowControllerId)) return;
+    if (this.dependencies.focus.requestFocus(this.#focusTarget(target)).status !== "focused") return;
     const targetMayBeMain = target.record.role === "standard";
     const currentMainId = this.#standardAncestor(target.id) ??
       this.#snapshot.mainWindowControllerId ??
@@ -2118,8 +2123,6 @@ export class WindowManager {
       webspringResponderId: "webspring",
       runtimeResponderId: "runtime",
     });
-    const focusTarget = this.#focusTarget(target);
-    this.dependencies.focus.requestFocus(focusTarget);
     if (publish) this.#publish(true);
   }
 

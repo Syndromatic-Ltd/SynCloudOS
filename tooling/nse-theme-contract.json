@@ -22,12 +22,18 @@
     },
     "app-view-chrome": {
       "parts": [
-        "background"
+        "background",
+        "content-border",
+        "content-view"
       ],
       "states": [
         "key-window=false"
       ],
-      "variants": {}
+      "variants": {
+        "content-border": [
+          "small"
+        ]
+      }
     },
     "badge": {
       "parts": [
@@ -1216,13 +1222,6 @@
           "horizontal"
         ]
       }
-    },
-    "status-bar": {
-      "parts": [
-        "background"
-      ],
-      "states": [],
-      "variants": {}
     },
     "stepper": {
       "parts": [

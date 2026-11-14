@@ -32,6 +32,27 @@ afterEach(async () => {
 });
 
 describe("window modality", () => {
+  it("lets another application take both key status and responder focus while an application modal is open", async () => {
+    const fixture = createWindowTestDependencies();
+    cleanups.push(fixture.cleanup);
+    const owner = fixture.manager.create(standardWindow("owner"));
+    const other = fixture.manager.create(standardWindow("other-application", {
+      applicationId: "com.example.other",
+      applicationSessionId: "session-other",
+    }));
+    const modal = fixture.manager.create(modalWindow("application-modal"));
+    await fixture.manager.open(owner.id);
+    await fixture.manager.open(other.id);
+    await fixture.manager.open(modal.id);
+
+    expect(fixture.manager.snapshot().blockedWindowControllerIds).toEqual([owner.id]);
+    fixture.manager.makeKey(other.id);
+    expect(fixture.manager.snapshot().keyWindowControllerId).toBe(other.id);
+    expect(other.contentState.status).toBe("loaded");
+    if (other.contentState.status !== "loaded") throw new Error("Other window did not load");
+    expect(fixture.focus.getFocusedResponderId()).toBe(other.contentState.rootResponderId);
+  });
+
   it("blocks a parent domain and restores focus to its last live content responder", async () => {
     const fixture = createWindowTestDependencies();
     cleanups.push(fixture.cleanup);

@@ -150,19 +150,6 @@ export interface SynWareDocumentTypeManifest {
   readonly displayName?: string;
 }
 
-export interface SynWareCommandManifest {
-  readonly id: string;
-  readonly title: string;
-  readonly menu?: string;
-  readonly shortcut?: string;
-}
-
-export interface SynWareMenuManifest {
-  readonly id: string;
-  readonly title: string;
-  readonly commandIds?: readonly string[];
-}
-
 export interface SynWareServiceManifest {
   readonly id: string;
   readonly required?: boolean;
@@ -298,8 +285,6 @@ export interface SynWareManifestV1 {
   readonly linkCapture?: SynWareLinkCaptureManifest;
   readonly shortcutItems?: readonly SynWareShortcutItemManifest[];
   readonly shareTarget?: SynWareShareTargetManifest;
-  readonly commands?: readonly SynWareCommandManifest[];
-  readonly menus?: readonly SynWareMenuManifest[];
   readonly applicationMenu?: SynWareApplicationMenuManifest;
   readonly services?: readonly SynWareServiceManifest[];
   /** Device and service capabilities captured by the runtime at application launch. */

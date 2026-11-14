@@ -91,13 +91,11 @@ This is a clean cutover: saved data is reset, not migrated. There are no old-ID 
 
 With `topBar: "standard"`, the stage sets `--webspring-app-top-bar-height` on your application's view root: the bar's own height, including the compact breakpoint. Content is laid out below the bar automatically; read the property if your own controls need the same band. The background still fills the whole frame, behind the bar.
 
-## Documents, commands and menus
+## Documents
 
 | Field | Notes |
 | --- | --- |
 | `documentTypes` | Each entry has an `id` and optionally `extensions` (letters and digits only) and `displayName`. Declare a type here before you open documents of that type. |
-| `commands` | Static command declarations with `id`, `title`, and optionally `menu` and `shortcut`. Register behaviour at runtime with `useCommands`. |
-| `menus` | Menu declarations with `id`, `title` and the `commandIds` they list. |
 | `applicationMenu` | Optional `trigger: "content"` and a `preferences` entry with a `commandId` and optional `label`. |
 
 ### The right-slot control

@@ -57,7 +57,6 @@ export type {
 export type {
   SynWareAppearanceManifest,
   SynWareBackgroundManifest,
-  SynWareCommandManifest,
   SynWareDocumentTypeManifest,
   SynWareLifecycleManifest,
   SynWareApplicationAvailability,
@@ -66,7 +65,6 @@ export type {
   SynWareManifestIssue,
   SynWareManifestValidation,
   SynWareManifestV1,
-  SynWareMenuManifest,
   SynWareMinimumViewportManifest,
   SynWarePresentation,
   SynWareRouteManifest,

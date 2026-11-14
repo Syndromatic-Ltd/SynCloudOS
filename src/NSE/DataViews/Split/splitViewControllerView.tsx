@@ -149,12 +149,12 @@ export function SplitViewControllerView({ controller }: { readonly controller: N
     return () => setCompactNavigation?.(null);
   }, [setCompactNavigation, snapshot.presentation]);
 
-  const frameRailWidth = frame?.railWidth;
+  const publishRailWidth = frame?.setRailWidth;
+  const sidebarWidth = snapshot.items[0]?.thickness;
   useLayoutEffect(() => {
-    if (frameRailWidth !== undefined && snapshot.presentation === "split" && !snapshot.bookRegions && snapshot.availableSize > 0) {
-      controller.setPosition(frameRailWidth, 0);
-    }
-  }, [controller, frameRailWidth, snapshot.presentation, snapshot.availableSize, snapshot.bookRegions]);
+    if (sidebarWidth === undefined || snapshot.presentation !== "split" || snapshot.bookRegions || snapshot.availableSize <= 0) return;
+    publishRailWidth?.(sidebarWidth);
+  }, [publishRailWidth, sidebarWidth, snapshot.presentation, snapshot.availableSize, snapshot.bookRegions]);
 
   useEffect(() => {
     const live = new Set(items.map(({ identifier }) => identifier));
@@ -295,7 +295,6 @@ export function SplitViewControllerView({ controller }: { readonly controller: N
           label={`Resize ${labelOf(definitions.get(first.identifier)!)} and ${labelOf(definitions.get(second.identifier)!)}`}
           onSidebarWidthChange={(width) => {
             if (!allowsMutation) return;
-            frame?.setRailWidth(width);
             if (width === null) layout.resetSizes();
             else layout.moveDivider(0, width - first.thickness);
           }}
