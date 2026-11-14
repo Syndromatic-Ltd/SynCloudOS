@@ -88,7 +88,7 @@ export type {
   NSEColourPanelProps,
 } from "./Colour/ColourPanel/NSEColourPanel";
 export {
-  createNSEColourPanelPreferences,
+  createColourPanelPreferences,
 } from "./Colour/ColourPanel/colourPanelPreferences";
 export {
   NSEColourWell,

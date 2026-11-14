@@ -27,7 +27,7 @@ export const NSE_COLOUR_DRAG_TYPE = "application/x-nse-colour";
 const COLUMNS = 10;
 const EXPANDED_ROWS = 3;
 
-export interface NSEColourSwatchStripProps {
+export interface ColourSwatchStripProps {
   readonly swatches: readonly GFXColour[];
   readonly current: GFXColour | null;
   readonly disabled?: boolean;
@@ -56,7 +56,7 @@ export function writeDraggedColour(event: DragEvent, colour: GFXColour) {
  * any well) to keep the current colour there, and Delete to take one out. The
  * grip beneath opens two more rows.
  */
-export function NSEColourSwatchStrip({ swatches, current, disabled = false, onChoose, onChange }: NSEColourSwatchStripProps) {
+export function ColourSwatchStrip({ swatches, current, disabled = false, onChoose, onChange }: ColourSwatchStripProps) {
   const [expanded, setExpanded] = useState(false);
   const [dropIndex, setDropIndex] = useState<number | null>(null);
   const cells = useRef(new Map<number, HTMLButtonElement>());

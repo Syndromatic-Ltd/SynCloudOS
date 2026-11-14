@@ -20,14 +20,14 @@
 
 import type { GFXColour } from "../../../FX/GraphicsFX/public";
 
-export interface NSEColourSwatchesProps {
+export interface ColourSwatchesProps {
   readonly colours: readonly GFXColour[];
   readonly selected?: GFXColour | null;
   onSelect(colour: GFXColour): void;
   onRemove?(colour: GFXColour): void;
 }
 
-export function NSEColourSwatches({ colours, selected, onSelect, onRemove }: NSEColourSwatchesProps) {
+export function ColourSwatches({ colours, selected, onSelect, onRemove }: ColourSwatchesProps) {
   return <div role="grid" aria-label="Colour swatches" data-nse-control="colour-swatches" data-nse-part="content">
     {colours.map((colour) => <button key={colour.toHex({ includeAlpha: true })} type="button" role="gridcell" aria-label={colour.toHex()} data-nse-part="swatch" data-nse-selected={selected?.equals(colour) ? "" : undefined} aria-selected={selected?.equals(colour) ?? false} data-state={selected?.equals(colour) ? "selected" : "normal"} style={{ backgroundColor: colour.toCSS() }} onClick={() => onSelect(colour)} onKeyDown={(event) => { if ((event.key === "Delete" || event.key === "Backspace") && onRemove) { event.preventDefault(); onRemove(colour); } }} />)}
   </div>;

@@ -30,10 +30,10 @@ import { NSETextField } from "../../Controls/Fields/NSEFields";
  * grey scale, RGB, CMYK and HSB (plus HSL). CMYK is device CMYK; see
  * GFXCMYKAComponents.
  */
-export type NSEColourSliderModel = "grey" | "rgb" | "cmyk" | "hsv" | "hsl";
+export type ColourSliderModel = "grey" | "rgb" | "cmyk" | "hsv" | "hsl";
 
-export interface NSEColourSliderPickerProps {
-  readonly model: NSEColourSliderModel;
+export interface ColourSliderPickerProps {
+  readonly model: ColourSliderModel;
   readonly colour: GFXColour;
   readonly showAlpha?: boolean;
   /** Compact rows for a panel: the value fields take this height and the
@@ -63,7 +63,7 @@ interface Channel {
 
 const percent = (unit: number) => Math.round(unit * 100);
 
-export function NSEColourSliderPicker({ model, colour, showAlpha, controlHeight, onPreview, onCommit }: NSEColourSliderPickerProps) {
+export function ColourSliderPicker({ model, colour, showAlpha, controlHeight, onPreview, onCommit }: ColourSliderPickerProps) {
   const sliderSize = controlHeight === undefined ? "small" : "mini";
   const [draft, setDraft] = useState(colour);
   const latest = useRef(colour);

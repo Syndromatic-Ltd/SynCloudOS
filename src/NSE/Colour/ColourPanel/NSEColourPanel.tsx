@@ -22,15 +22,15 @@ import { useEffect, useId, useMemo, useRef, useState, useSyncExternalStore, type
 import { useNSEOverlayProvider } from "../../Overlays";
 import { NSEUtilityPanel } from "../../Overlays/NSEUtilityPanel";
 import { GFXColour } from "../../../FX/GraphicsFX/GFXColour";
-import { createNSEBrowserEyeDropper, type NSEEyeDropperAdapter } from "../Pickers";
+import { createNSEBrowserEyeDropper, type EyeDropperAdapter } from "../Pickers";
 import { NSEColourPanelController } from "./NSEColourPanelController";
 import { useOptionalNSEColourPanelController } from "./NSEColourPanelProvider";
 import { NSETextField } from "../../Controls/Fields/NSEFields";
 import { NSESlider } from "../../Controls/Values/NSESlider";
 import { NSETabView } from "../../Navigation/NSETabView";
-import { NSEColourCrayonsMode, NSEColourImageMode, NSEColourPalettesMode, NSEColourSlidersMode, NSEColourWheelMode, nseColourPanelControlHeight } from "./NSEColourPanelModes";
-import { NSEColourCrayonsModeIcon, NSEColourImageModeIcon, NSEColourMagnifierIcon, NSEColourPalettesModeIcon, NSEColourSlidersModeIcon, NSEColourWheelModeIcon } from "./colourPanelIcons";
-import { NSEColourSwatchStrip, writeDraggedColour } from "./NSEColourSwatchStrip";
+import { ColourCrayonsMode, ColourImageMode, ColourPalettesMode, ColourSlidersMode, ColourWheelMode, nseColourPanelControlHeight } from "./colourPanelModes";
+import { ColourCrayonsModeIcon, ColourImageModeIcon, ColourMagnifierIcon, ColourPalettesModeIcon, ColourSlidersModeIcon, ColourWheelModeIcon } from "./colourPanelIcons";
+import { ColourSwatchStrip, writeDraggedColour } from "./ColourSwatchStrip";
 
 export interface NSEColourPanelProps {
   readonly controller?: NSEColourPanelController;
@@ -40,7 +40,7 @@ export interface NSEColourPanelProps {
   readonly contentState?: "ready" | "loading" | "empty" | "disabled" | "read-only" | "invalid" | "denied" | "interrupted" | "error";
   /** The magnifier's source: defaults to the browser's (the system eyedropper
    * where there is one, otherwise a loupe over a capture of the page). */
-  readonly eyeDropper?: NSEEyeDropperAdapter;
+  readonly eyeDropper?: EyeDropperAdapter;
 }
 
 const contentMessages = {
@@ -150,11 +150,11 @@ export function NSEColourPanel({ controller: supplied, "aria-label": label = "Co
   const presents = useSharedPanelPresenter(controller.sharedPanelKey);  useEffect(() => {
     if (!presents) return;
     const unregister = [
-      controller.registerPicker({ id: "wheel", label: "Colour Wheel", icon: <NSEColourWheelModeIcon />, order: 0, supportedSpaces: ["srgb", "display-p3"], render: (context) => <NSEColourWheelMode {...context} /> }),
-      controller.registerPicker({ id: "sliders", label: "Colour Sliders", icon: <NSEColourSlidersModeIcon />, order: 10, supportedSpaces: ["srgb", "display-p3"], render: (context) => <NSEColourSlidersMode {...context} /> }),
-      controller.registerPicker({ id: "palettes", label: "Colour Palettes", icon: <NSEColourPalettesModeIcon />, order: 20, supportedSpaces: ["srgb", "display-p3"], render: (context) => <NSEColourPalettesMode {...context} recents={controller.getSnapshot().recents} /> }),
-      controller.registerPicker({ id: "image", label: "Image Palettes", icon: <NSEColourImageModeIcon />, order: 30, supportedSpaces: ["srgb", "display-p3"], render: (context) => <NSEColourImageMode {...context} /> }),
-      controller.registerPicker({ id: "crayons", label: "Crayons", icon: <NSEColourCrayonsModeIcon />, order: 40, supportedSpaces: ["srgb", "display-p3"], render: (context) => <NSEColourCrayonsMode {...context} /> }),
+      controller.registerPicker({ id: "wheel", label: "Colour Wheel", icon: <ColourWheelModeIcon />, order: 0, supportedSpaces: ["srgb", "display-p3"], render: (context) => <ColourWheelMode {...context} /> }),
+      controller.registerPicker({ id: "sliders", label: "Colour Sliders", icon: <ColourSlidersModeIcon />, order: 10, supportedSpaces: ["srgb", "display-p3"], render: (context) => <ColourSlidersMode {...context} /> }),
+      controller.registerPicker({ id: "palettes", label: "Colour Palettes", icon: <ColourPalettesModeIcon />, order: 20, supportedSpaces: ["srgb", "display-p3"], render: (context) => <ColourPalettesMode {...context} recents={controller.getSnapshot().recents} /> }),
+      controller.registerPicker({ id: "image", label: "Image Palettes", icon: <ColourImageModeIcon />, order: 30, supportedSpaces: ["srgb", "display-p3"], render: (context) => <ColourImageMode {...context} /> }),
+      controller.registerPicker({ id: "crayons", label: "Crayons", icon: <ColourCrayonsModeIcon />, order: 40, supportedSpaces: ["srgb", "display-p3"], render: (context) => <ColourCrayonsMode {...context} /> }),
     ];
     return () => { for (const release of unregister.reverse()) release(); };
   }, [controller, presents]);
@@ -228,7 +228,7 @@ export function NSEColourPanel({ controller: supplied, "aria-label": label = "Co
         />
         <div data-nse-part="sample-row">
           <button type="button" data-nse-part="eyedropper" data-nse-state={eyeDropperState === "picking" ? "on" : "off"} aria-label="Pick a colour from the screen" aria-pressed={eyeDropperState === "picking"} disabled={disabled || !eyeDropper || eyeDropper.availability() !== "available"} onClick={() => { void pick(); }}>
-            <NSEColourMagnifierIcon />
+            <ColourMagnifierIcon />
           </button>
           <div data-nse-part="current-colour" role="img" aria-label={`Current colour ${currentHex}`} title="Drag to a colour well or a saved-colour slot" draggable={!disabled} style={{ "--nse-colour-sample": current.toCSS() } as CSSProperties} onDragStart={(event) => { writeDraggedColour(event, current); }} />
         </div>
@@ -252,7 +252,7 @@ export function NSEColourPanel({ controller: supplied, "aria-label": label = "Co
             controller.commit(next, "text");
           }} />
         </div>
-        <NSEColourSwatchStrip swatches={snapshot.swatches} current={current} disabled={disabled} onChoose={(colour) => controller.commit(colour, "swatch")} onChange={(next) => controller.setSwatches(next)} />
+        <ColourSwatchStrip swatches={snapshot.swatches} current={current} disabled={disabled} onChoose={(colour) => controller.commit(colour, "swatch")} onChange={(next) => controller.setSwatches(next)} />
       </fieldset>
     </section>
     </NSEUtilityPanel>

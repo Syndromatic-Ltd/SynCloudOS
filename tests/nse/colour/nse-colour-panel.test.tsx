@@ -21,7 +21,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { GFXColour } from "../../../src/FX/GraphicsFX/public";
-import { NSEColourCommitCompensationError, NSEColourPanelController, createNSEColourPanelPreferences } from "../../../src/NSE/Colour";
+import { ColourCommitCompensationError, NSEColourPanelController, createColourPanelPreferences } from "../../../src/NSE/Colour";
 import { createUndoManager } from "../../../src/SynCloudOS/Undo/UndoManager";
 import { createSynCloudOS } from "../../../src/SynCloudOS/Runtime/createSynCloudOS";
 import { createTestRuntimeEnvironment } from "../../runtime/helpers";
@@ -57,7 +57,7 @@ describe("NSEColourPanelController", () => {
     });
 
     expect(() => controller.commit(GFXColour.parse("#ff0000"), "keyboard"))
-      .toThrow(NSEColourCommitCompensationError);
+      .toThrow(ColourCommitCompensationError);
     expect(value.toHex()).toBe("#000000");
     expect(runtime.colourPanel.getSnapshot().currentCSS).toBe(GFXColour.parse("#000000").toCSS());
     expect(commits).toHaveBeenCalledTimes(2);
@@ -251,7 +251,7 @@ describe("NSEColourPanelController", () => {
   it("hydrates validated palettes through the preferences controller", () => {
     const values = new Map<string, unknown>();
     values.set("paint.palette", ["syncloudos:nse-preferences:v1", 1, { recents: ["rgb(0 0 255)"], swatches: ["rgb(255 0 0)"] }]);
-    const preferences = createNSEColourPanelPreferences({
+    const preferences = createColourPanelPreferences({
       getPreference: (key, fallback) => values.has(key) ? values.get(key) as typeof fallback : fallback,
       setPreference: (key, value) => { values.set(key, value); return true; },
       removePreference: (key) => { values.delete(key); },
@@ -263,7 +263,7 @@ describe("NSEColourPanelController", () => {
   });
 
   it("rejects failed runtime preference writes before mutating palette authority", () => {
-    const preferences = createNSEColourPanelPreferences({
+    const preferences = createColourPanelPreferences({
       getPreference: (_key, fallback) => fallback,
       setPreference: () => false,
       removePreference: () => undefined,
@@ -277,12 +277,12 @@ describe("NSEColourPanelController", () => {
   it("repairs corrupt and oversized palettes and rejects future preference versions", () => {
     const values = new Map<string, unknown>([["paint.palette", ["syncloudos:nse-preferences:v1", 1, { recents: Array.from({ length: 17 }, () => "rgb(0 0 0)"), swatches: ["not-a-colour"] }]]]);
     const writes = vi.fn((key: string, value: unknown) => { values.set(key, value); return true; });
-    const repaired = createNSEColourPanelPreferences({ getPreference: (key, fallback) => values.get(key) as typeof fallback ?? fallback, setPreference: writes, removePreference: (key) => { values.delete(key); } }, "paint.palette");
+    const repaired = createColourPanelPreferences({ getPreference: (key, fallback) => values.get(key) as typeof fallback ?? fallback, setPreference: writes, removePreference: (key) => { values.delete(key); } }, "paint.palette");
     expect(repaired.getSnapshot().value).toEqual({ recents: [], swatches: [] });
     expect(writes).toHaveBeenCalledTimes(1);
 
     values.set("paint.palette", ["syncloudos:nse-preferences:v1", 2, { recents: [], swatches: [] }]);
-    expect(() => createNSEColourPanelPreferences({ getPreference: (key, fallback) => values.get(key) as typeof fallback ?? fallback, setPreference: writes, removePreference: () => undefined }, "paint.palette")).toThrow(/future version/);
+    expect(() => createColourPanelPreferences({ getPreference: (key, fallback) => values.get(key) as typeof fallback ?? fallback, setPreference: writes, removePreference: () => undefined }, "paint.palette")).toThrow(/future version/);
   });
 
   it("registers validated runtime commands over the injected transfer seam", async () => {

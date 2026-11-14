@@ -21,28 +21,28 @@
 import type { ReactNode } from "react";
 import type { ColourPanelPickerDescriptor, ColourPanelServiceChange } from "../../../SynCloudOS/SynCloudOS";
 import type { UndoManager } from "../../../SynCloudOS/SynCloudOS";
-import type { NSEColourPanelPreferencesController } from "./colourPanelPreferences";
-import type { NSEColourTransferAdapter } from "../Transfer";
+import type { ColourPanelPreferencesController } from "./colourPanelPreferences";
+import type { ColourTransferAdapter } from "../Transfer";
 import type { GFXColour } from "../../../FX/GraphicsFX/public";
 import type { NSEControllerOwnershipOptions } from "../../Controllers/ownership";
 
-export interface NSEColourChange {
+export interface ColourChange {
   readonly previous: GFXColour;
   readonly current: GFXColour;
   readonly phase: ColourPanelServiceChange["phase"];
   readonly reason: ColourPanelServiceChange["reason"];
 }
 
-export interface NSEColourTarget {
+export interface ColourTarget {
   readonly id: string;
   readonly responderId: string;
   /** The target takes opacity: the panel shows its Opacity control while it
    * is the target, as NSColorPanel.showsAlpha does. */
   readonly showsAlpha?: boolean;
   read(): GFXColour;
-  preview(change: NSEColourChange): void;
-  commit(change: NSEColourChange): void;
-  cancel(change: NSEColourChange): void;
+  preview(change: ColourChange): void;
+  commit(change: ColourChange): void;
+  cancel(change: ColourChange): void;
 }
 
 export interface NSEColourPickerContext {
@@ -76,6 +76,6 @@ export interface NSEColourPanelSnapshot {
 
 export interface NSEColourPanelControllerOptions extends NSEControllerOwnershipOptions {
   readonly undoManager?: Pick<UndoManager, "isExecuting" | "register" | "reserve">;
-  readonly preferences?: NSEColourPanelPreferencesController;
-  readonly transferAdapter?: NSEColourTransferAdapter;
+  readonly preferences?: ColourPanelPreferencesController;
+  readonly transferAdapter?: ColourTransferAdapter;
 }

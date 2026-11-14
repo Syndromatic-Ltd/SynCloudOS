@@ -26,8 +26,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { GFXColour } from "../../../src/FX/GraphicsFX/public";
 import { NSEColourWell, NSEColourPanelProvider, NSEColourPanel, NSEColourPanelController, classifyEyeDropperError } from "../../../src/NSE/Colour";
-import { NSEColourSliderPicker, NSEColourSwatches, NSEColourWheelPicker } from "../../../src/NSE/Colour/Pickers";
-import type { NSEEyeDropperAdapter } from "../../../src/NSE/Colour/Pickers";
+import { ColourSliderPicker, ColourSwatches, ColourWheelPicker } from "../../../src/NSE/Colour/Pickers";
+import type { EyeDropperAdapter } from "../../../src/NSE/Colour/Pickers";
 import { OverlayProvider } from "../../../src/NSE/Overlays";
 import { SynCloudOSProvider } from "../../../src/SynCloudOSReact";
 import { createSynCloudOS } from "../../../src/SynCloudOS/Runtime/createSynCloudOS";
@@ -60,7 +60,7 @@ const colourOverlayPort = (runtime: ReturnType<typeof createSynCloudOS>, ownerDo
   };
 };
 
-function HostedColourHarness({ runtime, eyeDropper, children }: { readonly runtime: ReturnType<typeof createSynCloudOS>; readonly eyeDropper?: NSEEyeDropperAdapter; readonly children: React.ReactNode }) {
+function HostedColourHarness({ runtime, eyeDropper, children }: { readonly runtime: ReturnType<typeof createSynCloudOS>; readonly eyeDropper?: EyeDropperAdapter; readonly children: React.ReactNode }) {
   const workArea = React.useMemo(() => Object.freeze({ width: 1280, height: 720, safeArea: Object.freeze({ top: 0, right: 0, bottom: 0, left: 0 }) }), []);
   const presentation = React.useMemo(() => createStaticPresentationPort({ width: 1280, height: 720 }), []);
   const runtimePort = React.useMemo(() => ({
@@ -265,7 +265,7 @@ describe("colour controls", () => {
   it("maps real wheel pointer capture through polar preview and exactly one commit", () => {
     const preview = vi.fn();
     const commit = vi.fn();
-    const { container } = render(<NSEColourWheelPicker colour={GFXColour.hsva({ h: 0, s: 1, v: 1, a: 1 })} onPreview={preview} onCommit={commit} />);
+    const { container } = render(<ColourWheelPicker colour={GFXColour.hsva({ h: 0, s: 1, v: 1, a: 1 })} onPreview={preview} onCommit={commit} />);
     const wheel = screen.getByRole("slider", { name: "Colour hue and saturation" });
     Object.assign(wheel, { setPointerCapture: vi.fn(), releasePointerCapture: vi.fn(), getBoundingClientRect: () => ({ left: 0, top: 0, width: 200, height: 200, right: 200, bottom: 200, x: 0, y: 0, toJSON: () => ({}) }) });
     fireEvent.pointerDown(wheel, { pointerId: 7, clientX: 200, clientY: 100 });
@@ -336,7 +336,7 @@ describe("colour controls", () => {
     const preview = vi.fn();
     function Harness() {
       const [colour, setColour] = React.useState(() => GFXColour.cmyka({ c: 0.2, m: 0.4, y: 0.6, k: 0.1, a: 1 }));
-      return <NSEColourSliderPicker model="cmyk" colour={colour} onPreview={(next) => { preview(next); setColour(next); }} onCommit={() => undefined} />;
+      return <ColourSliderPicker model="cmyk" colour={colour} onPreview={(next) => { preview(next); setColour(next); }} onCommit={() => undefined} />;
     }
     render(<Harness />);
     const field = (name: string) => screen.getByRole("spinbutton", { name }) as HTMLInputElement;
@@ -351,7 +351,7 @@ describe("colour controls", () => {
 
   it("reads a grey scale colour as its white component", () => {
     const commit = vi.fn();
-    render(<NSEColourSliderPicker model="grey" colour={GFXColour.grayscale(0.5)} onPreview={() => undefined} onCommit={commit} />);
+    render(<ColourSliderPicker model="grey" colour={GFXColour.grayscale(0.5)} onPreview={() => undefined} onCommit={commit} />);
     expect((screen.getByRole("spinbutton", { name: "Brightness" }) as HTMLInputElement).value).toBe("50");
   });
 
@@ -401,7 +401,7 @@ describe("colour controls", () => {
   it("maps wheel pointer and keyboard input to preview and commit", () => {
     const preview = vi.fn();
     const commit = vi.fn();
-    render(<NSEColourWheelPicker colour={GFXColour.hsva({ h: 0, s: 1, v: 1, a: 1 })} onPreview={preview} onCommit={commit} />);
+    render(<ColourWheelPicker colour={GFXColour.hsva({ h: 0, s: 1, v: 1, a: 1 })} onPreview={preview} onCommit={commit} />);
     const wheel = screen.getByRole("slider", { name: "Colour hue and saturation" });
     fireEvent.keyDown(wheel, { key: "ArrowRight" });
     expect(preview).toHaveBeenCalled();
@@ -414,7 +414,7 @@ describe("colour controls", () => {
     const commit = vi.fn();
     const cancel = vi.fn();
     const colour = GFXColour.hsva({ h: 0, s: 1, v: 1, a: 1 });
-    const view = render(<NSEColourWheelPicker colour={colour} onPreview={preview} onCommit={commit} onCancel={cancel} />);
+    const view = render(<ColourWheelPicker colour={colour} onPreview={preview} onCommit={commit} onCancel={cancel} />);
     const wheel = screen.getByRole("slider", { name: "Colour hue and saturation" });
     const releasePointerCapture = vi.fn();
     Object.assign(wheel, {
@@ -425,7 +425,7 @@ describe("colour controls", () => {
     fireEvent.pointerDown(wheel, { pointerId: 17, clientX: 100, clientY: 0 });
     expect(wheel.getAttribute("aria-valuenow")).not.toBe("0");
     const previewsBeforeDisable = preview.mock.calls.length;
-    view.rerender(<NSEColourWheelPicker colour={colour} disabled onPreview={preview} onCommit={commit} onCancel={cancel} />);
+    view.rerender(<ColourWheelPicker colour={colour} disabled onPreview={preview} onCommit={commit} onCancel={cancel} />);
 
     const disabledWheel = screen.getByRole("slider", { name: "Colour hue and saturation" });
     expect(disabledWheel.getAttribute("aria-valuenow")).toBe("0");
@@ -455,7 +455,7 @@ describe("colour controls", () => {
     const commit = vi.fn();
     const cancel = vi.fn();
     const colour = GFXColour.hsva({ h: 15, s: 1, v: 1, a: 1 });
-    render(<NSEColourWheelPicker colour={colour} onPreview={preview} onCommit={commit} onCancel={cancel} />);
+    render(<ColourWheelPicker colour={colour} onPreview={preview} onCommit={commit} onCancel={cancel} />);
     const wheel = screen.getByRole("slider", { name: "Colour hue and saturation" });
     const releasePointerCapture = vi.fn();
     Object.assign(wheel, {
@@ -479,26 +479,26 @@ describe("colour controls", () => {
   it("resynchronizes the wheel when its controlled colour is replaced", () => {
     const first = GFXColour.hsva({ h: 15, s: 1, v: 1, a: 1 });
     const second = GFXColour.hsva({ h: 210, s: 1, v: 1, a: 1 });
-    const view = render(<NSEColourWheelPicker colour={first} onPreview={vi.fn()} onCommit={vi.fn()} />);
+    const view = render(<ColourWheelPicker colour={first} onPreview={vi.fn()} onCommit={vi.fn()} />);
     expect(screen.getByRole("slider", { name: "Colour hue and saturation" }).getAttribute("aria-valuenow")).toBe("15");
-    view.rerender(<NSEColourWheelPicker colour={second} onPreview={vi.fn()} onCommit={vi.fn()} />);
+    view.rerender(<ColourWheelPicker colour={second} onPreview={vi.fn()} onCommit={vi.fn()} />);
     expect(screen.getByRole("slider", { name: "Colour hue and saturation" }).getAttribute("aria-valuenow")).toBe("210");
   });
 
   it("edits RGB HSL HSV and alpha channels with numeric validation", () => {
     const commit = vi.fn();
-    const { rerender } = render(<NSEColourSliderPicker model="rgb" colour={GFXColour.parse("#369")} onPreview={vi.fn()} onCommit={commit} />);
+    const { rerender } = render(<ColourSliderPicker model="rgb" colour={GFXColour.parse("#369")} onPreview={vi.fn()} onCommit={commit} />);
     fireEvent.change(screen.getByRole("spinbutton", { name: "Red" }), { target: { value: "255" } });
     fireEvent.blur(screen.getByRole("spinbutton", { name: "Red" }));
     expect(commit).toHaveBeenCalledWith(GFXColour.parse("#ff6699"));
-    rerender(<NSEColourSliderPicker model="hsv" colour={GFXColour.parse("#369")} onPreview={vi.fn()} onCommit={commit} showAlpha />);
+    rerender(<ColourSliderPicker model="hsv" colour={GFXColour.parse("#369")} onPreview={vi.fn()} onCommit={commit} showAlpha />);
     expect(screen.getByRole("spinbutton", { name: "Alpha" })).toBeTruthy();
   });
 
   it("selects, adds, and removes swatches accessibly", () => {
     const select = vi.fn();
     const remove = vi.fn();
-    render(<NSEColourSwatches colours={[GFXColour.parse("#f00"), GFXColour.parse("#0f0")]} selected={GFXColour.parse("#f00")} onSelect={select} onRemove={remove} />);
+    render(<ColourSwatches colours={[GFXColour.parse("#f00"), GFXColour.parse("#0f0")]} selected={GFXColour.parse("#f00")} onSelect={select} onRemove={remove} />);
     fireEvent.click(screen.getByRole("gridcell", { name: "#00ff00" }));
     expect(select).toHaveBeenCalledWith(GFXColour.parse("#0f0"));
     fireEvent.keyDown(screen.getByRole("gridcell", { name: "#ff0000" }), { key: "Delete" });

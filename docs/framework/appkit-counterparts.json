@@ -30,7 +30,10 @@
     "Internals",
     "Error"
   ],
-  "internalCounterparts": {},
+  "internalCounterparts": {
+    "NSEColourList": "NSColorList",
+    "NSEColourPicker": "NSColorPicker"
+  },
   "members": {
     "SCAuthorization.copyRights": "AuthorizationCopyRights",
     "ASAuthorizationController.performRequests": "ASAuthorizationController.performRequests()",

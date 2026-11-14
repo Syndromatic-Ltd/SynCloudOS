@@ -24,7 +24,7 @@ import { GFXColour } from "../../../FX/GraphicsFX/GFXColour";
 import { NSESlider } from "../../Controls/Values/NSESlider";
 import { NSETextField } from "../../Controls/Fields/NSEFields";
 
-export interface NSEColourWheelPickerProps {
+export interface ColourWheelPickerProps {
   readonly colour: GFXColour;
   readonly disabled?: boolean;
   /** Numeric hue/saturation/brightness/opacity entry below the wheel. A host
@@ -51,7 +51,7 @@ function releasePointerCaptureSafely(element: HTMLElement | null, pointerId: num
   }
 }
 
-export function NSEColourWheelPicker({ colour, disabled, fields = true, brightnessPlacement = "below", controlHeight, onPreview, onCommit, onCancel }: NSEColourWheelPickerProps) {
+export function ColourWheelPicker({ colour, disabled, fields = true, brightnessPlacement = "below", controlHeight, onPreview, onCommit, onCancel }: ColourWheelPickerProps) {
   const [draft, setDraft] = useState(colour);
   const latest = useRef(colour);
   const activePointer = useRef<number | null>(null);

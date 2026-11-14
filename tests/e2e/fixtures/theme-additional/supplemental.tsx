@@ -10,7 +10,7 @@ import { NSEDivider } from "../../../../src/NSE/Controls/Selection/NSEDivider";
 import { NSEShadow } from "../../../../src/NSE/Graphics/NSEShadow";
 import { NSETokenField } from "../../../../src/NSE/Controls/Completion/NSETokenField";
 import { NSESegmentedControl } from "../../../../src/NSE/Controls/Values/NSESegmentedControl";
-import { NSEColourSwatches } from "../../../../src/NSE/Colour/Pickers/NSEColourSwatches";
+import { ColourSwatches } from "../../../../src/NSE/Colour/Pickers/ColourSwatches";
 import { GFXColour } from "../../../../src/FX/GraphicsFX/GFXColour";
 import { Tooltip } from "../../../../src/NSE/Tooltips/Tooltip";
 import { VirtualViewport, useVirtualiser } from "../../../../src/NSE/DataViews/Virtualisation";
@@ -89,7 +89,7 @@ export const supplementalThemeCatalogue: readonly { id: string; ready?: string; 
   { id: "plain-notification", render: () => <NSEAppearanceProvider theme={plainTheme}><SystemSurface kind="notifications" /></NSEAppearanceProvider> },
   ...(["compact", "regular"] as const).flatMap(widthClass => (widthClass === "compact" ? ["block-start", "block-end"] : ["source-list", "block-start"]).flatMap(placement => (["in-flow", "overlay"] as const).map(flow => ({ id: `navigation-${widthClass}-${placement}-${flow}`, render: () => <ThemeNavigation widthClass={widthClass} placement={placement} flow={flow} /> })))),
   ...[true, false].map(isEnabled => ({ id: `matrix-${isEnabled}`, render: () => <NSERadioGroup label="Layout" options={[{ label: "List", value: "list" }, { label: "Grid", value: "grid" }]} defaultValue="list" isEnabled={isEnabled} /> })),
-  { id: "colour-swatches", render: () => <NSEColourSwatches colours={[colour]} selected={colour} onSelect={noop} /> },
+  { id: "colour-swatches", render: () => <ColourSwatches colours={[colour]} selected={colour} onSelect={noop} /> },
   { id: "virtual-viewport", render: () => <Virtual /> },
   { id: "tooltip", render: () => <Tooltip /> },
   ...[50, 500].flatMap(width => [false, true].map(customising => ({ id: `configured-toolbar-${width}-${customising}`, render: () => <Toolbar width={width} customising={customising} /> }))),
