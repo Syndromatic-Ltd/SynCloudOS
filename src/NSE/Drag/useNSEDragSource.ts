@@ -21,7 +21,7 @@
 import { useEffect, useRef, type DragEventHandler, type FocusEventHandler, type KeyboardEventHandler } from "react";
 import type { PasteboardRepresentation } from "../../SynCloudOS/SynCloudOS";
 import { writeNSEDataTransfer } from "./browserDragBridge";
-import { dragCommandSucceeded, nseDragCommandIds, nseDragNoPayload, type NSEDragCommandPort } from "./dragCommandPort";
+import { dragCommandSucceeded, nseDragCommandIds, nseDragNoPayload, type DragCommandPort } from "./dragCommandPort";
 
 /** Native drag interop lives here; canonical state remains in the runtime manager. */
 export function useNSEDragSource(options: {
@@ -34,7 +34,7 @@ export function useNSEDragSource(options: {
   readonly onError?: (error: unknown) => void;
   /** When supplied, keyboard alternatives are admitted by the runtime command
    * system instead of calling the local drag operation directly. */
-  readonly command?: { readonly port: NSEDragCommandPort; readonly responderId: string };
+  readonly command?: { readonly port: DragCommandPort; readonly responderId: string };
 }) {
   const optionsRef = useRef(options);
   optionsRef.current = options;

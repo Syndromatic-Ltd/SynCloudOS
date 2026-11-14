@@ -31,7 +31,7 @@ import type {
 } from "../Core";
 import type { NSEDataViewDragBinding } from "../Drag";
 import type { DragEndpoint } from "../../../SynCloudOS/SynCloudOS";
-import type { NSEDragCommandPort } from "../../Drag";
+import type { DragCommandPort } from "../../Drag";
 
 export interface NSETableViewEditContext<T, TId, TValue> {
   readonly item: T;
@@ -111,7 +111,7 @@ export interface NSETableViewProps<T, TId extends NSEDataViewKey>
   readonly dragBinding?: NSEDataViewDragBinding<TId>;
   readonly dragEndpoint?: DragEndpoint;
   /** Optional runtime command bridge for focused keyboard drag alternatives. */
-  readonly commands?: NSEDragCommandPort;
+  readonly commands?: DragCommandPort;
   /** A live responder that owns the three generic NSE drag commands. */
   readonly responderId?: string;
   /** Establishes the table's responder focus before a keyboard drag command

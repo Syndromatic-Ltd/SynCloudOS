@@ -21,29 +21,29 @@
 import type { DragEndpoint, DragOperation, PasteboardRepresentation, TransferDragOperation } from "../../SynCloudOS/SynCloudOS";
 
 /** Private NSE lookup handle. It carries no manager state or transfer authority. */
-export interface NSEDragSessionHandle {
+export interface DragSessionHandle {
   readonly id: string;
 }
 
 /** NSE consumes operation receipts, never a reconstructed runtime session.
  * A runtime manager satisfies this port directly; AppSDK supplies opaque
  * handle lookup while retaining negotiation, payload and commit authority. */
-export interface NSEDragSessionPort {
+export interface DragSessionPort {
   readonly ownerToken: unknown;
   begin(input: {
     readonly source: DragEndpoint;
     readonly representations: readonly PasteboardRepresentation[];
     readonly operations: readonly TransferDragOperation[];
-  }): NSEDragSessionHandle;
+  }): DragSessionHandle;
   updateDestination(id: string, request: {
     readonly endpoint: DragEndpoint;
     readonly operations: readonly TransferDragOperation[];
-    readonly accept?: (session: NSEDragSessionHandle, signal: AbortSignal) => boolean | void | Promise<boolean | void>;
+    readonly accept?: (session: DragSessionHandle, signal: AbortSignal) => boolean | void | Promise<boolean | void>;
   }): Promise<Readonly<{ operation: DragOperation }>>;
   claimDrop(id: string): void;
   cancelUnclaimed(id: string, reason?: string): boolean;
   readPayload(id: string, types: readonly string[], signal: AbortSignal): readonly PasteboardRepresentation[];
   performDrop(id: string): Promise<Readonly<{ accepted: boolean; operation: DragOperation }>>;
   cancel(id?: string, reason?: string): void;
-  snapshot(): Readonly<{ active: NSEDragSessionHandle | null }>;
+  snapshot(): Readonly<{ active: DragSessionHandle | null }>;
 }

@@ -21,8 +21,8 @@
 import { createContext, useCallback, useContext, useEffect, useInsertionEffect, useMemo, type PropsWithChildren, type ReactNode } from "react";
 
 import type { ColourPanelService, CommandSystem, DragEndpoint } from "../../../SynCloudOS/SynCloudOS";
-import type { NSEDragCommandPort } from "../../Drag";
-import type { NSEDragSessionPort } from "../../Drag/dragSessionPort";
+import type { DragCommandPort } from "../../Drag";
+import type { DragSessionPort } from "../../Drag/dragSessionPort";
 import { createReactOwnedColourPanelController, observeReactOwnedColourPanelController, type NSEColourPanelController } from "./NSEColourPanelController";
 import type { NSEColourPanelControllerOptions } from "./colourPanelTypes";
 import { nseUnowned } from "../../Controllers/ownership";
@@ -37,9 +37,9 @@ export type ColourPanelServicePort = Pick<
 const ColourPanelServiceContext = createContext<ColourPanelServicePort | null>(null);
 const NSEColourPanelControllerContext = createContext<NSEColourPanelController | null>(null);
 const ColourPanelResponderContext = createContext<string | null>(null);
-const ColourPanelCommandsContext = createContext<NSEDragCommandPort | null>(null);
+const ColourPanelCommandsContext = createContext<DragCommandPort | null>(null);
 export interface ColourPanelDragPort {
-  readonly manager: NSEDragSessionPort;
+  readonly manager: DragSessionPort;
   readonly endpoint: DragEndpoint;
   /** Issues a distinct runtime-owned endpoint for a concrete control rather
    * than reconstructing one by copying caller-visible identity fields. */
@@ -50,7 +50,7 @@ const ColourPanelDragContext = createContext<ColourPanelDragPort | null>(null);
 export interface NSEColourPanelProviderProps extends PropsWithChildren {
   readonly service: ColourPanelServicePort;
   readonly options?: NSEColourPanelControllerOptions;
-  readonly commands?: NSEDragCommandPort & Pick<CommandSystem, "register">;
+  readonly commands?: DragCommandPort & Pick<CommandSystem, "register">;
   readonly responderId?: string;
   readonly drag?: ColourPanelDragPort;
 }
@@ -82,7 +82,7 @@ export function useOptionalNSEColourPanelResponderId(): string | null {
   return useContext(ColourPanelResponderContext);
 }
 
-export function useOptionalNSEColourPanelCommands(): NSEDragCommandPort | null {
+export function useOptionalNSEColourPanelCommands(): DragCommandPort | null {
   return useContext(ColourPanelCommandsContext);
 }
 

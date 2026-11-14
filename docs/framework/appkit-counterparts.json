@@ -37,7 +37,8 @@
     "NSEColourPicker": "NSColorPicker",
     "NSEPopoverBehavior": "NSPopover.Behavior",
     "NSEPreferencePane": "NSPreferencePane",
-    "NSETableHeaderView": "NSTableHeaderView"
+    "NSETableHeaderView": "NSTableHeaderView",
+    "NSETrackingOption": "NSTrackingArea.Options"
   },
   "members": {
     "SCAuthorization.copyRights": "AuthorizationCopyRights",

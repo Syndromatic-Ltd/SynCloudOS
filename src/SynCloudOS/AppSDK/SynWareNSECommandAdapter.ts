@@ -17,14 +17,14 @@
  * limitations under the License.
  */
 
-import type { NSEDragCommandPort } from "../../NSE/Drag";
+import type { DragCommandPort } from "../../NSE/Drag";
 import type { FontPanelCommandPort, FontPanelCommandResult } from "../../NSE/Typography";
 import type { AppCommandClient } from "./appClientTypes";
 
 /** Bridges the two drag-command operations NSE controls require. This keeps
  * AppSDK's broader command presentation client from becoming an NSE manager
  * escape hatch. */
-export function createSynWareNSEDragCommandPort(commands: AppCommandClient): NSEDragCommandPort {
+export function createSynWareNSEDragCommandPort(commands: AppCommandClient): DragCommandPort {
   return Object.freeze({
     register(declaration: object) {
       const registration = commands.register(declaration);
