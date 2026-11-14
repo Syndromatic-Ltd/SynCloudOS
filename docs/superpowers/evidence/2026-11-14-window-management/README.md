@@ -32,10 +32,11 @@ Framework baseline is 1bfc47e9 in the Webspring framework worktree. Site baselin
 ## Frozen screenshot results
 
 The existing baseline images and assertion file match framework commit 1bfc47e9 byte for byte. Chromium DPR 1 and DPR 2 reported 80 failing partitions and 2 passing interaction checks at 6ca65fdf. Each failing partition stops at its first differing image, so the catalogue can have further differences after the entries below.
+The full browser matrix at `27834416` also reported 40 failing catalogue partitions in Chromium reduced motion, for 120 across the three projects.
 
 ### Pending design review
 
-These first mismatches were reported in light and dark in both DPR projects.
+These first mismatches were reported in light and dark in both DPR projects and Chromium reduced motion, for 54 titlebar failures in the complete matrix.
 
 - Cumulus stage titlebar (`top-bar-atmoCumulus-dark` is the catalogue ID in both ambient schemes).
 - Metal key window with preference toolbar (`window-metal-key-preference`).
@@ -44,7 +45,7 @@ These first mismatches were reported in light and dark in both DPR projects.
 
 ### Other screenshot mismatches
 
-The first differing images also included Metal switches on and off, and circular sliders in mini, small and regular sizing at normal, focused, minimum or maximum positions. Their cause is unresolved. Exact surface IDs and all 80 partition results are in [the catalogue failure index](frozen-theme-failures.md).
+The other 66 first mismatches in the complete matrix were Metal switches on and off, and circular sliders in mini, small and regular sizing at normal, focused, minimum or maximum positions. A Chromium rerun using baseline titlebar and theme sources reproduced the enabled Metal switch and regular maximum slider mismatches. In that same run the partition containing the Metal preference titlebar passed. The remaining control variants have not been isolated. Exact surface IDs and the results for both runs are in [the catalogue failure index](frozen-theme-failures.md).
 
 ## Verification
 
@@ -52,11 +53,17 @@ The first differing images also included Metal switches on and off, and circular
 | --- | --- | --- |
 | Framework typecheck and SDK build | `131b9eda` | Passed. |
 | Site typecheck and boundaries | `c138484`, embedded framework `131b9eda` | Passed. Vendored archive SHA-256 is `bb1aa746669d72f108cbc813a1c909e11eb0890d8eb528726c2ee2fd2c0f948f`. |
+| Current framework build and site typecheck | Framework `73f0eebd`, site `703bfa5` | Framework typecheck and SDK build passed. Site typecheck and boundaries passed. The installed archive SHA-256 is `55549208ad303e5bae6c786aac96d1a1e76aeff2e22e4b38e39c443afa7121f5`. |
 | Full framework runtime suite | `34fac939` | 8,881 passed, six failed. Two QuickSwitch assertions and the retired Atmo selectors passed their focused reruns after fixing them. Three packed-consumer tests ran while the SDK output was being rebuilt. |
 | Full framework suite | `34fac939`, isolated SDK build followed by tests | 9,914 passed, three test failures and one failed suite. QuickSwitch, Atmo validation and the obsolete titlebar import were fixed and verified in focused reruns. |
+| Full framework suite | `27834416` | 9,916 passed, one test failure and one failed suite. Both outstanding failures passed the focused rerun at `131b9eda`. |
 | Framework focused runtime | `27834416` and `131b9eda` | 832 toolbar, runtime and semantic tests passed. 14 ownership, AppKit counterpart and QuickSwitch tests passed. 10 titlebar, menu and Atmo bundle tests passed after selector cleanup. |
 | Framework browser | `131b9eda` | 21 focused titlebar and stage overlay cases passed. Earlier separate runs passed all 34 Chromium titlebar geometry cases at standard and high DPR and all four stage overlay tests. |
+| Full framework browser matrix | `27834416` | All seven projects ran. 423 passed, 216 failed, seven skipped. There were 120 frozen catalogue failures and 96 other failures, including image metadata, typography, FX output and adaptive navigation. |
+| Host typography follow-up | `73f0eebd` | All six cases in Chromium, Firefox and WebKit passed after restoring inherited fonts and targeting the heading by role. The frozen follow-up passed 25 browser cases and 24 focused runtime cases. The full browser matrix predates this follow-up. |
 | Site runtime | `c138484`, embedded framework `131b9eda` | 24 Node tests passed. Vitest reported 403 passed and ten failed, including Gallery lifecycle and focus, and Publisher transient anchors and image editing. |
 | Site browser | `c138484`, embedded framework `131b9eda` | 11 passed and 14 failed. All five Chromium scroll/chrome viewports passed. Journal passed in Chromium, Firefox and WebKit. Failures cluster in Chronosphere/Gallery presentation, login, and Publisher. |
+
+All six Chronosphere/Gallery cases also failed on a separate rerun pointed at the current site's FX preview. The local-login test expects the previous test identity, while the current local-auth config advertises the generated acceptance identity.
 
 The acceptance-name search covered `src`, `tests`, `scripts` and `tooling` in both repositories. Hits remaining in active code are `sourceList` names for the unrelated NSE outline selection style, its fixtures and Gallery navigation strings. The retired `frame.sourceList` field is gone. The plan, migration guide and capture metadata retain historical names to identify what was removed. The frozen theme assertion and image tree still match `1bfc47e9` byte for byte.
