@@ -64,16 +64,17 @@ function Surface({
   header,
   containsHeader = false,
   backgroundColor,
+  fullSizeContentView = false,
   children
 }: {
   smoothSurface: WindowSmoothSurfaceConfiguration;
   /** What fills the body behind the content: the system light or dark background, nothing, or a surface. */
   background: "system" | "none";
-  /** Rendered as a non-scrolling header inside the rounded surface (source-list windows), so the
-   *  smooth-surface clip rounds the bar's top corners to match the body's bottom corners. */
+  /** The rounded surface clips the titlebar and its content together. */
   header?: ReactNode;
   containsHeader?: boolean;
   backgroundColor?: string | null;
+  fullSizeContentView?: boolean;
   children: ReactNode;
 }) {
   const surface = useRef<HTMLDivElement>(null);
@@ -84,10 +85,13 @@ function Surface({
     : "webspring-app-view-body-surface";
   const paint = {
     "data-frame-background": background,
+    "data-full-size-content": fullSizeContentView ? "" : undefined,
     style: {
       ...safeArea.properties,
       ...(backgroundColor ? { backgroundColor } : {}),
-      "--nse-content-inset-top": containsHeader ? "0px" : "var(--nse-safe-area-inset-top, 0px)",
+      "--nse-content-inset-top": fullSizeContentView
+        ? "var(--nse-content-layout-inset-top, 0px)"
+        : containsHeader ? "0px" : "var(--nse-safe-area-inset-top, 0px)",
     } as CSSProperties,
   };
 

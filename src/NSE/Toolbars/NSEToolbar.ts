@@ -27,9 +27,24 @@ import type { NSEToolbarItemInput, ToolbarPreferences, ToolbarRuntimePort } from
 import { createElement, type ReactNode } from "react";
 import { ApplicationMenuToolbarButton, type ApplicationMenuGlyph } from "./ApplicationMenuToolbarButton";
 
+import { ToggleWindowPane, WindowPreferencesButton } from "./windowToolbarItems";
+
 export type NSEToolbarItem = import("./toolbarTypes").NSEToolbarItem;
 
+const paneItem = (pane: "sidebar" | "inspector"): NSEToolbarItem => ({
+  kind: "custom", id: pane === "sidebar" ? "toggleSidebar" : "toggleInspector",
+  label: pane === "sidebar" ? "Sidebar" : "Inspector",
+  minimumWidth: 64, idealWidth: 108, render: () => createElement(ToggleWindowPane, { pane }),
+});
+
 export const NSEToolbarItem = Object.freeze({
+  toggleSidebar: Object.freeze(paneItem("sidebar")),
+  toggleInspector: Object.freeze(paneItem("inspector")),
+  sidebarTrackingSeparator: Object.freeze({ kind: "separator", id: "sidebarTrackingSeparator" } as const),
+  showPreferences: Object.freeze({
+    kind: "custom", id: "showPreferences", label: "Preferences…",
+    minimumWidth: 80, idealWidth: 112, render: () => createElement(WindowPreferencesButton),
+  } as const),
   /** NSE extension. The window supplies the shared application menu when this item is present. */
   applicationMenu(glyph: ApplicationMenuGlyph = "gear"): Extract<import("./toolbarTypes").NSEToolbarItem, { kind: "custom" }> {
     if (glyph !== "gear" && glyph !== "person") throw new TypeError("Application menu glyph must be gear or person.");

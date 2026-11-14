@@ -276,6 +276,7 @@ export function ApplicationStageView({
             smoothSurface={titlebarDocument?.cornerRadius ?? 31}
             background={titlebarDocument?.isOpaque === false ? "none" : "system"}
             backgroundColor={titlebarDocument?.backgroundColor}
+            fullSizeContentView={titlebarDocument?.fullSizeContentView}
             containsHeader={Boolean(standardTopBar)}
             header={standardTopBar}
           >
