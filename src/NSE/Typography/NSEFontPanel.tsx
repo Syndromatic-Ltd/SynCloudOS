@@ -21,7 +21,7 @@
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import { GFXColour } from "../../FX/GraphicsFX/GFXColour";
 import { useNSEColourPanelContextCarrier, useOptionalNSEColourPanelController, useOptionalNSEColourPanelResponderId } from "../Colour/ColourPanel/NSEColourPanelProvider";
-import { NSEToolButtonGroup } from "../Controls/Buttons/NSEButtonFamilies";
+import { ToolButtonGroup } from "../Controls/Buttons/NSEButtonFamilies";
 import { NSEButton } from "../Controls/Buttons/NSEButton";
 import { NSETextField } from "../Controls/Fields/NSEFields";
 import { NSESearchField } from "../Controls/Fields/NSESearchField";
@@ -551,7 +551,7 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
       </div> : null}
 
       {showsEffects ? <div role="toolbar" aria-label="Text effects" data-nse-part="effects">
-        <NSEToolButtonGroup controlSize="small" label="Lines">
+        <ToolButtonGroup controlSize="small" label="Lines">
           <NSEButton
             bezelStyle="texturedRounded"
             buttonType="pushOnPushOff"
@@ -574,12 +574,12 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
             aria-pressed={strike}
             onClick={() => { const next = !strike; setStrike(next); applyAttributes({ strike: next }); }}
           />
-        </NSEToolButtonGroup>
-        <NSEToolButtonGroup controlSize="small" label="Colours">
+        </ToolButtonGroup>
+        <ToolButtonGroup controlSize="small" label="Colours">
           <EffectColourButton id={`font-panel-${instanceId}-text-colour`} label="Text colour" glyph={<TextColourGlyph />} value={textColour} automatic="ink" disabled={effectsDisabled} onPreview={(colour) => setColourPreview((current) => ({ ...current, text: colour }))} onCommit={(colour) => { setTextColour(colour); applyAttributes({ foregroundColour: colour.toHex({ includeAlpha: colour.components.a < 1 }) }); }} />
           <EffectColourButton id={`font-panel-${instanceId}-document-colour`} label="Document colour" glyph={<DocumentColourGlyph />} value={documentColour} automatic="ground" disabled={effectsDisabled} onPreview={(colour) => setColourPreview((current) => ({ ...current, document: colour }))} onCommit={(colour) => { setDocumentColour(colour); applyAttributes({ documentColour: colour.toHex({ includeAlpha: colour.components.a < 1 }) }); }} />
-        </NSEToolButtonGroup>
-        <NSEToolButtonGroup controlSize="small" label="Shadow">
+        </ToolButtonGroup>
+        <ToolButtonGroup controlSize="small" label="Shadow">
           <NSEButton
             bezelStyle="texturedRounded"
             buttonType="pushOnPushOff"
@@ -595,7 +595,7 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
             applyAttributes(shadowPayload(next));
           }}
           />
-        </NSEToolButtonGroup>
+        </ToolButtonGroup>
         <NSESlider controlSize="mini" length={36} aria-label="Shadow opacity" value={shadow.opacity} minimum={0} maximum={100} step={1} isEnabled={!(effectsDisabled || !shadow.enabled)} tooltip={(value) => `Opacity ${value}%`} onValueChange={(value, phase) => changeShadow({ opacity: value }, phase)} />
         <NSESlider controlSize="mini" length={36} aria-label="Shadow blur" value={shadow.blur} minimum={0} maximum={20} step={1} isEnabled={!(effectsDisabled || !shadow.enabled)} tooltip={(value) => `Blur ${value}`} onValueChange={(value, phase) => changeShadow({ blur: value }, phase)} />
         <NSESlider controlSize="mini" length={36} aria-label="Shadow offset" value={shadow.offset} minimum={0} maximum={20} step={1} isEnabled={!(effectsDisabled || !shadow.enabled)} tooltip={(value) => `Offset ${value}`} onValueChange={(value, phase) => changeShadow({ offset: value }, phase)} />
@@ -627,7 +627,7 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
       </div>
 
       <div data-nse-part="footer">
-        <NSEToolButtonGroup controlSize="small" label="Add or remove fonts">
+        <ToolButtonGroup controlSize="small" label="Add or remove fonts">
           <NSEButton
             bezelStyle="texturedRounded"
             title="Add fonts"
@@ -644,7 +644,7 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
             isEnabled={!(removable === null)}
             onClick={() => { void remove(); }}
           />
-        </NSEToolButtonGroup>
+        </ToolButtonGroup>
         <FontActionsMenu fallbackParentResponderId={parentResponderId} items={menuItems} onSelect={(value) => {
           if (value === "favourite" && library) { if (isFavourite) library.removeFavourite(fontId); else library.addFavourite(fontId); }
           else if (value === "preview") setShowsPreview((shown) => !shown);

@@ -30,7 +30,7 @@ import { NSESlider } from "./NSESlider";
 import type { NSENumericValueContract, NSESliderProps } from "./valueControlTypes";
 
 /** The circular slider's resolved contract, once NSESlider has bound its value. @internal */
-interface NSECircularSliderProps extends NSENumericValueContract {
+interface CircularSliderProps extends NSENumericValueContract {
   readonly "aria-label": string;
   readonly value: number;
   readonly isEnabled?: boolean;
@@ -49,13 +49,13 @@ interface NSECircularSliderProps extends NSENumericValueContract {
  *
  * @internal NSESlider renders it.
  */
-export function NSECircularSlider(supplied: NSEBoundValueProps<number, NSESliderProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>) {
+export function CircularSlider(supplied: NSEBoundValueProps<number, NSESliderProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>) {
   const { sliderType: _sliderType, minimum, maximum, step, ...rest } = supplied;
-  const props = { ...rest, "aria-label": supplied["aria-label"] ?? "Slider", minimum: minimum ?? 0, maximum: maximum ?? 100, step: step ?? 1 } as unknown as NSEBoundValueProps<number, NSECircularSliderProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>;
-  return <NSECircularSliderControl {...useNSEValueBinding<number, NSECircularSliderProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>(props, {fallback:0,cancellable:true})} />;
+  const props = { ...rest, "aria-label": supplied["aria-label"] ?? "Slider", minimum: minimum ?? 0, maximum: maximum ?? 100, step: step ?? 1 } as unknown as NSEBoundValueProps<number, CircularSliderProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>;
+  return <CircularSliderControl {...useNSEValueBinding<number, CircularSliderProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>(props, {fallback:0,cancellable:true})} />;
 }
 
-function NSECircularSliderControl({ __nseBindingEditor, controlSize = "regular", valueText, ...props }: NSECircularSliderProps & ValueBindingControlProps<number>) {
+function CircularSliderControl({ __nseBindingEditor, controlSize = "regular", valueText, ...props }: CircularSliderProps & ValueBindingControlProps<number>) {
   const theme = useNSEThemeInteraction<HTMLSpanElement>(props.isEnabled !== false, true);
   const activePointer = useRef<number | null>(null);
   const opening = useRef(props.value);

@@ -14,7 +14,7 @@ import { ApplicationMenu } from "../../../../src/NSE/Menus/ApplicationMenu";
 import { NSEPopUpButton } from "../../../../src/NSE/Menus/NSEPopUpButton";
 import { nseUnowned } from "../../../../src/NSE/Controllers/ownership";
 import { DialogSurface } from "../../../../src/NSE/Overlays/NSEDialogSurface";
-import { NSEDivider } from "../../../../src/NSE/Controls/Selection/NSEDivider";
+import { Divider } from "../../../../src/NSE/Controls/Selection/NSEDivider";
 import { TopBar } from "../../../../src/NSE/Windows/Chrome/TopBar";
 import { NSEMediaCollectionPresenter } from "../../../../src/NSE/MediaPanels/NSEMediaCollectionPresenter";
 import { supplementalThemeCatalogue } from "../theme-additional/supplemental";
@@ -82,8 +82,8 @@ const own: ThemePortParitySurface[] = [
   ...(["metal", "cumulus"] as const).map(material => ({ id: `host-titlebar-${material}`, render: (scheme: "light" | "dark") => <HostTitlebar material={material} scheme={scheme} /> })),
   { id: "topbar-metal-centre", render: () => <TopBar variant="atmoMetal" title="Library" center={<span>Centre</span>} {...({} as Record<string, never>)} /> },
   { id: "dialog-surface", render: () => <DialogSurface title="Dialog"><p>Dialog body</p></DialogSurface> },
-  ...(["plain", "soft", "grey", "alpha", "arrow"] as const).map(variant => ({ id: `divider-toggle-${variant}`, render: () => <NSEDivider variant={variant} expanded={false} onToggle={noop} {...({} as Record<string, never>)} /> })),
-  { id: "divider-toggle-arrow-expanded", render: () => <NSEDivider variant="arrow" expanded onToggle={noop} {...({} as Record<string, never>)} /> },
+  ...(["plain", "soft", "grey", "alpha", "arrow"] as const).map(variant => ({ id: `divider-toggle-${variant}`, render: () => <Divider variant={variant} expanded={false} onToggle={noop} {...({} as Record<string, never>)} /> })),
+  { id: "divider-toggle-arrow-expanded", render: () => <Divider variant="arrow" expanded onToggle={noop} {...({} as Record<string, never>)} /> },
   { id: "pop-up-images-open", render: () => <NSEPopUpButton aria-label="Format" items={[{ title: "Picture", value: "p", image: <img alt="" src="/assets/webspring/Panel.png" width={16} height={16} /> }, { title: "Movie", value: "m", image: <span>M</span> }]} defaultValue="p" />, clickSelector: '[data-nse-control="pop-up-button"] button' },
   { id: "media-grid", render: () => <NSEMediaCollectionPresenter items={media as never} selectedIds={new Set(["5:local2:m1"])} selection="multiple" direction="ltr" onSelectionChange={noop} onActivate={noop} /> },
 ];

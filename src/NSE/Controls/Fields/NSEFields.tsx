@@ -23,7 +23,7 @@ import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
 import { nseControlHooks, nseStateHooks } from "../../Theme/contract/hooks";
 import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction";
 import { MetalThumb, type NSEThumbMaterial } from "../../Appearance/MetalThumb";
-import { NSEDivider } from "../Selection/NSEDivider";
+import { Divider } from "../Selection/NSEDivider";
 import { nseCSSValue } from "../../Graphics/NSEShadow";
 import { nseNonNegative, useNSEViewLayerProperties, type ViewLayerProperties } from "../../Views/viewLayerProperties";
 import {
@@ -1016,7 +1016,7 @@ export function NSEBox({
     }
     const separatorLabel = props["aria-label"] ?? (typeof title === "string" ? title : undefined);
     if (title && titlePosition !== "noTitle") {
-      return <NSEDivider data-nse-control="box" data-nse-box-type={boxType} data-nse-title-position={titlePosition} data-nse-border-type={borderType} className={classes("nse-box", "nse-box-separator-titled", className)} variant="alpha" caption={title} label={separatorLabel} style={style} />;
+      return <Divider data-nse-control="box" data-nse-box-type={boxType} data-nse-title-position={titlePosition} data-nse-border-type={borderType} className={classes("nse-box", "nse-box-separator-titled", className)} variant="alpha" caption={title} label={separatorLabel} style={style} />;
     }
     return (
       <div

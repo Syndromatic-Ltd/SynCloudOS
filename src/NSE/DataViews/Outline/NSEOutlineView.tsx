@@ -39,7 +39,7 @@ import { createSelectionChange, dataViewAllowsMutation, dataViewAllowsNavigation
 import { dataViewDisposedControllerState, warnDisposedDataViewController } from "../Core/disposedController";
 import { useVirtualiser } from "../Virtualisation";
 import { useNSEDataViewDragHost } from "../../Drag";
-import { NSEDivider } from "../../Controls/Selection/NSEDivider";
+import { Divider } from "../../Controls/Selection/NSEDivider";
 import { GroupedRow } from "../../Controls/Selection/GroupedRow";
 import { NSETableCellView } from "../Table/NSETableCellView";
 import type { NSETableCellViewProps } from "../Core/dataViewTypes";
@@ -420,7 +420,7 @@ export function NSEOutlineView<T, TId extends string | number>({
             <span className="nse-outline-group-label">{content}</span>
             <span className="nse-outline-group-line" aria-hidden="true" />
             {showsOutlineCell(row) ? (
-              <NSEDivider
+              <Divider
                 variant="arrow"
                 className="nse-outline-group-toggle"
                 expanded={row.expanded}

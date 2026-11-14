@@ -26,23 +26,23 @@ import { ToolbarView, type ToolbarViewProps } from "../../Toolbars/ToolbarView";
 /** A capsule control's size: NSControl's regular or small, or custom when a
  * height is given. The skin draws every part from the one band height, so
  * the art keeps its proportions at any size. */
-export interface NSECapsuleSizing {
+export interface CapsuleSizing {
   /** "small" is the 24px size inspectors and panels use. */
   controlSize?: "regular" | "small";
   /** An explicit band height in CSS pixels; overrides controlSize. */
   height?: number;
 }
 
-function capsuleSizeAttribute({ controlSize = "regular", height }: NSECapsuleSizing): "small" | "custom" | undefined {
+function capsuleSizeAttribute({ controlSize = "regular", height }: CapsuleSizing): "small" | "custom" | undefined {
   return height !== undefined ? "custom" : controlSize === "small" ? "small" : undefined;
 }
 
-export type NSEToolButtonGroupProps = Omit<Extract<ToolbarViewProps, { readonly composition: "children" }>, "composition"> & NSECapsuleSizing & {
+export type ToolButtonGroupProps = Omit<Extract<ToolbarViewProps, { readonly composition: "children" }>, "composition"> & CapsuleSizing & {
   label?: string;
 };
 
 /** @internal The joined tool-button band: the font panel's tool groups and NSESegmentedControl's textured segments. */
-export function NSEToolButtonGroup({
+export function ToolButtonGroup({
   label,
   position = "inline",
   grouped = true,
@@ -52,7 +52,7 @@ export function NSEToolButtonGroup({
   style,
   children,
   ...props
-}: NSEToolButtonGroupProps) {
+}: ToolButtonGroupProps) {
   return (
     <ToolbarView
       composition="children"
