@@ -23,7 +23,7 @@ import { createPortal } from "react-dom";
 import "./components.css";
 import "./nseSystemDialogs.css";
 import { NSEFocusScope } from "../Focus";
-import { NSEButton, nseButtonToneProps, type NSEButtonTone } from "../Controls/Buttons/NSEButton";
+import { NSEButton, nseButtonToneProps, type ButtonTone } from "../Controls/Buttons/NSEButton";
 import { NSEAlertSurface } from "./NSEAlertSurface";
 import { NSEAlertBackdrop } from "./NSEAlertBackdrop";
 import type { OverlayPresentationSource } from "../Overlays/overlayRegion";
@@ -151,7 +151,7 @@ export interface NSEConfirmDialogProps {
   /** The confirmation choice; defaults to the destructive negative tone. */
   confirmLabel: string;
   /** Non-destructive handoffs can retain their normal action tone. */
-  confirmTone?: NSEButtonTone;
+  confirmTone?: ButtonTone;
   cancelLabel: string;
   /** Defaults to the host's resolved light or dark appearance. */
   appearance?: "dark" | "light";

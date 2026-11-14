@@ -30,7 +30,7 @@ import { useNSEActionBinding } from "../Core/useNSEControlAction";
 import { useNSEControlFeedback } from "../Core/nseControlsShared";
 import type { HFXFeedbackRequest } from "../../../FX/HapticsFX/HFXHapticEvent";
 import type { NSESegmentedControlProps, NSESegmentedItem, NSESegmentedSelection } from "./valueControlTypes";
-import { NSETexturedSegmentCells, useSegmentActions } from "./NSESegmentStyles";
+import { TexturedSegmentCells, useSegmentActions } from "./NSESegmentStyles";
 
 interface SegmentButtonProps {
   readonly item: NSESegmentedItem;
@@ -93,15 +93,15 @@ function SegmentButton({ item, selected, tabIndex, disabled, readOnly, refs, hap
 }
 
 export function NSESegmentedControl<Payload = unknown>(props: NSEBoundValueProps<NSESegmentedSelection,NSESegmentedControlProps<Payload>,'value'|'defaultValue'|'onValueChange'|'undoManager'|'selection'|'onSelectionChange'>) {
-  return <NSESegmentedControlControl {...useNSEValueBinding<NSESegmentedSelection,NSESegmentedControlProps<Payload>,'value'|'defaultValue'|'onValueChange'|'undoManager'|'selection'|'onSelectionChange'>(props,{value:'selection',change:'onSelectionChange',fallback:{mode:'select-one',selectedIds:new Set<string>(),allowsEmpty:true}})} />;
+  return <SegmentedControlControl {...useNSEValueBinding<NSESegmentedSelection,NSESegmentedControlProps<Payload>,'value'|'defaultValue'|'onValueChange'|'undoManager'|'selection'|'onSelectionChange'>(props,{value:'selection',change:'onSelectionChange',fallback:{mode:'select-one',selectedIds:new Set<string>(),allowsEmpty:true}})} />;
 }
 
-function NSESegmentedControlControl(props: NSESegmentedControlProps) {
-  if (props.segmentStyle === "texturedRounded") return <NSETexturedSegmentCells {...props} />;
-  return <NSERoundedSegments {...props} />;
+function SegmentedControlControl(props: NSESegmentedControlProps) {
+  if (props.segmentStyle === "texturedRounded") return <TexturedSegmentCells {...props} />;
+  return <RoundedSegments {...props} />;
 }
 
-function NSERoundedSegments(props: NSESegmentedControlProps) {
+function RoundedSegments(props: NSESegmentedControlProps) {
   const theme = useNSEThemeInteraction<HTMLDivElement>(props.isEnabled !== false, true);
   const instanceId = useId().replace(/:/g, "");
   const refs = useRef(new Map<string, HTMLButtonElement>());

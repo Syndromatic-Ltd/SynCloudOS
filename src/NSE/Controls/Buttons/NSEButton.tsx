@@ -131,10 +131,10 @@ export interface NSEButtonProps<Payload = unknown>
  * become NSEAlert and NSEPopUpButton (phases 3 and 6 of the AppKit fidelity sweep); apps set the AppKit
  * properties instead.
  */
-export type NSEButtonTone = "medium" | "light" | "dark" | "affirmative" | "negative";
+export type ButtonTone = "medium" | "light" | "dark" | "affirmative" | "negative";
 
 /** @internal The AppKit properties that draw a button with one of the theme's arts. */
-export function nseButtonToneProps(tone: NSEButtonTone | undefined): Pick<NSEButtonProps, "appearance" | "keyEquivalent" | "hasDestructiveAction"> {
+export function nseButtonToneProps(tone: ButtonTone | undefined): Pick<NSEButtonProps, "appearance" | "keyEquivalent" | "hasDestructiveAction"> {
   switch (tone) {
     case "light": return { appearance: "aqua" };
     case "dark": return { appearance: "darkAqua" };
@@ -150,10 +150,10 @@ const TONE_HAPTICS = {
   dark: "rigid",
   affirmative: "success",
   negative: "error",
-} as const satisfies Record<NSEButtonTone, HFXFeedbackPresetName>;
+} as const satisfies Record<ButtonTone, HFXFeedbackPresetName>;
 
 /** The theme draws a default button, a destructive button and a forced appearance with their own art. */
-function toneFor(props: Pick<NSEButtonProps, "hasDestructiveAction" | "keyEquivalent" | "appearance" | "bezelStyle">): NSEButtonTone {
+function toneFor(props: Pick<NSEButtonProps, "hasDestructiveAction" | "keyEquivalent" | "appearance" | "bezelStyle">): ButtonTone {
   if (props.hasDestructiveAction) return "negative";
   if (props.keyEquivalent === "\r") return "affirmative";
   if (props.appearance === "aqua") return "light";
@@ -165,7 +165,7 @@ function accessibleTitle(title: ReactNode): string | undefined {
   return typeof title === "string" || typeof title === "number" ? String(title) : undefined;
 }
 
-const NSEPushButtonCell = forwardRef<HTMLButtonElement, NSEButtonProps>(function NSEPushButtonCell(
+const PushButtonCell = forwardRef<HTMLButtonElement, NSEButtonProps>(function PushButtonCell(
   {
     title,
     buttonType = "momentaryPushIn",
@@ -285,7 +285,7 @@ function fromCheckState(state: boolean | "mixed"): NSEControlStateValue {
 }
 
 /** A `switch` button: a checkbox whose title is its label. */
-function NSESwitchButtonCell(
+function SwitchButtonCell(
   {
     title,
     image: _image,
@@ -409,9 +409,9 @@ function NSESwitchButtonCell(
   );
 }
 
-const NSESwitchButton = forwardRef(NSESwitchButtonCell);
+const SwitchButton = forwardRef(SwitchButtonCell);
 
-const NSEButtonControl = forwardRef<HTMLButtonElement, NSEButtonProps>(function NSEButton(input, ref) {
+const ButtonControl = forwardRef<HTMLButtonElement, NSEButtonProps>(function NSEButton(input, ref) {
   // Cocoa Bindings bind a switch's value to a Boolean; mixed comes from a mixed selection.
   const bound = useNSEValueBinding<boolean | "mixed", NSEButtonProps & { state?: unknown; onStateChange?: unknown }, "state" | "defaultState" | "onStateChange">(
     input as never,
@@ -427,8 +427,8 @@ const NSEButtonControl = forwardRef<HTMLButtonElement, NSEButtonProps>(function 
       onStateChange: (next) => onStateChange?.(next === "mixed" ? "mixed" : next === "on"),
     };
   }
-  if (props.buttonType === "switch") return <NSESwitchButton ref={ref} {...props} />;
-  return <NSEPushButtonCell ref={ref} {...props} />;
+  if (props.buttonType === "switch") return <SwitchButton ref={ref} {...props} />;
+  return <PushButtonCell ref={ref} {...props} />;
 });
 
 /**
@@ -436,6 +436,6 @@ const NSEButtonControl = forwardRef<HTMLButtonElement, NSEButtonProps>(function 
  * `bezelStyle`. It sends its `action` along the responder chain (and is disabled while the action is
  * unavailable), or calls `onClick`.
  */
-export const NSEButton = NSEButtonControl as <Payload = unknown>(
+export const NSEButton = ButtonControl as <Payload = unknown>(
   props: NSEButtonProps<Payload> & RefAttributes<HTMLButtonElement>,
 ) => ReactElement | null;

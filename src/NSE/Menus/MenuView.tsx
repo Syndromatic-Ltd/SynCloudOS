@@ -25,7 +25,7 @@ import type { CommandDispatchAcceptance, CommandPresentation } from "../../SynCl
 import { NSEAppearanceNineSlice } from "../Appearance/NSEAppearanceNineSlice";
 import { useNSEAppearanceProjection } from "../Appearance";
 import { sizedControlStyle, useNSEControlFeedback } from "../Controls/Core/nseControlsShared";
-import { NSEButton, nseButtonToneProps, type NSEButtonTone, type NSEButtonProps } from "../Controls/Buttons/NSEButton";
+import { NSEButton, nseButtonToneProps, type ButtonTone, type NSEButtonProps } from "../Controls/Buttons/NSEButton";
 import { useNSEOverlayProvider } from "../Overlays";
 import { MenuOverlay } from "./MenuOverlay";
 import { createReactOwnedNSEMenu, nseRefreshMenuPresentation, type NSEMenu } from "./NSEMenu";
@@ -113,7 +113,7 @@ export interface ItemMenuProps extends Omit<HTMLAttributes<HTMLSpanElement>, "on
   readonly onSelect?: (value: string) => void;
   readonly menuOverlay?: MenuOverlayOptions;
   readonly parentResponderId?: string;
-  readonly tone?: NSEButtonTone;
+  readonly tone?: ButtonTone;
   readonly pressHaptic?: NSEButtonProps["haptic"];
   readonly selectionHaptic?: NSEButtonProps["haptic"];
   readonly smoothSurface?: boolean;
