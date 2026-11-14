@@ -25,7 +25,7 @@ import { describe, expect, it, vi } from "vitest";
 import { AnimationEnvironmentProvider, type Animator } from "../../src/NSE/Animation";
 import type { AFXAnimationDefinition } from "../../src/FX/AnimationFX/animationTypes";
 import { LoginWindow } from "../../src/NSE/SystemUI/LoginWindow";
-import { NSEFeedbackProvider } from "../../src/NSE/Feedback";
+import { FeedbackProvider } from "../../src/NSE/Feedback";
 import { HFXHapticEngine } from "../../src/FX/HapticsFX/HFXHapticEngine";
 import type { HFXFeedbackRequest } from "../../src/FX/HapticsFX/HFXHapticEvent";
 /** Records each presentation by the class of the element it plays on. */
@@ -84,9 +84,9 @@ describe("LoginWindow browser parity", () => {
       dispose() {},
     });
     const present = (configurationError: string | null, error: string | null, title = "Sign in") => (
-      <React.StrictMode><NSEFeedbackProvider value={engine}>
+      <React.StrictMode><FeedbackProvider value={engine}>
         <LoginWindow title={title} configurationError={configurationError} error={error} />
-      </NSEFeedbackProvider></React.StrictMode>
+      </FeedbackProvider></React.StrictMode>
     );
     const view = render(present("Authentication service unavailable.", null));
     expect(played).toEqual(["error"]);

@@ -25,7 +25,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { StandaloneControlHost, NSEPopup, ListboxPopup, createStandaloneNSEControlRuntime } from "../../../src/NSE/Overlays";
 import { OverlayProvider, useNSEOverlayProvider, type OverlayProviderContextValue } from "../../../src/NSE/Overlays/OverlayProvider";
 import { MenuView, NSEPopUpButton } from "../../../src/NSE/Menus";
-import { NSEFeedbackProvider } from "../../../src/NSE/Feedback";
+import { FeedbackProvider } from "../../../src/NSE/Feedback";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
 import { installNSEScrollIntoViewFixture } from "../fixtures/browser";
 
@@ -243,11 +243,11 @@ describe("standalone picker and menu keyboard contracts", () => {
 
   it("preserves default trigger and selection feedback through the supplied engine", async () => {
     const trigger = vi.fn(async () => {});
-    const engine = { trigger } as NonNullable<React.ComponentProps<typeof NSEFeedbackProvider>["value"]>;
-    render(<NSEFeedbackProvider value={engine}><Host>
+    const engine = { trigger } as NonNullable<React.ComponentProps<typeof FeedbackProvider>["value"]>;
+    render(<FeedbackProvider value={engine}><Host>
       <MenuView label="Feedback actions" items={[{ value: "save", label: "Save document" }]} />
       <NSEPopUpButton label="Feedback format" items={[{ value: "plain", title: "Plain" }, { value: "rich", title: "Rich" }]} />
-    </Host></NSEFeedbackProvider>);
+    </Host></FeedbackProvider>);
     fireEvent.click(screen.getByRole("button", { name: "Feedback actions" }));
     expect(trigger).toHaveBeenLastCalledWith("soft");
     fireEvent.click(await screen.findByRole("menuitem", { name: "Save document" }));

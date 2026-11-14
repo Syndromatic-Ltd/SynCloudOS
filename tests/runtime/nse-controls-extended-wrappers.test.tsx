@@ -30,7 +30,7 @@ import { atmoTheme } from "../../src/NSE/Appearance/atmo";
 import { NSEButton, NSEImageView, NSESearchField, NSESegmentedControl } from "../../src/NSE/public/controls";
 import { StandaloneControlHost } from "../../src/NSE/Overlays";
 import { HFXHapticEngine } from "../../src/FX/HapticsFX/HFXHapticEngine";
-import { NSEFeedbackProvider } from "../../src/NSE/Feedback";
+import { FeedbackProvider } from "../../src/NSE/Feedback";
 import { DateEntry } from "../../src/NSE/DateTime/Pickers/dateEntry";
 import { TimeEntry } from "../../src/NSE/DateTime/Pickers/timeEntry";
 import { MenuView } from "../../src/NSE/Menus/MenuView";
@@ -76,10 +76,10 @@ describe("NSE extended wrapper controls", () => {
     const engine = new HFXHapticEngine({ supported: true, trigger: haptic, cancel: vi.fn(), dispose: vi.fn() });
     const onSelectionChange = vi.fn();
     renderWithAppearance(
-      <NSEFeedbackProvider value={engine}>
+      <FeedbackProvider value={engine}>
         <NSESegmentedControl aria-label="Edit controls" className="app-edit-controls" segmentStyle="texturedRounded" haptic="success" selection={{ mode: "momentary", selectedIds: new Set() }} items={[{ id: "done", label: "Done" }, { id: "reset", label: "Reset" }]} onSelectionChange={onSelectionChange} />
         <NSESegmentedControl aria-label="View" className="app-view-switcher" haptic="success" selection={{ mode: "select-one", selectedIds: new Set(["list"]), allowsEmpty: false }} items={[{ id: "list", label: "List" }, { id: "grid", label: "Grid" }]} />
-      </NSEFeedbackProvider>
+      </FeedbackProvider>
     );
 
     expect(screen.getByRole("toolbar", { name: "Edit controls" }).classList.contains("app-edit-controls")).toBe(true);

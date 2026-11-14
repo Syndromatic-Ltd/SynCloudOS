@@ -25,7 +25,7 @@ import { createContext, useContext, type PropsWithChildren } from "react";
  * surfaces. It accepts only bounded category facts and never exposes a
  * runtime, snapshot, manager, or inspector read capability to the surface.
  */
-export interface NSEConformanceEvidencePort {
+export interface ConformanceEvidencePort {
   registerAppearanceFact(fact: {
     readonly slot: string;
     readonly status: "covered" | "unresolved" | "provenance-violation";
@@ -36,10 +36,10 @@ export interface NSEConformanceEvidencePort {
   }): () => void;
 }
 
-const NSEConformanceEvidenceContext = createContext<NSEConformanceEvidencePort | null>(null);
+const ConformanceEvidenceContext = createContext<ConformanceEvidencePort | null>(null);
 
-export interface NSEConformanceEvidenceProviderProps extends PropsWithChildren {
-  readonly port: NSEConformanceEvidencePort | null;
+export interface ConformanceEvidenceProviderProps extends PropsWithChildren {
+  readonly port: ConformanceEvidencePort | null;
 }
 
 /**
@@ -47,10 +47,10 @@ export interface NSEConformanceEvidenceProviderProps extends PropsWithChildren {
  * gallery. Ordinary SynWare observe `null`, so they cannot mutate Inspector
  * evidence through the public app runtime.
  */
-export function NSEConformanceEvidenceProvider({ port, children }: NSEConformanceEvidenceProviderProps) {
-  return <NSEConformanceEvidenceContext.Provider value={port}>{children}</NSEConformanceEvidenceContext.Provider>;
+export function ConformanceEvidenceProvider({ port, children }: ConformanceEvidenceProviderProps) {
+  return <ConformanceEvidenceContext.Provider value={port}>{children}</ConformanceEvidenceContext.Provider>;
 }
 
-export function useNSEConformanceEvidence(): NSEConformanceEvidencePort | null {
-  return useContext(NSEConformanceEvidenceContext);
+export function useNSEConformanceEvidence(): ConformanceEvidencePort | null {
+  return useContext(ConformanceEvidenceContext);
 }

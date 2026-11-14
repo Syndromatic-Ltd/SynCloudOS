@@ -29,7 +29,7 @@ export type {
 } from "./Appearance/NSEMaterialLighting";
 export { MaterialLightingProvider } from "./Appearance/MetalThumb";
 export {
-  NSEFeedbackProvider,
+  FeedbackProvider,
   useNSEFeedback,
 } from "./Feedback";
 export { resolveNSEFocusReturnTarget, isWithinNSEFocusOrigin } from "./Focus/focusOrigin";

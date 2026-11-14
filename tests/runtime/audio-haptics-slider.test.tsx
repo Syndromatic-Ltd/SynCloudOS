@@ -24,13 +24,13 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import { NSESlider } from "../../src/NSE/Controls/Values/NSESlider";
 import { HFXHapticEngine } from "../../src/FX/HapticsFX/HFXHapticEngine";
-import { NSEFeedbackProvider } from "../../src/NSE/Feedback";
+import { FeedbackProvider } from "../../src/NSE/Feedback";
 afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 
 it("attracts pointer values, breaks away, and keeps keyboard values precise", () => {
   const haptic = vi.fn();
   const engine = new HFXHapticEngine({ supported: true, trigger: haptic, cancel: vi.fn(), dispose: vi.fn() });
-  render(<NSEFeedbackProvider value={engine}><NSESlider defaultValue={0} detents={[10, 20]} detentThreshold={2} aria-label="Volume" /></NSEFeedbackProvider>);
+  render(<FeedbackProvider value={engine}><NSESlider defaultValue={0} detents={[10, 20]} detentThreshold={2} aria-label="Volume" /></FeedbackProvider>);
   const slider = screen.getByRole("slider") as HTMLInputElement;
   fireEvent.pointerDown(slider);
   fireEvent.change(slider, { target: { value: "9" } });
