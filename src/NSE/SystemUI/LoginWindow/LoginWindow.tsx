@@ -25,7 +25,7 @@ import "./LoginWindow.css";
 import { useNSEAnimationEnvironment, useNSEPresentation } from "../../Animation";
 import { resolveLoginWindowTransitions } from "./LoginWindow.transitions";
 import { NSEButton } from "../../Controls/Buttons/NSEButton";
-import { NSESpinner } from "../../Progress/spinnerSprite";
+import { Spinner } from "../../Progress/spinnerSprite";
 import { useNSEFeedback } from "../../Feedback";
 import { loginWindowAssets } from "./loginWindowAssets";
 
@@ -94,7 +94,7 @@ export function LoginWindow({ title = "Sign in", branding, methods = [], authent
             <div data-nse-part="content" className="nse-login-form" aria-live="polite"><p id="nse-login-window-error" data-nse-part="error" className="nse-login-error" role="alert">{activeError ?? (authenticationStatus === "checking" ? "Checking your session…" : "\u00a0")}</p><div data-nse-part="actions" className="nse-login-action">{methods.map((method) => <NSEButton
               appearance="aqua"
               title={method.label}
-              image={<>{authenticationStatus === "authenticating" ? <NSESpinner size="small" tone="dark" label="Loading" /> : null}{method.iconUrl ? <img data-nse-part="image" className="nse-login-provider-icon" src={method.iconUrl} alt="" aria-hidden={true} draggable={false} /> : null}</>}
+              image={<>{authenticationStatus === "authenticating" ? <Spinner size="small" tone="dark" label="Loading" /> : null}{method.iconUrl ? <img data-nse-part="image" className="nse-login-provider-icon" src={method.iconUrl} alt="" aria-hidden={true} draggable={false} /> : null}</>}
               isEnabled={!(pending || Boolean(configurationError) || authenticationStatus === "authenticating")}
               aria-busy={authenticationStatus === "authenticating" || undefined}
               key={method.id}
