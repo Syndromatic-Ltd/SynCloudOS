@@ -28,6 +28,7 @@ import {
   type WindowContentState,
   type WindowControllerClosePreparation,
   type WindowControllerDelegate,
+  type WindowFullScreenNotification,
   type WindowGeometryState,
   type WindowRecord,
   type WindowSerializableValue,
@@ -47,6 +48,7 @@ export interface WindowControllerDependencies {
 
 export class WindowController {
   readonly #listeners = new Set<() => void>();
+  readonly #fullScreenListeners = new Set<(event: WindowFullScreenNotification) => void>();
   readonly #responderHandles: ResponderRegistrationHandle[] = [];
   #record: WindowRecord;
   #geometryState: WindowGeometryState;
@@ -304,8 +306,17 @@ export class WindowController {
     this.#setContentState({ status: "unloaded" });
   }
 
-  notifyFullScreen(event: Extract<keyof WindowControllerDelegate, `window${string}FullScreen`>): void {
+  /** @internal A mounted app window observes only its own committed fullscreen changes. */
+  observeFullScreen(listener: (event: WindowFullScreenNotification) => void): () => void {
+    this.#fullScreenListeners.add(listener);
+    return () => { this.#fullScreenListeners.delete(listener); };
+  }
+
+  notifyFullScreen(event: WindowFullScreenNotification): void {
     try { this.dependencies.delegate?.[event]?.(this.#record); } catch (error) { this.#reportError(error, "full-screen"); }
+    for (const listener of this.#fullScreenListeners) {
+      try { listener(event); } catch (error) { this.#reportError(error, "full-screen"); }
+    }
   }
 
   notifyDidOpen(): void {
@@ -319,6 +330,7 @@ export class WindowController {
   dispose(reason: "close-commit" | "runtime-dispose" = "runtime-dispose"): void {
     if (this.#disposed) return;
     this.#disposed = true;
+    this.#fullScreenListeners.clear();
     this.#lifecycleGeneration += 1;
     const content = this.#contentController;
     if (content) {

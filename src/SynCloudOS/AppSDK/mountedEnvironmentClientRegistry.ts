@@ -58,6 +58,8 @@ export interface MountedAppEnvironmentClients {
     setStyle(style: readonly import("../Windows/windowTypes").WindowStyle[]): void;
     setCollectionBehavior(behavior: import("../Windows/windowTypes").WindowCollectionBehavior): void;
     toggleFullScreen(): void;
+    isFullScreen(): boolean;
+    observeFullScreen(listener: (event: import("../Windows/windowTypes").WindowFullScreenNotification) => void): () => void;
   };
   readonly persistence: AppPersistenceClient;
   readonly scheduler: AppSchedulerClient;

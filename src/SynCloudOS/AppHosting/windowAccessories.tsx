@@ -20,6 +20,7 @@
 
 import { WindowLayoutContext, useNSEWindowChromeElement } from "../../NSE/applicationHostInterop";
 import { NSESplitViewController } from "../../NSE/DataViews/Split/NSESplitViewController";
+import { isNSEHTMLElement } from "../../NSE/Focus/domRealm";
 import { contentInlineSize } from "./contentInlineSize";
 import { useNSEWindowChromeObstruction } from "../../NSE/NSE";
 
@@ -47,7 +48,7 @@ import { WindowTitlebarHostContext, type WindowTitlebarHost } from "../../NSE/ap
 import { nseWindowPresentedTitle } from "../../NSE/applicationHostInterop";
 
 /** Publishes the window's title, subtitle and edited state to the stage's title bar. */
-export function useNSEWindowTitlebarDocument(controller: NSEAnyWindowController, host: WindowTitlebarHost | null): void {
+export function useNSEWindowTitlebarDocument(controller: NSEAnyWindowController, host: WindowTitlebarHost | null, presentedSidebarWidth?: number): void {
   useObserve(controller);
   const window = controller.isDisposed ? null : controller.window;
   const title = window ? nseWindowPresentedTitle(window) : "";
@@ -70,9 +71,10 @@ export function useNSEWindowTitlebarDocument(controller: NSEAnyWindowController,
   const split = root instanceof NSESplitViewController ? root : null;
   const splitSnapshot = useSyncExternalStore(split?.subscribe ?? noSubscription, split?.getSnapshot ?? noSplit, noSplit);
   const pane = splitSnapshot?.items[0];
-  const sidebarWidth = splitSnapshot?.isVertical && splitSnapshot.presentation === "split"
+  const measuredSidebarWidth = presentedSidebarWidth ?? (splitSnapshot?.isVertical && splitSnapshot.presentation === "split"
     && split?.splitViewItems[0]?.behavior === "sidebar" && pane && !pane.isCollapsed && pane.thickness > 0
-    ? pane.thickness : undefined;
+    ? pane.thickness : 0);
+  const sidebarWidth = measuredSidebarWidth > 0 ? measuredSidebarWidth : undefined;
   useLayoutEffect(() => {
     if (!host || !claims) return undefined;
     host.setDocument(Object.freeze({ title, subtitle, documentEdited, toolbarStyle, titleVisibility, titlebarPresentation, titlebarAppearsTransparent, hasToolbar, frameViewClass, texturedBackground, sidebarWidth, fullSizeContentView, backgroundColor, isOpaque, cornerRadius }));
@@ -321,9 +323,9 @@ export function useNSEWindowSheetHost(onAttachedChange: (attached: boolean) => v
     const blocked: InertElement[] = [];
     const block = (element: Element) => {
       for (const sibling of Array.from(element.parentElement?.children ?? [])) {
-        if (sibling === element || !(sibling instanceof HTMLElement) || (sibling as InertElement).inert) continue;
-        (sibling as InertElement).inert = true;
-        blocked.push(sibling as InertElement);
+        if (sibling === element || !isNSEHTMLElement(sibling) || sibling.inert) continue;
+        sibling.inert = true;
+        blocked.push(sibling);
       }
     };
     block(layer);
@@ -349,8 +351,12 @@ function copySheet(frame: HTMLElement): HTMLElement {
   sources.forEach((source, index) => {
     const target = targets[index];
     if (!target) return;
-    if (source instanceof HTMLInputElement && (source.type === "checkbox" || source.type === "radio")) (target as HTMLInputElement).checked = source.checked;
-    else target.value = source.value;
+    const input = source.tagName === "INPUT" ? source as HTMLInputElement : null;
+    if (input && (input.type === "checkbox" || input.type === "radio")) {
+      (target as HTMLInputElement).checked = input.checked;
+    } else {
+      target.value = source.value;
+    }
   });
   return copy;
 }

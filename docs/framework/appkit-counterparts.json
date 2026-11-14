@@ -767,6 +767,7 @@
     "NSEWebContentSourceViewProps": "WKWebView.load(_:)",
     "NSEWebView": "WKWebView",
     "NSEWindow": "NSWindow",
+    "NSEWindowButtonType": "NSWindow.ButtonType",
     "NSEWindowToolbarStyle": "NSWindow.ToolbarStyle",
     "NSEWindowFrameView": { "none": "NSE extension inspired by AppKit private frame composition." },
     "NSEWindowTitlebarPresentation": { "none": "NSE extension for attached or floating titlebar paint." },

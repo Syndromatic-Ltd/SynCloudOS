@@ -4538,6 +4538,20 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
         toggleFullScreen() {
           if (windowControllerId !== undefined) runtime.windows.toggleFullScreen(ownedWindow(windowControllerId).id);
         },
+        isFullScreen() {
+          if (windowControllerId === undefined) return false;
+          if (!canRefreshPresentation()) return mountedWindowSnapshot.current?.fullScreen === "on";
+          try {
+            // Fullscreen callbacks run after the record changes and before the
+            // manager publishes a new snapshot to its views.
+            const { record } = runtime.windows.select(windowControllerId);
+            return ownsWindow(record) && record.fullScreen === "on";
+          } catch { return false; }
+        },
+        observeFullScreen(listener: Parameters<MountedAppEnvironmentClients["currentWindow"]["observeFullScreen"]>[0]) {
+          if (windowControllerId === undefined) return () => {};
+          return cleanupOnAbort(ownedWindow(windowControllerId).observeFullScreen(event => { if (!signal.aborted) listener(event); }));
+        },
       },
       speechSynthesis: createMountedAudioSpeechClient(runtime.environment.speechSynthesis, signal, deviceEntitlements, () => authoriseDeviceCapability("audio.speech")),
       network: createMountedNetworkPort(networkAdapterFor(runtime.environment) ?? {

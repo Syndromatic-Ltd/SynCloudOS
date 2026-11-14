@@ -8,6 +8,7 @@ import type { SynWareManifestV1 } from "../../../src/SynCloudOS/AppSDK/manifest/
 import type { AppCloseResult, AppLaunchResult } from "../../../src/SynCloudOS/Lifecycle/lifecycleTypes";
 import type { RuntimeOperationHandle, SynCloudOSRuntime } from "../../../src/SynCloudOS/Runtime/runtimeInstanceTypes";
 import type { WindowPresentation } from "../../../src/SynCloudOS/Windows";
+import type { WindowHostEnvironment } from "../../../src/SynCloudOS/Windows/WindowHostEnvironment";
 import { HostSiteBrandingProvider, SynCloudOSProvider } from "../../../src/SynCloudOSReact";
 import { createApplicationWindowContentRendererRegistry } from "../../../src/Webspring/WindowLayer";
 import { standardWindow } from "../../fixtures/windowTestDependencies";
@@ -38,11 +39,11 @@ export interface ClassApplicationHost {
  * its windows through the production window content renderer, so a test sees
  * the lifecycle, the window guards and the controllers' views as a host does.
  */
-export function createClassApplicationHost(AppClass: NSEApplicationClass | ComponentType, appId = "com.example.classes-app"): ClassApplicationHost {
+export function createClassApplicationHost(AppClass: NSEApplicationClass | ComponentType, appId = "com.example.classes-app", windowHost?: WindowHostEnvironment): ClassApplicationHost {
   const animationLayers = createBrowserAnimationLayerHost(document, { now: () => 0, requestFrame: () => () => {}, reducedMotion: true, suspended: false });
   const runtime = authoriseTestRuntime(createTestRuntime({
     id: `runtime:${appId}:${++hostSequence}`,
-    environment: { ...createTestRuntimeEnvironment(), animationLayers },
+    environment: { ...createTestRuntimeEnvironment(), animationLayers, windowHost },
   }));
   const manifest: SynWareManifestV1 = { schemaVersion: 1, bundleIdentifier: appId, version: "1.0.0", displayName: "Class application" };
   registerTestSynWare(

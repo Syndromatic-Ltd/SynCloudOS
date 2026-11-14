@@ -389,6 +389,9 @@ export interface WindowControllerDelegate {
   windowDidFailToExitFullScreen?(record: WindowRecord): void;
 }
 
+/** @internal Fullscreen outcomes from the window manager, including host-initiated changes. */
+export type WindowFullScreenNotification = Extract<keyof WindowControllerDelegate, `window${string}FullScreen`>;
+
 /** What the owner of a window's content registers to veto its close and to learn it is closing. */
 export interface WindowCloseGuard {
   shouldClose(request: WindowCloseRequest): boolean | Promise<boolean>;

@@ -734,7 +734,7 @@ export type { NSEViewAnimator } from "./Animation/NSEViewAnimator";
 export type {
   NSEAnyWindowController, NSEApplicationClass, NSEApplicationContext, NSEApplicationDelegate, NSEControllerView, NSEOpenWindowOptions,
   NSETraitCollection,
-  NSEViewComponent, NSEViewControllerClass, NSEViewControllerOptions, NSEWindow, NSEWindowCloseOutcome, NSEWindowContentBorderEdge, NSEWindowToolbarStyle, NSEWindowStyle, NSEWindowCollectionBehavior, NSEWindowTitleVisibility, NSEWindowTitlebarPresentation,
+  NSEViewComponent, NSEViewControllerClass, NSEViewControllerOptions, NSEWindow, NSEWindowButtonType, NSEWindowCloseOutcome, NSEWindowContentBorderEdge, NSEWindowToolbarStyle, NSEWindowStyle, NSEWindowCollectionBehavior, NSEWindowTitleVisibility, NSEWindowTitlebarPresentation,
   NSEWindowControllerClass, NSEWindowControllerContext, NSEWindowControllerOptions, NSEWindowDocument,
 } from "./Application";
 export { preference } from "./Objects/preference";

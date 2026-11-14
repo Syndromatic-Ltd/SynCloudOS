@@ -18,18 +18,18 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useRef, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
+import { useContext, useEffect, useRef, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
 import "./components.css";
 import { useNSEAnimationEnvironment, useNSEPresentation } from "../Animation";
 import { resolveNSEAlertBackdropMotion, resolveNSESheetBackdropMotion } from "./NSEAlert.transitions";
 import { useNSEAppearanceProjection } from "../Appearance";
 import { resolveNSEFocusReturnTarget } from "../Focus";
+import { isNSEHTMLElement } from "../Focus/domRealm";
 
 import { useOptionalOverlayProvider } from "../Overlays/OverlayProvider";
+import { PresentingDocumentContext } from "../Overlays/presentingDocument";
 import { useNSEOverlayRegion } from "../Overlays/useNSEOverlayRegion";
 import { nseOverlayRegionInsets, type OverlayPresentationSource } from "../Overlays/overlayRegion";
-
-type InertHTMLElement = HTMLElement & { inert?: boolean };
 
 interface AlertBackdropProps {
   readonly children: ReactNode;
@@ -57,10 +57,11 @@ export function AlertBackdrop({
 }: AlertBackdropProps) {
   const appearanceProjection = useNSEAppearanceProjection();
   const provider = useOptionalOverlayProvider();
-  const { region, hostViewport } = useNSEOverlayRegion({ source: presentation ?? provider?.runtime.environment.presentation ?? null, open: true, purpose: "alert", document: typeof document === "undefined" ? null : document });
+  const presentingDocument = useContext(PresentingDocumentContext) ?? (typeof document === "undefined" ? null : document);
+  const { region, hostViewport } = useNSEOverlayRegion({ source: presentation ?? provider?.runtime.environment.presentation ?? null, open: true, purpose: "alert", document: presentingDocument });
   const regionInsets = region && hostViewport ? nseOverlayRegionInsets(region, hostViewport) : null;
   const regionStyle = regionInsets ? Object.fromEntries(Object.entries(regionInsets).map(([side, value]) => [`--nse-overlay-region-${side}`, `${value}px`])) as CSSProperties : undefined;
-  const previousFocusRef = useRef(typeof document === "undefined" ? null : resolveNSEFocusReturnTarget(document.activeElement));
+  const previousFocusRef = useRef(resolveNSEFocusReturnTarget(presentingDocument?.activeElement ?? null));
   const { reducedMotion } = useNSEAnimationEnvironment();
   const backdropRef = useRef<HTMLDivElement>(null);
   useNSEPresentation(backdropRef, motion === "sheet" ? resolveNSESheetBackdropMotion(reducedMotion) : resolveNSEAlertBackdropMotion(reducedMotion));
@@ -72,7 +73,7 @@ export function AlertBackdrop({
     const parent = backdrop?.parentElement;
 
     const siblingState = Array.from(parent?.children ?? [])
-      .filter((element): element is InertHTMLElement => element instanceof HTMLElement && element !== backdrop)
+      .filter((element): element is HTMLElement => isNSEHTMLElement(element) && element !== backdrop)
       .map((element) => ({
         element,
         ariaHidden: element.getAttribute("aria-hidden"),
@@ -140,10 +141,11 @@ export function AlertBackdrop({
         }
         const first = focusable[0];
         const last = focusable[focusable.length - 1];
-        if (event.shiftKey && document.activeElement === first) {
+        const activeElement = event.currentTarget.ownerDocument.activeElement;
+        if (event.shiftKey && activeElement === first) {
           event.preventDefault();
           last.focus({ preventScroll: true });
-        } else if (!event.shiftKey && document.activeElement === last) {
+        } else if (!event.shiftKey && activeElement === last) {
           event.preventDefault();
           first.focus({ preventScroll: true });
         }

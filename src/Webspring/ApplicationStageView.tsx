@@ -185,7 +185,7 @@ export function ApplicationStageView({
     isKeyWindow={stage.isFocused} material={material} mode={resolvedMode}
     onSlotsChange={setSlots}
     controls={<>{returnControl}{stage.windowId && !standalone ? <button type="button" aria-label="Exit Full Screen"
-      className="nse-app-topbar-button" data-position="leading"
+      className="nse-app-topbar-button" data-position="leading" data-window-control="fullScreen"
       onClick={() => runtime.windows.toggleFullScreen(stage.windowId!)}>↙</button> : null}</>}
     leading={navigationBack ? <NavigationChromeSlot className="webspring-application-navigation-back-slot" enter={stageMotion.navigationBack}>
       <ApplicationNavigationBackButton label={navigationBack.label} onActivate={navigationBack.onActivate} />

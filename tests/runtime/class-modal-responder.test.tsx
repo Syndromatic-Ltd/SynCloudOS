@@ -1,8 +1,10 @@
 // @vitest-environment jsdom
 import * as React from "react";
-import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { createPortal } from "react-dom";
 import { afterEach, expect, it } from "vitest";
 import { NSEApplication } from "../../src/NSE/Application/NSEApplication";
+import { NSEAlert, NSEModalResponse } from "../../src/NSE/Application/NSEAlert";
 import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
 import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
@@ -23,6 +25,58 @@ afterEach(async () => {
   cleanup();
   for (const mount of foreignMounts.splice(0)) mount.dispose();
   for (const host of hosts.splice(0)) await host.dispose();
+});
+
+it("withdraws the class modal presenter when the key window resigns and restores it on activation", async () => {
+  class MainWindow extends NSEWindowController { static override view = () => <p>Modal presenter</p>; }
+  class Application extends NSEApplication { static override mainWindow = MainWindow; }
+  const host = createClassApplicationHost(Application, "com.example.resigned-key-window");
+  hosts.push(host);
+  await host.launch();
+  host.mountWindows();
+  let windowId!: string;
+  await act(async () => { windowId = await host.openMainWindow(); });
+  expect(host.runtime.windows.snapshot().keyWindowControllerId).toBe(windowId);
+
+  await act(async () => { host.runtime.windows.resignKey(); });
+  expect(host.runtime.windows.snapshot().keyWindowControllerId).toBeNull();
+  const alert = new NSEAlert();
+  alert.messageText = "Use the active window";
+  await act(async () => {
+    await expect(alert.runModal()).rejects.toThrow("runModal needs an active application with a key window.");
+  });
+
+  await act(async () => { host.runtime.windows.makeKey(windowId); });
+  let response!: Promise<NSEModalResponse>;
+  await act(async () => { response = alert.runModal(); });
+  const current = host.runtime.alerts.getSnapshot().current;
+  expect(current).toMatchObject({ ownerAppId: host.appId, title: "Use the active window" });
+  host.runtime.alerts.dismiss(current!.id);
+  await expect(response).resolves.toBe(NSEModalResponse.alertFirstButtonReturn);
+});
+
+it("hands an unclaimed class application's focus to its first mounted view in another realm", () => {
+  const iframe = document.createElement("iframe");
+  document.body.append(iframe);
+  let view: ReturnType<typeof render> | undefined;
+  try {
+    const childDocument = iframe.contentDocument!;
+    const appFrame = childDocument.createElement("section");
+    appFrame.tabIndex = -1;
+    appFrame.dataset.syncloudosResponderId = "application:child-focus";
+    childDocument.body.append(appFrame);
+    appFrame.focus();
+    expect(childDocument.activeElement).toBe(appFrame);
+    expect(appFrame).not.toBeInstanceOf(HTMLElement);
+    class Content extends NSEViewController {
+      static override view = () => <button data-nse-initial-focus="">Editor action</button>;
+    }
+    view = render(createPortal(<ViewControllerView controller={new Content()} />, appFrame));
+    expect(childDocument.activeElement).toBe(appFrame.querySelector("button"));
+  } finally {
+    view?.unmount();
+    iframe.remove();
+  }
 });
 
 async function mountModal(explicitParent = false) {

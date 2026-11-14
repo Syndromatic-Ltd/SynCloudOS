@@ -20,6 +20,7 @@
 
 import type { SynCloudOSLifecycleDisposalReason } from "../../SynCloudOS/nseRuntimeContracts";
 import type { SynWareOwnedWindowSnapshot, SynWareWindowCloseGuard } from "../../SynCloudOS/nseRuntimeContracts";
+import type { WindowFullScreenNotification } from "../../SynCloudOS/Windows/windowTypes";
 import {
   nseDisposeFor,
   type NSEControllerOwnershipOptions,
@@ -55,6 +56,13 @@ export type NSEWindowStyle = "titled" | "closable" | "miniaturizable" | "resizab
 export type NSEWindowCollectionBehavior = "fullScreenPrimary" | "fullScreenAuxiliary" | "fullScreenNone";
 export type NSEWindowTitleVisibility = "visible" | "hidden";
 export type NSEWindowTitlebarPresentation = "attached" | "floating";
+export type NSEWindowButtonType = "closeButton" | "miniaturizeButton" | "zoomButton" | "toolbarButton" | "documentIconButton" | "documentVersionsButton" | "fullScreenButton";
+
+const standardButtonSelectors = new Map<NSEWindowButtonType, string>([
+  ["closeButton", 'button[data-window-control="close"]'],
+  ["miniaturizeButton", 'button[data-window-control="minimise"]'],
+  ["zoomButton", 'button:is([data-window-control="zoom"],[data-window-control="fullScreen"])'],
+]);
 
 function projectWindowStyle(style: NonNullable<SynWareOwnedWindowSnapshot["style"]>): readonly NSEWindowStyle[] {
   return Object.freeze(style.flatMap(bit => bit === "zoomable" ? [] : [bit === "minimisable" ? "miniaturizable" as const : bit]));
@@ -72,6 +80,8 @@ export interface NSEWindow {
   titlebarAppearsTransparent: boolean;
   readonly isFullScreen: boolean;
   readonly document: NSEWindowDocument | null;
+  /** The existing titlebar button for this window, or null if the host does not draw it. */
+  standardWindowButton(kind: NSEWindowButtonType): HTMLButtonElement | null;
   toggleFullScreen(): void;
   performClose(): Promise<NSEWindowCloseOutcome>;
   miniaturize(): void;
@@ -172,6 +182,8 @@ export interface WindowMount {
   setStyleMask?(style: readonly NSEWindowStyle[]): void;
   setCollectionBehavior?(behavior: NSEWindowCollectionBehavior): void;
   toggleFullScreen?(): void;
+  isFullScreen?(): boolean;
+  observeFullScreen?(listener: (event: WindowFullScreenNotification) => void): () => void;
   close(): Promise<NSEWindowCloseOutcome>;
   /** Lets the controller veto the window's close and learn it is closing. Does nothing on the stage. Returns the function that removes the guard. */
   registerCloseGuard(guard: SynWareWindowCloseGuard): () => void;
@@ -249,6 +261,7 @@ export interface NSEWindowControllerInternals {
   attach(mount: WindowMount): () => void;
   /** Reports a key-window change to `windowDidBecomeKey` / `windowDidResignKey`. */
   setKey(isKey: boolean): void;
+  setStandardControls(controls: HTMLElement | null): void;
   updateContentLayout(rect: NSEScrollRect): void;
   notifySnapshotChange(): void;
   /** Consults `windowShouldClose`. */
@@ -296,6 +309,8 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
   #mount: WindowMount | null = null;
   readonly #contentLayout = new LayoutGuideStore();
   #stopContentLayout: (() => void) | null = null;
+  #stopFullScreen: (() => void) | null = null;
+  #standardControls: HTMLElement | null = null;
   #loaded = false;
   #key = false;
   #pendingTitle: string | null = null;
@@ -421,7 +436,12 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
         controller.notifyObservers();
       },
       get document() { return controller.document; },
-      get isFullScreen() { return controller.#mount?.getSnapshot()?.fullScreen === "on"; },
+      get isFullScreen() { return controller.#mount?.isFullScreen?.() ?? (controller.#mount?.getSnapshot()?.fullScreen === "on"); },
+      standardWindowButton(kind: NSEWindowButtonType) {
+        const controls = controller.#standardControls;
+        const selector = standardButtonSelectors.get(kind);
+        return controls?.isConnected && selector ? controls.querySelector<HTMLButtonElement>(selector) : null;
+      },
       toggleFullScreen: () => requireMount("toggleFullScreen").toggleFullScreen?.(),
       performClose: () => requireMount("performClose").close(),
       miniaturize: () => requireMount("miniaturize").minimise(),
@@ -535,6 +555,7 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
       get isLoaded() { return controller.#loaded; },
       attach: (mount) => controller.#attach(mount),
       setKey: (isKey) => controller.#setKey(isKey),
+      setStandardControls: (controls) => { controller.#standardControls = controls; },
       updateContentLayout: (rect) => controller.#contentLayout.setFrame(rect),
       notifySnapshotChange: () => controller.notifyObservers(),
       shouldClose: () => controller.windowShouldClose(),
@@ -622,6 +643,12 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
   windowDidBecomeKey(): void {}
   /** The window stopped being the key window. */
   windowDidResignKey(): void {}
+  windowWillEnterFullScreen(): void {}
+  windowDidEnterFullScreen(): void {}
+  windowWillExitFullScreen(): void {}
+  windowDidExitFullScreen(): void {}
+  windowDidFailToEnterFullScreen(): void {}
+  windowDidFailToExitFullScreen(): void {}
   /** Runs after the window controller is disposed, before the controllers it owns are. */
   protected didDispose(): void {}
 
@@ -637,6 +664,9 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
       this.#lifetime.dispose(reason, () => {
         this.#stopContentLayout?.();
         this.#stopContentLayout = null;
+        this.#stopFullScreen?.();
+        this.#stopFullScreen = null;
+        this.#standardControls = null;
         this.#contentLayout.dispose();
         this.#mount = null;
         this.didDispose();
@@ -655,6 +685,9 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
     this.#assertLive("window", "get");
     this.#mount = mount;
     this.#stopContentLayout?.();
+    this.#stopFullScreen?.();
+    const stopFullScreen = mount.observeFullScreen?.(event => this[event]()) ?? null;
+    this.#stopFullScreen = stopFullScreen;
     const updateLayout = () => {
       const bounds = mount.getSnapshot()?.bounds;
       this.#contentLayout.setFrame(mount.contentLayoutGuide?.frame ?? { x: 0, y: 0, width: bounds?.width ?? 0, height: bounds?.height ?? 0 });
@@ -671,7 +704,9 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
     }
     return () => {
       stopLayout();
+      stopFullScreen?.();
       if (this.#stopContentLayout === stopLayout) this.#stopContentLayout = null;
+      if (this.#stopFullScreen === stopFullScreen) this.#stopFullScreen = null;
       if (this.#mount === mount) this.#mount = null;
     };
   }

@@ -25,6 +25,7 @@ export interface WindowTitlebarDocument {
 
 /** @internal Portal targets keep toolbar and accessory ownership in the application. */
 export interface WindowTitlebarSlots {
+  readonly standardControls: HTMLElement | null;
   readonly leadingAccessories: HTMLElement | null;
   readonly trailingAccessories: HTMLElement | null;
   readonly toolbar: HTMLElement | null;
@@ -35,6 +36,7 @@ export interface WindowTitlebarSlots {
 /** @internal Accessory portals retain the application's context and responder chain. */
 export interface WindowTitlebarHost {
   setDocument(document: WindowTitlebarDocument | null): void;
+  readonly standardControls?: HTMLElement | null;
   readonly leadingAccessories: HTMLElement | null;
   readonly trailingAccessories: HTMLElement | null;
   readonly toolbar?: HTMLElement | null;
@@ -51,6 +53,7 @@ export const WindowTitlebarHostContext = createContext<WindowTitlebarHost | null
 export const WindowTitleSlotContext = createContext<{
   readonly root: NSEViewController<unknown> | null;
   readonly setSlot: (element: HTMLDivElement | null) => void;
+  readonly setSidebarWidth?: (width: number | undefined) => void;
 } | null>(null);
 
 /** @internal Title-bar drawing shared by expanded windows and preference panels. */

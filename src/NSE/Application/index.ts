@@ -30,6 +30,7 @@ export type { NSEPopoverPositioning, NSEViewControllerPresentationAnimator } fro
 export type {
   NSEAnyWindowController,
   NSEWindow,
+  NSEWindowButtonType,
   NSEWindowCloseOutcome,
   NSEWindowContentBorderEdge,
   NSEWindowToolbarStyle, NSEWindowStyle, NSEWindowCollectionBehavior, NSEWindowTitleVisibility, NSEWindowTitlebarPresentation,

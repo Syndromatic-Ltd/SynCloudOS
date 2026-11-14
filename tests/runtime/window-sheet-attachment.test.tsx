@@ -1,13 +1,17 @@
 // @vitest-environment jsdom
 import * as React from "react";
-import { act, cleanup, fireEvent, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { createPortal } from "react-dom";
 import { afterEach, expect, it } from "vitest";
 import { NSEApplication } from "../../src/NSE/Application/NSEApplication";
 import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
+import { AlertBackdrop } from "../../src/NSE/Components/NSEAlertBackdrop";
 import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
 import { NSEToolbar } from "../../src/NSE/Toolbars/NSEToolbar";
 import { observable } from "../../src/NSE/Objects";
+import { PresentingDocumentContext } from "../../src/NSE/Overlays/presentingDocument";
+import { useNSEWindowSheetHost } from "../../src/SynCloudOS/AppHosting/windowAccessories";
 import { action } from "../../src/SynCloudOS/AppSDK/actions";
 import { createClassApplicationHost, type ClassApplicationHost } from "./fixtures/classApplicationHost";
 
@@ -26,6 +30,8 @@ afterEach(async () => {
 
 it("attaches a sheet under the window's toolbar, blocks the window and refuses its close button", async () => {
   let content!: Content;
+  const closeChecks: string[] = [];
+  let allowClose = false;
   class Sheet extends NSEViewController {
     override title = "Rename";
     static override view = function SheetView() {
@@ -46,6 +52,11 @@ it("attaches a sheet under the window's toolbar, blocks the window and refuses i
   }
   class MainWindow extends NSEWindowController {
     constructor() { super(); this.contentViewController = new Content(); }
+    override windowShouldClose() {
+      closeChecks.push("shouldClose");
+      return allowClose;
+    }
+    override windowWillClose() { closeChecks.push("willClose"); }
     override windowDidLoad() {
       this.window.toolbar = new NSEToolbar({ identifier: "main", items: [{ id: "share", kind: "button", label: "Share" }], defaultItemIdentifiers: ["share"] });
       this.window.setContentBorderThickness(56, "minY");
@@ -88,14 +99,77 @@ it("attaches a sheet under the window's toolbar, blocks the window and refuses i
 
   const refused = await act(async () => host.runtime.windows.requestClose(windowId, { reason: "control" }));
   expect(refused.outcome).not.toBe("closed");
+  expect(closeChecks).toEqual([]);
 
   await act(async () => { content.presentedViewControllers[0]!.dismiss(); });
   expect(screen.queryByRole("dialog", { name: "Rename" })).toBeNull();
   expect(toolbar.inert).toBe(false);
   expect(inertAncestor(contentButton)).toBeNull();
   expect(inertAncestor(footerButton)).toBeNull();
+  const vetoed = await act(async () => host.runtime.windows.requestClose(windowId, { reason: "control" }));
+  expect(vetoed.outcome).not.toBe("closed");
+  expect(closeChecks).toEqual(["shouldClose"]);
+  allowClose = true;
   const closed = await act(async () => host.runtime.windows.requestClose(windowId, { reason: "control" }));
   expect(closed.outcome).toBe("closed");
+  expect(closeChecks).toEqual(["shouldClose", "shouldClose", "willClose"]);
+});
+
+it("makes the rest of the window inert while a sheet is attached in another DOM realm", () => {
+  const iframe = document.createElement("iframe");
+  document.body.append(iframe);
+  let view: ReturnType<typeof render> | undefined;
+  try {
+    const childDocument = iframe.contentDocument!;
+    function WindowInChildDocument({ attached }: { readonly attached: boolean }) {
+      const sheets = useNSEWindowSheetHost(() => {});
+      React.useLayoutEffect(() => {
+        if (attached) return sheets.host.attach();
+      }, [sheets.host, attached]);
+      return createPortal(<div>
+        <button id="child-toolbar">Toolbar</button>
+        <div className="nse-window-chrome-content">
+          <button id="child-content">Content</button>
+          <div ref={sheets.layerRef} />
+        </div>
+      </div>, childDocument.body);
+    }
+    view = render(<WindowInChildDocument attached />);
+    const toolbar = childDocument.getElementById("child-toolbar")!;
+    const content = childDocument.getElementById("child-content")!;
+    expect(toolbar).not.toBeInstanceOf(HTMLElement);
+    expect(toolbar.inert).toBe(true);
+    expect(content.inert).toBe(true);
+    view.rerender(<WindowInChildDocument attached={false} />);
+    expect(toolbar.inert).toBe(false);
+    expect(content.inert).toBe(false);
+  } finally {
+    view?.unmount();
+    iframe.remove();
+  }
+});
+
+it("restores a child-document alert's trigger and its sibling state on dismissal", () => {
+  const iframe = document.createElement("iframe");
+  document.body.append(iframe);
+  let view: ReturnType<typeof render> | undefined;
+  try {
+    const childDocument = iframe.contentDocument!;
+    const launcher = childDocument.createElement("button");
+    childDocument.body.append(launcher);
+    launcher.focus();
+    view = render(<PresentingDocumentContext value={childDocument}>{createPortal(
+      <AlertBackdrop><button>Child alert action</button></AlertBackdrop>, childDocument.body,
+    )}</PresentingDocumentContext>);
+    expect(launcher.inert).toBe(true);
+    expect(childDocument.activeElement).not.toBe(launcher);
+    view.unmount();
+    expect(launcher.hasAttribute("inert")).toBe(false);
+    expect(childDocument.activeElement).toBe(launcher);
+  } finally {
+    view?.unmount();
+    iframe.remove();
+  }
 });
 
 it("attaches an alert to its window as a sheet (NSAlert.beginSheetModal(for:))", async () => {

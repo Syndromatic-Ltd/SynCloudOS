@@ -58,6 +58,7 @@ import type { SynWareRuntime } from "../../SynCloudOSReact";
 import { useSynWareContext } from "../AppSDK/SynWareContext";
 import { NSEPopover } from "../../NSE/applicationHostInterop";
 import { NSEPopup } from "../../NSE/NSE";
+import { isNSEHTMLElement } from "../../NSE/Focus/domRealm";
 import type { SynWareContextValue } from "../AppSDK/appContextTypes";
 import { bindActionResponder, hasActions } from "../AppSDK/actions";
 import { trackLiveApplicationObject } from "./applicationHotReload";
@@ -246,7 +247,7 @@ export function ViewControllerView({ controller, className }: ViewControllerView
     // Content can arrive after the key stage has focused its empty frame.
     // Transfer only that existing handoff, never an editor or portalled focus.
     const active = element.ownerDocument.activeElement;
-    if (active instanceof HTMLElement && active.dataset.syncloudosResponderId?.startsWith("application:")
+    if (isNSEHTMLElement(active) && active.dataset.syncloudosResponderId?.startsWith("application:")
       && active.contains(element) && firstContentFrame(active) === element
       && !element.closest("[inert]")) {
       const target = active.querySelector<HTMLElement>("[data-nse-initial-focus]") ?? element;
@@ -404,6 +405,7 @@ function PresentedSheet({ controller }: { readonly controller: NSEViewController
 
 function createWindowMount(appRuntime: SynWareRuntime, alerts: WindowAlertQueue, appAlerts: SynWareContextValue["alerts"] | null): WindowMount {
   const windows = appRuntime.windows;
+  const currentWindow = getMountedAppEnvironmentClients(appRuntime).currentWindow;
   const current = () => {
     const snapshot = windows.getSnapshot();
     return snapshot.surface === "window" ? snapshot.current : null;
@@ -421,15 +423,17 @@ function createWindowMount(appRuntime: SynWareRuntime, alerts: WindowAlertQueue,
     minimise: () => { windows.minimise(requireId("minimise the window")); },
     zoom: () => { windows.zoom(requireId("zoom the window")); },
     setStyleMask(style) {
-      if (current()) getMountedAppEnvironmentClients(appRuntime).currentWindow.setStyle(style.flatMap(bit =>
+      if (current()) currentWindow.setStyle(style.flatMap(bit =>
         bit === "miniaturizable" ? ["minimisable" as const] : bit === "resizable" ? [bit, "zoomable" as const] : [bit]));
     },
     setCollectionBehavior(behavior) {
-      if (current()) getMountedAppEnvironmentClients(appRuntime).currentWindow.setCollectionBehavior(behavior);
+      if (current()) currentWindow.setCollectionBehavior(behavior);
     },
     toggleFullScreen() {
-      if (current()) getMountedAppEnvironmentClients(appRuntime).currentWindow.toggleFullScreen();
+      if (current()) currentWindow.toggleFullScreen();
     },
+    isFullScreen: currentWindow.isFullScreen,
+    observeFullScreen: currentWindow.observeFullScreen,
     setTitle: (title) => {
       const id = current()?.id;
       // An untitled window is named after its application in the window record.
@@ -469,21 +473,24 @@ export function WindowControllerView({ controller }: WindowControllerViewProps) 
     [appRuntime, alerts, appAlerts]);
   const [loaded, setLoaded] = useState(false);
   const [titleSlot, setTitleSlot] = useState<HTMLDivElement | null>(null);
-  const titleSlotHost = useMemo(() => ({ root: controller.contentViewController, setSlot: setTitleSlot }), [controller, controller.contentViewController]);
+  const [sidebarWidth, setSidebarWidth] = useState<number | undefined>();
+  const titleSlotHost = useMemo(() => ({ root: controller.contentViewController, setSlot: setTitleSlot, setSidebarWidth }), [controller, controller.contentViewController]);
   const titlebarHost = useContext(WindowTitlebarHostContext);
   // Both standalone windows and stage hosts project the same window-owned chrome.
   const stageTitlebar = titlebarHost;
   const accessoryHost = titlebarHost;
-  useNSEWindowTitlebarDocument(controller, loaded ? stageTitlebar : null);
+  useNSEWindowTitlebarDocument(controller, loaded ? stageTitlebar : null, sidebarWidth);
+  const standardControls = titlebarHost?.standardControls ?? null;
+  useLayoutEffect(() => {
+    const internals = controller[nseWindowInternals];
+    internals.setStandardControls(standardControls);
+    return () => { internals.setStandardControls(null); };
+  }, [controller, standardControls]);
   // While a sheet is attached, the window's close button and Close command are refused (performClose(_:)).
-  const sheetCloseGuard = useRef<(() => void) | null>(null);
+  const sheetAttached = useRef(false);
   const sheets = useNSEWindowSheetHost((attached) => {
-    sheetCloseGuard.current?.();
-    sheetCloseGuard.current = attached && mount
-      ? mount.registerCloseGuard({ shouldClose: (reason) => reason !== "control" && reason !== "command", willClose: () => {} })
-      : null;
+    sheetAttached.current = attached;
   });
-  useEffect(() => () => { sheetCloseGuard.current?.(); sheetCloseGuard.current = null; }, []);
   useLayoutEffect(() => {
     if (!mount || controller.isDisposed) return;
     const internals = controller[nseWindowInternals];
@@ -491,7 +498,7 @@ export function WindowControllerView({ controller }: WindowControllerViewProps) 
     const reportKey = () => {
       const isKey = mount.getSnapshot()?.isKey ?? mount.windowId === null;
       internals.setKey(isKey);
-      if (isKey) nseSetKeyWindowModalPresenter(mount, mount.presentModalAlert);
+      nseSetKeyWindowModalPresenter(mount, isKey ? mount.presentModalAlert : null);
     };
     reportKey();
     const unsubscribe = mount.subscribe(() => { reportKey(); internals.notifySnapshotChange(); });
@@ -500,7 +507,11 @@ export function WindowControllerView({ controller }: WindowControllerViewProps) 
     let closedOnItsOwn = false;
     const removeGuard = mount.registerCloseGuard({
       // Quitting the application is `applicationShouldTerminate`'s decision, not each window's.
-      shouldClose: (reason) => (reason === "application-quit" || reason === "runtime-dispose" ? true : internals.shouldClose()),
+      shouldClose: (reason) => {
+        if (reason === "application-quit" || reason === "runtime-dispose") return true;
+        if (sheetAttached.current && (reason === "control" || reason === "command")) return false;
+        return internals.shouldClose();
+      },
       willClose: (reason) => {
         closedOnItsOwn = reason !== "application-quit" && reason !== "runtime-dispose";
         internals.willClose();
