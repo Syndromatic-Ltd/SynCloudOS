@@ -519,8 +519,8 @@ and launch/return motion acceptance remain open. Electron remains a separate pha
   and drag regions excluding every interactive item.
 - Sidebar section derived from the content's split view; delete `frame.sourceList`, `SourceListFrameContext`'s
   width ownership and the stage rail state.
-- Standard toolbar items (above). Settings/user-info move from `rightSlot` to `showPreferences`/`account` items;
-  migrate every site app (table below).
+- Standard toolbar items (above). Migrate each site's `rightSlot` to its chosen gear or person
+  `NSEToolbarItem.applicationMenu` (table below). `showPreferences` remains a separate action where declared.
 - Remove app-drawn system chrome: Journal, JournalOld, MemoJournal and SynCal stop drawing Return to Webspring
   and app-menu buttons on phones; the window-controls slot provides them. Delete `Libraries/PhoneChrome`.
   **Visual gate** for those apps' phone layouts.
@@ -539,8 +539,9 @@ and launch/return motion acceptance remain open. Electron remains a separate pha
 
 ### Phase 5: menus (Codex builds, Claude designs the bar)
 
-- System-drawn `NSEApplication.mainMenu` above the title bar; compact collapse; one application-menu builder;
-  `showPreferences` action routing; delete `applicationMenu`, `rightSlot` and the duplicate builders.
+- System-drawn `NSEApplication.mainMenu` above the title bar, with compact collapse and one application-menu
+  builder. The menu bar and the toolbar's `NSEToolbarItem.applicationMenu` are independent opt-ins. Route
+  `showPreferences` through the responder chain and delete the manifest menu, `rightSlot` and duplicate builders.
 - The menu bar's Atmo art (metal colours, noise) is drawn by Claude in the theme; Codex supplies the structure and
   semantic parts (`data-nse-control="menu-bar"` etc.). **Visual gate.**
 

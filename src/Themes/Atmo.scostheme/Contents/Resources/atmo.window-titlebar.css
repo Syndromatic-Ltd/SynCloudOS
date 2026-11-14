@@ -11,9 +11,9 @@
   color: #2b3546;
   text-shadow: 0 1px 0 rgb(255 255 255 / 70%);
 }
-:scope [data-nse-part="title"]:where([data-nse-control="window"] *):where(:not([data-nse-control="window"] [data-nse-control] *)):where(:not([data-nse-part="header"]>*)):where(:not([data-nse-part="content"]>*)):where(:not([data-nse-part="document"] *)):where(:not([data-nse-part="leading"]>*)),
-:scope:is([data-nse-part="title"]:where([data-nse-control="window"] *):where(:not([data-nse-control="window"] [data-nse-control] *)):where(:not([data-nse-part="header"]>*)):where(:not([data-nse-part="content"]>*)):where(:not([data-nse-part="document"] *)):where(:not([data-nse-part="leading"]>*))),
-:scope[data-nse-part="title"]:where([data-nse-control="window"] *):where(:not([data-nse-control="window"] [data-nse-control] *)):where(:not([data-nse-part="header"]>*)):where(:not([data-nse-part="content"]>*)):where(:not([data-nse-part="document"] *)):where(:not([data-nse-part="leading"]>*)) { margin: 0; }
+:scope [data-nse-part="title"]:where([data-nse-control="window"] *):where(:not([data-nse-control="window"] [data-nse-control] *)):where(:not([data-nse-part="header"]>*)):where(:not([data-nse-part="content"]>*)):where(:not([data-nse-part="leading"]>*)),
+:scope:is([data-nse-part="title"]:where([data-nse-control="window"] *):where(:not([data-nse-control="window"] [data-nse-control] *)):where(:not([data-nse-part="header"]>*)):where(:not([data-nse-part="content"]>*)):where(:not([data-nse-part="leading"]>*))),
+:scope[data-nse-part="title"]:where([data-nse-control="window"] *):where(:not([data-nse-control="window"] [data-nse-control] *)):where(:not([data-nse-part="header"]>*)):where(:not([data-nse-part="content"]>*)):where(:not([data-nse-part="leading"]>*)) { margin: 0; }
 :scope [data-nse-control="window"]:where([data-nse-part="header"]):where([data-nse-toolbar-style])[data-nse-toolbar-style="preference"],
 :scope:is([data-nse-control="window"]:where([data-nse-part="header"]):where([data-nse-toolbar-style])[data-nse-toolbar-style="preference"]),
 :scope[data-nse-control="window"]:where([data-nse-part="header"]):where([data-nse-toolbar-style])[data-nse-toolbar-style="preference"],
