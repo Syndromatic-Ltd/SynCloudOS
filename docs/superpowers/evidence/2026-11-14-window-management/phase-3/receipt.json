@@ -1,0 +1,96 @@
+{
+  "baseline": "Phase 0 site captures, site 0472a7c",
+  "framework": "34fac939",
+  "site": "74c1017 with existing local site edits",
+  "viewportDpr": 1,
+  "captures": [
+    {
+      "id": "desktop-light-cumulus",
+      "url": "http://127.0.0.1:5454/about",
+      "app": "about",
+      "floating": {
+        "x": 81,
+        "y": 61,
+        "width": 978,
+        "height": 65
+      }
+    },
+    {
+      "id": "desktop-light-metal",
+      "url": "http://127.0.0.1:5454/software",
+      "app": "software",
+      "floating": {
+        "x": 81,
+        "y": 61,
+        "width": 1118,
+        "height": 65
+      }
+    },
+    {
+      "id": "desktop-dark-cumulus",
+      "url": "http://127.0.0.1:5454/about",
+      "app": "about",
+      "floating": {
+        "x": 81,
+        "y": 61,
+        "width": 978,
+        "height": 65
+      }
+    },
+    {
+      "id": "desktop-dark-metal",
+      "url": "http://127.0.0.1:5454/software",
+      "app": "software",
+      "floating": {
+        "x": 81,
+        "y": 61,
+        "width": 1118,
+        "height": 65
+      }
+    },
+    {
+      "id": "phone-light-cumulus",
+      "url": "http://127.0.0.1:5454/about",
+      "app": "about",
+      "floating": {
+        "x": 1,
+        "y": 1,
+        "width": 388,
+        "height": 65
+      }
+    },
+    {
+      "id": "phone-light-metal",
+      "url": "http://127.0.0.1:5454/software",
+      "app": "software",
+      "floating": {
+        "x": 1,
+        "y": 1,
+        "width": 388,
+        "height": 65
+      }
+    },
+    {
+      "id": "phone-dark-cumulus",
+      "url": "http://127.0.0.1:5454/about",
+      "app": "about",
+      "floating": {
+        "x": 1,
+        "y": 1,
+        "width": 388,
+        "height": 65
+      }
+    },
+    {
+      "id": "phone-dark-metal",
+      "url": "http://127.0.0.1:5454/software",
+      "app": "software",
+      "floating": {
+        "x": 1,
+        "y": 1,
+        "width": 388,
+        "height": 65
+      }
+    }
+  ]
+}

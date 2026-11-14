@@ -461,8 +461,14 @@ The production Webspring integration test, `tests/runtime/application-stage-tran
 class app through LaunchServices and moves its full-screen window to the floating presentation and back.
 It verifies one window ID, one controller, one load, the same mounted input, the unsaved draft and DOM focus.
 The browser stage binding follows committed destination slots and retains the portal when its slot moves.
-The host port currently handles full-screen intent and host events. Separate-surface binding and browser
-launch/return choreography still require their own end-to-end receipts. Electron remains a separate phase.
+Chromium captures through the site’s installed SDK show About (Cumulus) and Software (Metal)
+leaving the Webspring stage for a floating window at desktop and phone sizes, in both colour schemes.
+The [Phase 3 receipt](../evidence/2026-11-14-window-management/phase-3/receipt.json) records the visible destinations.
+
+The production host port handles full-screen intent, close requests and activation events. The stable
+container moves between same-document slots. Generation-fenced child-document transfer and rollback are
+verified in the prototype. The production bind/unbind acknowledgement, cross-document surface-loss recovery
+and launch/return motion acceptance remain open. Electron remains a separate phase.
 
 ### Phase 1: dead code and dead fields (Codex)
 

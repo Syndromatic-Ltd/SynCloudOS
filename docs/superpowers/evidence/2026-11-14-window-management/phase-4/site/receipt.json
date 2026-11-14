@@ -1,0 +1,175 @@
+{
+  "framework": "34fac939",
+  "site": "74c10178768525431178c217315a21477880b161",
+  "url": "http://127.0.0.1:5454",
+  "captures": [
+    {
+      "device": "desktop",
+      "scheme": "light",
+      "app": "about",
+      "material": "cumulus",
+      "file": "after-desktop-light-cumulus-about.png",
+      "url": "http://127.0.0.1:5454/about",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 74
+      }
+    },
+    {
+      "device": "desktop",
+      "scheme": "light",
+      "app": "software",
+      "material": "metal",
+      "file": "after-desktop-light-metal-software.png",
+      "url": "http://127.0.0.1:5454/software",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 74
+      }
+    },
+    {
+      "device": "desktop",
+      "scheme": "light",
+      "app": "journal",
+      "material": "cumulus",
+      "file": "after-desktop-light-cumulus-journal.png",
+      "url": "http://127.0.0.1:5454/journal",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 74
+      }
+    },
+    {
+      "device": "desktop",
+      "scheme": "dark",
+      "app": "about",
+      "material": "cumulus",
+      "file": "after-desktop-dark-cumulus-about.png",
+      "url": "http://127.0.0.1:5454/about",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 74
+      }
+    },
+    {
+      "device": "desktop",
+      "scheme": "dark",
+      "app": "software",
+      "material": "metal",
+      "file": "after-desktop-dark-metal-software.png",
+      "url": "http://127.0.0.1:5454/software",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 74
+      }
+    },
+    {
+      "device": "desktop",
+      "scheme": "dark",
+      "app": "journal",
+      "material": "cumulus",
+      "file": "after-desktop-dark-cumulus-journal.png",
+      "url": "http://127.0.0.1:5454/journal",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 74
+      }
+    },
+    {
+      "device": "phone",
+      "scheme": "light",
+      "app": "about",
+      "material": "cumulus",
+      "file": "after-phone-light-cumulus-about.png",
+      "url": "http://127.0.0.1:5454/about",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 64
+      }
+    },
+    {
+      "device": "phone",
+      "scheme": "light",
+      "app": "software",
+      "material": "metal",
+      "file": "after-phone-light-metal-software.png",
+      "url": "http://127.0.0.1:5454/software",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 64
+      }
+    },
+    {
+      "device": "phone",
+      "scheme": "light",
+      "app": "journal",
+      "material": "cumulus",
+      "file": "after-phone-light-cumulus-journal.png",
+      "url": "http://127.0.0.1:5454/journal",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 64
+      }
+    },
+    {
+      "device": "phone",
+      "scheme": "dark",
+      "app": "about",
+      "material": "cumulus",
+      "file": "after-phone-dark-cumulus-about.png",
+      "url": "http://127.0.0.1:5454/about",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 64
+      }
+    },
+    {
+      "device": "phone",
+      "scheme": "dark",
+      "app": "software",
+      "material": "metal",
+      "file": "after-phone-dark-metal-software.png",
+      "url": "http://127.0.0.1:5454/software",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 64
+      }
+    },
+    {
+      "device": "phone",
+      "scheme": "dark",
+      "app": "journal",
+      "material": "cumulus",
+      "file": "after-phone-dark-cumulus-journal.png",
+      "url": "http://127.0.0.1:5454/journal",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 64
+      }
+    }
+  ]
+}
