@@ -211,3 +211,54 @@ Each row records the first mismatch reached by a frozen catalogue partition.
 | chromium-reduced-motion | light | 18 | `slider-circular-small-minimum` |
 | chromium-reduced-motion | light | 19 | `slider-circular-regular-normal` |
 | chromium-reduced-motion | light | 20 | `slider-circular-regular-focused` |
+
+## Final source browser run
+
+Framework `afdf897c`. The Chromium, Chromium high-DPR and Chromium reduced-motion projects
+reported 120 first mismatches across their frozen catalogue partitions. The table shows each
+first differing image and the number of partitions that reported it.
+
+| First image | Partitions |
+| --- | ---: |
+| `dark-slider-circular-mini-focused.png` | 3 |
+| `dark-slider-circular-mini-minimum.png` | 3 |
+| `dark-slider-circular-mini-normal.png` | 3 |
+| `dark-slider-circular-regular-focused.png` | 3 |
+| `dark-slider-circular-regular-maximum.png` | 3 |
+| `dark-slider-circular-regular-normal.png` | 3 |
+| `dark-slider-circular-small-focused.png` | 3 |
+| `dark-slider-circular-small-minimum.png` | 3 |
+| `dark-slider-circular-small-normal.png` | 3 |
+| `dark-switch-metal-off-enabled.png` | 3 |
+| `dark-switch-metal-on-enabled.png` | 3 |
+| `dark-top-bar-atmoCumulus-dark.png` | 3 |
+| `dark-window-metal-key-preference.png` | 3 |
+| `dark-window-standard-inactive-automatic.png` | 3 |
+| `dark-window-standard-inactive-expanded.png` | 3 |
+| `dark-window-standard-inactive-unified.png` | 3 |
+| `dark-window-standard-inactive-unifiedCompact.png` | 3 |
+| `dark-window-standard-key-automatic.png` | 3 |
+| `dark-window-standard-key-expanded.png` | 3 |
+| `dark-window-standard-key-unifiedCompact.png` | 3 |
+| `light-button-destructive-focused.png` | 1 |
+| `light-button-rounded-large-momentaryPushIn-focused.png` | 1 |
+| `light-slider-circular-mini-focused.png` | 2 |
+| `light-slider-circular-mini-minimum.png` | 3 |
+| `light-slider-circular-mini-normal.png` | 2 |
+| `light-slider-circular-regular-focused.png` | 3 |
+| `light-slider-circular-regular-maximum.png` | 3 |
+| `light-slider-circular-regular-normal.png` | 3 |
+| `light-slider-circular-small-focused.png` | 3 |
+| `light-slider-circular-small-minimum.png` | 3 |
+| `light-slider-circular-small-normal.png` | 3 |
+| `light-switch-metal-off-enabled.png` | 3 |
+| `light-switch-metal-on-enabled.png` | 3 |
+| `light-top-bar-atmoCumulus-dark.png` | 3 |
+| `light-window-metal-key-preference.png` | 3 |
+| `light-window-standard-inactive-automatic.png` | 3 |
+| `light-window-standard-inactive-expanded.png` | 3 |
+| `light-window-standard-inactive-unified.png` | 3 |
+| `light-window-standard-inactive-unifiedCompact.png` | 3 |
+| `light-window-standard-key-automatic.png` | 3 |
+| `light-window-standard-key-expanded.png` | 3 |
+| `light-window-standard-key-unifiedCompact.png` | 2 |

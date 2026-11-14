@@ -1,0 +1,119 @@
+{
+  "sdk": "afdf897c",
+  "site": "0d62926 with existing local edits",
+  "method": "Actions from the production Webspring launcher; immediate screenshot and sampled MultiSwitch presence; paired historical probes remain incomplete.",
+  "rows": [
+    {
+      "device": "desktop",
+      "scheme": "light",
+      "material": "cumulus",
+      "app": "About",
+      "target": "Software",
+      "frames": {
+        "launch": "desktop-light-cumulus-launch.png",
+        "return": "desktop-light-cumulus-return.png",
+        "quickswitch": "desktop-light-cumulus-quickswitch.png",
+        "multiswitch": "desktop-light-cumulus-multiswitch.png"
+      },
+      "sampledMultiSwitchFrames": 1
+    },
+    {
+      "device": "desktop",
+      "scheme": "dark",
+      "material": "cumulus",
+      "app": "About",
+      "target": "Software",
+      "frames": {
+        "launch": "desktop-dark-cumulus-launch.png",
+        "return": "desktop-dark-cumulus-return.png",
+        "quickswitch": "desktop-dark-cumulus-quickswitch.png",
+        "multiswitch": "desktop-dark-cumulus-multiswitch.png"
+      },
+      "sampledMultiSwitchFrames": 1
+    },
+    {
+      "device": "desktop",
+      "scheme": "light",
+      "material": "metal",
+      "app": "Software",
+      "target": "About",
+      "frames": {
+        "launch": "desktop-light-metal-launch.png",
+        "return": "desktop-light-metal-return.png",
+        "quickswitch": "desktop-light-metal-quickswitch.png",
+        "multiswitch": "desktop-light-metal-multiswitch.png"
+      },
+      "sampledMultiSwitchFrames": 2
+    },
+    {
+      "device": "desktop",
+      "scheme": "dark",
+      "material": "metal",
+      "app": "Software",
+      "target": "About",
+      "frames": {
+        "launch": "desktop-dark-metal-launch.png",
+        "return": "desktop-dark-metal-return.png",
+        "quickswitch": "desktop-dark-metal-quickswitch.png",
+        "multiswitch": "desktop-dark-metal-multiswitch.png"
+      },
+      "sampledMultiSwitchFrames": 1
+    },
+    {
+      "device": "phone",
+      "scheme": "light",
+      "material": "cumulus",
+      "app": "About",
+      "target": "Software",
+      "frames": {
+        "launch": "phone-light-cumulus-launch.png",
+        "return": "phone-light-cumulus-return.png",
+        "quickswitch": "phone-light-cumulus-quickswitch.png",
+        "multiswitch": "phone-light-cumulus-multiswitch.png"
+      },
+      "sampledMultiSwitchFrames": 2
+    },
+    {
+      "device": "phone",
+      "scheme": "dark",
+      "material": "cumulus",
+      "app": "About",
+      "target": "Software",
+      "frames": {
+        "launch": "phone-dark-cumulus-launch.png",
+        "return": "phone-dark-cumulus-return.png",
+        "quickswitch": "phone-dark-cumulus-quickswitch.png",
+        "multiswitch": "phone-dark-cumulus-multiswitch.png"
+      },
+      "sampledMultiSwitchFrames": 2
+    },
+    {
+      "device": "phone",
+      "scheme": "dark",
+      "material": "metal",
+      "app": "Software",
+      "target": "About",
+      "frames": {
+        "launch": "phone-dark-metal-launch.png",
+        "return": "phone-dark-metal-return.png",
+        "quickswitch": "phone-dark-metal-quickswitch.png",
+        "multiswitch": "phone-dark-metal-multiswitch.png"
+      },
+      "sampledMultiSwitchFrames": 2
+    },
+    {
+      "device": "phone",
+      "scheme": "light",
+      "material": "metal",
+      "app": "Software",
+      "target": "About",
+      "frames": {
+        "launch": "phone-light-metal-launch.png",
+        "return": "phone-light-metal-return.png",
+        "quickswitch": "phone-light-metal-quickswitch.png",
+        "multiswitch": "phone-light-metal-multiswitch.png"
+      },
+      "sampledMultiSwitchFrames": 3
+    }
+  ]
+}

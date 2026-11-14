@@ -13,6 +13,9 @@ Framework baseline is 1bfc47e9 in the Webspring framework worktree. Site baselin
 - [Phase 7](phase-7/split-layout/) added three-pane seams and animated sidebar and inspector collapse. The scoped before/after fixture verifies retained content and focus during geometry changes.
 - [Phase 3 native](phase-3/native/) shows the retained Webspring editor in floating and child windows. Phone-width captures use a 390 CSS-pixel desktop popup. The browser test confirms sheet focus return, an app-close veto and recovery after native popup loss.
 - [Phase 3 motion probes](phase-3/production-motion/) include launch and return samples and the QuickSwitch surface where available. The receipt records failed routes and incomplete transition sequences.
+- [Phase 3 final site motion](phase-3/final-site-motion/) records launch, return, QuickSwitch and MultiSwitch in all eight requested combinations. The receipt includes observed MultiSwitch frames. Equivalent historical scenes remain incomplete.
+- [Phase 3 stage exit](phase-3/stage-exit/) pairs the fixture before and after moving its content at the beginning of stage exit. The [frame samples](phase-3/production-motion/stage-exit-frames.json) show the earlier blank interval and the corrected continuous editor.
+- [Phase 3 installed-site native](phase-3/installed-native/) verifies the same mounted About and Software content makes a desktop round trip through a child browser window in both schemes. The original window ID survives in the child and on return.
 - [Phase 4 scoped frame paint](phase-4/frame-scope/) compares the same fixture with the scoped stylesheet off and on. A separate window keeps its own paint and a rejected stylesheet falls back to built-in tokens.
 - [Phase 4 site apps](phase-4/site-apps/) shows both Journal variants in Journal and JournalOld, and the MemoJournal and SynCal layouts on desktop and phone. These are candidate captures. The original site's vendored SDK could not load Journal because its Atmo entry lacked the motion export required by that source.
 - [Phase 7 tracked separator](phase-7/sidebar-tracking/) compares the same split with and without a tracking separator. It follows rendered sidebar thickness through resize and collapse, including in floating Cumulus.
@@ -25,7 +28,7 @@ Framework baseline is 1bfc47e9 in the Webspring framework worktree. Site baselin
 - Pending design | Floating Cumulus titlebar art. The window opts in through titlebarPresentation, with a semantic floating surface and existing-token paint. Metal stays attached.
 - Pending design | Journal and JournalOld frame-view art for the Mountain Lion and leather variants. Both use metric and token placeholders.
 - Compare the shared titlebar's inline toolbar, controls, dark accessory paint, and desktop/phone layout with the reference captures. The titlebar and menu fixtures include their source hashes and geometry.
-- The production site captures include both Journal variants, MemoJournal and SynCal. Same-scene baseline pairs and complete launch, return, QuickSwitch and MultiSwitch motion comparisons remain open. During a desktop stage-to-floating handoff, the new frame can appear before its retained content becomes visible.
+- The production site captures include both Journal variants, MemoJournal and SynCal. Same-scene baseline pairs and complete launch, return, QuickSwitch and MultiSwitch motion comparisons remain open.
 - Window-controls-overlay verification remains open. Chrome accepted a temporary-profile PWA installation, but the test could not obtain a live native titlebar rectangle.
 
 ## Engineering follow-up
@@ -38,11 +41,11 @@ Framework baseline is 1bfc47e9 in the Webspring framework worktree. Site baselin
 ## Frozen screenshot results
 
 The existing baseline images and assertion file match framework commit 1bfc47e9 byte for byte. Chromium DPR 1 and DPR 2 reported 80 failing partitions and 2 passing interaction checks at 6ca65fdf. Each failing partition stops at its first differing image, so the catalogue can have further differences after the entries below.
-The full browser matrix at `27834416` also reported 40 failing catalogue partitions in Chromium reduced motion, for 120 across the three projects.
+The final browser matrix at `afdf897c` reported 120 frozen catalogue failures across Chromium, Chromium high DPR and Chromium reduced motion. The [failure index](frozen-theme-failures.md#final-source-browser-run) lists every first mismatch.
 
 ### Pending design review
 
-These first mismatches were reported in light and dark in both DPR projects and Chromium reduced motion, for 54 titlebar failures in the complete matrix.
+The final matrix reported 53 titlebar failures across light and dark in the three Chromium projects.
 
 - Cumulus stage titlebar (`top-bar-atmoCumulus-dark` is the catalogue ID in both ambient schemes).
 - Metal key window with preference toolbar (`window-metal-key-preference`).
@@ -51,7 +54,7 @@ These first mismatches were reported in light and dark in both DPR projects and 
 
 ### Other screenshot mismatches
 
-The other 66 first mismatches in the complete matrix were Metal switches on and off, and circular sliders in mini, small and regular sizing at normal, focused, minimum or maximum positions. A Chromium rerun using baseline titlebar and theme sources reproduced the enabled Metal switch and regular maximum slider mismatches. In that same run the partition containing the Metal preference titlebar passed. The remaining control variants have not been isolated. Exact surface IDs and the results for both runs are in [the catalogue failure index](frozen-theme-failures.md).
+The remaining first mismatches in the final matrix were Metal switches on and off, circular sliders in mini, small and regular sizing at normal, focused, minimum or maximum positions, and two light focused button states. These control differences remain open for review. A Chromium rerun using baseline titlebar and theme sources reproduced the enabled Metal switch and regular maximum slider mismatches. In that same run the partition containing the Metal preference titlebar passed. The remaining control variants have not been isolated. Exact surface IDs and the results for both runs are in [the catalogue failure index](frozen-theme-failures.md).
 
 ## Verification
 
@@ -70,7 +73,16 @@ The other 66 first mismatches in the complete matrix were Metal switches on and 
 | Host typography follow-up | `73f0eebd` | All six cases in Chromium, Firefox and WebKit passed after restoring inherited fonts and targeting the heading by role. The frozen follow-up passed 25 browser cases and 24 focused runtime cases. The full browser matrix predates this follow-up. |
 | Site runtime | `c138484`, embedded framework `131b9eda` | 24 Node tests passed. Vitest reported 403 passed and ten failed, including Gallery lifecycle and focus, and Publisher transient anchors and image editing. |
 | Site browser | `c138484`, embedded framework `131b9eda` | 11 passed and 14 failed. All five Chromium scroll/chrome viewports passed. Journal passed in Chromium, Firefox and WebKit. Failures cluster in Chronosphere/Gallery presentation, login, and Publisher. |
+| Full framework suite before the toolbar contract correction | `afdf897c` | 9,931 passed and four timed out in the concurrent run. A rendered-contract assertion also failed. The four timeout cases passed focused reruns. The next commit adds the disabled and selected toolbar hooks to the generated contract and reference. |
+| Final framework typecheck and SDK build | `afdf897c` | Passed. |
+| Final site typecheck and boundaries | Site `11818eb`, installed framework `afdf897c` | Passed. Archive SHA-256 `68d791660cf9bc904bd936d779cb4a5176024b4bd62fa22c88f5158229ac2b1f`. |
+| Final site runtime | Site `11818eb`, installed framework `afdf897c` | All 24 Node tests and all 413 Vitest cases passed with two workers and a 15-second test timeout. |
+| Final framework focused runtime | `afdf897c` and source-equivalent precommit changes | 83 boundary, public API and animation-revocation checks passed in isolation. Another 70 passed across API, idiom, class modal and attached sheet files. The earlier integrated AppKit, focus, command and transfer run passed 78. |
+| Final native browser | `afdf897c` | Chromium covered retained input, draft, ID, sheet focus, explicit reattach, close veto and OS loss. The separate stage-exit test sampled consecutive rendered frames. |
+| Complete framework browser run | `afdf897c` | All seven projects ran. 438 passed, 206 failed and seven skipped. 120 frozen catalogue partitions failed. The detached-window and continuous stage-exit tests passed. |
+| Focused final window browser checks | `afdf897c` | All 11 passed, including the forced-colours focus case that failed in the whole matrix. |
+| Final site browser | Site `0d62926`, installed framework `afdf897c` | 18 passed and seven failed. All three Journal/Lumina browsers, both Publisher settings cases, and the repeated sign-in flow passed. Six Chronosphere/Gallery cases remained red. The Publisher context-menu case passed on the same-SDK focused rerun. |
 
-All six Chronosphere/Gallery cases also failed on a separate rerun pointed at the current site's FX preview. The local-login test now follows the configured identity and the new toolbar menu. Its focused rerun gets through sign-in and Journal, then times out waiting for Publisher's Title field. Chromium reached the Publisher URL and rendered its stage title without a content mount. Launch history records cancellation after Publisher's bundle became ready, followed by MultiSwitch settlement and suspension of Journal. A direct authenticated Publisher entry mounted its window. On the current SDK, the focused phone and desktop scroll cases and the three Journal browser cases passed.
+The final framework browser matrix reported 86 failures outside the frozen catalogue. The four adaptive navigation failures reproduced on clean baseline framework `1bfc47e9`. Window management and forced-colour focus passed the 11-case focused run. Most other failures were in FX, text output and capability fixtures. The site Chronosphere development archive requires local authorisation. An authorised probe got past launch and still reported failures in the existing loading, recovery, Gallery and mobile visual checks.
 
 The acceptance-name search covered `src`, `tests`, `scripts` and `tooling` in both repositories. Hits remaining in active code are `sourceList` names for the unrelated NSE outline selection style, its fixtures and Gallery navigation strings. The retired `frame.sourceList` field is gone. The plan, migration guide and capture metadata retain historical names to identify what was removed. The frozen theme assertion and image tree still match `1bfc47e9` byte for byte.
