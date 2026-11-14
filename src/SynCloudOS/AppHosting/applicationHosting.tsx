@@ -18,9 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEViewSafeAreaContext, useNSEViewSafeArea } from "../../NSE/applicationHostInterop";
+import { ViewSafeAreaContext, useNSEViewSafeArea } from "../../NSE/applicationHostInterop";
 import { nseUpdateSafeArea } from "../../NSE/applicationHostInterop";
-import { NSEWindowLayoutContext } from "../../NSE/applicationHostInterop";
+import { WindowLayoutContext } from "../../NSE/applicationHostInterop";
 import { nativePresentations } from "../../NSE/applicationHostInterop";
 
 import { WindowTitleSlotContext, WindowTitlebarContent } from "../../NSE/applicationHostInterop";
@@ -282,11 +282,11 @@ export function NSEViewControllerView({ controller, className }: NSEViewControll
   if (!View) throw new TypeError(`${controller.constructor.name} has no static view or renderView; declare one rendering form.`);
   const frame = (
     <div ref={frameRef} tabIndex={-1} className={className} data-nse-view-controller="" style={{ ...safeArea.properties, ...(controller.parent ? {} : FRAME_STYLE), ...(controller.presentedViewControllers.some(presented => presented[nsePresentationStyle] === "custom") ? { position: "relative" as const } : {}) }}>
-      <NSEViewSafeAreaContext.Provider value={safeArea.value}>
+      <ViewSafeAreaContext.Provider value={safeArea.value}>
       <NSEViewControllerRendererProvider value={NSEViewControllerView}>
         <View controller={controller} />
       </NSEViewControllerRendererProvider>
-      </NSEViewSafeAreaContext.Provider>
+      </ViewSafeAreaContext.Provider>
       {controller.presentedViewControllers.map(presented => {
         if (nativePresentations.has(presented)) return null;
         const style = presented[nsePresentationStyle];
@@ -451,7 +451,7 @@ export function NSEWindowControllerView({ controller }: NSEWindowControllerViewP
   const appRuntime = useContext(SynWareRuntimeContext);
   const alerts = useMemo(() => createNSEWindowAlertQueue(), []);
   const appAlerts = useSynWareContext()?.alerts ?? null;
-  const layout = useContext(NSEWindowLayoutContext);
+  const layout = useContext(WindowLayoutContext);
   const mount = useMemo(() => {
     const mount = appRuntime ? createWindowMount(appRuntime, alerts, appAlerts) : null;
     return mount && layout ? { ...mount, get windowId() { return mount.windowId; }, contentLayoutGuide: layout } : mount;

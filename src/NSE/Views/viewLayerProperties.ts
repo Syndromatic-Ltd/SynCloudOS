@@ -24,7 +24,7 @@ import { NSEShadow, type NSEShadowOptions } from "../Graphics/NSEShadow";
 import { useNSEAppearance } from "../Appearance/NSEAppearanceProvider";
 
 /** Shared NSView.shadow and CALayer corner properties. */
-export interface NSEViewLayerProperties {
+export interface ViewLayerProperties {
   readonly shadow?: NSEShadow | NSEShadowOptions | null;
   readonly cornerRadius?: number;
   readonly cornerCurve?: AFXLayerCornerCurve;
@@ -36,7 +36,7 @@ export function nseNonNegative(value: number | undefined, name: string): number 
 }
 
 /** Project semantic properties only. The selected theme owns the drawing recipe. */
-export function useNSEViewLayerProperties({ shadow, cornerRadius, cornerCurve }: NSEViewLayerProperties) {
+export function useNSEViewLayerProperties({ shadow, cornerRadius, cornerCurve }: ViewLayerProperties) {
   const appearance = useNSEAppearance();
   const radius = nseNonNegative(cornerRadius, "cornerRadius");
   if (cornerCurve !== undefined && cornerCurve !== "circular" && cornerCurve !== "continuous") throw new TypeError("Unknown cornerCurve.");

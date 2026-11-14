@@ -27,7 +27,7 @@ import {
   type NSEOwner,
 } from "../Controllers/ownership";
 import { NSEObject } from "../Objects/NSEObject";
-import { NSELayoutGuideStore, type NSELayoutGuide } from "../Layout/NSELayoutGuide";
+import { LayoutGuideStore, type NSELayoutGuide } from "../Layout/NSELayoutGuide";
 import type { NSEScrollRect } from "../Scroll/scrollTypes";
 import type { NSEApplication, NSEOpenWindowOptions } from "./NSEApplication";
 import { NSEObjectLifetime } from "./objectLifetime";
@@ -255,7 +255,7 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
   readonly #window: NSEWindow;
   readonly #internals: NSEWindowControllerInternals;
   #mount: NSEWindowMount | null = null;
-  readonly #contentLayout = new NSELayoutGuideStore();
+  readonly #contentLayout = new LayoutGuideStore();
   #stopContentLayout: (() => void) | null = null;
   #loaded = false;
   #key = false;

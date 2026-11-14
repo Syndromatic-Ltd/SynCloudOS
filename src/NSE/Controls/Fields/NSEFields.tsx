@@ -25,7 +25,7 @@ import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction
 import { MetalThumb, type NSEThumbMaterial } from "../../Appearance/MetalThumb";
 import { NSEDivider } from "../Selection/NSEDivider";
 import { nseCSSValue } from "../../Graphics/NSEShadow";
-import { nseNonNegative, useNSEViewLayerProperties, type NSEViewLayerProperties } from "../../Views/viewLayerProperties";
+import { nseNonNegative, useNSEViewLayerProperties, type ViewLayerProperties } from "../../Views/viewLayerProperties";
 import {
   Children,
   Fragment,
@@ -925,7 +925,7 @@ export interface NSEBoxContentViewMargins {
  */
 export type NSEContentLayout = "stack" | "flow";
 
-export interface NSEBoxProps extends Omit<HTMLAttributes<HTMLFieldSetElement>, "title">, NSEViewLayerProperties {
+export interface NSEBoxProps extends Omit<HTMLAttributes<HTMLFieldSetElement>, "title">, ViewLayerProperties {
   /** NSBox.title. A titled separator draws its title as the theme's captioned separator. */
   title?: ReactNode;
   /** NSBox.titlePosition (default atTop with a title, otherwise noTitle). */

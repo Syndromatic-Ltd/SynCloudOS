@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEWindowLayoutContext, NSEWindowLayoutModel, useNSEContentLayoutProperties } from "../NSE/hostComposition";
+import { WindowLayoutContext, WindowLayoutModel, useNSEContentLayoutProperties } from "../NSE/hostComposition";
 import { useNSEDeferredDisposal } from "../NSE/hostComposition";
 
 import { useCallback, useLayoutEffect, useMemo, useEffect, useRef, type CSSProperties, type FocusEventHandler, type ReactNode, type Ref } from "react";
@@ -80,7 +80,7 @@ function Root({
   ...hostProps
 }: RootProps) {
   const frameRef = useRef<HTMLDivElement | null>(null);
-  const layout = useMemo(() => new NSEWindowLayoutModel(), []);
+  const layout = useMemo(() => new WindowLayoutModel(), []);
   useNSEDeferredDisposal(layout);
   useLayoutEffect(() => frameRef.current ? layout.connectRoot(frameRef.current) : undefined, [layout]);
   useLayoutEffect(() => { if (safeAreaInsets) layout.setLogicalScreenInsets(safeAreaInsets); }, [layout, safeAreaInsets]);
@@ -113,7 +113,7 @@ function Root({
     target.focus({ preventScroll: true, focusVisible: false } as FocusOptions);
   }, [inactive, keyWindow]);
   return (
-    <NSEWindowLayoutContext.Provider value={layout}>
+    <WindowLayoutContext.Provider value={layout}>
     <div
       {...hostProps}
       ref={setFrame}
@@ -130,7 +130,7 @@ function Root({
     >
       {children}
     </div>
-    </NSEWindowLayoutContext.Provider>
+    </WindowLayoutContext.Provider>
   );
 }
 

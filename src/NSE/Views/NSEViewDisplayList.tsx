@@ -58,7 +58,7 @@ function svgBlendMode(mode: GFXBlendMode): React.CSSProperties["mixBlendMode"] {
     return mode;
 }
 /** Internal SVG renderer for NSView.draw(_:), with recorder-owned definitions. */
-export function NSEViewDisplayList({ displayList, placement, accessibility }: { readonly displayList: GFXDisplayList; readonly placement: NSEViewLayerContentsPlacement; readonly accessibility: React.AriaAttributes }) {
+export function ViewDisplayList({ displayList, placement, accessibility }: { readonly displayList: GFXDisplayList; readonly placement: NSEViewLayerContentsPlacement; readonly accessibility: React.AriaAttributes }) {
     assertGFXDisplayList(displayList);
     assertDisplayListImagePaintBudget(displayList);
     const definitions = useMemo(() => {

@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEWindowLayoutContext, useNSEWindowChromeElement } from "../../NSE/applicationHostInterop";
+import { WindowLayoutContext, useNSEWindowChromeElement } from "../../NSE/applicationHostInterop";
 import { contentInlineSize } from "./contentInlineSize";
 import { useNSEWindowChromeObstruction } from "../../NSE/NSE";
 
@@ -155,7 +155,7 @@ export function NSEWindowToolbar({ controller, toolbar }: { readonly controller:
   const overlayId = `nse-window-toolbar:${useId()}`;
   const mode = useWindowChromeMode();
   const element = useRef<HTMLDivElement | null>(null);
-  const layout = useContext(NSEWindowLayoutContext);
+  const layout = useContext(WindowLayoutContext);
   useNSEWindowChromeElement(element, "top", false, toolbar.isVisible);
   const [width, setWidth] = useState(0);
   const [attached, setAttached] = useState(false);

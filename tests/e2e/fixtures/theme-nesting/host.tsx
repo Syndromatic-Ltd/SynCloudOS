@@ -14,7 +14,7 @@ import { NSEViewController, nseUpdateTraits } from '../../../../src/NSE/Applicat
 import { NSEViewControllerView } from '../../../../src/SynCloudOS/AppHosting/applicationHosting';
 import { NSETabViewController, NSETabViewItem } from '../../../../src/NSE/Navigation/NSETabViewController';
 import { NSEScrollView } from '../../../../src/NSE/Scroll/NSEScrollView';
-import { NSEWindowLayoutContext, NSEWindowLayoutModel } from '../../../../src/NSE/Layout/windowChromeObstructions';
+import { WindowLayoutContext, WindowLayoutModel } from '../../../../src/NSE/Layout/windowChromeObstructions';
 import { createStaticPresentationPort, createStaticPresentationTraits } from '../../../fixtures/presentationTraits';
 import '../../../../src/NSE/public/styles.css';
 const parameters = new URLSearchParams(location.search);
@@ -27,7 +27,7 @@ class DocumentPage extends NSEViewController {
 }
 function Navigation() {
   const root = useRef<HTMLDivElement>(null);
-  const [model] = useState(() => new NSEWindowLayoutModel({bounds:{x:0,y:0,width,height}}));
+  const [model] = useState(() => new WindowLayoutModel({bounds:{x:0,y:0,width,height}}));
   const [tabs] = useState(() => {
     const tabs = new NSETabViewController(); tabs.tabStyle='sidebarAdaptable';
     tabs[nseUpdateTraits]({reducedMotion:true,presentation:createStaticPresentationTraits({width,height})});
@@ -38,7 +38,7 @@ function Navigation() {
   const flow = parameters.get('flow') as 'in-flow' | 'overlay';
   const theme=freezeNSETheme({...atmoTheme,bundleIdentifier:'com.example.navigation',navigation:{...atmoTheme.navigation,[widthClass]:{placement,flow}}} as typeof atmoTheme);
   useLayoutEffect(()=> { const stop=model.connectRoot(root.current!); return ()=>{stop();model.dispose();tabs.dispose();}; },[model,tabs]);
-  return <NSEAppearanceProvider theme={theme}><div ref={root} dir={parameters.get('dir') ?? 'ltr'} style={{position:'relative',width,height}}><NSEWindowLayoutContext.Provider value={model}><NSEViewControllerView controller={tabs}/></NSEWindowLayoutContext.Provider></div></NSEAppearanceProvider>;
+  return <NSEAppearanceProvider theme={theme}><div ref={root} dir={parameters.get('dir') ?? 'ltr'} style={{position:'relative',width,height}}><WindowLayoutContext.Provider value={model}><NSEViewControllerView controller={tabs}/></WindowLayoutContext.Provider></div></NSEAppearanceProvider>;
 }
 function Contents() {
   if(parameters.has('placement')) return <Navigation/>;

@@ -2,7 +2,7 @@
 import { createContext, createElement, Fragment, useContext, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PropsWithChildren, type RefObject } from "react";
 import { NSEEdgeInsetsMake, NSEEdgeInsetsZero, type NSEEdgeInsets } from "./NSEEdgeInsets";
 import { nseEmptyLayoutRect, nseEqualRects } from "./NSELayoutGuide";
-import { NSEWindowLayoutContext, useNSEWindowLayoutSnapshot } from "./windowChromeObstructions";
+import { WindowLayoutContext, useNSEWindowLayoutSnapshot } from "./windowChromeObstructions";
 import type { NSEScrollRect } from "../Scroll/scrollTypes";
 
 export interface NSESafeArea {
@@ -12,7 +12,7 @@ export interface NSESafeArea {
 export const nseEqualInsets = (a: NSEEdgeInsets, b: NSEEdgeInsets) => a.top === b.top && a.left === b.left && a.bottom === b.bottom && a.right === b.right;
 interface ViewSafeArea extends NSESafeArea { readonly additional: NSEEdgeInsets }
 /** @internal The accumulated additional insets are distinct from the window overlap. */
-export const NSEViewSafeAreaContext = createContext<ViewSafeArea | null>(null);
+export const ViewSafeAreaContext = createContext<ViewSafeArea | null>(null);
 
 type TransformAnswers = Map<HTMLElement | null, Map<HTMLElement, boolean>>;
 type MeasureView = (answers?: TransformAnswers) => (() => void) | undefined;
@@ -33,7 +33,7 @@ interface SafeAreaMeasurementQueue {
 const SafeAreaMeasurements = createContext<SafeAreaMeasurementQueue | null>(null);
 
 /** @internal A layout update schedules the reader even when only a descendant commits. */
-export function NSESafeAreaMeasurementProvider({ children }: PropsWithChildren) {
+export function SafeAreaMeasurementProvider({ children }: PropsWithChildren) {
   const batch = useMemo(() => {
     const pending = new Map<RefObject<HTMLElement | null>, MeasureView>();
     let schedule: (() => void) | undefined;
@@ -70,7 +70,7 @@ function SafeAreaReader({ batch }: { batch: { connect(request: () => void): () =
 }
 
 export function useNSESafeArea(): NSESafeArea {
-  const inherited = useContext(NSEViewSafeAreaContext);
+  const inherited = useContext(ViewSafeAreaContext);
   const { bounds, insets } = useNSEWindowLayoutSnapshot();
   return useMemo(() => inherited ? { safeAreaInsets: inherited.safeAreaInsets, safeAreaRect: inherited.safeAreaRect } : {
     safeAreaInsets: insets,
@@ -126,9 +126,9 @@ function nseTransformedWithin(element: HTMLElement, root: HTMLElement | null | u
 
 /** @internal Measures an existing view element; never inserts a layout wrapper. */
 export function useNSEViewSafeArea(ref: RefObject<HTMLElement | null>, additional: NSEEdgeInsets = NSEEdgeInsetsZero, onChange?: (insets: NSEEdgeInsets) => void, onResize?: () => void, contentRef?: RefObject<HTMLElement | null>) {
-  const model = useContext(NSEWindowLayoutContext);
+  const model = useContext(WindowLayoutContext);
   const measurements = useContext(SafeAreaMeasurements);
-  const parent = useContext(NSEViewSafeAreaContext);
+  const parent = useContext(ViewSafeAreaContext);
   const window = useNSEWindowLayoutSnapshot(model);
   const [rect, setRect] = useState<NSEScrollRect>(nseEmptyLayoutRect);
   const resizeCallback = useRef(onResize);
