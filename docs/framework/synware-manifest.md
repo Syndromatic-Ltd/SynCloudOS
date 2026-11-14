@@ -11,7 +11,6 @@ export default {
   routes: [{ path: "/notes", primary: true }],
   presentations: ["desktop", "tablet", "mobile"],
   windowDefaults: { title: "Notes", width: 920, height: 680, minimumWidth: 360, minimumHeight: 460, resizable: true },
-  frame: { material: "standard", topBar: "standard", rightSlot: "auto", background: "system" },
   documentTypes: [{ id: "com.example.notes.note", extensions: ["note"], displayName: "Note" }],
   entitlements: ["file.open"],
   runtime: { policy: { public: true } },
@@ -54,7 +53,6 @@ Identifiers retain their declared case in manifests and public displays. Registr
 
 This is a clean cutover: saved data is reset, not migrated. There are no old-ID aliases or compatibility shims. Window, document, command, folder, pane and widget IDs and window/command titles are unchanged.
 
-
 ## Routes and presentations
 
 | Field | Type | Notes |
@@ -74,40 +72,17 @@ This is a clean cutover: saved data is reset, not migrated. There are no old-ID 
 | `minimumWidth`, `minimumHeight` | integer | Smallest size the user can resize to. |
 | `resizable` | boolean | Whether the window resizes. |
 | `role` | enum | `"standard"`, `"panel"`, `"modal"`, `"sheet"` or `"hud"`. |
-| `chrome` | enum | `"system"` (the default title bar), `"custom"` (your `windowChrome` component) or `"frameless"`. |
 | `smoothSurface` | `"off"`, `false`, a number, or an object | Corner shape. A number sets the radius. The object form accepts `radius`, `curve` (`"arc"`, `"squircle"`, `"superellipse"` or `"clothoid"`), `smoothing`, per-corner radii and `overflow`. |
 
 `frame` describes how the application presents inside the application stage.
 
-| Field | Values | Notes |
-| --- | --- | --- |
-| `material` | `"standard"`, `"metal"` | The material of the system top bar and furniture. `metal` selects the brushed metal look. |
-| `topBar` | `"standard"`, `"custom"`, `"none"` | `standard` uses the system bar and starts your content directly below it. `custom` leaves the bar to your application. `none` removes it and the runtime supplies the return control. `custom` and `none` leave your content the whole frame. |
-| `presentationMotion` | `"host"`, `"content"` | Defaults to `host`. `content` lets the application choreograph its entrance and return; the stage and shell omit their launch/return motion while retaining staging, focus, route and lifecycle settlement. |
-| `rightSlot` | `"auto"`, `"userInfo"`, `"none"` or `{ icon, label }` | The control in the right of the standard top bar. `"auto"` (the default) draws a gear, `"userInfo"` a person, and `{ icon, label }` your own SVG (`icon` is a resource reference, `label` localised text). `"none"` removes it. See [The right-slot control](#the-right-slot-control). |
-| `background` | `"system"`, `"none"` or a surface | What fills the body behind your content. `"system"` (the default) is a plain light or dark background that follows the appearance; `"none"` leaves the body to your app; a surface object paints a colour, texture, tint, spotlight and overlay, using the same fields as the Board's `background` surfaces. Content is always full-bleed across the frame — there is no card — and the background runs under the bar; a standard bar only reserves its height at the top. `topBar: "custom"` follows the same background rule. |
-| `smoothSurface` | `"off"` or `{ radius }` | Corner shape of the stage surface. |
-| `sourceList` | object | Optional `railLabel`, `minWidth`, `maxWidth` and `defaultWidth` for a source list sidebar. |
-
-With `topBar: "standard"`, the stage sets `--webspring-app-top-bar-height` on your application's view root: the bar's own height, including the compact breakpoint. Content is laid out below the bar automatically; read the property if your own controls need the same band. The background still fills the whole frame, behind the bar.
+`frame.presentationMotion` selects `host` or `content` launch and return choreography. Window chrome and menus are assigned on the window and application controllers.
 
 ## Documents
 
 | Field | Notes |
 | --- | --- |
 | `documentTypes` | Each entry has an `id` and optionally `extensions` (letters and digits only) and `displayName`. Declare a type here before you open documents of that type. |
-| `applicationMenu` | Optional `trigger: "content"` and a `preferences` entry with a `commandId` and optional `label`. |
-
-### The right-slot control
-
-The right-slot control opens the application menu. Each item appears only when it applies:
-
-1. **About {App}**, when the host supplies attribution for the app (a copyright, trademark or tagline). Attribution belongs to the host, so `Info.ts` has no field for it.
-2. **{App} Preferences…**, when it declares `applicationMenu.preferences`.
-3. **System Preferences…**, always.
-4. **Log Out**, after a separator, when sign-in is on and the user is signed in.
-
-When System Preferences is the only item, the control opens it directly and no menu appears. An app that declares `applicationMenu.trigger: "content"` gets the same menu, and the same direct opening, from `useApplicationMenuTrigger()`.
 
 ## Entitlements, privacy and services
 

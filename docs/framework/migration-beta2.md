@@ -161,7 +161,6 @@ Hosts that genuinely build rendering surfaces use `createAFXLayer(surface, sched
 | `frame.layout: "simple"` or `"defacto"` | Removed; content is full-bleed in the app frame |
 | A hard-coded cotton app body | `frame.background`, default `"system"`; use an explicit surface to retain cotton or `"none"` for app-drawn content |
 | Hard-coded return artwork | `branding.homeIcon`, or the generic house glyph |
-| `frame.rightSlot` defaulting to `"userInfo"` | `"auto"`; explicit `"userInfo"`, `"none"` and custom artwork remain choices |
 | A generic "Preferences" system entry | "System Preferences…", distinct from an app's own preferences |
 | Private preference-pane registration | `definePreferencePane` and discovered `.prefPane` folders |
 

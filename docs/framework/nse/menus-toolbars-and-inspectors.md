@@ -41,34 +41,11 @@ An item is one of four kinds, as `NSMenuItem` is:
 
 When a menu opens, each command item is validated along the responder chain, as `validateMenuItem(_:)` does: the action's `validate<Name>()` decides whether it is enabled and whether it shows a check mark (its `state`). An item's key equivalent is the action's key binding, so declare the shortcut once, in `@action({ keyBindings })`, and the menu shows it; the binding is also what performs the action from the keyboard.
 
-## A menu bar
+## Application menus
 
-The host's application menu (the app name menu in the SynCloudOS top bar) belongs to the system. Open it from your own control with `useApplicationMenuTrigger()`; do not draw your own copy of it.
+Set `NSEApplication.mainMenu` to author File, Edit and View menus. The key window draws the bar above its titlebar, and the host prepends the application menu. Compact widths collapse the bar into one Menu control.
 
-Most SynWare doesn't need a menu bar of its own. Its commands live in the toolbar, in context menus, and in the host's application menu. Give the application a `mainMenu` only when it is a dense, document- or instrument-style tool whose users expect File/Edit/View menus. Setting `mainMenu` is the opt-in: an application without one has no menu bar. Follow the standard order: File, Edit, View, then your own menus, then Window and Help last. Put the standard items in their standard places (Undo and Redo first in Edit, Close in File).
-
-```tsx
-// Contents/index.tsx: the application owns its main menu
-async applicationWillFinishLaunching() {
-  this.mainMenu = new NSEMenu({
-    owner: this,
-    title: "Main Menu",
-    items: [
-      { title: "File", submenu: [{ action: "document.save" }, { action: "exportPDF", title: "Export as PDF…" }] },
-      { title: "Edit", submenu: [{ action: "undo" }, { action: "redo" }] },
-      { title: "View", submenu: [{ action: "toggleInspector", title: "Inspector" }] },
-      { title: "Help", submenu: [{ action: "startDemo", title: "Guided Demonstration" }] },
-    ],
-    runtime: SCOS.menus.runtime,
-  });
-}
-
-// In the main window's view (the window controller's `app` is the application)
-const { mainMenu } = windowController.app;
-{mainMenu ? <NSEMenuBar menu={mainMenu} /> : null}
-```
-
-Each item with a submenu is a menu across the bar. As `NSApp.mainMenu` does with the key window, the bar validates and dispatches its items along the responder chain of the window that draws it, so an `@action` on a view controller is enabled when that view controller is in the chain.
+Add `NSEToolbarItem.applicationMenu("gear")` or `NSEToolbarItem.applicationMenu("person")` to the window's toolbar to offer the same application menu from a toolbar button. The menu bar and the button can be used independently.
 
 ## Responder provenance for toolbars and menus
 
@@ -112,7 +89,7 @@ The window owns the toolbar's command and preference authority, so you do not bu
 
 `window.toolbarStyle` takes NSWindow.ToolbarStyle’s `automatic`, `expanded`, `preference`, `unified` or `unifiedCompact`. Atmo draws `expanded` on its own large plate row beneath toolbar items, fixed above scroll content even on a phone. `preference` centres the pane’s title with leading/trailing accessory space. The other three values retain today’s title bar. The gallery sets only its section title and `expanded`; its description is ordinary secondary-colour text in the scroll content. See [the complete Atmo mapping](../windows.md#window-title-and-toolbar-style).
 
-Controls an application puts in its title bar are `NSETitlebarAccessoryViewController`s (NSTitlebarAccessoryViewController), added with `window.addTitlebarAccessoryViewController(_:)`; the window owns them from then on. The Webspring stage draws this bar, and so does an application-only host (`mountSynCloudOS({ application: { bundleIdentifier, frame: "declared" } })`) for a page-filling application whose frame declares `topBar: "standard"`; there the application's icon stands where the stage has its home button. On the stage, Atmo draws `leading` accessories before the title and `trailing` accessories after it; `bottom` accessories, and in a window of its own every accessory, sit in a row under the toolbar.
+The window owns accessory controllers added with `window.addTitlebarAccessoryViewController(_:)`. The shared title bar places leading and trailing accessories beside the title and bottom accessories below the titlebar row.
 
 ```ts
 class FileAccessory extends NSETitlebarAccessoryViewController {

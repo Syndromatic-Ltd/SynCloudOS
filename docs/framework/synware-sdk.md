@@ -70,7 +70,6 @@ Optional named exports customise the application:
 | default export | The component or application class the host mounts inside the session. |
 | `routes` | A route graph from `defineSynWareRoutes`, for applications with several screens. |
 | `migrations` | Data migrations, each with `fromVersion`, `toVersion` and a `migrate(value, { signal })` function. |
-| `windowChrome` | A component that draws the title bar when `windowDefaults.chrome` is `"custom"`. |
 | `createBackgroundHandler` | A factory for the handler that runs the background tasks the manifest declares. |
 | `rematerialiseOwnedDocument` | Restores an app-owned document projection when rematerialising it. |
 

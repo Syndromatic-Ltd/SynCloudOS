@@ -1,6 +1,6 @@
 # Source-list application chrome
 
-A source-list window has an `NSESplitViewController` as its content view controller. Its sidebar item holds an `NSEOutlineView` with `selectionHighlightStyle="sourceList"`; its other items hold ordinary child view controllers. Declare `frame.sourceList` in the manifest for the host-owned title-bar rail, QuickSwitch and shared sidebar width. Name the window with `window.title`.
+A source-list window uses an `NSESplitViewController` as its content view controller. A sidebar item can render an `NSEOutlineView` with `selectionHighlightStyle="sourceList"`. The split controller owns sidebar sizing and compact presentation.
 
 ```ts
 const split = new NSESplitViewController({ id: "catalogue" });

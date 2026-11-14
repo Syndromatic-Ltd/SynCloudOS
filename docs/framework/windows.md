@@ -63,26 +63,11 @@ A window's role describes what it is for, and the host picks the matching presen
 
 A panel can become key, which makes it the target of keyboard commands, without replacing its parent as the main window. The host keeps the two states apart, as Cocoa does.
 
-## Observe your windows
+## Window identity
 
-`useWindow()` returns the window client and a live snapshot of the windows your application owns.
+Use `useNSEWindow()` and `useNSEApplication()` in a function component rendered by an application. A class window uses `this.window`. An application shown in Webspring's stage has a real window ID. Moving that window to the floating layer keeps its controller and rendered content.
 
-```tsx
-import { useWindow } from "@syndromatic/syncloudos/sdk";
-
-export function WindowStatus() {
-  const { client, snapshot } = useWindow();
-  return (
-    <p>
-      {snapshot.owned.length} window(s) open. Key window:{" "}
-      {snapshot.owned.find((window) => window.isKey)?.title ?? "none"}.
-      <button onClick={() => snapshot.current && void client.close(snapshot.current.id)}>Close this window</button>
-    </p>
-  );
-}
-```
-
-The snapshot's `state` is `"open"` or `"closed"`, `current` is the window that hosts this session, and `owned` lists every window your application has open. Each entry reports its `title`, `bounds`, `state` (`"opening"`, `"open"`, `"minimised"` or `"closing"`), the document it shows, whether it is `isKey` or `isMain`, and its mobile policy.
+`window.toggleFullScreen()` asks the host to change presentation. `window.isFullScreen` reflects host confirmation. The window's regular bounds and zoom state survive a round trip. A standard window with `collectionBehavior = ["fullScreenPrimary"]` can enter full screen. Auxiliary windows can accompany a primary window.
 
 ## Open a window for a document
 
@@ -140,42 +125,11 @@ In CSS, each view publishes its insets as `--nse-safe-area-inset-top`, `--nse-sa
 
 The Developer MCP reports `idiom.layout-guide` for a raw `env(safe-area-inset-*)` in application CSS, or for a fixed or sticky element offset by a known system bar height.
 
-## Custom title bars
+## Frame appearance
 
-Set `windowDefaults.chrome` to `"custom"` and export a named `windowChrome` component from the application entry to draw the title bar yourself. The component receives the window's state and actions.
+The system draws each title bar. Set `window.titleVisibility`, `window.titlebarAppearsTransparent`, or the `fullSizeContentView` style bit to change how chrome is placed against content. The layout guide and `window.contentLayoutRect` describe the content area available below the measured chrome.
 
-```tsx
-import type { PointerEvent } from "react";
-import type { AppWindowChromeProps } from "@syndromatic/syncloudos/sdk";
-
-function Chrome(props: AppWindowChromeProps) {
-  const move = props.createMoveRegionProps();
-  const onPointerDown = (event: PointerEvent<HTMLElement>) =>
-    move.onPointerDown({
-      button: event.button,
-      isPrimary: event.isPrimary,
-      pointerId: event.pointerId,
-      clientX: event.clientX,
-      clientY: event.clientY,
-      target: event.target as Element,
-      currentTarget: event.currentTarget,
-    });
-
-  return (
-    <header onPointerDown={onPointerDown} data-key={props.isKey}>
-      <button aria-label="Close" onClick={() => void props.close()} disabled={!props.closable} />
-      <button aria-label="Minimise" onClick={props.minimise} disabled={!props.minimisable} />
-      <button aria-label="Zoom" onClick={props.zoom} disabled={!props.zoomable} />
-      <h1 id={props.titleId}>{props.title}{props.dirty ? " (edited)" : ""}</h1>
-    </header>
-  );
-}
-
-export const windowChrome = Chrome;
-export default function App() { return <main>Application content</main>; }
-```
-
-`createMoveRegionProps()` returns the pointer handler that drags the window. The handler takes a plain structural event, so a React component forwards the fields it needs, as the example shows. Use `"frameless"` when the application draws no title bar at all. Give every custom control a label and a touch target of at least 44 by 44 CSS pixels, even when the painted glyph is smaller.
+`window.titlebarPresentation = "floating"` detaches Cumulus chrome across all toolbar styles. The default is `"attached"`. Windows with `texturedBackground` use Metal and keep their bars attached. A subclass of `NSEWindowFrameView` can supply titlebar metrics and theme tokens.
 
 ## Key, main and focus
 

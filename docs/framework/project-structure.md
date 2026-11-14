@@ -55,7 +55,7 @@ Development-only applications are excluded from production builds. In-project ap
 
 ## Application modules
 
-The default export is a React component or an `NSEApplication` subclass. Export optional `routes`, `migrations`, `windowChrome`, `rematerialiseOwnedDocument` and `createBackgroundHandler` beside it; the loader builds the captured definition from the complete derived manifest and these named exports. `createSynWare` is internal; `sdk/testing` retains it for test hosts without discovery.
+The default export is a React component or an `NSEApplication` subclass. Export optional `routes`, `migrations`, `rematerialiseOwnedDocument` and `createBackgroundHandler` beside it; the loader builds the captured definition from the complete derived manifest and these named exports. `createSynWare` is internal; `sdk/testing` retains it for test hosts without discovery.
 
 Imports of `@syndromatic/syncloudos` within `<Name>.app/**` resolve to `virtual:syncloudos/app/<bundleIdentifier>`, with `SCOS` bound to the canonical case-insensitive identity key. `SCOS.app` exposes the declared `bundleIdentifier`, `displayName` and `version`. Shared React components use `useSCOS()` instead. See [Applications](applications.md).
 
