@@ -1,0 +1,77 @@
+{
+  "fixture": "http://127.0.0.1:5509/tests/e2e/fixtures/detached-window.html",
+  "desktop": {
+    "width": 1280,
+    "height": 820
+  },
+  "phone": {
+    "width": 390,
+    "height": 844
+  },
+  "entries": [
+    {
+      "name": "before-desktop-light-cumulus.png",
+      "note": "Source host in the Webspring floating layer immediately before detaching."
+    },
+    {
+      "name": "after-desktop-light-cumulus.png",
+      "note": "Destination in a real same-origin browser popup with the retained editor."
+    },
+    {
+      "name": "after-phone-light-cumulus.png",
+      "note": "The same desktop browser popup constrained to 390 CSS pixels."
+    },
+    {
+      "name": "before-phone-light-cumulus.png",
+      "note": "Production Webspring stage at phone width. The desktop native detach control is not offered here."
+    },
+    {
+      "name": "before-desktop-light-metal.png",
+      "note": "Source host in the Webspring floating layer immediately before detaching."
+    },
+    {
+      "name": "after-desktop-light-metal.png",
+      "note": "Destination in a real same-origin browser popup with the retained editor."
+    },
+    {
+      "name": "after-phone-light-metal.png",
+      "note": "The same desktop browser popup constrained to 390 CSS pixels."
+    },
+    {
+      "name": "before-phone-light-metal.png",
+      "note": "Production Webspring stage at phone width. The desktop native detach control is not offered here."
+    },
+    {
+      "name": "before-desktop-dark-cumulus.png",
+      "note": "Source host in the Webspring floating layer immediately before detaching."
+    },
+    {
+      "name": "after-desktop-dark-cumulus.png",
+      "note": "Destination in a real same-origin browser popup with the retained editor."
+    },
+    {
+      "name": "after-phone-dark-cumulus.png",
+      "note": "The same desktop browser popup constrained to 390 CSS pixels."
+    },
+    {
+      "name": "before-phone-dark-cumulus.png",
+      "note": "Production Webspring stage at phone width. The desktop native detach control is not offered here."
+    },
+    {
+      "name": "before-desktop-dark-metal.png",
+      "note": "Source host in the Webspring floating layer immediately before detaching."
+    },
+    {
+      "name": "after-desktop-dark-metal.png",
+      "note": "Destination in a real same-origin browser popup with the retained editor."
+    },
+    {
+      "name": "after-phone-dark-metal.png",
+      "note": "The same desktop browser popup constrained to 390 CSS pixels."
+    },
+    {
+      "name": "before-phone-dark-metal.png",
+      "note": "Production Webspring stage at phone width. The desktop native detach control is not offered here."
+    }
+  ]
+}

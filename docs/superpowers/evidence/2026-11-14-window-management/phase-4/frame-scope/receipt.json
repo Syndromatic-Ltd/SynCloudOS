@@ -1,0 +1,194 @@
+[
+  {
+    "file": "before-desktop-light-cumulus.png",
+    "viewport": {
+      "width": 1280,
+      "height": 800
+    },
+    "dpr": 1,
+    "fixture": "/tests/e2e/fixtures/window-titlebar-layout.html?frame=before&scheme=light&width=1000&evidence=&cumulus=",
+    "title": "rgb(244, 247, 251)",
+    "other": "rgb(37, 48, 60)",
+    "scoped": false
+  },
+  {
+    "file": "after-desktop-light-cumulus.png",
+    "viewport": {
+      "width": 1280,
+      "height": 800
+    },
+    "dpr": 1,
+    "fixture": "/tests/e2e/fixtures/window-titlebar-layout.html?frame=after&scheme=light&width=1000&evidence=&cumulus=",
+    "title": "rgb(21, 101, 183)",
+    "other": "rgb(37, 48, 60)",
+    "scoped": true
+  },
+  {
+    "file": "before-desktop-light-metal.png",
+    "viewport": {
+      "width": 1280,
+      "height": 800
+    },
+    "dpr": 1,
+    "fixture": "/tests/e2e/fixtures/window-titlebar-layout.html?frame=before&scheme=light&width=1000&evidence=",
+    "title": "rgb(43, 51, 60)",
+    "other": "rgb(37, 48, 60)",
+    "scoped": false
+  },
+  {
+    "file": "after-desktop-light-metal.png",
+    "viewport": {
+      "width": 1280,
+      "height": 800
+    },
+    "dpr": 1,
+    "fixture": "/tests/e2e/fixtures/window-titlebar-layout.html?frame=after&scheme=light&width=1000&evidence=",
+    "title": "rgb(21, 101, 183)",
+    "other": "rgb(37, 48, 60)",
+    "scoped": true
+  },
+  {
+    "file": "before-desktop-dark-cumulus.png",
+    "viewport": {
+      "width": 1280,
+      "height": 800
+    },
+    "dpr": 1,
+    "fixture": "/tests/e2e/fixtures/window-titlebar-layout.html?frame=before&scheme=dark&width=1000&evidence=&cumulus=",
+    "title": "rgb(244, 247, 251)",
+    "other": "rgb(227, 232, 238)",
+    "scoped": false
+  },
+  {
+    "file": "after-desktop-dark-cumulus.png",
+    "viewport": {
+      "width": 1280,
+      "height": 800
+    },
+    "dpr": 1,
+    "fixture": "/tests/e2e/fixtures/window-titlebar-layout.html?frame=after&scheme=dark&width=1000&evidence=&cumulus=",
+    "title": "rgb(21, 101, 183)",
+    "other": "rgb(227, 232, 238)",
+    "scoped": true
+  },
+  {
+    "file": "before-desktop-dark-metal.png",
+    "viewport": {
+      "width": 1280,
+      "height": 800
+    },
+    "dpr": 1,
+    "fixture": "/tests/e2e/fixtures/window-titlebar-layout.html?frame=before&scheme=dark&width=1000&evidence=",
+    "title": "rgb(241, 244, 248)",
+    "other": "rgb(227, 232, 238)",
+    "scoped": false
+  },
+  {
+    "file": "after-desktop-dark-metal.png",
+    "viewport": {
+      "width": 1280,
+      "height": 800
+    },
+    "dpr": 1,
+    "fixture": "/tests/e2e/fixtures/window-titlebar-layout.html?frame=after&scheme=dark&width=1000&evidence=",
+    "title": "rgb(21, 101, 183)",
+    "other": "rgb(227, 232, 238)",
+    "scoped": true
+  },
+  {
+    "file": "before-phone-light-cumulus.png",
+    "viewport": {
+      "width": 390,
+      "height": 667
+    },
+    "dpr": 2,
+    "fixture": "/tests/e2e/fixtures/window-titlebar-layout.html?frame=before&scheme=light&width=350&evidence=&cumulus=",
+    "title": "rgb(244, 247, 251)",
+    "other": "rgb(37, 48, 60)",
+    "scoped": false
+  },
+  {
+    "file": "after-phone-light-cumulus.png",
+    "viewport": {
+      "width": 390,
+      "height": 667
+    },
+    "dpr": 2,
+    "fixture": "/tests/e2e/fixtures/window-titlebar-layout.html?frame=after&scheme=light&width=350&evidence=&cumulus=",
+    "title": "rgb(21, 101, 183)",
+    "other": "rgb(37, 48, 60)",
+    "scoped": true
+  },
+  {
+    "file": "before-phone-light-metal.png",
+    "viewport": {
+      "width": 390,
+      "height": 667
+    },
+    "dpr": 2,
+    "fixture": "/tests/e2e/fixtures/window-titlebar-layout.html?frame=before&scheme=light&width=350&evidence=",
+    "title": "rgb(43, 51, 60)",
+    "other": "rgb(37, 48, 60)",
+    "scoped": false
+  },
+  {
+    "file": "after-phone-light-metal.png",
+    "viewport": {
+      "width": 390,
+      "height": 667
+    },
+    "dpr": 2,
+    "fixture": "/tests/e2e/fixtures/window-titlebar-layout.html?frame=after&scheme=light&width=350&evidence=",
+    "title": "rgb(21, 101, 183)",
+    "other": "rgb(37, 48, 60)",
+    "scoped": true
+  },
+  {
+    "file": "before-phone-dark-cumulus.png",
+    "viewport": {
+      "width": 390,
+      "height": 667
+    },
+    "dpr": 2,
+    "fixture": "/tests/e2e/fixtures/window-titlebar-layout.html?frame=before&scheme=dark&width=350&evidence=&cumulus=",
+    "title": "rgb(244, 247, 251)",
+    "other": "rgb(227, 232, 238)",
+    "scoped": false
+  },
+  {
+    "file": "after-phone-dark-cumulus.png",
+    "viewport": {
+      "width": 390,
+      "height": 667
+    },
+    "dpr": 2,
+    "fixture": "/tests/e2e/fixtures/window-titlebar-layout.html?frame=after&scheme=dark&width=350&evidence=&cumulus=",
+    "title": "rgb(21, 101, 183)",
+    "other": "rgb(227, 232, 238)",
+    "scoped": true
+  },
+  {
+    "file": "before-phone-dark-metal.png",
+    "viewport": {
+      "width": 390,
+      "height": 667
+    },
+    "dpr": 2,
+    "fixture": "/tests/e2e/fixtures/window-titlebar-layout.html?frame=before&scheme=dark&width=350&evidence=",
+    "title": "rgb(241, 244, 248)",
+    "other": "rgb(227, 232, 238)",
+    "scoped": false
+  },
+  {
+    "file": "after-phone-dark-metal.png",
+    "viewport": {
+      "width": 390,
+      "height": 667
+    },
+    "dpr": 2,
+    "fixture": "/tests/e2e/fixtures/window-titlebar-layout.html?frame=after&scheme=dark&width=350&evidence=",
+    "title": "rgb(21, 101, 183)",
+    "other": "rgb(227, 232, 238)",
+    "scoped": true
+  }
+]
