@@ -29,6 +29,7 @@ import {
 import { NSEObject } from "../Objects/NSEObject";
 import { LayoutGuideStore, type NSELayoutGuide } from "../Layout/NSELayoutGuide";
 import type { NSEScrollRect } from "../Scroll/scrollTypes";
+import { validateNSEWindowFrameView, type NSEWindowFrameViewClass } from "./NSEWindowFrameView";
 import type { NSEApplication, NSEOpenWindowOptions } from "./NSEApplication";
 import { ObjectLifetime } from "./objectLifetime";
 import { ownNSEFactory, type Disposable, type SynchronousDisposable } from "./ownedFactory";
@@ -50,7 +51,30 @@ export type NSEWindowContentBorderEdge = "minY";
 /** NSWindow.ToolbarStyle. Atmo keeps expanded titles fixed, including on compact widths. */
 export type NSEWindowToolbarStyle = "automatic" | "expanded" | "preference" | "unified" | "unifiedCompact";
 
+export type NSEWindowStyle = "titled" | "closable" | "miniaturizable" | "resizable" | "fullSizeContentView" | "texturedBackground" | "fullScreen";
+export type NSEWindowCollectionBehavior = "fullScreenPrimary" | "fullScreenAuxiliary" | "fullScreenNone";
+export type NSEWindowTitleVisibility = "visible" | "hidden";
+export type NSEWindowTitlebarPresentation = "attached" | "floating";
+
+function projectWindowStyle(style: NonNullable<SynWareOwnedWindowSnapshot["style"]>): readonly NSEWindowStyle[] {
+  return Object.freeze(style.flatMap(bit => bit === "zoomable" ? [] : [bit === "minimisable" ? "miniaturizable" as const : bit]));
+}
+
 export interface NSEWindow {
+  styleMask: readonly NSEWindowStyle[];
+  collectionBehavior: readonly NSEWindowCollectionBehavior[];
+  titleVisibility: NSEWindowTitleVisibility;
+  titlebarPresentation: NSEWindowTitlebarPresentation;
+  frameViewClass: NSEWindowFrameViewClass | null;
+  backgroundColor: string | null;
+  isOpaque: boolean;
+  cornerRadius: number | null;
+  titlebarAppearsTransparent: boolean;
+  readonly isFullScreen: boolean;
+  readonly document: NSEWindowDocument | null;
+  toggleFullScreen(): void;
+  performClose(): Promise<NSEWindowCloseOutcome>;
+  miniaturize(): void;
   readonly contentLayoutRect: NSEScrollRect;
   readonly contentLayoutGuide: NSELayoutGuide;
   /** The window's identity, or `null` when the application is shown on the stage. */
@@ -120,6 +144,11 @@ export type NSEAnyWindowController = NSEWindowController<any>;
 export interface NSEWindowControllerClass<TController extends NSEAnyWindowController = NSEAnyWindowController> {
   new (options?: NSEWindowControllerOptions): TController;
   readonly view?: NSEViewComponent;
+  readonly frameViewClass?: NSEWindowFrameViewClass;
+  readonly styleMask?: readonly NSEWindowStyle[];
+  readonly collectionBehavior?: readonly NSEWindowCollectionBehavior[];
+  readonly titleVisibility?: NSEWindowTitleVisibility;
+  readonly titlebarAppearsTransparent?: boolean;
   readonly contentViewControllerClass?: NSEViewControllerClass;
 }
 
@@ -140,6 +169,9 @@ export interface WindowMount {
   minimise(): void;
   zoom(): void;
   setTitle(title: string): void;
+  setStyleMask?(style: readonly NSEWindowStyle[]): void;
+  setCollectionBehavior?(behavior: NSEWindowCollectionBehavior): void;
+  toggleFullScreen?(): void;
   close(): Promise<NSEWindowCloseOutcome>;
   /** Lets the controller veto the window's close and learn it is closing. Does nothing on the stage. Returns the function that removes the guard. */
   registerCloseGuard(guard: SynWareWindowCloseGuard): () => void;
@@ -158,7 +190,7 @@ export interface WindowAlertRequest {
 }
 
 const windowAlertPresenters = new WeakMap<NSEWindow, (request: WindowAlertRequest, signal: AbortSignal) => Promise<string>>();
-const windowChromeSubscriptions = new WeakMap<NSEWindow, (listener: () => void) => () => void>();
+const windowSubscriptions = new WeakMap<NSEWindow, (listener: () => void) => () => void>();
 const windowTitlePresenters = new WeakMap<NSEWindow, (title: string) => () => void>();
 const presentedWindowTitles = new WeakMap<NSEWindow, string>();
 
@@ -174,7 +206,7 @@ export function nseWindowPresentedTitle(window: NSEWindow): string {
 
 /** @internal Observes window-owned chrome without adding a second public window state API. */
 export function nseSubscribeWindowChrome(window: NSEWindow, listener: () => void): () => void {
-  return windowChromeSubscriptions.get(window)?.(listener) ?? (() => {});
+  return windowSubscriptions.get(window)?.(listener) ?? (() => {});
 }
 
 /** @internal Presents an NSEAlert as a sheet on a window a window controller manages; aborting `signal` ends it. */
@@ -217,6 +249,8 @@ export interface NSEWindowControllerInternals {
   attach(mount: WindowMount): () => void;
   /** Reports a key-window change to `windowDidBecomeKey` / `windowDidResignKey`. */
   setKey(isKey: boolean): void;
+  updateContentLayout(rect: NSEScrollRect): void;
+  notifySnapshotChange(): void;
   /** Consults `windowShouldClose`. */
   shouldClose(): boolean | Promise<boolean>;
   /** Notifies `windowWillClose`. */
@@ -248,6 +282,11 @@ let windowControllerSequence = 0;
 export class NSEWindowController<TApp extends NSEApplication = NSEApplication> extends NSEObject implements NSEOwner, OwnedObject {
   /** The component that renders this window's content. */
   static view?: NSEViewComponent;
+  static frameViewClass?: NSEWindowFrameViewClass;
+  static styleMask?: readonly NSEWindowStyle[];
+  static collectionBehavior?: readonly NSEWindowCollectionBehavior[];
+  static titleVisibility?: NSEWindowTitleVisibility;
+  static titlebarAppearsTransparent?: boolean;
   /** The class constructed in a fresh scope for this window's initial root. */
   static contentViewControllerClass?: NSEViewControllerClass;
 
@@ -263,6 +302,15 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
   #subtitle = "";
   #toolbarStyle: NSEWindowToolbarStyle = "automatic";
   #documentEdited = false;
+  #styleMask: readonly NSEWindowStyle[] | undefined;
+  #collectionBehavior: readonly NSEWindowCollectionBehavior[] | undefined;
+  #titleVisibility: NSEWindowTitleVisibility;
+  #titlebarPresentation: NSEWindowTitlebarPresentation = "attached";
+  #frameViewClass: NSEWindowFrameViewClass | null;
+  #backgroundColor: string | null = null;
+  #isOpaque = true;
+  #cornerRadius: number | null = null;
+  #titlebarAppearsTransparent: boolean;
   #contentBorderMinY = 0;
   #toolbar: NSEToolbar | null = null;
   #bottomBarAccessory: ReactNode = null;
@@ -281,6 +329,13 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
       `${new.target.name || "NSEWindowController"}#${++windowControllerSequence}`,
       options,
     );
+    const Controller = new.target as NSEWindowControllerClass;
+    this.#frameViewClass = Controller.frameViewClass ?? null;
+    validateNSEWindowFrameView(this.#frameViewClass);
+    this.#styleMask = options.styleMask ?? Controller.styleMask;
+    this.#collectionBehavior = options.collectionBehavior ?? Controller.collectionBehavior;
+    this.#titleVisibility = options.titleVisibility ?? Controller.titleVisibility ?? "visible";
+    this.#titlebarAppearsTransparent = options.titlebarAppearsTransparent ?? Controller.titlebarAppearsTransparent ?? false;
     const controller = this as NSEWindowController<NSEApplication>;
     const requireMount = (member: string): WindowMount => {
       const mount = controller.#mount;
@@ -293,6 +348,83 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
       });
     };
     this.#window = Object.freeze({
+      get styleMask() {
+        const record = controller.#mount?.getSnapshot();
+        return record?.style ? projectWindowStyle(record.style) : controller.#styleMask ?? Object.freeze([]);
+      },
+      set styleMask(value: readonly NSEWindowStyle[]) {
+        if (!Array.isArray(value) || value.some(bit => !["titled", "closable", "miniaturizable", "resizable", "fullSizeContentView", "texturedBackground", "fullScreen"].includes(bit)) ||
+            new Set(value).size !== value.length) throw new TypeError("Unknown or duplicate NSEWindow style.");
+        controller.#styleMask = Object.freeze(value.filter(bit => bit !== "fullScreen"));
+        controller.#mount?.setStyleMask?.(controller.#styleMask);
+        controller.notifyObservers();
+      },
+      get collectionBehavior() {
+        const current = controller.#mount?.getSnapshot()?.collectionBehavior;
+        return current ? Object.freeze([current]) : controller.#collectionBehavior ?? Object.freeze(["fullScreenNone" as const]);
+      },
+      set collectionBehavior(value: readonly NSEWindowCollectionBehavior[]) {
+        if (!Array.isArray(value) || value.length > 1 || value.some(bit => !["fullScreenPrimary", "fullScreenAuxiliary", "fullScreenNone"].includes(bit))) {
+          throw new TypeError("NSEWindow collection behavior permits one full-screen role.");
+        }
+        controller.#collectionBehavior = Object.freeze([...value]);
+        controller.#mount?.setCollectionBehavior?.(value[0] ?? "fullScreenNone");
+        controller.notifyObservers();
+      },
+      get titleVisibility() { return controller.#titleVisibility; },
+      set titleVisibility(value: NSEWindowTitleVisibility) {
+        if (value !== "visible" && value !== "hidden") throw new TypeError("Unknown NSEWindow title visibility.");
+        if (value === controller.#titleVisibility) return;
+        controller.#titleVisibility = value;
+        controller.notifyObservers();
+      },
+      get frameViewClass() { return controller.#frameViewClass; },
+      set frameViewClass(value: NSEWindowFrameViewClass | null) {
+        validateNSEWindowFrameView(value);
+        if (value === controller.#frameViewClass) return;
+        controller.#frameViewClass = value;
+        controller.notifyObservers();
+      },
+      get backgroundColor() { return controller.#backgroundColor; },
+      set backgroundColor(value: string | null) {
+        if (value !== null && typeof value !== "string") throw new TypeError("A window background is a CSS color or null.");
+        if (value === controller.#backgroundColor) return;
+        controller.#backgroundColor = value;
+        controller.notifyObservers();
+      },
+      get isOpaque() { return controller.#isOpaque; },
+      set isOpaque(value: boolean) {
+        if (typeof value !== "boolean") throw new TypeError("Window opacity must be a boolean.");
+        if (value === controller.#isOpaque) return;
+        controller.#isOpaque = value;
+        controller.notifyObservers();
+      },
+      get cornerRadius() { return controller.#cornerRadius; },
+      set cornerRadius(value: number | null) {
+        if (value !== null && (!Number.isFinite(value) || value < 0)) throw new RangeError("A window corner radius must be finite and non-negative.");
+        if (value === controller.#cornerRadius) return;
+        controller.#cornerRadius = value;
+        controller.notifyObservers();
+      },
+      get titlebarPresentation() { return controller.#titlebarPresentation; },
+      set titlebarPresentation(value: NSEWindowTitlebarPresentation) {
+        if (value !== "attached" && value !== "floating") throw new TypeError("Unknown NSEWindow titlebar presentation.");
+        if (value === controller.#titlebarPresentation) return;
+        controller.#titlebarPresentation = value;
+        controller.notifyObservers();
+      },
+      get titlebarAppearsTransparent() { return controller.#titlebarAppearsTransparent; },
+      set titlebarAppearsTransparent(value: boolean) {
+        if (typeof value !== "boolean") throw new TypeError("NSEWindow titlebarAppearsTransparent must be boolean.");
+        if (value === controller.#titlebarAppearsTransparent) return;
+        controller.#titlebarAppearsTransparent = value;
+        controller.notifyObservers();
+      },
+      get document() { return controller.document; },
+      get isFullScreen() { return controller.#mount?.getSnapshot()?.fullScreen === "on"; },
+      toggleFullScreen: () => requireMount("toggleFullScreen").toggleFullScreen?.(),
+      performClose: () => requireMount("performClose").close(),
+      miniaturize: () => requireMount("miniaturize").minimise(),
       get contentLayoutRect() { return controller.#contentLayout.frame; },
       get contentLayoutGuide() { return controller.#contentLayout; },
       get id() { return controller.#mount?.windowId ?? null; },
@@ -381,7 +513,7 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
         sheet?.[nseEndSheet]?.(controller.#window, returnCode);
       },
     });
-    windowChromeSubscriptions.set(this.#window, listener => controller.subscribe(listener));
+    windowSubscriptions.set(this.#window, listener => controller.subscribe(listener));
     const titleClaims = new Map<symbol, string>();
     const publishTitle = () => {
       const title = [...titleClaims.values()].at(-1);
@@ -403,6 +535,8 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
       get isLoaded() { return controller.#loaded; },
       attach: (mount) => controller.#attach(mount),
       setKey: (isKey) => controller.#setKey(isKey),
+      updateContentLayout: (rect) => controller.#contentLayout.setFrame(rect),
+      notifySnapshotChange: () => controller.notifyObservers(),
       shouldClose: () => controller.windowShouldClose(),
       willClose: () => controller.windowWillClose(),
     };
@@ -530,6 +664,8 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
     this.#stopContentLayout = stopLayout;
     if (this.#pendingTitle !== null) mount.setTitle(this.#pendingTitle);
     if (!this.#loaded) {
+      if (this.#styleMask) mount.setStyleMask?.(this.#styleMask);
+      if (this.#collectionBehavior) mount.setCollectionBehavior?.(this.#collectionBehavior[0] ?? "fullScreenNone");
       this.#loaded = true;
       this.windowDidLoad();
     }

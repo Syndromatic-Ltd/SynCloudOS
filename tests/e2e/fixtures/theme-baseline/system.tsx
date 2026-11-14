@@ -55,7 +55,7 @@ function WindowSurface({ chrome, isKey, toolbarStyle }: { chrome: "standard" | "
     role: chrome === "hud" ? "hud" : "standard", style: ["titled", "closable", "minimisable", "zoomable", "resizable"], title: "Documents",
     content: { rendererId: "baseline", parameters: {} }, bounds: { x: 0, y: 0, width: 600, height: 280 }, minimumSize: { width: 200, height: 150 }, maximumSize: null,
     level: chrome === "hud" ? "floating" : "normal", parentWindowControllerId: null, anchor: null, pinned: false, state: "open", isKey, isMain: isKey,
-    zIndex: 1, mobilePolicy: "fullscreen", restorationKey: null, chromeMode: "system", smoothSurface: "off",
+    zIndex: 1, mobilePolicy: "fullscreen", restorationKey: null, smoothSurface: "off",
   };
   const View = chrome === "hud" ? HUDWindowView : StandardWindowView;
   return <div style={{ position: "relative", width: 600, height: 280 }}><NSEAppearanceProvider theme={atmoTheme} chrome={chrome} colourScheme={scheme}>

@@ -32,14 +32,9 @@ export { defineSynWareRoutes } from "./defineSynWareRoutes";
 export type * from "./defineSynWareRoutes";
 export { RouteOutlet } from "./RouteOutlet";
 export { QueryValidationError, routeQuery } from "../Routing/appSdkRoutePort";
-export { useWindowChrome } from "./windowChromeContexts";
 export { TFXFontDescriptor, type TFXFontDescriptorOptions } from "../../FX/TextFX/TFXFontDescriptor";
 export type { TFXFontReadinessChange, TFXFontRegistration, TFXFontResourceMimeType } from "../../FX/TextFX/textLayoutTypes";
 export type {
-  AppWindowChromeActions,
-  AppWindowChromePointerDownEvent,
-  AppWindowChromeProps,
-  AppWindowChromeSnapshot,
   AppWindowCloseResult,
 } from "./appClientTypes";
 export { captureSynWareManifest, validateSynWareManifest } from "./manifest";
@@ -115,7 +110,6 @@ export type {
   AppServiceResult,
   AUFXAudioClient,
   AppUndoClient,
-  AppWindowClient,
   AppWindowSnapshot,
 } from "./appClientTypes";
 export type * from "./appEnvironmentClientTypes";
@@ -134,8 +128,6 @@ export type { CommandMenuItem as SynWareCommandMenuItem } from "../../SynCloudOS
 export { useRuntimeNSEMenuPort as useNSEMenuPort } from "../../SynCloudOSReact";
 /** Public app-authoring boundary for locally focused control responders. */
 export { ResponderScope, type ResponderScopeProps } from "../../SynCloudOSReact";
-export { useApplicationMenuTrigger } from "../../SynCloudOSReact";
-export type { ApplicationMenuTriggerPort as SynWareApplicationMenuTriggerPort } from "../../SynCloudOSReact";
 export { useQuickSwitchTrigger } from "../../SynCloudOSReact";
 export type { QuickSwitchTriggerPort as SynWareQuickSwitchTriggerPort } from "../../SynCloudOSReact";
 export { useCommandRegistration } from "../../SynCloudOSReact";

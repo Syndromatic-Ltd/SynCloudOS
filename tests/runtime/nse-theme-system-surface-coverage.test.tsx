@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import React from "react";
 import { AppViewChrome } from "../../src/Webspring/AppViewChrome";
-import { WindowContentBorder } from "../../src/SynCloudOS/AppHosting/windowChrome";
+import { WindowContentBorder } from "../../src/SynCloudOS/AppHosting/windowAccessories";
 import { cleanup, render, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { themeBaselineCatalogue } from "../e2e/fixtures/theme-baseline/catalogue";

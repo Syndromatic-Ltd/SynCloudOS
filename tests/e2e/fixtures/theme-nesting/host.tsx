@@ -14,7 +14,7 @@ import { NSEViewController, nseUpdateTraits } from '../../../../src/NSE/Applicat
 import { ViewControllerView } from '../../../../src/SynCloudOS/AppHosting/applicationHosting';
 import { NSETabViewController, NSETabViewItem } from '../../../../src/NSE/Navigation/NSETabViewController';
 import { NSEScrollView } from '../../../../src/NSE/Scroll/NSEScrollView';
-import { WindowLayoutContext, WindowLayoutModel } from '../../../../src/NSE/Layout/windowChromeObstructions';
+import { WindowLayoutContext, WindowLayoutModel } from '../../../../src/NSE/Layout/windowObstructions';
 import { createStaticPresentationPort, createStaticPresentationTraits } from '../../../fixtures/presentationTraits';
 import '../../../../src/NSE/public/styles.css';
 const parameters = new URLSearchParams(location.search);

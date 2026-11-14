@@ -21,26 +21,16 @@ import { synCloudOSLogoUrl } from "../Resources/frameworkAssets";
 import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type {
   SynCloudOSAppAboutManifest,
-  SynCloudOSAppFrameManifest,
   SynCloudOSAppManifest,
   SynCloudOSAppAccessPolicy,
 } from "../SynCloudOS";
 // The window-surface defaults come from their leaf module: a value import of
 // the SynCloudOS facade would make app definition depend on runtime construction.
 import { defaultWindowSmoothSurface, normaliseWindowSmoothSurface } from "../Windows/windowTypes";
-import type { SynWareFrameManifest, SynWareManifestV1, SynWareRuntimeManifestContext } from "./manifest/manifestTypes";
+import type { SynWareManifestV1, SynWareRuntimeManifestContext } from "./manifest/manifestTypes";
 
 const DEFAULT_WEBSPRING_ORDER = 1000;
 const DEFAULT_ICON_SRC = synCloudOSLogoUrl;
-
-const standardV1Frame: SynCloudOSAppFrameManifest = {
-  material: "standard",
-  topBar: "standard",
-  presentationMotion: "host",
-  rightSlot: "auto",
-  background: "system",
-  smoothSurface: { radius: 31 },
-};
 
 function cleanString(value: string): string {
   return value.trim();
@@ -60,21 +50,6 @@ function projectPolicy(manifest: Readonly<SynWareManifestV1>): SynCloudOSAppAcce
     };
   }
   return undefined;
-}
-
-/** The authoring frame with its right-slot icon resolved to the URL the host registered for it. Without a
- *  resource map (a host that bundles no resources) the declared resource path stands in as the URL. */
-function projectFrame(
-  frame: SynWareFrameManifest | undefined,
-  resourceUrls: SynWareRuntimeManifestContext["resourceUrls"],
-): Partial<SynCloudOSAppFrameManifest> {
-  if (!frame) return standardV1Frame;
-  const { rightSlot, ...rest } = frame;
-  if (typeof rightSlot !== "object") return frame as Partial<SynCloudOSAppFrameManifest>;
-  const resource = rightSlot.icon.resource;
-  const icon = resourceUrls ? resourceUrls[resource] : resource;
-  if (icon === undefined) throw new TypeError(`SynWare right-slot icon resource ${resource} is not registered.`);
-  return { ...rest, rightSlot: { icon, label: rightSlot.label } };
 }
 
 function projectAbout(about: SynWareRuntimeManifestContext["about"]): SynCloudOSAppAboutManifest {
@@ -148,7 +123,6 @@ export function projectRuntimeManifest(
       defaultHeight: height,
       minWidth: minimumWidth,
       minHeight: minimumHeight,
-      chrome: defaults.chrome ?? "system",
       smoothSurface,
       resizable: defaults.resizable ?? true,
       role: defaults.role === "panel" || defaults.role === "hud" ? defaults.role : "standard",
@@ -163,8 +137,7 @@ export function projectRuntimeManifest(
       mobilePolicy: "fullscreen",
       restorationKey: `application.${normalizeBundleIdentifier(id)}.primary`,
     },
-    frame: projectFrame(manifest.frame, context.resourceUrls),
-    applicationMenu: manifest.applicationMenu,
+    frame: { presentationMotion: manifest.frame?.presentationMotion ?? "host" },
     lifecycle: {
       preload: manifest.lifecycle?.preload ?? false,
       loadInBackground: manifest.background?.enabled ?? false,

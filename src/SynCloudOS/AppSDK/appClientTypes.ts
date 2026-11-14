@@ -45,10 +45,6 @@ import type { DocumentResourceDescriptor, DocumentResourceInput, DocumentResourc
 import type { DocumentEditOptions, DocumentEditResourceRetention, DocumentEditResult } from "../Documents";
 import type { DocumentEditingLifetimeOptions, DocumentEditingParticipant, DocumentEditingParticipantRegistration, DocumentEditingReason, DocumentEditingSettlementResult } from "../Documents";
 export type {
-  AppWindowChromeActions,
-  AppWindowChromePointerDownEvent,
-  AppWindowChromeProps,
-  AppWindowChromeSnapshot,
   AppWindowCloseResult,
 } from "./appDefinitionTypes";
 
@@ -641,7 +637,7 @@ export interface AppWindowSnapshot {
 
 /** A presentation-scoped window projection. Applications can observe only
  * their own session's lifecycle. */
-export interface AppWindowClient {
+export interface AppOwnedWindows {
   getSnapshot(): AppWindowSnapshot;
   subscribe(listener: () => void): () => void;
   openDocumentWindow(request: AppOpenDocumentWindowRequest): Promise<AppOwnedWindowSnapshot>;

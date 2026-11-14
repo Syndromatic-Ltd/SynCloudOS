@@ -1,0 +1,126 @@
+{
+  "capturedAt": "2026-11-14T19:13:30.306Z",
+  "root": "C:\\Users\\Kavish Krishnakumar\\Developer\\SynCloudOS-Workspace\\.worktrees\\webspring-folders\\framework",
+  "head": "9673c3f1824c5b8f06c5736b483fb3695dd6748b",
+  "browserVersion": "149.0.7827.55",
+  "deviceScaleFactor": 1,
+  "sourceFile": "src/NSE/Windows/WindowTitlebarView.css",
+  "sourceHash": "6844db76823beef8e18c98a926adb482994e25f169462ec8efa0c87208d591be",
+  "sourceStableDuringCapture": true,
+  "issueReceipt": "../receipt.json",
+  "change": "Only the attached Cumulus paint geometry: a grid cell anchors glass and shadow to the actual title row after the menu. Palette unchanged.",
+  "captures": [
+    {
+      "viewport": {
+        "name": "desktop",
+        "width": 1280,
+        "height": 850
+      },
+      "scheme": "light",
+      "material": "cumulus",
+      "state": "after",
+      "errors": [],
+      "file": "after-desktop-light-cumulus.png",
+      "url": "http://127.0.0.1:5418/tests/e2e/fixtures/window-titlebar-layout.html?style=unified&width=1240&scheme=light&cumulus",
+      "row": {
+        "x": 20,
+        "y": 20,
+        "width": 1240,
+        "height": 58
+      },
+      "glass": {
+        "x": 19,
+        "y": 19,
+        "width": 1242,
+        "height": 60
+      },
+      "menu": null,
+      "menuItems": [],
+      "sha256": "6ab4b6759b918b6ca806644c16043e4c391e8ca1390a7030a67b590f1a8de85d"
+    },
+    {
+      "viewport": {
+        "name": "desktop",
+        "width": 1280,
+        "height": 850
+      },
+      "scheme": "dark",
+      "material": "cumulus",
+      "state": "after",
+      "errors": [],
+      "file": "after-desktop-dark-cumulus.png",
+      "url": "http://127.0.0.1:5418/tests/e2e/fixtures/window-titlebar-layout.html?style=unified&width=1240&scheme=dark&cumulus",
+      "row": {
+        "x": 20,
+        "y": 20,
+        "width": 1240,
+        "height": 58
+      },
+      "glass": {
+        "x": 19,
+        "y": 19,
+        "width": 1242,
+        "height": 60
+      },
+      "menu": null,
+      "menuItems": [],
+      "sha256": "0ec904221245e08f5477f2e2753059c9fcf5cfd9e26e73689bd79d5db14a2ba7"
+    },
+    {
+      "viewport": {
+        "name": "phone",
+        "width": 390,
+        "height": 844
+      },
+      "scheme": "light",
+      "material": "cumulus",
+      "state": "after",
+      "errors": [],
+      "file": "after-phone-light-cumulus.png",
+      "url": "http://127.0.0.1:5418/tests/e2e/fixtures/window-titlebar-layout.html?style=unified&width=350&scheme=light&cumulus",
+      "row": {
+        "x": 20,
+        "y": 20,
+        "width": 350,
+        "height": 58
+      },
+      "glass": {
+        "x": 19,
+        "y": 19,
+        "width": 352,
+        "height": 60
+      },
+      "menu": null,
+      "menuItems": [],
+      "sha256": "df46152231d7cb9a1cd139726dc1521db99a9ad9fe1a1b0172442393895fc9be"
+    },
+    {
+      "viewport": {
+        "name": "phone",
+        "width": 390,
+        "height": 844
+      },
+      "scheme": "dark",
+      "material": "cumulus",
+      "state": "after",
+      "errors": [],
+      "file": "after-phone-dark-cumulus.png",
+      "url": "http://127.0.0.1:5418/tests/e2e/fixtures/window-titlebar-layout.html?style=unified&width=350&scheme=dark&cumulus",
+      "row": {
+        "x": 20,
+        "y": 20,
+        "width": 350,
+        "height": 58
+      },
+      "glass": {
+        "x": 19,
+        "y": 19,
+        "width": 352,
+        "height": 60
+      },
+      "menu": null,
+      "menuItems": [],
+      "sha256": "864d27d5a9c0f8f64a8c90576f480bbb736b8a636739e31e52b0167f8f2e1337"
+    }
+  ]
+}

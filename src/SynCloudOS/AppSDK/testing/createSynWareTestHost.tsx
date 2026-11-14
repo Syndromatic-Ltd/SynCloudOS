@@ -162,7 +162,6 @@ export function createSynWareTestHost(options: CreateSynWareTestHostOptions): Sy
       return <AppRoot />;
     },
     ...(supplied.migrations === undefined ? {} : { migrations: supplied.migrations }),
-    ...(supplied.windowChrome === undefined ? {} : { windowChrome: supplied.windowChrome }),
     ...(supplied.createBackgroundHandler === undefined ? {} : { createBackgroundHandler: supplied.createBackgroundHandler }),
     ...(supplied.routes === undefined ? {} : { routes: supplied.routes }),
   });
@@ -293,7 +292,6 @@ export function createSynWareTestHost(options: CreateSynWareTestHostOptions): Sy
       toolbar: null,
       role: app.window.role,
       style: app.window.style,
-      chromeMode: app.window.chrome,
       smoothSurface: app.window.smoothSurface,
       title: app.window.title,
       content: { rendererId: "application", parameters: { appId: app.bundleIdentifier } },

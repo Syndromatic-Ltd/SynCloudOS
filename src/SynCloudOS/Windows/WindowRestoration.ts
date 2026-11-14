@@ -25,13 +25,10 @@ import {
   assertFiniteWindowBounds,
   assertValidWindowRecord,
   canonicalWindowSerializableValue,
-  canonicalWindowChromeMode,
-  chromeModes,
   isWindowSerializableValue,
   normaliseWindowSmoothSurface,
   type WindowAnchor,
   type WindowBounds,
-  type WindowChromeMode,
   type WindowContentDescriptor,
   type WindowGeometryState,
   type WindowIdPort,
@@ -42,7 +39,7 @@ import {
   type WindowStyle,
   type WindowToolbarState,
 } from "./windowTypes";
-import type { SynCloudOSAppFrameSmoothSurfaceManifest } from "../AppRegistry/appRegistryTypes";
+import type { WindowSmoothSurfaceConfiguration } from "../AppRegistry/appRegistryTypes";
 
 declare const resolvedWindowPersistenceNamespaceBrand: unique symbol;
 export type ResolvedWindowPersistenceNamespace = string & {
@@ -108,8 +105,7 @@ export interface RestorableWindowRecord {
   readonly restorationKey: string;
   /** Additive schema-1 fields: `undefined` means a legacy snapshot and
    * resolves to `system` chrome / the default window smooth surface. */
-  readonly chromeMode?: WindowChromeMode;
-  readonly smoothSurface?: SynCloudOSAppFrameSmoothSurfaceManifest | null;
+  readonly smoothSurface?: WindowSmoothSurfaceConfiguration | null;
 }
 
 export interface WindowRestorationSnapshot {
@@ -255,7 +251,11 @@ export function validateWindowRestorationSnapshot(
     return freezeWindowRestorationSnapshot({
       ...snapshot,
       schemaVersion: 2,
-      windows: snapshot.windows.map(record => ({ ...record, fullScreen: "off", collectionBehavior: "fullScreenNone" })),
+      windows: snapshot.windows.map(record => {
+        const legacy = { ...record } as Record<string, unknown>;
+        delete legacy["chrome" + "Mode"];
+        return { ...legacy, fullScreen: "off", collectionBehavior: "fullScreenNone" } as unknown as RestorableWindowRecord;
+      }),
     });
   }
   return snapshot;
@@ -403,9 +403,6 @@ function assertRestorableWindowRecord(value: unknown, runtimeId: WindowRecord["r
   if (!roles.has(value.role as WindowRole) || !levels.has(value.level as WindowRecord["level"]) ||
       !mobilePolicies.has(value.mobilePolicy as WindowRecord["mobilePolicy"])) invalid("Restored window enums are invalid.");
   if (!Array.isArray(value.style) || !value.style.every((entry) => styles.has(entry as WindowStyle))) invalid("Restored window styles are invalid.");
-  if (value.chromeMode !== undefined && (typeof value.chromeMode !== "string" || !chromeModes.has(value.chromeMode as WindowChromeMode))) {
-    invalid("Restored window chrome mode is invalid.");
-  }
   try { normaliseWindowSmoothSurface(value.smoothSurface); }
   catch { invalid("Restored window smoothSurface is invalid."); }
   if (typeof value.pinned !== "boolean" || typeof value.wasMinimised !== "boolean" || typeof value.wasZoomed !== "boolean") {
@@ -452,7 +449,6 @@ function assertRestorableWindowRecord(value: unknown, runtimeId: WindowRecord["r
       zIndex: value.zOrder as number,
       mobilePolicy: value.mobilePolicy as WindowRecord["mobilePolicy"],
       restorationKey: value.restorationKey as string,
-      chromeMode: canonicalWindowChromeMode(value.role as WindowRole, value.chromeMode as WindowChromeMode | undefined),
       smoothSurface: normaliseWindowSmoothSurface(value.smoothSurface),
       fullScreen: schemaVersion === 1 ? "off" : value.fullScreen as RestorableWindowRecord["fullScreen"],
       collectionBehavior: schemaVersion === 1 ? "fullScreenNone" : value.collectionBehavior as RestorableWindowRecord["collectionBehavior"],

@@ -41,6 +41,10 @@ export interface NSEOpenWindowOptions {
   readonly documentId?: string;
   readonly restorationKey?: string;
   readonly mobilePolicy?: AppOwnedWindowSnapshot["mobilePolicy"];
+  readonly styleMask?: readonly import("./NSEWindowController").NSEWindowStyle[];
+  readonly collectionBehavior?: readonly import("./NSEWindowController").NSEWindowCollectionBehavior[];
+  readonly titleVisibility?: import("./NSEWindowController").NSEWindowTitleVisibility;
+  readonly titlebarAppearsTransparent?: boolean;
   /** Explicit bounds, or placement using width/height and the current work area. */
   readonly preferredBounds?: AppBounds | "centred" | "cascaded";
 }

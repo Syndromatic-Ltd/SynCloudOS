@@ -46,7 +46,6 @@ export function isNSEApplicationClass(value: unknown): value is NSEApplicationCl
 export interface SynWareModuleNamedExports {
   readonly routes?: SynWareRouteGraph | undefined;
   readonly migrations?: readonly SynWareMigration[] | undefined;
-  readonly windowChrome?: SynWareDefinition["windowChrome"] | undefined;
   readonly rematerialiseOwnedDocument?: SynWareDefinition["rematerialiseOwnedDocument"] | undefined;
   readonly createBackgroundHandler?: SynWareDefinition["createBackgroundHandler"] | undefined;
 }
@@ -59,7 +58,6 @@ function assembleDefinition(
   const definition: { -readonly [Key in keyof SynWareDefinition]: SynWareDefinition[Key] } = { manifest, root };
   if (parts.routes !== undefined) definition.routes = parts.routes;
   if (parts.migrations !== undefined) definition.migrations = parts.migrations;
-  if (parts.windowChrome !== undefined) definition.windowChrome = parts.windowChrome;
   if (parts.rematerialiseOwnedDocument !== undefined) definition.rematerialiseOwnedDocument = parts.rematerialiseOwnedDocument;
   if (parts.createBackgroundHandler !== undefined) definition.createBackgroundHandler = parts.createBackgroundHandler;
   return definition;
@@ -94,7 +92,6 @@ export function createSynWareDefinitionFromApplicationClass(
   return assembleDefinition(manifest, root, {
     routes: AppClass.routes ?? named.routes,
     migrations: AppClass.migrations ?? named.migrations,
-    windowChrome: named.windowChrome,
     rematerialiseOwnedDocument: named.rematerialiseOwnedDocument,
     createBackgroundHandler: handlesBackgroundTasks
       ? () => ({ handle: (taskId, context) => runApplicationBackgroundTask(source, manifest.bundleIdentifier, taskId, context) })

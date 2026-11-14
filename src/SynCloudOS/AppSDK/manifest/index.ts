@@ -23,7 +23,6 @@ export { findSynWareManifestDifference } from "./compareCanonicalManifests";
 export type { SynWareManifestDifference } from "./compareCanonicalManifests";
 export type {
   SynWareAppearanceManifest,
-  SynWareApplicationMenuManifest,
   SynWareBackgroundManifest,
   SynWareDocumentTypeManifest,
   SynWareLifecycleManifest,
@@ -40,8 +39,6 @@ export type {
   SynWareRuntimeManifestContext,
   SynWareRouteManifest,
   SynWareFrameManifest,
-  SynWareFrameBackgroundManifest,
-  SynWareFrameRightSlotManifest,
   SynWareSurfaceManifest,
   SynWareServiceManifest,
   SynWareWebspringFolderManifest,
@@ -51,9 +48,9 @@ export type {
   SynWareWebspringViewManifest,
   SynWareResourceReference,
   SynWareWindowDefaultsManifest,
-  SynCloudOSAppFrameSmoothSurfaceCurve,
-  SynCloudOSAppFrameSmoothSurfaceManifest,
-  SynCloudOSAppFrameSmoothSurfacePhysicality,
+  WindowSmoothSurfaceCurve,
+  WindowSmoothSurfaceConfiguration,
+  WindowSmoothSurfacePhysicality,
 } from "./manifestTypes";
 
 export type * from "./installedApplicationTypes";

@@ -22,32 +22,11 @@ import type { DocumentLocation, DocumentWindowAssociation } from "../Documents";
 import type { SynCloudOSRuntimeId } from "../Runtime/runtimeInstanceTypes";
 import type { RuntimeDisposalPrepareContext, RuntimeDisposalPreparation } from "../Runtime/disposalTypes";
 import type {
-  SynCloudOSAppFrameSmoothSurfaceManifest,
-  SynCloudOSAppFrameSmoothSurfacePhysicality,
+  WindowSmoothSurfaceConfiguration,
+  WindowSmoothSurfacePhysicality,
 } from "../AppRegistry/appRegistryTypes";
 
-/** Window chrome anatomy: who paints the titlebar and window controls.
- * `system` renders the NSE system titlebar; `custom` mounts the owning
- * application's `windowChrome` component; `frameless` paints no chrome. */
-export type WindowChromeMode = "system" | "custom" | "frameless";
-
-export const chromeModes: ReadonlySet<WindowChromeMode> = new Set(["system", "custom", "frameless"]);
-
-/** Canonical role/chrome compatibility. Borderless windows are genuinely
- * frameless; system-owned specialised roles always use system chrome; only
- * standard document windows may opt into app chrome or no chrome. */
-export function canonicalWindowChromeMode(role: WindowRole, supplied?: WindowChromeMode): WindowChromeMode {
-  const resolved = supplied ?? (role === "borderless" ? "frameless" : "system");
-  if (role === "standard") return resolved;
-  if (role === "borderless") {
-    if (resolved !== "frameless") throw new InvalidWindowRecordError("Borderless windows require frameless chrome.");
-    return resolved;
-  }
-  if (resolved !== "system") throw new InvalidWindowRecordError(`${role} windows require system chrome.`);
-  return resolved;
-}
-
-type WindowSmoothSurfaceObject = Exclude<SynCloudOSAppFrameSmoothSurfaceManifest, "off" | false | number>;
+type WindowSmoothSurfaceObject = Exclude<WindowSmoothSurfaceConfiguration, "off" | false | number>;
 
 /** Default SmoothSurface corner treatment for floating-window surfaces.
  * Tuning constant: adjudicate against system-chrome nine-slice corners and
@@ -66,7 +45,7 @@ export const defaultWindowSmoothSurface: WindowSmoothSurfaceObject = Object.free
 export function normaliseWindowSmoothSurface(
   value: unknown,
   note?: (field: string, supplied: unknown, resolved: unknown, reason: string) => void,
-): SynCloudOSAppFrameSmoothSurfaceManifest | null {
+): WindowSmoothSurfaceConfiguration | null {
   const reject = (field: string, supplied: unknown, resolved: unknown, reason: string) => {
     if (note) note(field, supplied, resolved, reason);
     else throw new InvalidWindowRecordError(`Window smoothSurface ${field} is invalid: ${reason}.`);
@@ -107,7 +86,7 @@ export function normaliseWindowSmoothSurface(
   const input = Object.fromEntries(Object.entries(descriptors)
     .filter(([key, descriptor]) => allowedKeys.has(key) && "value" in descriptor && descriptor.enumerable)
     .map(([key, descriptor]) => [key, (descriptor as PropertyDescriptor & { value: unknown }).value])) as Record<string, unknown>;
-  const output: Exclude<SynCloudOSAppFrameSmoothSurfaceManifest, "off" | false | number> = {};
+  const output: Exclude<WindowSmoothSurfaceConfiguration, "off" | false | number> = {};
   if (input.radius !== undefined) {
     if (typeof input.radius === "number" && Number.isFinite(input.radius) && input.radius >= 0) output.radius = input.radius;
     else reject("radius", input.radius, defaultWindowSmoothSurface.radius, "radius must be a finite non-negative number");
@@ -299,19 +278,16 @@ export interface WindowRecord {
   readonly zIndex: number;
   readonly mobilePolicy: "fullscreen" | "sheet" | "popover-to-sheet" | "hidden";
   readonly restorationKey: string | null;
-  readonly chromeMode: WindowChromeMode;
-  readonly smoothSurface: SynCloudOSAppFrameSmoothSurfaceManifest | null;
+  readonly smoothSurface: WindowSmoothSurfaceConfiguration | null;
 }
 
 export type CreateWindowRequest = Omit<
   WindowRecord,
-  "id" | "runtimeId" | "state" | "isKey" | "isMain" | "zIndex" | "chromeMode" | "smoothSurface"
+  "id" | "runtimeId" | "state" | "isKey" | "isMain" | "zIndex" | "smoothSurface"
 > & {
   readonly id?: string;
-  /** Optional at request time; `WindowManager.create` fills `"system"`. */
-  readonly chromeMode?: WindowChromeMode;
   /** Optional at request time; `create` fills `defaultWindowSmoothSurface`. Explicit `null`/`"off"` disables the surface. */
-  readonly smoothSurface?: SynCloudOSAppFrameSmoothSurfaceManifest | null;
+  readonly smoothSurface?: WindowSmoothSurfaceConfiguration | null;
 };
 
 /** The single production record-construction seam used by WindowManager and
@@ -332,7 +308,6 @@ export function createCanonicalWindowRecord(
     fullScreen: request.fullScreen ?? "off",
     collectionBehavior: request.collectionBehavior ?? "fullScreenNone",
     style: effectiveWindowStyle(request.style, request.fullScreen ?? "off"),
-    chromeMode: canonicalWindowChromeMode(request.role, request.chromeMode),
     smoothSurface: normaliseWindowSmoothSurface(request.smoothSurface),
   });
 }
@@ -727,12 +702,6 @@ function assertCanonicalWindowRecord(record: WindowRecord): void {
   if (record.role !== "popover" && record.anchor) throw new InvalidWindowRecordError("Only popovers carry anchors.");
   if ((record.role === "panel" || record.role === "hud") && record.level === "normal") {
     throw new InvalidWindowRecordError("Panels and HUDs require a floating, modal, or status level.");
-  }
-  if (!chromeModes.has(record.chromeMode)) {
-    throw new InvalidWindowRecordError("Window chrome mode must be system, custom, or frameless.");
-  }
-  if (canonicalWindowChromeMode(record.role, record.chromeMode) !== record.chromeMode) {
-    throw new InvalidWindowRecordError("Window role and chrome mode are incompatible.");
   }
   const canonicalSmoothSurface = normaliseWindowSmoothSurface(record.smoothSurface);
   const serialisedSmoothSurface = canonicalWindowSerializableValue(

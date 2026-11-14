@@ -44,11 +44,10 @@ export type {
 } from "./BundleLoader/bundleTypes";
 export type {
   SynCloudOSAppAboutManifest,
-  SynCloudOSAppFrameManifest,
+  SynCloudOSPresentationMotionManifest,
   SynCloudOSAppIconManifest,
   SynCloudOSAppLifecycleManifest,
   SynCloudOSAppManifest,
-  SynCloudOSAppMenuManifest,
   SynCloudOSAppNotificationManifest,
   SynCloudOSAppPresentation,
   SynCloudOSAppSeoManifest,
@@ -57,7 +56,7 @@ export type {
   SynCloudOSAppWindowManifest,
   SynCloudOSStagePoint,
 } from "./AppRegistry/appRegistryTypes";
-export type { SynCloudOSAppFrameBackground, SynCloudOSAppFrameRightSlot, SynCloudOSAppFrameSmoothSurfaceManifest } from "./AppRegistry/appRegistryTypes";
+export type { WindowSmoothSurfaceConfiguration } from "./AppRegistry/appRegistryTypes";
 export type { SynCloudOSAppAccessPolicy } from "./ConfigurationProfiles/policyTypes";
 export type { SynCloudOSPolicySubject } from "./ConfigurationProfiles/policyTypes";
 export type { SynCloudOSConfigurationProfile, SynCloudOSConfigurationProfileSession, SynCloudOSPolicySubjectGrant } from "./ConfigurationProfiles/policyTypes";

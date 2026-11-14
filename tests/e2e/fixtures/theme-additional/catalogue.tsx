@@ -6,7 +6,7 @@ import { WebspringQuickSwitchView } from "../../../../src/Webspring/WebspringQui
 import { SystemAlert } from "../../../../src/SynCloudOSReact/SystemAlert";
 import { AlertBackdrop } from "../../../../src/NSE/Components/NSEAlertBackdrop";
 import { AppViewChrome } from "../../../../src/Webspring/AppViewChrome";
-import { WindowContentBorder } from "../../../../src/SynCloudOS/AppHosting/windowChrome";
+import { WindowContentBorder } from "../../../../src/SynCloudOS/AppHosting/windowAccessories";
 import "../../../../src/SynCloudOS/AppHosting/window-chrome.css";
 import { WindowTitlebarContent } from "../../../../src/NSE/Windows/windowTitlebarContext";
 import { NSEDatePicker } from "../../../../src/NSE/DateTime/Pickers/NSEDatePicker";

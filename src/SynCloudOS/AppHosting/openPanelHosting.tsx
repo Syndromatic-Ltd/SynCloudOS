@@ -6,7 +6,7 @@ import { createPortal } from "react-dom";
 import { useOptionalNSEWindowSurfaceBridge } from "../../NSE/NSE";
 import type { WindowSurfaceBridge, WindowSurfaceRequest } from "../../NSE/NSE";
 import { OpenPanelSheetSurface } from "../../NSE/applicationHostInterop";
-import { WindowSheetFrame, WindowSheetHostContext } from "./windowChrome";
+import { WindowSheetFrame, WindowSheetHostContext } from "./windowAccessories";
 import type { NSEWindow } from "../../NSE/NSE";
 import type { SynWareContextValue } from "../AppSDK/appContextTypes";
 import { openPanelFileSystemFor } from "../FilePanels";

@@ -30,7 +30,6 @@ export * from "./NSEHierarchyStack";
 export * from "./NSEApplicationNavigationChrome";
 export * from "./NSETabView";
 export type { TabStripPresentation, TabStyle } from "./tabStrip";
-export * from "./SourceList";
 import "./SourceList/nse-sourcelist.css";
 import "./SourceList/nse-source-list-scene.css";
 import "./nse-navigation.css";

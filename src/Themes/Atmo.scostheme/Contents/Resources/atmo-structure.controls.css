@@ -791,7 +791,7 @@
    down (Heritage top:-2px left:4px). It supplies its own dark frame via
    the app menu surface element, so the generic light popup frame + centering is stripped. */
 
-/* Optional top-right placement (e.g. wired under the rightSlot / User Info button). */
+/* Optional top-right placement for the application menu. */
 
 /* Retracts the way it arrived. NSEPopup holds the mount open for exitDuration so
    this has something to play on; without that the menu unmounted on the same

@@ -92,7 +92,6 @@ import * as NSEControlButtons from "./Controls/Buttons";
 import * as NSEControlFields from "./Controls/Fields";
 import * as NSEControlImages from "./Controls/Images";
 import * as NSEControlSelection from "./Controls/Selection";
-import * as NSEChrome from "./Windows/Chrome";
 import * as NSEMaterial from "./Material";
 import * as NSEAppearance from "./Appearance";
 export * from "./Appearance";
@@ -105,7 +104,6 @@ const ControlCatalogue = {
   ...NSEControlSelection,
   ...NSEControlCore,
   ...NSEValueControls,
-  ...NSEChrome,
   ...NSENavigation,
   ...NSEMaterial,
   ...NSEFilePanels,
@@ -224,7 +222,7 @@ export const NSE = {
 
 
 export type { NSELayoutGuide } from "./Layout/NSELayoutGuide";
-export { useNSEWindowChromeObstruction } from "./Layout/windowChromeObstructions";
+export { useNSEWindowChromeObstruction } from "./Layout/windowObstructions";
 
 export { useNSESafeArea } from "./Layout/useNSESafeArea";
 export type { NSESafeArea } from "./Layout/useNSESafeArea";

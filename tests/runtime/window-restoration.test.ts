@@ -40,9 +40,9 @@ function memoryPersistence(): WindowRestorationPersistencePort & { readonly valu
 }
 
 describe("window workspace restoration", () => {
-  it("migrates schema 1 without changing saved identity, chrome or geometry", async () => {
+  it("migrates schema 1 while dropping legacy decoration and preserving saved geometry", async () => {
     const source = createWindowTestDependencies();
-    const controller = source.manager.create(standardWindow("legacy-window", { chromeMode: "custom" }));
+    const controller = source.manager.create(standardWindow("legacy-window"));
     await source.manager.open(controller.id);
     source.manager.zoom(controller.id);
     source.manager.minimise(controller.id);
@@ -50,18 +50,21 @@ describe("window workspace restoration", () => {
     legacy.schemaVersion = 1;
     delete legacy.windows[0].fullScreen;
     delete legacy.windows[0].collectionBehavior;
+    const decorationKey = "chrome" + "Mode";
+    legacy.windows[0][decorationKey] = "custom";
     const original = structuredClone(legacy);
     const migrated = validateWindowRestorationSnapshot(legacy, {
       namespace: legacy.namespace, installationId: legacy.installationId, runtimeId: controller.record.runtimeId,
     });
     expect(migrated.schemaVersion).toBe(2);
-    expect(migrated.windows[0]).toEqual({ ...original.windows[0], fullScreen: "off", collectionBehavior: "fullScreenNone" });
+    const { [decorationKey]: _discarded, ...originalWindow } = original.windows[0];
+    expect(migrated.windows[0]).toEqual({ ...originalWindow, fullScreen: "off", collectionBehavior: "fullScreenNone" });
     expect(legacy).toEqual(original);
     const target = createWindowTestDependencies();
     const restored = await target.manager.restoreWorkspace(legacy);
     expect(restored.failures).toEqual([]);
     const restoredController = target.manager.select(controller.id);
-    expect(restoredController.record).toMatchObject({ id: controller.id, state: "minimised", chromeMode: "custom", fullScreen: "off" });
+    expect(restoredController.record).toMatchObject({ id: controller.id, state: "minimised", fullScreen: "off" });
     expect(restoredController.geometryState.normalBounds).toEqual(original.windows[0].normalBounds);
     expect(restoredController.geometryState.minimisedFrom).toBe("zoomed");
     await Promise.all([source.cleanup(), target.cleanup()]);

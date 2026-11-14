@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEView } from "../../src/NSE/Views/NSEView";
 import { NSEViewController, nseUpdateSafeArea } from "../../src/NSE/Application/NSEViewController";
 import { NSEEdgeInsetsMake } from "../../src/NSE/Layout/NSEEdgeInsets";
-import { WindowLayoutContext, WindowLayoutModel } from "../../src/NSE/Layout/windowChromeObstructions";
+import { WindowLayoutContext, WindowLayoutModel } from "../../src/NSE/Layout/windowObstructions";
 import { SafeAreaMeasurementProvider, useNSESafeArea } from "../../src/NSE/Layout/useNSESafeArea";
 
 afterEach(() => { cleanup(); vi.restoreAllMocks(); });

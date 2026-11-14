@@ -23,7 +23,6 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { MenuView } from "../../src/NSE/Menus";
 import { NSESwitch, NSEButton, NSEBox, NSEPopUpButton, NSESegmentedControl, useNSEControlFeedback } from "../../src/NSE/public/controls";
-import { TopBar } from "../../src/NSE/Windows/Chrome";
 import { GroupedRow } from "../../src/NSE/Controls/Selection/GroupedRow";
 import { GlassPanel } from "../../src/NSE/Components/GlassPanel";
 import { BrowserHapticsAdapter, createHFXVibratePattern, normalizeHFXFeedbackInput } from "../../src/SynCloudOS/PlatformAdapters/BrowserHapticsAdapter";
@@ -316,11 +315,7 @@ describe("HapticsFX feedback preservation", () => {
           selection: { mode: "select-one", selectedIds: new Set(["a"]), allowsEmpty: false },
           onSelectionChange: vi.fn()
         }),
-        createElement(GroupedRow, { role: "button", onClick: vi.fn() }, "List item"),
-        createElement(TopBar, {
-          title: "Journal",
-          leadingItems: [{ kind: "webspring", label: "Return", onClick: vi.fn() }]
-        })
+        createElement(GroupedRow, { role: "button", onClick: vi.fn() }, "List item")
       ));
 
       fireEvent.click(rendered.getByText("Medium"));
@@ -343,8 +338,6 @@ describe("HapticsFX feedback preservation", () => {
       expect(vibrate).toHaveBeenLastCalledWith(expectedHapticPattern("selection"));
       fireEvent.click(rendered.getByText("List item"));
       expect(vibrate).toHaveBeenLastCalledWith(expectedHapticPattern("selection"));
-      fireEvent.click(rendered.getByLabelText("Return"));
-      expect(vibrate).toHaveBeenLastCalledWith(expectedHapticPattern("rigid"));
     } finally {
       cleanup();
       cleanupDom();
@@ -514,33 +507,6 @@ describe("SmoothSurface", () => {
     expect(groupBoxMarkup).toContain("nse-control-group-box");
     expect(groupBoxMarkup).toContain('data-corner-curve="continuous"');
     expect(groupBoxMarkup).toContain("--nse-corner-radius:18px");
-
-    const appTopBarMarkup = renderToStaticMarkup(createElement(TopBar, {
-      title: "Journal",
-      smoothSurface: {
-        radius: "lg",
-        overflow: "hidden",
-        shadow: "hairline"
-      }
-    }));
-
-    expect(appTopBarMarkup).toContain("nse-app-topbar");
-    expect(appTopBarMarkup).toContain("nse-smooth-surface-radius-lg");
-    expect(appTopBarMarkup).toContain("--nse-smooth-surface-shadow:0 0 0 1px rgba(255, 255, 255, 0.18)");
-
-    const appTopBarWithTitleActionMarkup = renderToStaticMarkup(createElement(TopBar, {
-      title: "Journal",
-      titleAction: {
-        label: "Open QuickSwitch",
-        selected: true,
-        onClick: vi.fn()
-      }
-    }));
-
-    expect(appTopBarWithTitleActionMarkup).toContain("nse-app-topbar-title-button");
-    expect(appTopBarWithTitleActionMarkup).toContain("aria-expanded=\"true\"");
-    expect(appTopBarWithTitleActionMarkup).toContain("nse-app-topbar-title-arrow-right");
-    expect(appTopBarWithTitleActionMarkup).toContain("nse-app-topbar-title-arrow-down");
 
     const glassPanelMarkup = renderToStaticMarkup(createElement(
       GlassPanel,

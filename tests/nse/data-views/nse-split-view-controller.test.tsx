@@ -37,7 +37,6 @@ import { SplitViewControllerView } from "../../../src/NSE/DataViews/Split/splitV
 import { ViewControllerView } from "../../../src/SynCloudOS/AppHosting/applicationHosting";
 import { createStaticPresentationTraits } from "../../fixtures/presentationTraits";
 import { defaultsFrom } from "../../fixtures/userDefaults";
-import { SourceListFrameProvider } from "../../../src/NSE/Navigation/SourceList/sourceListFrameContext";
 
 /** A child view controller that renders `content`. */
 class PaneViewController extends NSEViewController {
@@ -176,21 +175,7 @@ describe("NSESplitViewController", () => {
     expect(inspector.isCollapsed).toBe(true);
     expect(controller.compactItem).toBe(inspector);
   });
-  it("shares its sidebar seam and compact handoff with a source-list window's frame", () => {
-    const setRailWidth = vi.fn(), setCompactNavigation = vi.fn();
-    const controller = new NSESplitViewController({ id: "source-list", preferences: createPreferences({ sizes: { sidebar: 340, content: 560 }, collapsedPaneIds: [], activePaneId: "content" }), splitViewItems: [
-      item("sidebar", "Sources", () => <p>Sources</p>, { behavior: "sidebar", minimumThickness: 208, maximumThickness: 460 }),
-      item("content", "Content", () => <p>Content</p>, { minimumThickness: 320 }),
-    ] });
-    render(<SourceListFrameProvider value={{ railWidth: 264, setRailWidth, setCompactNavigation, minWidth: 208, maxWidth: 460, defaultWidth: 264, railLabel: "Library", scheme: "light" }}><ViewControllerView controller={controller} /></SourceListFrameProvider>);
-    setWidth(controller, 900);
-    const divider = screen.getByRole("separator");
-    expect(divider.getAttribute("aria-valuenow")).toBe("340");
-    fireEvent.keyDown(divider, { key: "ArrowRight" });
-    expect(setRailWidth).toHaveBeenLastCalledWith(356);
-    setWidth(controller, 390);
-    expect(setCompactNavigation).toHaveBeenLastCalledWith(true);
-  });
+
   it("shows a compact detail and returns focus to its initiating sidebar control", () => {
     let controller: NSESplitViewController;
     const sidebar = item("sidebar", "Folders", () => <button onClick={() => controller.showDetail(detail.viewController)}>Open note</button>, { behavior: "sidebar", minimumThickness: 208 });

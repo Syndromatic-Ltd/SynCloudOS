@@ -67,7 +67,7 @@ export interface WindowSurfaceBridge {
 
 const Context = createContext<WindowSurfaceBridge | null>(null);
 
-export function WindowSurfaceBridgeProvider({ bridge, children }: PropsWithChildren<{ readonly bridge: WindowSurfaceBridge }>) {
+export function WindowSurfaceBridgeProvider({ bridge, children }: PropsWithChildren<{ readonly bridge: WindowSurfaceBridge | null }>) {
   return <Context.Provider value={bridge}>{children}</Context.Provider>;
 }
 

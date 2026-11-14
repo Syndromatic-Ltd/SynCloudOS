@@ -18,7 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { WindowLayoutContext, WindowLayoutModel } from "../../NSE/hostComposition";
+import { WindowPresentationSlot, useWindowPresentationContent } from "../WindowPresentationContent";
+import { isNSEDOMElement, WindowLayoutContext, WindowLayoutModel } from "../../NSE/hostComposition";
 
 import React, { useCallback, useLayoutEffect, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useNSEPresenceExiting, useNSEPresentation, type PresentationSpec } from "../../NSE/Animation";
@@ -49,7 +50,6 @@ import {
 } from "../../SynCloudOS/SynCloudOS";
 import { FocusScope, useRuntimeNSEControlPort, useRuntimeNSEFocusPort, useRuntimeNSEOverlayPort, useKernelSynCloudOS } from "../../SynCloudOSReact";
 import { createTransientWindowSurfaceBridge } from "./TransientWindowSurfaceBridge";
-import { WindowChromeSlotContext } from "./windowChromeSlotContext";
 import { useWindowMoveResize } from "./useWindowMoveResize";
 import type { WindowContentRendererRegistry } from "./WindowContentRendererRegistry";
 import { PopoverWindowSurface } from "./PopoverWindowSurface";
@@ -110,6 +110,7 @@ export function WindowHost({
   onDiagnostic,
 }: WindowHostProps) {
   const runtime = useKernelSynCloudOS();
+  const sharedPresentation = useWindowPresentationContent();
   const record = useSyncExternalStore(controller.subscribe, () => controller.record, () => controller.record);
   const contentState = useSyncExternalStore(controller.subscribe, () => controller.contentState, () => controller.contentState);
   useSyncExternalStore(renderers.subscribe, () => renderers.revision, () => renderers.revision);
@@ -118,42 +119,6 @@ export function WindowHost({
   const popoverSurface = surface && (record.role === "popover" || record.role === "sheet" && surface.request.drawsBackground !== undefined) ? surface : null;
   const wasPopoverSurface = useRef(false);
   if (popoverSurface) wasPopoverSurface.current = true;
-  // The custom-titlebar slot div is rendered declaratively by the view; the
-  // host learns the node through a ref callback (raw `document` access is
-  // forbidden in Webspring surfaces). The mounted application's chrome
-  // portals into it once the node exists.
-  const [chromeSlotNode, setChromeSlotNode] = useState<HTMLDivElement | null>(null);
-  // Readiness handshake: a declared-custom window starts on complete
-  // system chrome. Only a mounted bridge that reports a live
-  // renderer promotes the window to custom chrome; renderer unmount
-  // (detached) or a crash (failed) returns it to the system titlebar, so
-  // chromeMode alone can never blank the bar. The key comparison resets the
-  // *derived* handshake synchronously without scheduling state during render;
-  // callbacks carry the key so stale bridge cleanups cannot overwrite a new
-  // controller/mode generation.
-  const chromeHandshakeKey = `${controller.id}:${record.chromeMode}`;
-  const chromeHandshakeKeyRef = React.useRef(chromeHandshakeKey);
-  chromeHandshakeKeyRef.current = chromeHandshakeKey;
-  const [chromeHandshake, setChromeHandshake] = useState(
-    () => ({ key: chromeHandshakeKey, ready: false, failed: false }),
-  );
-  const currentChromeHandshake = chromeHandshake.key === chromeHandshakeKey
-    ? chromeHandshake
-    : { key: chromeHandshakeKey, ready: false, failed: false };
-  const chromeReady = record.chromeMode === "custom" && currentChromeHandshake.ready;
-  const chromeFailed = currentChromeHandshake.failed;
-  const chromeSlot = useMemo(() => ({
-    slotElement: chromeSlotNode,
-    reportChromeReady: () => setChromeHandshake((state) => chromeHandshakeKeyRef.current === chromeHandshakeKey
-      ? { key: chromeHandshakeKey, ready: true, failed: state.key === chromeHandshakeKey && state.failed }
-      : state),
-    reportChromeDetached: () => setChromeHandshake((state) => chromeHandshakeKeyRef.current === chromeHandshakeKey
-      ? { key: chromeHandshakeKey, ready: false, failed: state.key === chromeHandshakeKey && state.failed }
-      : state),
-    reportChromeFailure: () => setChromeHandshake((state) => chromeHandshakeKeyRef.current === chromeHandshakeKey
-      ? { key: chromeHandshakeKey, ready: false, failed: true }
-      : state),
-  }), [chromeHandshakeKey, chromeSlotNode]);
   const presentation = resolveWindowPresentation(record, screen, controller.geometryState);
   const compactPopover = Boolean(popoverSurface && (presentation.kind === "mobile-sheet" || popoverSurface.request.presentation?.mode === "sheet"));
   const ownsPopoverFocus = record.role === "popover" && popoverSurface !== null;
@@ -330,7 +295,9 @@ export function WindowHost({
   const parentScopeId = parentController && (parentController.record.role === "modal" || parentController.record.role === "sheet")
     ? `window:${parentController.id}`
     : undefined;
-  const hostedContent = renderers.render(contentState.mountKey, {
+  const hostedContent = sharedPresentation && record.role === "standard" && record.content.rendererId === "application"
+    ? <WindowPresentationSlot windowId={record.id} priority={1} bridge={childTransientBridge} overlay={overlayLayerNode} />
+    : renderers.render(contentState.mountKey, {
     mountKey: contentState.mountKey,
     window: record,
     presentation,
@@ -347,14 +314,7 @@ export function WindowHost({
         </FocusScopeIdContext.Provider>
       </PopoverWindowSurface>
     : hostedContent;
-  const customChromeActive = chromeReady && !chromeFailed;
-  // The slot node must exist BEFORE the handshake can complete: the bridge
-  // needs a portal target to mount and report ready. Render it for every
-  // declared-custom window (the empty div collapses until chrome arrives);
-  // paint suppression still waits for customChromeActive.
-  const chromeSlotWanted = record.chromeMode === "custom" && !chromeFailed;
   const runtimeHostedContent = (
-    <WindowChromeSlotContext.Provider value={chromeSlot}>
       <OverlayProvider
         runtimePort={overlayPort}
         defaultParentResponderId={controller.windowResponderId}
@@ -370,7 +330,6 @@ export function WindowHost({
         </ControlRuntimeProvider>
       </TooltipProvider>
       </OverlayProvider>
-    </WindowChromeSlotContext.Provider>
   );
   const view = popoverSurface ? runtimeHostedContent : (
     <View
@@ -379,8 +338,6 @@ export function WindowHost({
       zoomed={controller.geometryState.zoomed}
       blocked={blocked}
       dirty={dirty}
-      customChromeActive={customChromeActive}
-      customTitleBarSlotRef={chromeSlotWanted ? setChromeSlotNode : undefined}
       dispatchCommand={(commandId, payload) => commands.dispatch(commandId, payload, { source: "toolbar" })}
       moveHandleProps={moveHandleProps}
       resizeHandleProps={resizeHandleProps}
@@ -425,7 +382,7 @@ export function WindowHost({
       aria-hidden={blocked ? true : undefined}
       onPointerDownCapture={(event) => {
         const target = event.target;
-        if (record.state === "open" && !(target instanceof Element && target.closest("[data-window-control]"))) {
+        if (record.state === "open" && !(isNSEDOMElement(target) && target.closest("[data-window-control]"))) {
           manager.makeKey(controller.id);
         }
       }}

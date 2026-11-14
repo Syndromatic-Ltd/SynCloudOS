@@ -52,6 +52,7 @@ import { nseDisposeFor } from "../../NSE/applicationHostInterop";
 import { ActionResponderContext, ActionScopeProvider } from "../../NSE/applicationHostInterop";
 import { ResponderScope } from "../../SynCloudOSReact";
 import { useResponderHierarchy } from "../../SynCloudOSReact";
+import { getMountedAppEnvironmentClients } from "../AppSDK/mountedEnvironmentClientRegistry";
 import { SynCloudOSRuntimeContext, SynWareRuntimeContext } from "../../SynCloudOSReact";
 import type { SynWareRuntime } from "../../SynCloudOSReact";
 import { useSynWareContext } from "../AppSDK/SynWareContext";
@@ -60,7 +61,9 @@ import { NSEPopup } from "../../NSE/NSE";
 import type { SynWareContextValue } from "../AppSDK/appContextTypes";
 import { bindActionResponder, hasActions } from "../AppSDK/actions";
 import { trackLiveApplicationObject } from "./applicationHotReload";
-import { WindowContentBorder, WindowSheetFrame, WindowSheetHostContext, WindowTitlebarAccessories, nseContentBorderSize, WindowTitlebarHostContext, useNSEWindowSheetHost, WindowToolbar, useNSEWindowTitlebarDocument } from "./windowChrome";
+import { WindowContentBorder, WindowSheetFrame, WindowSheetHostContext, WindowTitlebarAccessories, nseContentBorderSize, WindowTitlebarHostContext, useNSEWindowSheetHost, WindowToolbar, useNSEWindowTitlebarDocument } from "./windowAccessories";
+import { NSEMountedWindowContext } from "../../NSE/Application/NSEWindowContext";
+import { WindowApplicationMenu } from "./windowApplicationMenu";
 import { applicationSessionFor } from "./applicationSession";
 import { createNSEWindowAlertQueue, WindowAlertSheet, type WindowAlertQueue } from "./windowAlertSheet";
 import { useNSEAnimationEnvironment, useNSEViewActivitySource } from "../../NSE/applicationHostInterop";
@@ -417,6 +420,16 @@ function createWindowMount(appRuntime: SynWareRuntime, alerts: WindowAlertQueue,
     focus: () => { windows.focus(requireId("focus the window")); },
     minimise: () => { windows.minimise(requireId("minimise the window")); },
     zoom: () => { windows.zoom(requireId("zoom the window")); },
+    setStyleMask(style) {
+      if (current()) getMountedAppEnvironmentClients(appRuntime).currentWindow.setStyle(style.flatMap(bit =>
+        bit === "miniaturizable" ? ["minimisable" as const] : bit === "resizable" ? [bit, "zoomable" as const] : [bit]));
+    },
+    setCollectionBehavior(behavior) {
+      if (current()) getMountedAppEnvironmentClients(appRuntime).currentWindow.setCollectionBehavior(behavior);
+    },
+    toggleFullScreen() {
+      if (current()) getMountedAppEnvironmentClients(appRuntime).currentWindow.toggleFullScreen();
+    },
     setTitle: (title) => {
       const id = current()?.id;
       // An untitled window is named after its application in the window record.
@@ -452,17 +465,15 @@ export function WindowControllerView({ controller }: WindowControllerViewProps) 
   const alerts = useMemo(() => createNSEWindowAlertQueue(), []);
   const appAlerts = useSynWareContext()?.alerts ?? null;
   const layout = useContext(WindowLayoutContext);
-  const mount = useMemo(() => {
-    const mount = appRuntime ? createWindowMount(appRuntime, alerts, appAlerts) : null;
-    return mount && layout ? { ...mount, get windowId() { return mount.windowId; }, contentLayoutGuide: layout } : mount;
-  }, [appRuntime, alerts, appAlerts, layout]);
+  const mount = useMemo(() => appRuntime ? createWindowMount(appRuntime, alerts, appAlerts) : null,
+    [appRuntime, alerts, appAlerts]);
   const [loaded, setLoaded] = useState(false);
   const [titleSlot, setTitleSlot] = useState<HTMLDivElement | null>(null);
   const titleSlotHost = useMemo(() => ({ root: controller.contentViewController, setSlot: setTitleSlot }), [controller, controller.contentViewController]);
   const titlebarHost = useContext(WindowTitlebarHostContext);
   // Both standalone windows and stage hosts project the same window-owned chrome.
   const stageTitlebar = titlebarHost;
-  const accessoryHost = mount?.windowId === null ? titlebarHost : null;
+  const accessoryHost = titlebarHost;
   useNSEWindowTitlebarDocument(controller, loaded ? stageTitlebar : null);
   // While a sheet is attached, the window's close button and Close command are refused (performClose(_:)).
   const sheetCloseGuard = useRef<(() => void) | null>(null);
@@ -483,7 +494,7 @@ export function WindowControllerView({ controller }: WindowControllerViewProps) 
       if (isKey) nseSetKeyWindowModalPresenter(mount, mount.presentModalAlert);
     };
     reportKey();
-    const unsubscribe = mount.subscribe(reportKey);
+    const unsubscribe = mount.subscribe(() => { reportKey(); internals.notifySnapshotChange(); });
     // A window that closes on its own (not because the application quits) disposes its controller once the view leaves.
     // The window's own mount is revoked with the window, so nothing else would report this close.
     let closedOnItsOwn = false;
@@ -505,6 +516,12 @@ export function WindowControllerView({ controller }: WindowControllerViewProps) 
       if (closedOnItsOwn) controller[nseDisposeFor]("window-closed");
     };
   }, [controller, mount]);
+  useLayoutEffect(() => {
+    if (!layout || !loaded || controller.isDisposed) return;
+    const update = () => controller[nseWindowInternals].updateContentLayout(layout.frame);
+    update();
+    return layout.observe(update);
+  }, [controller, layout, loaded]);
   if (!appRuntime) throw new Error("NSEWindowControllerView must render inside a mounted application.");
   if (controller.isDisposed || !loaded) return null;
   const root = controller.contentViewController;
@@ -518,16 +535,21 @@ export function WindowControllerView({ controller }: WindowControllerViewProps) 
   const bottomBorder = controller.window.contentBorderThickness("minY");
   const { toolbarStyle, subtitle } = controller.window;
   const title = nseWindowPresentedTitle(controller.window);
-  const ownTitle = toolbarStyle === "expanded" ? <WindowTitlebarContent toolbarStyle={toolbarStyle} title={title} subtitle={subtitle} /> : null;
+  const ownTitle = !titlebarHost && toolbarStyle === "expanded" ? <WindowTitlebarContent toolbarStyle={toolbarStyle} title={title} subtitle={subtitle} /> : null;
   // Keep the content host permanent: showing chrome must not remount an editor or its draft.
   const hasBottomAccessory = bottomBorder > 0 && bottomBarAccessory != null;
   return (
+    <NSEMountedWindowContext.Provider value={controller}>
     <WindowTitleSlotContext.Provider value={titleSlotHost}>
     <ActionScopeProvider appId={appRuntime.app.bundleIdentifier}>
       <ControllerResponder target={controller} kind="controller">
+        <WindowApplicationMenu app={controller.app} destination={titlebarHost?.menuBar}>
         {accessories.length ? <WindowTitlebarAccessories accessories={accessories} renderController={renderAccessory} host={accessoryHost} placement="titlebar" /> : null}
           <div className="nse-window-chrome-frame">
-            {toolbar ? <WindowToolbar controller={controller} toolbar={toolbar} /> : null}
+            {toolbar ? titlebarHost?.toolbar
+              ? createPortal(<WindowToolbar controller={controller} toolbar={toolbar} />, titlebarHost.toolbar)
+              : !titlebarHost ? <WindowToolbar controller={controller} toolbar={toolbar} /> : null
+              : null}
             <WindowTitlebarAccessories accessories={accessories} renderController={renderAccessory} host={accessoryHost} placement="row" />
             {titleSlot ? createPortal(ownTitle, titleSlot) : ownTitle}
             <div data-nse-part="content-view" data-nse-content-border={bottomBorder > 0 ? nseContentBorderSize(bottomBorder) : undefined} className="nse-window-chrome-content" data-content-border={bottomBorder > 0 ? nseContentBorderSize(bottomBorder) : undefined}>
@@ -537,8 +559,10 @@ export function WindowControllerView({ controller }: WindowControllerViewProps) 
               {sheetLayer}
             </div>
           </div>
+        </WindowApplicationMenu>
       </ControllerResponder>
     </ActionScopeProvider>
     </WindowTitleSlotContext.Provider>
+    </NSEMountedWindowContext.Provider>
   );
 }

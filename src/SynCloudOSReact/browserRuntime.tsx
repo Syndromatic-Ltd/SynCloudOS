@@ -18,7 +18,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { InstalledApplicationTitleBar } from "./InstalledApplicationTitleBar";
 import { configureApplicationPush } from "../SynCloudOS/InstalledApplications/applicationSystemServices";
 import type { UNPushConfiguration } from "../SynCloudOS/UserNotifications/UserNotifications";
 import { installedApplicationRoute } from "../SynCloudOS/InstalledApplications/installedApplicationLaunch";
@@ -114,15 +113,7 @@ interface BrowserHostOptions {
   readonly composition?: SynCloudOSProjectComposition;
 }
 
-/** How an application-only host presents its primary application:
- * `fullscreen` (the default) fills the page with the app's content and no
- * system top bar; `declared` keeps the manifest's presentation and frame, so a
- * page-filling primary with `topBar: "standard"` draws the standard bar above it,
- * with its window's title, subtitle and titlebar accessories.
- * A primary that fills the page under `optional` or `required` authentication
- * must declare `applicationMenu: { trigger: "content" }` and open the menu
- * from its content with `useApplicationMenuTrigger()`: that menu is the
- * only way to reach Preferences > Account, Sign In and Log Out. */
+/** Present the primary full screen or use its declared presentation. */
 export type SynCloudOSApplicationFrameMode = "fullscreen" | "declared";
 
 /** A host chooses its Webspring shell, one primary application, or — with
@@ -384,7 +375,6 @@ function renderHost(
           <RuntimeInputBoundary>
             {/* Above the recovery boundary, so the root error window scrolls like every other surface. */}
             <RubberBandProvider><RootRecoveryBoundary runtime={runtime} options={options} fontCatalogue={fontCatalogue}>
-              <InstalledApplicationTitleBar />
               {home
                 ? <ApplicationHost applicationId={home.primaryId} authentication={options.authentication ?? "disabled"} home={home} />
                 : Shell && <Shell shell={options.shell!} shellResources={options.shellResources} authentication={options.authentication} />}
@@ -600,7 +590,7 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
     if ((options.application.frame ?? "fullscreen") === "fullscreen") {
       initialBundles = initialBundles.map(bundle => normalizeBundleIdentifier(bundle.manifest.bundleIdentifier) !== primaryId ? bundle : Object.freeze({ ...bundle,
         manifest: Object.freeze({ ...bundle.manifest, presentation: "appView" as const,
-          frame: Object.freeze({ ...bundle.manifest.frame, topBar: "none" as const, presentationMotion: "content" as const }),
+          frame: Object.freeze({ ...bundle.manifest.frame, presentationMotion: "content" as const }),
         }) }));
     }
     if ((authenticationPolicy ?? "disabled") === "disabled") {
@@ -614,17 +604,13 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
         return Object.freeze({ ...bundle, manifest: Object.freeze({ ...bundle.manifest, policy: Object.freeze({ ...bundle.manifest.policy, public: true }) }) });
       });
     }
-    const primary = initialBundles.find(bundle => normalizeBundleIdentifier(bundle.manifest.bundleIdentifier) === primaryId)!.manifest;
     // Without sign-in everyone is the anonymous role, so a single application that brings no policy
     // profile gets the document-store capabilities it declares; otherwise its documents are denied.
     if ((authenticationPolicy ?? "disabled") === "disabled" && composition.runtimeConfig.configurationProfile === undefined) {
       const primaryBundle = initialBundles.find(bundle => normalizeBundleIdentifier(bundle.manifest.bundleIdentifier) === primaryId) as { readonly synWareManifest?: { readonly entitlements?: readonly string[] } } | undefined;
       applicationConfigurationProfile = singleApplicationConfigurationProfile(primaryBundle?.synWareManifest?.entitlements ?? []);
     }
-    if (authenticationPolicy !== undefined && authenticationPolicy !== "disabled"
-      && (primary.presentation ?? "appView") === "appView" && primary.applicationMenu?.trigger !== "content") {
-      throw new TypeError(`Application ${primaryId} fills the page with ${authenticationPolicy} sign-in but declares no content application-menu trigger. Declare applicationMenu: { trigger: "content" } and open the menu with useApplicationMenuTrigger(), so people can reach Preferences > Account, Sign In and Log Out.`);
-    }
+
   }
   const config: SynCloudOSRuntimeConfig = {
     environment,

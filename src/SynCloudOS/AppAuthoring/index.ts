@@ -28,11 +28,9 @@ export {
   usePasteboard,
   useService,
   useAudio,
-  useWindow,
 } from "../AppSDK";
 export type {
   SynWareAppearanceState,
   SynWareColourPanelState,
   SynWareCommandDefinition,
-  SynWareWindowState,
 } from "../AppSDK";

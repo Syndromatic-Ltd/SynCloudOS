@@ -6,7 +6,7 @@
  */
 
 import { useNSEAppearance } from "../Appearance/NSEAppearanceProvider";
-import { WindowLayoutContext, useNSEWindowChromeElement } from "../Layout/windowChromeObstructions";
+import { WindowLayoutContext, useNSEWindowChromeElement } from "../Layout/windowObstructions";
 import { useNSEViewSafeArea } from "../Layout/useNSESafeArea";
 import { useContext, useCallback, useLayoutEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
 import { NSEOutlineView } from "../DataViews/Outline/NSEOutlineView";
@@ -16,7 +16,6 @@ import { TabBar, TabBarOverflowList } from "./TabBar";
 import { TabBarMoreDestinationId } from "./TabBarController";
 import { getNSETabBarPanelId, getNSETabBarTabId } from "./NSENavigationDestinationHost";
 import { resolveNSEBookRegions } from "./bookRegions";
-import { useSourceListFrame } from "./SourceList/sourceListFrameContext";
 import type { NSETabViewController } from "./NSETabViewController";
 import type { NSENavigationIcon } from "./navigationTypes";
 import { tabViewProjection } from "./tabViewInternals";
@@ -42,7 +41,6 @@ const sidebarMinimumWidth = 768;
 
 /** @internal The sidebar-adaptable theme projection of NSTabViewController's items. */
 export function AdaptiveTabView({ controller, scope }: { readonly controller: NSETabViewController; readonly scope: string }) {
-  const frame = useSourceListFrame();
   const { theme } = useNSEAppearance();
   const root = useRef<HTMLDivElement>(null);
   const chrome = useRef<HTMLDivElement>(null);
@@ -105,11 +103,6 @@ export function AdaptiveTabView({ controller, scope }: { readonly controller: NS
     return () => observer?.disconnect();
   }, [layout, traits?.revision]);
 
-  useLayoutEffect(() => {
-    if (!adaptive) return undefined;
-    frame?.setCompactNavigation?.(compact ? true : null);
-    return () => frame?.setCompactNavigation?.(null);
-  }, [adaptive, compact, frame?.setCompactNavigation]);
 
   useLayoutEffect(() => {
     if (selected) outline.select([selected.identifier]);
@@ -148,9 +141,9 @@ export function AdaptiveTabView({ controller, scope }: { readonly controller: NS
             },
           }} />
       </div>}
-      sidebarWidth={frame?.railWidth} defaultSidebarWidth={frame?.defaultWidth ?? 264}
-      minSidebarWidth={frame?.minWidth ?? 208} maxSidebarWidth={frame?.maxWidth ?? 460}
-      onSidebarWidthChange={frame?.setRailWidth} resizable={renderer === "source-list-content"} bookRegions={adaptive ? bookRegions : null}>
+      defaultSidebarWidth={264}
+      minSidebarWidth={208} maxSidebarWidth={460}
+      resizable={renderer === "source-list-content"} bookRegions={adaptive ? bookRegions : null}>
       <div className="nse-adaptive-tab-content">
         {controller.tabViewItems.filter(item => visited.current.has(item.identifier)).map(item => <div key={item.identifier}
           className="nse-adaptive-tab-panel" hidden={item !== selected || moreListOpen} inert={item !== selected || moreListOpen}

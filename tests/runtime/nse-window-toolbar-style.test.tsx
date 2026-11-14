@@ -5,7 +5,7 @@ import { afterEach, expect, it } from "vitest";
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
 import { PreferencesToast } from "../../src/NSE/Components/NSEPreferencesToast";
 import { WindowTitlebarContent } from "../../src/NSE/Windows/windowTitlebarContext";
-import { useNSEWindowTitlebarDocument, WindowTitlebarHostContext } from "../../src/SynCloudOS/AppHosting/windowChrome";
+import { useNSEWindowTitlebarDocument, WindowTitlebarHostContext } from "../../src/SynCloudOS/AppHosting/windowAccessories";
 import { StandardWindowView } from "../../src/NSE/Windows/StandardWindowView";
 import { standardWindow } from "../fixtures/windowTestDependencies";
 import type { WindowRecord } from "../../src/SynCloudOS/Windows";
@@ -13,18 +13,8 @@ import { NSEApplication } from "../../src/NSE/Application/NSEApplication";
 import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { createClassApplicationHost } from "./fixtures/classApplicationHost";
 import { act } from "@testing-library/react";
-import { TopBar } from "../../src/NSE/Windows/Chrome/TopBar";
 
 afterEach(cleanup);
-
-it("keeps the host's Home and Account controls alongside window titlebar accessories", () => {
-  render(<TopBar variant="atmoMetal" title="" leadingItems={[{kind:"webspring",label:"Home"}]}
-    trailingItems={[{kind:"userInfo",label:"Account"}]}
-    leadingAccessory={<button>Sections</button>} trailingAccessory={<span>Window action</span>} />);
-  expect(screen.getByRole("button", {name:"Home"})).toBeTruthy();
-  expect(screen.getByRole("button", {name:"Account"})).toBeTruthy();
-  expect(screen.getByRole("button", {name:"Sections"})).toBeTruthy();
-});
 
 it("owns the Preferences panel and Back accessory while a class application is running", async () => {
   class Content extends NSEViewController {

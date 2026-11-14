@@ -25,7 +25,7 @@ import type { TrustedSynWareBundle } from "../SynCloudOS";
 import { bindSynWareRouteGraph, createAppRouteGraph, isSynWareRouteGraph } from "../Routing/appSdkRoutePort";
 import type { SynWareRouteDefinition, SynWareRouteGraph } from "../Routing/appSdkRoutePort";
 
-const DEFINITION_KEYS = new Set(["manifest", "root", "routes", "migrations", "windowChrome", "rematerialiseOwnedDocument", "createBackgroundHandler"]);
+const DEFINITION_KEYS = new Set(["manifest", "root", "routes", "migrations", "rematerialiseOwnedDocument", "createBackgroundHandler"]);
 const canonicalDefinitions = new WeakMap<object, Readonly<SynWareDefinition>>();
 
 /** Preserve a closed V1 declaration at authoring time as well as at the JSON
@@ -144,10 +144,6 @@ function captureDefinition(value: unknown): Readonly<SynWareDefinition> {
   if (createBackgroundHandler !== undefined && typeof createBackgroundHandler !== "function") {
     throw new TypeError("SynWare background handlers must be created by a function.");
   }
-  const windowChrome = dataProperty(value, "windowChrome");
-  if (windowChrome !== undefined && typeof windowChrome !== "function") {
-    throw new TypeError("SynWare window chrome must be a component.");
-  }
   const rematerialiseOwnedDocument = dataProperty(value, "rematerialiseOwnedDocument");
   if (rematerialiseOwnedDocument !== undefined && typeof rematerialiseOwnedDocument !== "function") {
     throw new TypeError("SynWare owned-document rematerialisers must be functions.");
@@ -157,7 +153,6 @@ function captureDefinition(value: unknown): Readonly<SynWareDefinition> {
     root: root as SynWareDefinition["root"],
     routes: routeGraph,
     ...(migrations === undefined ? {} : { migrations: deepFreeze([...migrations]) }),
-    ...(windowChrome === undefined ? {} : { windowChrome: windowChrome as NonNullable<SynWareDefinition["windowChrome"]> }),
     ...(rematerialiseOwnedDocument === undefined ? {} : { rematerialiseOwnedDocument: rematerialiseOwnedDocument as NonNullable<SynWareDefinition["rematerialiseOwnedDocument"]> }),
     ...(createBackgroundHandler === undefined ? {} : { createBackgroundHandler: createBackgroundHandler as NonNullable<SynWareDefinition["createBackgroundHandler"]> }),
   };

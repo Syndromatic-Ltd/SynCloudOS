@@ -28,5 +28,4 @@ export * from "./HUDWindowView";
 export * from "./ModalWindowView";
 export * from "./SheetView";
 export * from "./PopoverWindowView";
-export * from "./Chrome";
 export * from "./BorderlessWindowView";

@@ -56,10 +56,6 @@ function PresentedApplicationControls({ children }: { readonly children: ReactNo
   return <ControlRuntimeProvider port={controls}><MenuRuntimeProvider port={menus}>{children}</MenuRuntimeProvider></ControlRuntimeProvider>;
 }
 
-// Host-only bridge entrypoint. This is deliberately not exported from the
-// public AppSDK package barrel: applications receive only the chrome hook.
-export { AppWindowChromePropsProvider as HostAppWindowChromePropsProvider } from "./windowChromeContexts";
-
 interface MountedState {
   readonly key: string;
   readonly registrationAuthority: object;

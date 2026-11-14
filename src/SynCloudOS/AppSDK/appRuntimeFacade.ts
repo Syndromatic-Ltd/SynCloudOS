@@ -1329,6 +1329,9 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
     documentAssociationRole: record.documentAssociationRole,
     mobilePolicy: record.mobilePolicy,
     restorationKey: record.restorationKey,
+    style: record.style,
+    fullScreen: record.fullScreen,
+    collectionBehavior: record.collectionBehavior,
     isKey: record.isKey,
     isMain: record.isMain,
   });
@@ -1412,7 +1415,6 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
         toolbar: null,
         role: "standard",
         style: app.window.style,
-        chromeMode: app.window.chrome,
         smoothSurface: app.window.smoothSurface,
         title,
         content: { rendererId: "application", parameters: { appId: app.bundleIdentifier } },
@@ -1458,7 +1460,6 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
         toolbar: null,
         role: "standard",
         style: app.window.style,
-        chromeMode: app.window.chrome,
         smoothSurface: app.window.smoothSurface,
         title,
         content: { rendererId: "application", parameters: { appId: app.bundleIdentifier } },
@@ -2554,6 +2555,8 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
     // return-to-Webspring is a fixed route with no target payload.
     const safeHostCommandResponders = new Map<string, string>([
       ["application.showAbout", "runtime"],
+      ["application.quit", "runtime"],
+      ["session.requestSignIn", "runtime"],
       ["system.showPreferences", "runtime"],
       // The shared Font and Colours panels are the system's (Webspring's
       // SystemPanelsLayer); any app may show them.
@@ -4522,6 +4525,17 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
     const unsubscribeCanonicalPrivacySession = runtime.identity.session.subscribe(checkPrivacyOwner);
     cleanupOnAbort(() => { unsubscribePrivacyIdentity(); unsubscribePrivacyProfile(); unsubscribeCanonicalPrivacySession(); privacyOwner.abort(); });
     const environmentClients = Object.freeze({
+      currentWindow: {
+        setStyle(style: readonly import("../Windows/windowTypes").WindowStyle[]) {
+          if (windowControllerId !== undefined) runtime.windows.setStyle(ownedWindow(windowControllerId).id, style);
+        },
+        setCollectionBehavior(behavior: import("../Windows/windowTypes").WindowCollectionBehavior) {
+          if (windowControllerId !== undefined) runtime.windows.setCollectionBehavior(ownedWindow(windowControllerId).id, behavior);
+        },
+        toggleFullScreen() {
+          if (windowControllerId !== undefined) runtime.windows.toggleFullScreen(ownedWindow(windowControllerId).id);
+        },
+      },
       speechSynthesis: createMountedAudioSpeechClient(runtime.environment.speechSynthesis, signal, deviceEntitlements, () => authoriseDeviceCapability("audio.speech")),
       network: createMountedNetworkPort(networkAdapterFor(runtime.environment) ?? {
         currentPath: () => { throw NWFXError.posix(45, "Network path monitoring is unavailable."); },

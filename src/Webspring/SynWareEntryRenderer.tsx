@@ -21,7 +21,6 @@
 import { LoadingSpinner } from "../NSE/NSE";
 import type { SynCloudOSAppInfo, SynCloudOSRuntime } from "../SynCloudOS/SynCloudOS";
 import { SynWareRuntimeMount } from "../SynCloudOS/AppSDK/SynWareRuntimeMount";
-import { SynWareWindowChromeBridge } from "./WindowLayer/WindowChromeBridge";
 
 export interface SynWareEntryRendererProps {
   readonly runtime: SynCloudOSRuntime;
@@ -67,7 +66,6 @@ export function SynWareEntryRenderer({
     );
   }
   const Root = definition.root;
-  const windowChrome = definition.windowChrome;
   return (
     <SynWareRuntimeMount
       runtime={runtime}
@@ -76,13 +74,6 @@ export function SynWareEntryRenderer({
       {...(windowControllerId === undefined ? {} : { windowControllerId })}
     >
       <Root />
-      {windowChrome && windowControllerId !== undefined ? (
-        <SynWareWindowChromeBridge
-          runtime={runtime}
-          windowChrome={windowChrome}
-          windowControllerId={windowControllerId}
-        />
-      ) : null}
     </SynWareRuntimeMount>
   );
 }

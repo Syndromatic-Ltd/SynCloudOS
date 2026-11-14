@@ -72,32 +72,10 @@ it.each([
   expect(result.errors).toContainEqual(expect.objectContaining({ path, code: "type" }));
 });
 
-const frameFixture = (frame: unknown) => ({ schemaVersion: 1, bundleIdentifier: "com.example.fixture.frame", version: "1.0.0", displayName: "Frame", frame });
-const helpIcon = { resource: "./Resources/help.svg", alternativeText: { key: "help.alt", fallback: "Help" } };
-
-it.each([
-  { rightSlot: "auto", background: "system" },
-  { rightSlot: "userInfo", background: "none" },
-  { rightSlot: "none" },
-  { rightSlot: { icon: helpIcon, label: { key: "help.label", fallback: "Help" } } },
-  { background: { colour: "#223344", texture: { image: "/assets/grain.png", size: "256px" }, tint: { colour: "#4a6fa5", opacity: 0.1 }, vignette: { edge: 0.5 } } },
-])("accepts the frame declaration %j", (frame) => {
-  expect(validateSynWareManifest(frameFixture(frame)).ok).toBe(true);
-});
-
-it.each([
-  { frame: { layout: "simple" }, path: "/frame/layout", code: "unknown-key" },
-  { frame: { layout: "defacto" }, path: "/frame/layout", code: "unknown-key" },
-])("rejects the removed frame.layout field ($frame.layout)", ({ frame, path, code }) => {
-  expect(validateSynWareManifest(frameFixture(frame)).errors).toContainEqual(expect.objectContaining({ path, code }));
-});
-
-it.each([
-  { rightSlot: "gear" },
-  { rightSlot: { icon: helpIcon } },
-  { background: "cotton" },
-])("rejects the invalid frame declaration %j", (frame) => {
-  expect(validateSynWareManifest(frameFixture(frame)).ok).toBe(false);
+it("accepts only presentation motion in a frame declaration", () => {
+  const manifest = { schemaVersion: 1, bundleIdentifier: "com.example.frame", version: "1.0.0", displayName: "Frame" };
+  expect(validateSynWareManifest({ ...manifest, frame: { presentationMotion: "content" } }).ok).toBe(true);
+  expect(validateSynWareManifest({ ...manifest, frame: { material: "metal" } }).ok).toBe(false);
 });
 
 it("accepts a Webspring shell home icon beside the logo", () => {

@@ -249,7 +249,6 @@ function StandaloneUtilityPanel({ id, title, anchor, fitting, closing, onExited,
       pinned: false,
       mobilePolicy: "sheet",
       restorationKey: `nse-utility-panel.${id}`,
-      chromeMode: "system",
       smoothSurface: null,
     }, runtime.runtimeId as SynCloudOSRuntimeId, id);
     return freezeWindowRecord({ ...canonical, state: "open", isKey: true, isMain: false, zIndex: 1 });

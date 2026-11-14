@@ -37,17 +37,13 @@ export { isNSEDOMNode, isNSEDOMElement, isNSEHTMLElement } from "./Focus/domReal
 export { PresentingDocumentContext } from "./Overlays/presentingDocument";
 
 export { AlertSurface } from "./Components/NSEAlertSurface";
-export { SourceListFrameProvider } from "./Navigation/SourceList/sourceListFrameContext";
-export type { SourceListFrameContextValue } from "./Navigation/SourceList/sourceListFrameContext";
 
 export { AlertBackdrop } from "./SystemUI";
-export { nseTopBarHeightCssValue } from "./Windows/Chrome/topBarStyles";
 export { FocusScope } from "./Focus";
 export { NSEPopover } from "./Overlays/NSEPopover";
 export { NSEPopup } from "./Overlays/NSEPopup";
 
 // Window chrome and transient surfaces are drawn by NSE for framework hosts.
-export { TopBar } from "./Windows/Chrome/TopBar";
 export { WindowTitlebarHostContext } from "./Windows/windowTitlebarContext";
 export type { WindowTitlebarDocument, WindowTitlebarHost } from "./Windows/windowTitlebarContext";
 export { PopoverFrame } from "./Overlays/NSEPopoverFrame";
@@ -60,7 +56,7 @@ export { logicalPlacementToFloatingPlacement } from "./Overlays/computeOverlayPo
 export { registerNSEHapticFeedbackEngine } from "./Feedback/NSEHapticFeedbackManager";
 export { ViewDrawingEnvironmentContext } from "./Views/NSEViewDrawingEnvironment";
 // Window layout and safe areas for framework chrome, and the theme hooks system surfaces publish.
-export { WindowLayoutContext, WindowLayoutModel, useNSEContentLayoutProperties } from "./Layout/windowChromeObstructions";
+export { WindowLayoutContext, WindowLayoutModel, useNSEContentLayoutProperties } from "./Layout/windowObstructions";
 export { SafeAreaMeasurementProvider, useNSEViewSafeArea } from "./Layout/useNSESafeArea";
 export { useNSEDeferredDisposal } from "./interactionLifecycle";
 export { createReactOwnedNSEMenu } from "./Menus/NSEMenu";

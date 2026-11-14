@@ -3,7 +3,7 @@ import React from "react";
 import { act, cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEWindowController, nseWindowInternals, type WindowMount } from "../../src/NSE/Application/NSEWindowController";
-import { WindowLayoutContext, WindowLayoutModel, useNSEContentLayoutProperties, useNSEWindowChromeObstruction } from "../../src/NSE/Layout/windowChromeObstructions";
+import { WindowLayoutContext, WindowLayoutModel, useNSEContentLayoutProperties, useNSEWindowChromeObstruction } from "../../src/NSE/Layout/windowObstructions";
 
 afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 function setup() {

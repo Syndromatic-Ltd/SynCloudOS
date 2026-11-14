@@ -10,6 +10,25 @@ export interface WindowTitlebarDocument {
   readonly subtitle: string;
   readonly documentEdited: boolean;
   readonly toolbarStyle?: NSEWindowToolbarStyle;
+  readonly titleVisibility?: "visible" | "hidden";
+  readonly titlebarAppearsTransparent?: boolean;
+  readonly hasToolbar?: boolean;
+  readonly frameViewClass?: import("../Application/NSEWindowFrameView").NSEWindowFrameViewClass | null;
+  readonly texturedBackground?: boolean;
+  readonly fullSizeContentView?: boolean;
+  readonly backgroundColor?: string | null;
+  readonly isOpaque?: boolean;
+  readonly cornerRadius?: number | null;
+  readonly titlebarPresentation?: "attached" | "floating";
+}
+
+/** @internal Portal targets keep toolbar and accessory ownership in the application. */
+export interface WindowTitlebarSlots {
+  readonly leadingAccessories: HTMLElement | null;
+  readonly trailingAccessories: HTMLElement | null;
+  readonly toolbar: HTMLElement | null;
+  readonly bottomAccessories: HTMLElement | null;
+  readonly menuBar: HTMLElement | null;
 }
 
 /** @internal Accessory portals retain the application's context and responder chain. */
@@ -17,6 +36,10 @@ export interface WindowTitlebarHost {
   setDocument(document: WindowTitlebarDocument | null): void;
   readonly leadingAccessories: HTMLElement | null;
   readonly trailingAccessories: HTMLElement | null;
+  readonly toolbar?: HTMLElement | null;
+  readonly bottomAccessories?: HTMLElement | null;
+  readonly menuBar?: HTMLElement | null;
+  setSlots?(slots: WindowTitlebarSlots): void;
 }
 
 export const WindowTitlebarDocumentContext = createContext<WindowTitlebarDocument | null>(null);

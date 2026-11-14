@@ -64,8 +64,7 @@ import { windowSpecimens } from "./windowSpecimens";
 import { MaterialProvider } from "../../../../src/NSE/Material/MaterialProvider";
 import { NSEView } from "../../../../src/NSE/Views/NSEView";
 import { MediaCollectionPresenter } from "../../../../src/NSE/MediaPanels/NSEMediaCollectionPresenter";
-import { ApplicationHostTitlebar } from "../../../../src/SynCloudOSReact/ApplicationHostTitlebar";
-import { createApplicationMenuStore } from "../../../../src/SynCloudOSReact/ApplicationMenuTrigger";
+import { WindowTitlebarView } from "../../../../src/NSE/Windows/WindowTitlebarView";
 import { NSEPopUpButton } from "../../../../src/NSE/Menus/NSEPopUpButton";
 import { GroupedRow } from "../../../../src/NSE/Controls/Selection/GroupedRow";
 import { NSEDatePicker } from "../../../../src/NSE/DateTime/Pickers/NSEDatePicker";
@@ -100,7 +99,7 @@ export const supplementalThemeCatalogue: readonly { id: string; ready?: string; 
   { id: "application-menu-open", ready: '[data-nse-application-menu]', render: () => <SpecimenApplicationMenu open /> },
   { id: "application-menu-submenu", ready: '[data-nse-application-menu]', hover: '[data-nse-application-menu] [aria-haspopup]', render: () => <SpecimenApplicationMenu open id="specimen-app-submenu" /> },
   { id: "context-menu", context: '[data-specimen-context]', render: () => <SpecimenContextMenu /> },
-  ...(["metal", "cumulus"] as const).map(material => ({ id: `host-titlebar-${material}`, render: () => <ApplicationHostTitlebar title="Documents" iconSrc={null} material={material} scheme="light" menuStore={createApplicationMenuStore()} menuLabel="Documents"><p>Body</p></ApplicationHostTitlebar> })),
+  ...(["metal", "cumulus"] as const).map(material => ({ id: `host-titlebar-${material}`, render: () => <><WindowTitlebarView document={{ title: "Documents", subtitle: "", documentEdited: false }} isKeyWindow material={material} /><p>Body</p></> })),
   { id: "media-grid", render: () => <MediaCollectionPresenter items={["Beach", "Forest"].map((name, index) => ({ id: `m${index}`, providerId: "local", name, kind: "image", mimeType: "image/png", thumbnailUrl: "/assets/webspring/Panel.png" }))} selectedIds={new Set(["5:local2:m1"])} selection="multiple" direction="ltr" onSelectionChange={() => undefined} onActivate={() => undefined} /> },
   { id: "date-picker-calendar-sheet", activate: '[data-nse-control="date-picker"] button[aria-label^="Choose"]', activeReady: '[data-nse-part="calendar-sheet"]', render: () => <NSEDatePicker aria-label="Date" locale="en-GB" timeZone="Europe/London" defaultValue={{ year: 2026, month: 11, day: 9 }} /> },
   { id: "time-picker-clock-sheet", activate: '[data-nse-part="clock-affix"]', activeReady: '[data-nse-part="clock-sheet"]', render: () => <NSEDatePicker aria-label="Time" locale="en-US" timeZone="America/New_York" datePickerElements={["hourMinute"]} defaultValue={{ hour: 13, minute: 30, second: 0 }} /> },

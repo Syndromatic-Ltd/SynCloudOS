@@ -53,7 +53,6 @@ import {
 } from "./WindowRestoration";
 import {
   assertFiniteWindowBounds,
-  canonicalWindowChromeMode,
   createCanonicalWindowRecord,
   defaultWindowSmoothSurface,
   effectiveWindowStyle,
@@ -1212,7 +1211,6 @@ export class WindowManager {
         mobilePolicy: record.mobilePolicy,
         restorationKey: record.restorationKey,
         zOrder: record.zIndex,
-        chromeMode: record.chromeMode,
         smoothSurface: record.smoothSurface,
       });
     }
@@ -1455,7 +1453,6 @@ export class WindowManager {
           pinned: source.pinned,
           mobilePolicy: source.mobilePolicy,
           restorationKey: source.restorationKey,
-          chromeMode: canonicalWindowChromeMode(source.role, source.chromeMode),
           smoothSurface: normaliseWindowSmoothSurface(source.smoothSurface),
         });
         controller.setContentRestorationState(restoredContent.state);

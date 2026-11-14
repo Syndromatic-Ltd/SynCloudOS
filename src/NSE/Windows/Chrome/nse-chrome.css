@@ -592,8 +592,8 @@
   --nse-chrome-bottom-corner-radius: var(--nse-smooth-surface-active-radius, var(--nse-smooth-surface-radius, 0px));
 }
 
-.nse-window-view:not([data-window-custom-chrome-active="true"]):not([data-window-chrome-mode="frameless"])>.nse-window__surface:not(.nse-smooth-surface),
-:where(:scope):is(.nse-window-view:not([data-window-custom-chrome-active="true"]):not([data-window-chrome-mode="frameless"]))>.nse-window__surface:not(.nse-smooth-surface) {
+.nse-window-view:not([data-window-frame="frameless"])>.nse-window__surface:not(.nse-smooth-surface),
+:where(:scope):is(.nse-window-view:not([data-window-frame="frameless"]))>.nse-window__surface:not(.nse-smooth-surface) {
   --nse-chrome-top-corner-radius: var(--nse-window-radius, 8px);
   --nse-chrome-bottom-corner-radius: var(--nse-window-radius, 8px);
 }

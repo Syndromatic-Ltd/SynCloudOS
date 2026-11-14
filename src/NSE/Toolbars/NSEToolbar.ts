@@ -24,7 +24,22 @@ import { NSEUserDefaults } from "../../Foundation/NSEUserDefaults";
 import type { NSEOwner } from "../Controllers/ownership";
 import { NSEToolbarController } from "./NSEToolbarController";
 import type { NSEToolbarItemInput, ToolbarPreferences, ToolbarRuntimePort } from "./toolbarTypes";
-import type { ReactNode } from "react";
+import { createElement, type ReactNode } from "react";
+import { ApplicationMenuToolbarButton, type ApplicationMenuGlyph } from "./ApplicationMenuToolbarButton";
+
+export type NSEToolbarItem = import("./toolbarTypes").NSEToolbarItem;
+
+export const NSEToolbarItem = Object.freeze({
+  /** NSE extension. The window supplies the shared application menu when this item is present. */
+  applicationMenu(glyph: ApplicationMenuGlyph = "gear"): Extract<import("./toolbarTypes").NSEToolbarItem, { kind: "custom" }> {
+    if (glyph !== "gear" && glyph !== "person") throw new TypeError("Application menu glyph must be gear or person.");
+    return Object.freeze({
+      kind: "custom", id: "applicationMenu", label: "Application Menu",
+      minimumWidth: 36, idealWidth: 36,
+      render: () => createElement(ApplicationMenuToolbarButton, { glyph }),
+    });
+  },
+});
 
 /** NSToolbar.DisplayMode. `default` follows the toolbar's own default, icon and label. */
 export type NSEToolbarDisplayMode = "default" | "iconAndLabel" | "iconOnly" | "labelOnly";

@@ -18,7 +18,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { installedApplicationMenuSections } from "../SynCloudOSReact";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type Ref, type ReactNode } from "react";
 import { nseUnowned } from "../NSE/sdkPackageEntry";
 import { useWebspringLaunchZoom } from "./WebspringLaunchZoomContext";
@@ -35,20 +34,17 @@ import {
   WindowSurfaceBridgeProvider,
   useNSEDeferredDisposal,
 } from "../NSE/NSE";
-import { nseMenuModel } from "../NSE/NSE";
 import { ApplicationNavigationBackButton } from "./ApplicationNavigationBackButton";
-import { NSEButton } from "@syndromatic/syncloudos/nse/controls";
-import { createReactOwnedNSEMenu, TopBar, useMenuLifetime } from "../NSE/hostComposition";
-import { SourceListFrameProvider, type SourceListFrameContextValue } from "../NSE/hostComposition";
-import { activateResponderHierarchy, clearOwnedResponderAnchor, QuickSwitchTriggerProvider, ResponderScope, useHostSiteBranding, useResolvedMode, useRuntimeNSEControlPort, useRuntimeNSEFocusPort, useRuntimeNSEMenuPort, useRuntimeNSEOverlayPort, useRuntimeSelector, useKernelSynCloudOS } from "../SynCloudOSReact";
+import { activateResponderHierarchy, clearOwnedResponderAnchor, QuickSwitchTriggerProvider, ResponderScope, useHostSiteBranding, useResolvedMode, useRuntimeNSEControlPort, useRuntimeNSEFocusPort, useRuntimeNSEOverlayPort, useRuntimeSelector, useKernelSynCloudOS } from "../SynCloudOSReact";
 import type { SynCloudOSAppInfo } from "../SynCloudOS/SynCloudOS";
 import { AppViewChrome, type AppViewPresentation } from "./AppViewChrome";
 import { AppViewContent } from "./AppViewContent";
+import { WindowTitlebarView } from "../NSE/Windows/WindowTitlebarView";
+import type { WindowTitlebarSlots } from "../NSE/Windows/windowTitlebarContext";
+import { nseTopBarGlyphs } from "../NSE/Windows/Chrome/topBarAssets";
+import { WindowPresentationSlot, useWindowPresentationContent } from "./WindowPresentationContent";
 import { SynWareEntryRenderer } from "./SynWareEntryRenderer";
 import { WindowTitlebarHostContext, type WindowTitlebarDocument, type WindowTitlebarHost } from "../NSE/hostComposition";
-import { createApplicationMenuStore, useApplicationMenuSnapshot, type ApplicationMenuStore } from "../SynCloudOSReact";
-import { applicationDeclaresAbout, applicationMenuLabels, ApplicationMenuOverlayHost, ApplicationMenuTriggerBridge, menuOpensSystemPreferencesDirectly } from "./applicationMenuPresentation";
-import { createWebspringAppMenuModel } from "./webspringAppMenu";
 import { useWebspringLocale } from "./webspringLocale";
 import type { ApplicationStagePresentation } from "./stage";
 import { createTransientWindowSurfaceBridge, type WindowContentRendererRegistry } from "./WindowLayer";
@@ -76,8 +72,8 @@ export function ApplicationStageView({
   quickSwitchOpen = false,
   presentationSettlementId = null,
   onQuickSwitchRequest,
+  standalone = false,
   onMultiSwitchAnimationComplete,
-  onApplicationMenuToggleRegister,
 }: {
   windowContentRegistry: WindowContentRendererRegistry;
   stage: ApplicationStagePresentation;
@@ -88,16 +84,16 @@ export function ApplicationStageView({
   staged?: boolean;
   presentationRootRef?: Ref<HTMLDivElement>;
   quickSwitchOpen?: boolean;
+  standalone?: boolean;
   presentationSettlementId?: string | null;
   onQuickSwitchRequest?: () => void;
   onMultiSwitchAnimationComplete?: (switchId: string, role: WebspringMultiSwitchRole) => void;
-  onApplicationMenuToggleRegister?: (appId: string, toggle: () => void, ready: boolean) => () => void;
 }) {
   const runtime = useKernelSynCloudOS();
+  const sharedPresentation = useWindowPresentationContent();
   const presentationTraits = useSyncExternalStore(runtime.presentationTraits.subscribe, runtime.presentationTraits.getSnapshot, runtime.presentationTraits.getSnapshot);
   const runtimeLaunchPhase = useRuntimeSelector((snapshot) => snapshot.webspring.launchPhase);
   const launchZoom = useWebspringLaunchZoom();
-  const sessionAuthorised = useRuntimeSelector((snapshot) => snapshot.loginServices.isAuthorised);
   const locale = useWebspringLocale();
   const appName = locale.appName(app);
   const appWindowTitle = locale.appName(app, "window");
@@ -122,7 +118,8 @@ export function ApplicationStageView({
     setOverlayDestination(element);
   }, []);
   const resolvedMode = useResolvedMode();
-  const usesStandardTopBar = frame.topBar === "standard";
+  const [titlebarDocument, setTitlebarDocument] = useState<WindowTitlebarDocument | null>(null);
+  const usesStandardTopBar = frame.presentationMotion !== "content" || Boolean(titlebarDocument?.hasToolbar);
   const siteBranding = useHostSiteBranding();
   const navigationChromeController = useMemo(() => new ApplicationNavigationChromeController({ owner: nseUnowned }), [stage.id]);
   const navigationChromeSnapshot = useSyncExternalStore(
@@ -134,63 +131,19 @@ export function ApplicationStageView({
   const showsApplicationStageTopBar = usesStandardTopBar;
   useNSEDeferredDisposal(navigationChromeController);
 
-  // Source-list rail: the system owns the resizable sidebar width so the bar seam and the sidebar
-  // (drawn by the app via the source-list split view) can never disagree. Honoured only with the standard bar.
-  const sourceList = usesStandardTopBar ? frame.sourceList : undefined;
-  const railMin = sourceList?.minWidth ?? 208;
-  const railMax = sourceList?.maxWidth ?? 460;
-  const railDefault = sourceList?.defaultWidth ?? 264;
-  const railLabel = sourceList?.railLabel ?? app.shortName;
-  const [railWidth, setRailWidthState] = useState(railDefault);
-  // The window shown on the stage puts its document (title, subtitle, titlebar accessories) in the standard bar.
-  const [titlebarDocument, setTitlebarDocument] = useState<WindowTitlebarDocument | null>(null);
-  const [leadingAccessories, setLeadingAccessories] = useState<HTMLSpanElement | null>(null);
-  const [trailingAccessories, setTrailingAccessories] = useState<HTMLSpanElement | null>(null);
-  const titlebarHost = useMemo<WindowTitlebarHost | null>(() => (usesStandardTopBar ? Object.freeze({
+  const [slots, setSlots] = useState<WindowTitlebarSlots | null>(null);
+  const titlebarHost = useMemo<WindowTitlebarHost>(() => Object.freeze({
     setDocument: setTitlebarDocument,
-    leadingAccessories,
-    trailingAccessories,
-  }) : null), [leadingAccessories, trailingAccessories, usesStandardTopBar]);
-  const [compactNavigation, setCompactNavigation] = useState<boolean | null>(null);
-  const showsSourceListRail = sourceList && !(compactNavigation ?? presentationTraits.horizontalSizeClass === "compact");
-  const appMenuStore = useMemo(createApplicationMenuStore, [stage.id]);
+    leadingAccessories: null,
+    trailingAccessories: null,
+    ...slots,
+    setSlots,
+  }), [slots]);
   const applicationResponderId = `application:${app.bundleIdentifier}`;
-  const [appMenuParent, setAppMenuParent] = useState<string | null>(null);
-  const setRailWidth = useCallback(
-    (px: number | null) => {
-      if (px === null) {
-        setRailWidthState(railDefault);
-        return;
-      }
-      setRailWidthState(Math.min(railMax, Math.max(railMin, Math.round(px))));
-    },
-    [railDefault, railMax, railMin]
-  );
-  const sourceListContext = useMemo<SourceListFrameContextValue | null>(
-    () =>
-      sourceList
-        ? {
-            railWidth,
-            setRailWidth,
-            minWidth: railMin,
-            maxWidth: railMax,
-            defaultWidth: railDefault,
-            railLabel,
-            scheme: resolvedMode,
-            setCompactNavigation
-          }
-        : null,
-    [sourceList, railWidth, setRailWidth, railMin, railMax, railDefault, railLabel, resolvedMode]
-  );
-  // Source-list bars surface QuickSwitch on the rail wordmark (app identity) and show the window's
-  // title (NSWindow.title) in the centre; plain standard bars keep QuickSwitch on the centre title.
   const quickSwitchAction = onQuickSwitchRequest
     ? { label: quickSwitchLabel, selected: quickSwitchOpen, onClick: () => { void runtime.commands.dispatch("webspring.quickSwitch.toggle", undefined, { source: "toolbar" }); } }
     : null;
-  const standardBarTitle = titlebarDocument?.toolbarStyle === "expanded" ? "" : sourceList ? (titlebarDocument?.title || appWindowTitle) : appWindowTitle;
-  const appMenuLabels = useMemo(() => applicationMenuLabels(appName, locale.t), [appName, locale]);
-  const appDeclaresAbout = applicationDeclaresAbout(app.about);
-  const appPreferences = app.applicationMenu?.preferences;
+  const standardBarTitle = appWindowTitle;
   const menuPresentationReady = !staged && !multiSwitchRole;
   const quickSwitchTrigger = useMemo(() => (
     stage.isFocused && menuPresentationReady && onQuickSwitchRequest
@@ -201,68 +154,6 @@ export function ApplicationStageView({
         })
       : null
   ), [menuPresentationReady, onQuickSwitchRequest, quickSwitchLabel, quickSwitchOpen, stage.isFocused]);
-  const appMenuModel = useMemo(() => createWebspringAppMenuModel({
-    appId: app.bundleIdentifier,
-    labels: appMenuLabels,
-    appPreferences: appPreferences ? {
-      commandId: appPreferences.commandId,
-      label: appPreferences.label ?? locale.t("appMenu.appPreferences", "{app} Preferences…", { app: appName }),
-    } : undefined,
-    extensions: installedApplicationMenuSections(runtime, app.bundleIdentifier),
-    includeAbout: appDeclaresAbout,
-    includeLogOut: sessionAuthorised,
-  }), [app.bundleIdentifier, appDeclaresAbout, appMenuLabels, appName, appPreferences, locale, sessionAuthorised]);
-  // With only System Preferences to offer, the control opens it instead of a one-item menu.
-  const opensPreferencesDirectly = menuOpensSystemPreferencesDirectly(appMenuModel);
-  const openSystemPreferences = useCallback(() => {
-    void runtime.commands.dispatch("system.showPreferences", undefined, { source: "toolbar" });
-  }, [runtime]);
-  // The application menu validates its commands from the key window's first responder, as AppKit's
-  // menus do, not from the control that opened it: the title bar's controls resolve to the application,
-  // so the last responder focused inside the application's content stands in for it.
-  const contentResponder = useRef<string | null>(null);
-  useEffect(() => {
-    const inContent = (id: string | null): id is string => Boolean(id && id !== applicationResponderId
-      && runtime.responders.resolveChain(id).some(responder => responder.id === applicationResponderId));
-    const remember = () => {
-      const focused = runtime.focus.getFocusedResponderId();
-      if (inContent(focused)) contentResponder.current = focused;
-    };
-    remember();
-    return runtime.focus.subscribe(remember);
-  }, [applicationResponderId, runtime]);
-  const toggleApplicationMenu = useCallback(() => {
-    if (!appMenuStore.getSnapshot().open) {
-      const focused = runtime.focus.getFocusedResponderId();
-      const inApplication = (id: string | null): id is string => Boolean(id && runtime.responders.resolveChain(id).some(responder => responder.id === applicationResponderId));
-      const remembered = contentResponder.current;
-      setAppMenuParent(inApplication(focused) && focused !== applicationResponderId ? focused
-        : remembered && runtime.responders.get(remembered) && inApplication(remembered) ? remembered
-          : applicationResponderId);
-    }
-    appMenuStore.toggle();
-  }, [appMenuStore, applicationResponderId, runtime]);
-  const activateMenu = opensPreferencesDirectly ? openSystemPreferences : toggleApplicationMenu;
-  const hasRightSlot = usesStandardTopBar && frame.rightSlot !== "none";
-  const hasApplicationMenu = menuPresentationReady && !opensPreferencesDirectly && (hasRightSlot || app.applicationMenu?.trigger === "content");
-  useEffect(() => {
-    if (!onApplicationMenuToggleRegister) return undefined;
-    const unregister = onApplicationMenuToggleRegister(app.bundleIdentifier, activateMenu, menuPresentationReady);
-    return unregister;
-  }, [activateMenu, app.bundleIdentifier, menuPresentationReady, onApplicationMenuToggleRegister]);
-  const rightSlot = useMemo<RightSlotControl | null>(() => {
-    if (!hasRightSlot || frame.rightSlot === "none") return null;
-    const common = { opensMenu: !opensPreferencesDirectly, onActivate: activateMenu };
-    if (frame.rightSlot === "userInfo") return { ...common, kind: "userInfo", label: locale.t("userInfo.label", "User Info") };
-    if (frame.rightSlot === "auto") return { ...common, kind: "settings", label: locale.t("settings.label", "Settings") };
-    return { ...common, kind: "custom", label: locale.appText(app, frame.rightSlot.label.key, frame.rightSlot.label.fallback ?? frame.rightSlot.label.key), icon: frame.rightSlot.icon };
-  }, [activateMenu, app, frame.rightSlot, hasRightSlot, locale, opensPreferencesDirectly]);
-  const appMenuRuntime = useRuntimeNSEMenuPort();
-  const appMenuController = useMemo(
-    () => createReactOwnedNSEMenu({ ownerSignal: appMenuRuntime.signal, [nseMenuModel]: appMenuModel, runtime: appMenuRuntime }),
-    [appMenuModel, appMenuRuntime],
-  );
-  useMenuLifetime(appMenuController);
   const { reducedMotion } = useNSEAnimationEnvironment();
   const stageMotion = useApplicationStageMotion({
     role: multiSwitchRole,
@@ -277,76 +168,37 @@ export function ApplicationStageView({
   // Only the original stage elements report roles and canonical settlement.
   useNSEPresentation(overlayRootRef, stageMotion.root);
   useNSEPresentation(overlayPlaneRef, stageMotion.surface);
-  const documentTitlebar = titlebarDocument && !sourceList && titlebarDocument.toolbarStyle !== "expanded" ? titlebarDocument : null;
   const navigationBack = activeNavigationChrome?.back ?? null;
-  const standardTopBar = showsApplicationStageTopBar && documentTitlebar ? (
-    <ApplicationStageTopBar
-      menuStore={appMenuStore}
-      rightSlot={rightSlot}
-      title={standardBarTitle}
-      titlePlacement="leading"
-      className="nse-document-titlebar"
-      documentTitlebar
-      variant={frame.material === "metal" ? "atmoMetal" : "atmoCumulus"}
-      scheme={resolvedMode}
-      titleAction={quickSwitchAction}
-      leadingItems={[{
-        kind: "webspring",
-        label: returnToWebspringLabel,
-        ...(siteBranding?.homeIconUrl ? { icon: siteBranding.homeIconUrl } : {}),
-        selected: false,
-        onClick: () => { void runtime.commands.dispatch("workspace.returnToWebspring", undefined, { source: "toolbar" }); }
-      }]}
-      leading={navigationBack ? (
-        <NavigationChromeSlot className="webspring-application-navigation-back-slot" enter={stageMotion.navigationBack}>
-          <ApplicationNavigationBackButton label={navigationBack.label} onActivate={navigationBack.onActivate} />
-        </NavigationChromeSlot>
-      ) : undefined}
-      center={(
-        <span data-nse-part="document" className="nse-window-titlebar-document">
-          <span ref={setLeadingAccessories} className="nse-window-titlebar-accessory-slot" data-layout-attribute="leading" />
-          <span data-nse-part="title" className="nse-window-titlebar-title" data-document-edited={documentTitlebar.documentEdited || undefined}>
-            {documentTitlebar.title ? <span className="nse-window-titlebar-title-text">{documentTitlebar.title}</span> : null}
-            {documentTitlebar.subtitle ? <span className="nse-window-titlebar-subtitle">{documentTitlebar.subtitle}</span> : null}
-            <span ref={setTrailingAccessories} className="nse-window-titlebar-accessory-slot" data-layout-attribute="trailing" />
-          </span>
-        </span>
-      )}
-    />
-  ) : showsApplicationStageTopBar ? (
-    <ApplicationStageTopBar
-      menuStore={appMenuStore}
-      rightSlot={rightSlot}
-      title={titlebarDocument?.toolbarStyle === "expanded" ? standardBarTitle : activeNavigationChrome?.title ?? standardBarTitle}
-      variant={frame.material === "metal" ? "atmoMetal" : "atmoCumulus"}
-      scheme={resolvedMode}
-      rail={showsSourceListRail ? { width: railWidth, content: railLabel, titleAction: quickSwitchAction } : undefined}
-      titleAction={titlebarDocument?.toolbarStyle === "expanded" || activeNavigationChrome || showsSourceListRail ? null : quickSwitchAction}
-      leadingItems={[{
-        kind: "webspring",
-        label: returnToWebspringLabel,
-        ...(siteBranding?.homeIconUrl ? { icon: siteBranding.homeIconUrl } : {}),
-        selected: false,
-        onClick: () => { void runtime.commands.dispatch("workspace.returnToWebspring", undefined, { source: "toolbar" }); }
-      }]}
-      leading={activeNavigationChrome?.back ? (
-        <NavigationChromeSlot className="webspring-application-navigation-back-slot" enter={stageMotion.navigationBack}>
-          <ApplicationNavigationBackButton label={activeNavigationChrome.back.label} onActivate={activeNavigationChrome.back.onActivate} />
-        </NavigationChromeSlot>
-      ) : undefined}
-      trailing={activeNavigationChrome?.back ? <span className="webspring-application-navigation-chrome-balance" aria-hidden="true" /> : undefined}
-      leadingAccessory={titlebarDocument?.toolbarStyle === "expanded" ? <span ref={setLeadingAccessories} className="nse-window-titlebar-accessory-slot" data-layout-attribute="leading" /> : undefined}
-      trailingAccessory={titlebarDocument?.toolbarStyle === "expanded" ? <span ref={setTrailingAccessories} className="nse-window-titlebar-accessory-slot" data-layout-attribute="trailing" /> : undefined}
-      // An expanded window draws its large title below the bar, so neither
-      // the bar title above nor this centre slot repeats it beside Back, as
-      // with a large-title navigation bar.
-      center={activeNavigationChrome?.back && titlebarDocument?.toolbarStyle !== "expanded" ? (
-        <NavigationChromeSlot className="webspring-application-navigation-title" enter={stageMotion.navigationTitle}>
-          {activeNavigationChrome.title}
-        </NavigationChromeSlot>
-      ) : undefined}
-    />
-  ) : null;
+  const material = titlebarDocument?.texturedBackground ? "metal" : "cumulus";
+  const currentTitle = titlebarDocument?.title || activeNavigationChrome?.title || standardBarTitle;
+  const returnControl = standalone ? null : <button
+    type="button" aria-label={returnToWebspringLabel} title={returnToWebspringLabel}
+    className="nse-app-topbar-button" data-position="leading"
+    onClick={() => { void runtime.commands.dispatch("workspace.returnToWebspring", undefined, { source: "toolbar" }); }}>
+    <span className="nse-app-topbar-button-well" aria-hidden="true" />
+    <span className="nse-app-topbar-button-icon" style={{ "--nse-topbar-glyph": `url(${JSON.stringify(siteBranding?.homeIconUrl ?? nseTopBarGlyphs.webspring)})` } as React.CSSProperties} aria-hidden="true">
+      <span className="nse-app-topbar-glyph-shape" />
+    </span>
+  </button>;
+  const standardTopBar = showsApplicationStageTopBar ? <WindowTitlebarView
+    document={{ ...(titlebarDocument ?? { subtitle: "", documentEdited: false }), title: currentTitle }}
+    isKeyWindow={stage.isFocused} material={material} mode={resolvedMode}
+    onSlotsChange={setSlots}
+    controls={<>{returnControl}{stage.windowId && !standalone ? <button type="button" aria-label="Exit Full Screen"
+      className="nse-app-topbar-button" data-position="leading"
+      onClick={() => runtime.windows.toggleFullScreen(stage.windowId!)}>↙</button> : null}</>}
+    leading={navigationBack ? <NavigationChromeSlot className="webspring-application-navigation-back-slot" enter={stageMotion.navigationBack}>
+      <ApplicationNavigationBackButton label={navigationBack.label} onActivate={navigationBack.onActivate} />
+    </NavigationChromeSlot> : undefined}
+    titleAction={quickSwitchAction && !navigationBack ? <button className="nse-app-topbar-title-button"
+      type="button" aria-label={quickSwitchAction.label} aria-expanded={quickSwitchAction.selected} onClick={quickSwitchAction.onClick}>
+      <span className="nse-app-topbar-title-text">{currentTitle}</span>
+      <span data-nse-part="arrow" className="nse-app-topbar-title-arrow" aria-hidden="true">
+        <span className="nse-app-topbar-title-arrow-glyph nse-app-topbar-title-arrow-right" />
+        <span className="nse-app-topbar-title-arrow-glyph nse-app-topbar-title-arrow-down" />
+      </span>
+    </button> : undefined}
+  /> : null;
   const isMultiSwitching = Boolean(multiSwitchRole);
   const completePresentation = useCallback(() => {
     if (!presentationSettlementId || staged) return;
@@ -386,23 +238,23 @@ export function ApplicationStageView({
     runtime,
     renderers: windowContentRegistry,
     physicalHostId: `application-stage:${stage.id}`,
-    owner: { workspaceId: "workspace:default", applicationId: app.bundleIdentifier, applicationSessionId: app.bundleIdentifier },
+    owner: { workspaceId: stage.windowId ? "workspace-main" : "workspace:default", applicationId: app.bundleIdentifier, applicationSessionId: app.bundleIdentifier },
     restoreFocus: (anchor) => nseOverlayPort.restoreFocus(applicationResponderId, anchor),
-  }), [app.bundleIdentifier, applicationResponderId, nseOverlayPort, runtime, stage.id, windowContentRegistry]);
+  }), [app.bundleIdentifier, applicationResponderId, nseOverlayPort, runtime, stage.id, stage.windowId, windowContentRegistry]);
   useNSEDeferredDisposal(windowSurfaceBridge);
   const stageWindowSurfaceBridge = useMemo(() => ({
     present: (request: Parameters<typeof windowSurfaceBridge.present>[0], content: Parameters<typeof windowSurfaceBridge.present>[1]) => (
-      windowSurfaceBridge.present({ ...request, parentWindowControllerId: null }, content)
+      windowSurfaceBridge.present({ ...request, parentWindowControllerId: stage.windowId ?? null }, content)
     ),
     dismiss: windowSurfaceBridge.dismiss,
-  }), [windowSurfaceBridge]);
+  }), [stage.windowId, windowSurfaceBridge]);
   useEffect(() => {
-    if (!stage.isFocused) return;
+    if (!stage.isFocused || stage.windowId) return;
     activateResponderHierarchy(runtime, { responderId: applicationResponderId, applicationResponderId });
     return () => {
       clearOwnedResponderAnchor(runtime, "application", applicationResponderId);
     };
-  }, [applicationResponderId, runtime, stage.isFocused]);
+  }, [applicationResponderId, runtime, stage.isFocused, stage.windowId]);
   return (
     <OverlayProvider runtimePort={nseOverlayPort} defaultParentResponderId={applicationResponderId} portalContainer={overlayDestination}>
     <TooltipProvider>
@@ -419,45 +271,30 @@ export function ApplicationStageView({
       rootRef={presentationRootRef}
       presentation={rootPresentation}
     >
-      {hasApplicationMenu ? (
-        <ApplicationMenuOverlayHost
-          menuStore={appMenuStore}
-          model={appMenuModel}
-          controller={appMenuController}
-          overlay={{
-            id: `webspring:app-menu-overlay:${stage.id}`,
-            parentResponderId: appMenuParent ?? applicationResponderId,
-            placement: "block-end-inline-end",
-          }}
-          anchorTitle={appName}
-        />
-      ) : null}
       <AppViewChrome.Surface
-        frame={frame}
+        material={material} hasTitlebar={showsApplicationStageTopBar}
         multiSwitchRole={multiSwitchRole}
         presentation={surfacePresentation}
       >
-        {showsApplicationStageTopBar && !sourceList && !documentTitlebar ? standardTopBar : null}
         <FocusPortProvider port={nseFocusPort}>
-        <SourceListFrameProvider value={sourceListContext}>
-          <ApplicationMenuTriggerBridge
-            menuStore={appMenuStore}
-            label={appName}
-            onActivate={activateMenu}
-          >
           <QuickSwitchTriggerProvider port={quickSwitchTrigger}>
           <AppViewContent.Surface
-            smoothSurface={frame.smoothSurface}
-            background={frame.background}
-            sourceList={Boolean(sourceList || documentTitlebar)}
-            header={sourceList || documentTitlebar ? standardTopBar : undefined}
+            smoothSurface={titlebarDocument?.cornerRadius ?? 31}
+            background={titlebarDocument?.isOpaque === false ? "none" : "system"}
+            backgroundColor={titlebarDocument?.backgroundColor}
+            containsHeader={Boolean(standardTopBar)}
+            header={standardTopBar}
           >
             <div
               className="webspring-app-view-fullbleed-content"
               aria-label={appName}
             >
               <WindowTitlebarHostContext.Provider value={titlebarHost}>
-              <SynWareEntryRenderer
+              {sharedPresentation && stage.windowId
+                ? <WindowPresentationSlot windowId={stage.windowId} priority={2}
+                    overlay={overlayDestination} bridge={stageWindowSurfaceBridge}
+                    navigation={navigationChromeController} standardChrome={usesStandardTopBar} />
+                : !sharedPresentation || isLoading ? <SynWareEntryRenderer
                 runtime={runtime}
                 app={app}
                 responderId={applicationResponderId}
@@ -466,13 +303,11 @@ export function ApplicationStageView({
                 loadingLabel={loadingLabel}
                 loadingPackageLabel={loadingPackageLabel}
                 missingComponentLabel={missingComponentLabel}
-              />
+              /> : null}
               </WindowTitlebarHostContext.Provider>
             </div>
           </AppViewContent.Surface>
           </QuickSwitchTriggerProvider>
-          </ApplicationMenuTriggerBridge>
-        </SourceListFrameProvider>
         </FocusPortProvider>
       </AppViewChrome.Surface>
     </AppViewChrome.Root>
@@ -487,42 +322,5 @@ export function ApplicationStageView({
     </div>
     </TooltipProvider>
     </OverlayProvider>
-  );
-}
-
-type TopBarProps = Parameters<typeof TopBar>[0];
-
-/** The standard bar's right-hand control: what it draws and what it does when pressed. */
-interface RightSlotControl {
-  readonly kind: "settings" | "userInfo" | "custom";
-  readonly label: string;
-  readonly icon?: string;
-  /** The control opens the application menu; otherwise it opens System Preferences itself. */
-  readonly opensMenu: boolean;
-  readonly onActivate: () => void;
-}
-
-function ApplicationStageTopBar({
-  menuStore,
-  rightSlot,
-  ...props
-}: Pick<TopBarProps, "title" | "titlePlacement" | "className" | "variant" | "scheme" | "rail" | "titleAction" | "leadingItems" | "leading" | "trailing" | "center" | "leadingAccessory" | "trailingAccessory" | "documentTitlebar"> & {
-  readonly menuStore: ApplicationMenuStore;
-  readonly rightSlot: RightSlotControl | null;
-}) {
-  const menu = useApplicationMenuSnapshot(menuStore);
-  return (
-    <TopBar
-      {...props}
-      trailingItems={rightSlot && props.trailing === undefined ? [{
-          kind: rightSlot.kind,
-          label: rightSlot.label,
-          ...(rightSlot.icon ? { icon: rightSlot.icon } : {}),
-          selected: rightSlot.opensMenu && menu.open,
-          opensMenu: rightSlot.opensMenu,
-          onElementChange: menuStore.setAnchor,
-          onClick: rightSlot.onActivate,
-        }] : []}
-    />
   );
 }

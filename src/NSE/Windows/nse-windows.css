@@ -71,8 +71,8 @@
 /* Theme-neutral fallback paint for window roles. A selected NSE theme can
    override these semantic hooks with higher-specificity appearance rules.
    Custom-active and frameless windows suppress the generic system surface. */
-.nse-window-view:not([data-window-custom-chrome-active="true"]):not([data-window-chrome-mode="frameless"]),
-:where(:scope):is(.nse-window-view:not([data-window-custom-chrome-active="true"]):not([data-window-chrome-mode="frameless"])) {
+.nse-window-view:not([data-window-frame="frameless"]),
+:where(:scope):is(.nse-window-view:not([data-window-frame="frameless"])) {
   color: var(--nse-window-foreground, #17202a);
   background: var(--nse-window-background, #f4f5f6);
   border: 1px solid var(--nse-window-border, rgba(31, 41, 55, 0.42));
@@ -80,15 +80,15 @@
   box-shadow: none;
 }
 
-.nse-window-view:not([data-window-custom-chrome-active="true"]):not([data-window-chrome-mode="frameless"]) .nse-window__surface,
-:where(:scope):is(.nse-window-view:not([data-window-custom-chrome-active="true"]):not([data-window-chrome-mode="frameless"])) .nse-window__surface {
+.nse-window-view:not([data-window-frame="frameless"]) .nse-window__surface,
+:where(:scope):is(.nse-window-view:not([data-window-frame="frameless"])) .nse-window__surface {
   box-shadow: var(--nse-window-shadow, 0 14px 42px rgba(15, 23, 42, 0.26));
 }
 
-.nse-window-view[data-window-chrome-mode="frameless"],
-:where(:scope):is(.nse-window-view[data-window-chrome-mode="frameless"]),
-.nse-window-view[data-window-chrome-mode="frameless"] .nse-window__surface,
-:where(:scope):is(.nse-window-view[data-window-chrome-mode="frameless"]) .nse-window__surface {
+.nse-window-view[data-window-frame="frameless"],
+:where(:scope):is(.nse-window-view[data-window-frame="frameless"]),
+.nse-window-view[data-window-frame="frameless"] .nse-window__surface,
+:where(:scope):is(.nse-window-view[data-window-frame="frameless"]) .nse-window__surface {
   background: none;
   border: 0;
   box-shadow: none;
@@ -103,54 +103,6 @@
 :where(:scope):is(.nse-window-view--popover) {
   --nse-window-shadow: var(--nse-window-popover-shadow, 0 10px 32px rgba(15, 23, 42, 0.28));
 }
-/* Custom-chrome windows paint their own bar artwork; the host applies a
-   CSS-only key-state drop-shadow on the WINDOW VIEW so the shadow follows
-   the SmoothSurface outline. Filter and clip-path cannot share an element:
-   the record-driven clip-path on the surface would clip a surface filter
-   to nothing. The view is the unclipped parent, so the drop-shadow reads
-   the clipped surface's alpha. Custom shadows only apply while custom
-   chrome is actually active — a fallback window paints the active
-   theme's system titlebar instead, never both. Values are visual-tuning constants. */
-.nse-window-view[data-window-custom-chrome-active="true"],
-:where(:scope):is(.nse-window-view[data-window-custom-chrome-active="true"]) {
-  filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.22)) drop-shadow(0 6px 22px rgba(0, 0, 0, 0.14));
-  transition: filter 160ms ease;
-}
-
-.nse-window-view[data-window-custom-chrome-active="true"][data-window-key="true"],
-:where(:scope):is(.nse-window-view[data-window-custom-chrome-active="true"][data-window-key="true"]) {
-  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.3)) drop-shadow(0 18px 48px rgba(0, 0, 0, 0.22));
-  transition: filter 160ms ease;
-}
-
-.nse-window-view[data-window-custom-chrome-active="true"] .nse-window__surface,
-:where(:scope):is(.nse-window-view[data-window-custom-chrome-active="true"]) .nse-window__surface {
-  /* Host-owned 1px perimeter edge. A border (not a box-shadow) follows the
-   * SmoothSurface outline through the inline border-radius, and unlike a
-   * stylesheet box-shadow it survives the record-driven inline box-shadow
-   * the SmoothSurface props always set. */
-  border: 1px solid rgba(0, 0, 0, 0.14);
-}
-
-/* Custom-chrome slot: the mounted application's chrome portals into this
-   container. It stays out of layout until the host handshake flips
-   data-window-custom-chrome-active, so a pending renderer cannot stack a
-   second bar on top of the system titlebar. Corner geometry and clipping
-   come from the record's smoothSurface via inline style — never from a
-   hard-coded radius here. */
-.nse-window__custom-titlebar,
-:where(:scope):is(.nse-window__custom-titlebar) {
-  display: none;
-  position: relative;
-  flex: none;
-  min-width: 0;
-}
-
-.nse-window-view[data-window-custom-chrome-active="true"] .nse-window__custom-titlebar,
-:where(:scope):is(.nse-window-view[data-window-custom-chrome-active="true"]) .nse-window__custom-titlebar {
-  display: block;
-}
-
 .nse-window__titlebar,
 :where(:scope):is(.nse-window__titlebar) {
   position: relative;

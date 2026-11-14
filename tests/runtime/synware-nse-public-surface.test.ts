@@ -129,7 +129,7 @@ describe("SynWare NSE public framework boundary", () => {
       expect(names).not.toContain(forbidden);
     }
     const controls = publicExports(resolve("src/NSE/public/controls.ts"));
-    for (const forbidden of ["SourceListFrameProvider", "SourceListFrameContextValue", "useSourceListFrame"]) {
+    for (const forbidden of ["WindowTitlebarHostContext", "WindowTitlebarHost", "WindowPresentationSlot"]) {
       expect(controls.names).not.toContain(forbidden);
     }
   });

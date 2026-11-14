@@ -37,7 +37,6 @@
       "type": "array",
       "items": { "$ref": "#/$defs/documentType" }
     },
-    "applicationMenu": { "$ref": "#/$defs/applicationMenu" },
     "services": {
       "type": "array",
       "items": { "$ref": "#/$defs/service" }
@@ -95,7 +94,6 @@
         "height": { "type": "integer", "minimum": 1 },
         "minimumWidth": { "type": "integer", "minimum": 1 },
         "minimumHeight": { "type": "integer", "minimum": 1 },
-        "chrome": { "enum": ["system", "custom", "frameless"] },
         "smoothSurface": {
           "oneOf": [
             { "const": "off" },
@@ -143,47 +141,7 @@
     "frame": {
       "type": "object",
       "additionalProperties": false,
-      "properties": {
-        "material": { "enum": ["standard", "metal"] },
-        "topBar": { "enum": ["standard", "custom", "none"] },
-        "presentationMotion": { "enum": ["host", "content"] },
-        "rightSlot": {
-          "oneOf": [
-            { "enum": ["auto", "userInfo", "none"] },
-            {
-              "type": "object",
-              "additionalProperties": false,
-              "required": ["icon", "label"],
-              "properties": {
-                "icon": { "$ref": "#/$defs/resourceReference" },
-                "label": { "$ref": "#/$defs/localisedText" }
-              }
-            }
-          ]
-        },
-        "background": {
-          "oneOf": [
-            { "enum": ["system", "none"] },
-            { "$ref": "#/$defs/surface" }
-          ]
-        },
-        "smoothSurface": {
-          "oneOf": [
-            { "const": "off" },
-            { "type": "object", "additionalProperties": false, "properties": { "radius": { "type": "number", "minimum": 0 } } }
-          ]
-        },
-        "sourceList": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "railLabel": { "type": "string", "minLength": 1 },
-            "minWidth": { "type": "number", "minimum": 0 },
-            "maxWidth": { "type": "number", "minimum": 0 },
-            "defaultWidth": { "type": "number", "minimum": 0 }
-          }
-        }
-      }
+      "properties": { "presentationMotion": { "enum": ["host", "content"] } }
     },
     "surface": {
       "type": "object",
@@ -237,22 +195,6 @@
             "size": { "type": "string", "minLength": 1 },
             "opacity": { "type": "number", "minimum": 0, "maximum": 1 },
             "blend": { "type": "string", "minLength": 1 }
-          }
-        }
-      }
-    },
-    "applicationMenu": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "trigger": { "const": "content" },
-        "preferences": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": ["commandId"],
-          "properties": {
-            "commandId": { "type": "string", "minLength": 1 },
-            "label": { "type": "string", "minLength": 1 }
           }
         }
       }

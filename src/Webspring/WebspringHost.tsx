@@ -34,6 +34,7 @@ import { ApplicationStageLayer } from "./ApplicationStageLayer";
 import { syncApplicationWindowContentRenderers, WindowContentRendererRegistry, WindowLayer, type ApplicationWindowRendererRegistrations } from "./WindowLayer";
 import { HostSiteBrandingProvider, useKernelSynCloudOS, useRuntimeNSEFocusPort, useRuntimeSelector } from "../SynCloudOSReact";
 import { presentationForSizeClass, WebspringController, type SynCloudOSShellResources } from "./WebspringController";
+import { WindowPresentationContent } from "./WindowPresentationContent";
 import { WebspringQuickSwitchView } from "./WebspringQuickSwitchView";
 import { WebspringIconEffectProvider } from "./WebspringIconEffect";
 import { WebspringFolderAppearanceProvider } from "./WebspringFolderAppearance";
@@ -236,7 +237,6 @@ export function WebspringHost({
   const model = controller?.model(runtime.store.getSnapshot(), presentation, entrancePhase) ?? null;
   const [notificationCentreRequest, setNotificationCentreRequest] = useState<{ key: number; notificationId?: string | null } | null>(null);
   const [quickSwitchOpen, setQuickSwitchOpen] = useState(false);
-  const applicationMenuToggleRef = useRef<{ appId: string; toggle: () => void } | null>(null);
   const layoutPreference = snapshot.webspring.layout.preference;
   const folderConfiguration = snapshot.webspring.layout.folderConfiguration;
   const orderedApps = useMemo(
@@ -255,19 +255,7 @@ export function WebspringHost({
     setQuickSwitchOpen((current) => !current);
     feedback?.trigger("selection");
   }, [canUseQuickSwitch, feedback]);
-  const registerApplicationMenuToggle = useCallback((appId: string, toggle: () => void, ready: boolean) => {
-    if (ready && normalizeBundleIdentifier(appId) === normalizeBundleIdentifier(runtime.store.getSnapshot().application.activeAppId)) applicationMenuToggleRef.current = { appId, toggle };
-    return () => {
-      if (applicationMenuToggleRef.current?.toggle === toggle) applicationMenuToggleRef.current = null;
-    };
-  }, [runtime]);
-  const requestApplicationMenuToggle = useCallback(() => {
-    const entry = applicationMenuToggleRef.current;
-    const current = runtime.store.getSnapshot();
-    if (!entry || normalizeBundleIdentifier(entry.appId) !== normalizeBundleIdentifier(current.application.activeAppId) || current.application.multiSwitch.status === "switching") return;
-    entry.toggle();
-  }, [runtime]);
-  useWebspringResponder({ onNotificationCentreRequest: requestNotificationCentre, onApplicationMenuToggle: requestApplicationMenuToggle });
+  useWebspringResponder({ onNotificationCentreRequest: requestNotificationCentre });
   useEffect(() => {
     runtime.webspring.configureFolders(shell.manifest.webspringShell.folders ?? EMPTY_WEBSPRING_FOLDER_CONFIGURATION);
     runtime.webspring.hydrateLayoutPreference();
@@ -294,7 +282,6 @@ export function WebspringHost({
     presentationSettlementId={snapshot.webspring.presentationSettlementId}
     quickSwitchOpen={quickSwitchOpen}
     onQuickSwitchRequest={toggleQuickSwitch}
-    onApplicationMenuToggleRegister={registerApplicationMenuToggle}
   /></WebspringLaunchZoomContext.Provider>;
   useEffect(() => {
     const id = snapshot.webspring.presentationSettlementId;
@@ -335,8 +322,10 @@ export function WebspringHost({
     </WebspringHostPresentationContext.Provider>
     {/* Before the app stage, so the system's Colours panel is the one drawn. */}
     <SystemPanelsLayer windowContentRegistry={registry} />
-    {createPortal(applicationStage, outletContainer)}
-    <WindowLayer contentRegistry={registry} />
+    <WindowPresentationContent>
+      {createPortal(applicationStage, outletContainer)}
+      <WindowLayer contentRegistry={registry} />
+    </WindowPresentationContent>
     <WebspringQuickSwitchView
       open={quickSwitchOpen}
       apps={orderedApps}

@@ -23,9 +23,8 @@ import { useNSEDeferredDisposal } from "../NSE/hostComposition";
 
 import { useCallback, useLayoutEffect, useMemo, useEffect, useRef, type CSSProperties, type FocusEventHandler, type ReactNode, type Ref } from "react";
 import { useNSEPresenceExiting, useNSEPresentation } from "../NSE/Animation";
-import { nseTopBarHeightCssValue } from "../NSE/hostComposition";
 import { isWithinNSEFocusOrigin } from "../NSE/hostComposition";
-import type { SynCloudOSAppFrameManifest, SynCloudOSPresentationTraits } from "../SynCloudOS/SynCloudOS";
+import type { SynCloudOSPresentationTraits } from "../SynCloudOS/SynCloudOS";
 import type { ApplicationStagePartMotion } from "./ApplicationStage.transitions";
 
 /** A stage element's AnimationFX presentation, and who hears it finish. */
@@ -41,11 +40,6 @@ function useStagePresentation(element: { current: HTMLElement | null }, presenta
     exit: presentation?.motion.exit ?? null,
     onPresented: presentation?.onPresented,
   });
-}
-
-function isStandardFrame(frame: SynCloudOSAppFrameManifest) {
-  // System chrome whenever the app is not drawing its own bar.
-  return frame.topBar !== "custom";
 }
 
 type RootProps = {
@@ -135,12 +129,13 @@ function Root({
 }
 
 function Surface({
-  frame,
+  material, hasTitlebar,
   multiSwitchRole,
   children,
   presentation
 }: {
-  frame: SynCloudOSAppFrameManifest;
+  material: "cumulus" | "metal";
+  hasTitlebar: boolean;
   multiSwitchRole?: "incoming" | "outgoing" | null;
   children: ReactNode;
   presentation?: AppViewPresentation;
@@ -150,23 +145,16 @@ function Surface({
   // A role change starts its presentation during layout, so the outgoing
   // plane shows its first 3D pose in the same frame its role changes.
   useStagePresentation(surfaceRef, presentation);
-  const surfaceClass = isStandardFrame(frame)
-    ? "webspring-app-view-surface-generic"
-    : "webspring-app-view-surface-custom";
-  // The floating bar and the neutral initial-content inset share the bar's
-  // own height token. The viewport/background remain full size beneath the
-  // glass; a custom or absent bar contributes no system overlay inset.
-  const topBarHeight = frame.topBar === "standard"
-    ? nseTopBarHeightCssValue(frame.material === "metal" ? "atmoMetal" : "atmoCumulus")
-    : "0px";
+  const surfaceClass = hasTitlebar ? "webspring-app-view-surface-generic" : "webspring-app-view-surface-custom";
+  const topBarHeight = hasTitlebar ? `var(--nse-topbar-height, var(--nse-topbar-height-${material}))` : "0px";
 
   return (
     <div
       ref={surfaceRef}
       data-nse-part="content" className={`webspring-app-view-surface ${surfaceClass}`}
-      data-frame-material={frame.material}
-      data-frame-top-bar={frame.topBar}
-      data-nse-material={frame.material}
+      data-frame-material={material === "metal" ? "metal" : "standard"}
+      data-frame-top-bar={hasTitlebar ? "standard" : "none"}
+      data-nse-material={material === "metal" ? "metal" : "standard"}
       data-multiswitch-role={multiSwitchRole ?? undefined}
       style={{ ...contentLayoutProperties, ...presentation?.motion.style, "--webspring-app-top-bar-height": topBarHeight } as CSSProperties}
     >

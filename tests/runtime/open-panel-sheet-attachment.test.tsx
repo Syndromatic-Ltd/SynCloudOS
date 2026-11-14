@@ -6,7 +6,7 @@ import { NSEOpenPanel } from "../../src/NSE/FilePanels/NSEOpenPanel";
 import { OpenPanelWindowHost } from "../../src/SynCloudOS/AppHosting/openPanelHosting";
 import { OpenPanelApplicationHost } from "../../src/SynCloudOS/AppHosting/openPanelHosting";
 import { SynWareProvider } from "../../src/SynCloudOS/AppSDK/SynWareContext";
-import { WindowSheetHostContext, useNSEWindowSheetHost } from "../../src/SynCloudOS/AppHosting/windowChrome";
+import { WindowSheetHostContext, useNSEWindowSheetHost } from "../../src/SynCloudOS/AppHosting/windowAccessories";
 import { WindowSurfaceBridgeProvider } from "../../src/NSE/Overlays/NSEWindowSurfaceBridge";
 import { createOpenPanelFileSystem, registerOpenPanelFileSystem } from "../../src/SynCloudOS/FilePanels/OpenPanelFileSystem";
 import type { NSEWindow } from "../../src/NSE/Application/NSEWindowController";

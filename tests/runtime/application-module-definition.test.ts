@@ -15,14 +15,12 @@ describe("application entry modules", () => {
     expect(definition.migrations?.[0].migrate("note", { signal: new AbortController().signal })).toEqual({ revised: "note" });
     expect(migrated).toEqual(["note"]);
   });
-  it("retains named chrome, document rematerialisation and background behaviour", async () => {
+  it("retains named document rematerialisation and background behaviour", async () => {
     const calls: string[] = [];
-    const chrome = () => null;
-    const definition = captureLazySynWareDefinition({ default: function Notes() { return null; }, windowChrome: chrome,
+    const definition = captureLazySynWareDefinition({ default: function Notes() { return null; },
       rematerialiseOwnedDocument: async () => { calls.push("document"); return null; },
       createBackgroundHandler: () => ({ handle: async (taskId: string) => { calls.push(taskId); } }),
     }, bundle);
-    expect(definition.windowChrome).toBe(chrome);
     const handler = definition.createBackgroundHandler?.();
     await handler?.handle("refresh", { signal: new AbortController().signal });
     expect(calls).toEqual(["refresh"]);

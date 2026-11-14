@@ -38,14 +38,7 @@ const resizeEdges: readonly WindowResizeEdge[] = Object.freeze([
 export function StandardWindowView(props: WindowViewProps) {
   assertNSEWindowViewRole("NSEStandardWindowView", props.record, "standard");
   const { record, presentation, dirty, dispatchCommand, moveHandleProps, resizeHandleProps } = props;
-  // Explicit chrome decision: custom chrome suppresses the system bar only
-  // once the host handshake reports it active. chromeMode alone must never
-  // blank the bar — a missing customChromeActive prop therefore paints the
-  // system fallback, matching a pending or failed renderer.
-  const customChromeActive = props.customChromeActive === true;
-  const frameless = record.chromeMode === "frameless";
-  const paintsSystemChrome = !customChromeActive && !frameless;
-  const showsTitleBar = paintsSystemChrome && presentation.titleBarVisible && record.style.includes("titled");
+  const showsTitleBar = presentation.titleBarVisible && record.style.includes("titled");
   const showsResizeHandles = presentation.kind === "desktop-window" &&
     presentation.resizable && record.style.includes("resizable");
   const titleBar = showsTitleBar ? (
@@ -70,7 +63,7 @@ export function StandardWindowView(props: WindowViewProps) {
   return (
     <WindowView
       {...props}
-      hasShadow={paintsSystemChrome}
+      hasShadow
       className="nse-window-view--standard"
 
 

@@ -88,7 +88,7 @@ describe("SDK build public API boundaries", () => {
   it.each([
     "NSEStandardWindowSpecimen", "NSEStandardWindowSpecimenProps", "nseControlVariantCount",
     "PortfolioCollectionSnapshot", "PortfolioCollectionsClient", "portfolioCollectionsServiceToken",
-    "SourceListFrameProvider", "SourceListFrameContextValue", "useSourceListFrame",
+    "WindowTitlebarHostContext", "WindowTitlebarHost", "WindowPresentationSlot",
     "NSEWindowSurfaceBridge", "NSEWindowSurfaceBridgeProvider", "NSEWindowSurfaceRequest",
     "NSEWindowSurfaceDismissResult", "NSEWindowSurfaceErrorContext", "useOptionalNSEWindowSurfaceBridge",
     "WindowManager", "WindowController", "SynWareProvider", "SynWareProviderProps",
@@ -130,12 +130,12 @@ describe("SDK build public API boundaries", () => {
   it("rejects a direct imported host type declaration alias with no semantic errors", async () => {
     const { inspectPublicApiBoundaries } = await guard();
     const input = fixture({
-      "src/owner.ts": "export interface SourceListFrameContextValue { readonly value: string; }",
-      "src/sdk.ts": "import type { SourceListFrameContextValue } from './owner'; export type FrameConfiguration = SourceListFrameContextValue;",
+      "src/owner.ts": "export interface WindowTitlebarHost { readonly value: string; }",
+      "src/sdk.ts": "import type { WindowTitlebarHost } from './owner'; export type FrameConfiguration = WindowTitlebarHost;",
     });
     expect(input.program.getSemanticDiagnostics()).toEqual([]);
     expect(inspectPublicApiBoundaries(input)).toEqual([
-      expect.objectContaining({ entry: "sdk", exportName: "FrameConfiguration", symbolName: "SourceListFrameContextValue", reason: "host" }),
+      expect.objectContaining({ entry: "sdk", exportName: "FrameConfiguration", symbolName: "WindowTitlebarHost", reason: "host" }),
     ]);
   });
 
@@ -154,13 +154,13 @@ describe("SDK build public API boundaries", () => {
   it("follows qualified type aliases across intermediate declarations and reexports", async () => {
     const { inspectPublicApiBoundaries } = await guard();
     const input = fixture({
-      "src/owner.ts": "export interface SourceListFrameContextValue { readonly value: string; }",
-      "src/middle.ts": "import type * as host from './owner'; type Frame = host.SourceListFrameContextValue; export type Settings = Frame;",
+      "src/owner.ts": "export interface WindowTitlebarHost { readonly value: string; }",
+      "src/middle.ts": "import type * as host from './owner'; type Frame = host.WindowTitlebarHost; export type Settings = Frame;",
       "src/sdk.ts": "export type { Settings as FrameConfiguration } from './middle';",
     });
     expect(input.program.getSemanticDiagnostics()).toEqual([]);
     expect(inspectPublicApiBoundaries(input)).toEqual([
-      expect.objectContaining({ exportName: "FrameConfiguration", symbolName: "SourceListFrameContextValue" }),
+      expect.objectContaining({ exportName: "FrameConfiguration", symbolName: "WindowTitlebarHost" }),
     ]);
   });
 
@@ -196,13 +196,13 @@ describe("SDK build public API boundaries", () => {
   });
 
   it.each([
-    ["export type FrameConfiguration = (owner.SourceListFrameContextValue);", "FrameConfiguration", "SourceListFrameContextValue"],
+    ["export type FrameConfiguration = (owner.WindowTitlebarHost);", "FrameConfiguration", "WindowTitlebarHost"],
     ["export const controlCount = (owner.nseControlVariantCount);", "controlCount", "nseControlVariantCount"],
     ["export type ControlCount = typeof owner.nseControlVariantCount;", "ControlCount", "nseControlVariantCount"],
   ])("follows transparent direct declaration aliases: %s", async (declaration, exportName, symbolName) => {
     const { inspectPublicApiBoundaries } = await guard();
     const input = fixture({
-      "src/owner.ts": "export interface SourceListFrameContextValue { readonly value: string; } export const nseControlVariantCount = 4;",
+      "src/owner.ts": "export interface WindowTitlebarHost { readonly value: string; } export const nseControlVariantCount = 4;",
       "src/sdk.ts": `import * as owner from './owner'; ${declaration}`,
     });
     expect(input.program.getSemanticDiagnostics()).toEqual([]);
@@ -241,12 +241,12 @@ describe("SDK build public API boundaries", () => {
   it("does not traverse arbitrary object members or compound type contents", async () => {
     const { inspectPublicApiBoundaries } = await guard();
     const input = fixture({
-      "src/owner.ts": "export interface SourceListFrameContextValue { readonly value: string; } export const nseControlVariantCount = 4;",
+      "src/owner.ts": "export interface WindowTitlebarHost { readonly value: string; } export const nseControlVariantCount = 4;",
       "src/sdk.ts": [
-        "import { nseControlVariantCount, type SourceListFrameContextValue } from './owner';",
-        "export interface ComponentProps { readonly frame: SourceListFrameContextValue; }",
-        "export type ComponentOptions = { readonly frame: SourceListFrameContextValue; };",
-        "export type OptionalFrame = SourceListFrameContextValue | undefined;",
+        "import { nseControlVariantCount, type WindowTitlebarHost } from './owner';",
+        "export interface ComponentProps { readonly frame: WindowTitlebarHost; }",
+        "export type ComponentOptions = { readonly frame: WindowTitlebarHost; };",
+        "export type OptionalFrame = WindowTitlebarHost | undefined;",
         "export const componentDefaults = { count: nseControlVariantCount };",
         "export const computeCount = () => nseControlVariantCount;",
       ].join("\n"),
@@ -300,7 +300,7 @@ describe("SDK build public API boundaries", () => {
   it.each(["browser", "sdk/animation-host"])("allows host wiring only at the explicit %s host entry", async (entry) => {
     const { inspectPublicApiBoundaries } = await guard();
     const files = {
-      "src/host.ts": "export class WindowController {} export const SourceListFrameProvider = 1;",
+      "src/host.ts": "export class WindowController {} export const WindowTitlebarHostContext = 1;",
       "src/entry.ts": "export * from './host';",
     };
     expect(inspectPublicApiBoundaries(fixture(files, { [entry]: "src/entry.ts" }))).toEqual([]);

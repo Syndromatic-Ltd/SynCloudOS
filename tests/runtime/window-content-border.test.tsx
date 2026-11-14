@@ -2,7 +2,7 @@
 import React from "react";
 import { cleanup, render } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
-import { WindowContentBorder } from "../../src/SynCloudOS/AppHosting/windowChrome";
+import { WindowContentBorder } from "../../src/SynCloudOS/AppHosting/windowAccessories";
 import { NSETextField } from "../../src/NSE/Controls/Fields/NSEFields";
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
 

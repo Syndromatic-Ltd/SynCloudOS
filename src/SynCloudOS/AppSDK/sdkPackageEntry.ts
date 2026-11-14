@@ -105,8 +105,6 @@ export { createSynWareNSETextLayoutPort } from "./SynWareNSEMediaAdapters";
 export type { TFXTextGeometryCapabilities, TFXTextLayoutResult } from "../../FX/TextFX/textLayoutTypes";
 export { useNSEMenuPort } from "./SynWareNSEMenuPort";
 export { ResponderScope, type ResponderScopeProps } from "../../SynCloudOSReact/ResponderScope";
-export { useApplicationMenuTrigger } from "../../SynCloudOSReact/ApplicationMenuTrigger";
-export type { ApplicationMenuTriggerPort as SynWareApplicationMenuTriggerPort } from "../../SynCloudOSReact/ApplicationMenuTrigger";
 export { useQuickSwitchTrigger } from "../../SynCloudOSReact/QuickSwitchTrigger";
 export type { QuickSwitchTriggerPort as SynWareQuickSwitchTriggerPort } from "../../SynCloudOSReact/QuickSwitchTrigger";
 export { SynWareManifestValidationError } from "./createSynWare";
@@ -232,20 +230,15 @@ export type {
   AppUndoHistory,
   AppUndoReservation,
   AppWorkspaceDocumentsClient,
-  AppWindowClient,
   AppWindowSnapshot,
 } from "./appClientTypes";
 export type {
-  AppWindowChromeActions,
-  AppWindowChromePointerDownEvent,
-  AppWindowChromeProps,
-  AppWindowChromeSnapshot,
   SynWareOwnedDocumentRematerialiseContext,
   SynWareOwnedDocumentRematerialiser,
   SynWareOwnedProjectionRequest,
   SynWareOwnedProjectionResult,
 } from "./appDefinitionTypes";
-export { useWindowChrome } from "./windowChromeContexts";
+export { useNSEApplication, useNSEWindow } from "../../NSE/Application/NSEWindowContext";
 export { TFXFontDescriptor, type TFXFontDescriptorOptions } from "../../FX/TextFX/TFXFontDescriptor";
 export type { TFXFontReadinessChange, TFXFontRegistration, TFXFontResourceMimeType } from "../../FX/TextFX/textLayoutTypes";
 export type {
@@ -344,7 +337,6 @@ export {
   useTracking,
   useTrustedClient,
   useWebContent,
-  useWindow,
   useWorkArea,
   useWorkAreaSnapshot,
 } from "./hooks";
@@ -356,7 +348,6 @@ export type {
   SynWareRouterPreloadOptions,
   SynWareRouterSnapshot,
   SynWareRouteStateClient,
-  SynWareWindowState,
 } from "./hooks";
 export type { SynCloudOSPresentationTraits } from "./appClientTypes";
 export type { AppVideoClient, AppVideoPlaybackPresentationRequest } from "./appClientTypes";

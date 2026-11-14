@@ -22,18 +22,11 @@ import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import { selectionCircleUrl, selectorArrowUrl, timeMachineShadowUrl, spinnerUrl } from "../Resources/frameworkAssets";
 import {
   normalizeSynCloudOSAppPresentation,
-  type SynCloudOSAppFrameBackground,
-  type SynCloudOSAppFrameManifest,
-  type SynCloudOSAppFrameRightSlot,
-  type SynCloudOSAppFrameMaterial,
-  type SynCloudOSAppFrameSmoothSurfaceManifest,
-  type SynCloudOSAppFrameSourceList,
-  type SynCloudOSAppFrameTopBar,
+  type SynCloudOSPresentationMotionManifest,
   type SynCloudOSAppManifest,
   type SynCloudOSAppPresentation,
   type SynCloudOSAppType,
   type SynCloudOSAppWindowManifest,
-  type SynCloudOSWindowChrome,
 } from "../AppRegistry/appRegistryTypes";
 import { normaliseWindowSmoothSurface } from "../Windows/windowTypes";
 import { inspectExternalRouteSafety, normalizeRoutePath } from "../Routing/routeNormalization";
@@ -48,35 +41,11 @@ import type {
 
 const appTypes: SynCloudOSAppType[] = ["internal", "external", "system"];
 const presentations: SynCloudOSAppPresentation[] = ["appView", "windowedView", "systemSheet", "backgroundService"];
-const windowChromeInputs = ["custom", "frameless", "system"];
-const frameMaterials: SynCloudOSAppFrameMaterial[] = ["standard", "metal"];
-const frameTopBars: SynCloudOSAppFrameTopBar[] = ["standard", "custom", "none"];
-const framePresentationMotions = ["host", "content"] as const;
-const frameSmoothSurfaceCurves = ["arc", "squircle", "superellipse", "clothoid"];
-const defaultFrameSmoothSurface = {
-  radius: 31,
-  curve: "squircle",
-  smoothing: 0.6,
-  physicality: "default",
-  overflow: "hidden"
-} as const satisfies SynCloudOSAppFrameSmoothSurfaceManifest;
-const defaultStandardFrame: SynCloudOSAppFrameManifest = {
-  material: "standard",
-  topBar: "standard",
-  presentationMotion: "host",
-  rightSlot: "auto",
-  background: "system",
-  smoothSurface: defaultFrameSmoothSurface
-};
-const defaultFrameSourceList = {
-  minWidth: 208,
-  maxWidth: 460,
-  defaultWidth: 264
-} as const satisfies Required<Omit<SynCloudOSAppFrameSourceList, "railLabel">>;
+const defaultPresentationMotion: SynCloudOSPresentationMotionManifest = { presentationMotion: "host" };
 
 type NormalisedSynCloudOSAppManifest = SynCloudOSAppManifest & {
   presentation: SynCloudOSAppPresentation;
-  frame: SynCloudOSAppFrameManifest;
+  frame: SynCloudOSPresentationMotionManifest;
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -163,176 +132,13 @@ function normaliseServiceList(
   return unique;
 }
 
-function normaliseFrameField<T extends string>(
-  frame: Record<string, unknown>,
-  field: keyof SynCloudOSAppFrameManifest,
-  valid: readonly T[],
-  fallback: T,
-  notes: SynCloudOSAppInfoNormalisationNote[]
-): T {
-  const value = frame[field];
-  if (!(field in frame)) return fallback;
-  if (valid.includes(value as T)) return value as T;
-  note(notes, `frame.${String(field)}`, value, fallback, `Invalid frame ${String(field)} values are normalised to the default app-view composition.`);
-  return fallback;
-}
-
-function normaliseFrameSmoothSurface(
-  value: unknown,
-  notes: SynCloudOSAppInfoNormalisationNote[]
-): SynCloudOSAppFrameSmoothSurfaceManifest {
-  if (value === undefined) return defaultFrameSmoothSurface;
-  if (value === "off" || value === false) return "off";
-  if (isFiniteNumber(value) && value >= 0) return value;
-  if (!isRecord(value)) {
-    note(notes, "frame.smoothSurface", value, defaultFrameSmoothSurface, "Invalid frame smoothSurface values use the default app smooth surface.");
-    return defaultFrameSmoothSurface;
+function normaliseFrame(frame: unknown, notes: SynCloudOSAppInfoNormalisationNote[]): SynCloudOSPresentationMotionManifest {
+  if (frame === undefined) return defaultPresentationMotion;
+  if (isRecord(frame) && (frame.presentationMotion === "content" || frame.presentationMotion === "host")) {
+    return { presentationMotion: frame.presentationMotion };
   }
-
-  const output: Exclude<SynCloudOSAppFrameSmoothSurfaceManifest, "off" | false | number> = {};
-  if (value.radius !== undefined) {
-    if (isFiniteNumber(value.radius) && value.radius >= 0) {
-      output.radius = value.radius;
-    } else {
-      note(notes, "frame.smoothSurface.radius", value.radius, defaultFrameSmoothSurface.radius, "Invalid smoothSurface radius values use the app default.");
-    }
-  }
-  if (value.curve !== undefined) {
-    if (frameSmoothSurfaceCurves.includes(value.curve as string)) {
-      output.curve = value.curve as typeof output.curve;
-    } else {
-      note(notes, "frame.smoothSurface.curve", value.curve, defaultFrameSmoothSurface.curve, "Invalid smoothSurface curve values use the app default.");
-    }
-  }
-  if (value.smoothing !== undefined) {
-    if (isFiniteNumber(value.smoothing)) output.smoothing = Math.min(1, Math.max(0, value.smoothing));
-    else note(notes, "frame.smoothSurface.smoothing", value.smoothing, defaultFrameSmoothSurface.smoothing, "Invalid smoothSurface smoothing values use the app default.");
-  }
-  if (value.exponent !== undefined) {
-    if (isFiniteNumber(value.exponent) && value.exponent > 0) output.exponent = value.exponent;
-    else note(notes, "frame.smoothSurface.exponent", value.exponent, undefined, "Invalid smoothSurface exponent values are ignored.");
-  }
-  if (value.preserveSmoothing !== undefined) {
-    if (typeof value.preserveSmoothing === "boolean") output.preserveSmoothing = value.preserveSmoothing;
-    else note(notes, "frame.smoothSurface.preserveSmoothing", value.preserveSmoothing, undefined, "Invalid smoothSurface preserveSmoothing values are ignored.");
-  }
-  (["topLeft", "topRight", "bottomRight", "bottomLeft"] as const).forEach((corner) => {
-    if (value[corner] === undefined) return;
-    if (isFiniteNumber(value[corner]) && value[corner] >= 0) output[corner] = value[corner];
-    else note(notes, `frame.smoothSurface.${corner}`, value[corner], undefined, "Invalid smoothSurface corner radius values are ignored.");
-  });
-  if (value.overflow !== undefined) {
-    if (value.overflow === "hidden" || value.overflow === "clip" || value.overflow === "visible") output.overflow = value.overflow;
-    else note(notes, "frame.smoothSurface.overflow", value.overflow, defaultFrameSmoothSurface.overflow, "Invalid smoothSurface overflow values use the app default.");
-  }
-  if (value.physicality !== undefined) {
-    if (value.physicality === "default" || value.physicality === "off" || isRecord(value.physicality)) {
-      output.physicality = value.physicality as typeof output.physicality;
-    } else {
-      note(notes, "frame.smoothSurface.physicality", value.physicality, defaultFrameSmoothSurface.physicality, "Invalid smoothSurface physicality values use the app default.");
-    }
-  }
-
-  return Object.keys(output).length === 0 ? defaultFrameSmoothSurface : output;
-}
-
-function isValidRightSlot(value: unknown): value is SynCloudOSAppFrameRightSlot {
-  if (value === "auto" || value === "userInfo" || value === "none") return true;
-  return isRecord(value)
-    && isNonEmptyString(value.icon)
-    && isRecord(value.label)
-    && isNonEmptyString(value.label.key);
-}
-
-function normaliseFrameRightSlot(frame: Record<string, unknown>, notes: SynCloudOSAppInfoNormalisationNote[]): SynCloudOSAppFrameRightSlot {
-  if (!("rightSlot" in frame)) return defaultStandardFrame.rightSlot;
-  const value = frame.rightSlot;
-  if (isValidRightSlot(value)) return value;
-  note(notes, "frame.rightSlot", value, defaultStandardFrame.rightSlot, "Invalid frame rightSlot values use the automatic gear affordance.");
-  return defaultStandardFrame.rightSlot;
-}
-
-function isValidBackground(value: unknown): value is SynCloudOSAppFrameBackground {
-  return value === "system" || value === "none" || isRecord(value);
-}
-
-function normaliseFrameBackground(frame: Record<string, unknown>, notes: SynCloudOSAppInfoNormalisationNote[]): SynCloudOSAppFrameBackground {
-  if (!("background" in frame)) return defaultStandardFrame.background;
-  const value = frame.background;
-  if (isValidBackground(value)) return value;
-  note(notes, "frame.background", value, defaultStandardFrame.background, "Invalid frame background values use the system app background.");
-  return defaultStandardFrame.background;
-}
-
-function normaliseSourceListWidth(
-  value: unknown,
-  fallback: number,
-  field: string,
-  notes: SynCloudOSAppInfoNormalisationNote[]
-): number {
-  if (value === undefined) return fallback;
-  if (isFiniteNumber(value) && value >= 1) return Math.round(value);
-  note(notes, `frame.sourceList.${field}`, value, fallback, `Invalid frame sourceList ${field} values use the app default.`);
-  return fallback;
-}
-
-function normaliseFrameSourceList(
-  frame: Record<string, unknown>,
-  topBar: SynCloudOSAppFrameTopBar,
-  notes: SynCloudOSAppInfoNormalisationNote[]
-): SynCloudOSAppFrameSourceList | undefined {
-  if (!("sourceList" in frame) || frame.sourceList === undefined) return undefined;
-
-  // A source-list rail only exists when the system owns the bar.
-  if (topBar !== "standard") {
-    note(notes, "frame.sourceList", frame.sourceList, undefined, "frame.sourceList is ignored unless topBar is \"standard\".");
-    return undefined;
-  }
-
-  const value = frame.sourceList;
-  if (!isRecord(value)) {
-    note(notes, "frame.sourceList", value, defaultFrameSourceList, "Invalid frame sourceList values use the default source-list rail.");
-    return { ...defaultFrameSourceList };
-  }
-
-  const minWidth = normaliseSourceListWidth(value.minWidth, defaultFrameSourceList.minWidth, "minWidth", notes);
-  const maxWidthRaw = normaliseSourceListWidth(value.maxWidth, defaultFrameSourceList.maxWidth, "maxWidth", notes);
-  const maxWidth = Math.max(minWidth, maxWidthRaw);
-  if (maxWidth !== maxWidthRaw) {
-    note(notes, "frame.sourceList.maxWidth", maxWidthRaw, maxWidth, "sourceList maxWidth is raised to at least minWidth.");
-  }
-  const defaultWidthRaw = normaliseSourceListWidth(value.defaultWidth, defaultFrameSourceList.defaultWidth, "defaultWidth", notes);
-  const defaultWidth = Math.min(maxWidth, Math.max(minWidth, defaultWidthRaw));
-  if (defaultWidth !== defaultWidthRaw) {
-    note(notes, "frame.sourceList.defaultWidth", defaultWidthRaw, defaultWidth, "sourceList defaultWidth is clamped into [minWidth, maxWidth].");
-  }
-
-  const output: SynCloudOSAppFrameSourceList = { minWidth, maxWidth, defaultWidth };
-  if (value.railLabel !== undefined) {
-    if (isNonEmptyString(value.railLabel)) output.railLabel = value.railLabel.trim();
-    else note(notes, "frame.sourceList.railLabel", value.railLabel, undefined, "Empty sourceList railLabel falls back to the app short name.");
-  }
-  return output;
-}
-
-function normaliseFrame(frame: unknown, notes: SynCloudOSAppInfoNormalisationNote[]): SynCloudOSAppFrameManifest {
-  const record = isRecord(frame) ? frame : {};
-  if (frame !== undefined && !isRecord(frame)) {
-    note(notes, "frame", frame, defaultStandardFrame, "Frame composition must be an object.");
-  }
-
-  const topBar = normaliseFrameField(record, "topBar", frameTopBars, defaultStandardFrame.topBar, notes);
-  const sourceList = normaliseFrameSourceList(record, topBar, notes);
-
-  return {
-    material: normaliseFrameField(record, "material", frameMaterials, defaultStandardFrame.material, notes),
-    topBar,
-    presentationMotion: normaliseFrameField(record, "presentationMotion", framePresentationMotions, "host", notes),
-    rightSlot: normaliseFrameRightSlot(record, notes),
-    background: normaliseFrameBackground(record, notes),
-    smoothSurface: normaliseFrameSmoothSurface(record.smoothSurface, notes),
-    ...(sourceList ? { sourceList } : {})
-  };
+  note(notes, "frame.presentationMotion", frame, defaultPresentationMotion, "Invalid presentation motion uses host motion.");
+  return defaultPresentationMotion;
 }
 
 function normaliseWindow(
@@ -391,7 +197,6 @@ function normaliseWindow(
     defaultHeight,
     minWidth,
     minHeight,
-    chrome: normaliseWindowChrome(record.chrome, notes),
     smoothSurface: normaliseWindowSmoothSurface(
       record.smoothSurface,
       (field, supplied, resolved, reason) => note(notes, `window.smoothSurface.${field}`, supplied, resolved, reason),
@@ -404,17 +209,6 @@ function normaliseWindow(
     mobilePolicy,
     restorationKey,
   };
-}
-
-function normaliseWindowChrome(
-  value: unknown,
-  notes: SynCloudOSAppInfoNormalisationNote[],
-): SynCloudOSWindowChrome {
-  if (value === "custom" || value === "frameless" || value === "system") return value;
-  if (value !== undefined) {
-    note(notes, "window.chrome", value, "system", "Invalid window chrome values use system chrome.");
-  }
-  return "system";
 }
 
 function createValidationReport(manifest: unknown, issues: SynCloudOSAppInfoIssue[]): SynCloudOSAppInfoValidationReport {
@@ -513,59 +307,9 @@ export function validateAppManifest(manifest: unknown): SynCloudOSAppInfoValidat
     addIssue(issues, "error", "manifest.presentation.invalid", "presentation", "presentation must be appView, windowedView, systemSheet, or backgroundService.");
   }
 
-  if (manifest.frame !== undefined) {
-    const frame = getNestedRecord(manifest, "frame");
-    if (!frame) {
-      addIssue(issues, "warning", "manifest.frame.defaulted", "frame", "frame must be an object and will default to the standard app-view composition.");
-    } else {
-      if (frame.material !== undefined && !frameMaterials.includes(frame.material as SynCloudOSAppFrameMaterial)) {
-        addIssue(issues, "warning", "manifest.frame.material.defaulted", "frame.material", "frame.material is unknown and will default to standard.");
-      }
-      if (frame.topBar !== undefined && !frameTopBars.includes(frame.topBar as SynCloudOSAppFrameTopBar)) {
-        addIssue(issues, "warning", "manifest.frame.topBar.defaulted", "frame.topBar", "frame.topBar is unknown and will default to standard.");
-      }
-      if (frame.rightSlot !== undefined && !isValidRightSlot(frame.rightSlot)) {
-        addIssue(issues, "warning", "manifest.frame.rightSlot.defaulted", "frame.rightSlot", "frame.rightSlot must be auto, userInfo, none or { icon, label } and will default to auto.");
-      }
-      if (frame.background !== undefined && !isValidBackground(frame.background)) {
-        addIssue(issues, "warning", "manifest.frame.background.defaulted", "frame.background", "frame.background must be system, none or a surface object and will default to system.");
-      }
-      if (frame.presentationMotion !== undefined && !framePresentationMotions.includes(frame.presentationMotion as "host" | "content")) {
-        addIssue(issues, "warning", "manifest.frame.presentationMotion.defaulted", "frame.presentationMotion", "frame.presentationMotion must be host or content and will default to host.");
-      }
-      if (frame.smoothSurface !== undefined) {
-        const smoothSurface = frame.smoothSurface;
-        const validSmoothSurface =
-          smoothSurface === "off" ||
-          smoothSurface === false ||
-          isFiniteNumber(smoothSurface) ||
-          isRecord(smoothSurface);
-        if (!validSmoothSurface) {
-          addIssue(issues, "warning", "manifest.frame.smoothSurface.defaulted", "frame.smoothSurface", "frame.smoothSurface is unknown and will default to the standard smooth app surface.");
-        } else if (isRecord(smoothSurface)) {
-          if (smoothSurface.radius !== undefined && (!isFiniteNumber(smoothSurface.radius) || smoothSurface.radius < 0)) {
-            addIssue(issues, "warning", "manifest.frame.smoothSurface.radius.defaulted", "frame.smoothSurface.radius", "frame.smoothSurface.radius must be a non-negative number.");
-          }
-          if (smoothSurface.curve !== undefined && !frameSmoothSurfaceCurves.includes(smoothSurface.curve as string)) {
-            addIssue(issues, "warning", "manifest.frame.smoothSurface.curve.defaulted", "frame.smoothSurface.curve", "frame.smoothSurface.curve is unknown and will default to squircle.");
-          }
-        }
-      }
-      if (frame.sourceList !== undefined) {
-        if (frame.topBar !== undefined && frame.topBar !== "standard") {
-          addIssue(issues, "warning", "manifest.frame.sourceList.ignored", "frame.sourceList", "frame.sourceList is only honoured when frame.topBar is \"standard\" and will otherwise be ignored.");
-        } else if (!isRecord(frame.sourceList)) {
-          addIssue(issues, "warning", "manifest.frame.sourceList.defaulted", "frame.sourceList", "frame.sourceList must be an object and will default to the standard source-list rail.");
-        } else {
-          (["minWidth", "maxWidth", "defaultWidth"] as const).forEach((widthField) => {
-            const widthValue = (frame.sourceList as Record<string, unknown>)[widthField];
-            if (widthValue !== undefined && (!isFiniteNumber(widthValue) || widthValue < 1)) {
-              addIssue(issues, "warning", `manifest.frame.sourceList.${widthField}.defaulted`, `frame.sourceList.${widthField}`, `frame.sourceList.${widthField} must be a positive number.`);
-            }
-          });
-        }
-      }
-    }
+  const motion = getNestedRecord(manifest, "frame")?.presentationMotion;
+  if (motion !== undefined && motion !== "host" && motion !== "content") {
+    addIssue(issues, "warning", "manifest.frame.presentationMotion.defaulted", "frame.presentationMotion", "Unknown presentation motion uses host motion.");
   }
 
   if (!Array.isArray(manifest.requiredServices)) {
@@ -614,9 +358,6 @@ export function validateAppManifest(manifest: unknown): SynCloudOSAppInfoValidat
         addIssue(issues, "error", `manifest.window.${field}.required`, `window.${field}`, `window.${field} must be a finite number.`);
       }
     });
-    if (!windowChromeInputs.includes(String(window.chrome))) {
-      addIssue(issues, "error", "manifest.window.chrome.invalid", "window.chrome", "window.chrome must be system, custom, or frameless.");
-    }
     if (typeof window.resizable !== "boolean") {
       addIssue(issues, "error", "manifest.window.resizable.required", "window.resizable", "window.resizable must be a boolean.");
     }

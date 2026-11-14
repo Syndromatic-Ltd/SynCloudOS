@@ -26,11 +26,10 @@ import {
   nseSmoothSurfaceDefaultPhysicality,
   type SmoothSurfaceRequest
 } from "../NSE/SmoothSurface";
-import type { SynCloudOSAppFrameBackground, SynCloudOSAppFrameSmoothSurfaceManifest } from "../SynCloudOS/SynCloudOS";
-import { webspringSurfaceStyle } from "./webspringSurface";
+import type { WindowSmoothSurfaceConfiguration } from "../SynCloudOS/SynCloudOS";
 
 function appFrameSmoothSurfaceToNSE(
-  smoothSurface: SynCloudOSAppFrameSmoothSurfaceManifest
+  smoothSurface: WindowSmoothSurfaceConfiguration
 ): SmoothSurfaceRequest {
   if (smoothSurface === "off" || smoothSurface === false) return false;
 
@@ -63,30 +62,32 @@ function Surface({
   smoothSurface,
   background,
   header,
-  sourceList = false,
+  containsHeader = false,
+  backgroundColor,
   children
 }: {
-  smoothSurface: SynCloudOSAppFrameSmoothSurfaceManifest;
+  smoothSurface: WindowSmoothSurfaceConfiguration;
   /** What fills the body behind the content: the system light or dark background, nothing, or a surface. */
-  background: SynCloudOSAppFrameBackground;
+  background: "system" | "none";
   /** Rendered as a non-scrolling header inside the rounded surface (source-list windows), so the
    *  smooth-surface clip rounds the bar's top corners to match the body's bottom corners. */
   header?: ReactNode;
-  sourceList?: boolean;
+  containsHeader?: boolean;
+  backgroundColor?: string | null;
   children: ReactNode;
 }) {
   const surface = useRef<HTMLDivElement>(null);
   const safeArea = useNSEViewSafeArea(surface);
   const request = appFrameSmoothSurfaceToNSE(smoothSurface);
-  const className = sourceList
+  const className = containsHeader
     ? "webspring-app-view-body-surface webspring-app-view-body-surface-sourcelist"
     : "webspring-app-view-body-surface";
   const paint = {
-    "data-frame-background": typeof background === "string" ? background : "surface",
+    "data-frame-background": background,
     style: {
       ...safeArea.properties,
-      ...(typeof background === "string" ? {} : webspringSurfaceStyle(background, "--nse-surface")),
-      "--nse-content-inset-top": sourceList ? "0px" : "var(--nse-safe-area-inset-top, 0px)",
+      ...(backgroundColor ? { backgroundColor } : {}),
+      "--nse-content-inset-top": containsHeader ? "0px" : "var(--nse-safe-area-inset-top, 0px)",
     } as CSSProperties,
   };
 

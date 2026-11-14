@@ -20,6 +20,9 @@
 
 export { NSEApplication } from "./NSEApplication";
 export type { NSEApplicationClass, NSEApplicationContext, NSEApplicationDelegate, NSEOpenWindowOptions } from "./NSEApplication";
+export { useNSEApplication, useNSEWindow } from "./NSEWindowContext";
+export { NSEWindowFrameView } from "./NSEWindowFrameView";
+export type { NSEWindowFrameViewClass } from "./NSEWindowFrameView";
 export { NSEWindowController } from "./NSEWindowController";
 export { NSEAlert, NSEAlertButton, NSEModalResponse } from "./NSEAlert";
 export type { NSEAlertStyle } from "./NSEAlert";
@@ -29,7 +32,7 @@ export type {
   NSEWindow,
   NSEWindowCloseOutcome,
   NSEWindowContentBorderEdge,
-  NSEWindowToolbarStyle,
+  NSEWindowToolbarStyle, NSEWindowStyle, NSEWindowCollectionBehavior, NSEWindowTitleVisibility, NSEWindowTitlebarPresentation,
   NSEWindowControllerClass,
   NSEWindowControllerContext,
   NSEWindowControllerOptions,

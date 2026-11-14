@@ -54,6 +54,11 @@ import type { AppTrustedClient } from "./appTrustedClientTypes";
 /** This host-private association prevents the public context from retaining a
  * façade object. The context receives only already-projected client values. */
 export interface MountedAppEnvironmentClients {
+  readonly currentWindow: {
+    setStyle(style: readonly import("../Windows/windowTypes").WindowStyle[]): void;
+    setCollectionBehavior(behavior: import("../Windows/windowTypes").WindowCollectionBehavior): void;
+    toggleFullScreen(): void;
+  };
   readonly persistence: AppPersistenceClient;
   readonly scheduler: AppSchedulerClient;
   readonly mediaQueries: AppMediaQueryClient;
