@@ -7,7 +7,7 @@ import * as objectLifetime from "../../src/NSE/Application/objectLifetime";
 import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
 import { NSEArrayController } from "../../src/NSE/Controllers/NSEArrayController";
-import { instantiateInOwnerScope, NSEOwnershipScope, nseUnowned } from "../../src/NSE/Controllers/ownership";
+import { instantiateInOwnerScope, OwnershipScope, nseUnowned } from "../../src/NSE/Controllers/ownership";
 import { ApplicationSession } from "../../src/SynCloudOS/AppHosting/applicationSession";
 import { createClassApplicationHost, type ClassApplicationHost } from "./fixtures/classApplicationHost";
 
@@ -43,7 +43,7 @@ describe("controller ownership hardening", () => {
   });
 
   it("rejects a released framework scope before entering the constructor", () => {
-    const scope = new NSEOwnershipScope("NSEViewController", "released");
+    const scope = new OwnershipScope("NSEViewController", "released");
     scope.release("explicit");
     const construct = vi.fn(() => new NSEViewController());
     expect(() => instantiateInOwnerScope(scope, construct)).toThrow();
@@ -207,7 +207,7 @@ describe("controller ownership hardening", () => {
       readonly windowRows = rows();
       constructor() { super(); this.contentViewController = new Root(); }
     }
-    const host = instantiateInOwnerScope(new NSEOwnershipScope("NSEWindowController", "nested"), () => new HostWindow());
+    const host = instantiateInOwnerScope(new OwnershipScope("NSEWindowController", "nested"), () => new HostWindow());
     owned.push(host);
     const root = host.contentViewController as Root;
     host.contentViewController = null;
@@ -222,7 +222,7 @@ describe("controller ownership hardening", () => {
       readonly laterWindowRows = rows();
       constructor() { super(); this.contentViewController = this.root; }
     }
-    const host = instantiateInOwnerScope(new NSEOwnershipScope("NSEWindowController", "raw-nested"), () => new HostWindow());
+    const host = instantiateInOwnerScope(new OwnershipScope("NSEWindowController", "raw-nested"), () => new HostWindow());
     owned.push(host);
     host.contentViewController = null;
     expect(host.root.isDisposed).toBe(true);
@@ -287,7 +287,7 @@ describe("internal recorded owner observation", () => {
     class HostWindow extends NSEWindowController {
       override get app(): NSEApplication { throw new Error("do not read arbitrary app getters"); }
     }
-    const host = instantiateInOwnerScope(new NSEOwnershipScope("NSEWindowController", "chain"), () => new HostWindow(), { app: session.app });
+    const host = instantiateInOwnerScope(new OwnershipScope("NSEWindowController", "chain"), () => new HostWindow(), { app: session.app });
     owned.push(host);
     const root = new NSEViewController({ owner: host });
     host.contentViewController = root;

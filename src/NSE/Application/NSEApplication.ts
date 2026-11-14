@@ -23,7 +23,7 @@ import type { BGTaskScheduler, UNUserNotificationCenter, UNRemoteNotificationReg
 import type { SynWareMigration } from "../../SynCloudOS/nseRuntimeContracts";
 import type { SynWareRouteGraph } from "../../SynCloudOS/nseRuntimeContracts";
 import type { SynCloudOSLifecycleDisposalReason } from "../../SynCloudOS/nseRuntimeContracts";
-import { nseDisposeFor, type NSEOwnedObject, type NSEOwner } from "../Controllers/ownership";
+import { nseDisposeFor, type OwnedObject, type NSEOwner } from "../Controllers/ownership";
 import { NSEObject } from "../Objects/NSEObject";
 import { publishObservableChange } from "../Objects/observable";
 import type { NSEMenu } from "../Menus/NSEMenu";
@@ -91,7 +91,7 @@ export interface NSEApplicationClass<TApplication extends NSEApplication = NSEAp
  * initialisers, the constructor) is owned by it and disposed when the
  * application closes.
  */
-export class NSEApplication extends NSEObject implements NSEOwner, NSEOwnedObject {
+export class NSEApplication extends NSEObject implements NSEOwner, OwnedObject {
   /** The window controller the framework opens for the application's window. */
   static mainWindow?: NSEWindowControllerClass;
   /** A standard main window whose root is this view controller class. */

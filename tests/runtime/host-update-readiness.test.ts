@@ -8,7 +8,7 @@ import { createBrowserFileSystemAccessPanelPort } from '../../src/SynCloudOS/Pla
 import type { UpdateReadinessObservation, NativeOperationActivity } from '../../src/SynCloudOS/Updates';
 import { noteType } from '../fixtures/noteDocumentType';
 import { NSEObjectController } from '../../src/NSE/Controllers/NSEObjectController';
-import { NSEUpdateReadinessController } from '../../src/NSE/Controllers/NSEUpdateReadinessController';
+import { UpdateReadinessController } from '../../src/NSE/Controllers/NSEUpdateReadinessController';
 import { nseUnowned } from '../../src/NSE/Controllers/ownership';
 import { editingControllerUpdateReadiness, updateReadinessDomains } from '../../src/SynCloudOS/Updates';
 import { HostUpdateReadinessService } from '../../src/SynCloudOS/Updates/HostUpdateReadinessService';
@@ -206,7 +206,7 @@ describe('host readiness owner integration', () => {
   });
   it('observes explicit editing-controller disposal without a separately supplied owner signal', () => {
     const editing = new NSEObjectController({ id: 'generated-editing', owner: nseUnowned, content: { value: 1 }, fields: { value: { read: value => value.value, write: (model, value: number) => ({ ...model, value }) } } });
-    const readiness = new NSEUpdateReadinessController({ id: 'generated-observer', owner: nseUnowned, clientInstance: 'generated-instance', hostBuild: 'build-A', inventory: { read: () => ({ covered: updateReadinessDomains, authorities: [editingControllerUpdateReadiness(editing)] }), subscribe: () => () => {} } });
+    const readiness = new UpdateReadinessController({ id: 'generated-observer', owner: nseUnowned, clientInstance: 'generated-instance', hostBuild: 'build-A', inventory: { read: () => ({ covered: updateReadinessDomains, authorities: [editingControllerUpdateReadiness(editing)] }), subscribe: () => () => {} } });
     const first = readiness.getSnapshot(); editing.dispose(); expect(readiness.getSnapshot().clientInstance).toBe(first.clientInstance); expect(readiness.getSnapshot().readiness).toBe('unknown'); expect(readiness.getSnapshot().generation).toBeGreaterThan(first.generation); readiness.dispose();
   });
 });

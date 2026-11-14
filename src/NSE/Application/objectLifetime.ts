@@ -26,23 +26,23 @@ import {
 import {
   nseDisposeFor,
   journalNSEAcquisition,
-  NSEOwnershipScope,
+  OwnershipScope,
   registerOwnerScope,
   resolveOwnership,
   takePendingSelf,
   type NSEControllerOwnershipOptions,
-  type NSEOwnedObject,
+  type OwnedObject,
 } from "../Controllers/ownership";
 
 interface ObjectOwnership {
-  readonly scope: NSEOwnershipScope;
-  ownerScope: NSEOwnershipScope | undefined;
+  readonly scope: OwnershipScope;
+  ownerScope: OwnershipScope | undefined;
   ownerSignal: AbortSignal | undefined;
 }
 
 const ownershipByObject = new WeakMap<object, ObjectOwnership>();
-const objectByScope = new WeakMap<NSEOwnershipScope, object>();
-const scopeBySignal = new WeakMap<AbortSignal, NSEOwnershipScope>();
+const objectByScope = new WeakMap<OwnershipScope, object>();
+const scopeBySignal = new WeakMap<AbortSignal, OwnershipScope>();
 const lifetimes = new WeakMap<object, ObjectLifetime>();
 
 /** @internal Lifetime/context registry for authoring descriptors; no application getters. */
@@ -78,7 +78,7 @@ export function getNSEObjectOwners(target: object): readonly object[] {
  * it, or the one named by `owner` / `ownerSignal`.
  */
 export class ObjectLifetime {
-  readonly scope: NSEOwnershipScope;
+  readonly scope: OwnershipScope;
   readonly record: SynCloudOSLifecycleRecord;
   /** What the framework handed to the constructor, when it constructed the object. */
   readonly context: unknown;
@@ -89,14 +89,14 @@ export class ObjectLifetime {
   readonly #ownership: ObjectOwnership;
 
   constructor(
-    self: NSEOwnedObject,
+    self: OwnedObject,
     kind: string,
     id: string,
     options: NSEControllerOwnershipOptions,
   ) {
     this.record = new SynCloudOSLifecycleRecord({ kind, id });
     const pending = takePendingSelf();
-    let ownerScope: NSEOwnershipScope | undefined;
+    let ownerScope: OwnershipScope | undefined;
     let ownerSignal: AbortSignal | undefined;
     if (pending) {
       pending.scope.assertLive();
@@ -110,7 +110,7 @@ export class ObjectLifetime {
         : undefined;
       ownerScope = app ? ownershipByObject.get(app)?.scope : undefined;
     } else {
-      this.scope = new NSEOwnershipScope(kind, id);
+      this.scope = new OwnershipScope(kind, id);
       this.context = undefined;
       this.constructedByFramework = false;
       const owner = resolveOwnership(options, { kind, id });
@@ -137,7 +137,7 @@ export class ObjectLifetime {
   }
 
   /** Moves the object under `scope`: it is disposed with that scope instead of its previous owner. */
-  adoptBy(self: NSEOwnedObject, scope: NSEOwnershipScope): void {
+  adoptBy(self: OwnedObject, scope: OwnershipScope): void {
     scope.assertLive();
     if (this.#ownership.ownerScope === scope) return;
     const leaveOwner = scope.adopt(self);

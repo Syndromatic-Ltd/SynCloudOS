@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEControllerLifetime } from "../Controllers/controllerLifetime";
+import { ControllerLifetime } from "../Controllers/controllerLifetime";
 import {
   clampPageProgress,
   createPageSnapshot
@@ -38,10 +38,10 @@ export class PageTurnController {
   private snapshot: PageTurnSnapshot;
   private listeners = new Set<PageTurnListener>();
   private nextTurnId = 1;
-  readonly #lifetime: NSEControllerLifetime;
+  readonly #lifetime: ControllerLifetime;
 
   constructor(options: PageTurnControllerOptions = {}) {
-    this.#lifetime = new NSEControllerLifetime(options, { kind: "NSEPage", id: "page" });
+    this.#lifetime = new ControllerLifetime(options, { kind: "NSEPage", id: "page" });
     this.snapshot = createPageSnapshot({
       progress: options.progress,
       phase: options.phase,

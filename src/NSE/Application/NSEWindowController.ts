@@ -23,7 +23,7 @@ import type { SynWareOwnedWindowSnapshot, SynWareWindowCloseGuard } from "../../
 import {
   nseDisposeFor,
   type NSEControllerOwnershipOptions,
-  type NSEOwnedObject,
+  type OwnedObject,
   type NSEOwner,
 } from "../Controllers/ownership";
 import { NSEObject } from "../Objects/NSEObject";
@@ -245,7 +245,7 @@ let windowControllerSequence = 0;
  * whose root is a view controller. Declare `@action` methods for commands
  * scoped to the window.
  */
-export class NSEWindowController<TApp extends NSEApplication = NSEApplication> extends NSEObject implements NSEOwner, NSEOwnedObject {
+export class NSEWindowController<TApp extends NSEApplication = NSEApplication> extends NSEObject implements NSEOwner, OwnedObject {
   /** The component that renders this window's content. */
   static view?: NSEViewComponent;
   /** The class constructed in a fresh scope for this window's initial root. */

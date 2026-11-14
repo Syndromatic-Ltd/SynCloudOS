@@ -31,9 +31,9 @@ import {
   instantiateInOwnerScope,
   hasNSEConstructionOwner,
   nseDisposeFor,
-  NSEOwnershipScope,
+  OwnershipScope,
   type NSEControllerOwnershipOptions,
-  type NSEOwnedObject,
+  type OwnedObject,
   type NSEOwner,
 } from "../Controllers/ownership";
 import { NSEObject } from "../Objects/NSEObject";
@@ -203,7 +203,7 @@ let viewControllerSequence = 0;
  * controller fields should pass `owner: this`: the ambient scope still belongs
  * to the outer constructor, including after the nested constructor returns.
  */
-export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> implements NSEOwner, NSEOwnedObject {
+export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> implements NSEOwner, OwnedObject {
   static readonly TransitionOptions = NSEViewControllerTransitionOptions;
   /** The component that renders this controller's view. */
   static view?: NSEViewComponent;
@@ -216,7 +216,7 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
   readonly #children: NSEViewController<unknown>[] = [];
   readonly #view: NSEControllerView;
   #parent: NSEViewController<unknown> | null = null;
-  #windowScope: NSEOwnershipScope | null = null;
+  #windowScope: OwnershipScope | null = null;
   #window: NSEWindow | null = null;
   #presenting: NSEViewController<unknown> | null = null;
   #popover: NSEPopoverPositioning | null = null;
@@ -480,7 +480,7 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
   addChild<TChild extends NSEViewController<unknown>, TArgs extends unknown[]>(child: TChild | (new (...args: TArgs) => TChild), ...args: TArgs): TChild {
     this.#assertLive("addChild", "call");
     const instance = typeof child === "function"
-      ? instantiateInOwnerScope(new NSEOwnershipScope("NSEViewController", child.name), () => {
+      ? instantiateInOwnerScope(new OwnershipScope("NSEViewController", child.name), () => {
         const result = new child(...args);
         try { this.#assertLive("addChild", "call"); }
         catch (error) { try { result[nseDisposeFor](this.disposalReason ?? "explicit"); } finally { throw error; } }
@@ -631,7 +631,7 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
   #present<TSheet extends NSEViewController<unknown>, TArgs extends unknown[]>(operation: string, style: PresentationStyle, popover: NSEPopoverPositioning | null, viewController: TSheet | (new (...args: TArgs) => TSheet), args: TArgs): TSheet {
     this.#assertLive(operation, "call");
     const instance = typeof viewController === "function"
-      ? instantiateInOwnerScope(new NSEOwnershipScope("NSEViewController", viewController.name), () => {
+      ? instantiateInOwnerScope(new OwnershipScope("NSEViewController", viewController.name), () => {
         const result = new viewController(...args);
         try { this.#assertLive(operation, "call"); }
         catch (error) { try { result[nseDisposeFor](this.disposalReason ?? "explicit"); } finally { throw error; } }
@@ -713,7 +713,7 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
   }
 
   /** @internal Makes `scope` (a window controller's) own this root view controller. */
-  [nseAdoptViewController](scope: NSEOwnershipScope, window: NSEWindow): void {
+  [nseAdoptViewController](scope: OwnershipScope, window: NSEWindow): void {
     this.#assertLive("contentViewController", "set");
     if (this.#parent) throw new TypeError("A child view controller cannot be a window's content view controller; call removeFromParent() first.");
     if (this.#windowScope && this.#windowScope !== scope) throw new TypeError("The view controller is already another window's content view controller.");

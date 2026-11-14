@@ -20,7 +20,7 @@
 
 import type { CommandDispatchResult, CommandPresentation } from "../../SynCloudOS/SynCloudOS";
 import { commandValidationRequestKey, SynCloudOSLifecycleRecord, synCloudOSLifecycleSignalReason } from "../../SynCloudOS/nseRuntimeContracts";
-import { NSEControllerLifetime } from "../Controllers/controllerLifetime";
+import { ControllerLifetime } from "../Controllers/controllerLifetime";
 import { nseActionReferenceName, type NSEActionPayloadCheck } from "../Controls/Core/actionReference";
 import { subscribeNSEActionChanges } from "../Controls/Core/actionChanges";
 import type {
@@ -187,7 +187,7 @@ export class NSEToolbarController<const Items extends readonly NSEToolbarItemInp
   readonly runtime;
   readonly #catalogue: ReadonlyMap<string, NSEToolbarItem>;
   readonly #lifecycle: SynCloudOSLifecycleRecord;
-  readonly #ownership: NSEControllerLifetime;
+  readonly #ownership: ControllerLifetime;
   readonly #listeners = new Set<() => void>();
   #snapshot: NSEToolbarSnapshot = initialSnapshot;
   #validation: AbortLease | null = null;
@@ -217,7 +217,7 @@ export class NSEToolbarController<const Items extends readonly NSEToolbarItemInp
       return { ...rest, commandId: runtime.resolveAction(typeof action === "string" ? action : nseActionReferenceName(action)) };
     });
     if (!configuration.identifier.trim()) throw new TypeError("NSE toolbar identifiers must not be empty.");
-    this.#ownership = new NSEControllerLifetime(options, { kind: "NSEToolbarController", id: configuration.identifier }, runtime.signal);
+    this.#ownership = new ControllerLifetime(options, { kind: "NSEToolbarController", id: configuration.identifier }, runtime.signal);
     this.#lifecycle = this.#ownership.record;
     assertOwner(configuration.owner);
     if (!validDisplayMode(configuration.displayMode) || !validSizeMode(configuration.sizeMode)) {

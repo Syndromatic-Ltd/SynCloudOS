@@ -7,7 +7,7 @@ import { NSEApplication } from "../../src/NSE/Application/NSEApplication";
 import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
 import { NSEUserDefaultsController } from "../../src/NSE/Controllers/NSEUserDefaultsController";
-import { instantiateInOwnerScope, NSEOwnershipScope, type NSEControllerOwnershipOptions } from "../../src/NSE/Controllers/ownership";
+import { instantiateInOwnerScope, OwnershipScope, type NSEControllerOwnershipOptions } from "../../src/NSE/Controllers/ownership";
 import { NSEMenu } from "../../src/NSE/Menus/NSEMenu";
 import type { NSEMenuRuntimePort } from "../../src/NSE/Menus/menuTypes";
 import { NSEToolbarController } from "../../src/NSE/Toolbars/NSEToolbarController";
@@ -103,7 +103,7 @@ describe.each(kinds)("%s canonical runtime ownership", kind => {
   it("keeps an explicit owner ahead of the construction owner and runtime", async () => {
     const host = await launched();
     const explicit = new AbortController();
-    const ambient = new NSEOwnershipScope("test", "ambient");
+    const ambient = new OwnershipScope("test", "ambient");
     const controller = instantiateInOwnerScope(ambient, () => construct(kind, runtimeFor(host), { owner: { ownerSignal: explicit.signal } }));
     ambient.release("explicit");
     expect(controller.isDisposed).toBe(false);
@@ -117,7 +117,7 @@ describe.each(kinds)("%s canonical runtime ownership", kind => {
     const first = construct(kind, runtimeFor(host), { ownerSignal: explicit.signal, owner: { ownerSignal: owner.signal } });
     owner.abort(); expect(first.isDisposed).toBe(false);
     explicit.abort(); expect(first.isDisposed).toBe(true);
-    const ambient = new NSEOwnershipScope("test", "ambient-only");
+    const ambient = new OwnershipScope("test", "ambient-only");
     const second = instantiateInOwnerScope(ambient, () => construct(kind, runtimeFor(host)));
     ambient.release("explicit"); expect(second.isDisposed).toBe(true);
     expect(host.runtime.signal.aborted).toBe(false);
@@ -133,7 +133,7 @@ describe.each(kinds)("%s canonical runtime ownership", kind => {
   });
 
   it("rolls back construction-owned presentation resources on a derived construction failure", async () => {
-    const host = await launched(), scope = new NSEOwnershipScope("test", "failed-owner");
+    const host = await launched(), scope = new OwnershipScope("test", "failed-owner");
     const error = new Error("derived construction failed");
     let controller!: ReturnType<typeof construct>;
     expect(() => instantiateInOwnerScope(scope, () => { controller = construct(kind, runtimeFor(host)); throw error; })).toThrow(error);

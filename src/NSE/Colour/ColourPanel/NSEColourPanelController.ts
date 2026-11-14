@@ -23,7 +23,7 @@ import { defineSyncUndoAction } from "../../../SynCloudOS/nseRuntimeContracts";
 import { GFXColour } from "../../../FX/GraphicsFX/GFXColour";
 import { parseNSEColourTransfer, serialiseNSEColourTransfer } from "../Transfer";
 import type { ColourChange, NSEColourPanelControllerOptions, NSEColourPanelSnapshot, NSEColourPicker, ColourTarget } from "./colourPanelTypes";
-import { NSEControllerLifetime } from "../../Controllers/controllerLifetime";
+import { ControllerLifetime } from "../../Controllers/controllerLifetime";
 
 type ColourPanelServicePort = Pick<
   ColourPanelService,
@@ -74,11 +74,11 @@ export class NSEColourPanelController {
   #applyingUndo = false;
   #serviceSnapshot: ReturnType<ColourPanelService["getSnapshot"]> | null = null;
   #facadeSnapshot: NSEColourPanelSnapshot | null = null;
-  readonly #lifetime: NSEControllerLifetime;
+  readonly #lifetime: ControllerLifetime;
   readonly #registrations = new Set<() => void>();
 
   constructor(runtime: Pick<SynCloudOSRuntime, "colourPanel"> | ColourPanelServicePort, options: NSEColourPanelControllerOptions = {}) {
-    this.#lifetime = new NSEControllerLifetime(options, { kind: "NSEColourPanelController", id: "colour-panel" });
+    this.#lifetime = new ControllerLifetime(options, { kind: "NSEColourPanelController", id: "colour-panel" });
     this.#service = "colourPanel" in runtime ? runtime.colourPanel : runtime;
     this.#undoManager = options.undoManager;
     this.#preferences = options.preferences;
