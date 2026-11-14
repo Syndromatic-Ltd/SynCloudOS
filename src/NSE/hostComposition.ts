@@ -62,7 +62,7 @@ export { NSEWindowLayoutContext, NSEWindowLayoutModel, useNSEContentLayoutProper
 export { NSESafeAreaMeasurementProvider, useNSEViewSafeArea } from "./Layout/useNSESafeArea";
 export { useNSEDeferredDisposal } from "./interactionLifecycle";
 export { createReactOwnedNSEMenu } from "./Menus/NSEMenu";
-export { useNSEMenuLifetime } from "./Menus/useNSEMenuLifetime";
+export { useMenuLifetime } from "./Menus/useMenuLifetime";
 export { nseStateHooks } from "./Theme/contract/hooks";
 export { useNSEThemeInteraction } from "./Theme/contract/useThemeInteraction";
 export type { NSETheme } from "./Theme/NSETheme";

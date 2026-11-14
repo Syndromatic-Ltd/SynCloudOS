@@ -33,7 +33,7 @@ import { HFXHapticEngine } from "../../src/FX/HapticsFX/HFXHapticEngine";
 import { NSEFeedbackProvider } from "../../src/NSE/Feedback";
 import { NSEDateEntry } from "../../src/NSE/DateTime/Pickers/dateEntry";
 import { NSETimeEntry } from "../../src/NSE/DateTime/Pickers/timeEntry";
-import { NSEMenuView } from "../../src/NSE/Menus/NSEMenuView";
+import { MenuView } from "../../src/NSE/Menus/MenuView";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 
 afterEach(() => {
@@ -132,7 +132,7 @@ describe("NSE extended wrapper controls", () => {
     const onSelect = vi.fn();
 
     renderWithAppearance(
-      <NSEMenuView
+      <MenuView
         label="Nested"
         onSelect={onSelect}
         items={[

@@ -19,7 +19,7 @@
  */
 
 import { useMemo, type ReactNode } from "react";
-import { NSEApplicationMenu, type NSEMenuModel } from "../NSE/NSE";
+import { ApplicationMenu, type MenuModel } from "../NSE/NSE";
 import { ApplicationMenuTriggerProvider, useApplicationMenuSnapshot, type ApplicationMenuStore } from "../SynCloudOSReact";
 import type { SynCloudOSAppAboutManifest } from "../SynCloudOS/SynCloudOS";
 import type { SynCloudOSTranslationParams } from "../SynCloudOS/LocaleServices";
@@ -34,7 +34,7 @@ export function applicationDeclaresAbout(about: SynCloudOSAppAboutManifest | und
 }
 
 /** True when System Preferences is the menu's only command, so its control opens System Preferences itself. */
-export function menuOpensSystemPreferencesDirectly(model: NSEMenuModel): boolean {
+export function menuOpensSystemPreferencesDirectly(model: MenuModel): boolean {
   const commandIds = [...model.entries, ...(model.sections ?? []).flatMap((section) => section.entries)]
     .flatMap((entry) => entry.kind === "command" && "commandId" in entry ? [entry.commandId] : []);
   return commandIds.length === 1 && commandIds[0] === "system.showPreferences";
@@ -54,7 +54,7 @@ export function applicationMenuLabels(appName: string, t: ApplicationMenuText): 
   };
 }
 
-type NSEApplicationMenuProps = Parameters<typeof NSEApplicationMenu>[0];
+type ApplicationMenuProps = Parameters<typeof ApplicationMenu>[0];
 
 export function ApplicationMenuOverlayHost({
   menuStore,
@@ -64,14 +64,14 @@ export function ApplicationMenuOverlayHost({
   anchorTitle,
 }: {
   readonly menuStore: ApplicationMenuStore;
-  readonly model: NSEApplicationMenuProps["model"];
-  readonly controller: NSEApplicationMenuProps["controller"];
-  readonly overlay: NSEApplicationMenuProps["overlay"];
+  readonly model: ApplicationMenuProps["model"];
+  readonly controller: ApplicationMenuProps["controller"];
+  readonly overlay: ApplicationMenuProps["overlay"];
   readonly anchorTitle: string;
 }) {
   const menu = useApplicationMenuSnapshot(menuStore);
   return (
-    <NSEApplicationMenu
+    <ApplicationMenu
       model={model}
       controller={controller}
       overlay={overlay}

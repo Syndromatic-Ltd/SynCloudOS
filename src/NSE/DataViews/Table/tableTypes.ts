@@ -20,7 +20,7 @@
 
 import type { HTMLAttributes, ReactNode } from "react";
 
-import type { NSEMenu, NSEMenuOverlayOptions } from "../../Menus";
+import type { NSEMenu, MenuOverlayOptions } from "../../Menus";
 import type { SelectionChange, SelectionSnapshot } from "../../../SynCloudOS/Models";
 import type { NSEFormatter, NSESortDescriptor } from "../../../Foundation/public";
 import type {
@@ -76,7 +76,7 @@ export interface NSETableColumnConfiguration {
 /** The header view's menu (NSTableHeaderView.menu), opened from its Columns pull-down. */
 export interface NSETableColumnMenu {
   readonly menu: NSEMenu;
-  readonly overlay: NSEMenuOverlayOptions;
+  readonly overlay: MenuOverlayOptions;
 }
 
 export interface NSETableViewProps<T, TId extends NSEDataViewKey>

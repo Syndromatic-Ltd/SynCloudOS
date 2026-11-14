@@ -21,11 +21,11 @@
 import type { HTMLAttributes, ReactNode } from "react";
 import { classes } from "../Controls/Core/nseControlsShared";
 
-export interface NSEAppMenuSurfaceProps extends Omit<HTMLAttributes<HTMLElement>, "title"> {
+export interface AppMenuSurfaceProps extends Omit<HTMLAttributes<HTMLElement>, "title"> {
   title?: ReactNode;
 }
 
-export function NSEAppMenuSurface({ title, className = "", children, ...props }: NSEAppMenuSurfaceProps) {
+export function AppMenuSurface({ title, className = "", children, ...props }: AppMenuSurfaceProps) {
   return (
     <section data-nse-part="bezel" data-nse-role="application-menu" className={classes("nse-control-app-menu-surface", className)} {...props}>
       {title ? <div data-nse-part="title" className="nse-control-app-menu-title">{title}</div> : null}

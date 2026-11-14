@@ -38,7 +38,7 @@ import {
 import { nseMenuModel } from "../NSE/NSE";
 import { ApplicationNavigationBackButton } from "./ApplicationNavigationBackButton";
 import { NSEButton } from "@syndromatic/syncloudos/nse/controls";
-import { createReactOwnedNSEMenu, TopBar, useNSEMenuLifetime } from "../NSE/hostComposition";
+import { createReactOwnedNSEMenu, TopBar, useMenuLifetime } from "../NSE/hostComposition";
 import { SourceListFrameProvider, type SourceListFrameContextValue } from "../NSE/hostComposition";
 import { activateResponderHierarchy, clearOwnedResponderAnchor, QuickSwitchTriggerProvider, ResponderScope, useHostSiteBranding, useResolvedMode, useRuntimeNSEControlPort, useRuntimeNSEFocusPort, useRuntimeNSEMenuPort, useRuntimeNSEOverlayPort, useRuntimeSelector, useKernelSynCloudOS } from "../SynCloudOSReact";
 import type { SynCloudOSAppInfo } from "../SynCloudOS/SynCloudOS";
@@ -262,7 +262,7 @@ export function ApplicationStageView({
     () => createReactOwnedNSEMenu({ ownerSignal: appMenuRuntime.signal, [nseMenuModel]: appMenuModel, runtime: appMenuRuntime }),
     [appMenuModel, appMenuRuntime],
   );
-  useNSEMenuLifetime(appMenuController);
+  useMenuLifetime(appMenuController);
   const { reducedMotion } = useNSEAnimationEnvironment();
   const stageMotion = useApplicationStageMotion({
     role: multiSwitchRole,

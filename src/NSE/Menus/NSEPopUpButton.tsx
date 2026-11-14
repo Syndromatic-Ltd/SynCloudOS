@@ -32,10 +32,10 @@ import type { NSEControlActionProps } from "../Controls/Core/controlTypes";
 import { useNSEControlCommand, type NSEControlCommandState } from "../Controls/Core/useNSEControlCommand";
 import { useNSEValueBinding } from "../Controls/Core/useNSEValueBinding";
 import type { NSEBoundValueProps } from "../Bindings/bindingTypes";
-import { NSEMenuView } from "./NSEMenuView";
+import { MenuView } from "./MenuView";
 import type { NSEMenu } from "./NSEMenu";
-import { NSEMenuOverlay } from "./NSEMenuOverlay";
-import type { NSEMenuOverlayOptions } from "./menuTypes";
+import { MenuOverlay } from "./MenuOverlay";
+import type { MenuOverlayOptions } from "./menuTypes";
 
 /**
  * An item of an NSEPopUpButton's menu (NSMenuItem). A choice item has a
@@ -86,16 +86,16 @@ export interface NSEPopUpButtonProps<Payload = unknown> extends Omit<HTMLAttribu
   /** An explicit width (CSS pixels, or any CSS length). */
   readonly width?: number | string;
   /** Overlay provenance for the menu, when the nearest responder is not its parent. */
-  readonly overlay?: NSEMenuOverlayOptions;
+  readonly overlay?: MenuOverlayOptions;
   readonly parentResponderId?: string;
   readonly presentation?: NSEPopupPresentation;
   readonly direction?: "ltr" | "rtl";
 }
 
-type NSEPopUpButtonChoiceItem = Exclude<NSEPopUpButtonItem, { readonly isSeparatorItem: true }>;
-interface NSEPopUpButtonRow {
+type PopUpButtonChoiceItem = Exclude<NSEPopUpButtonItem, { readonly isSeparatorItem: true }>;
+interface PopUpButtonRow {
   readonly rowId: string;
-  readonly item: NSEPopUpButtonChoiceItem;
+  readonly item: PopUpButtonChoiceItem;
   readonly separatorBefore: boolean;
 }
 
@@ -127,10 +127,10 @@ function available(command: NSEControlCommandState<unknown> | undefined): boolea
  * the one intentional native surface.
  */
 export function NSEPopUpButton<Payload = unknown>(props: NSEBoundValueProps<string, NSEPopUpButtonProps<Payload>, "value" | "defaultValue" | "onValueChange" | "undoManager">) {
-  return <NSEPopUpButtonControl {...useNSEValueBinding<string, NSEPopUpButtonProps<Payload>, "value" | "defaultValue" | "onValueChange" | "undoManager">(props, { fallback: "", disableReadOnly: true })} />;
+  return <PopUpButtonControl {...useNSEValueBinding<string, NSEPopUpButtonProps<Payload>, "value" | "defaultValue" | "onValueChange" | "undoManager">(props, { fallback: "", disableReadOnly: true })} />;
 }
 
-function NSEPopUpButtonControl(props: NSEPopUpButtonProps) {
+function PopUpButtonControl(props: NSEPopUpButtonProps) {
   const {
     items = [],
     pullsDown = false,
@@ -191,7 +191,7 @@ function NSEPopUpButtonControl(props: NSEPopUpButtonProps) {
 
   // A separator item becomes a rule above the next row.
   const rows = useMemo(() => {
-    const result: NSEPopUpButtonRow[] = [];
+    const result: PopUpButtonRow[] = [];
     let rule = false;
     items.forEach((item, index) => {
       if (item.isSeparatorItem) { rule = result.length > 0; return; }
@@ -208,7 +208,7 @@ function NSEPopUpButtonControl(props: NSEPopUpButtonProps) {
   const [initialFocus, setInitialFocus] = useState<"first" | "last">("first");
   const anchorRef = useRef<HTMLButtonElement | null>(null);
   const selectedRow = choiceRows.find((row) => row.item.value === selectedValue) ?? choiceRows.find((row) => row.item.isEnabled !== false);
-  const rowEnabled = useCallback((row: NSEPopUpButtonRow) => {
+  const rowEnabled = useCallback((row: PopUpButtonRow) => {
     if (row.item.isEnabled === false) return false;
     if (row.item.action !== undefined) return available(itemCommands.get(row.rowId));
     return action === undefined || available(itemCommands.get(row.rowId));
@@ -344,9 +344,9 @@ function NSEPopUpButtonControl(props: NSEPopUpButtonProps) {
         }}
       />
       {menu ? (
-        <NSEMenuOverlay overlay={overlayOptions} controller={menu} open={open} anchor={anchorRef.current} labelledBy={buttonId} onOpenChange={setOpen}>
-          <NSEMenuView model={menu.model} controller={menu} open={open} labelledBy={buttonId} onOpenChange={setOpen} direction={direction} initialFocus={initialFocus} />
-        </NSEMenuOverlay>
+        <MenuOverlay overlay={overlayOptions} controller={menu} open={open} anchor={anchorRef.current} labelledBy={buttonId} onOpenChange={setOpen}>
+          <MenuView model={menu.model} controller={menu} open={open} labelledBy={buttonId} onOpenChange={setOpen} direction={direction} initialFocus={initialFocus} />
+        </MenuOverlay>
       ) : (
         <NSEListboxPopup
           id={listboxId}

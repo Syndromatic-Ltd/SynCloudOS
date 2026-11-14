@@ -25,7 +25,7 @@ installNSEScrollIntoViewFixture();
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { NSEMenuView } from "../../src/NSE/Menus/NSEMenuView";
+import { MenuView } from "../../src/NSE/Menus/MenuView";
 import {
   NSEImageView,
 } from "../../src/NSE/public/controls";
@@ -45,7 +45,7 @@ afterEach(() => {
 describe("NSEMenu sub-item disclosure", () => {
   it("renders a semantic submenu indicator without literal chevron text", async () => {
     render(
-      <Host><NSEMenuView
+      <Host><MenuView
         label="File"
         defaultOpen
         items={[{ value: "recent", label: "Open recent", children: [{ value: "a", label: "A.txt" }] }]}

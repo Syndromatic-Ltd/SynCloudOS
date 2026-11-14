@@ -27,16 +27,16 @@ import { useNSEAppearanceProjection } from "../Appearance";
 import { sizedControlStyle, useNSEControlFeedback } from "../Controls/Core/nseControlsShared";
 import { NSEButton, nseButtonToneProps, type NSEButtonTone, type NSEButtonProps } from "../Controls/Buttons/NSEButton";
 import { useNSEOverlayProvider } from "../Overlays";
-import { NSEMenuOverlay } from "./NSEMenuOverlay";
+import { MenuOverlay } from "./MenuOverlay";
 import { createReactOwnedNSEMenu, nseRefreshMenuPresentation, type NSEMenu } from "./NSEMenu";
-import { useNSEMenuLifetime } from "./useNSEMenuLifetime";
+import { useMenuLifetime } from "./useMenuLifetime";
 import { nseMenuModel } from "./menuTypes";
 import type {
-  NSEMenuEntry,
-  NSEMenuItemDefinition,
-  NSEMenuModel,
-  NSEMenuOverlayOptions,
-  NSEMenuPresentedEntry,
+  MenuEntry,
+  MenuItemDefinition,
+  MenuModel,
+  MenuOverlayOptions,
+  MenuPresentedEntry,
   NSEMenuRuntimePort,
 } from "./menuTypes";
 import { useNSEMenuOverlayPresentationScope } from "./menuPresentationContext";
@@ -62,7 +62,7 @@ function sameNode(a: ReactNode, b: ReactNode): boolean {
   ));
 }
 
-function sameMenuItems(a: readonly NSEMenuItemDefinition[], b: readonly NSEMenuItemDefinition[]): boolean {
+function sameMenuItems(a: readonly MenuItemDefinition[], b: readonly MenuItemDefinition[]): boolean {
   return a.length === b.length && a.every((item, index) => {
     const other = b[index]!;
     return item.value === other.value &&
@@ -90,8 +90,8 @@ function useEquivalentValue<T>(value: T, equivalent: (a: T, b: T) => boolean): T
   return ref.current;
 }
 
-export interface NSECommandMenuProps {
-  readonly model: NSEMenuModel;
+export interface CommandMenuProps {
+  readonly model: MenuModel;
   readonly controller: NSEMenu;
   readonly open: boolean;
   readonly labelledBy?: string;
@@ -104,14 +104,14 @@ export interface NSECommandMenuProps {
   readonly appearance?: "default" | "application-menu";
 }
 
-export interface NSEItemMenuProps extends Omit<HTMLAttributes<HTMLSpanElement>, "onSelect" | "children"> {
+export interface ItemMenuProps extends Omit<HTMLAttributes<HTMLSpanElement>, "onSelect" | "children"> {
   readonly label: ReactNode;
-  readonly items: readonly NSEMenuItemDefinition[];
+  readonly items: readonly MenuItemDefinition[];
   readonly open?: boolean;
   readonly defaultOpen?: boolean;
   readonly onOpenChange?: (open: boolean) => void;
   readonly onSelect?: (value: string) => void;
-  readonly menuOverlay?: NSEMenuOverlayOptions;
+  readonly menuOverlay?: MenuOverlayOptions;
   readonly parentResponderId?: string;
   readonly tone?: NSEButtonTone;
   readonly pressHaptic?: NSEButtonProps["haptic"];
@@ -130,13 +130,13 @@ export interface NSEItemMenuProps extends Omit<HTMLAttributes<HTMLSpanElement>, 
   readonly height?: number;
 }
 
-export type NSEMenuProps = NSECommandMenuProps | NSEItemMenuProps;
+export type NSEMenuProps = CommandMenuProps | ItemMenuProps;
 
-function isFocusable(entry: NSEMenuPresentedEntry): entry is Exclude<NSEMenuPresentedEntry, { readonly kind: "separator" | "custom" }> {
+function isFocusable(entry: MenuPresentedEntry): entry is Exclude<MenuPresentedEntry, { readonly kind: "separator" | "custom" }> {
   return entry.kind !== "separator" && entry.kind !== "custom" && entry.enabled;
 }
 
-function roleFor(entry: NSEMenuPresentedEntry): "menuitem" | "menuitemcheckbox" | "menuitemradio" {
+function roleFor(entry: MenuPresentedEntry): "menuitem" | "menuitemcheckbox" | "menuitemradio" {
   if (entry.kind !== "command") return "menuitem";
   if (entry.selectionKind === "radio") return "menuitemradio";
   // Existing command presentations already use off/on/mixed as their
@@ -145,7 +145,7 @@ function roleFor(entry: NSEMenuPresentedEntry): "menuitem" | "menuitemcheckbox" 
   return entry.selectionKind === "checkbox" || entry.checked !== "off" ? "menuitemcheckbox" : "menuitem";
 }
 
-function entryLabel(entry: Exclude<NSEMenuPresentedEntry, { readonly kind: "separator" }>): string {
+function entryLabel(entry: Exclude<MenuPresentedEntry, { readonly kind: "separator" }>): string {
   return Children.toArray(entry.label).reduce<string>((text, child) => {
     if (typeof child === "string" || typeof child === "number") return `${text}${child}`;
     return text;
@@ -153,7 +153,7 @@ function entryLabel(entry: Exclude<NSEMenuPresentedEntry, { readonly kind: "sepa
 }
 
 /** Semantic command menu surface. Its parent chooses portal/popover/sheet presentation. */
-function NSECommandMenuSurface({
+function CommandMenuSurface({
   model,
   controller,
   open,
@@ -163,7 +163,7 @@ function NSECommandMenuSurface({
   initialFocus = "first",
   submenuDelayMs = 180,
   appearance = "default",
-}: NSECommandMenuProps) {
+}: CommandMenuProps) {
   const appearanceProjection = useNSEAppearanceProjection();
   const applicationAppearance = appearance === "application-menu";
   const subscribe = useCallback((listener: () => void) => controller.subscribe(() => {
@@ -262,7 +262,7 @@ function NSECommandMenuSurface({
   const chosen = useRef(false);
   const shownSnapshot = useRef(snapshot);
   if (open && snapshot.open && shownSnapshot.current.generation !== snapshot.generation) chosen.current = false;
-  const activate = async (entry: NSEMenuPresentedEntry, delayed = false) => {
+  const activate = async (entry: MenuPresentedEntry, delayed = false) => {
     if (entry.kind === "submenu") {
       if (!entry.enabled) return;
       void controller.openSubmenu(entry.id, delayed ? submenuDelayMs : 0);
@@ -525,22 +525,22 @@ function textFromMenuNode(node: ReactNode): string {
 }
 
 interface LocalMenuItemRecord {
-  readonly item: NSEMenuItemDefinition;
+  readonly item: MenuItemDefinition;
   readonly commandId: string;
 }
 
 interface LocalItemMenuModel {
-  readonly model: NSEMenuModel;
+  readonly model: MenuModel;
   readonly records: ReadonlyMap<string, LocalMenuItemRecord>;
 }
 
 function buildLocalItemMenuModel(
   id: string,
   label: ReactNode,
-  items: readonly NSEMenuItemDefinition[],
+  items: readonly MenuItemDefinition[],
 ): LocalItemMenuModel {
   const records = new Map<string, LocalMenuItemRecord>();
-  const buildEntries = (entries: readonly NSEMenuItemDefinition[], path: string): readonly NSEMenuEntry[] => entries.map((item, index) => {
+  const buildEntries = (entries: readonly MenuItemDefinition[], path: string): readonly MenuEntry[] => entries.map((item, index) => {
     const entryId = `${path}:${index}`;
     if (item.separator) return { kind: "separator", id: `${entryId}:separator` };
     if (item.children?.length) {
@@ -640,7 +640,7 @@ function createLocalItemMenuRuntime(
   return runtime;
 }
 
-function NSEItemMenu({
+function ItemMenu({
   label,
   items,
   open,
@@ -661,7 +661,7 @@ function NSEItemMenu({
   height,
   className,
   ...htmlAttributes
-}: NSEItemMenuProps) {
+}: ItemMenuProps) {
   const provider = useNSEOverlayProvider();
   const nearestResponderId = useContext(NSEActionResponderContext);
   const generatedId = useId().replace(/:/g, "");
@@ -690,7 +690,7 @@ function NSEItemMenu({
     },
   ), [localMenu.records, resolvedParentResponderId, runtimeSource, selectionHaptic, triggerNSEControlHaptic]);
   const controller = useMemo(() => createReactOwnedNSEMenu({ ownerSignal: localRuntime.signal, [nseMenuModel]: localMenu.model, runtime: localRuntime }), [localMenu.model, localRuntime]);
-  useNSEMenuLifetime(controller);
+  useMenuLifetime(controller);
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
   const [keyboardInitialFocus, setKeyboardInitialFocus] = useState<"first" | "last" | null>(null);
   const isOpen = open ?? uncontrolledOpen;
@@ -743,7 +743,7 @@ function NSEItemMenu({
           }
         }}
       />
-      <NSEMenuOverlay
+      <MenuOverlay
         overlay={resolvedOverlay}
         controller={controller}
         open={isOpen}
@@ -751,7 +751,7 @@ function NSEItemMenu({
         labelledBy={triggerId}
         onOpenChange={(nextOpen) => requestOpen(nextOpen)}
       >
-        <NSECommandMenuSurface
+        <CommandMenuSurface
           model={localMenu.model}
           controller={controller}
           open={isOpen}
@@ -760,7 +760,7 @@ function NSEItemMenu({
           initialFocus={keyboardInitialFocus ?? initialFocus}
           submenuDelayMs={submenuDelayMs}
         />
-      </NSEMenuOverlay>
+      </MenuOverlay>
     </span>
   );
 }
@@ -778,7 +778,7 @@ function ariaKeyShortcuts(binding: ResolvedKeyBinding | undefined): string | und
 }
 
 /** @internal The menu surface drawn by pop-up buttons, view menus and the menu bar. */
-export function NSEMenuView(props: NSEMenuProps) {
-  if ("model" in props) return <NSECommandMenuSurface {...props} />;
-  return <NSEItemMenu {...props} />;
+export function MenuView(props: NSEMenuProps) {
+  if ("model" in props) return <CommandMenuSurface {...props} />;
+  return <ItemMenu {...props} />;
 }

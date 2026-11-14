@@ -27,8 +27,8 @@ import {
   ChromeSurface,
   type ChromeVisualState,
 } from "../Appearance/chromePrimitives";
-import { NSEMenu, NSEMenuView, nseMenuModel, type NSEMenuEntry, type NSEMenuModel } from "../Menus";
-import { NSEMenuOverlay } from "../Menus/NSEMenuOverlay";
+import { NSEMenu, MenuView, nseMenuModel, type MenuEntry, type MenuModel } from "../Menus";
+import { MenuOverlay } from "../Menus/MenuOverlay";
 import { useOptionalOverlayProvider } from "../Overlays";
 import type { NSEToolbarController } from "./NSEToolbarController";
 import type { NSEToolbarLayoutEntry } from "./toolbarTypes";
@@ -45,8 +45,8 @@ export interface NSEToolbarOverflowMenuProps {
   onFocus?(): void;
 }
 
-function modelFor(controller: NSEToolbarController, entries: readonly NSEToolbarLayoutEntry[]): NSEMenuModel {
-  const menuEntries: NSEMenuEntry[] = [];
+function modelFor(controller: NSEToolbarController, entries: readonly NSEToolbarLayoutEntry[]): MenuModel {
+  const menuEntries: MenuEntry[] = [];
   for (const entry of entries) {
     const item = entry.item;
     if (item.kind === "command") {
@@ -172,7 +172,7 @@ export function NSEToolbarOverflowMenu({
         <span aria-hidden="true" data-nse-part="overflow-glyph" />
       </button>
       {menuController ? (
-        <NSEMenuOverlay
+        <MenuOverlay
           overlay={{ id: overlayId, parentResponderId, parentScopeId }}
           controller={menuController}
           open={open}
@@ -180,8 +180,8 @@ export function NSEToolbarOverflowMenu({
           labelledBy={undefined}
           onOpenChange={requestOpen}
         >
-          <NSEMenuView model={model} controller={menuController} open={open} onOpenChange={requestOpen} />
-        </NSEMenuOverlay>
+          <MenuView model={model} controller={menuController} open={open} onOpenChange={requestOpen} />
+        </MenuOverlay>
       ) : null}
     </span>
   );

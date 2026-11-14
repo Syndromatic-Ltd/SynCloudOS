@@ -26,7 +26,7 @@ import { nseMenuModel } from "../../src/NSE/Menus/menuTypes";
 import { act, cleanup, render, waitFor } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 
-import { NSEMenuView, NSEMenu, NSEMenuOverlay, type NSEMenuModel, type NSEMenuRuntimePort } from "../../src/NSE/Menus";
+import { MenuView, NSEMenu, MenuOverlay, type MenuModel, type NSEMenuRuntimePort } from "../../src/NSE/Menus";
 import { OverlayProvider, createOverlayManager, type OverlayRuntimePort } from "../../src/NSE/Overlays";
 import budgets from "../fixtures/conformance-performance-budgets.json";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
@@ -35,7 +35,7 @@ import { runStructuralScenario } from "./structural-performance-scenario";
 afterEach(cleanup);
 
 const scenarioId = "overlays.menu-open-painted";
-const menuModel: NSEMenuModel = Object.freeze({
+const menuModel: MenuModel = Object.freeze({
   id: "performance-menu",
   label: "Performance menu",
   entries: Object.freeze([
@@ -109,15 +109,15 @@ function CycleFixture({
   return (
     <OverlayProvider manager={manager} runtimePort={runtimePort}>
       <button ref={setAnchor} type="button">Performance menu trigger</button>
-      <NSEMenuOverlay
+      <MenuOverlay
         overlay={{ id: "performance-menu-overlay", parentResponderId: "application:performance" }}
         controller={controller}
         open={open}
         anchor={anchor}
         onOpenChange={() => undefined}
       >
-        <NSEMenuView model={menuModel} controller={controller} open={open} onOpenChange={() => undefined} />
-      </NSEMenuOverlay>
+        <MenuView model={menuModel} controller={controller} open={open} onOpenChange={() => undefined} />
+      </MenuOverlay>
     </OverlayProvider>
   );
 }

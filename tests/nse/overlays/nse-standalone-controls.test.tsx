@@ -24,7 +24,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testi
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEStandaloneControlHost, NSEPopup, NSEListboxPopup, createStandaloneNSEControlRuntime } from "../../../src/NSE/Overlays";
 import { OverlayProvider, useNSEOverlayProvider, type OverlayProviderContextValue } from "../../../src/NSE/Overlays/OverlayProvider";
-import { NSEMenuView, NSEPopUpButton } from "../../../src/NSE/Menus";
+import { MenuView, NSEPopUpButton } from "../../../src/NSE/Menus";
 import { NSEFeedbackProvider } from "../../../src/NSE/Feedback";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
 import { installNSEScrollIntoViewFixture } from "../fixtures/browser";
@@ -163,7 +163,7 @@ describe("standalone NSE host lifetime", () => {
 describe("standalone picker and menu keyboard contracts", () => {
   it("retains an open menu branch and focus across an unrelated parent render", async () => {
     const items = [{ value: "file", label: "File", children: [{ value: "save", label: "Save document" }] }];
-    const fixture = (revision: number) => <Host><output>{revision}</output><NSEMenuView label="Document actions" items={items} /></Host>;
+    const fixture = (revision: number) => <Host><output>{revision}</output><MenuView label="Document actions" items={items} /></Host>;
     const view = render(fixture(1));
     fireEvent.click(screen.getByRole("button", { name: "Document actions" }));
     fireEvent.click(await screen.findByRole("menuitem", { name: "File" }));
@@ -176,7 +176,7 @@ describe("standalone picker and menu keyboard contracts", () => {
   });
 
   it("draws a tool menu's text label as the trigger's title, not as an image", () => {
-    render(<Host><NSEMenuView label="Presets" trigger="tool" controlSize="small" triggerLabel="Coil presets" items={[{ value: "all", label: "All" }]} /></Host>);
+    render(<Host><MenuView label="Presets" trigger="tool" controlSize="small" triggerLabel="Coil presets" items={[{ value: "all", label: "All" }]} /></Host>);
     const trigger = screen.getByRole("button", { name: "Coil presets" });
     expect(trigger.querySelector("img")).toBeNull();
     expect(trigger.textContent).toContain("Presets");
@@ -189,7 +189,7 @@ describe("standalone picker and menu keyboard contracts", () => {
     const fixture = (revision: number) => (
       <Host>
         <output>{revision}</output>
-        <NSEMenuView label={<Glyph />} trigger="tool" triggerLabel="Font actions" items={[
+        <MenuView label={<Glyph />} trigger="tool" triggerLabel="Font actions" items={[
           { value: "favourite", label: "Add to Favourites" },
           { value: "divider", label: "", separator: true },
           { value: "ruler", label: "Show Ruler" },
@@ -227,7 +227,7 @@ describe("standalone picker and menu keyboard contracts", () => {
         </>
       );
     }
-    render(<Host><ClippedSurface><NSEMenuView label="Actions" items={[{ value: "one", label: "One" }]} /></ClippedSurface></Host>);
+    render(<Host><ClippedSurface><MenuView label="Actions" items={[{ value: "one", label: "One" }]} /></ClippedSurface></Host>);
     const trigger = screen.getByRole("button", { name: "Actions" });
     fireEvent.click(trigger);
     const menu = await screen.findByRole("menu");
@@ -245,7 +245,7 @@ describe("standalone picker and menu keyboard contracts", () => {
     const trigger = vi.fn(async () => {});
     const engine = { trigger } as NonNullable<React.ComponentProps<typeof NSEFeedbackProvider>["value"]>;
     render(<NSEFeedbackProvider value={engine}><Host>
-      <NSEMenuView label="Feedback actions" items={[{ value: "save", label: "Save document" }]} />
+      <MenuView label="Feedback actions" items={[{ value: "save", label: "Save document" }]} />
       <NSEPopUpButton label="Feedback format" items={[{ value: "plain", title: "Plain" }, { value: "rich", title: "Rich" }]} />
     </Host></NSEFeedbackProvider>);
     fireEvent.click(screen.getByRole("button", { name: "Feedback actions" }));
@@ -287,7 +287,7 @@ describe("standalone picker and menu keyboard contracts", () => {
   });
 
   it("opens an item menu with ArrowDown and skips disabled entries", async () => {
-    render(<Host><NSEMenuView label="Actions" items={[{ value: "first", label: "First" }, { value: "off", label: "Disabled", disabled: true }, { value: "last", label: "Last" }]} /></Host>);
+    render(<Host><MenuView label="Actions" items={[{ value: "first", label: "First" }, { value: "off", label: "Disabled", disabled: true }, { value: "last", label: "Last" }]} /></Host>);
     fireEvent.keyDown(screen.getByRole("button", { name: "Actions" }), { key: "ArrowDown" });
     const first = await screen.findByRole("menuitem", { name: "First" });
     await waitFor(() => expect(document.activeElement).toBe(first));
