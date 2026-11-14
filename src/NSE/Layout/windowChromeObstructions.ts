@@ -2,7 +2,7 @@
 import { createContext, useContext, useLayoutEffect, useSyncExternalStore, type CSSProperties, type RefObject } from "react";
 import { NSEEdgeInsetsMake, NSEEdgeInsetsZero, type NSEEdgeInsets } from "./NSEEdgeInsets";
 import { NSELayoutGuideStore, nseEmptyLayoutRect, nseEqualRects } from "./NSELayoutGuide";
-import { physicalSafeAreaInsets, resolveSafeAreaInsets, type NSEChromeObstruction } from "./safeAreaModel";
+import { physicalSafeAreaInsets, resolveSafeAreaInsets, type ChromeObstruction } from "./safeAreaModel";
 import type { NSEScrollRect } from "../Scroll/scrollTypes";
 
 interface LayoutSnapshot {
@@ -26,7 +26,7 @@ export class NSEWindowLayoutModel extends NSELayoutGuideStore {
   #observer: ResizeObserver | null = null;
   #root: HTMLElement | null = null;
   readonly #leadingChrome = new Set<symbol>();
-  readonly #chrome = new Map<symbol, NSEChromeObstruction>();
+  readonly #chrome = new Map<symbol, ChromeObstruction>();
   readonly #listeners = new Set<() => void>();
   readonly #measurements = new Map<HTMLElement, Set<(rect: NSEScrollRect) => void>>();
   readonly #requestFrame: (callback: FrameRequestCallback) => number;
@@ -57,13 +57,13 @@ export class NSEWindowLayoutModel extends NSELayoutGuideStore {
     this.#logicalScreen = insets;
     this.setScreenInsets(physicalSafeAreaInsets(insets, this.#direction));
   }
-  registerChrome(obstruction: NSEChromeObstruction): () => void {
+  registerChrome(obstruction: ChromeObstruction): () => void {
     resolveSafeAreaInsets({ bounds: this.#bounds, screen: NSEEdgeInsetsZero, additional: NSEEdgeInsetsZero, chrome: [obstruction] });
     const token = Symbol("window-chrome");
     this.#chrome.set(token, Object.freeze({ ...obstruction })); this.#schedule();
     return () => { if (this.#chrome.delete(token)) this.#schedule(); };
   }
-  observeChrome(element: HTMLElement, edge: NSEChromeObstruction["edge"] | "leading", translucent: boolean): () => void {
+  observeChrome(element: HTMLElement, edge: ChromeObstruction["edge"] | "leading", translucent: boolean): () => void {
     const token = Symbol("measured-window-chrome");
     if (edge === "leading") this.#leadingChrome.add(token);
     const stop = this.observeElement(element, rect => {
@@ -154,11 +154,11 @@ export function useNSEContentLayoutProperties(model?: NSEWindowLayoutModel | nul
   const { insets } = useNSEWindowLayoutSnapshot(model);
   return { "--nse-content-layout-inset-top": `${insets.top}px`, "--nse-content-layout-inset-left": `${insets.left}px`, "--nse-content-layout-inset-bottom": `${insets.bottom}px`, "--nse-content-layout-inset-right": `${insets.right}px` } as CSSProperties;
 }
-export function useNSEWindowChromeObstruction(edge: NSEChromeObstruction["edge"], thickness: number, translucent: boolean): void {
+export function useNSEWindowChromeObstruction(edge: ChromeObstruction["edge"], thickness: number, translucent: boolean): void {
   const model = useContext(NSEWindowLayoutContext);
   useLayoutEffect(() => model?.registerChrome({ edge, thickness, translucent }), [model, edge, thickness, translucent]);
 }
-export function useNSEWindowChromeElement(ref: RefObject<HTMLElement | null>, edge: NSEChromeObstruction["edge"] | "leading", translucent: boolean, enabled = true): void {
+export function useNSEWindowChromeElement(ref: RefObject<HTMLElement | null>, edge: ChromeObstruction["edge"] | "leading", translucent: boolean, enabled = true): void {
   const model = useContext(NSEWindowLayoutContext);
   useLayoutEffect(() => model && enabled && ref.current ? model.observeChrome(ref.current, edge, translucent) : undefined, [model, ref, edge, translucent, enabled]);
 }

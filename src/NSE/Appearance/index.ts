@@ -37,17 +37,17 @@ export type {
   NSETransparency,
 } from "./nseAppearanceTypes";
 export {
-  NSEChromePrimitive,
-  NSEChromeSurface,
-  NSEChromeBevel,
-  NSEChromeCap,
-  NSEChromeSplice,
-  NSEChromeSeparator,
-  NSEChromeGloss,
-  NSEChromeInnerShadow,
-  type NSEChromePrimitiveKind,
-  type NSEChromePrimitiveProps,
-  type NSEChromeVisualState,
-} from "./NSEChromePrimitives";
+  ChromePrimitive,
+  ChromeSurface,
+  ChromeBevel,
+  ChromeCap,
+  ChromeSplice,
+  ChromeSeparator,
+  ChromeGloss,
+  ChromeInnerShadow,
+  type ChromePrimitiveKind,
+  type ChromePrimitiveProps,
+  type ChromeVisualState,
+} from "./chromePrimitives";
 
 export type { NSETheme, NSEThemeNavigation, NSEThemePresentation, NSEThemeImage } from "../Theme/NSETheme";

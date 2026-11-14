@@ -107,7 +107,7 @@ Classes: **a** is a static rule (named below); **b** is an implemented framework
 | View-menu actions, second bullet: route from first responder | c | Verify menu/toolbar routing against actual focused content; static idiom checks do not assert complete routing parity. |
 | Click-to-rename, first bullet: standard title is text | c | Document-title interaction is a framework feature decision; absent click handlers are not inherently wrong. |
 | Click-to-rename, second bullet: title menu / NSDocument proposal | c | Needs a document-title API and interaction acceptance; no invented API is recommended. |
-| `NSETopBar` drops data attributes | c | Internal component DOM behaviour requires a focused component regression; it is no longer public app chrome. |
+| `TopBar` drops data attributes | c | Internal component DOM behaviour requires a focused component regression; it is no longer public app chrome. |
 | FieldLab design note: off-state toolbar ink | c | Appearance design decision and rendered contrast evidence. |
 | FieldLab design note: compact document title hidden | c | Responsive composition and owner decision. |
 | FieldLab design note: title/edited gap | c | Measured visual spacing, not a semantic source error. |

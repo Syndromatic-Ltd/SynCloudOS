@@ -34,17 +34,17 @@ import {
   type SmoothSurfaceStyle
 } from "../../SmoothSurface";
 import { useNSEFeedback } from "../../Feedback";
-import { NSETopBarButton } from "./NSETopBarButton";
-import { nseTopBarStyles, resolveNSETopBarGlyphStyle } from "./nseTopBarStyles";
-import type { NSETopBarItem, NSETopBarItemPosition, NSETopBarProps } from "./nseTopBarTypes";
+import { TopBarButton } from "./TopBarButton";
+import { nseTopBarStyles, resolveNSETopBarGlyphStyle } from "./topBarStyles";
+import type { TopBarItem, TopBarItemPosition, TopBarProps } from "./topBarTypes";
 
 type CSSVarStyle = CSSProperties & Record<`--${string}`, string>;
 
-function NSETopBarTitle({
+function TopBarTitle({
   title,
   center,
   titleAction
-}: Pick<NSETopBarProps, "title" | "center" | "titleAction">) {
+}: Pick<TopBarProps, "title" | "center" | "titleAction">) {
   const feedback = useNSEFeedback();
 
   if (center) return <>{center}</>;
@@ -76,7 +76,7 @@ function NSETopBarTitle({
 }
 
 /** CSS-drawn metal pill (return / user-info / settings / custom glyph) for the `atmoMetal` chrome. */
-function NSETopBarMetalPill({ item, position }: { item: NSETopBarItem; position: NSETopBarItemPosition }) {
+function TopBarMetalPill({ item, position }: { item: TopBarItem; position: TopBarItemPosition }) {
   const feedback = useNSEFeedback();
 
   const glyphStyle = resolveNSETopBarGlyphStyle(item);
@@ -108,7 +108,7 @@ function NSETopBarMetalPill({ item, position }: { item: NSETopBarItem; position:
   );
 }
 
-function NSETopBarMetal({
+function TopBarMetal({
   title,
   scheme = "light",
   rail,
@@ -123,7 +123,7 @@ function NSETopBarMetal({
   center,
   className = "",
   documentTitlebar = false
-}: NSETopBarProps) {
+}: TopBarProps) {
   const header = useRef<HTMLElement>(null);
   useNSEWindowChromeElement(header, "top", true);
   const railWidth = rail?.width;
@@ -138,12 +138,12 @@ function NSETopBarMetal({
       {leading !== undefined || leadingItems.length || leadingAccessory || leadingTitle ? (
         <div data-nse-part="leading" className="nse-app-topbar-metal-cluster nse-app-topbar-metal-leading">
           {leading !== undefined ? leadingLabelHelp(leading) : leadingItems.map((item) => (
-            <NSETopBarMetalPill key={`${item.kind}-${item.label}`} item={item} position="left" />
+            <TopBarMetalPill key={`${item.kind}-${item.label}`} item={item} position="left" />
           ))}
           {leadingAccessory}
           {leadingTitle ? (
             <h1 data-nse-part="title" className="nse-app-topbar-metal-title nse-app-topbar-metal-leading-title">
-              <NSETopBarTitle title={title} titleAction={titleAction} />
+              <TopBarTitle title={title} titleAction={titleAction} />
             </h1>
           ) : null}
         </div>
@@ -152,13 +152,13 @@ function NSETopBarMetal({
         center !== undefined ? <div data-nse-part="centre" className="nse-app-topbar-metal-title nse-app-topbar-metal-centre">{center}</div> : null
       ) : (
         <h1 className="nse-app-topbar-metal-title">
-          <NSETopBarTitle title={title} center={center} titleAction={titleAction} />
+          <TopBarTitle title={title} center={center} titleAction={titleAction} />
         </h1>
       )}
       {trailing !== undefined || trailingItems.length || trailingAccessory ? (
         <div data-nse-part="trailing" className="nse-app-topbar-metal-cluster nse-app-topbar-metal-trailing">
           {trailing !== undefined ? trailing : trailingItems.map(item => (
-            <NSETopBarMetalPill key={`${item.kind}-${item.label}`} item={item} position="right" />
+            <TopBarMetalPill key={`${item.kind}-${item.label}`} item={item} position="right" />
           ))}
           {trailingAccessory}
         </div>
@@ -183,7 +183,7 @@ function NSETopBarMetal({
           <span className="nse-app-topbar-metal-grain" aria-hidden="true" />
           <div className="nse-app-topbar-metal-rail-content">
             {rail.titleAction ? (
-              <NSETopBarTitle title={typeof rail.content === "string" ? rail.content : ""} titleAction={rail.titleAction} />
+              <TopBarTitle title={typeof rail.content === "string" ? rail.content : ""} titleAction={rail.titleAction} />
             ) : (
               rail.content
             )}
@@ -195,15 +195,15 @@ function NSETopBarMetal({
   );
 }
 
-export function NSETopBar(props: NSETopBarProps) {
+export function TopBar(props: TopBarProps) {
   if (props.variant === "atmoMetal") {
-    return <NSETopBarMetal {...props} />;
+    return <TopBarMetal {...props} />;
   }
 
-  return <NSETopBarCumulus {...props} />;
+  return <TopBarCumulus {...props} />;
 }
 
-function NSETopBarCumulus(props: NSETopBarProps) {
+function TopBarCumulus(props: TopBarProps) {
   const header = useRef<HTMLElement>(null);
   useNSEWindowChromeElement(header, "top", true);
   const {
@@ -235,16 +235,16 @@ function NSETopBarCumulus(props: NSETopBarProps) {
       <div data-nse-part="content" className="nse-app-topbar-content">
         <div data-nse-part="leading" className="nse-app-topbar-slot nse-app-topbar-slot-left">
           {leading !== undefined ? leadingLabelHelp(leading) : leadingItems.map((item) => (
-            <NSETopBarButton key={`${item.kind}-${item.label}`} item={item} position="left" styleDefinition={styleDefinition} />
+            <TopBarButton key={`${item.kind}-${item.label}`} item={item} position="left" styleDefinition={styleDefinition} />
           ))}
           {leadingAccessory}
         </div>
         <h1 data-nse-part="title" className="nse-app-topbar-title">
-          <NSETopBarTitle title={title} center={center} titleAction={titleAction} />
+          <TopBarTitle title={title} center={center} titleAction={titleAction} />
         </h1>
         <div data-nse-part="trailing" className="nse-app-topbar-slot nse-app-topbar-slot-right">
           {trailing !== undefined ? trailing : trailingItems.map((item) => (
-            <NSETopBarButton key={`${item.kind}-${item.label}`} item={item} position="right" styleDefinition={styleDefinition} />
+            <TopBarButton key={`${item.kind}-${item.label}`} item={item} position="right" styleDefinition={styleDefinition} />
           ))}
           {trailingAccessory}
         </div>

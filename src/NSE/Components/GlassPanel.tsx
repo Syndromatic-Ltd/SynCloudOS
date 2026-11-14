@@ -25,7 +25,7 @@ import {
   type SmoothSurfaceStyle
 } from "../SmoothSurface";
 
-export function NSEGlassPanel({
+export function GlassPanel({
   children,
   smoothSurface = false,
   className = "",

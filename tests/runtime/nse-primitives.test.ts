@@ -23,9 +23,9 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { NSEMenuView } from "../../src/NSE/Menus";
 import { NSESwitch, NSEButton, NSEBox, NSEPopUpButton, NSESegmentedControl, useNSEControlFeedback } from "../../src/NSE/public/controls";
-import { NSETopBar } from "../../src/NSE/Windows/Chrome";
+import { TopBar } from "../../src/NSE/Windows/Chrome";
 import { GroupedRow } from "../../src/NSE/Controls/Selection/GroupedRow";
-import { NSEGlassPanel } from "../../src/NSE/Components/NSEGlassPanel";
+import { GlassPanel } from "../../src/NSE/Components/GlassPanel";
 import { BrowserHapticsAdapter, createHFXVibratePattern, normalizeHFXFeedbackInput } from "../../src/SynCloudOS/PlatformAdapters/BrowserHapticsAdapter";
 import { defaultHFXFeedbackPatterns, HFX_FEEDBACK_PRESET_NAMES } from "../../src/SynCloudOS/HapticsFX/feedbackPatterns";
 import type { HFXFeedbackInput, HFXFeedbackPresetName, HFXFeedbackOptions } from "../../src/SynCloudOS/HapticsFX/feedbackTypes";
@@ -317,7 +317,7 @@ describe("HapticsFX feedback preservation", () => {
           onSelectionChange: vi.fn()
         }),
         createElement(GroupedRow, { role: "button", onClick: vi.fn() }, "List item"),
-        createElement(NSETopBar, {
+        createElement(TopBar, {
           title: "Journal",
           leadingItems: [{ kind: "webspring", label: "Return", onClick: vi.fn() }]
         })
@@ -515,7 +515,7 @@ describe("SmoothSurface", () => {
     expect(groupBoxMarkup).toContain('data-corner-curve="continuous"');
     expect(groupBoxMarkup).toContain("--nse-corner-radius:18px");
 
-    const appTopBarMarkup = renderToStaticMarkup(createElement(NSETopBar, {
+    const appTopBarMarkup = renderToStaticMarkup(createElement(TopBar, {
       title: "Journal",
       smoothSurface: {
         radius: "lg",
@@ -528,7 +528,7 @@ describe("SmoothSurface", () => {
     expect(appTopBarMarkup).toContain("nse-smooth-surface-radius-lg");
     expect(appTopBarMarkup).toContain("--nse-smooth-surface-shadow:0 0 0 1px rgba(255, 255, 255, 0.18)");
 
-    const appTopBarWithTitleActionMarkup = renderToStaticMarkup(createElement(NSETopBar, {
+    const appTopBarWithTitleActionMarkup = renderToStaticMarkup(createElement(TopBar, {
       title: "Journal",
       titleAction: {
         label: "Open QuickSwitch",
@@ -543,7 +543,7 @@ describe("SmoothSurface", () => {
     expect(appTopBarWithTitleActionMarkup).toContain("nse-app-topbar-title-arrow-down");
 
     const glassPanelMarkup = renderToStaticMarkup(createElement(
-      NSEGlassPanel,
+      GlassPanel,
       {
         children: "Panel",
         smoothSurface: {

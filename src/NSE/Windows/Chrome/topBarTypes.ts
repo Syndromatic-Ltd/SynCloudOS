@@ -22,9 +22,9 @@ import type { CSSProperties, ReactNode } from "react";
 import type { HFXFeedbackRequest } from "../../Feedback";
 import type { SmoothSurfaceRequest } from "../../SmoothSurface";
 
-export type NSETopBarVariant = "atmoCumulus" | "atmoMetal";
-export type NSETopBarItemKind = "webspring" | "userInfo" | "settings" | "custom";
-export type NSETopBarItemPosition = "left" | "right";
+export type TopBarVariant = "atmoCumulus" | "atmoMetal";
+export type TopBarItemKind = "webspring" | "userInfo" | "settings" | "custom";
+export type TopBarItemPosition = "left" | "right";
 /** Chrome appearance for the metal variant. Atmo ships both light and dark chrome (Onyx is a
  *  separate theme, not a dark mode), so the metal bar follows the app's light/dark surface. */
 export type NSEChromeScheme = "light" | "dark";
@@ -34,16 +34,16 @@ export type NSEChromeScheme = "light" | "dark";
  * rail segment (sized to the source list) and a main segment that meet at the sidebar seam, exactly
  * like a native source-list window. Omit it for a single, full-width metal bar.
  */
-export interface NSETopBarRail {
+export interface TopBarRail {
   width?: number | string;
   content?: ReactNode;
   /** When set, the rail wordmark renders as the QuickSwitch trigger (disclosure arrow + selected
    *  state), so source-list windows surface app identity as the switch affordance. */
-  titleAction?: NSETopBarTitleAction | null;
+  titleAction?: TopBarTitleAction | null;
 }
 
-export interface NSETopBarItem {
-  kind: NSETopBarItemKind;
+export interface TopBarItem {
+  kind: TopBarItemKind;
   label: string;
   selected?: boolean;
   disabled?: boolean;
@@ -64,7 +64,7 @@ export interface NSETopBarItem {
   onElementChange?: (element: HTMLButtonElement | null) => void;
 }
 
-export interface NSETopBarTitleAction {
+export interface TopBarTitleAction {
   label: string;
   selected?: boolean;
   disabled?: boolean;
@@ -72,15 +72,15 @@ export interface NSETopBarTitleAction {
   onClick: () => void;
 }
 
-export interface NSETopBarProps {
+export interface TopBarProps {
   title: string;
-  variant?: NSETopBarVariant;
+  variant?: TopBarVariant;
   /** Chrome light/dark surface for the `atmoMetal` variant. Ignored by `atmoCumulus`. */
   scheme?: NSEChromeScheme;
   /** Sidebar-aligned rail cell for the `atmoMetal` variant (source-list windows). */
-  rail?: NSETopBarRail;
-  leadingItems?: NSETopBarItem[];
-  trailingItems?: NSETopBarItem[];
+  rail?: TopBarRail;
+  leadingItems?: TopBarItem[];
+  trailingItems?: TopBarItem[];
   /** Replaces mapped leading items when supplied, including when explicitly null. */
   leading?: ReactNode;
   /** @internal Window-owned views beside the host’s leading controls. */
@@ -89,7 +89,7 @@ export interface NSETopBarProps {
   trailing?: ReactNode;
   /** @internal Window-owned views beside the host’s trailing controls. */
   trailingAccessory?: ReactNode;
-  titleAction?: NSETopBarTitleAction | null;
+  titleAction?: TopBarTitleAction | null;
   /** Metal variant: `"leading"` sets the app title (and its title action) straight after the
    *  leading items, as a document window does, leaving the middle for `center`. In dark chrome
    *  the leading title glows. Defaults to `"centre"`. */
@@ -102,7 +102,7 @@ export interface NSETopBarProps {
   style?: CSSProperties;
 }
 
-export interface NSETopBarStyleDefinition {
+export interface TopBarStyleDefinition {
   /** Built-in glyph URL per item kind (single-shape SVGs used as CSS masks). */
-  icons: Partial<Record<NSETopBarItemKind, string>>;
+  icons: Partial<Record<TopBarItemKind, string>>;
 }

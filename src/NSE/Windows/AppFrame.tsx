@@ -24,17 +24,17 @@ function classes(...values: Array<string | false | null | undefined>) {
   return values.filter(Boolean).join(" ");
 }
 
-export type NSEAppFrameVariant = "standard" | "sourceList" | "document" | "canvas";
+export type AppFrameVariant = "standard" | "sourceList" | "document" | "canvas";
 
-export interface NSEAppFrameProps extends HTMLAttributes<HTMLElement> {
-  variant?: NSEAppFrameVariant;
+export interface AppFrameProps extends HTMLAttributes<HTMLElement> {
+  variant?: AppFrameVariant;
   topBar?: ReactNode;
   sidebar?: ReactNode;
   statusBar?: ReactNode;
   children: ReactNode;
 }
 
-export function NSEAppFrame({
+export function AppFrame({
   variant = "standard",
   topBar,
   sidebar,
@@ -42,7 +42,7 @@ export function NSEAppFrame({
   children,
   className = "",
   ...props
-}: NSEAppFrameProps) {
+}: AppFrameProps) {
   return (
     <main className={classes("nse-app-frame", className)} data-variant={variant} {...props}>
       {topBar ? <div className="nse-app-frame-topbar">{topBar}</div> : null}

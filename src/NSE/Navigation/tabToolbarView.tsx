@@ -9,7 +9,7 @@ import { useLayoutEffect, useRef, useSyncExternalStore, type KeyboardEvent } fro
 import { nseSubscribeWindowChrome } from "../Application/NSEWindowController";
 import { useObserve } from "../Objects/useObserve";
 import { NSEToolbar, nseRegisterToolbarTabView } from "../Toolbars/NSEToolbar";
-import { NSEChromeBevel, NSEChromeCap, NSEChromeGloss, NSEChromeInnerShadow, NSEChromeSurface } from "../Appearance/NSEChromePrimitives";
+import { ChromeBevel, ChromeCap, ChromeGloss, ChromeInnerShadow, ChromeSurface } from "../Appearance/chromePrimitives";
 import type { NSETabViewController } from "./NSETabViewController";
 import "./tabToolbarView.css";
 
@@ -61,9 +61,9 @@ function TabToolbarView({ controller, toolbar }: { readonly controller: NSETabVi
   };
   return <div className="nse-toolbar nse-tab-toolbar-items" role="toolbar" aria-label={controller.title ?? "Tabs"}
     data-nse-control="toolbar" data-nse-part="background" data-nse-toolbar-size-mode={toolbar.sizeMode} >
-    <NSEChromeSurface  state="normal" />
-    <NSEChromeBevel  state="normal" />
-    <NSEChromeGloss  state="normal" />
+    <ChromeSurface  state="normal" />
+    <ChromeBevel  state="normal" />
+    <ChromeGloss  state="normal" />
     {items.map(item => {
       const active = item === selected;
 
@@ -72,11 +72,11 @@ function TabToolbarView({ controller, toolbar }: { readonly controller: NSETabVi
         ref={element => { if (element) buttons.current.set(item.identifier, element); else buttons.current.delete(item.identifier); }}
         data-nse-control="toolbar-item" data-nse-selected={active ? "" : undefined} data-nse-state={active ? "on" : "off"} data-nse-part="item" data-state={active ? "selected" : "normal"}
          onClick={() => controller.selectTabViewItem(item.identifier)} onKeyDown={event => move(event, item.identifier)}>
-        <NSEChromeSurface  state={active ? "selected" : "normal"} />
-        <NSEChromeBevel  state={active ? "selected" : "normal"} />
-        <NSEChromeCap  state={active ? "selected" : "normal"} />
-        <NSEChromeGloss  state={active ? "selected" : "normal"} />
-        <NSEChromeInnerShadow  state={active ? "selected" : "normal"} />
+        <ChromeSurface  state={active ? "selected" : "normal"} />
+        <ChromeBevel  state={active ? "selected" : "normal"} />
+        <ChromeCap  state={active ? "selected" : "normal"} />
+        <ChromeGloss  state={active ? "selected" : "normal"} />
+        <ChromeInnerShadow  state={active ? "selected" : "normal"} />
         {item.image && toolbar.displayMode !== "labelOnly" ? <span data-nse-part="image" className="nse-toolbar-item-icon" aria-hidden="true">
           {item.image.kind === "vector" ? <img src={item.image.path} alt="" /> : <span data-nse-template-image={item.image.name} />}
         </span> : null}

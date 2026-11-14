@@ -27,7 +27,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { type NSETheme, type NSEContrast } from "@syndromatic/syncloudos/nse";
 import { NSEAppearanceProvider } from "../../../src/NSE/Appearance";
 import { atmoTheme } from "@syndromatic/syncloudos/nse/themes/atmo";
-import { NSEMetalThumb, NSEMaterialLightingProvider } from "../../../src/NSE/Appearance/NSEMetalThumb";
+import { MetalThumb, NSEMaterialLightingProvider } from "../../../src/NSE/Appearance/MetalThumb";
 import { NSEMaterialLighting, staticNSEMaterialLight, type NSEMaterialLight } from "../../../src/NSE/Appearance/NSEMaterialLighting";
 import type { AFXFrameScheduler } from "../../../src/FX/AnimationFX/AFXLayer";
 import type { MFXMotionManager } from "../../../src/FX/MotionFX/MFXMotionManager";
@@ -55,13 +55,13 @@ describe("explicit metal thumbs are independent of theme identity", () => {
   it("uses static material light when the selected theme disables the effect", () => {
     const light = lightingPort();
     const theme = { ...atmoTheme, presentation: { ...atmoTheme.presentation, materialLighting: "off" as const } };
-    const view = render(<NSEAppearanceProvider theme={theme}><NSEMaterialLightingProvider value={light}><NSEMetalThumb /></NSEMaterialLightingProvider></NSEAppearanceProvider>);
+    const view = render(<NSEAppearanceProvider theme={theme}><NSEMaterialLightingProvider value={light}><MetalThumb /></NSEMaterialLightingProvider></NSEAppearanceProvider>);
     expect(light.listeners.size).toBe(0);
     expect(view.container.querySelector(".nse-metal-thumb")?.getAttribute("data-lighting")).toBe("static");
   });
   it.each([undefined, ...themes])("subscribes under $id, including the neutral default", (appearance) => {
     const light = lightingPort();
-    const thumb = <NSEMaterialLightingProvider value={light}><NSEMetalThumb /></NSEMaterialLightingProvider>;
+    const thumb = <NSEMaterialLightingProvider value={light}><MetalThumb /></NSEMaterialLightingProvider>;
     const view = render(appearance ? <NSEAppearanceProvider theme={appearance}>{thumb}</NSEAppearanceProvider> : thumb);
     const element = view.container.querySelector<HTMLElement>(".nse-metal-thumb")!;
     expect(light.listeners.size).toBe(1);
@@ -78,7 +78,7 @@ describe("explicit metal thumbs are independent of theme identity", () => {
     const light = lightingPort();
     const fixture = (appearance: NSETheme, disabled = false, contrast: NSEContrast = "normal") =>
       <NSEAppearanceProvider theme={appearance} contrast={contrast}>
-        <NSEMaterialLightingProvider value={light}><NSEMetalThumb disabled={disabled} /></NSEMaterialLightingProvider>
+        <NSEMaterialLightingProvider value={light}><MetalThumb disabled={disabled} /></NSEMaterialLightingProvider>
       </NSEAppearanceProvider>;
     const view = render(fixture(atmoTheme));
     const element = view.container.querySelector(".nse-metal-thumb");
@@ -107,7 +107,7 @@ describe("explicit metal thumbs are independent of theme identity", () => {
     style.textContent = css.split("\n").filter((line) => line.startsWith(":where(")).join("\n");
     document.head.append(style);
     try {
-      const view = render(<NSEAppearanceProvider theme={appearance}><NSEMetalThumb /></NSEAppearanceProvider>);
+      const view = render(<NSEAppearanceProvider theme={appearance}><MetalThumb /></NSEAppearanceProvider>);
       expect(getComputedStyle(view.container.querySelector(".nse-metal-thumb")!).display).not.toBe("none");
     } finally { style.remove(); }
   });
@@ -128,7 +128,7 @@ describe("explicit metal thumbs are independent of theme identity", () => {
     };
     const store = new NSEMaterialLighting(create, scheduler);
     const view = render(<NSEAppearanceProvider theme={custom}>
-      <NSEMaterialLightingProvider value={store}><NSEMetalThumb /></NSEMaterialLightingProvider>
+      <NSEMaterialLightingProvider value={store}><MetalThumb /></NSEMaterialLightingProvider>
     </NSEAppearanceProvider>);
     expect(states.size).toBe(1);
     expect(create).not.toHaveBeenCalled();

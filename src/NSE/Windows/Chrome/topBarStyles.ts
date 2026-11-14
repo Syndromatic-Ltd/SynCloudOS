@@ -19,11 +19,11 @@
  */
 
 import type { CSSProperties } from "react";
-import type { NSETopBarItem, NSETopBarStyleDefinition, NSETopBarVariant } from "./nseTopBarTypes";
+import type { TopBarItem, TopBarStyleDefinition, TopBarVariant } from "./topBarTypes";
 
-import { nseTopBarGlyphs } from "./nseTopBarAssets";
+import { nseTopBarGlyphs } from "./topBarAssets";
 
-const cumulus: NSETopBarStyleDefinition = {
+const cumulus: TopBarStyleDefinition = {
   icons: nseTopBarGlyphs
 };
 
@@ -34,14 +34,14 @@ const cumulus: NSETopBarStyleDefinition = {
  */
 export const nseTopBarStyles = {
   atmoCumulus: cumulus
-} satisfies Record<"atmoCumulus", NSETopBarStyleDefinition>;
+} satisfies Record<"atmoCumulus", TopBarStyleDefinition>;
 
 /**
  * A chrome variant's rendered height, as the CSS value to reserve above app content: the exact
  * expression the bar itself uses, so the bar and the content below it can never disagree —
  * including a host override of `--nse-topbar-height` and the compact breakpoint.
  */
-export function nseTopBarHeightCssValue(variant: NSETopBarVariant): string {
+export function nseTopBarHeightCssValue(variant: TopBarVariant): string {
   const token = variant === "atmoMetal" ? "--nse-topbar-height-metal" : "--nse-topbar-height-cumulus";
   return `var(--nse-topbar-height, var(${token}))`;
 }
@@ -52,8 +52,8 @@ export function nseTopBarHeightCssValue(variant: NSETopBarVariant): string {
  * item with no icon), so the caller renders no glyph rather than an unmasked block.
  */
 export function resolveNSETopBarGlyphStyle(
-  item: Pick<NSETopBarItem, "kind" | "icon">,
-  icons: NSETopBarStyleDefinition["icons"] = nseTopBarGlyphs
+  item: Pick<TopBarItem, "kind" | "icon">,
+  icons: TopBarStyleDefinition["icons"] = nseTopBarGlyphs
 ): CSSProperties | undefined {
   const url = item.icon ?? (item.kind === "custom" ? undefined : icons[item.kind]);
   return url ? ({ "--nse-topbar-glyph": `url(${JSON.stringify(url)})` } as CSSProperties) : undefined;

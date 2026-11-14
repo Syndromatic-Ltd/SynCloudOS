@@ -20,7 +20,7 @@
 
 /** Supported SynWare SDK NSE controls surface. Host machinery stays private. */
 export type { NSEControlValidation, NSEControlInteractionPhase, NSEControlValueProps } from "../Controls/Core/controlTypes";
-export type { NSEThumbMaterial } from "../Appearance/NSEMetalThumb";
+export type { NSEThumbMaterial } from "../Appearance/MetalThumb";
 
 export {
   NSEDrawer,
@@ -40,7 +40,7 @@ export type { NSEMetalSurfaceProps } from "../Material";
 
 export { NSESplitView } from "../DataViews/Split/NSESplitView";
 export type { NSESplitViewProps } from "../DataViews/Split/NSESplitView";
-// NSETopBar is the host's drawing of a window's title bar (NSWindow.title, its toolbar and
+// TopBar is the host's drawing of a window's title bar (NSWindow.title, its toolbar and
 // titlebar accessories); it is internal, not an app control.
 export type { NSEChromeScheme } from "../Windows/Chrome";
 

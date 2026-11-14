@@ -22,7 +22,7 @@ import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
 
 import { nseControlHooks, nseMinimumControlProperties } from "../../Theme/contract/hooks";
 import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction";
-import { NSEMetalThumb } from "../../Appearance/NSEMetalThumb";
+import { MetalThumb } from "../../Appearance/MetalThumb";
 import { cloneElement, useEffect, useRef, useState, type CSSProperties, type InputHTMLAttributes, type ReactElement, type ReactNode } from "react";
 import { useNSEFeedback } from "../../Feedback";
 import { useNSETooltip, useOptionalTooltipProvider } from "../../Tooltips";
@@ -190,7 +190,7 @@ function NSESliderControl({ __nseBindingEditor, sliderType: _sliderType, valueTe
     <label className={["nse-control-slider", className].filter(Boolean).join(" ")} data-nse-part="content" {...theme.events} {...nseControlHooks({ control: "slider", tracking: dragging, enabled: isEnabled, highlighted: dragging, hovered: theme.hovered, focused: theme.focused, variants: { "slider-type": "linear", "control-size": controlSize, orientation } })} data-orientation={orientation} data-size={controlSize} data-thumb-material={thumbMaterial} data-state={disabled ? "disabled" : readOnly ? "read-only" : "ready"} data-dragging={dragging ? "true" : "false"} style={nseMinimumControlProperties(sliderStyle)}>{label ? <span data-nse-part="title" className="nse-control-slider-label">{label}</span> : null}
     <span data-nse-part="bezel" className="nse-control-slider-control">
       <span data-nse-part="track" className="nse-control-slider-track" aria-hidden="true"><span data-nse-part="fill" className="nse-control-slider-fill" /></span>
-      <span data-nse-part="accessory" className="nse-control-slider-thumb-rail" aria-hidden="true"><span data-nse-part="knob" className="nse-control-slider-thumb-visual">{thumbMaterial === "metal" ? <NSEMetalThumb disabled={disabled} /> : null}</span></span>
+      <span data-nse-part="accessory" className="nse-control-slider-thumb-rail" aria-hidden="true"><span data-nse-part="knob" className="nse-control-slider-thumb-visual">{thumbMaterial === "metal" ? <MetalThumb disabled={disabled} /> : null}</span></span>
       {tooltip === undefined || !tooltips ? sliderInput : <SliderTooltipAnchor input={sliderInput} content={typeof tooltip === "function" ? tooltip(resolvedValue) : tooltip} />}
     </span>
     {ticks?.map((tick) => <i aria-hidden="true" data-nse-part="tick" key={tick} data-value={tick} />)}

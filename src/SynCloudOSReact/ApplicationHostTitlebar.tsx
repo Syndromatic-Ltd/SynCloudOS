@@ -19,7 +19,7 @@
  */
 
 import { useMemo, useState, type ReactNode } from "react";
-import { NSETopBar } from "../NSE/hostComposition";
+import { TopBar } from "../NSE/hostComposition";
 import { NSEWindowTitlebarHostContext, type NSEWindowTitlebarDocument, type NSEWindowTitlebarHost } from "../NSE/hostComposition";
 import { useApplicationMenuSnapshot, type ApplicationMenuStore } from "./ApplicationMenuTrigger";
 
@@ -71,7 +71,7 @@ export function ApplicationHostTitlebar({ title, iconSrc, material, scheme, menu
 function HostTopBar({ title, iconSrc, material, scheme, menuStore, menuLabel, center }: Omit<ApplicationHostTitlebarProps, "children"> & { readonly center: ReactNode }) {
   const snapshot = useApplicationMenuSnapshot(menuStore);
   return (
-    <NSETopBar
+    <TopBar
       title={title}
       titlePlacement="leading"
       className="nse-document-titlebar"

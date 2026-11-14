@@ -22,14 +22,14 @@
 import React from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { NSETopBar } from "../../src/NSE/Windows/Chrome/NSETopBar";
+import { TopBar } from "../../src/NSE/Windows/Chrome/TopBar";
 
 afterEach(cleanup);
 
 describe("NSETopBar document window placement", () => {
   it("sets the app title beside the return control and the document in the middle", () => {
     const toggle = vi.fn();
-    const { container } = render(<NSETopBar
+    const { container } = render(<TopBar
       variant="atmoMetal" scheme="dark" title="Publisher" titlePlacement="leading"
       titleAction={{ label: "Switch apps", onClick: toggle }}
       leadingItems={[{ kind: "webspring", label: "Return to Webspring" }]}
@@ -47,13 +47,13 @@ describe("NSETopBar document window placement", () => {
   });
 
   it("keeps the centred title by default", () => {
-    const { container } = render(<NSETopBar variant="atmoMetal" title="Software" />);
+    const { container } = render(<TopBar variant="atmoMetal" title="Software" />);
     expect(container.querySelector(".nse-app-topbar-metal-leading-title")).toBeNull();
     expect(container.querySelector("h1.nse-app-topbar-metal-title")?.textContent).toBe("Software");
   });
 
   it("draws a settings item on the Cumulus bar from its own icon", () => {
-    const { container } = render(<NSETopBar title="App" trailingItems={[{ kind: "settings", label: "Settings", icon: "/gear.svg" }]} />);
+    const { container } = render(<TopBar title="App" trailingItems={[{ kind: "settings", label: "Settings", icon: "/gear.svg" }]} />);
     const glyph = container.querySelector<HTMLElement>(".nse-app-topbar-button-icon")!;
     expect(glyph.style.getPropertyValue("--nse-topbar-glyph")).toBe('url("/gear.svg")');
   });

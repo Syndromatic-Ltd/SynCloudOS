@@ -37,7 +37,7 @@
   position: relative;
 }
 
-/* The paint layers are .nse-chrome-primitive (Appearance/NSEChromePrimitives).
+/* The paint layers are .nse-chrome-primitive (Appearance/chromePrimitives).
    These rules named a retired class, so the layers were caught by the
    :not() below, made position: relative, and collapsed to nothing. */
 .nse-toolbar>.nse-chrome-primitive,
