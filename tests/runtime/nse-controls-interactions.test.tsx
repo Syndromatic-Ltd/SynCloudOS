@@ -29,7 +29,7 @@ import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEAppearanceProvider } from "../../src/NSE/Appearance";
 import { atmoTheme } from "../../src/NSE/Appearance/atmo";
-import { NSEMenuView, NSEPopUpButton } from "../../src/NSE/Menus";
+import { MenuView, NSEPopUpButton } from "../../src/NSE/Menus";
 import { NSELevelIndicator, NSEStepper } from "../../src/NSE/Controls/Values";
 import { NSEComboBox } from "../../src/NSE/Controls/Completion";
 import { NSEStandaloneControlHost, NSEPopup } from "../../src/NSE/Overlays";
@@ -113,7 +113,7 @@ describe("NSE menu and picker interactions", () => {
     render(
       <InteractionHost>
         <NSEAppearanceProvider theme={customAppearance}>
-          <NSEMenuView
+          <MenuView
             label="Actions"
             items={[
               { value: "pin", label: "Pin Surface", checked: true },

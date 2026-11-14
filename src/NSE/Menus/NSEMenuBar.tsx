@@ -21,14 +21,14 @@
 import { useContext, useId, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { NSEActionResponderContext } from "../Controls/Core/useNSEControlAction";
 import { useOptionalOverlayProvider } from "../Overlays";
-import { NSEMenuView } from "./NSEMenuView";
+import { MenuView } from "./MenuView";
 import { createReactOwnedNSEMenu, type NSEMenu } from "./NSEMenu";
-import { useNSEMenuLifetime } from "./useNSEMenuLifetime";
+import { useMenuLifetime } from "./useMenuLifetime";
 import { useOptionalNSEMenuRuntimePort } from "./menuRuntimeContext";
-import { NSEMenuOverlay } from "./NSEMenuOverlay";
-import { nseMenuModel, type NSEMenuOverlayOptions } from "./menuTypes";
+import { MenuOverlay } from "./MenuOverlay";
+import { nseMenuModel, type MenuOverlayOptions } from "./menuTypes";
 
-export interface NSEMenuBarOverlayOptions extends Omit<NSEMenuOverlayOptions, "id" | "parentResponderId"> {
+export interface NSEMenuBarOverlayOptions extends Omit<MenuOverlayOptions, "id" | "parentResponderId"> {
   /** Defaults to the nearest responder: in a class application, the view
    * controller whose view renders the menu bar. */
   readonly parentResponderId?: string;
@@ -64,7 +64,7 @@ function useBarMenus(mainMenu: NSEMenu): readonly NSEMenu[] {
         runtime,
       })]
     : []), [mainMenu, runtime]);
-  useNSEMenuLifetime(menus);
+  useMenuLifetime(menus);
   return menus;
 }
 
@@ -125,7 +125,7 @@ export function NSEMenuBar({ menu: mainMenu, overlay, direction = "ltr" }: NSEMe
         const model = item.model;
         const open = openIndex === index;
         const triggerId = `nse-menu-bar-${instanceId}-${index}`;
-        const menu = <NSEMenuView model={model} controller={controller} open={open} labelledBy={triggerId} onOpenChange={() => setOpenIndex(null)} direction={direction} initialFocus={initialFocus} />;
+        const menu = <MenuView model={model} controller={controller} open={open} labelledBy={triggerId} onOpenChange={() => setOpenIndex(null)} direction={direction} initialFocus={initialFocus} />;
         const overlayOptions = {
           ...overlay,
           parentResponderId: overlay?.parentResponderId ?? nearestResponderId ?? provider.defaultParentResponderId ?? "",
@@ -152,7 +152,7 @@ export function NSEMenuBar({ menu: mainMenu, overlay, direction = "ltr" }: NSEMe
             >
               {model.label}
             </button>
-            <NSEMenuOverlay
+            <MenuOverlay
               overlay={overlayOptions}
               controller={controller}
               open={open}
@@ -161,7 +161,7 @@ export function NSEMenuBar({ menu: mainMenu, overlay, direction = "ltr" }: NSEMe
               onOpenChange={(nextOpen) => setOpenIndex(nextOpen ? index : null)}
             >
               {menu}
-            </NSEMenuOverlay>
+            </MenuOverlay>
           </span>
         );
       })}

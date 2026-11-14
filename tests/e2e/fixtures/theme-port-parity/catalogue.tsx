@@ -10,7 +10,7 @@ import { createApplicationMenuStore } from "../../../../src/SynCloudOSReact/Appl
 import { ApplicationHostTitlebar } from "../../../../src/SynCloudOSReact/ApplicationHostTitlebar";
 import { NSEMenu } from "../../../../src/NSE/Menus/NSEMenu";
 import { NSEMenuBar } from "../../../../src/NSE/Menus/NSEMenuBar";
-import { NSEApplicationMenu } from "../../../../src/NSE/Menus/NSEApplicationMenu";
+import { ApplicationMenu } from "../../../../src/NSE/Menus/ApplicationMenu";
 import { NSEPopUpButton } from "../../../../src/NSE/Menus/NSEPopUpButton";
 import { nseUnowned } from "../../../../src/NSE/Controllers/ownership";
 import { NSEDialogSurface } from "../../../../src/NSE/Overlays/NSEDialogSurface";
@@ -64,7 +64,7 @@ function ApplicationMenu({ open }: { open: boolean }) {
   const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null);
   return <SynCloudOSProvider runtime={runtime}>
     <button ref={setAnchor} type="button">Parity</button>
-    <NSEApplicationMenu model={menu.model} controller={menu} overlay={{ id: "parity-app-menu", parentResponderId: "parity", placement: "block-end-inline-end" } as never} open={open && anchor !== null} anchor={anchor} title="Parity" onOpenChange={noop} />
+    <ApplicationMenu model={menu.model} controller={menu} overlay={{ id: "parity-app-menu", parentResponderId: "parity", placement: "block-end-inline-end" } as never} open={open && anchor !== null} anchor={anchor} title="Parity" onOpenChange={noop} />
   </SynCloudOSProvider>;
 }
 function HostTitlebar({ material, scheme }: { material: "metal" | "cumulus"; scheme: "light" | "dark" }) {

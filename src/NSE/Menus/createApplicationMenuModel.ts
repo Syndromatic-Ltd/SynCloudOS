@@ -18,9 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { NSEMenuEntry, NSEMenuModel, NSEMenuSection } from "./menuTypes";
+import type { MenuEntry, MenuModel, MenuSection } from "./menuTypes";
 
-export interface NSEApplicationMenuLabels {
+export interface ApplicationMenuLabels {
   readonly label: string;
   readonly about: string;
   /** The system Preferences entry, which is always present. */
@@ -28,11 +28,11 @@ export interface NSEApplicationMenuLabels {
   readonly logOut: string;
 }
 
-export interface NSEApplicationMenuModelOptions {
+export interface ApplicationMenuModelOptions {
   readonly appId: string;
-  readonly labels: NSEApplicationMenuLabels;
+  readonly labels: ApplicationMenuLabels;
   readonly appPreferences?: Readonly<{ commandId: string; label: string }>;
-  readonly extensions?: readonly NSEMenuSection[];
+  readonly extensions?: readonly MenuSection[];
   /** Whether the menu opens with About {App}. Defaults to `true`. */
   readonly includeAbout?: boolean;
   /** Whether the menu ends with a separator and Log Out. Defaults to `true`. */
@@ -41,10 +41,10 @@ export interface NSEApplicationMenuModelOptions {
   readonly createPayload?: (key: string, value: unknown) => Readonly<Record<string, unknown>>;
 }
 
-export function createNSEApplicationMenuModel({ appId, labels, appPreferences, extensions = [], includeAbout = true, includeLogOut = true, createPayload }: NSEApplicationMenuModelOptions): NSEMenuModel {
+export function createApplicationMenuModel({ appId, labels, appPreferences, extensions = [], includeAbout = true, includeLogOut = true, createPayload }: ApplicationMenuModelOptions): MenuModel {
   if (!appId.trim()) throw new TypeError("NSE application menus require a stable app ID.");
   const aboutPayload = createPayload?.("appId", appId) ?? Object.freeze({ appId });
-  const entries: readonly NSEMenuEntry[] = Object.freeze([
+  const entries: readonly MenuEntry[] = Object.freeze([
     ...(includeAbout ? [Object.freeze({ kind: "command" as const, id: "about", commandId: "application.showAbout", payload: aboutPayload, labelOverride: labels.about })] : []),
     ...(appPreferences ? [Object.freeze({ kind: "command" as const, id: "app-preferences", commandId: appPreferences.commandId, labelOverride: appPreferences.label })] : []),
     Object.freeze({ kind: "command" as const, id: "preferences", commandId: "system.showPreferences", labelOverride: labels.preferences }),

@@ -44,7 +44,7 @@ import type { InspectorRouteInspectionPort } from "../Inspector/inspectorOwnerSo
 import type { AFXFrameScheduler } from "../../FX/AnimationFX/AFXLayer";
 import { createRuntimeAnimationState, createScopedAnimationFrames } from "../AnimationFX/scopedAnimationFrames";
 import { controllerServicesFor, installControllerServices } from "./controllerServices";
-import { NSEMenuRuntimeProvider } from "../../NSE/applicationHostInterop";
+import { MenuRuntimeProvider } from "../../NSE/applicationHostInterop";
 import { NSEViewActivityProvider } from "../../NSE/applicationHostInterop";
 import { NSEPresentedContentProvider } from "../../NSE/applicationHostInterop";
 import { NSEActionScopeProvider } from "../../NSE/applicationHostInterop";
@@ -53,7 +53,7 @@ import { useRuntimeNSEMenuPort } from "../../SynCloudOSReact";
 function PresentedApplicationControls({ children }: { readonly children: ReactNode }) {
   const controls = useRuntimeNSEControlPort();
   const menus = useRuntimeNSEMenuPort();
-  return <NSEControlRuntimeProvider port={controls}><NSEMenuRuntimeProvider port={menus}>{children}</NSEMenuRuntimeProvider></NSEControlRuntimeProvider>;
+  return <NSEControlRuntimeProvider port={controls}><MenuRuntimeProvider port={menus}>{children}</MenuRuntimeProvider></NSEControlRuntimeProvider>;
 }
 
 // Host-only bridge entrypoint. This is deliberately not exported from the
@@ -138,9 +138,9 @@ function MountedAppPresentationBoundary({
     <NSEConformanceEvidenceProvider port={conformanceEvidencePort}>
       <OverlayProvider runtimePort={overlayPort} defaultParentResponderId={`application:${runtime.app.bundleIdentifier}`}>
         <NSEControlRuntimeProvider port={controlPort}>
-          <NSEMenuRuntimeProvider port={menuPort}>
+          <MenuRuntimeProvider port={menuPort}>
             <NSEFocusPortProvider port={focusPort}>{children}</NSEFocusPortProvider>
-          </NSEMenuRuntimeProvider>
+          </MenuRuntimeProvider>
         </NSEControlRuntimeProvider>
       </OverlayProvider>
     </NSEConformanceEvidenceProvider>

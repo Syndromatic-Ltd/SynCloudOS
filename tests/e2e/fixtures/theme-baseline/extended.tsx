@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import * as NSE from "../../../../src/NSE/sdkPackageEntry";
 import { NSEPathControl } from "../../../../src/NSE/Controls/Values/NSEPathControl";
-import { NSEMenuView } from "../../../../src/NSE/Menus/NSEMenuView";
+import { MenuView } from "../../../../src/NSE/Menus/MenuView";
 import { NSEPopup } from "../../../../src/NSE/Overlays/NSEPopup";
 import { NSEPopover } from "../../../../src/NSE/Overlays/NSEPopover";
 import { TabBarController } from "../../../../src/NSE/Navigation/TabBarController";
@@ -78,7 +78,7 @@ export function extendedThemeBaselineCatalogue(): ThemeBaselineSurface[] {
   add("tab-view", () => <NSE.NSETabView aria-label="Documents" items={[{ id: "one", label: "First", render: () => <p>First document</p> }, { id: "two", label: "Second", render: () => <p>Second document</p> }]} />);
   add("tab-bar-more", () => <Tabs orientation="horizontal" />);
   add("tab-bar-rail", () => <Tabs orientation="vertical" />);
-  add("menu", () => <NSEMenuView label="File" items={[{ value: "new", label: "New document" }, { value: "open", label: "Open…" }, { value: "close", label: "Close", disabled: true }]} />, { interaction: "open", fullPage: true });
+  add("menu", () => <MenuView label="File" items={[{ value: "new", label: "New document" }, { value: "open", label: "Open…" }, { value: "close", label: "Close", disabled: true }]} />, { interaction: "open", fullPage: true });
   add("popover", () => <Overlay popover />, { fullPage: true });
   add("sheet", () => <Overlay popover={false} />, { fullPage: true });
   for (const toolbarStyle of ["automatic", "expanded", "preference", "unified", "unifiedCompact"] as const) for (const mode of ["light", "dark"] as const) add(`titlebar-${toolbarStyle}-${mode}`, () => <WindowTitlebarContent title="Documents" subtitle="3 items" toolbarStyle={toolbarStyle} mode={mode} leading={<NSE.NSEButton title="Back" />} trailing={<NSE.NSEButton title="Add" />} />);

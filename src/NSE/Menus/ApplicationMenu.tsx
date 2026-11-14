@@ -19,19 +19,19 @@
  */
 
 import { useCallback } from "react";
-import { NSEAppMenuSurface } from "./NSEAppMenuSurface";
+import { AppMenuSurface } from "./AppMenuSurface";
 import type { OverlayDismissReason } from "../Overlays";
-import { NSEMenuView } from "./NSEMenuView";
+import { MenuView } from "./MenuView";
 import type { NSEMenu } from "./NSEMenu";
-import { NSEMenuOverlay } from "./NSEMenuOverlay";
-import type { NSEMenuModel, NSEMenuOverlayOptions } from "./menuTypes";
+import { MenuOverlay } from "./MenuOverlay";
+import type { MenuModel, MenuOverlayOptions } from "./menuTypes";
 
 const applicationMenuFrameBleed = Object.freeze({ blockStart: 2, inlineEnd: 6 });
 
-export interface NSEApplicationMenuProps {
-  readonly model: NSEMenuModel;
+export interface ApplicationMenuProps {
+  readonly model: MenuModel;
   readonly controller: NSEMenu;
-  readonly overlay: NSEMenuOverlayOptions;
+  readonly overlay: MenuOverlayOptions;
   readonly open: boolean;
   readonly anchor: HTMLElement | null;
   readonly title?: string;
@@ -40,7 +40,7 @@ export interface NSEApplicationMenuProps {
 }
 
 /** Canonical command-backed application menu using the curated vector Atmo surface. */
-export function NSEApplicationMenu({ model, controller, overlay, open, anchor, title, labelledBy, onOpenChange }: NSEApplicationMenuProps) {
+export function ApplicationMenu({ model, controller, overlay, open, anchor, title, labelledBy, onOpenChange }: ApplicationMenuProps) {
   const handleMenuOpenChange = useCallback((nextOpen: boolean, reason?: OverlayDismissReason) => {
     onOpenChange(nextOpen, reason);
     if (!nextOpen) {
@@ -56,7 +56,7 @@ export function NSEApplicationMenu({ model, controller, overlay, open, anchor, t
   }, [anchor, onOpenChange]);
 
   return (
-    <NSEMenuOverlay
+    <MenuOverlay
       overlay={overlay}
       controller={controller}
       open={open}
@@ -71,9 +71,9 @@ export function NSEApplicationMenu({ model, controller, overlay, open, anchor, t
       restoreFocus={false}
       onOpenChange={onOpenChange}
     >
-      <NSEAppMenuSurface className="nse-application-menu" title={title} data-nse-style="application-menu" data-nse-application-menu="true">
-        <NSEMenuView appearance="application-menu" model={model} controller={controller} open={open} onOpenChange={handleMenuOpenChange} />
-      </NSEAppMenuSurface>
-    </NSEMenuOverlay>
+      <AppMenuSurface className="nse-application-menu" title={title} data-nse-style="application-menu" data-nse-application-menu="true">
+        <MenuView appearance="application-menu" model={model} controller={controller} open={open} onOpenChange={handleMenuOpenChange} />
+      </AppMenuSurface>
+    </MenuOverlay>
   );
 }

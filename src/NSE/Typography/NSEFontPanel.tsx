@@ -30,8 +30,8 @@ import { useNSEArrayController } from "../Controllers";
 import { NSETableView, type NSEDataViewAdapter, type NSETableColumn } from "../DataViews";
 import type { NSEFontFamily, NSEFontPreset } from "../Text/fontDescriptors";
 import { useNSEDeferredDisposal, type NSEDisposalScheduler } from "../interactionLifecycle";
-import { NSEMenuView } from "../Menus/NSEMenuView";
-import type { NSEMenuItemDefinition } from "../Menus/menuTypes";
+import { MenuView } from "../Menus/MenuView";
+import type { MenuItemDefinition } from "../Menus/menuTypes";
 import { useNSEOverlayProvider } from "../Overlays/OverlayProvider";
 import { NSEUtilityPanel } from "../Overlays/NSEUtilityPanel";
 import { NSESegmentedControl } from "../Controls/Values/NSESegmentedControl";
@@ -285,9 +285,9 @@ function EffectColourButton({ id, label, glyph, value, automatic, disabled, onPr
  * panel, whose overlay host names it; outside a window host it falls back to
  * the panel's own parent responder.
  */
-function FontActionsMenu({ fallbackParentResponderId, items, onSelect }: { readonly fallbackParentResponderId?: string; readonly items: readonly NSEMenuItemDefinition[]; onSelect(value: string): void }) {
+function FontActionsMenu({ fallbackParentResponderId, items, onSelect }: { readonly fallbackParentResponderId?: string; readonly items: readonly MenuItemDefinition[]; onSelect(value: string): void }) {
   const overlays = useNSEOverlayProvider();
-  return <NSEMenuView label={<GearGlyph />} trigger="tool" triggerLabel="Font actions" controlSize="small" parentResponderId={overlays.defaultParentResponderId ?? fallbackParentResponderId} items={items} data-nse-part="action-menu" onSelect={onSelect} />;
+  return <MenuView label={<GearGlyph />} trigger="tool" triggerLabel="Font actions" controlSize="small" parentResponderId={overlays.defaultParentResponderId ?? fallbackParentResponderId} items={items} data-nse-part="action-menu" onSelect={onSelect} />;
 }
 
 function familyMatchesQuery(family: NSEFontFamily, query: string): boolean {

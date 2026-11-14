@@ -28,8 +28,8 @@ import { nseControlHooks } from "../../Theme/contract/hooks";
 import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction";
 import { useContext, useId, useMemo, useState } from "react";
 import { NSEMenu } from "../../Menus/NSEMenu";
-import { NSEMenuOverlay } from "../../Menus/NSEMenuOverlay";
-import { NSEMenuView } from "../../Menus/NSEMenuView";
+import { MenuOverlay } from "../../Menus/MenuOverlay";
+import { MenuView } from "../../Menus/MenuView";
 import { useOptionalOverlayProvider } from "../../Overlays";
 import { NSEActionResponderContext } from "../Core/useNSEControlAction";
 import { NSEButton } from "../Buttons/NSEButton";
@@ -174,9 +174,9 @@ function NSEMenuSegment({ item, menu, props }: { readonly item: NSESegmentedItem
         onClick={() => setOpen((current) => !current)}
         style={item.width === undefined ? undefined : { boxSizing: "border-box", inlineSize: item.width, minInlineSize: item.width }}
       />
-      <NSEMenuOverlay overlay={{ id: `${baseId}:overlay`, parentResponderId }} controller={menu} open={open} anchor={anchor} labelledBy={`${baseId}-button`} onOpenChange={setOpen}>
-        <NSEMenuView model={menu.model} controller={menu} open={open} labelledBy={`${baseId}-button`} onOpenChange={setOpen} initialFocus="first" />
-      </NSEMenuOverlay>
+      <MenuOverlay overlay={{ id: `${baseId}:overlay`, parentResponderId }} controller={menu} open={open} anchor={anchor} labelledBy={`${baseId}-button`} onOpenChange={setOpen}>
+        <MenuView model={menu.model} controller={menu} open={open} labelledBy={`${baseId}-button`} onOpenChange={setOpen} initialFocus="first" />
+      </MenuOverlay>
     </>
   );
 }

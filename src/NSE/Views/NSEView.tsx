@@ -25,10 +25,10 @@ import { NSEAppearanceProvider, useNSEAppearance } from "../Appearance/NSEAppear
 import type { NSEAppearance } from "../Appearance/NSEAppearance";
 import { useOptionalOverlayProvider } from "../Overlays";
 import { NSEActionResponderContext } from "../Controls/Core/useNSEControlAction";
-import { NSEMenuView } from "../Menus/NSEMenuView";
+import { MenuView } from "../Menus/MenuView";
 import type { NSEMenu } from "../Menus/NSEMenu";
-import { NSEMenuOverlay } from "../Menus/NSEMenuOverlay";
-import type { NSEMenuOverlayOptions } from "../Menus/menuTypes";
+import { MenuOverlay } from "../Menus/MenuOverlay";
+import type { MenuOverlayOptions } from "../Menus/menuTypes";
 import type { OverlayAnchorPoint } from "../Overlays/computeOverlayPosition";
 import { GFXContext } from "../../FX/GraphicsFX/GFXContext";
 import type { GFXRect } from "../../FX/GraphicsFX/GFXGeometry";
@@ -62,7 +62,7 @@ export interface NSEViewProps extends HTMLAttributes<HTMLDivElement>, NSEViewLay
   /** NSView.toolTip. */
   readonly toolTip?: string;
   /** Overlay provenance for the menu, when the nearest responder is not its parent. */
-  readonly menuOverlay?: NSEMenuOverlayOptions;
+  readonly menuOverlay?: MenuOverlayOptions;
   /** How long a touch must rest before the menu opens. */
   readonly longPressDelayMs?: number;
   readonly direction?: "ltr" | "rtl";
@@ -222,7 +222,7 @@ function NSEMenuHostView({ menu, toolTip, menuOverlay, longPressDelayMs, directi
       }}
     >
       {children}
-      <NSEMenuOverlay
+      <MenuOverlay
         overlay={overlay}
         controller={menu}
         open={open}
@@ -232,8 +232,8 @@ function NSEMenuHostView({ menu, toolTip, menuOverlay, longPressDelayMs, directi
         kind="context-menu"
         onOpenChange={(nextOpen) => setOpen(nextOpen)}
       >
-        <NSEMenuView model={menu.model} controller={menu} open={open} labelledBy={viewId} onOpenChange={setOpen} direction={direction} />
-      </NSEMenuOverlay>
+        <MenuView model={menu.model} controller={menu} open={open} labelledBy={viewId} onOpenChange={setOpen} direction={direction} />
+      </MenuOverlay>
     </div>
   );
 }

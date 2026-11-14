@@ -24,21 +24,21 @@ import type { CommandDispatchResult, CommandPresentation, CommandValidationReque
 import { commandValidationRequestKey } from "../../SynCloudOS/nseRuntimeContracts";
 import { nseMenuModel } from "./menuTypes";
 import type {
-  NSECheckedMenuItems,
-  NSEMenuDismissReason,
-  NSEMenuEntry,
-  NSEMenuEntryInput,
-  NSEMenuKeyEquivalent,
-  NSEMenuKeyEquivalentClaim,
-  NSEMenuKeyEquivalentResult,
+  CheckedMenuItems,
+  MenuDismissReason,
+  MenuEntry,
+  MenuEntryInput,
+  MenuKeyEquivalent,
+  MenuKeyEquivalentClaim,
+  MenuKeyEquivalentResult,
   NSEMenuItem,
-  NSEMenuModelOptions,
+  MenuModelOptions,
   NSEMenuOptions,
-  NSEMenuPresentedEntry,
+  MenuPresentedEntry,
   NSEMenuRuntimePort,
-  NSEMenuSection,
+  MenuSection,
   NSEMenuSnapshot,
-  NSEMenuModel,
+  MenuModel,
 } from "./menuTypes";
 
 /** Validations repeated while focus or registry authority settles before a branch closes. */
@@ -59,7 +59,7 @@ interface AbortLease {
 
 interface BranchFrame {
   readonly id: string;
-  readonly entries: readonly NSEMenuEntry[];
+  readonly entries: readonly MenuEntry[];
   readonly path: readonly string[];
 }
 
@@ -77,7 +77,7 @@ function createAbortLease(parent: AbortSignal): AbortLease {
   };
 }
 
-function findSubmenu(entries: readonly NSEMenuEntry[], id: string): Extract<NSEMenuEntry, { readonly kind: "submenu" }> | null {
+function findSubmenu(entries: readonly MenuEntry[], id: string): Extract<MenuEntry, { readonly kind: "submenu" }> | null {
   for (const entry of entries) {
     if (entry.kind === "submenu" && entry.id === id) return entry;
   }
@@ -98,7 +98,7 @@ function stableSections<TSection extends { readonly id: string; readonly weight?
  */
 export function orderMenuEntries<TEntry extends { readonly id: string }>(
   baseEntries: readonly TEntry[],
-  sections: readonly NSEMenuSection<TEntry>[] = [],
+  sections: readonly MenuSection<TEntry>[] = [],
 ): readonly TEntry[] {
   const ordered = [...baseEntries];
   for (const section of stableSections(sections)) {
@@ -113,8 +113,8 @@ export function orderMenuEntries<TEntry extends { readonly id: string }>(
 let generatedMenuIds = 0;
 
 /** NSMenuItems as the menu's internal entries. An item's identifier, or its position, keeps it unique. */
-function entriesFromItems(items: readonly NSEMenuItem[]): readonly NSEMenuEntryInput[] {
-  return items.map((item, index): NSEMenuEntryInput => {
+function entriesFromItems(items: readonly NSEMenuItem[]): readonly MenuEntryInput[] {
+  return items.map((item, index): MenuEntryInput => {
     const id = item.identifier ?? String(index);
     if ("isSeparatorItem" in item) return { kind: "separator", id };
     if ("submenu" in item) {
@@ -134,10 +134,10 @@ function entriesFromItems(items: readonly NSEMenuItem[]): readonly NSEMenuEntryI
 
 /** Replaces every `{ action }` entry with the command entry for that action's command ID. */
 function resolveMenuEntries(
-  entries: readonly NSEMenuEntryInput[],
+  entries: readonly MenuEntryInput[],
   resolveAction: NSEMenuRuntimePort["resolveAction"],
-): readonly NSEMenuEntry[] {
-  return entries.map((entry): NSEMenuEntry => {
+): readonly MenuEntry[] {
+  return entries.map((entry): MenuEntry => {
     if (entry.kind === "submenu") return { ...entry, entries: resolveMenuEntries(entry.entries, resolveAction) };
     if (entry.kind === "command" && "action" in entry) {
       const name = typeof entry.action === "string" ? entry.action : nseActionReferenceName(entry.action);
@@ -155,7 +155,7 @@ function resolveMenuEntries(
   });
 }
 
-function assertUniqueEntries(entries: readonly NSEMenuEntry[], branchId: string): void {
+function assertUniqueEntries(entries: readonly MenuEntry[], branchId: string): void {
   const ids = new Set<string>();
   for (const entry of entries) {
     if (!entry.id.trim()) throw new TypeError(`NSE menu entry IDs must not be empty (${branchId}).`);
@@ -165,7 +165,7 @@ function assertUniqueEntries(entries: readonly NSEMenuEntry[], branchId: string)
   }
 }
 
-function requestsFor(branchId: string, entries: readonly NSEMenuEntry[]): readonly CommandValidationRequest[] {
+function requestsFor(branchId: string, entries: readonly MenuEntry[]): readonly CommandValidationRequest[] {
   return entries.flatMap((entry) => entry.kind === "command" ? [{
     key: commandValidationRequestKey(`${branchId}:${entry.id}`),
     commandId: entry.commandId,
@@ -175,10 +175,10 @@ function requestsFor(branchId: string, entries: readonly NSEMenuEntry[]): readon
 
 function presentBranch(
   branchId: string,
-  entries: readonly NSEMenuEntry[],
+  entries: readonly MenuEntry[],
   presentations: ReadonlyMap<string, CommandPresentation>,
-): readonly NSEMenuPresentedEntry[] {
-  return entries.flatMap((entry): readonly NSEMenuPresentedEntry[] => {
+): readonly MenuPresentedEntry[] {
+  return entries.flatMap((entry): readonly MenuPresentedEntry[] => {
     if (entry.kind === "separator") return [{ kind: "separator", id: entry.id }];
     if (entry.kind === "submenu") return [{
       kind: "submenu",
@@ -230,7 +230,7 @@ const deferMenuObservation = Symbol("nse.deferMenuObservation");
 const reactMenuObservers = new WeakMap<NSEMenu, () => () => void>();
 
 /** @internal Create a menu whose subscriptions start only when React commits it. */
-export function createReactOwnedNSEMenu(options: NSEMenuModelOptions): NSEMenu {
+export function createReactOwnedNSEMenu(options: MenuModelOptions): NSEMenu {
   const deferred = { ...options, [deferMenuObservation]: true };
   return new NSEMenu(deferred);
 }
@@ -248,7 +248,7 @@ export function observeReactOwnedNSEMenu(menu: NSEMenu): (() => void) | undefine
  */
 export class NSEMenu<const Items extends readonly NSEMenuItem[] = readonly NSEMenuItem[]> {
   /** @internal */
-  readonly model: NSEMenuModel;
+  readonly model: MenuModel;
   readonly items: Items;
   readonly runtime: NSEMenuRuntimePort;
   readonly #ownership: NSEControllerLifetime;
@@ -259,19 +259,19 @@ export class NSEMenu<const Items extends readonly NSEMenuItem[] = readonly NSEMe
   #pendingSubmenu: { readonly handle: unknown; resolve(): void } | null = null;
   #generation = 0;
   #presentationGeneration: PresentationGeneration | null = null;
-  #rootEntries: readonly NSEMenuEntry[] = [];
-  #branchEntries: readonly NSEMenuEntry[] = [];
+  #rootEntries: readonly MenuEntry[] = [];
+  #branchEntries: readonly MenuEntry[] = [];
   #branchId = "";
   #branchStack: BranchFrame[] = [];
   #disposed = false;
   #runtimeAbort = () => this.dispose();
 
-  constructor(options: Omit<NSEMenuOptions, "items"> & { readonly items: Items & NSECheckedMenuItems<NoInfer<Items>> });
+  constructor(options: Omit<NSEMenuOptions, "items"> & { readonly items: Items & CheckedMenuItems<NoInfer<Items>> });
   /** @internal */
-  constructor(options: NSEMenuModelOptions);
-  constructor(options: NSEMenuOptions | NSEMenuModelOptions) {
+  constructor(options: MenuModelOptions);
+  constructor(options: NSEMenuOptions | MenuModelOptions) {
     const { runtime } = options;
-    const model: NSEMenuModel = nseMenuModel in options ? options[nseMenuModel] : {
+    const model: MenuModel = nseMenuModel in options ? options[nseMenuModel] : {
       id: options.identifier ?? `nse-menu-${++generatedMenuIds}`,
       label: options.title,
       entries: entriesFromItems(options.items),
@@ -387,7 +387,7 @@ export class NSEMenu<const Items extends readonly NSEMenuItem[] = readonly NSEMe
     this.#cancelPendingSubmenu();
   }
 
-  claimKeyEquivalent(input: NSEMenuKeyEquivalent): NSEMenuKeyEquivalentClaim | null {
+  claimKeyEquivalent(input: MenuKeyEquivalent): MenuKeyEquivalentClaim | null {
     if (!this.#snapshot.open) return null;
     const keyBindings = this.runtime.keyBindings;
     if (!keyBindings) return null;
@@ -397,9 +397,9 @@ export class NSEMenu<const Items extends readonly NSEMenuItem[] = readonly NSEMe
   }
 
   async dispatchKeyEquivalent(
-    input: NSEMenuKeyEquivalent,
-    accepted: NSEMenuKeyEquivalentClaim,
-  ): Promise<NSEMenuKeyEquivalentResult> {
+    input: MenuKeyEquivalent,
+    accepted: MenuKeyEquivalentClaim,
+  ): Promise<MenuKeyEquivalentResult> {
     const keyBindings = this.runtime.keyBindings;
     if (!keyBindings || !this.#snapshot.open) return null;
     const generation = this.#generation;
@@ -414,7 +414,7 @@ export class NSEMenu<const Items extends readonly NSEMenuItem[] = readonly NSEMe
     }
   }
 
-  dismiss(_reason: NSEMenuDismissReason): void {
+  dismiss(_reason: MenuDismissReason): void {
     this.#dismiss(true);
   }
 
@@ -497,7 +497,7 @@ export class NSEMenu<const Items extends readonly NSEMenuItem[] = readonly NSEMe
     this.#listeners.clear();
   }
 
-  async #openBranch(branchId: string, entries: readonly NSEMenuEntry[], branchPath: readonly string[], preserveRows=false): Promise<void> {
+  async #openBranch(branchId: string, entries: readonly MenuEntry[], branchPath: readonly string[], preserveRows=false): Promise<void> {
     this.#cancelPendingSubmenu();
     this.#validation?.dispose();
     const generation = ++this.#generation;
@@ -520,7 +520,7 @@ export class NSEMenu<const Items extends readonly NSEMenuItem[] = readonly NSEMe
       // generation, so a pending activation still owns the branch; only
       // authority that never settles closes the menu.
       let presentationGeneration = this.runtime.commands.getPresentationGeneration();
-      let projected: readonly NSEMenuPresentedEntry[] = [];
+      let projected: readonly MenuPresentedEntry[] = [];
       for (let attempt = 1; ; attempt += 1) {
         const result = await this.runtime.commands.validateMany(requests, {
           signal: lease.signal,

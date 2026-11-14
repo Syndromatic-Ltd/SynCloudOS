@@ -3,7 +3,7 @@
 import { useInsertionEffect } from "react";
 import { observeReactOwnedNSEMenu, type NSEMenu } from "./NSEMenu";
 
-export function useNSEMenuLifetime(menu: NSEMenu | readonly NSEMenu[]): void {
+export function useMenuLifetime(menu: NSEMenu | readonly NSEMenu[]): void {
   useInsertionEffect(() => {
     const menus = "dispose" in menu ? [menu] : menu;
     const release = menus.map(observeReactOwnedNSEMenu);

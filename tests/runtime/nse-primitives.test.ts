@@ -21,7 +21,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { NSEMenuView } from "../../src/NSE/Menus";
+import { MenuView } from "../../src/NSE/Menus";
 import { NSESwitch, NSEButton, NSEBox, NSEPopUpButton, NSESegmentedControl, useNSEControlFeedback } from "../../src/NSE/public/controls";
 import { TopBar } from "../../src/NSE/Windows/Chrome";
 import { GroupedRow } from "../../src/NSE/Controls/Selection/GroupedRow";
@@ -359,7 +359,7 @@ describe("HapticsFX feedback preservation", () => {
 
     try {
       const rendered = render(createElement("div", null,
-        createElement(NSEMenuView, {
+        createElement(MenuView, {
           label: "Actions",
           items: [{ value: "open", label: "Open" }],
           onSelect: vi.fn()

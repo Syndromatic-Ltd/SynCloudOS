@@ -26,16 +26,16 @@ import { createContext, useContext, type PropsWithChildren } from "react";
  * menu has no such boundary and must remain immediately usable (including
  * hosts whose scheduler is reserved for typeahead only).
  */
-const NSEMenuOverlayPresentationContext = createContext({ portaled: false, ready: true });
+const MenuOverlayPresentationContext = createContext({ portaled: false, ready: true });
 
-export function NSEMenuOverlayPresentationScope({ children, ready = true }: PropsWithChildren<{ readonly ready?: boolean }>) {
+export function MenuOverlayPresentationScope({ children, ready = true }: PropsWithChildren<{ readonly ready?: boolean }>) {
   return (
-    <NSEMenuOverlayPresentationContext.Provider value={{ portaled: true, ready }}>
+    <MenuOverlayPresentationContext.Provider value={{ portaled: true, ready }}>
       {children}
-    </NSEMenuOverlayPresentationContext.Provider>
+    </MenuOverlayPresentationContext.Provider>
   );
 }
 
 export function useNSEMenuOverlayPresentationScope(): Readonly<{ portaled: boolean; ready: boolean }> {
-  return useContext(NSEMenuOverlayPresentationContext);
+  return useContext(MenuOverlayPresentationContext);
 }

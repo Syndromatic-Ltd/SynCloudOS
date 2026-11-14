@@ -23,11 +23,11 @@ import { NSEPopup, useNSEOverlayProvider } from "../Overlays";
 import type { OverlayDismissReason } from "../Overlays";
 import type { OverlayAnchorPoint } from "../Overlays/computeOverlayPosition";
 import type { NSEMenu } from "./NSEMenu";
-import type { NSEMenuOverlayOptions } from "./menuTypes";
-import { NSEMenuOverlayPresentationScope } from "./menuPresentationContext";
+import type { MenuOverlayOptions } from "./menuTypes";
+import { MenuOverlayPresentationScope } from "./menuPresentationContext";
 
-export interface NSEMenuOverlayProps {
-  readonly overlay: NSEMenuOverlayOptions;
+export interface MenuOverlayProps {
+  readonly overlay: MenuOverlayOptions;
   /** The branch controller must be closed before the popup unmounts its semantic surface. */
   readonly controller: Pick<NSEMenu, "dismiss" | "snapshot"> & Partial<Pick<NSEMenu, "subscribe">>;
   readonly open: boolean;
@@ -54,7 +54,7 @@ export interface NSEMenuOverlayProps {
  * controller/model while their physical form changes from anchored overlay to
  * an action-sheet/drill-in boundary on a constrained runtime.
  */
-export function NSEMenuOverlay({ overlay, controller, open, anchor, anchorPoint, labelledBy, kind = "menu", presentationMode = "responsive", viewportCornerBleed, appearance = "default", className, exitDuration, restoreFocus = true, children, onOpenChange }: NSEMenuOverlayProps) {
+export function MenuOverlay({ overlay, controller, open, anchor, anchorPoint, labelledBy, kind = "menu", presentationMode = "responsive", viewportCornerBleed, appearance = "default", className, exitDuration, restoreFocus = true, children, onOpenChange }: MenuOverlayProps) {
   const { runtime } = useNSEOverlayProvider();
   if (!overlay.id.trim()) throw new TypeError("NSE menu overlay IDs must not be empty.");
   if (!overlay.parentResponderId.trim()) throw new TypeError("NSE menu overlays require a parent responder ID.");
@@ -142,7 +142,7 @@ export function NSEMenuOverlay({ overlay, controller, open, anchor, anchorPoint,
       restoreFocus={restoreFocus}
       onOpenChange={handleOpenChange}
     >
-      <NSEMenuOverlayPresentationScope ready={!contentPending}>{children}</NSEMenuOverlayPresentationScope>
+      <MenuOverlayPresentationScope ready={!contentPending}>{children}</MenuOverlayPresentationScope>
     </NSEPopup>
   );
 }
