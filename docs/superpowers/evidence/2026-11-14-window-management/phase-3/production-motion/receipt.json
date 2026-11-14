@@ -1,0 +1,687 @@
+{
+  "baseline": "0472a7c site with original vendored SDK",
+  "candidate": "909a62bf vendored SDK",
+  "dpr": 1,
+  "captures": [
+    {
+      "era": "before",
+      "port": 5477,
+      "device": "desktop",
+      "colorScheme": "light",
+      "material": "cumulus",
+      "app": "About",
+      "images": [
+        "before-desktop-light-cumulus-launch.png"
+      ],
+      "failure": "TimeoutError: locator.waitFor: Timeout 8000ms exceeded. Call log: \u001b[2m  - waiting for locator('.about-app') to be visible\u001b[22m "
+    },
+    {
+      "era": "before",
+      "port": 5477,
+      "device": "desktop",
+      "colorScheme": "dark",
+      "material": "cumulus",
+      "app": "About",
+      "images": [
+        "before-desktop-dark-cumulus-launch.png"
+      ],
+      "failure": "TimeoutError: locator.waitFor: Timeout 8000ms exceeded. Call log: \u001b[2m  - waiting for locator('.about-app') to be visible\u001b[22m "
+    },
+    {
+      "era": "before",
+      "port": 5477,
+      "device": "phone",
+      "colorScheme": "light",
+      "material": "cumulus",
+      "app": "About",
+      "images": [
+        "before-phone-light-cumulus-launch.png"
+      ],
+      "failure": "TimeoutError: locator.waitFor: Timeout 8000ms exceeded. Call log: \u001b[2m  - waiting for locator('.about-app') to be visible\u001b[22m "
+    },
+    {
+      "era": "before",
+      "port": 5477,
+      "device": "phone",
+      "colorScheme": "dark",
+      "material": "cumulus",
+      "app": "About",
+      "images": [
+        "before-phone-dark-cumulus-launch.png"
+      ],
+      "failure": "TimeoutError: locator.waitFor: Timeout 8000ms exceeded. Call log: \u001b[2m  - waiting for locator('.about-app') to be visible\u001b[22m "
+    },
+    {
+      "era": "before",
+      "port": 5477,
+      "device": "phone",
+      "colorScheme": "light",
+      "material": "metal",
+      "app": "Software",
+      "images": [
+        "before-phone-light-metal-launch.png",
+        "before-phone-light-metal-return.png",
+        "before-phone-light-metal-quick-switch.png"
+      ],
+      "motion": {
+        "launch": [
+          {
+            "t": 7081,
+            "frames": [
+              {
+                "staged": "true",
+                "opacity": "0",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.04, 0, 0, 0.04, 0, 0)"
+              }
+            ]
+          },
+          {
+            "t": 7200,
+            "frames": [
+              {
+                "staged": "true",
+                "opacity": "0",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.04, 0, 0, 0.04, 0, 0)"
+              }
+            ]
+          },
+          {
+            "t": 7289,
+            "frames": [
+              {
+                "opacity": "0",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.04, 0, 0, 0.04, 0, 0)"
+              }
+            ]
+          },
+          {
+            "t": 7391,
+            "frames": [
+              {
+                "opacity": "0.10187",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.04, 0, 0, 0.04, 0, 0)"
+              }
+            ]
+          }
+        ]
+      },
+      "failure": "TimeoutError: locator.click: Timeout 4000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('dialog', { name: 'QuickSwitch', exact: true }).getByText('About', { exact: true })\u001b[22m "
+    },
+    {
+      "era": "before",
+      "port": 5477,
+      "device": "phone",
+      "colorScheme": "dark",
+      "material": "metal",
+      "app": "Software",
+      "images": [
+        "before-phone-dark-metal-launch.png"
+      ],
+      "motion": {
+        "launch": [
+          {
+            "t": 6744,
+            "frames": [
+              {
+                "staged": "true",
+                "opacity": "0",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.04, 0, 0, 0.04, 0, 0)"
+              }
+            ]
+          },
+          {
+            "t": 6873,
+            "frames": [
+              {
+                "staged": "true",
+                "opacity": "0",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.04, 0, 0, 0.04, 0, 0)"
+              }
+            ]
+          },
+          {
+            "t": 6956,
+            "frames": [
+              {
+                "opacity": "0",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.04, 0, 0, 0.04, 0, 0)"
+              }
+            ]
+          },
+          {
+            "t": 6968,
+            "frames": [
+              {
+                "opacity": "0",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.04, 0, 0, 0.04, 0, 0)"
+              }
+            ]
+          }
+        ]
+      },
+      "failure": "TimeoutError: locator.click: Timeout 3000ms exceeded. Call log: \u001b[2m  - waiting for locator('.webspring-app-view-frame:not([inert])').filter({ visible: true }).last().getByRole('button', { name: 'Return to Webspring', exact: true })\u001b[22m \u001b[2m    - locator resolved to <button type=\"button\" data-position=\"left\" data-selected=\"false\" title=\"Return to Webspring\" aria-label=\"Return to Webspring\" class=\"nse-app-topbar-metal-pill\">…</button>\u001b[22m"
+    },
+    {
+      "era": "before",
+      "port": 5477,
+      "device": "desktop",
+      "colorScheme": "light",
+      "material": "metal",
+      "app": "Software",
+      "images": [
+        "before-desktop-light-metal-launch.png"
+      ],
+      "failure": "Error: locator.waitFor: Error: strict mode violation: locator('.software-app') resolved to 2 elements:     1) <main data-mode=\"light\" class=\"software-app\" data-synapp-navigation-route=\"/software\" data-synapp-navigation-restoration-version=\"2\" data-synapp-navigation-presentation-size=\"wide\" data-synapp-navigation-controller-state=\"overview\" data-synapp-navigation-renderer=\"source-list-content\" data-synapp-navigation-app-id=\"com.syndromatic.software\" data-synapp-navigation-controller-policy=\"peer-adaptive\" data-synapp-navigation-visual-status=\"pending-human-review\" data-synapp-navigation-content-identity=\"sof…>…</main> aka getByLabel('Software', { exact: true }).getByRole('main')     2) <div data-mode=\"light\" class=\"software-app\">…</div> aka locator('div').filter({ hasText: /^Last updated: 3 October 2026$/ }).nth(1) "
+    },
+    {
+      "era": "before",
+      "port": 5477,
+      "device": "desktop",
+      "colorScheme": "dark",
+      "material": "metal",
+      "app": "Software",
+      "images": [
+        "before-desktop-dark-metal-launch.png"
+      ],
+      "failure": "Error: locator.waitFor: Error: strict mode violation: locator('.software-app') resolved to 2 elements:     1) <main data-mode=\"dark\" class=\"software-app\" data-synapp-navigation-route=\"/software\" data-synapp-navigation-restoration-version=\"2\" data-synapp-navigation-presentation-size=\"wide\" data-synapp-navigation-controller-state=\"overview\" data-synapp-navigation-renderer=\"source-list-content\" data-synapp-navigation-app-id=\"com.syndromatic.software\" data-synapp-navigation-controller-policy=\"peer-adaptive\" data-synapp-navigation-visual-status=\"pending-human-review\" data-synapp-navigation-content-identity=\"soft…>…</main> aka getByLabel('Software', { exact: true }).getByRole('main')     2) <div data-mode=\"dark\" class=\"software-app\">…</div> aka locator('div').filter({ hasText: /^Last updated: 3 October 2026$/ }).nth(1) "
+    },
+    {
+      "era": "after",
+      "port": 5479,
+      "device": "desktop",
+      "colorScheme": "dark",
+      "material": "cumulus",
+      "app": "About",
+      "images": [
+        "after-desktop-dark-cumulus-launch.png"
+      ],
+      "failure": "Error: page.evaluate: TypeError: Cannot read properties of undefined (reading 'slice')     at eval (eval at evaluate (:303:30), <anonymous>:1:25)     at UtilityScript.evaluate (<anonymous>:305:16)     at UtilityScript.<anonymous> (<anonymous>:1:44)"
+    },
+    {
+      "era": "after",
+      "port": 5479,
+      "device": "desktop",
+      "colorScheme": "light",
+      "material": "cumulus",
+      "app": "About",
+      "images": [
+        "after-desktop-light-cumulus-launch.png"
+      ],
+      "failure": "TimeoutError: locator.waitFor: Timeout 8000ms exceeded. Call log: \u001b[2m  - waiting for locator('.about-app') to be visible\u001b[22m "
+    },
+    {
+      "era": "after",
+      "port": 5479,
+      "device": "phone",
+      "colorScheme": "dark",
+      "material": "cumulus",
+      "app": "About",
+      "failure": "Error: page.evaluate: Execution context was destroyed, most likely because of a navigation"
+    },
+    {
+      "era": "after",
+      "port": 5479,
+      "device": "phone",
+      "colorScheme": "dark",
+      "material": "metal",
+      "app": "Software",
+      "images": [
+        "after-phone-dark-metal-launch.png"
+      ],
+      "motion": {
+        "launch": [
+          {
+            "t": 6996,
+            "frames": [
+              {
+                "staged": "true",
+                "opacity": "0",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.04, 0, 0, 0.04, 0, 0)"
+              },
+              {
+                "staged": "true",
+                "opacity": "0",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.04, 0, 0, 0.04, 0, 0)"
+              }
+            ]
+          },
+          {
+            "t": 7189,
+            "frames": [
+              {
+                "staged": "true",
+                "opacity": "0",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.04, 0, 0, 0.04, 0, 0)"
+              },
+              {
+                "opacity": "0",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.04, 0, 0, 0.04, 0, 0)"
+              }
+            ]
+          },
+          {
+            "t": 7235,
+            "frames": [
+              {
+                "staged": "true",
+                "opacity": "0",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.0387098, 0, 0, 0.0387098, 0, 0)"
+              },
+              {
+                "opacity": "0",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.04, 0, 0, 0.04, 0, 0)"
+              }
+            ]
+          },
+          {
+            "t": 7239,
+            "frames": [
+              {
+                "staged": "true",
+                "opacity": "0",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.0383338, 0, 0, 0.0383338, 0, 0)"
+              },
+              {
+                "opacity": "0",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.04, 0, 0, 0.04, 0, 0)"
+              }
+            ]
+          },
+          {
+            "t": 7259,
+            "frames": [
+              {
+                "staged": "true",
+                "opacity": "0",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.0378998, 0, 0, 0.0378998, 0, 0)"
+              },
+              {
+                "opacity": "0.0366351",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.04, 0, 0, 0.04, 0, 0)"
+              }
+            ]
+          }
+        ]
+      },
+      "failure": "TimeoutError: locator.click: Timeout 3000ms exceeded. Call log: \u001b[2m  - waiting for locator('.webspring-app-view-frame:not([inert])').filter({ visible: true }).last().getByRole('button', { name: 'Return to Webspring', exact: true })\u001b[22m \u001b[2m    - locator resolved to <button type=\"button\" data-position=\"leading\" title=\"Return to Webspring\" class=\"nse-app-topbar-button\" aria-label=\"Return to Webspring\">…</button>\u001b[22m"
+    },
+    {
+      "era": "after",
+      "port": 5479,
+      "device": "phone",
+      "colorScheme": "light",
+      "material": "cumulus",
+      "app": "About",
+      "images": [
+        "after-phone-light-cumulus-launch.png",
+        "after-phone-light-cumulus-return.png",
+        "after-phone-light-cumulus-quick-switch.png"
+      ],
+      "motion": {
+        "launch": [
+          {
+            "t": 5438,
+            "frames": [
+              {
+                "staged": "true",
+                "opacity": "0",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.04, 0, 0, 0.04, 0, 0)"
+              },
+              {
+                "staged": "true",
+                "opacity": "0",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.04, 0, 0, 0.04, 0, 0)"
+              }
+            ]
+          },
+          {
+            "t": 5481,
+            "frames": [
+              {
+                "staged": "true",
+                "opacity": "0",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.04, 0, 0, 0.04, 0, 0)"
+              },
+              {
+                "staged": "true",
+                "opacity": "0",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.04, 0, 0, 0.04, 0, 0)"
+              }
+            ]
+          },
+          {
+            "t": 5617,
+            "frames": [
+              {
+                "staged": "true",
+                "opacity": "0",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.0387067, 0, 0, 0.0387067, 0, 0)"
+              },
+              {
+                "opacity": "0",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.04, 0, 0, 0.04, 0, 0)"
+              }
+            ]
+          },
+          {
+            "t": 5651,
+            "frames": [
+              {
+                "staged": "true",
+                "opacity": "0",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.0379011, 0, 0, 0.0379011, 0, 0)"
+              },
+              {
+                "opacity": "0",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.04, 0, 0, 0.04, 0, 0)"
+              }
+            ]
+          },
+          {
+            "t": 5677,
+            "frames": [
+              {
+                "staged": "true",
+                "opacity": "0",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.0368418, 0, 0, 0.0368418, 0, 0)"
+              },
+              {
+                "opacity": "0.102135",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.04, 0, 0, 0.04, 0, 0)"
+              }
+            ]
+          }
+        ]
+      },
+      "failure": "TimeoutError: locator.click: Timeout 4000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('dialog', { name: 'QuickSwitch', exact: true }).getByText('Software', { exact: true })\u001b[22m "
+    },
+    {
+      "era": "after",
+      "port": 5479,
+      "device": "desktop",
+      "colorScheme": "dark",
+      "material": "metal",
+      "app": "Software",
+      "images": [
+        "after-desktop-dark-metal-launch.png"
+      ],
+      "failure": "Error: locator.waitFor: Error: strict mode violation: locator('.software-app') resolved to 2 elements:     1) <main data-mode=\"dark\" class=\"software-app\" data-synapp-navigation-route=\"/software\" data-synapp-navigation-restoration-version=\"2\" data-synapp-navigation-presentation-size=\"wide\" data-synapp-navigation-controller-state=\"overview\" data-synapp-navigation-renderer=\"source-list-content\" data-synapp-navigation-app-id=\"com.syndromatic.software\" data-synapp-navigation-controller-policy=\"peer-adaptive\" data-synapp-navigation-visual-status=\"pending-human-review\" data-synapp-navigation-content-identity=\"soft…>…</main> aka getByRole('main').filter({ hasText: 'AboutPortfolio' }).getByRole('main')     2) <div data-mode=\"dark\" class=\"software-app\">…</div> aka locator('div').filter({ hasText: /^Last updated: 3 October 2026$/ }).nth(1) "
+    },
+    {
+      "era": "after",
+      "port": 5479,
+      "device": "desktop",
+      "colorScheme": "light",
+      "material": "metal",
+      "app": "Software",
+      "images": [
+        "after-desktop-light-metal-launch.png"
+      ],
+      "failure": "Error: locator.waitFor: Error: strict mode violation: locator('.software-app') resolved to 2 elements:     1) <main data-mode=\"light\" class=\"software-app\" data-synapp-navigation-route=\"/software\" data-synapp-navigation-restoration-version=\"2\" data-synapp-navigation-presentation-size=\"wide\" data-synapp-navigation-controller-state=\"overview\" data-synapp-navigation-renderer=\"source-list-content\" data-synapp-navigation-app-id=\"com.syndromatic.software\" data-synapp-navigation-controller-policy=\"peer-adaptive\" data-synapp-navigation-visual-status=\"pending-human-review\" data-synapp-navigation-content-identity=\"sof…>…</main> aka getByRole('main').filter({ hasText: 'AboutPortfolio' }).getByRole('main')     2) <div data-mode=\"light\" class=\"software-app\">…</div> aka locator('div').filter({ hasText: /^Last updated: 3 October 2026$/ }).nth(1) "
+    },
+    {
+      "era": "after",
+      "port": 5479,
+      "device": "phone",
+      "colorScheme": "light",
+      "material": "metal",
+      "app": "Software",
+      "images": [
+        "after-phone-light-metal-launch.png",
+        "after-phone-light-metal-return.png",
+        "after-phone-light-metal-quick-switch.png"
+      ],
+      "motion": {
+        "launch": [
+          {
+            "t": 2957,
+            "frames": [
+              {
+                "staged": "true",
+                "opacity": "0",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.04, 0, 0, 0.04, 0, 0)"
+              },
+              {
+                "staged": "true",
+                "opacity": "0",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.04, 0, 0, 0.04, 0, 0)"
+              }
+            ]
+          },
+          {
+            "t": 3046,
+            "frames": [
+              {
+                "staged": "true",
+                "opacity": "0",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.04, 0, 0, 0.04, 0, 0)"
+              },
+              {
+                "staged": "true",
+                "opacity": "0",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.04, 0, 0, 0.04, 0, 0)"
+              }
+            ]
+          },
+          {
+            "t": 3158,
+            "frames": [
+              {
+                "staged": "true",
+                "opacity": "0",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.0383341, 0, 0, 0.0383341, 0, 0)"
+              },
+              {
+                "opacity": "0",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.04, 0, 0, 0.04, 0, 0)"
+              }
+            ]
+          },
+          {
+            "t": 3164,
+            "frames": [
+              {
+                "staged": "true",
+                "opacity": "0",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.0378973, 0, 0, 0.0378973, 0, 0)"
+              },
+              {
+                "opacity": "0",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.04, 0, 0, 0.04, 0, 0)"
+              }
+            ]
+          },
+          {
+            "t": 3242,
+            "frames": [
+              {
+                "staged": "true",
+                "opacity": "0",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.0374038, 0, 0, 0.0374038, 0, 0)"
+              },
+              {
+                "opacity": "0.036709",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.04, 0, 0, 0.04, 0, 0)"
+              }
+            ]
+          },
+          {
+            "t": 3290,
+            "frames": [
+              {
+                "staged": "true",
+                "opacity": "0",
+                "transform": "none"
+              },
+              {
+                "opacity": "0",
+                "transform": "matrix(0.0346897, 0, 0, 0.0346897, 0, 0)"
+              },
+              {
+                "opacity": "0.405049",
+                "transform": "none"
+              },
+              {
+                "opacity": "0.465056",
+                "transform": "matrix(0.486454, 0, 0, 0.486454, 0, 0)"
+              }
+            ]
+          }
+        ]
+      },
+      "failure": "TimeoutError: locator.click: Timeout 4000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('dialog', { name: 'QuickSwitch', exact: true }).getByText('About', { exact: true })\u001b[22m \u001b[2m    - waiting for\" http://127.0.0.1:5479/software\" navigation to finish...\u001b[22m"
+    }
+  ]
+}

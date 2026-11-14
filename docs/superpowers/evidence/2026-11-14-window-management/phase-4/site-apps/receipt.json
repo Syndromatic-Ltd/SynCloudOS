@@ -1,0 +1,247 @@
+{
+  "sitePreview": "http://127.0.0.1:5479",
+  "framework": "909a62bf",
+  "dpr": 1,
+  "captures": [
+    {
+      "app": "journal-leather",
+      "route": "/journal?journalChromeVariant=leather-toolbar",
+      "device": "desktop",
+      "colorScheme": "dark",
+      "file": "after-desktop-dark-journal-leather.png",
+      "text": "↙\nJournal",
+      "appearance": null,
+      "frameCSS": true
+    },
+    {
+      "app": "journal-leather",
+      "route": "/journal?journalChromeVariant=leather-toolbar",
+      "device": "desktop",
+      "colorScheme": "light",
+      "file": "after-desktop-light-journal-leather.png",
+      "text": "↙\nJournal",
+      "appearance": null,
+      "frameCSS": true
+    },
+    {
+      "app": "journal-leather",
+      "route": "/journal?journalChromeVariant=leather-toolbar",
+      "device": "phone",
+      "colorScheme": "dark",
+      "file": "after-phone-dark-journal-leather.png",
+      "text": "↙\nJournal",
+      "appearance": null,
+      "frameCSS": true
+    },
+    {
+      "app": "journal-leather",
+      "route": "/journal?journalChromeVariant=leather-toolbar",
+      "device": "phone",
+      "colorScheme": "light",
+      "file": "after-phone-light-journal-leather.png",
+      "text": "↙\nJournal",
+      "appearance": null,
+      "frameCSS": true
+    },
+    {
+      "app": "journal-mountain-lion",
+      "route": "/journal?journalChromeVariant=mountain-lion",
+      "device": "desktop",
+      "colorScheme": "dark",
+      "file": "after-desktop-dark-journal-mountain-lion.png",
+      "text": "↙\nJournal",
+      "appearance": null,
+      "frameCSS": true
+    },
+    {
+      "app": "journal-mountain-lion",
+      "route": "/journal?journalChromeVariant=mountain-lion",
+      "device": "desktop",
+      "colorScheme": "light",
+      "file": "after-desktop-light-journal-mountain-lion.png",
+      "text": "↙\nJournal",
+      "appearance": null,
+      "frameCSS": true
+    },
+    {
+      "app": "journal-mountain-lion",
+      "route": "/journal?journalChromeVariant=mountain-lion",
+      "device": "phone",
+      "colorScheme": "dark",
+      "file": "after-phone-dark-journal-mountain-lion.png",
+      "text": "↙\nJournal",
+      "appearance": null,
+      "frameCSS": true
+    },
+    {
+      "app": "journal-mountain-lion",
+      "route": "/journal?journalChromeVariant=mountain-lion",
+      "device": "phone",
+      "colorScheme": "light",
+      "file": "after-phone-light-journal-mountain-lion.png",
+      "text": "↙\nJournal",
+      "appearance": null,
+      "frameCSS": true
+    },
+    {
+      "app": "journal-old-leather",
+      "route": "/journal-old?journalChromeVariant=leather-toolbar",
+      "device": "desktop",
+      "colorScheme": "dark",
+      "file": "after-desktop-dark-journal-old-leather.png",
+      "text": "↙\nJournal",
+      "appearance": null,
+      "frameCSS": true
+    },
+    {
+      "app": "journal-old-leather",
+      "route": "/journal-old?journalChromeVariant=leather-toolbar",
+      "device": "desktop",
+      "colorScheme": "light",
+      "file": "after-desktop-light-journal-old-leather.png",
+      "text": "↙\nJournal",
+      "appearance": null,
+      "frameCSS": true
+    },
+    {
+      "app": "journal-old-leather",
+      "route": "/journal-old?journalChromeVariant=leather-toolbar",
+      "device": "phone",
+      "colorScheme": "dark",
+      "file": "after-phone-dark-journal-old-leather.png",
+      "text": "↙\nJournal",
+      "appearance": null,
+      "frameCSS": true
+    },
+    {
+      "app": "journal-old-leather",
+      "route": "/journal-old?journalChromeVariant=leather-toolbar",
+      "device": "phone",
+      "colorScheme": "light",
+      "file": "after-phone-light-journal-old-leather.png",
+      "text": "↙\nJournal",
+      "appearance": null,
+      "frameCSS": true
+    },
+    {
+      "app": "journal-old-mountain-lion",
+      "route": "/journal-old?journalChromeVariant=mountain-lion",
+      "device": "desktop",
+      "colorScheme": "dark",
+      "file": "after-desktop-dark-journal-old-mountain-lion.png",
+      "text": "↙\nJournal",
+      "appearance": null,
+      "frameCSS": true
+    },
+    {
+      "app": "journal-old-mountain-lion",
+      "route": "/journal-old?journalChromeVariant=mountain-lion",
+      "device": "desktop",
+      "colorScheme": "light",
+      "file": "after-desktop-light-journal-old-mountain-lion.png",
+      "text": "↙\nJournal",
+      "appearance": null,
+      "frameCSS": true
+    },
+    {
+      "app": "journal-old-mountain-lion",
+      "route": "/journal-old?journalChromeVariant=mountain-lion",
+      "device": "phone",
+      "colorScheme": "dark",
+      "file": "after-phone-dark-journal-old-mountain-lion.png",
+      "text": "↙\nJournal",
+      "appearance": null,
+      "frameCSS": true
+    },
+    {
+      "app": "journal-old-mountain-lion",
+      "route": "/journal-old?journalChromeVariant=mountain-lion",
+      "device": "phone",
+      "colorScheme": "light",
+      "file": "after-phone-light-journal-old-mountain-lion.png",
+      "text": "↙\nJournal",
+      "appearance": null,
+      "frameCSS": true
+    },
+    {
+      "app": "memo-journal",
+      "route": "/memo-journal",
+      "device": "desktop",
+      "colorScheme": "dark",
+      "file": "after-desktop-dark-memo-journal.png",
+      "text": "↙\nMemoJournal",
+      "appearance": null,
+      "frameCSS": false
+    },
+    {
+      "app": "memo-journal",
+      "route": "/memo-journal",
+      "device": "desktop",
+      "colorScheme": "light",
+      "file": "after-desktop-light-memo-journal.png",
+      "text": "↙\nMemoJournal",
+      "appearance": null,
+      "frameCSS": false
+    },
+    {
+      "app": "memo-journal",
+      "route": "/memo-journal",
+      "device": "phone",
+      "colorScheme": "dark",
+      "file": "after-phone-dark-memo-journal.png",
+      "text": "↙\nMemoJournal",
+      "appearance": null,
+      "frameCSS": false
+    },
+    {
+      "app": "memo-journal",
+      "route": "/memo-journal",
+      "device": "phone",
+      "colorScheme": "light",
+      "file": "after-phone-light-memo-journal.png",
+      "text": "↙\nMemoJournal",
+      "appearance": null,
+      "frameCSS": false
+    },
+    {
+      "app": "syncal",
+      "route": "/syncal",
+      "device": "desktop",
+      "colorScheme": "dark",
+      "file": "after-desktop-dark-syncal.png",
+      "text": "↙\nSynCal",
+      "appearance": null,
+      "frameCSS": false
+    },
+    {
+      "app": "syncal",
+      "route": "/syncal",
+      "device": "desktop",
+      "colorScheme": "light",
+      "file": "after-desktop-light-syncal.png",
+      "text": "↙\nSynCal",
+      "appearance": null,
+      "frameCSS": false
+    },
+    {
+      "app": "syncal",
+      "route": "/syncal",
+      "device": "phone",
+      "colorScheme": "dark",
+      "file": "after-phone-dark-syncal.png",
+      "text": "↙\nSynCal",
+      "appearance": null,
+      "frameCSS": false
+    },
+    {
+      "app": "syncal",
+      "route": "/syncal",
+      "device": "phone",
+      "colorScheme": "light",
+      "file": "after-phone-light-syncal.png",
+      "text": "↙\nSynCal",
+      "appearance": null,
+      "frameCSS": false
+    }
+  ]
+}
