@@ -28,7 +28,7 @@ import { useResolvedMode as useScopedResolvedMode } from "../../src/SynCloudOS/A
 import { clearOwnedResponderAnchor, SynCloudOSProvider } from "../../src/SynCloudOSReact";
 import { useSCOS, useQuickSwitchTrigger } from "../../src/SynCloudOS/AppSDK";
 import { createInMemoryNSETextOwner, plainNSETextContent, NSETextCommands, NSETextView, TextEditingSession } from "@syndromatic/syncloudos/nse/text";
-import { NSEHierarchyStack, NSENavigationStackController, TabBarController } from "../../src/NSE/Navigation";
+import { HierarchyStack, NavigationStackController, TabBarController } from "../../src/NSE/Navigation";
 import { useNSEDeferredDisposal, type NSEDisposalScheduler } from "../../src/NSE/NSE";
 import { ResponderScope, useStrings } from "@syndromatic/syncloudos/sdk";
 import { SynWareProvider } from "../../src/SynCloudOS/AppSDK/SynWareContext";
@@ -131,7 +131,7 @@ function ApplicationStageHierarchyFixture() {
       { id: "library", label: "Library", accessibleLabel: "Library destination", icon: { kind: "template", name: "library" } },
     ],
   }));
-  const [stack] = React.useState(() => new NSENavigationStackController({
+  const [stack] = React.useState(() => new NavigationStackController({
     id: "stage-hierarchy-stack",
     rootDestinationId: "home",
     destinationIds: ["home", "library"],
@@ -146,7 +146,7 @@ function ApplicationStageHierarchyFixture() {
   return (
     <section>
       <button data-testid="stage-open-library" type="button" onClick={() => { void stack.push("library"); }}>Open Library destination</button>
-      <NSEHierarchyStack
+      <HierarchyStack
         controller={tabs}
         stackController={stack}
         applicationChrome={{ ownerId: "test-app:application-hierarchy" }}

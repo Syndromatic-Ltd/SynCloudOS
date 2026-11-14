@@ -7,7 +7,7 @@ import { enterClassApplication, instantiateInOwnerScope, NSEOwnershipScope } fro
 import { NSEMenu } from "../../src/NSE/Menus/NSEMenu";
 import { PageTurnController } from "../../src/NSE/Page/pageTurnController";
 import { NSEColourPanelController } from "../../src/NSE/Colour/ColourPanel/NSEColourPanelController";
-import { NSEApplicationNavigationChromeController } from "../../src/NSE/Navigation/NSEApplicationNavigationChrome";
+import { ApplicationNavigationChromeController } from "../../src/NSE/Navigation/NSEApplicationNavigationChrome";
 import { NSEScrollViewController } from "../../src/NSE/Scroll/scrollTypes";
 import { NSEToolbarController } from "../../src/NSE/Toolbars/NSEToolbarController";
 import type { ToolbarPreferences } from "../../src/NSE/Toolbars/toolbarTypes";
@@ -63,7 +63,7 @@ const factories = {
   },
   page: (options: NSEControllerOwnershipOptions) => new PageTurnController(options),
   colour: (options: NSEControllerOwnershipOptions) => new NSEColourPanelController(runtime(), options),
-  navigationChrome: (options: NSEControllerOwnershipOptions) => new NSEApplicationNavigationChromeController(options),
+  navigationChrome: (options: NSEControllerOwnershipOptions) => new ApplicationNavigationChromeController(options),
   scroll: (options: NSEControllerOwnershipOptions) => new NSEScrollViewController(document.createElement("div"), undefined, options),
   text: (options: NSEControllerOwnershipOptions) => {
     const textOwner = createInMemoryNSETextOwner();

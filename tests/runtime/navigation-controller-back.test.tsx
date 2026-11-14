@@ -6,7 +6,7 @@ import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { NSEViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
 import { NSESplitViewController, NSESplitViewItem } from "../../src/NSE/DataViews/Split";
 import { NSEPageController } from "../../src/NSE/Page/NSEPageController";
-import { NSEApplicationNavigationChromeController, NSEApplicationNavigationChromeProvider } from "../../src/NSE/Navigation/NSEApplicationNavigationChrome";
+import { ApplicationNavigationChromeController, ApplicationNavigationChromeProvider } from "../../src/NSE/Navigation/NSEApplicationNavigationChrome";
 import { TestContentViewController, updateTraits } from "../fixtures/tabViewController";
 import { createStaticPresentationTraits } from "../fixtures/presentationTraits";
 
@@ -26,13 +26,13 @@ function splitHierarchy() {
   return split;
 }
 
-function Stage({ controller }: { controller: NSEApplicationNavigationChromeController }) {
+function Stage({ controller }: { controller: ApplicationNavigationChromeController }) {
   const active = useSyncExternalStore(controller.subscribe, controller.getSnapshot, controller.getSnapshot).active;
   return <header data-testid="stage-chrome"><h1>{active?.title ?? "Application"}</h1>{active?.back ? <button onClick={active.back.onActivate}>{active.back.label}</button> : null}</header>;
 }
 function renderAtStage(controller: NSEViewController<unknown>, available = true) {
-  const chrome = new NSEApplicationNavigationChromeController(); owned.push(chrome);
-  render(<NSEApplicationNavigationChromeProvider controller={chrome} standardChromeAvailable={available}><Stage controller={chrome} /><NSEViewControllerView controller={controller} /></NSEApplicationNavigationChromeProvider>);
+  const chrome = new ApplicationNavigationChromeController(); owned.push(chrome);
+  render(<ApplicationNavigationChromeProvider controller={chrome} standardChromeAvailable={available}><Stage controller={chrome} /><NSEViewControllerView controller={controller} /></ApplicationNavigationChromeProvider>);
   return chrome;
 }
 

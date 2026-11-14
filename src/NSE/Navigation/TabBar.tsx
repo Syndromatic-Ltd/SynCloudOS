@@ -39,12 +39,12 @@ import { useOptionalTooltipProvider } from "../Tooltips/TooltipProvider";
 import {
   getNSETabBarPanelId,
   getNSETabBarTabId,
-  NSENavigationDestinationHost,
+  NavigationDestinationHost,
 } from "./NSENavigationDestinationHost";
 import { MetalSurface } from "../Material/MetalSurface";
 import { GroupedRows } from "../Controls/Selection/GroupedRows";
 import { GroupedRow } from "../Controls/Selection/GroupedRow";
-import { NSEHierarchyStack } from "./NSEHierarchyStack";
+import { HierarchyStack } from "./NSEHierarchyStack";
 import { TabBarMoreDestinationId, TabBarController } from "./TabBarController";
 import {
   projectNSENavigationIcon,
@@ -520,7 +520,7 @@ export function TabBar({
         </div>
       </div>
 
-      {renderPanels ? <NSENavigationDestinationHost controller={controller} idScope={resolvedIdScope} snapshot={snapshot} /> : null}
+      {renderPanels ? <NavigationDestinationHost controller={controller} idScope={resolvedIdScope} snapshot={snapshot} /> : null}
     </>
   );
 }
@@ -757,7 +757,7 @@ export function TabBarOverflowList({
   return (
     <>
       {moreHierarchyActive ? (
-        <NSEHierarchyStack
+        <HierarchyStack
           controller={controller}
           stackController={moreStack}
           applicationChrome={applicationChrome}

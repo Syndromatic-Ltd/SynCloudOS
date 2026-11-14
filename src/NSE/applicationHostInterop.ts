@@ -30,7 +30,7 @@ export { useNSEOverlayFocusScope } from "./Overlays/useNSEOverlay";
 export { NSEViewActivityProvider, useNSEViewActivitySource } from "./Application/viewActivityContext";
 export { NSEViewControllerRendererProvider } from "./Application/viewControllerRenderer";
 
-export { NSELocalisationProvider } from "./Navigation/compactMoreTitle";
+export { LocalisationProvider } from "./Navigation/compactMoreTitle";
 
 // Private window drawing and lifecycle protocols supplied to the application host.
 export { WindowTitleSlotContext, WindowTitlebarContent, WindowTitlebarHostContext } from "./Windows/windowTitlebarContext";

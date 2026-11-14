@@ -23,7 +23,7 @@ import { NSEViewController, type NSEViewControllerOptions } from "../Application
 import { NSEPresence } from "../Animation/NSEPresentation";
 import { useObserve } from "../Objects/useObserve";
 import { NSEButton } from "../Controls/Buttons/NSEButton";
-import { NSEControllerNavigationChromeBoundary, useNSEControllerNavigationChrome } from "../Navigation/NSEApplicationNavigationChrome";
+import { ControllerNavigationChromeBoundary, useNSEControllerNavigationChrome } from "../Navigation/NSEApplicationNavigationChrome";
 import { PageCurlView } from "./PageCurlView";
 import type { PageEvent, PageHandle } from "./pageTypes";
 import { connectPageCurl } from "./pageCurlConnection";
@@ -396,7 +396,7 @@ function PageNavigationView({ controller }: { readonly controller: NSEPageContro
     previousIndex.current = index;
   }, [compact, index]);
   return (
-    <NSEControllerNavigationChromeBoundary>
+    <ControllerNavigationChromeBoundary>
     <div
       className={strip ? "nse-page-controller nse-container-sliding-view" : "nse-page-controller"}
       aria-label={controller.title}
@@ -437,6 +437,6 @@ function PageNavigationView({ controller }: { readonly controller: NSEPageContro
         </div>
       )}
     </div>
-    </NSEControllerNavigationChromeBoundary>
+    </ControllerNavigationChromeBoundary>
   );
 }

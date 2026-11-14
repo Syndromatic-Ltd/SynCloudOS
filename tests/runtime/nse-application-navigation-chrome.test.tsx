@@ -24,16 +24,16 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-libra
 import * as React from "react";
 import { afterEach, describe, expect, it } from "vitest";
 import {
-  NSEApplicationNavigationChromeController,
-  NSEApplicationNavigationChromeProvider,
-  NSEHierarchyStack,
-  NSENavigationStackController,
+  ApplicationNavigationChromeController,
+  ApplicationNavigationChromeProvider,
+  HierarchyStack,
+  NavigationStackController,
   TabBarController,
   useNSEApplicationNavigationChrome,
   type NSEApplicationNavigationChromeState,
 } from "../../src/NSE/Navigation";
 
-import { NSELocalisationProvider, useNSEMoreTitle } from "../../src/NSE/Navigation/compactMoreTitle";
+import { LocalisationProvider, useNSEMoreTitle } from "../../src/NSE/Navigation/compactMoreTitle";
 
 afterEach(cleanup);
 
@@ -53,7 +53,7 @@ function ChromeRegistration({ state }: { readonly state: NSEApplicationNavigatio
   return null;
 }
 
-function StageChromeBackControl({ controller }: { readonly controller: NSEApplicationNavigationChromeController }) {
+function StageChromeBackControl({ controller }: { readonly controller: ApplicationNavigationChromeController }) {
   const snapshot = React.useSyncExternalStore(controller.subscribe, controller.getSnapshot, controller.getSnapshot);
   if (!snapshot.active?.back) return null;
   return <button type="button" aria-label={snapshot.active.back.label} onClick={snapshot.active.back.onActivate}>Back</button>;
@@ -61,15 +61,15 @@ function StageChromeBackControl({ controller }: { readonly controller: NSEApplic
 
 describe("NSE application navigation chrome", () => {
   it("claims released chrome with the latest pending state and stops waiting on unmount", () => {
-    const controller = new NSEApplicationNavigationChromeController();
+    const controller = new ApplicationNavigationChromeController();
     const split = controller.claim("split:initial")!;
     split.update({ title: "Split", back: null });
-    const view = render(<NSEApplicationNavigationChromeProvider controller={controller}>
+    const view = render(<ApplicationNavigationChromeProvider controller={controller}>
       <ChromeRegistration state={chromeState("gallery", "First")} />
-    </NSEApplicationNavigationChromeProvider>);
-    view.rerender(<NSEApplicationNavigationChromeProvider controller={controller}>
+    </ApplicationNavigationChromeProvider>);
+    view.rerender(<ApplicationNavigationChromeProvider controller={controller}>
       <ChromeRegistration state={chromeState("gallery", "Sections")} />
-    </NSEApplicationNavigationChromeProvider>);
+    </ApplicationNavigationChromeProvider>);
     expect(controller.getSnapshot().active?.ownerId).toBe("split:initial");
     act(() => split.release());
     expect(controller.getSnapshot().active).toMatchObject({ ownerId: "gallery", title: "Sections" });
@@ -90,16 +90,16 @@ describe("NSE application navigation chrome", () => {
         { id: "library", label: "Library", icon: { kind: "template", name: "library" } },
       ],
     });
-    const stack = new NSENavigationStackController({
+    const stack = new NavigationStackController({
       id: "unclaimed-hierarchy-stack",
       rootDestinationId: "home",
       destinationIds: ["home", "library"],
     });
-    const controller = new NSEApplicationNavigationChromeController();
+    const controller = new ApplicationNavigationChromeController();
     render(
-      <NSEApplicationNavigationChromeProvider controller={controller}>
-        <NSEHierarchyStack controller={tabs} stackController={stack} aria-label="Unclaimed hierarchy" />
-      </NSEApplicationNavigationChromeProvider>,
+      <ApplicationNavigationChromeProvider controller={controller}>
+        <HierarchyStack controller={tabs} stackController={stack} aria-label="Unclaimed hierarchy" />
+      </ApplicationNavigationChromeProvider>,
     );
 
     expect(controller.getSnapshot().active).toBeNull();
@@ -112,7 +112,7 @@ describe("NSE application navigation chrome", () => {
   });
 
   it("rejects a second application claim and ignores a stale release", () => {
-    const controller = new NSEApplicationNavigationChromeController();
+    const controller = new ApplicationNavigationChromeController();
     const first = controller.claim("application:fixture");
     expect(first).not.toBeNull();
     first?.update({ title: "First destination", back: null });
@@ -142,18 +142,18 @@ describe("NSE application navigation chrome", () => {
         { id: "library", label: "Library", accessibleLabel: "Library destination", icon: { kind: "template", name: "library" } },
       ],
     });
-    const stack = new NSENavigationStackController({
+    const stack = new NavigationStackController({
       id: "fixture-stack",
       rootDestinationId: "home",
       destinationIds: ["home", "library"],
     });
-    const chromeController = new NSEApplicationNavigationChromeController();
+    const chromeController = new ApplicationNavigationChromeController();
     render(
-      <NSEApplicationNavigationChromeProvider controller={chromeController}>
+      <ApplicationNavigationChromeProvider controller={chromeController}>
         <button type="button" onClick={() => { void stack.push("library"); }}>
           Open Library destination
         </button>
-        <NSEHierarchyStack
+        <HierarchyStack
           controller={tabs}
           stackController={stack}
           applicationChrome={{ ownerId: "application:hierarchy-fixture" }}
@@ -162,7 +162,7 @@ describe("NSE application navigation chrome", () => {
           aria-label="Hierarchy fixture"
         />
         <StageChromeBackControl controller={chromeController} />
-      </NSEApplicationNavigationChromeProvider>,
+      </ApplicationNavigationChromeProvider>,
     );
 
     const open = screen.getByRole("button", { name: "Open Library destination" });
@@ -191,12 +191,12 @@ describe("NSE application navigation chrome", () => {
   });
 
   it("retains one explicit application claim through StrictMode effect replay", () => {
-    const controller = new NSEApplicationNavigationChromeController();
+    const controller = new ApplicationNavigationChromeController();
     render(
       <React.StrictMode>
-        <NSEApplicationNavigationChromeProvider controller={controller}>
+        <ApplicationNavigationChromeProvider controller={controller}>
           <ChromeRegistration state={chromeState("application:strict", "Strict destination")} />
-        </NSEApplicationNavigationChromeProvider>
+        </ApplicationNavigationChromeProvider>
       </React.StrictMode>,
     );
 
@@ -218,7 +218,7 @@ it("localises compact navigation through an NSE-owned host capability and releas
     t: (key: string) => key === "navigation.more" ? title : key,
   };
   function MoreTitle() { return <output>{useNSEMoreTitle()}</output>; }
-  const view = render(<NSELocalisationProvider value={locale}><MoreTitle /></NSELocalisationProvider>);
+  const view = render(<LocalisationProvider value={locale}><MoreTitle /></LocalisationProvider>);
   expect(screen.getByText("More destinations")).toBeTruthy();
   act(() => { title = "Weitere Ziele"; for (const listener of listeners) listener(); });
   expect(screen.getByText("Weitere Ziele")).toBeTruthy();

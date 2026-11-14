@@ -23,15 +23,15 @@ import { registerNSEAuthoringFinalizer } from "../Application/authoringLifecycle
 import { connectNSENavigationRestoration, type NSENavigationRestorationDescriptor } from "./navigationRestoration";
 import { observe } from "../Objects/observable";
 import type {
-  NSENavigationStackRestorationSnapshot,
-  NSENavigationStackSnapshot,
+  NavigationStackRestorationSnapshot,
+  NavigationStackSnapshot,
 } from "./navigationTypes";
 
-export interface NSENavigationStackControllerOptions extends NSEViewControllerOptions {
+export interface NavigationStackControllerOptions extends NSEViewControllerOptions {
   readonly id: string;
   readonly rootDestinationId?: string | null;
   readonly destinationIds: readonly string[];
-  readonly restoration?: NSENavigationRestorationDescriptor<NSENavigationStackController, unknown>;
+  readonly restoration?: NSENavigationRestorationDescriptor<NavigationStackController, unknown>;
   readonly onPush?: (destinationId: string, options: { readonly signal: AbortSignal }) => void | Promise<void>;
 }
 
@@ -65,25 +65,25 @@ function awaitAbortable<T>(value: Promise<T>, signal: AbortSignal): Promise<T> {
   });
 }
 
-function freezeSnapshot(input: Omit<NSENavigationStackSnapshot, "path"> & { readonly path: readonly string[] }): NSENavigationStackSnapshot {
+function freezeSnapshot(input: Omit<NavigationStackSnapshot, "path"> & { readonly path: readonly string[] }): NavigationStackSnapshot {
   return Object.freeze({ ...input, path: Object.freeze([...input.path]) });
 }
 
 /** Owns hierarchy path semantics only; it never creates or replaces content. */
-export class NSENavigationStackController extends NSEViewController<NSENavigationStackSnapshot> {
+export class NavigationStackController extends NSEViewController<NavigationStackSnapshot> {
   /** Semantic snapshots never publish a fabricated path change on disposal. */
   override readonly subscribe = (listener: () => void): (() => void) => observe(this, () => { if (!this.isDisposed) listener(); });
   readonly id: string;
   readonly #destinationIds: ReadonlySet<string>;
   readonly #rootDestinationId: string | null;
-  readonly #onPush: NSENavigationStackControllerOptions["onPush"];
+  readonly #onPush: NavigationStackControllerOptions["onPush"];
   #path: readonly string[] = Object.freeze([]);
-  #snapshot: NSENavigationStackSnapshot;
+  #snapshot: NavigationStackSnapshot;
   #revision = 0;
   #pending: AbortController | null = null;
   #intentRevision = 0;
 
-  constructor(options: NSENavigationStackControllerOptions) {
+  constructor(options: NavigationStackControllerOptions) {
     super(options);
     this.id = requireId(options.id, "Navigation stack id");
     const ids = options.destinationIds.map((id) => requireId(id, "Navigation destination id"));
@@ -141,7 +141,7 @@ export class NSENavigationStackController extends NSEViewController<NSENavigatio
     this.#publish();
   }
 
-  restore(snapshot: NSENavigationStackRestorationSnapshot): void {
+  restore(snapshot: NavigationStackRestorationSnapshot): void {
     this.#invalidatePendingIntent();
     this.#assertLive();
     const path = (snapshot?.version === undefined || snapshot.version === 1) && Array.isArray(snapshot?.path)
@@ -173,7 +173,7 @@ export class NSENavigationStackController extends NSEViewController<NSENavigatio
     pending?.abort(abortError());
   }
 
-  #makeSnapshot(): NSENavigationStackSnapshot {
+  #makeSnapshot(): NavigationStackSnapshot {
     const currentDestinationId = this.#path.at(-1) ?? this.#rootDestinationId;
     const backDestinationId = this.#path.length > 0
       ? this.#path.length > 1 ? this.#path.at(-2)! : this.#rootDestinationId

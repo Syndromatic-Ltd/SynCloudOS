@@ -40,7 +40,7 @@ import { NSESplitView } from "./NSESplitView";
 import { nseSplitViewLayout, type NSESplitViewController } from "./NSESplitViewController";
 import type { NSESplitViewItem } from "./NSESplitViewItem";
 import { useSourceListFrame } from "../../Navigation/SourceList/sourceListFrameContext";
-import { NSEControllerNavigationChromeBoundary, useNSEControllerNavigationChrome } from "../../Navigation/NSEApplicationNavigationChrome";
+import { ControllerNavigationChromeBoundary, useNSEControllerNavigationChrome } from "../../Navigation/NSEApplicationNavigationChrome";
 import "./splitViewController.css";
 import { WindowTitleSlotContext } from "../../Windows/windowTitlebarContext";
 
@@ -237,7 +237,7 @@ export function SplitViewControllerView({ controller }: { readonly controller: N
   const keepAlive = presentsContent && ownerDocument
     ? items.map((item) => createPortal(<NSEChildViewControllerView controller={item.viewController} />, hostFor(item.identifier)!, item.identifier))
     : null;
-  return <NSEControllerNavigationChromeBoundary>{keepAlive}{renderPresentation()}</NSEControllerNavigationChromeBoundary>;
+  return <ControllerNavigationChromeBoundary>{keepAlive}{renderPresentation()}</ControllerNavigationChromeBoundary>;
 
   function renderPresentation() {
     if (!presentsContent) {
