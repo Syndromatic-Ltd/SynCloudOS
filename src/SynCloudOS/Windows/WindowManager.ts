@@ -203,7 +203,7 @@ export class WindowManager {
   readonly host: WindowHostEnvironment;
   readonly #unsubscribeHost: () => void;
   readonly #fullScreenIntents = new Map<string, boolean>();
-  readonly #surfaceTransfers = new Map<string, { readonly generation: number; binding: WindowSurfaceBinding | null }>();
+  readonly #surfaceTransfers = new Map<string, { readonly generation: number; binding: WindowSurfaceBinding | null; lastKeyWindowId: string | null }>();
   #surfaceGeneration = 0;
 
   constructor(readonly dependencies: WindowManagerDependencies) {
@@ -854,8 +854,7 @@ export class WindowManager {
         controller.replaceRecord({ ...controller.record, isKey: false, isMain: false });
       }
     }
-    const { windowResponderId: _window, documentResponderId: _document, ...anchors } = this.dependencies.focus.getActiveAnchors();
-    this.dependencies.focus.setActiveAnchors(anchors);
+    this.#clearWindowFocusAnchors();
     this.#publish(false);
   }
 
@@ -1036,7 +1035,7 @@ export class WindowManager {
         record.state !== "open" || (record.fullScreen ?? "off") !== "off" ||
         this.#snapshot.blockedWindowControllerIds.includes(windowId) || this.#surfaceTransfers.has(windowId)) return false;
     const generation = ++this.#surfaceGeneration;
-    const transfer = { generation, binding: null as WindowSurfaceBinding | null };
+    const transfer = { generation, binding: null as WindowSurfaceBinding | null, lastKeyWindowId: null as string | null };
     this.#surfaceTransfers.set(windowId, transfer);
     try {
       const binding = await this.host.bind(windowId, { generation, title: record.title, bounds: record.bounds });
@@ -1151,6 +1150,28 @@ export class WindowManager {
         return;
       }
       if (!transfer.binding || this.#closeReservations.has(event.windowId)) return;
+      if (event.kind === "activated" || event.kind === "deactivated") {
+        const windows = this.#orderedControllers().filter(({ id, record }) =>
+          record.state === "open" && this.presentingSurface(id) === transfer.binding);
+        const key = windows.find(({ record }) => record.isKey);
+        if (event.kind === "deactivated") {
+          if (key) {
+            this.#rememberCurrentWindowFocus();
+            transfer.lastKeyWindowId = key.id;
+            key.replaceRecord({ ...key.record, isKey: false });
+            this.#clearWindowFocusAnchors();
+            this.#publish(false);
+          }
+        } else if (!key) {
+          const blocked = this.#blockedWindowIds();
+          const eligible = windows.filter(({ id }) => !blocked.has(id) && !this.#closeReservations.has(id));
+          const preferred = eligible.find(({ id }) => id === transfer.lastKeyWindowId)
+            ?? eligible.find(({ id }) => id === event.windowId)
+            ?? eligible.at(-1);
+          if (preferred) this.#makeKey(preferred.id, true);
+        }
+        return;
+      }
     }
     const controller = this.#controllers.get(event.windowId);
     if (!controller || controller.record.state !== "open") return;
@@ -1913,6 +1934,11 @@ export class WindowManager {
     if (!windowResponder || !windowResponder.id.startsWith("window:")) return;
     const windowId = windowResponder.id.slice("window:".length);
     if (this.#controllers.has(windowId)) this.#lastFocusedByWindow.set(windowId, focused);
+  }
+
+  #clearWindowFocusAnchors(): void {
+    const { windowResponderId: _window, documentResponderId: _document, ...anchors } = this.dependencies.focus.getActiveAnchors();
+    this.dependencies.focus.setActiveAnchors(anchors);
   }
 
   #focusTarget(controller: WindowController): string {

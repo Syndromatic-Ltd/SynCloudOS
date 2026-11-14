@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { WindowHostEnvironment, WindowHostEvent, WindowSurfaceBinding } from "../../src/SynCloudOS/Windows/WindowHostEnvironment";
-import { createWindowTestDependencies, standardWindow } from "../fixtures/windowTestDependencies";
+import { createWindowTestDependencies, modalWindow, standardWindow } from "../fixtures/windowTestDependencies";
 
 function fixture() {
   let listener: ((event: WindowHostEvent) => void) | undefined;
@@ -71,6 +71,33 @@ describe("window host surface bindings", () => {
       await expect(detach).resolves.toBe(false);
       expect(f.manager.detachedSurface(owner.id)).toBeNull();
       expect(f.unbind).toHaveBeenCalledWith(owner.id, binding.generation);
+    } finally {
+      await f.cleanup();
+    }
+  });
+
+  it("restores the popup's logical key window without making the blocked parent key", async () => {
+    const f = fixture();
+    try {
+      const owner = f.manager.create(standardWindow("editor"));
+      await f.manager.open(owner.id);
+      const detach = f.manager.detach(owner.id);
+      const { generation } = f.acknowledge();
+      await expect(detach).resolves.toBe(true);
+      const modal = f.manager.create(modalWindow("inspector", owner.id));
+      await f.manager.open(modal.id);
+      expect(f.manager.snapshot().keyWindowControllerId).toBe(modal.id);
+      expect(f.manager.snapshot().mainWindowControllerId).toBe(owner.id);
+
+      f.send({ kind: "deactivated", windowId: owner.id, generation });
+      expect(f.manager.snapshot().keyWindowControllerId).toBeNull();
+      expect(f.manager.snapshot().mainWindowControllerId).toBe(owner.id);
+      expect(f.focus.getActiveAnchors().windowResponderId).toBeUndefined();
+
+      f.send({ kind: "activated", windowId: owner.id, generation });
+      expect(f.manager.snapshot().keyWindowControllerId).toBe(modal.id);
+      expect(f.manager.snapshot().mainWindowControllerId).toBe(owner.id);
+      expect(f.focus.getActiveAnchors().windowResponderId).toBe(modal.windowResponderId);
     } finally {
       await f.cleanup();
     }
