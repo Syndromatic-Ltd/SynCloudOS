@@ -21,7 +21,7 @@
 import { NSEWindowLayoutContext, NSEWindowLayoutModel } from "../../NSE/hostComposition";
 
 import React, { useCallback, useLayoutEffect, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { useNSEPresenceExiting, useNSEPresentation, type NSEPresentationSpec } from "../../NSE/Animation";
+import { useNSEPresenceExiting, useNSEPresentation, type PresentationSpec } from "../../NSE/Animation";
 import {
   NSEControlRuntimeProvider,
   NSEFocusPortProvider,
@@ -90,7 +90,7 @@ const windowHostMotion = Object.freeze({
     duration: 0.16,
     timing: "linear",
     tracks: Object.freeze([Object.freeze({ keyPath: "opacity", values: Object.freeze([1, 0]) })]),
-  }) satisfies NSEPresentationSpec,
+  }) satisfies PresentationSpec,
 });
 const popoverWindowMotion = { exit: { duration: 0.15, timing: "linear", tracks: [{ keyPath: "opacity", values: [1, 1] }] } } satisfies Parameters<typeof useNSEPresentation>[1];
 

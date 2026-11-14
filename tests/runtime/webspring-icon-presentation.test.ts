@@ -19,7 +19,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { compileNSEPresentation, type NSEPresentationEnter, type NSEPresentationSpec } from "../../src/NSE/Animation";
+import { compileNSEPresentation, type PresentationEnter, type PresentationSpec } from "../../src/NSE/Animation";
 import {
   getWebspringRadialExitForIcon,
   resolveWebspringIconPresentation,
@@ -31,8 +31,8 @@ import {
 const radialExit = getWebspringRadialExitForIcon(0, 3, 90);
 const icon = (state: WebspringIconState, reducedMotion = false, index = 0) =>
   resolveWebspringIconPresentation({ reducedMotion, state, index, total: 3, radialExit });
-const into = (enter: NSEPresentationEnter, previous: string | null) => typeof enter === "function" ? enter(previous) : enter;
-const endpoints = (spec: NSEPresentationSpec | null) =>
+const into = (enter: PresentationEnter, previous: string | null) => typeof enter === "function" ? enter(previous) : enter;
+const endpoints = (spec: PresentationSpec | null) =>
   Object.fromEntries(compileNSEPresentation(spec!, "icon").animations.map(({ keyPath, from, to }) => [keyPath, [from, to]]));
 
 describe("launcher icon presentation", () => {

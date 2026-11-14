@@ -21,18 +21,18 @@
 import type { AFXAnimationTiming } from "../../FX/AnimationFX/animationTypes";
 import {
   NSEAnimationDefaults,
-  type NSELayoutTransitionTiming,
-  type NSEPresentationSpec,
-  type NSETransformComponents,
-  type NSETranslationUnit,
+  type LayoutTransitionTiming,
+  type PresentationSpec,
+  type TransformComponents,
+  type TranslationUnit,
 } from "../Animation";
 
 export type NSEPreferencesPaneDirection = "forward" | "back";
 
 /** A view's AnimationFX presentations into and out of the panel. */
 export interface NSEPreferencesPresentation {
-  readonly enter: NSEPresentationSpec;
-  readonly exit: NSEPresentationSpec;
+  readonly enter: PresentationSpec;
+  readonly exit: PresentationSpec;
 }
 
 export interface NSEPreferencesTransitions {
@@ -46,12 +46,12 @@ export interface NSEPreferencesTransitions {
   readonly pane: (direction: NSEPreferencesPaneDirection) => NSEPreferencesPresentation;
   readonly back: NSEPreferencesPresentation;
   /** How the panel's body grows and shrinks to the pane it shows. */
-  readonly resize: NSELayoutTransitionTiming;
+  readonly resize: LayoutTransitionTiming;
 }
 
 interface Pose {
   readonly opacity: number;
-  readonly transform?: NSETransformComponents;
+  readonly transform?: TransformComponents;
 }
 
 const bezier = (x1: number, y1: number, x2: number, y2: number): AFXAnimationTiming =>
@@ -62,18 +62,18 @@ const emphasized = NSEAnimationDefaults.easing.emphasized;
 // Framer tweens given only a duration ease with easeInOut.
 const framerTween = "ease-in-out";
 
-function move(from: Pose, to: Pose, duration: number, timing: AFXAnimationTiming, unit: NSETranslationUnit = "px"): NSEPresentationSpec {
-  const tracks: NSEPresentationSpec["tracks"][number][] = [{ keyPath: "opacity", values: [from.opacity, to.opacity] }];
+function move(from: Pose, to: Pose, duration: number, timing: AFXAnimationTiming, unit: TranslationUnit = "px"): PresentationSpec {
+  const tracks: PresentationSpec["tracks"][number][] = [{ keyPath: "opacity", values: [from.opacity, to.opacity] }];
   if (from.transform || to.transform) tracks.push({ keyPath: "transform", unit, values: [from.transform ?? {}, to.transform ?? {}] });
   return Object.freeze({ duration, timing, tracks: Object.freeze(tracks) });
 }
 
 const shown: Pose = Object.freeze({ opacity: 1 });
 const hidden: Pose = Object.freeze({ opacity: 0 });
-const presentation = (enter: NSEPresentationSpec, exit: NSEPresentationSpec): NSEPreferencesPresentation => Object.freeze({ enter, exit });
+const presentation = (enter: PresentationSpec, exit: PresentationSpec): NSEPreferencesPresentation => Object.freeze({ enter, exit });
 
 /** Enters from `from` and leaves toward `to`, whichever way the stack moves. */
-function directional(forward: { from: Pose; to: Pose }, back: { from: Pose; to: Pose }, duration: number, unit: NSETranslationUnit) {
+function directional(forward: { from: Pose; to: Pose }, back: { from: Pose; to: Pose }, duration: number, unit: TranslationUnit) {
   const forwards = presentation(move(forward.from, shown, duration, emphasized, unit), move(shown, forward.to, duration, emphasized, unit));
   const backwards = presentation(move(back.from, shown, duration, emphasized, unit), move(shown, back.to, duration, emphasized, unit));
   return (direction: NSEPreferencesPaneDirection) => direction === "back" ? backwards : forwards;

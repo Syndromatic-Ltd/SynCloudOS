@@ -23,7 +23,7 @@ import { useNSEThemeInteraction } from "../../../../NSE/hostComposition";
 import { normalizeBundleIdentifier } from "../../../../SynCloudOS/Identity/bundleIdentifier.mjs";
 import { WebspringLaunchDim } from "../../../WebspringLaunchDim";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent, type ReactNode, type TransitionEvent } from "react";
-import { NSELayoutView, useNSEAnimationEnvironment, useNSEPresentation, type NSELayoutTransitionTiming } from "../../../../NSE/Animation";
+import { LayoutView, useNSEAnimationEnvironment, useNSEPresentation, type LayoutTransitionTiming } from "../../../../NSE/Animation";
 import { Badge, LoadingSpinner } from "../../../../NSE/NSE";
 import { useNSEFeedback } from "../../../../NSE/hostComposition";
 import { NSEButton, NSESegmentedControl } from "@syndromatic/syncloudos/nse/controls";
@@ -89,7 +89,7 @@ interface BoardEntryProps {
   model: WebspringViewModel;
   exit: WebspringRadialExit | undefined;
   actions: WebspringViewProps["actions"];
-  reorderMotion: NSELayoutTransitionTiming | null;
+  reorderMotion: LayoutTransitionTiming | null;
   onLongPress(itemId: string, pointerId: number): void;
   onMoved(title: string, index: number): void;
 }
@@ -155,7 +155,7 @@ function BoardIcon({ app, opening, ...entry }: BoardEntryProps & {
   // A slot springs to wherever an update lays it out (a new cell on reorder,
   // or the grid shifting); the dragged icon follows the pointer's proxy, so
   // its slot moves at once.
-  return <NSELayoutView className="webspring-board-slot" layoutTransition={dragging ? null : reorderMotion}><button
+  return <LayoutView className="webspring-board-slot" layoutTransition={dragging ? null : reorderMotion}><button
     type="button"
     {...drawing.events} {...nseControlHooks({ control: "app-icon", enabled: !disabled, highlighted: drawing.highlighted, hovered: drawing.hovered, focused: drawing.focused, selected: editing && dragging, variants: { type: "application" } })} data-nse-part="content"
     className={`webspring-board-icon ${editing ? "is-editing" : ""} ${dragging ? "is-dragging" : ""} ${disabled ? "is-disabled" : ""}`}
@@ -183,7 +183,7 @@ function BoardIcon({ app, opening, ...entry }: BoardEntryProps & {
       </span>
       <span data-nse-part="title" className="webspring-board-icon-label">{app.displayName}</span>
     </BoardIconArtwork>
-  </button></NSELayoutView>;
+  </button></LayoutView>;
 }
 
 function BoardFolderIcon({ folder, onOpen, ...entry }: BoardEntryProps & {
@@ -196,7 +196,7 @@ function BoardFolderIcon({ folder, onOpen, ...entry }: BoardEntryProps & {
   const open = model.folders.openFolderId === folder.id;
   const drawing = useNSEThemeInteraction<HTMLButtonElement>(true, true);
 
-  return <NSELayoutView className="webspring-board-slot" layoutTransition={dragging ? null : reorderMotion}><button
+  return <LayoutView className="webspring-board-slot" layoutTransition={dragging ? null : reorderMotion}><button
     type="button"
     {...drawing.events} {...nseControlHooks({ control: "app-icon", highlighted: drawing.highlighted, hovered: drawing.hovered, focused: drawing.focused, selected: open || dragging, variants: { type: "folder" } })} data-nse-part="content"
     className={`webspring-board-icon is-folder ${editing ? "is-editing" : ""} ${dragging ? "is-dragging" : ""}`}
@@ -220,7 +220,7 @@ function BoardFolderIcon({ folder, onOpen, ...entry }: BoardEntryProps & {
       </span>
       <span data-nse-part="title" className="webspring-board-icon-label">{folder.title}</span>
     </BoardIconArtwork>
-  </button></NSELayoutView>;
+  </button></LayoutView>;
 }
 
 /** The entries a drag arbitrates over: each visible icon's artwork rect without

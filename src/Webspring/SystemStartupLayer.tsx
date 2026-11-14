@@ -20,7 +20,7 @@
 
 import type { SystemStartupPhase } from "../SynCloudOS/RootRuntime";
 import { useRef, type CSSProperties, type ReactNode } from "react";
-import { NSEPresence, useNSEPresentation } from "../NSE/Animation";
+import { Presence, useNSEPresentation } from "../NSE/Animation";
 import { LoadingSpinner } from "../NSE/NSE";
 import { useWebspringLocale } from "./webspringLocale";
 import { useSystemStartupMotion, type SystemStartupMotionPreset } from "./SystemStartupLayer.transitions";
@@ -57,5 +57,5 @@ function StartupScreen({ showMaterial }: { showMaterial: boolean }) {
 
 export function SystemStartupLayer({ phase }: { phase: SystemStartupPhase }) {
   // The whole screen leaves once every part's exit has settled.
-  return <NSEPresence>{phase !== "complete" ? <StartupScreen showMaterial={phase === "material"} /> : null}</NSEPresence>;
+  return <Presence>{phase !== "complete" ? <StartupScreen showMaterial={phase === "material"} /> : null}</Presence>;
 }

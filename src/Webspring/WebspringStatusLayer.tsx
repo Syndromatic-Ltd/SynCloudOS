@@ -19,7 +19,7 @@
  */
 
 import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
-import { NSEPresence } from "../NSE/Animation";
+import { Presence } from "../NSE/Animation";
 import { NSEAlertBackdrop } from "../NSE/NSE";
 import { SystemAlert, SystemAlertAssetCache, useResolvedMode } from "../SynCloudOSReact";
 import { FocusScope, useKernelSynCloudOS, useRuntimeSelector } from "../SynCloudOSReact";
@@ -58,7 +58,7 @@ export function WebspringStatusLayer({ errors }: { errors: CapturedSynCloudOSErr
     <>
       <SystemAlertAssetCache />
       {/* The backdrop and alert play their AnimationFX exits before removal. */}
-      <NSEPresence>
+      <Presence>
         {latest ? (
           <FocusScope asChild key={latest.id} scopeId={`system-alert:${latest.id}`} kind="modal" parentResponderId="workspace" trapFocus>
             <NSEAlertBackdrop
@@ -77,7 +77,7 @@ export function WebspringStatusLayer({ errors }: { errors: CapturedSynCloudOSErr
             </NSEAlertBackdrop>
           </FocusScope>
         ) : null}
-      </NSEPresence>
+      </Presence>
     </>
   );
 }

@@ -25,7 +25,7 @@ import * as React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { AFXTimingFunction } from "../../src/FX/AnimationFX/public";
 import {
-  NSEAnimationEnvironmentProvider,
+  AnimationEnvironmentProvider,
   useNSEAnimationEnvironment,
 } from "../../src/NSE/Animation/NSEAnimationEnvironment";
 // The framework's curves and durations, published as NSEAnimationContext.current.
@@ -164,9 +164,9 @@ describe("NSE animation environment", () => {
   it("falls back to the system media query and tracks modern media changes", () => {
     const media = installMatchMedia(false);
     render(
-      <NSEAnimationEnvironmentProvider>
+      <AnimationEnvironmentProvider>
         <EnvironmentProbe />
-      </NSEAnimationEnvironmentProvider>,
+      </AnimationEnvironmentProvider>,
     );
 
     expect(screen.getByTestId("environment").dataset.reducedMotion).toBe("false");
@@ -183,9 +183,9 @@ describe("NSE animation environment", () => {
   it("supports legacy media-listener subscriptions", () => {
     const media = installMatchMedia(false, "legacy");
     render(
-      <NSEAnimationEnvironmentProvider>
+      <AnimationEnvironmentProvider>
         <EnvironmentProbe />
-      </NSEAnimationEnvironmentProvider>,
+      </AnimationEnvironmentProvider>,
     );
 
     expect(media.addListener).toHaveBeenCalledWith(expect.any(Function));
@@ -197,20 +197,20 @@ describe("NSE animation environment", () => {
   it("composes explicit provider requests monotonically", () => {
     installMatchMedia(false);
     const view = render(
-      <NSEAnimationEnvironmentProvider reducedMotion>
-        <NSEAnimationEnvironmentProvider reducedMotion={false}>
+      <AnimationEnvironmentProvider reducedMotion>
+        <AnimationEnvironmentProvider reducedMotion={false}>
           <EnvironmentProbe />
-        </NSEAnimationEnvironmentProvider>
-      </NSEAnimationEnvironmentProvider>,
+        </AnimationEnvironmentProvider>
+      </AnimationEnvironmentProvider>,
     );
     expect(screen.getByTestId("environment").dataset.reducedMotion).toBe("true");
 
     view.rerender(
-      <NSEAnimationEnvironmentProvider reducedMotion={false}>
-        <NSEAnimationEnvironmentProvider reducedMotion>
+      <AnimationEnvironmentProvider reducedMotion={false}>
+        <AnimationEnvironmentProvider reducedMotion>
           <EnvironmentProbe />
-        </NSEAnimationEnvironmentProvider>
-      </NSEAnimationEnvironmentProvider>,
+        </AnimationEnvironmentProvider>
+      </AnimationEnvironmentProvider>,
     );
     expect(screen.getByTestId("environment").dataset.reducedMotion).toBe("true");
   });
@@ -218,22 +218,22 @@ describe("NSE animation environment", () => {
   it("keeps independent roots scoped to their own provider values", () => {
     installMatchMedia(false);
     const first = render(
-      <NSEAnimationEnvironmentProvider reducedMotion>
+      <AnimationEnvironmentProvider reducedMotion>
         <EnvironmentProbe label="first" />
-      </NSEAnimationEnvironmentProvider>,
+      </AnimationEnvironmentProvider>,
     );
     const second = render(
-      <NSEAnimationEnvironmentProvider reducedMotion={false}>
+      <AnimationEnvironmentProvider reducedMotion={false}>
         <EnvironmentProbe label="second" />
-      </NSEAnimationEnvironmentProvider>,
+      </AnimationEnvironmentProvider>,
     );
 
     expect(screen.getByTestId("first").dataset.reducedMotion).toBe("true");
     expect(screen.getByTestId("second").dataset.reducedMotion).toBe("false");
     first.rerender(
-      <NSEAnimationEnvironmentProvider reducedMotion={false}>
+      <AnimationEnvironmentProvider reducedMotion={false}>
         <EnvironmentProbe label="first" />
-      </NSEAnimationEnvironmentProvider>,
+      </AnimationEnvironmentProvider>,
     );
     expect(screen.getByTestId("first").dataset.reducedMotion).toBe("false");
     expect(screen.getByTestId("second").dataset.reducedMotion).toBe("false");

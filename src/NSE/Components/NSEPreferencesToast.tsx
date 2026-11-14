@@ -21,7 +21,7 @@
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState, type HTMLAttributes, type ReactNode, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import "./nsePreferencesToast.css";
-import { NSEPresence, useNSEAnimationEnvironment, useNSEPresentation, useNSEPresenceExiting } from "../Animation";
+import { Presence, useNSEAnimationEnvironment, useNSEPresentation, useNSEPresenceExiting } from "../Animation";
 import {
   resolveNSEPreferencesTransitions,
   type NSEPreferencesPaneDirection,
@@ -260,7 +260,7 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
   // Mounted whether or not it is open: returning null on close would unmount the
   // panel on the same frame the flag flips, and the exit would never play.
   return createPortal(
-    <NSEPresence onExitComplete={() => setActiveId(null)}>
+    <Presence onExitComplete={() => setActiveId(null)}>
       {open ? (
         <NSEFocusScope options={{ scopeId: focusScopeId ?? "nse-preferences-toast", kind: "modal", modal: true, trapFocus: true, asChild: true }}>
           <div
@@ -301,15 +301,15 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
                 // through each other without either escaping the plate or
                 // changing the header's height while it happens.
                 <span data-nse-part="header" className="nse-prefs-title-clip">
-                  <NSEPresence initial={false}>
+                  <Presence initial={false}>
                     <PaneTitle key={active ? active.id : "__root"}>
                       {active ? active.label : title}
                     </PaneTitle>
-                  </NSEPresence>
+                  </Presence>
                 </span>
               )}
               leading={(
-                <NSEPresence initial={false}>
+                <Presence initial={false}>
                   {active ? (
                     <BackSlot key="back">
                       <NSEButton
@@ -322,7 +322,7 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
                       />
                     </BackSlot>
                   ) : null}
-                </NSEPresence>
+                </Presence>
               )}
             />
             <PreferencesBody height={bodyHeight}>
@@ -331,7 +331,7 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
                   changed, THEN the box resized — and doubled how long the whole
                   move took. */}
               <div data-nse-part="content" className="nse-prefs-panes">
-                <NSEPresence initial={false}>
+                <Presence initial={false}>
                 <PaneSlide key={active ? active.id : "__list"}>
                   <div data-nse-part="content" className="nse-prefs-pane-content" ref={trackContent}>
                   {active ? active.render() : (
@@ -369,7 +369,7 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
                   )}
                   </div>
                 </PaneSlide>
-                </NSEPresence>
+                </Presence>
               </div>
             </PreferencesBody>
             </PaneDirectionContext.Provider>
@@ -377,7 +377,7 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
           </div>
         </NSEFocusScope>
       ) : null}
-    </NSEPresence>,
+    </Presence>,
     document.body
   );
 }

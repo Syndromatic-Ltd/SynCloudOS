@@ -32,43 +32,43 @@ import type { AFXLayer } from "../../FX/AnimationFX/AFXLayer";
 import type { AFXRenderer, AFXRendererOptions } from "../../FX/AnimationFX/AFXRenderer";
 
 /** The layer capability NSE needs; host and app clients satisfy it structurally. */
-interface NSEAnimationLayers {
+interface AnimationLayers {
   createRenderer(target: object, options?: Pick<AFXRendererOptions, "maximumQuads" | "onRenderError">, signal?: AbortSignal): AFXRenderer;
   bindLayer?(target: object, signal?: AbortSignal, options?: Readonly<{ layout?: "css" }>): AFXLayer;
 }
 
 /** Where NSE views run presentation animations: an AnimationFX service and
  * the owner identity its leases carry (the shell, or the mounted app). */
-export interface NSEAnimator {
+export interface Animator {
   readonly animations: Pick<RuntimeAnimationService, "acquireOwner" | "animate">;
   readonly ownerAppId: string;
 }
 
-export interface NSEAnimationEnvironment {
+export interface AnimationEnvironment {
   readonly reducedMotion: boolean;
   /** Absent outside a runtime: views then appear in their final state. */
-  readonly animator: NSEAnimator | null;
+  readonly animator: Animator | null;
   /** Scoped layer rendering and frame timing for custom NSE/shell artwork. */
-  readonly layers: NSEAnimationLayers | null;
+  readonly layers: AnimationLayers | null;
   readonly frames: AFXFrameScheduler | null;
 }
 
-export interface NSEAnimationEnvironmentProviderProps extends PropsWithChildren {
+export interface AnimationEnvironmentProviderProps extends PropsWithChildren {
   readonly reducedMotion?: boolean;
   /** Replaces the inherited animator (e.g. with an application-owned one). */
-  readonly animator?: NSEAnimator | null;
-  readonly layers?: NSEAnimationLayers | null;
+  readonly animator?: Animator | null;
+  readonly layers?: AnimationLayers | null;
   readonly frames?: AFXFrameScheduler | null;
 }
 
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
-const defaultEnvironment: NSEAnimationEnvironment = Object.freeze({
+const defaultEnvironment: AnimationEnvironment = Object.freeze({
   reducedMotion: false,
   animator: null,
   layers: null,
   frames: null,
 });
-const NSEAnimationEnvironmentContext = createContext<NSEAnimationEnvironment | null>(null);
+const AnimationEnvironmentContext = createContext<AnimationEnvironment | null>(null);
 
 export function getSystemReducedMotion(): boolean {
   if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
@@ -98,19 +98,19 @@ export function subscribeSystemReducedMotion(listener: () => void): () => void {
   return () => undefined;
 }
 
-export function NSEAnimationEnvironmentProvider({
+export function AnimationEnvironmentProvider({
   reducedMotion: requestedReducedMotion,
   animator: requestedAnimator,
   layers: requestedLayers,
   frames: requestedFrames,
   children,
-}: NSEAnimationEnvironmentProviderProps): ReactNode {
+}: AnimationEnvironmentProviderProps): ReactNode {
   const systemReducedMotion = useSyncExternalStore(
     subscribeSystemReducedMotion,
     getSystemReducedMotion,
     getServerReducedMotion,
   );
-  const inherited = useContext(NSEAnimationEnvironmentContext) ?? defaultEnvironment;
+  const inherited = useContext(AnimationEnvironmentContext) ?? defaultEnvironment;
   const environment = useMemo(
     () => Object.freeze({
       reducedMotion:
@@ -123,15 +123,15 @@ export function NSEAnimationEnvironmentProvider({
     [inherited.reducedMotion, inherited.animator, inherited.layers, inherited.frames, requestedAnimator, requestedLayers, requestedFrames, requestedReducedMotion, systemReducedMotion],
   );
   return (
-    <NSEAnimationEnvironmentContext.Provider value={environment}>
+    <AnimationEnvironmentContext.Provider value={environment}>
       {children}
-    </NSEAnimationEnvironmentContext.Provider>
+    </AnimationEnvironmentContext.Provider>
   );
 }
 
-export function useNSEAnimationEnvironment(): NSEAnimationEnvironment {
-  return useContext(NSEAnimationEnvironmentContext) ?? defaultEnvironment;
+export function useNSEAnimationEnvironment(): AnimationEnvironment {
+  return useContext(AnimationEnvironmentContext) ?? defaultEnvironment;
 }
 
 /** @internal Distinguishes static React roots from an explicitly overridden host. */
-export function useProvidedNSEAnimationEnvironment(): NSEAnimationEnvironment | null { return useContext(NSEAnimationEnvironmentContext); }
+export function useProvidedNSEAnimationEnvironment(): AnimationEnvironment | null { return useContext(AnimationEnvironmentContext); }

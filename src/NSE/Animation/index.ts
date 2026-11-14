@@ -19,24 +19,24 @@
  */
 
 export {
-  NSEAnimationEnvironmentProvider,
+  AnimationEnvironmentProvider,
   useNSEAnimationEnvironment,
 } from "./NSEAnimationEnvironment";
 export type {
-  NSEAnimationEnvironment,
-  NSEAnimationEnvironmentProviderProps,
-  NSEAnimator,
+  AnimationEnvironment,
+  AnimationEnvironmentProviderProps,
+  Animator,
 } from "./NSEAnimationEnvironment";
 export { NSEAnimationDefaults } from "../Appearance/NSEAnimationDefaults";
 export { NSEAnimationContext } from "./NSEAnimationContext";
 export { useNSETraitCollection } from "./useNSETraitCollection";
 export type { NSEViewAnimator } from "./NSEViewAnimator";
 export { useNSEViewAnimator } from "./useNSEViewAnimator";
-export { NSELayoutView } from "./NSELayoutView";
-export type { NSELayoutTransitionTiming, NSELayoutViewProps } from "./NSELayoutView";
+export { LayoutView } from "./NSELayoutView";
+export type { LayoutTransitionTiming, LayoutViewProps } from "./NSELayoutView";
 export {
-  NSEPresence,
-  NSEPresenceBoundary,
+  Presence,
+  PresenceBoundary,
   compileNSEPresentation,
   nseFilterStyle,
   nseTransformStyle,
@@ -44,13 +44,13 @@ export {
   useNSEPresentation,
 } from "./NSEPresentation";
 export type {
-  NSEFilterComponents,
-  NSEPresentationEnter,
-  NSEPresentationLayout,
-  NSEPresentationMotion,
-  NSEPresentationOrigin,
-  NSEPresentationSpec,
-  NSEPresentationTrack,
-  NSETransformComponents,
-  NSETranslationUnit,
+  FilterComponents,
+  PresentationEnter,
+  PresentationLayout,
+  PresentationMotion,
+  PresentationOrigin,
+  PresentationSpec,
+  PresentationTrack,
+  TransformComponents,
+  TranslationUnit,
 } from "./NSEPresentation";

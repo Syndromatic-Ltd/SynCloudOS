@@ -18,17 +18,17 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEAnimationDefaults, type NSEPresentationSpec } from "../Animation";
+import { NSEAnimationDefaults, type PresentationSpec } from "../Animation";
 
 /** Enter and exit presentations, played through AnimationFX. */
 export interface NSEAlertMotion {
-  readonly enter: NSEPresentationSpec;
-  readonly exit: NSEPresentationSpec;
+  readonly enter: PresentationSpec;
+  readonly exit: PresentationSpec;
 }
 
 const { decelerate } = NSEAnimationDefaults.easing;
 // Framer tweens given only a duration eased with easeInOut (CSS ease-in-out).
-const fade = (from: number, to: number, duration: number, timing: NSEPresentationSpec["timing"] = "ease-in-out"): NSEPresentationSpec =>
+const fade = (from: number, to: number, duration: number, timing: PresentationSpec["timing"] = "ease-in-out"): PresentationSpec =>
   Object.freeze({ duration, timing, tracks: Object.freeze([Object.freeze({ keyPath: "opacity" as const, values: Object.freeze([from, to]) })]) });
 
 // The standard alert pops in with a damped overshoot. As with a CAKeyframe
@@ -92,7 +92,7 @@ export function resolveNSEAlertMotion(reducedMotion: boolean): NSEAlertMotion {
 }
 
 // A sheet's backdrop is not drawn and does not fade: it only holds the sheet while it slides in and out.
-const hold = (duration: number): NSEPresentationSpec =>
+const hold = (duration: number): PresentationSpec =>
   Object.freeze({ duration, timing: "linear" as const, tracks: Object.freeze([Object.freeze({ keyPath: "opacity" as const, values: Object.freeze([1, 1]) })]) });
 const sheetBackdrop: NSEAlertMotion = Object.freeze({ enter: hold(0.36), exit: hold(0.3) });
 

@@ -31,7 +31,7 @@ import { NSEOpenPanelApplicationHost } from "../AppHosting/openPanelHosting";
 import { useSCOS } from "./scos/useSCOS";
 import { createFontCatalogueResourceLoader, FontCatalogueProvider, useFontCatalogue } from "./fontAccess";
 import { createSynWareNSEAnimations } from "./SynWareNSEMediaAdapters";
-import { NSEAnimationEnvironmentProvider, NSEPresenceBoundary, type NSEAnimator } from "../../NSE/Animation";
+import { AnimationEnvironmentProvider, PresenceBoundary, type Animator } from "../../NSE/Animation";
 import type { SynWareContextValue } from "./appContextTypes";
 import { getMountedAppEnvironmentClients } from "./mountedEnvironmentClientRegistry";
 import { hasTrustedBundlePrivilege } from "../BundleLoader/trustedBundleProvenance";
@@ -127,14 +127,14 @@ function MountedAppPresentationBoundary({
     // milliseconds and native RAF timestamps, so it cannot be this clock.
     return timing ? createScopedAnimationFrames(runtime.signal, animationState, timing) : null;
   }, [animationState, kernelRuntime, runtime]);
-  const animator = useMemo<NSEAnimator>(() => Object.freeze({
+  const animator = useMemo<Animator>(() => Object.freeze({
     animations: createSynWareNSEAnimations(appAnimations),
     ownerAppId: runtime.app.bundleIdentifier,
   }), [appAnimations, runtime.app.bundleIdentifier]);
   return (
-    <NSEPresenceBoundary>
+    <PresenceBoundary>
     <NSEViewActivityProvider source={animationState}>
-    <NSEAnimationEnvironmentProvider reducedMotion={reducedMotion} animator={animator} layers={appAnimations} frames={appFrames}>
+    <AnimationEnvironmentProvider reducedMotion={reducedMotion} animator={animator} layers={appAnimations} frames={appFrames}>
     <NSEConformanceEvidenceProvider port={conformanceEvidencePort}>
       <OverlayProvider runtimePort={overlayPort} defaultParentResponderId={`application:${runtime.app.bundleIdentifier}`}>
         <NSEControlRuntimeProvider port={controlPort}>
@@ -144,9 +144,9 @@ function MountedAppPresentationBoundary({
         </NSEControlRuntimeProvider>
       </OverlayProvider>
     </NSEConformanceEvidenceProvider>
-    </NSEAnimationEnvironmentProvider>
+    </AnimationEnvironmentProvider>
     </NSEViewActivityProvider>
-    </NSEPresenceBoundary>
+    </PresenceBoundary>
   );
 }
 

@@ -24,16 +24,16 @@ import {
   nseFilterStyle,
   nseTransformStyle,
   useNSEAnimationEnvironment,
-  type NSEPresentationEnter,
-  type NSEPresentationSpec,
-  type NSEPresentationTrack,
+  type PresentationEnter,
+  type PresentationSpec,
+  type PresentationTrack,
 } from "../NSE/Animation";
 import type { AFXAnimationTiming } from "../FX/AnimationFX/animationTypes";
 
 /** A presented element's model style and the presentation into it. */
 export interface NotificationStatePresentation {
   readonly style: CSSProperties;
-  readonly enter: NSEPresentationEnter;
+  readonly enter: PresentationEnter;
 }
 
 /** The banner cube's rotor: hidden until its screen slice is ready, then
@@ -41,16 +41,16 @@ export interface NotificationStatePresentation {
 export type NotificationRotorState = "hidden" | "presented" | "replaced" | "incoming";
 
 export interface NotificationMotion {
-  readonly bannerStage: Readonly<{ exit: NSEPresentationSpec }>;
+  readonly bannerStage: Readonly<{ exit: PresentationSpec }>;
   readonly rotor: (state: NotificationRotorState) => NotificationStatePresentation;
   /** Flips the rotor away as the banner is dismissed, from the state it shows. */
-  readonly rotorExit: (state: NotificationRotorState) => NSEPresentationSpec;
+  readonly rotorExit: (state: NotificationRotorState) => PresentationSpec;
   readonly bannerScreenFace: NotificationStatePresentation;
   readonly bannerStatusStrip: NotificationStatePresentation;
   /** Returns a dragged banner that was not dismissed to rest. */
-  readonly dragRelease: ((offset: number) => NSEPresentationSpec) | null;
-  readonly centre: Readonly<{ enter: NSEPresentationSpec; exit: NSEPresentationSpec }>;
-  readonly group: Readonly<{ enter: NSEPresentationSpec; exit: NSEPresentationSpec }>;
+  readonly dragRelease: ((offset: number) => PresentationSpec) | null;
+  readonly centre: Readonly<{ enter: PresentationSpec; exit: PresentationSpec }>;
+  readonly group: Readonly<{ enter: PresentationSpec; exit: PresentationSpec }>;
 }
 
 const { standard: material, emphasized, accelerate } = NSEAnimationDefaults.easing;
@@ -66,9 +66,9 @@ const framerTween = "ease-in-out";
 const releaseSpring: AFXAnimationTiming = Object.freeze({ kind: "spring", stiffness: 500, damping: 25, mass: 1 });
 const releaseSettling = Math.log(10000) / (25 / 2);
 
-const track = (keyPath: NSEPresentationTrack["keyPath"], values: readonly unknown[]): NSEPresentationTrack =>
-  Object.freeze({ keyPath, values: Object.freeze(values) }) as NSEPresentationTrack;
-const spec = (duration: number, timing: AFXAnimationTiming, tracks: readonly NSEPresentationTrack[], delay = 0): NSEPresentationSpec =>
+const track = (keyPath: PresentationTrack["keyPath"], values: readonly unknown[]): PresentationTrack =>
+  Object.freeze({ keyPath, values: Object.freeze(values) }) as PresentationTrack;
+const spec = (duration: number, timing: AFXAnimationTiming, tracks: readonly PresentationTrack[], delay = 0): PresentationSpec =>
   Object.freeze({ duration, timing, tracks: Object.freeze(tracks), ...(delay > 0 ? { delay } : {}) });
 
 const hiddenRotation = 92;

@@ -9,7 +9,7 @@ import { AFXLayer } from "../../src/FX/AnimationFX/AFXLayer";
 import { AFXTransform3D } from "../../src/FX/AnimationFX/AFXTransform3D";
 import { GFXColour } from "../../src/FX/GraphicsFX/GFXColour";
 import { NSEViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
-import { NSEAnimationEnvironmentProvider } from "../../src/NSE/Animation";
+import { AnimationEnvironmentProvider } from "../../src/NSE/Animation";
 import { render } from "@testing-library/react";
 import { createClassApplicationHost, type ClassApplicationHost } from "./fixtures/classApplicationHost";
 
@@ -328,9 +328,9 @@ describe("child view controllers", () => {
       override traitCollectionDidChange() { changes.push(this.traitCollection.reducedMotion); }
     }
     const controller = new Animated({ owner: nseTestOwner() });
-    const view = render(<NSEAnimationEnvironmentProvider reducedMotion={false}><NSEViewControllerView controller={controller} /></NSEAnimationEnvironmentProvider>);
+    const view = render(<AnimationEnvironmentProvider reducedMotion={false}><NSEViewControllerView controller={controller} /></AnimationEnvironmentProvider>);
     expect(screen.getByText("false")).toBeTruthy();
-    view.rerender(<NSEAnimationEnvironmentProvider reducedMotion><NSEViewControllerView controller={controller} /></NSEAnimationEnvironmentProvider>);
+    view.rerender(<AnimationEnvironmentProvider reducedMotion><NSEViewControllerView controller={controller} /></AnimationEnvironmentProvider>);
     expect(screen.getByText("true")).toBeTruthy();
     expect(changes).toEqual([true]);
     view.unmount();

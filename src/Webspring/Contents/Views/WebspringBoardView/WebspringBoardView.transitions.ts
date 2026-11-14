@@ -19,14 +19,14 @@
  */
 
 import { useMemo } from "react";
-import { useNSEAnimationEnvironment, type NSELayoutTransitionTiming } from "../../../../NSE/Animation";
+import { useNSEAnimationEnvironment, type LayoutTransitionTiming } from "../../../../NSE/Animation";
 import { resolveWebspringLaunchDimMotion, type WebspringLaunchDimMotion } from "../../../WebspringLaunchDim";
 import { webspringIconSprings, type WebspringRadialExit } from "../../../Webspring.transitions";
 
 export interface WebspringBoardMotion {
   /** How a board slot moves to its new cell when the order changes; `null`
    * moves it at once. */
-  readonly iconReorder: NSELayoutTransitionTiming | null;
+  readonly iconReorder: LayoutTransitionTiming | null;
   readonly launchBackdropDim: WebspringLaunchDimMotion;
 }
 

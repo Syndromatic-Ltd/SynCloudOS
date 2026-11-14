@@ -19,20 +19,20 @@
  */
 
 import { useRef } from "react";
-import { NSEAnimationDefaults, NSEPresence, useNSEPresentation, type NSEPresentationSpec } from "../NSE/Animation";
+import { NSEAnimationDefaults, Presence, useNSEPresentation, type PresentationSpec } from "../NSE/Animation";
 
 /** The launch dim's resting opacity (its model value) and the AnimationFX
  * presentations that bring it in over the Board or Dial and take it away. */
 export interface WebspringLaunchDimMotion {
   readonly opacity: number;
-  readonly enter: NSEPresentationSpec;
-  readonly exit: NSEPresentationSpec;
+  readonly enter: PresentationSpec;
+  readonly exit: PresentationSpec;
 }
 
-const fade = (from: number, to: number, duration: number, timing: NSEPresentationSpec["timing"]): NSEPresentationSpec =>
+const fade = (from: number, to: number, duration: number, timing: PresentationSpec["timing"]): PresentationSpec =>
   Object.freeze({ duration, timing, tracks: Object.freeze([Object.freeze({ keyPath: "opacity" as const, values: Object.freeze([from, to]) })]) });
 
-const dim = (opacity: number, duration: number, timing: NSEPresentationSpec["timing"]): WebspringLaunchDimMotion =>
+const dim = (opacity: number, duration: number, timing: PresentationSpec["timing"]): WebspringLaunchDimMotion =>
   Object.freeze({ opacity, enter: fade(0, opacity, duration, timing), exit: fade(opacity, 0, duration, timing) });
 
 const standard = dim(0.78, 0.56, "linear");
@@ -52,5 +52,5 @@ function LaunchDim({ motion }: { motion: WebspringLaunchDimMotion }) {
 
 /** Dims the launcher while an application launches, fading out as it leaves. */
 export function WebspringLaunchDim({ visible, motion }: { visible: boolean; motion: WebspringLaunchDimMotion }) {
-  return <NSEPresence>{visible ? <LaunchDim motion={motion} /> : null}</NSEPresence>;
+  return <Presence>{visible ? <LaunchDim motion={motion} /> : null}</Presence>;
 }

@@ -23,11 +23,11 @@ import React, { StrictMode, useRef } from "react";
 import { act, cleanup, render } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import {
-  NSEAnimationEnvironmentProvider,
-  NSEPresence,
+  AnimationEnvironmentProvider,
+  Presence,
   useNSEPresentation,
-  type NSEAnimator,
-  type NSEPresentationSpec,
+  type Animator,
+  type PresentationSpec,
 } from "../../src/NSE/Animation";
 import type { AFXAnimationSettlement } from "../../src/FX/AnimationFX/animationTypes";
 
@@ -35,7 +35,7 @@ afterEach(cleanup);
 
 function recordingAnimator() {
   const exits = new Map<Element, (state: AFXAnimationSettlement["state"]) => Promise<void>>();
-  const animator: NSEAnimator = {
+  const animator: Animator = {
     ownerAppId: "syncloudos.system",
     animations: {
       acquireOwner: (owner) => Object.freeze({ ...owner, epoch: 1, release() {} }),
@@ -47,12 +47,12 @@ function recordingAnimator() {
         return { id: "a", finished, progress: 0, cancel: () => resolve({ state: "cancelled", reduced: false }),
           seek() {}, pause() {}, resume() {} };
       },
-    } as NSEAnimator["animations"],
+    } as Animator["animations"],
   };
   return { animator, exits };
 }
 
-const fade = (from: number, to: number): NSEPresentationSpec =>
+const fade = (from: number, to: number): PresentationSpec =>
   ({ duration: 0.2, timing: "linear", tracks: [{ keyPath: "opacity", values: [from, to] }] });
 const motion = { enter: fade(0, 1), exit: fade(1, 0) };
 
@@ -74,9 +74,9 @@ it("removes the child only after every nested presentation's exit settles, then 
   const { animator, exits } = recordingAnimator();
   const onExitComplete = vi.fn();
   const view = (shown: boolean) => (
-    <NSEAnimationEnvironmentProvider animator={animator}>
-      <NSEPresence onExitComplete={onExitComplete}>{shown ? <Layer /> : null}</NSEPresence>
-    </NSEAnimationEnvironmentProvider>
+    <AnimationEnvironmentProvider animator={animator}>
+      <Presence onExitComplete={onExitComplete}>{shown ? <Layer /> : null}</Presence>
+    </AnimationEnvironmentProvider>
   );
   const { rerender } = render(view(true));
   rerender(view(false));
@@ -92,9 +92,9 @@ it("removes the child only after every nested presentation's exit settles, then 
 it("removes a child without presentations at once, and counts a cancelled exit as settled", async () => {
   const { animator, exits } = recordingAnimator();
   const plain = (shown: boolean) => (
-    <NSEAnimationEnvironmentProvider animator={animator}>
-      <NSEPresence>{shown ? <p data-part="plain" /> : null}</NSEPresence>
-    </NSEAnimationEnvironmentProvider>
+    <AnimationEnvironmentProvider animator={animator}>
+      <Presence>{shown ? <p data-part="plain" /> : null}</Presence>
+    </AnimationEnvironmentProvider>
   );
   const first = render(plain(true));
   first.rerender(plain(false));
@@ -102,9 +102,9 @@ it("removes a child without presentations at once, and counts a cancelled exit a
   first.unmount();
 
   const layered = (shown: boolean, inner: boolean) => (
-    <NSEAnimationEnvironmentProvider animator={animator}>
-      <NSEPresence>{shown ? <Layer inner={inner} /> : null}</NSEPresence>
-    </NSEAnimationEnvironmentProvider>
+    <AnimationEnvironmentProvider animator={animator}>
+      <Presence>{shown ? <Layer inner={inner} /> : null}</Presence>
+    </AnimationEnvironmentProvider>
   );
   const second = render(layered(true, true));
   second.rerender(layered(false, true));
@@ -117,7 +117,7 @@ it("removes a child without presentations at once, and counts a cancelled exit a
 
 it("plays one enter per presentation under StrictMode's effect replay, and re-enters only after an exit", () => {
   const played: string[] = [];
-  const animator: NSEAnimator = {
+  const animator: Animator = {
     ownerAppId: "syncloudos.system",
     animations: {
       acquireOwner: (owner) => Object.freeze({ ...owner, epoch: 1, release() {} }),
@@ -126,13 +126,13 @@ it("plays one enter per presentation under StrictMode's effect replay, and re-en
         return { id: "a", finished: new Promise(() => undefined), progress: 0, cancel() { played.push("cancel"); },
           seek() {}, pause() {}, resume() {} };
       },
-    } as NSEAnimator["animations"],
+    } as Animator["animations"],
   };
   const view = (shown: boolean) => (
     <StrictMode>
-      <NSEAnimationEnvironmentProvider animator={animator}>
-        <NSEPresence>{shown ? <Part name="only" /> : null}</NSEPresence>
-      </NSEAnimationEnvironmentProvider>
+      <AnimationEnvironmentProvider animator={animator}>
+        <Presence>{shown ? <Part name="only" /> : null}</Presence>
+      </AnimationEnvironmentProvider>
     </StrictMode>
   );
   const { rerender } = render(view(true));
@@ -150,7 +150,7 @@ it("plays one enter per presentation under StrictMode's effect replay, and re-en
 });
 
 it("presents in the final state when the animator refuses the owner or the animation", () => {
-  const refusing = (stage: "owner" | "animate"): NSEAnimator => ({
+  const refusing = (stage: "owner" | "animate"): Animator => ({
     ownerAppId: "com.example.app",
     animations: {
       acquireOwner(owner) {
@@ -158,13 +158,13 @@ it("presents in the final state when the animator refuses the owner or the anima
         return Object.freeze({ ...owner, epoch: 1, release() {} });
       },
       animate() { throw new DOMException("refused", "SecurityError"); },
-    } as NSEAnimator["animations"],
+    } as Animator["animations"],
   });
   for (const stage of ["owner", "animate"] as const) {
     const view = (shown: boolean) => (
-      <NSEAnimationEnvironmentProvider animator={refusing(stage)}>
-        <NSEPresence>{shown ? <Part name={stage} /> : null}</NSEPresence>
-      </NSEAnimationEnvironmentProvider>
+      <AnimationEnvironmentProvider animator={refusing(stage)}>
+        <Presence>{shown ? <Part name={stage} /> : null}</Presence>
+      </AnimationEnvironmentProvider>
     );
     const { rerender, unmount } = render(view(true));
     expect(part(stage)).not.toBeNull();

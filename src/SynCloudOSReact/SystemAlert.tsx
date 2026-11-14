@@ -19,7 +19,7 @@
  */
 
 import { useId, useRef, useState, type ReactNode } from "react";
-import { NSEPresence, useNSEAnimationEnvironment, useNSEPresentation } from "../NSE/Animation";
+import { Presence, useNSEAnimationEnvironment, useNSEPresentation } from "../NSE/Animation";
 import { resolveSystemAlertDetailsMotion } from "./SystemAlert.transitions";
 import { NSEButton, type NSEAppearanceName } from "../NSE/public/controls";
 import { NSEAlertSurface } from "../NSE/hostComposition";
@@ -181,9 +181,9 @@ export function SystemAlert({
             <span aria-hidden="true">{expanded ? "▾" : "▸"}</span>
             Technical details
           </button>
-          <NSEPresence initial={false}>
+          <Presence initial={false}>
             {expanded ? <SystemAlertDetails details={details} /> : null}
-          </NSEPresence>
+          </Presence>
         </div>
       </div>
       <div data-nse-part="actions" className="nse-alert-actions">

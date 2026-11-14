@@ -23,11 +23,11 @@ import { useNSEThemeInteraction } from "../NSE/hostComposition";
 import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type ComponentProps, type KeyboardEvent as ReactKeyboardEvent, type RefObject } from "react";
 import {
-  NSEPresence,
+  Presence,
   useNSEAnimationEnvironment,
   useNSEPresentation,
-  type NSEPresentationSpec,
-  type NSETransformComponents,
+  type PresentationSpec,
+  type TransformComponents,
 } from "../NSE/Animation";
 import type { AFXAnimationTiming } from "../FX/AnimationFX/animationTypes";
 import { WebspringIconEffect } from "./WebspringIconEffect";
@@ -49,7 +49,7 @@ import { useWebspringLocale } from "./webspringLocale";
 
 const quickSwitchEase: AFXAnimationTiming = Object.freeze({ kind: "cubic-bezier", x1: 0.22, y1: 1, x2: 0.36, y2: 1 });
 const quickSwitchPresentation = (opacity: readonly [number, number],
-  transform?: readonly [NSETransformComponents, NSETransformComponents]): NSEPresentationSpec => Object.freeze({
+  transform?: readonly [TransformComponents, TransformComponents]): PresentationSpec => Object.freeze({
   duration: 0.18,
   timing: quickSwitchEase,
   tracks: Object.freeze([
@@ -249,7 +249,7 @@ export function WebspringQuickSwitchView({
   }
 
   return (
-    <NSEPresence>
+    <Presence>
       {open ? (
         <FocusScope scopeId={`quickswitch:${quickSwitchId}`} kind="popover" parentResponderId="webspring">
         <QuickSwitchSurface
@@ -336,7 +336,7 @@ export function WebspringQuickSwitchView({
         </QuickSwitchSurface>
         </FocusScope>
       ) : null}
-    </NSEPresence>
+    </Presence>
   );
 }
 
@@ -347,7 +347,7 @@ function QuickSwitchItem({ selected, ...attributes }: ComponentProps<"button"> &
 
 function QuickSwitchSurface({ surfaceRef, motion, ...props }: ComponentProps<"div"> & {
   readonly surfaceRef: RefObject<HTMLDivElement | null>;
-  readonly motion: Readonly<{ enter: NSEPresentationSpec; exit: NSEPresentationSpec }>;
+  readonly motion: Readonly<{ enter: PresentationSpec; exit: PresentationSpec }>;
 }) {
   useNSEPresentation(surfaceRef, motion);
   return <div ref={surfaceRef} {...props} />;

@@ -20,19 +20,19 @@
 
 import { Component, useId, type HTMLAttributes, type ReactNode } from "react";
 import type { AFXAnimationHandle, AFXAnimationTiming } from "../../FX/AnimationFX/animationTypes";
-import { useNSEAnimationEnvironment, type NSEAnimator } from "./NSEAnimationEnvironment";
+import { useNSEAnimationEnvironment, type Animator } from "./NSEAnimationEnvironment";
 import { compileNSEPresentation } from "./NSEPresentation";
 
 /** How a view moves into a new layout position. */
-export interface NSELayoutTransitionTiming {
+export interface LayoutTransitionTiming {
   readonly duration: number;
   readonly timing: AFXAnimationTiming;
 }
 
-export interface NSELayoutViewProps extends HTMLAttributes<HTMLDivElement> {
+export interface LayoutViewProps extends HTMLAttributes<HTMLDivElement> {
   /** How the view moves to a new position; `null` moves it at once (reduced
    * motion, or an item being dragged). */
-  readonly layoutTransition: NSELayoutTransitionTiming | null;
+  readonly layoutTransition: LayoutTransitionTiming | null;
   /** When given, the view is measured only when the key changes (its owner
    * knows when its slot moves); otherwise every update is measured, so any
    * layout shift animates. */
@@ -52,12 +52,12 @@ function drawnTranslation(element: HTMLElement): Offset {
   return { x: Number.isFinite(x) ? x! : 0, y: Number.isFinite(y) ? y! : 0 };
 }
 
-type Lease = ReturnType<NSEAnimator["animations"]["acquireOwner"]>;
-type LayoutViewProps = NSELayoutViewProps & { readonly animator: NSEAnimator | null; readonly viewId: string };
+type Lease = ReturnType<Animator["animations"]["acquireOwner"]>;
+type MeasuredLayoutViewProps = LayoutViewProps & { readonly animator: Animator | null; readonly viewId: string };
 
 // A class, because only getSnapshotBeforeUpdate reads the DOM before an
 // update mutates it.
-class LayoutView extends Component<LayoutViewProps> {
+class MeasuredLayoutView extends Component<MeasuredLayoutViewProps> {
   private element: HTMLDivElement | null = null;
   private lease: Lease | null = null;
   private running: AFXAnimationHandle | null = null;
@@ -82,7 +82,7 @@ class LayoutView extends Component<LayoutViewProps> {
     this.release();
   }
 
-  override getSnapshotBeforeUpdate(previous: Readonly<LayoutViewProps>): Position | null {
+  override getSnapshotBeforeUpdate(previous: Readonly<MeasuredLayoutViewProps>): Position | null {
     const element = this.element;
     if (!element || (this.props.layoutKey !== undefined && previous.layoutKey === this.props.layoutKey)) return null;
     // Where the view is drawn now, before this update lays it out again.
@@ -90,7 +90,7 @@ class LayoutView extends Component<LayoutViewProps> {
     return { left: element.offsetLeft + drawn.x, top: element.offsetTop + drawn.y };
   }
 
-  override componentDidUpdate(previous: Readonly<LayoutViewProps>, _state: unknown, drawn: Position | null) {
+  override componentDidUpdate(previous: Readonly<MeasuredLayoutViewProps>, _state: unknown, drawn: Position | null) {
     if (previous.animator !== this.props.animator) {
       this.stop("layout animator changed");
       this.release();
@@ -167,8 +167,8 @@ class LayoutView extends Component<LayoutViewProps> {
  * The view's own `transform` must be free: static offsets such as centring
  * belong in the individual `translate` property.
  */
-export function NSELayoutView(props: NSELayoutViewProps): ReactNode {
+export function LayoutView(props: LayoutViewProps): ReactNode {
   const { animator } = useNSEAnimationEnvironment();
   const viewId = `nse-layout:${useId()}`;
-  return <LayoutView {...props} animator={animator} viewId={viewId} />;
+  return <MeasuredLayoutView {...props} animator={animator} viewId={viewId} />;
 }

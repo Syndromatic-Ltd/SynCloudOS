@@ -2,7 +2,7 @@
 import React, { useRef } from "react";
 import { act, cleanup, render } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
-import { NSEAnimationEnvironmentProvider, NSEPresence, useNSEPresentation, type NSEAnimator } from "../../src/NSE/Animation";
+import { AnimationEnvironmentProvider, Presence, useNSEPresentation, type Animator } from "../../src/NSE/Animation";
 import { createRuntimeAnimationService } from "../../src/SynCloudOS/AnimationFX/AnimationService";
 import { BrowserAnimationAdapterFactory, type BrowserNativeAnimation } from "../../src/SynCloudOS/PlatformAdapters/BrowserAnimationAdapter";
 
@@ -25,7 +25,7 @@ function fixture() {
   const lease = factory.acquire("retained-fill", owner.signal);
   const service = createRuntimeAnimationService({ runtimeId: "retained-fill" as Parameters<typeof createRuntimeAnimationService>[0]["runtimeId"], signal: owner.signal, adapterLease: lease, randomUUID: () => String(++sequence), prefersReducedMotion: () => false });
   cleanups.push(() => { service.dispose(); lease.release(); owner.abort(); });
-  const animator: NSEAnimator = { ownerAppId: "com.example.retained", animations: service as unknown as NSEAnimator["animations"] };
+  const animator: Animator = { ownerAppId: "com.example.retained", animations: service as unknown as Animator["animations"] };
   return { natives, service, animator };
 }
 const fade = { duration: .08, timing: "linear" as const, tracks: [{ keyPath: "opacity" as const, values: [1, 0] }] };
@@ -48,7 +48,7 @@ it("clears a completed exit when the same presence key returns without an enter 
     const ref = useRef<HTMLDivElement>(null); useNSEPresentation(ref, { state: "presented", enter: null, exit: fade });
     return <div ref={ref} data-part={name} style={{ opacity: 1 }} />;
   }
-  const view = (shown: boolean) => <NSEAnimationEnvironmentProvider animator={animator}><NSEPresence>{shown ? <section key="retained"><Part name="surface" /><Part name="holding" /></section> : null}</NSEPresence></NSEAnimationEnvironmentProvider>;
+  const view = (shown: boolean) => <AnimationEnvironmentProvider animator={animator}><Presence>{shown ? <section key="retained"><Part name="surface" /><Part name="holding" /></section> : null}</Presence></AnimationEnvironmentProvider>;
   const mounted = render(view(true)), surface = document.querySelector('[data-part="surface"]');
   mounted.rerender(view(false)); expect(natives).toHaveLength(2); expect(natives[0]!.fill).toBe("forwards");
   natives[0]!.finish(); await flush(); expect(document.querySelector('[data-part="surface"]')).toBe(surface);
@@ -63,7 +63,7 @@ it("retires the previous completed handle on a model-only state change without r
     const ref = useRef<HTMLDivElement>(null); useNSEPresentation(ref, { state, enter: previous => previous === null ? fade : null, onPresented: presented });
     return <div ref={ref} style={{ opacity: 1 }} />;
   }
-  const view = (state: string) => <NSEAnimationEnvironmentProvider animator={animator}><Part state={state} /></NSEAnimationEnvironmentProvider>;
+  const view = (state: string) => <AnimationEnvironmentProvider animator={animator}><Part state={state} /></AnimationEnvironmentProvider>;
   const mounted = render(view("incoming")); natives[0]!.finish(); await flush();
   expect(presented).toHaveBeenLastCalledWith("incoming"); mounted.rerender(view("presented"));
   expect(natives[0]!.native.cancel).toHaveBeenCalledOnce(); expect(natives).toHaveLength(1); expect(presented).toHaveBeenLastCalledWith("presented");

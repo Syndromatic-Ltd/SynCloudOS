@@ -22,7 +22,7 @@ import { installedApplicationMenuSections } from "../SynCloudOSReact";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type Ref, type ReactNode } from "react";
 import { nseUnowned } from "../NSE/sdkPackageEntry";
 import { useWebspringLaunchZoom } from "./WebspringLaunchZoomContext";
-import { useNSEAnimationEnvironment, useNSEPresenceExiting, useNSEPresentation, type NSEPresentationSpec } from "../NSE/Animation";
+import { useNSEAnimationEnvironment, useNSEPresenceExiting, useNSEPresentation, type PresentationSpec } from "../NSE/Animation";
 import { useApplicationStageMotion } from "./ApplicationStage.transitions";
 import { WEBSPRING_MULTI_SWITCH_ROLES, WEBSPRING_PRESENTATION_ROLES, type WebspringMultiSwitchRole } from "../SynCloudOS/SynCloudOS";
 import {
@@ -56,7 +56,7 @@ import { createTransientWindowSurfaceBridge, type WindowContentRendererRegistry 
 /** Navigation chrome that slides in with the navigation it belongs to. */
 function NavigationChromeSlot({ className, enter, children }: {
   readonly className: string;
-  readonly enter: NSEPresentationSpec | null;
+  readonly enter: PresentationSpec | null;
   readonly children: ReactNode;
 }) {
   const slotRef = useRef<HTMLSpanElement>(null);

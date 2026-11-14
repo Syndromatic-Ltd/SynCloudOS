@@ -24,7 +24,7 @@ import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { WebspringFolderItem } from "../../src/Webspring/webspringTypes";
 import { createWebspringFolderSplitPresentation } from "../../src/Webspring/WebspringFolderSplitPresentation";
-import { NSEAnimationEnvironmentProvider, type NSEAnimator } from "../../src/NSE/Animation";
+import { AnimationEnvironmentProvider, type Animator } from "../../src/NSE/Animation";
 import type { AFXAnimationDefinition, AFXAnimationHandle } from "../../src/FX/AnimationFX/animationTypes";
 
 const folder = {
@@ -282,7 +282,7 @@ describe("Webspring folder split presentation", () => {
   });
   it("glides the folder's apps to their new places when they reorder", () => {
     const moves: { readonly target: Element; readonly definition: AFXAnimationDefinition }[] = [];
-    const animator: NSEAnimator = {
+    const animator: Animator = {
       ownerAppId: "syncloudos.system",
       animations: {
         acquireOwner: (owner) => Object.freeze({ ...owner, epoch: 1, release() {} }),
@@ -290,7 +290,7 @@ describe("Webspring folder split presentation", () => {
           moves.push({ target: target as Element, definition: definition as AFXAnimationDefinition });
           return { id: "move", finished: new Promise(() => {}), progress: 0, state: "running", cancel() {}, seek() {}, pause() {}, resume() {} } as AFXAnimationHandle;
         },
-      } as NSEAnimator["animations"],
+      } as Animator["animations"],
     };
     // jsdom does not lay out: each cell sits 100px right of the one before it.
     const offsetLeft = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "offsetLeft")!;
@@ -300,10 +300,10 @@ describe("Webspring folder split presentation", () => {
     });
     try {
       const view = (apps: WebspringFolderItem["apps"], reducedMotion: boolean) => (
-        <NSEAnimationEnvironmentProvider animator={animator} reducedMotion={reducedMotion}>
+        <AnimationEnvironmentProvider animator={animator} reducedMotion={reducedMotion}>
           <Presentation folder={{ ...folder, apps }} stage={stage} anchor={new DOMRect(100, 100, 80, 80)} reducedMotion={reducedMotion}
             renderApp={(app) => <button type="button">{`Open ${app.displayName}`}</button>} onClose={vi.fn()} />
-        </NSEAnimationEnvironmentProvider>
+        </AnimationEnvironmentProvider>
       );
       const [beta, gamma] = folder.apps;
       const rendered = render(view([beta!, gamma!], false), { container: layer });

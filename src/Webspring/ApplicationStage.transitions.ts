@@ -24,11 +24,11 @@ import {
   nseFilterStyle,
   nseTransformStyle,
   useNSEAnimationEnvironment,
-  type NSEFilterComponents,
-  type NSEPresentationEnter,
-  type NSEPresentationSpec,
-  type NSEPresentationTrack,
-  type NSETransformComponents,
+  type FilterComponents,
+  type PresentationEnter,
+  type PresentationSpec,
+  type PresentationTrack,
+  type TransformComponents,
 } from "../NSE/Animation";
 import type { AFXAnimationTiming } from "../FX/AnimationFX/animationTypes";
 
@@ -40,8 +40,8 @@ export type ApplicationStageRole = "incoming" | "outgoing" | null;
 export interface ApplicationStagePartMotion {
   readonly state: string;
   readonly style: CSSProperties;
-  readonly enter: NSEPresentationEnter;
-  readonly exit: NSEPresentationSpec | null;
+  readonly enter: PresentationEnter;
+  readonly exit: PresentationSpec | null;
 }
 
 export interface ApplicationStageMotion {
@@ -49,8 +49,8 @@ export interface ApplicationStageMotion {
   readonly root: ApplicationStagePartMotion;
   /** The window surface: the launch zoom, and its plane during a MultiSwitch. */
   readonly surface: ApplicationStagePartMotion;
-  readonly navigationBack: NSEPresentationSpec | null;
-  readonly navigationTitle: NSEPresentationSpec | null;
+  readonly navigationBack: PresentationSpec | null;
+  readonly navigationTitle: PresentationSpec | null;
 }
 
 export interface ApplicationStageMotionInput {
@@ -77,31 +77,31 @@ const framerDefaultEase = bezier(0.25, 0.1, 0.35, 1);
 const framerTween = "ease-in-out";
 const multiSwitchDuration = 0.72;
 
-const opacityTrack = (values: readonly number[], keyTimes?: readonly number[]): NSEPresentationTrack =>
+const opacityTrack = (values: readonly number[], keyTimes?: readonly number[]): PresentationTrack =>
   Object.freeze({ keyPath: "opacity", values: Object.freeze(values), ...(keyTimes ? { keyTimes: Object.freeze(keyTimes) } : {}) });
-const transformTrack = (values: readonly NSETransformComponents[], options: Partial<Pick<Extract<NSEPresentationTrack, { keyPath: "transform" }>, "keyTimes" | "unit" | "timingFunctions">> = {}): NSEPresentationTrack =>
+const transformTrack = (values: readonly TransformComponents[], options: Partial<Pick<Extract<PresentationTrack, { keyPath: "transform" }>, "keyTimes" | "unit" | "timingFunctions">> = {}): PresentationTrack =>
   Object.freeze({ keyPath: "transform", values: Object.freeze(values), ...options });
-const filterTrack = (values: readonly NSEFilterComponents[], keyTimes: readonly number[]): NSEPresentationTrack =>
+const filterTrack = (values: readonly FilterComponents[], keyTimes: readonly number[]): PresentationTrack =>
   Object.freeze({ keyPath: "filter", values: Object.freeze(values), keyTimes: Object.freeze(keyTimes) });
-const spec = (duration: number, timing: AFXAnimationTiming, tracks: readonly NSEPresentationTrack[], delay = 0): NSEPresentationSpec =>
+const spec = (duration: number, timing: AFXAnimationTiming, tracks: readonly PresentationTrack[], delay = 0): PresentationSpec =>
   Object.freeze({ duration, timing, tracks: Object.freeze(tracks), ...(delay > 0 ? { delay } : {}) });
 const fade = (from: number, to: number, duration: number, timing: AFXAnimationTiming, delay = 0) =>
   spec(duration, timing, [opacityTrack([from, to])], delay);
 /** Presents only a fresh element (mount, launch from staging, or re-entry). */
-const onPresentation = (presentation: NSEPresentationSpec) =>
+const onPresentation = (presentation: PresentationSpec) =>
   (previous: string | null) => previous === null || previous === "staged" ? presentation : null;
-const onMount = (presentation: NSEPresentationSpec) =>
+const onMount = (presentation: PresentationSpec) =>
   (previous: string | null) => previous === null ? presentation : null;
 
 // The outgoing MultiSwitch plane recedes, darkens and leans away; the
 // incoming plane settles forward from the pose the outgoing one reaches.
 const outgoingKeyTimes = [0, 0.45, 1];
-const outgoingPoses: readonly NSETransformComponents[] = [
+const outgoingPoses: readonly TransformComponents[] = [
   { scale: 0.98, z: -24, rotateY: 2 },
   { scale: 0.86, z: -180, rotateY: 14 },
   { scale: 0.86, z: -260, rotateY: 22 },
 ];
-const outgoingFilters: readonly NSEFilterComponents[] = [{ brightness: 1 }, { brightness: 0.6 }, { brightness: 0.4 }];
+const outgoingFilters: readonly FilterComponents[] = [{ brightness: 1 }, { brightness: 0.6 }, { brightness: 0.4 }];
 const outgoingOpacity = [1, 1, 0.94];
 const outgoingSurface = spec(multiSwitchDuration, framerTween, [
   opacityTrack(outgoingOpacity, outgoingKeyTimes),
@@ -118,7 +118,7 @@ const incomingSurface = spec(multiSwitchDuration, framerTween, [transformTrack([
   { scale: 0.86, z: -180, rotateY: -14 },
   {},
 ], { keyTimes: [0, 0.55, 1], timingFunctions: [framerTween, multiSwitchSettleEase] })]);
-const outgoingRootPose: NSETransformComponents = { x: -118 };
+const outgoingRootPose: TransformComponents = { x: -118 };
 const outgoingRoot = spec(multiSwitchDuration, multiSwitchEase, [transformTrack([{}, outgoingRootPose], { unit: "vw" })]);
 const incomingRoot = spec(multiSwitchDuration, multiSwitchEase, [transformTrack([{ x: 118 }, {}], { unit: "vw" })]);
 

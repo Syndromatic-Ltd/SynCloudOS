@@ -42,11 +42,11 @@ import type {
   AFXPropertyAnimation,
 } from "../../FX/AnimationFX/animationTypes";
 import { AFXTimingFunction } from "../../FX/AnimationFX/AFXTimingFunction";
-import { useNSEAnimationEnvironment, type NSEAnimator } from "./NSEAnimationEnvironment";
+import { useNSEAnimationEnvironment, type Animator } from "./NSEAnimationEnvironment";
 
 /** Transform components, composed as translate, scale, rotate, rotateX, rotateY
  * (the order Framer Motion and the shell's CSS use). Angles are in degrees. */
-export interface NSETransformComponents {
+export interface TransformComponents {
   readonly x?: number;
   readonly y?: number;
   /** Depth translation in pixels. */
@@ -58,19 +58,19 @@ export interface NSETransformComponents {
 }
 
 /** CSS filter components, like CALayer.filters. */
-export interface NSEFilterComponents {
+export interface FilterComponents {
   readonly brightness?: number;
   readonly saturate?: number;
 }
 
-interface NSEKeyframes {
+interface Keyframes {
   readonly keyTimes?: readonly number[];
   /** One timing function per segment, like CAKeyframeAnimation.timingFunctions;
    * without it the spec's `timing` eases every segment. */
   readonly timingFunctions?: readonly AFXAnimationTiming[];
 }
 
-export type NSETransformComponentKeyPath = `transform.${keyof NSETransformComponents}`;
+export type TransformComponentKeyPath = `transform.${keyof TransformComponents}`;
 
 /** One animated property. The spec's `timing` applies to every segment
  * between keyframes, not to the whole track.
@@ -79,35 +79,35 @@ export type NSETransformComponentKeyPath = `transform.${keyof NSETransformCompon
  * `transform.<component>` track animates one component with its own
  * keyframes; a spec's component tracks compose into the element's one
  * transform (a spec uses either those or a whole `transform` track). */
-export type NSEPresentationTrack =
-  | Readonly<NSEKeyframes & { keyPath: "opacity"; values: readonly number[] }>
-  | Readonly<NSEKeyframes & {
+export type PresentationTrack =
+  | Readonly<Keyframes & { keyPath: "opacity"; values: readonly number[] }>
+  | Readonly<Keyframes & {
       keyPath: "transform";
-      values: readonly NSETransformComponents[];
+      values: readonly TransformComponents[];
       /** The unit of `x` and `y`: `%` of the view's own size (as a push
        * navigation slides a pane), or viewport widths or heights. */
-      unit?: NSETranslationUnit;
+      unit?: TranslationUnit;
     }>
-  | Readonly<NSEKeyframes & { keyPath: NSETransformComponentKeyPath; values: readonly number[] }>
-  | Readonly<NSEKeyframes & { keyPath: "filter"; values: readonly NSEFilterComponents[] }>
+  | Readonly<Keyframes & { keyPath: TransformComponentKeyPath; values: readonly number[] }>
+  | Readonly<Keyframes & { keyPath: "filter"; values: readonly FilterComponents[] }>
   /** Pixels, or `auto` for the element's natural height, measured when the
    * presentation starts (a disclosure growing to fit its content). */
-  | Readonly<NSEKeyframes & { keyPath: "height"; values: readonly (number | "auto")[] }>;
+  | Readonly<Keyframes & { keyPath: "height"; values: readonly (number | "auto")[] }>;
 
-export type NSETranslationUnit = "px" | "%" | "vw" | "vh";
+export type TranslationUnit = "px" | "%" | "vw" | "vh";
 
-export interface NSEPresentationSpec {
+export interface PresentationSpec {
   readonly duration: number;
   /** Seconds before the presentation starts; the first keyframe shows meanwhile. */
   readonly delay?: number;
   readonly timing: AFXAnimationTiming;
-  readonly tracks: readonly NSEPresentationTrack[];
+  readonly tracks: readonly PresentationTrack[];
 }
 
 type PresentedKeyPath = "opacity" | "transform" | "filter" | "height";
 
 /** Element geometry a presentation resolves `auto` values against. */
-export interface NSEPresentationLayout {
+export interface PresentationLayout {
   /** The element's natural height in CSS pixels, for the box its `height` sizes. */
   readonly height?: number;
 }
@@ -117,9 +117,9 @@ const sampledOffsets = Object.freeze(Array.from({ length: 61 }, (_, index) => in
 
 type TransformPart = "z" | "rotate" | "rotateX" | "rotateY";
 const optionalTransformParts: readonly TransformPart[] = ["z", "rotate", "rotateX", "rotateY"];
-type ResolvedTransform = Required<NSETransformComponents>;
+type ResolvedTransform = Required<TransformComponents>;
 
-function resolvedTransform(value: NSETransformComponents): ResolvedTransform {
+function resolvedTransform(value: TransformComponents): ResolvedTransform {
   return {
     x: value.x ?? 0, y: value.y ?? 0, z: value.z ?? 0, scale: value.scale ?? 1,
     rotate: value.rotate ?? 0, rotateX: value.rotateX ?? 0, rotateY: value.rotateY ?? 0,
@@ -136,7 +136,7 @@ function isIdentityTransform(value: ResolvedTransform): boolean {
  * interpolates each function rather than a decomposed matrix. Identity is
  * `none`, so a held or directly applied terminal value never leaves a stacking
  * context or fixed-position containing block behind. */
-function transformCSS(value: ResolvedTransform, unit: NSETranslationUnit,
+function transformCSS(value: ResolvedTransform, unit: TranslationUnit,
   parts: ReadonlySet<TransformPart>): string {
   if (isIdentityTransform(value)) return "none";
   let text = parts.has("z")
@@ -149,14 +149,14 @@ function transformCSS(value: ResolvedTransform, unit: NSETranslationUnit,
   return text;
 }
 
-function transformParts(values: readonly NSETransformComponents[]): ReadonlySet<TransformPart> {
+function transformParts(values: readonly TransformComponents[]): ReadonlySet<TransformPart> {
   const parts = new Set<TransformPart>();
   for (const value of values) for (const part of optionalTransformParts) if ((value[part] ?? 0) !== 0) parts.add(part);
   return parts;
 }
 
-type ResolvedFilter = Required<NSEFilterComponents>;
-type FilterPart = keyof NSEFilterComponents;
+type ResolvedFilter = Required<FilterComponents>;
+type FilterPart = keyof FilterComponents;
 
 function filterCSS(value: ResolvedFilter, parts: ReadonlySet<FilterPart>): string {
   const text: string[] = [];
@@ -165,7 +165,7 @@ function filterCSS(value: ResolvedFilter, parts: ReadonlySet<FilterPart>): strin
   return text.length === 0 || (value.brightness === 1 && value.saturate === 1) ? "none" : text.join(" ");
 }
 
-function filterParts(values: readonly NSEFilterComponents[]): ReadonlySet<FilterPart> {
+function filterParts(values: readonly FilterComponents[]): ReadonlySet<FilterPart> {
   const parts = new Set<FilterPart>();
   for (const value of values) {
     if (value.brightness !== undefined) parts.add("brightness");
@@ -176,16 +176,16 @@ function filterParts(values: readonly NSEFilterComponents[]): ReadonlySet<Filter
 
 /** The CSS a transform model value is written as, identical to the text a
  * presentation ends on, so a view's style and its presentation agree. */
-export function nseTransformStyle(value: NSETransformComponents, unit: NSETranslationUnit = "px"): string {
+export function nseTransformStyle(value: TransformComponents, unit: TranslationUnit = "px"): string {
   return transformCSS(resolvedTransform(value), unit, transformParts([value]));
 }
 
 /** The CSS a filter model value is written as. */
-export function nseFilterStyle(value: NSEFilterComponents): string {
+export function nseFilterStyle(value: FilterComponents): string {
   return filterCSS({ brightness: value.brightness ?? 1, saturate: value.saturate ?? 1 }, filterParts([value]));
 }
 
-function keyTimesFor(track: NSEPresentationTrack): readonly number[] {
+function keyTimesFor(track: PresentationTrack): readonly number[] {
   const count = track.values.length;
   if (count < 2) throw new RangeError("A presentation track needs at least two values.");
   const times = track.keyTimes ?? Array.from({ length: count }, (_, index) => index / (count - 1));
@@ -196,14 +196,14 @@ function keyTimesFor(track: NSEPresentationTrack): readonly number[] {
   return times;
 }
 
-type WholeTrack = Exclude<NSEPresentationTrack, { keyPath: NSETransformComponentKeyPath }>;
-type ComponentTrack = Extract<NSEPresentationTrack, { keyPath: NSETransformComponentKeyPath }>;
-const isComponentTrack = (track: NSEPresentationTrack): track is ComponentTrack => track.keyPath.startsWith("transform.");
-const componentOf = (track: ComponentTrack) => track.keyPath.slice("transform.".length) as keyof NSETransformComponents;
+type WholeTrack = Exclude<PresentationTrack, { keyPath: TransformComponentKeyPath }>;
+type ComponentTrack = Extract<PresentationTrack, { keyPath: TransformComponentKeyPath }>;
+const isComponentTrack = (track: PresentationTrack): track is ComponentTrack => track.keyPath.startsWith("transform.");
+const componentOf = (track: ComponentTrack) => track.keyPath.slice("transform.".length) as keyof TransformComponents;
 const mix = (from: number, to: number, eased: number) => from + (to - from) * eased;
 
 /** Writes a track's values as CSS, sharing one function list across them. */
-function trackWriter(track: WholeTrack, layout: NSEPresentationLayout): (index: number, next?: number, eased?: number) => AFXAnimationScalar {
+function trackWriter(track: WholeTrack, layout: PresentationLayout): (index: number, next?: number, eased?: number) => AFXAnimationScalar {
   if (track.keyPath === "height") {
     const values = track.values.map((value) => {
       if (value !== "auto") return value;
@@ -253,12 +253,12 @@ interface CompiledTrack {
   at(progress: number): AFXAnimationScalar;
 }
 
-function curvesFor(track: NSEPresentationTrack, curve: AFXTimingFunction): readonly AFXTimingFunction[] {
+function curvesFor(track: PresentationTrack, curve: AFXTimingFunction): readonly AFXTimingFunction[] {
   return track.timingFunctions?.map((timing) => new AFXTimingFunction(timing)) ??
     Array.from({ length: track.values.length - 1 }, () => curve);
 }
 
-function compileTracks(spec: NSEPresentationSpec, layout: NSEPresentationLayout): readonly CompiledTrack[] {
+function compileTracks(spec: PresentationSpec, layout: PresentationLayout): readonly CompiledTrack[] {
   const curve = new AFXTimingFunction(spec.timing);
   const components = spec.tracks.filter(isComponentTrack);
   const compiled = spec.tracks.filter((track): track is WholeTrack => !isComponentTrack(track)).map((track): CompiledTrack => {
@@ -280,10 +280,10 @@ function compileTracks(spec: NSEPresentationSpec, layout: NSEPresentationLayout)
   }));
   if (new Set(channels.map(({ component }) => component)).size !== channels.length)
     throw new TypeError("A presentation animates each transform component once.");
-  const compose = (valueOf: (channel: (typeof channels)[number]) => number): NSETransformComponents =>
+  const compose = (valueOf: (channel: (typeof channels)[number]) => number): TransformComponents =>
     Object.fromEntries(channels.map((channel) => [channel.component, valueOf(channel)]));
   const parts = transformParts(channels.flatMap((channel) => channel.values.map((value) => ({ [channel.component]: value }))));
-  const write = (value: NSETransformComponents) => transformCSS(resolvedTransform(value), "px", parts);
+  const write = (value: TransformComponents) => transformCSS(resolvedTransform(value), "px", parts);
   return [...compiled, {
     keyPath: "transform",
     from: write(compose(({ values }) => values[0]!)),
@@ -298,7 +298,7 @@ function compileTracks(spec: NSEPresentationSpec, layout: NSEPresentationLayout)
 
 /** Presented values a presentation starts from instead of its first keyframe
  * (Core Animation's begin-from-current-state). */
-export type NSEPresentationOrigin = Readonly<Partial<Record<PresentedKeyPath, AFXAnimationScalar>>>;
+export type PresentationOrigin = Readonly<Partial<Record<PresentedKeyPath, AFXAnimationScalar>>>;
 
 /** Compiles a presentation into one AFX group for one element. Two-keyframe
  * tracks keep the exact curve as the group timing; any multi-segment track
@@ -309,9 +309,9 @@ export type NSEPresentationOrigin = Readonly<Partial<Record<PresentedKeyPath, AF
  * presentation until the element is removed. With an `origin`, a track starts
  * from that presented value, so an interrupted presentation continues from
  * where it was rather than jumping to the new presentation's first keyframe. */
-export function compileNSEPresentation(spec: NSEPresentationSpec, targetId: string,
-  phase: "enter" | "exit" = "enter", origin: NSEPresentationOrigin = {},
-  layout: NSEPresentationLayout = {}): AFXAnimationDefinition {
+export function compileNSEPresentation(spec: PresentationSpec, targetId: string,
+  phase: "enter" | "exit" = "enter", origin: PresentationOrigin = {},
+  layout: PresentationLayout = {}): AFXAnimationDefinition {
   const tracks = compileTracks(spec, layout);
   const sampled = tracks.some((track) => track.sampled);
   const animations = tracks.map((track): AFXPropertyAnimation => {
@@ -336,7 +336,7 @@ export function compileNSEPresentation(spec: NSEPresentationSpec, targetId: stri
 }
 
 /** Measures what a spec's `auto` values resolve against. */
-function presentationLayout(element: HTMLElement, spec: NSEPresentationSpec): NSEPresentationLayout {
+function presentationLayout(element: HTMLElement, spec: PresentationSpec): PresentationLayout {
   if (!spec.tracks.some((track) => track.keyPath === "height" && track.values.includes("auto"))) return {};
   const style = element.ownerDocument.defaultView?.getComputedStyle(element);
   const length = (value: string | undefined) => Number.parseFloat(value ?? "") || 0;
@@ -349,7 +349,7 @@ function presentationLayout(element: HTMLElement, spec: NSEPresentationSpec): NS
 }
 
 /** Reads what an element currently presents for the spec's key paths. */
-function presentedOrigin(element: HTMLElement, spec: NSEPresentationSpec): NSEPresentationOrigin {
+function presentedOrigin(element: HTMLElement, spec: PresentationSpec): PresentationOrigin {
   const style = element.ownerDocument.defaultView?.getComputedStyle(element);
   if (!style) return {};
   const origin: Partial<Record<PresentedKeyPath, AFXAnimationScalar>> = {};
@@ -368,16 +368,16 @@ function presentedOrigin(element: HTMLElement, spec: NSEPresentationSpec): NSEPr
 
 /** A presentation into the current state, given the state it leaves (`null`
  * when the element mounts or re-enters after an exit). */
-export type NSEPresentationEnter =
-  | NSEPresentationSpec
+export type PresentationEnter =
+  | PresentationSpec
   | null
-  | ((previousState: string | null) => NSEPresentationSpec | null);
+  | ((previousState: string | null) => PresentationSpec | null);
 
-export interface NSEPresentationMotion {
+export interface PresentationMotion {
   /** Presents the element into its current state. */
-  readonly enter?: NSEPresentationEnter;
+  readonly enter?: PresentationEnter;
   /** Plays before an NSEPresence removes the element. */
-  readonly exit?: NSEPresentationSpec | null;
+  readonly exit?: PresentationSpec | null;
   /** The model state the element's own style shows. When it changes, the
    * element presents the new state with `enter`, as a view animates a change
    * to its layer's model value. */
@@ -416,7 +416,7 @@ export function useNSEPresenceExiting(): boolean {
  * `state` changes, and, inside an NSEPresence, `exit` before it unmounts.
  * Without an animator the element simply shows each state at once.
  */
-export function useNSEPresentation(ref: RefObject<HTMLElement | null>, motion: NSEPresentationMotion): void {
+export function useNSEPresentation(ref: RefObject<HTMLElement | null>, motion: PresentationMotion): void {
   const { animator } = useNSEAnimationEnvironment();
   const presence = useContext(PresenceContext);
   const [participant] = useState(() => ({}));
@@ -425,7 +425,7 @@ export function useNSEPresentation(ref: RefObject<HTMLElement | null>, motion: N
   const viewId = `nse-presentation:${useId()}`;
   const latest = useRef(motion);
   latest.current = motion;
-  const view = useRef<{ animator: NSEAnimator; lease: ReturnType<NSEAnimator["animations"]["acquireOwner"]>; generation: number } | null>(null);
+  const view = useRef<{ animator: Animator; lease: ReturnType<Animator["animations"]["acquireOwner"]>; generation: number } | null>(null);
   const running = useRef<AFXAnimationHandle | null>(null);
   /** The state the element last presented, or null while unmounted. */
   const presentedState = useRef<string | null>(null);
@@ -433,7 +433,7 @@ export function useNSEPresentation(ref: RefObject<HTMLElement | null>, motion: N
    * replay (StrictMode replays a view's effects when a keyed list moves it),
    * but not a remount. */
   const settledState = useRef<string | null>(null);
-  const run = (spec: NSEPresentationSpec | null | undefined, phase: "enter" | "exit"): AFXAnimationHandle | null => {
+  const run = (spec: PresentationSpec | null | undefined, phase: "enter" | "exit"): AFXAnimationHandle | null => {
     const element = ref.current, active = view.current;
     const previous = running.current;
     running.current = null;
@@ -471,7 +471,7 @@ export function useNSEPresentation(ref: RefObject<HTMLElement | null>, motion: N
     });
   };
   useLayoutEffect(() => {
-    let lease: ReturnType<NSEAnimator["animations"]["acquireOwner"]> | null = null;
+    let lease: ReturnType<Animator["animations"]["acquireOwner"]> | null = null;
     if (animator) {
       try {
         lease = animator.animations.acquireOwner({ appId: animator.ownerAppId, viewId });
@@ -539,7 +539,7 @@ export function useNSEPresentation(ref: RefObject<HTMLElement | null>, motion: N
  * uses it so the shell's exit and its settlement never wait on another
  * owner's animations.
  */
-export function NSEPresenceBoundary({ children }: Readonly<{ children: ReactNode }>): ReactNode {
+export function PresenceBoundary({ children }: Readonly<{ children: ReactNode }>): ReactNode {
   return <PresenceContext.Provider value={null}>{children}</PresenceContext.Provider>;
 }
 
@@ -601,7 +601,7 @@ interface PresenceRecord {
  * runs when the last exiting child has left. With `initial={false}` the
  * children present on first render appear without their enter.
  */
-export function NSEPresence({ children, initial = true, onExitComplete }: Readonly<{
+export function Presence({ children, initial = true, onExitComplete }: Readonly<{
   children: ReactNode;
   initial?: boolean;
   onExitComplete?: () => void;

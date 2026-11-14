@@ -30,7 +30,7 @@ import {
   type NotificationRotorState,
   type NotificationStatePresentation,
 } from "./NotificationCentre.transitions";
-import { NSEPresence, useNSEAnimationEnvironment, useNSEPresentation } from "../NSE/Animation";
+import { Presence, useNSEAnimationEnvironment, useNSEPresentation } from "../NSE/Animation";
 import { FocusScope, useKernelSynCloudOS } from "../SynCloudOSReact";
 import type { SynCloudOSAppInfo } from "../SynCloudOS/SynCloudOS";
 import type {
@@ -586,7 +586,7 @@ function NotificationGroup({
           {t("notifications.clear", "Clear")}
         </button>
       </div>
-      <NSEPresence initial={false}>
+      <Presence initial={false}>
         {expanded ? (
           <NotificationGroupBody>
             {group.notifications.map((notification) => {
@@ -634,7 +634,7 @@ function NotificationGroup({
             })}
           </NotificationGroupBody>
         ) : null}
-      </NSEPresence>
+      </Presence>
     </section>
   );
 }
@@ -970,7 +970,7 @@ export function NotificationCentrePresenter({
       <div className="syncloudos-notification-live-region" role="status" aria-live="polite" aria-atomic="true">
         {presenter.liveRegionText ?? ""}
       </div>
-      <NSEPresence>
+      <Presence>
         {presentationReady && banner && !centreOpen ? (
           <NotificationBanner
             key="syncloudos-notification-banner"
@@ -982,8 +982,8 @@ export function NotificationCentrePresenter({
             onRunAction={runAction}
           />
         ) : null}
-      </NSEPresence>
-      <NSEPresence>
+      </Presence>
+      <Presence>
         {centreOpen ? (
           <FocusScope scopeId="notification-centre" kind="popover" parentResponderId="webspring">
             <NotificationCentreSurface
@@ -1000,7 +1000,7 @@ export function NotificationCentrePresenter({
             />
           </FocusScope>
         ) : null}
-      </NSEPresence>
+      </Presence>
     </aside>
   );
 }

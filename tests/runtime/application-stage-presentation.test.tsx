@@ -23,7 +23,7 @@ import React from "react";
 import { createPortal } from "react-dom";
 import { act, cleanup, render } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { compileNSEPresentation, NSEPresence, type NSEPresentationEnter, type NSEPresentationSpec } from "../../src/NSE/Animation";
+import { compileNSEPresentation, Presence, type PresentationEnter, type PresentationSpec } from "../../src/NSE/Animation";
 import { useNSEOverlayProvider } from "../../src/NSE/Overlays";
 import { createSynWare } from "../../src/SynCloudOS/AppSDK/createSynWare";
 import { resolveApplicationStageMotion } from "../../src/Webspring/ApplicationStage.transitions";
@@ -40,9 +40,9 @@ import type {
 
 afterEach(cleanup);
 
-const resolved = (enter: NSEPresentationEnter, previous: string | null): NSEPresentationSpec | null =>
+const resolved = (enter: PresentationEnter, previous: string | null): PresentationSpec | null =>
   typeof enter === "function" ? enter(previous) : enter;
-const endpoints = (spec: NSEPresentationSpec | null) =>
+const endpoints = (spec: PresentationSpec | null) =>
   Object.fromEntries(compileNSEPresentation(spec!, "t").animations.map(({ keyPath, from, to }) => [keyPath, [from, to]]));
 
 describe("stage presentation", () => {
@@ -168,9 +168,9 @@ describe("mounted content presentation", () => {
     const registry = new WindowContentRendererRegistry();
     const fixture = (staged: boolean, shown = true) => <SynCloudOSProvider runtime={runtime}>
       <HostSiteBrandingProvider value={{ name: "Stage", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null, logoAlt: "Stage" }}>
-        <NSEPresence onExitComplete={exited}>{shown ? <ApplicationStageView key={app.bundleIdentifier} windowContentRegistry={registry}
+        <Presence onExitComplete={exited}>{shown ? <ApplicationStageView key={app.bundleIdentifier} windowContentRegistry={registry}
           stage={{ id: "application-stage:com.example.content-plane", appId: app.bundleIdentifier, title: app.window.title, isFocused: true, zIndex: 2 }}
-          app={app} lifecycle="active" staged={staged} presentationSettlementId={settlement.id} /> : null}</NSEPresence>
+          app={app} lifecycle="active" staged={staged} presentationSettlementId={settlement.id} /> : null}</Presence>
       </HostSiteBrandingProvider>
     </SynCloudOSProvider>;
     const rendered = render(fixture(true));
@@ -224,10 +224,10 @@ describe("stage overlay ownership", () => {
     const registry = new WindowContentRendererRegistry();
     const view = (staged = false, role: "incoming" | "outgoing" | null = null, shown = true) => <SynCloudOSProvider runtime={runtime}>
       <HostSiteBrandingProvider value={{ name: "Stage", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null, logoAlt: "Stage" }}>
-        <NSEPresence initial={false} onExitComplete={exited}>{shown ? <ApplicationStageView key={app.bundleIdentifier}
+        <Presence initial={false} onExitComplete={exited}>{shown ? <ApplicationStageView key={app.bundleIdentifier}
           windowContentRegistry={registry} app={app} lifecycle="active" staged={staged}
           stage={{ id: "application-stage:com.example.overlay-owner", appId: app.bundleIdentifier, title: app.window.title, isFocused: true, zIndex: 2 }}
-          multiSwitchRole={role} multiSwitchId={role ? "overlay-switch" : null} onMultiSwitchAnimationComplete={onRole} /> : null}</NSEPresence>
+          multiSwitchRole={role} multiSwitchId={role ? "overlay-switch" : null} onMultiSwitchAnimationComplete={onRole} /> : null}</Presence>
       </HostSiteBrandingProvider>
     </SynCloudOSProvider>;
     return { runtime, presentations, exited, onRole, view };

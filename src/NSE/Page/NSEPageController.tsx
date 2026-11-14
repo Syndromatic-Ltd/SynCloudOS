@@ -20,7 +20,7 @@
 
 import { useCallback, useId, useLayoutEffect, useRef, type PointerEvent } from "react";
 import { NSEViewController, type NSEViewControllerOptions } from "../Application/NSEViewController";
-import { NSEPresence } from "../Animation/NSEPresentation";
+import { Presence } from "../Animation/NSEPresentation";
 import { useObserve } from "../Objects/useObserve";
 import { NSEButton } from "../Controls/Buttons/NSEButton";
 import { ControllerNavigationChromeBoundary, useNSEControllerNavigationChrome } from "../Navigation/NSEApplicationNavigationChrome";
@@ -433,7 +433,7 @@ function PageNavigationView({ controller }: { readonly controller: NSEPageContro
       ) : (
         <div ref={content} tabIndex={-1} role="region" aria-label={Selected?.title ?? "Page content"}
           style={compact ? { flex: "1 1 auto", minHeight: 0 } : { height: "100%" }}>
-          <NSEPresence>{Selected ? <Selected.view key={controller.identifierForObject(objects[index])} /> : null}</NSEPresence>
+          <Presence>{Selected ? <Selected.view key={controller.identifierForObject(objects[index])} /> : null}</Presence>
         </div>
       )}
     </div>

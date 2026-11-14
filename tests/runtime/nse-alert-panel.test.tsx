@@ -22,7 +22,7 @@
 import React from "react";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { NSEAnimationDefaults, NSEAnimationEnvironmentProvider, type NSEAnimator } from "../../src/NSE/Animation";
+import { NSEAnimationDefaults, AnimationEnvironmentProvider, type Animator } from "../../src/NSE/Animation";
 import { NSEAlertSurface } from "../../src/NSE/Components/NSEAlertSurface";
 import { NSEAlertBackdrop } from "../../src/NSE/Components/NSEAlertBackdrop";
 import { SystemAlert } from "../../src/SynCloudOSReact/SystemAlert";
@@ -40,7 +40,7 @@ interface Played {
 function recordingAnimator(ownerAppId = "syncloudos.system") {
   const played: Played[] = [];
   const released: string[] = [];
-  const animator: NSEAnimator = {
+  const animator: Animator = {
     ownerAppId,
     animations: {
       acquireOwner(owner) {
@@ -67,7 +67,7 @@ function recordingAnimator(ownerAppId = "syncloudos.system") {
           resume() {},
         };
       },
-    } as NSEAnimator["animations"],
+    } as Animator["animations"],
   };
   return { animator, played, released };
 }
@@ -79,16 +79,16 @@ const valueAt = (played: Played, keyPath: string, offset: number) =>
   track(played, keyPath).keyframes!.find((keyframe) => Math.abs(keyframe.offset - offset) < 1e-9)!.value;
 const bezier = ({ x1, y1, x2, y2 }: { x1: number; y1: number; x2: number; y2: number }) => [x1, y1, x2, y2];
 
-function renderSystemAlert(animator: NSEAnimator | null, reducedMotion = false) {
+function renderSystemAlert(animator: Animator | null, reducedMotion = false) {
   return render(
-    <NSEAnimationEnvironmentProvider reducedMotion={reducedMotion} animator={animator}>
+    <AnimationEnvironmentProvider reducedMotion={reducedMotion} animator={animator}>
       <SystemAlert
         error={{ code: "APP_CONTENT_FAILED", title: "Stopped", message: "Try again" }}
         onDismiss={() => undefined}
         onReturn={() => undefined}
         onReload={() => undefined}
       />
-    </NSEAnimationEnvironmentProvider>,
+    </AnimationEnvironmentProvider>,
   );
 }
 
@@ -130,9 +130,9 @@ describe("NSE alert choreography on AnimationFX", () => {
   it("pops the alert in with the damped elastic scale, and fades it when motion is reduced", () => {
     const { animator, played } = recordingAnimator();
     const standard = render(
-      <NSEAnimationEnvironmentProvider reducedMotion={false} animator={animator}>
+      <AnimationEnvironmentProvider reducedMotion={false} animator={animator}>
         <NSEAlertSurface labelledBy="title"><h2 id="title">Notice</h2></NSEAlertSurface>
-      </NSEAnimationEnvironmentProvider>,
+      </AnimationEnvironmentProvider>,
     );
     const alert = screen.getByRole("alertdialog");
     expect(played).toHaveLength(1);
@@ -158,9 +158,9 @@ describe("NSE alert choreography on AnimationFX", () => {
 
     const reduced = recordingAnimator();
     render(
-      <NSEAnimationEnvironmentProvider reducedMotion animator={reduced.animator}>
+      <AnimationEnvironmentProvider reducedMotion animator={reduced.animator}>
         <NSEAlertSurface labelledBy="title"><h2 id="title">Notice</h2></NSEAlertSurface>
-      </NSEAnimationEnvironmentProvider>,
+      </AnimationEnvironmentProvider>,
     );
     const [fade] = reduced.played as [Played];
     expect(fade.definition).toMatchObject({ duration: 0.16, timing: "ease-in-out", fill: "backwards" });
@@ -171,9 +171,9 @@ describe("NSE alert choreography on AnimationFX", () => {
     for (const [reducedMotion, duration] of [[false, 0.18], [true, 0.08]] as const) {
       const { animator, played } = recordingAnimator();
       const view = render(
-        <NSEAnimationEnvironmentProvider reducedMotion={reducedMotion} animator={animator}>
+        <AnimationEnvironmentProvider reducedMotion={reducedMotion} animator={animator}>
           <NSEAlertBackdrop><NSEAlertSurface labelledBy="title"><h2 id="title">Notice</h2></NSEAlertSurface></NSEAlertBackdrop>
-        </NSEAnimationEnvironmentProvider>,
+        </AnimationEnvironmentProvider>,
       );
       const backdrop = document.querySelector<HTMLElement>(".nse-control-alert-backdrop")!;
       const dim = played.find((record) => record.target === backdrop)!;

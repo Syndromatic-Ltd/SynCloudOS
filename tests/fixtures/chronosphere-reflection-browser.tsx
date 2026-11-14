@@ -5,7 +5,7 @@ import { AFXRenderer } from "../../src/FX/AnimationFX/AFXRenderer";
 import type { AFXFrameScheduler } from "../../src/FX/AnimationFX/AFXLayer";
 import { GFXImage } from "../../src/FX/GraphicsFX/GFXImage";
 import { createGFXPixelLease, type GFXPixelLease } from "../../src/FX/GraphicsFX/GFXPixelLease";
-import { NSEAnimationEnvironmentProvider } from "../../src/NSE/Animation/NSEAnimationEnvironment";
+import { AnimationEnvironmentProvider } from "../../src/NSE/Animation/NSEAnimationEnvironment";
 import { ChronosphereReflection } from "../../src/NSE/Chronosphere/ChronosphereReflection";
 import { ChronosphereEnvironmentProvider, type ChronosphereEnvironment } from "../../src/NSE/Chronosphere/chronosphereEnvironment";
 import { BrowserAFXCanvasRenderer } from "../../src/SynCloudOS/PlatformAdapters/BrowserAFXCanvasRenderer";
@@ -112,9 +112,9 @@ export function mountReflectionFixture() {
     document.body.append(source);
     flushSync(() => root.render(
       <ChronosphereEnvironmentProvider value={environment}>
-        <NSEAnimationEnvironmentProvider frames={frames} layers={layers} reducedMotion={false}>
+        <AnimationEnvironmentProvider frames={frames} layers={layers} reducedMotion={false}>
           <ChronosphereReflection currentElement={source} settledKey={++generation} />
-        </NSEAnimationEnvironmentProvider>
+        </AnimationEnvironmentProvider>
       </ChronosphereEnvironmentProvider>,
     ));
   };

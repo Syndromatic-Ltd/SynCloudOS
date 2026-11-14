@@ -19,7 +19,7 @@
  */
 
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
-import { NSELayoutView } from "../NSE/Animation";
+import { LayoutView } from "../NSE/Animation";
 import { NSEFocusScope } from "../NSE/NSE";
 import { webspringIconSprings } from "./Webspring.transitions";
 import type { WebspringFolderPresentationComponent, WebspringFolderPresentationProps } from "./webspringTypes";
@@ -358,7 +358,7 @@ function FolderSplit({ folder, stage, anchor, reducedMotion, renderApp, onClose,
           <h2 id={titleId} data-nse-part="title" className="webspring-folder-split-title">{folder.title}</h2>
           <div data-nse-part="group" className="webspring-folder-split-apps">
             {/* Apps spring to their new places as they reorder, as on the stage. */}
-            {folder.apps.map((app, index) => <NSELayoutView key={app.bundleIdentifier} data-nse-part="cell" className="webspring-folder-split-cell" layoutTransition={reorder}>{renderApp(app, index)}</NSELayoutView>)}
+            {folder.apps.map((app, index) => <LayoutView key={app.bundleIdentifier} data-nse-part="cell" className="webspring-folder-split-cell" layoutTransition={reorder}>{renderApp(app, index)}</LayoutView>)}
           </div>
         </div>
       </div>
