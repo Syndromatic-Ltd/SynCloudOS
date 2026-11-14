@@ -23,7 +23,7 @@ import React, { useMemo, useState } from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { OverlayProvider } from "../../../src/NSE/Overlays";
-import { NSELabelHelp } from "../../../src/NSE/Tooltips/NSELabelHelp";
+import { LabelHelp } from "../../../src/NSE/Tooltips/NSELabelHelp";
 import { TooltipProvider, useNSETooltip } from "../../../src/NSE/Tooltips";
 
 interface ScheduledTask {
@@ -147,7 +147,7 @@ afterEach(() => {
 describe("NSE tooltip service", () => {
   it("dismisses old label help when the same control changes semantic context", async () => {
     const scheduler=createScheduler(),ref=React.createRef<HTMLButtonElement>();
-    const view=(label:string)=><TooltipHarness scheduler={scheduler} reducedMotion><NSELabelHelp label={label}><button ref={ref}>Context title</button></NSELabelHelp></TooltipHarness>;
+    const view=(label:string)=><TooltipHarness scheduler={scheduler} reducedMotion><LabelHelp label={label}><button ref={ref}>Context title</button></LabelHelp></TooltipHarness>;
     const {rerender}=render(view("Categories"));const anchor=screen.getByRole("button",{name:"Context title"});
     fireEvent.pointerEnter(anchor,{pointerType:"mouse"});expect((await screen.findByRole("tooltip")).textContent).toBe("Categories");
     rerender(view("Date and Time"));
@@ -157,7 +157,7 @@ describe("NSE tooltip service", () => {
 
   it("preserves the original control ref, handlers and existing description", async () => {
     const scheduler=createScheduler(), ref=React.createRef<HTMLButtonElement>(), click=vi.fn();
-    const {unmount}=render(<TooltipHarness scheduler={scheduler} reducedMotion><NSELabelHelp label="Complete destination"><button ref={ref} aria-describedby="existing-description" onClick={click}>Short</button></NSELabelHelp></TooltipHarness>);
+    const {unmount}=render(<TooltipHarness scheduler={scheduler} reducedMotion><LabelHelp label="Complete destination"><button ref={ref} aria-describedby="existing-description" onClick={click}>Short</button></LabelHelp></TooltipHarness>);
     const anchor=screen.getByRole("button",{name:"Short"});expect(ref.current).toBe(anchor);
     fireEvent.pointerEnter(anchor,{pointerType:"mouse"});const help=await screen.findByRole("tooltip");
     expect(anchor.getAttribute("aria-describedby")).toContain("existing-description");expect(anchor.getAttribute("aria-describedby")).toContain(help.id);

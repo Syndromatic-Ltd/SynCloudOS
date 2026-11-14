@@ -25,7 +25,7 @@ import { useOptionalTooltipProvider } from "./TooltipProvider";
 type AnchorProps = HTMLAttributes<HTMLElement>;
 interface LabelHelpProps { readonly label: ReactNode; readonly children: ReactElement<AnchorProps> }
 /** Keeps the control/ref/owner intact; help uses the existing overlay provider. */
-export function NSELabelHelp(props: LabelHelpProps) {
+export function LabelHelp(props: LabelHelpProps) {
   const provider = useOptionalTooltipProvider();
   return provider && props.label ? <BoundLabelHelp {...props} /> : props.children;
 }

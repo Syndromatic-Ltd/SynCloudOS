@@ -21,13 +21,13 @@
 import { useNSEWindowChromeElement } from "../../Layout/windowChromeObstructions";
 
 import { useRef, isValidElement, type CSSProperties, type HTMLAttributes, type ReactElement, type ReactNode } from "react";
-import { NSELabelHelp } from "../../Tooltips/NSELabelHelp";
+import { LabelHelp } from "../../Tooltips/NSELabelHelp";
 
 function leadingLabelHelp(node: ReactNode) {
   if (!isValidElement(node)) return node;
   const props = node.props as HTMLAttributes<HTMLElement> & { children?: ReactNode };
   const label = props["aria-label"] ?? (typeof props.children === "string" ? props.children : null);
-  return label ? <NSELabelHelp label={label}>{node as ReactElement<HTMLAttributes<HTMLElement>>}</NSELabelHelp> : node;
+  return label ? <LabelHelp label={label}>{node as ReactElement<HTMLAttributes<HTMLElement>>}</LabelHelp> : node;
 }
 import {
   getOptionalSmoothSurfaceProps,
@@ -50,7 +50,7 @@ function TopBarTitle({
   if (center) return <>{center}</>;
   if (!titleAction) return <>{title}</>;
   return (
-    <NSELabelHelp label={typeof title === "string" && title !== titleAction.label ? `${title} — ${titleAction.label}` : titleAction.label}><button
+    <LabelHelp label={typeof title === "string" && title !== titleAction.label ? `${title} — ${titleAction.label}` : titleAction.label}><button
       type="button"
       data-nse-part="button"
       className="nse-app-topbar-title-button"
@@ -71,7 +71,7 @@ function TopBarTitle({
         <span className="nse-app-topbar-title-arrow-glyph nse-app-topbar-title-arrow-right" />
         <span className="nse-app-topbar-title-arrow-glyph nse-app-topbar-title-arrow-down" />
       </span>
-    </button></NSELabelHelp>
+    </button></LabelHelp>
   );
 }
 

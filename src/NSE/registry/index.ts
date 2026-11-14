@@ -18,12 +18,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export type NSERegistryItemType = "primitive" | "composition" | "appearance" | "example";
+export type RegistryItemType = "primitive" | "composition" | "appearance" | "example";
 
-export interface NSERegistryItem {
+export interface RegistryItem {
   name: string;
   title: string;
-  type: NSERegistryItemType;
+  type: RegistryItemType;
   description: string;
   files: string[];
   dependencies?: string[];
@@ -120,7 +120,7 @@ export const nseRegistry = [
     description: "Canonical first-party Atmo appearance for NSE controls.",
     files: ["src/NSE/Appearance/atmo.ts", "src/NSE/Appearance/atmo-theme.css"]
   }
-] satisfies NSERegistryItem[];
+] satisfies RegistryItem[];
 
 export function getNSERegistryItem(name: string) {
   return nseRegistry.find((item) => item.name === name) ?? null;

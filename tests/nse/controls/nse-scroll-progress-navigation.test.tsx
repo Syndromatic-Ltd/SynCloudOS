@@ -26,7 +26,7 @@ import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEScroller, NSEScrollView, NSEScrollViewController, computeScrollRectTarget, normalizeRTLScrollLeft } from "../../../src/NSE/Scroll";
 import { NSEProgressIndicator } from "../../../src/NSE/Progress";
-import { NSESpinner } from "../../../src/NSE/Progress/spinnerSprite";
+import { Spinner } from "../../../src/NSE/Progress/spinnerSprite";
 import { AnimationEnvironmentProvider } from "../../../src/NSE/Animation/NSEAnimationEnvironment";
 import { NSETabView } from "../../../src/NSE/Navigation";
 import { NSESegmentedControl } from "../../../src/NSE/Controls/Values";
@@ -169,7 +169,7 @@ describe("scroll progress and navigation", () => {
   });
   it("keeps an always-visible zero-range scroller disabled", () => { render(<NSEScroller orientation="vertical" policy="always" value={0} maximum={0} onValueChange={() => {}} />); expect(screen.getByRole("slider")).toHaveProperty("disabled", true); });
   it("exposes the system chrome spinner's accessible status and visual variant", () => {
-    render(<NSESpinner size="large" tone="dark" label="Loading records" />);
+    render(<Spinner size="large" tone="dark" label="Loading records" />);
     const spinner = screen.getByRole("status", { name: "Loading records" });
     expect(spinner.getAttribute("data-size")).toBe("large");
     expect(spinner.getAttribute("data-tone")).toBe("dark");

@@ -33,7 +33,7 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
-import { NSELabelHelp } from "../Tooltips/NSELabelHelp";
+import { LabelHelp } from "../Tooltips/NSELabelHelp";
 import { useNSEAppearance } from "../Appearance";
 import { useOptionalTooltipProvider } from "../Tooltips/TooltipProvider";
 import {
@@ -377,7 +377,7 @@ export function TabBar({
           const segment = tabChromeSegment(index, orientation === "vertical" ? 1 : controls.length);
           const chromeState = tabChromeState(state, selected, pressed);
           return (
-            <NSELabelHelp key={destination.id} label={destination.accessibleLabel ?? destination.label}><button
+            <LabelHelp key={destination.id} label={destination.accessibleLabel ?? destination.label}><button
               className={classes("nse-tab-bar-tab", usesTallTabChrome && "nse-control-button")}
               key={destination.id}
               type="button"
@@ -445,11 +445,11 @@ export function TabBar({
                   <span data-nse-part="badge" className="nse-tab-bar-badge" data-nse-tab-badge="true" aria-hidden="true" >{destination.badge}</span>
                 ) : null}
               </span>
-            </button></NSELabelHelp>
+            </button></LabelHelp>
           );
         })}
         {overflowDestinations.length > 0 ? (
-          <NSELabelHelp label="More destinations"><button
+          <LabelHelp label="More destinations"><button
             className={classes("nse-tab-bar-tab", "nse-tab-bar-more", usesTallTabChrome && "nse-control-button")}
             type="button"
             role="tab"
@@ -514,7 +514,7 @@ export function TabBar({
               </span>
               <span data-nse-part="title" className="nse-tab-bar-label" >{moreTitle}</span>
             </span>
-          </button></NSELabelHelp>
+          </button></LabelHelp>
         ) : null}
           </div>
         </div>

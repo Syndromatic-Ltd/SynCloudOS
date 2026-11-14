@@ -98,7 +98,7 @@ import * as NSEAppearance from "./Appearance";
 export * from "./Appearance";
 export * from "./Controls/Images";
 
-const NSEControlCatalogue = {
+const ControlCatalogue = {
   ...NSEControlButtons,
   ...NSEControlFields,
   ...NSEControlImages,
@@ -168,7 +168,7 @@ export const NSE = {
   ...NSEWebContent,
   ...NSEContainers,
   ...NSEWindows,
-  ...NSEControlCatalogue,
+  ...ControlCatalogue,
   Appearance: NSEAppearance,
   ControlCore: NSEControlCore,
   Colour: NSEColourControls,

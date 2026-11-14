@@ -24,7 +24,7 @@ import { classes } from "../Controls/Core/nseControlsShared";
 import { useNSEProgressVisibility } from "./progressCore";
 
 /** @internal */
-export interface NSESpinnerProps extends HTMLAttributes<HTMLSpanElement> {
+export interface SpinnerProps extends HTMLAttributes<HTMLSpanElement> {
   size?: "small" | "large";
   tone?: "light" | "dark";
   label?: string;
@@ -36,7 +36,7 @@ export interface NSESpinnerProps extends HTMLAttributes<HTMLSpanElement> {
  *
  * @internal
  */
-export function NSESpinner({ size = "small", tone = "light", label = "Loading", className = "", ...props }: NSESpinnerProps) {
+export function Spinner({ size = "small", tone = "light", label = "Loading", className = "", ...props }: SpinnerProps) {
   const rootRef = useNSEProgressVisibility<HTMLSpanElement>();
 
   return (

@@ -22,7 +22,7 @@ import { useEffect, useRef } from "react";
 
 import { clamp, type CSSVarStyle } from "../Controls/Core/nseControlsShared";
 
-export interface NSEProgressRangeInput {
+export interface ProgressRangeInput {
   readonly value?: number;
   readonly minimum?: number;
   readonly maximum?: number;
@@ -30,7 +30,7 @@ export interface NSEProgressRangeInput {
   readonly alternateValue?: number;
 }
 
-export interface NSEProgressMetrics {
+export interface ProgressMetrics {
   readonly minimum: number;
   readonly maximum: number;
   readonly range: number;
@@ -46,7 +46,7 @@ export interface NSEProgressMetrics {
  * Progress snap is intentionally absolute, matching the historical progress
  * calcNormalizedPosition implementation rather than anchoring to minimum.
  */
-export function normalizeNSEProgress({ value, minimum, maximum, snap, alternateValue }: NSEProgressRangeInput): NSEProgressMetrics {
+export function normalizeNSEProgress({ value, minimum, maximum, snap, alternateValue }: ProgressRangeInput): ProgressMetrics {
   const safeMinimum = Number.isFinite(minimum) ? minimum as number : 0;
   const rawMaximum = Number.isFinite(maximum) ? maximum as number : 100;
   const safeMaximum = rawMaximum > safeMinimum ? rawMaximum : safeMinimum + 100;
@@ -74,7 +74,7 @@ export function normalizeNSEProgress({ value, minimum, maximum, snap, alternateV
   };
 }
 
-export function progressStyle(metrics: NSEProgressMetrics): CSSVarStyle {
+export function progressStyle(metrics: ProgressMetrics): CSSVarStyle {
   return {
     "--nse-control-progress": `${Number(metrics.percent.toPrecision(15))}%`,
     "--nse-control-progress-alt": `${Number(metrics.alternatePercent.toPrecision(15))}%`,
