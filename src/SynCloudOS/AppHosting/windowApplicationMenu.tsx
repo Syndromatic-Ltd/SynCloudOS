@@ -27,9 +27,10 @@ import { useMenuLifetime } from "../../NSE/Menus/useMenuLifetime";
 import { WindowApplicationMenuContext } from "../../NSE/Toolbars/ApplicationMenuToolbarButton";
 import { ActionResponderContext, useObserve } from "../../NSE/applicationHostInterop";
 import type { NSEApplication } from "../../NSE/Application";
-import { SynWareRuntimeContext } from "../../SynCloudOSReact";
+import { SynCloudOSRuntimeContext, SynWareRuntimeContext } from "../../SynCloudOSReact";
 import { useRuntimeNSEMenuPort } from "../../SynCloudOSReact/nseMenuPort";
 import { useSynWareContext } from "../AppSDK/SynWareContext";
+import { installedApplicationMenuSections } from "./installedApplicationMenus";
 import { applicationMenuLabels, ApplicationMenuOverlayHost } from "../../Webspring/applicationMenuPresentation";
 import { createApplicationMenuStore, useApplicationMenuSnapshot } from "../../SynCloudOSReact/ApplicationMenuTrigger";
 
@@ -40,6 +41,7 @@ export function WindowApplicationMenu({ app, destination, children }: PropsWithC
   useObserve(app);
   const runtime = useContext(SynWareRuntimeContext);
   const context = useSynWareContext();
+  const kernel = useContext(SynCloudOSRuntimeContext);
   const responder = useContext(ActionResponderContext) ?? runtime?.responderId ?? "";
   const port = useRuntimeNSEMenuPort();
   const current = useSyncExternalStore(runtime?.windows.subscribe ?? noSubscribe,
@@ -59,16 +61,16 @@ export function WindowApplicationMenu({ app, destination, children }: PropsWithC
       { kind: "separator", id: "quit-divider" },
       { kind: "command", id: "quit", commandId: "application.quit", payload: createPayload?.("appId", appId), labelOverride: `Quit ${name}` },
     ];
-    const dock = app.delegate?.applicationDockMenu?.(app);
+    const dock = kernel ? null : app.delegate?.applicationDockMenu?.(app);
     const extensions: MenuSection[] = [
-      ...(dock ? [{ id: "dock-menu", beforeId: "preferences", entries: dock.model.entries }] : []),
+      ...(kernel ? installedApplicationMenuSections(kernel, appId, app) : dock ? [{ id: "dock-menu", beforeId: "preferences", entries: dock.model.entries }] : []),
       ...(current && context?.sessionId === null ? [{ id: "sign-in", entries: [
         { kind: "command" as const, id: "sign-in", commandId: "session.requestSignIn", labelOverride: "Sign In" },
       ] }] : []),
       { id: "quit", entries, weight: 100 },
     ];
-    return createApplicationMenuModel({ appId, labels, includeLogOut: Boolean(context?.sessionId), extensions, createPayload });
-  }, [app, appId, context?.sessionId, Boolean(current), name, runtime]);
+    return createApplicationMenuModel({ appId, labels, appPreferences: { commandId: `${appId}.showPreferences`, label: "Preferences…" }, includeLogOut: Boolean(context?.sessionId), extensions, createPayload });
+  }, [app, appId, context?.sessionId, Boolean(current), kernel, name, runtime]);
   const menu = useMemo(() => createReactOwnedNSEMenu({ ownerSignal: port.signal, runtime: port, [nseMenuModel]: model }), [model, port]);
   const composed = useMemo(() => {
     if (!mainMenu) return null;
