@@ -2,15 +2,15 @@ import { createTestTheme } from "../../fixtures/themes";
 import React, { useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { NSEPopover } from "../../../src/NSE/Overlays/NSEPopover";
-import { NSEOverlayProvider } from "../../../src/NSE/Overlays/NSEOverlayProvider";
+import { OverlayProvider } from "../../../src/NSE/Overlays/OverlayProvider";
 import { NSEAppearanceProvider } from "../../../src/NSE/Appearance/NSEAppearanceProvider";
 
-import { NSEAnimationEnvironmentProvider } from "../../../src/NSE/Animation/NSEAnimationEnvironment";
+import { AnimationEnvironmentProvider } from "../../../src/NSE/Animation/NSEAnimationEnvironment";
 import { createStaticPresentationTraits } from "../../fixtures/presentationTraits";
-import type { NSELogicalPlacement } from "../../../src/NSE/Overlays/overlayTypes";
+import type { LogicalPlacement } from "../../../src/NSE/Overlays/overlayTypes";
 
 const appearance = createTestTheme("com.syndromatic.atmo", "Atmo");
-type Options = { open: boolean; mounted: boolean; dark: boolean; paper: boolean; reducedMotion: boolean; tall: boolean; placement: NSELogicalPlacement; x: number; y: number; region?: { x: number; y: number; width: number; height: number } };
+type Options = { open: boolean; mounted: boolean; dark: boolean; paper: boolean; reducedMotion: boolean; tall: boolean; placement: LogicalPlacement; x: number; y: number; region?: { x: number; y: number; width: number; height: number } };
 const initial: Options = { open: true, mounted: true, dark: false, paper: false, reducedMotion: false, tall: false, placement: "block-end", x: 440, y: 160 };
 
 function Fixture() {
@@ -35,7 +35,7 @@ function Fixture() {
     };
   }, [options.region]);
   return <NSEAppearanceProvider theme={appearance} colourScheme={options.dark ? "dark" : "light"}>
-    <NSEAnimationEnvironmentProvider reducedMotion={options.reducedMotion}><NSEOverlayProvider runtimePort={runtimePort}>
+    <AnimationEnvironmentProvider reducedMotion={options.reducedMotion}><OverlayProvider runtimePort={runtimePort}>
       <button ref={setAnchor} id="anchor" style={{ position: "fixed", left: options.x, top: options.y, width: 80, height: 32 }}>Options</button>
       {options.mounted ? <NSEPopover id="browser-popover" open={options.open} anchor={anchor} surface="overlay" parentWindowControllerId={null} parentResponderId="fixture" title="Publish options" drawsBackground={!options.paper}
         presentation={{ mode: "automatic", placement: options.placement }} onOpenChange={() => undefined}>
@@ -45,7 +45,7 @@ function Fixture() {
           <label>Title <input aria-label="Title" defaultValue="A walk through Manchester" /></label><button className="done">Done</button>
         </div>
       </NSEPopover> : null}
-    </NSEOverlayProvider></NSEAnimationEnvironmentProvider>
+    </OverlayProvider></AnimationEnvironmentProvider>
   </NSEAppearanceProvider>;
 }
 createRoot(document.getElementById("root")!).render(<Fixture />);

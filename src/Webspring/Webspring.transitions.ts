@@ -21,12 +21,12 @@
 import { useMemo, type CSSProperties } from "react";
 import type { AFXAnimationTiming } from "../FX/AnimationFX/animationTypes";
 import {
-  NSEAnimationDefaults,
+  AnimationDefaults,
   nseTransformStyle,
   useNSETraitCollection,
-  type NSEPresentationEnter,
-  type NSEPresentationSpec,
-  type NSETransformComponents,
+  type PresentationEnter,
+  type PresentationSpec,
+  type TransformComponents,
 } from "../NSE/Animation";
 
 export interface WebspringMotion {
@@ -35,19 +35,19 @@ export interface WebspringMotion {
   /** The orb swells while an application launches from the Dial. */
   readonly orbLaunchPulse: Readonly<{ scale: number }>;
   /** AnimationFX presentations for the dim behind the login window. */
-  readonly loginBackdropDim: Readonly<{ enter: NSEPresentationSpec; exit: NSEPresentationSpec }>;
+  readonly loginBackdropDim: Readonly<{ enter: PresentationSpec; exit: PresentationSpec }>;
   readonly getRadialExitForIcon: typeof getWebspringRadialExitForIcon;
 }
 
-const opacityFade = (from: number, to: number, duration: number, timing: NSEPresentationSpec["timing"], delay = 0): NSEPresentationSpec =>
+const opacityFade = (from: number, to: number, duration: number, timing: PresentationSpec["timing"], delay = 0): PresentationSpec =>
   Object.freeze({
     duration, timing, ...(delay > 0 ? { delay } : {}),
     tracks: Object.freeze([Object.freeze({ keyPath: "opacity" as const, values: Object.freeze([from, to]) })]),
   });
 const loginBackdropDim = Object.freeze({
   standard: Object.freeze({
-    enter: opacityFade(0, 1, 0.55, NSEAnimationDefaults.easing.emphasized, 0.35),
-    exit: opacityFade(1, 0, 0.28, NSEAnimationDefaults.easing.emphasized),
+    enter: opacityFade(0, 1, 0.55, AnimationDefaults.easing.emphasized, 0.35),
+    exit: opacityFade(1, 0, 0.28, AnimationDefaults.easing.emphasized),
   }),
   // Framer tweens given only a duration ease with easeInOut.
   reduced: Object.freeze({ enter: opacityFade(0, 1, 0.1, "ease-in-out"), exit: opacityFade(1, 0, 0.1, "ease-in-out") }),
@@ -129,7 +129,7 @@ export function useWebspringMotion(): WebspringMotion {
 export function resolveWebspringOrbPresentation(reducedMotion: boolean, launching: boolean): Readonly<{
   state: "launching" | "rest";
   style: CSSProperties;
-  enter: NSEPresentationEnter;
+  enter: PresentationEnter;
 }> {
   const pulse = (reducedMotion ? orbLaunchPulse.reduced : orbLaunchPulse.standard).scale;
   const scale = launching ? pulse : 1, from = launching ? 1 : pulse;
@@ -167,11 +167,11 @@ const ICON_REVEAL_DELAY = 0.1;
 const ICON_REVEAL_STAGGER = 0.075;
 const ICON_REVEAL_MAX_DELAY = 0.2;
 const LAUNCH_EXIT_STAGGER = 0.045;
-const reducedFade = NSEAnimationDefaults.durationSeconds.reducedFade;
+const reducedFade = AnimationDefaults.durationSeconds.reducedFade;
 
 interface IconPose {
   readonly opacity: number;
-  readonly transform: NSETransformComponents;
+  readonly transform: TransformComponents;
 }
 const waitingPose: IconPose = Object.freeze({ opacity: 0, transform: Object.freeze({ y: 28, scale: 1.72 }) });
 const holdingPose: IconPose = Object.freeze({ opacity: 1, transform: Object.freeze({ y: 14, scale: 1.3 }) });
@@ -194,7 +194,7 @@ export interface WebspringIconPresentation {
   readonly state: WebspringIconState;
   /** The icon's model pose for `state`. */
   readonly style: CSSProperties;
-  readonly enter: NSEPresentationEnter;
+  readonly enter: PresentationEnter;
 }
 
 /**
@@ -215,7 +215,7 @@ export function resolveWebspringIconPresentation({
       : of === "launching" || of === "covered" ? exitPose : readyPose;
   const revealDelay = Math.min(ICON_REVEAL_DELAY + index * ICON_REVEAL_STAGGER, ICON_REVEAL_MAX_DELAY);
   const launchDelay = Math.max(total - index - 1, 0) * exitStagger;
-  const move = (from: IconPose, to: IconPose, duration: number, timing: AFXAnimationTiming, delay: number): NSEPresentationSpec => Object.freeze({
+  const move = (from: IconPose, to: IconPose, duration: number, timing: AFXAnimationTiming, delay: number): PresentationSpec => Object.freeze({
     duration, timing, ...(delay > 0 ? { delay } : {}),
     tracks: reducedMotion
       ? [{ keyPath: "opacity" as const, values: [from.opacity, to.opacity] }]
@@ -225,7 +225,7 @@ export function resolveWebspringIconPresentation({
         ],
   });
   const target = poseOf(state);
-  const enter = (previous: WebspringIconState | null): NSEPresentationSpec | null => {
+  const enter = (previous: WebspringIconState | null): PresentationSpec | null => {
     // A newly shown icon starts from its waiting pose, unless it is shown
     // held or waiting, where it simply appears in that pose.
     if (previous === null && (state === "waiting" || state === "holding" || state === "covered")) return null;
@@ -250,7 +250,7 @@ export function resolveWebspringIconPresentation({
       case "launching":
         return reducedMotion
           ? move(from, target, reducedFade, framerTween, launchDelay)
-          : move(from, target, exitDuration, NSEAnimationDefaults.easing.decelerate, launchDelay);
+          : move(from, target, exitDuration, AnimationDefaults.easing.decelerate, launchDelay);
       case "covered":
         // The launch exit carries on to the same pose; from anywhere else the
         // icon is already covered, so it goes at once.
@@ -262,6 +262,6 @@ export function resolveWebspringIconPresentation({
     style: reducedMotion
       ? { opacity: target.opacity }
       : { opacity: target.opacity, transform: nseTransformStyle(target.transform) },
-    enter: enter as NSEPresentationEnter,
+    enter: enter as PresentationEnter,
   };
 }

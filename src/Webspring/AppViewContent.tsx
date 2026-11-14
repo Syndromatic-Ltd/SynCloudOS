@@ -22,16 +22,16 @@ import { useRef } from "react";
 import { useNSEViewSafeArea } from "../NSE/hostComposition";
 import type { CSSProperties, ReactNode } from "react";
 import {
-  NSESmoothSurface,
+  SmoothSurface,
   nseSmoothSurfaceDefaultPhysicality,
-  type NSESmoothSurfaceRequest
+  type SmoothSurfaceRequest
 } from "../NSE/SmoothSurface";
 import type { SynCloudOSAppFrameBackground, SynCloudOSAppFrameSmoothSurfaceManifest } from "../SynCloudOS/SynCloudOS";
 import { webspringSurfaceStyle } from "./webspringSurface";
 
 function appFrameSmoothSurfaceToNSE(
   smoothSurface: SynCloudOSAppFrameSmoothSurfaceManifest
-): NSESmoothSurfaceRequest {
+): SmoothSurfaceRequest {
   if (smoothSurface === "off" || smoothSurface === false) return false;
 
   const base = {
@@ -100,7 +100,7 @@ function Surface({
   }
 
   return (
-    <NSESmoothSurface
+    <SmoothSurface
       ref={surface}
       className={className}
       smoothSurface={request}
@@ -109,7 +109,7 @@ function Surface({
     >
       {header}
       {children}
-    </NSESmoothSurface>
+    </SmoothSurface>
   );
 }
 

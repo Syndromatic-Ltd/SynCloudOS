@@ -1,21 +1,21 @@
 import { expect, it, vi } from "vitest";
 import { NSEAnimationContext } from "../../src/NSE/Animation/NSEAnimationContext";
-import { NSEAnimationDefaults } from "../../src/NSE/Appearance/NSEAnimationDefaults";
+import { AnimationDefaults } from "../../src/NSE/Appearance/NSEAnimationDefaults";
 
 it("carries the duration and timing function system animations use (NSAnimationContext.current)", () => {
   const context = NSEAnimationContext.current;
   expect(NSEAnimationContext.current).toBe(context);
-  expect(context.duration).toBe(NSEAnimationDefaults.durationSeconds.standard);
-  expect(context.timingFunction).toBe(NSEAnimationDefaults.easing.standard);
+  expect(context.duration).toBe(AnimationDefaults.durationSeconds.standard);
+  expect(context.timingFunction).toBe(AnimationDefaults.easing.standard);
   expect(context.allowsImplicitAnimation).toBe(false);
-  expect(Object.isFrozen(NSEAnimationDefaults)).toBe(true);
+  expect(Object.isFrozen(AnimationDefaults)).toBe(true);
 });
 
 it("scopes mutable animation groups and restores the enclosing context after errors", () => {
   const outer = NSEAnimationContext.current;
   NSEAnimationContext.runAnimationGroup(context => {
     context.duration = 0.42;
-    context.timingFunction = NSEAnimationDefaults.easing.emphasized;
+    context.timingFunction = AnimationDefaults.easing.emphasized;
     context.allowsImplicitAnimation = true;
     expect(NSEAnimationContext.current).toBe(context);
     expect(() => NSEAnimationContext.runAnimationGroup(nested => {

@@ -25,7 +25,7 @@ import { createBrowserRuntimeEnvironment } from "../../../../src/SynCloudOS/Plat
 import { SynCloudOSProvider } from "../../../../src/SynCloudOSReact";
 import { NSEMenu } from "../../../../src/NSE/Menus/NSEMenu";
 import { NSEMenuBar } from "../../../../src/NSE/Menus/NSEMenuBar";
-import { NSEApplicationMenu } from "../../../../src/NSE/Menus/NSEApplicationMenu";
+import { ApplicationMenu } from "../../../../src/NSE/Menus/ApplicationMenu";
 import { NSEView } from "../../../../src/NSE/Views/NSEView";
 import { nseUnowned } from "../../../../src/NSE/Controllers/ownership";
 
@@ -65,7 +65,7 @@ export function SpecimenApplicationMenu({ open, id = "specimen-app-menu" }: { op
   const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null);
   return <SynCloudOSProvider runtime={runtime}>
     <button ref={setAnchor} type="button">Specimen</button>
-    <NSEApplicationMenu model={menu.model} controller={menu} overlay={{ id, parentResponderId: "specimen", placement: "block-end-inline-end" } as never} open={open && anchor !== null} anchor={anchor} title="Specimen" onOpenChange={noop} />
+    <ApplicationMenu model={menu.model} controller={menu} overlay={{ id, parentResponderId: "specimen", placement: "block-end-inline-end" } as never} open={open && anchor !== null} anchor={anchor} title="Specimen" onOpenChange={noop} />
   </SynCloudOSProvider>;
 }
 export function SpecimenContextMenu() {

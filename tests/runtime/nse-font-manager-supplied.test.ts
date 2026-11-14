@@ -20,7 +20,7 @@
 
 import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
-import { NSEFontLibrary } from "../../src/NSE/Typography/NSEFontLibrary";
+import { FontLibrary } from "../../src/NSE/Typography/NSEFontLibrary";
 import { NSEFontManager } from "../../src/NSE/Typography/NSEFontManager";
 import { typographyTokens } from "../../src/NSE/Typography/typographyTokens";
 import { typographyFontFamilies } from "../fixtures/typographyFontFamilies";
@@ -98,7 +98,7 @@ describe("host supplied typography fonts", () => {
   it("derives imported choices from the injected library and stops offering released faces", async () => {
     const release = vi.fn();
     const register = vi.fn(async () => release);
-    const library = new NSEFontLibrary({ storage: null, preferences: null, faceHost: { register } });
+    const library = new FontLibrary({ storage: null, preferences: null, faceHost: { register } });
     const manager = new NSEFontManager({ library });
     expect(manager.allFamilies()).toEqual([]);
     const bytes = readFileSync(new URL("../fixtures/fx/fonts/notosans-NotoSans[wdth,wght].ttf", import.meta.url));
@@ -120,7 +120,7 @@ describe("host supplied typography fonts", () => {
   });
 
   it("keeps supplied choices separate from imported removable faces", () => {
-    const library = new NSEFontLibrary({ faceHost: null, storage: null, preferences: null });
+    const library = new FontLibrary({ faceHost: null, storage: null, preferences: null });
     const manager = new NSEFontManager({ families: typographyFontFamilies, library });
     expect(manager.allFamilies()).toEqual(typographyFontFamilies);
     expect(manager.isUserFont("fixture.sans.regular")).toBe(false);
@@ -130,10 +130,10 @@ describe("host supplied typography fonts", () => {
   it.each(["family", "preset"] as const)("rejects a supplied %s id that collides with later library registration", async (part) => {
     const bytes = readFileSync(new URL("../fixtures/fx/fonts/notosans-NotoSans[wdth,wght].ttf", import.meta.url));
     const file = { name: "Fixture.ttf", size: bytes.byteLength, arrayBuffer: async () => Uint8Array.from(bytes).buffer };
-    const discovery = new NSEFontLibrary({ faceHost: { register: async () => () => undefined } });
+    const discovery = new FontLibrary({ faceHost: { register: async () => () => undefined } });
     const added = await discovery.addFonts([file]);
     const imported = discovery.userPreset(added.added[0]!.id)!;
-    const library = new NSEFontLibrary({ faceHost: { register: async () => () => undefined } });
+    const library = new FontLibrary({ faceHost: { register: async () => () => undefined } });
     const supplied = { ...typographyFontFamilies[0]!, presets: typographyFontFamilies[0]!.presets.map(preset => ({ ...preset })) };
     if (part === "family") { supplied.id = imported.familyId; supplied.presets.forEach(preset => { preset.familyId = imported.familyId; }); }
     else { supplied.presets[0]!.id = imported.id; supplied.defaultPresetId = imported.id; }

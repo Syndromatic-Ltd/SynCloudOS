@@ -19,7 +19,7 @@
  */
 
 import { createContext, useContext, useLayoutEffect, useRef, useSyncExternalStore, type ReactNode } from "react";
-import { NSEControllerLifetime } from "../Controllers/controllerLifetime";
+import { ControllerLifetime } from "../Controllers/controllerLifetime";
 import type { NSEControllerOwnershipOptions } from "../Controllers/ownership";
 
 export interface NSEApplicationNavigationChromeState {
@@ -31,19 +31,19 @@ export interface NSEApplicationNavigationChromeState {
   };
 }
 
-export interface NSEApplicationNavigationChromeSnapshot {
+export interface ApplicationNavigationChromeSnapshot {
   readonly revision: number;
   readonly active: NSEApplicationNavigationChromeState | null;
 }
 
-export type NSEApplicationNavigationChromeClaimState = Readonly<{
+export type ApplicationNavigationChromeClaimState = Readonly<{
   readonly title: string;
   readonly back: NSEApplicationNavigationChromeState["back"];
 }>;
 
-export interface NSEApplicationNavigationChromeClaim {
+export interface ApplicationNavigationChromeClaim {
   readonly ownerId: string;
-  update(state: NSEApplicationNavigationChromeClaimState): void;
+  update(state: ApplicationNavigationChromeClaimState): void;
   release(): void;
 }
 
@@ -63,12 +63,12 @@ function statesEqual(left: NSEApplicationNavigationChromeState | undefined, righ
     left.back?.onActivate === right.back?.onActivate;
 }
 
-function freezeSnapshot(revision: number, active: NSEApplicationNavigationChromeState | null): NSEApplicationNavigationChromeSnapshot {
+function freezeSnapshot(revision: number, active: NSEApplicationNavigationChromeState | null): ApplicationNavigationChromeSnapshot {
   return Object.freeze({ revision, active });
 }
 
 /** Stage-owned projection of one explicitly claimed application hierarchy. */
-export class NSEApplicationNavigationChromeController {
+export class ApplicationNavigationChromeController {
   readonly #listeners = new Set<() => void>();
   #claim: null | {
     readonly token: symbol;
@@ -78,16 +78,16 @@ export class NSEApplicationNavigationChromeController {
   #revision = 0;
   #snapshot = freezeSnapshot(0, null);
   #disposed = false;
-  readonly #lifetime: NSEControllerLifetime;
+  readonly #lifetime: ControllerLifetime;
 
   constructor(options: NSEControllerOwnershipOptions = {}) {
-    this.#lifetime = new NSEControllerLifetime(options, { kind: "NSEApplicationNavigationChromeController", id: "navigation-chrome" });
+    this.#lifetime = new ControllerLifetime(options, { kind: "NSEApplicationNavigationChromeController", id: "navigation-chrome" });
     this.#lifetime.bind(() => this.dispose());
   }
 
   get isDisposed(): boolean { return this.#disposed; }
 
-  getSnapshot = (): NSEApplicationNavigationChromeSnapshot => this.#snapshot;
+  getSnapshot = (): ApplicationNavigationChromeSnapshot => this.#snapshot;
 
   subscribe = (listener: () => void): (() => void) => {
     if (this.#disposed) return () => undefined;
@@ -100,7 +100,7 @@ export class NSEApplicationNavigationChromeController {
     };
   };
 
-  claim(ownerId: string): NSEApplicationNavigationChromeClaim | null {
+  claim(ownerId: string): ApplicationNavigationChromeClaim | null {
     if (this.#disposed) return null;
     const normalizedOwnerId = ownerId.trim();
     if (!normalizedOwnerId) throw new TypeError("Application navigation chrome owner id must not be empty.");
@@ -111,7 +111,7 @@ export class NSEApplicationNavigationChromeController {
     let released = false;
     return Object.freeze({
       ownerId: normalizedOwnerId,
-      update: (state: NSEApplicationNavigationChromeClaimState) => {
+      update: (state: ApplicationNavigationChromeClaimState) => {
         if (released || this.#disposed || this.#claim?.token !== token) return;
         const next = cloneState({ ownerId: normalizedOwnerId, ...state });
         if (statesEqual(this.#claim.state ?? undefined, next)) return;
@@ -145,43 +145,43 @@ export class NSEApplicationNavigationChromeController {
   }
 }
 
-const NSEApplicationNavigationChromeContext = createContext<NSEApplicationNavigationChromeController | null>(null);
-const NSEStandardNavigationChromeAvailableContext = createContext(true);
-const NSEControllerNavigationChromeBoundaryContext = createContext(false);
+const ApplicationNavigationChromeContext = createContext<ApplicationNavigationChromeController | null>(null);
+const StandardNavigationChromeAvailableContext = createContext(true);
+const ControllerNavigationChromeBoundaryContext = createContext(false);
 
-export function NSEApplicationNavigationChromeProvider({
+export function ApplicationNavigationChromeProvider({
   controller,
   children,
   standardChromeAvailable = true,
 }: {
-  readonly controller: NSEApplicationNavigationChromeController;
+  readonly controller: ApplicationNavigationChromeController;
   readonly children?: ReactNode;
   /** @internal Whether this host actually renders standard application chrome. */
   readonly standardChromeAvailable?: boolean;
 }): ReactNode {
   return (
-    <NSEApplicationNavigationChromeContext.Provider value={controller}>
-      <NSEStandardNavigationChromeAvailableContext.Provider value={standardChromeAvailable}>{children}</NSEStandardNavigationChromeAvailableContext.Provider>
-    </NSEApplicationNavigationChromeContext.Provider>
+    <ApplicationNavigationChromeContext.Provider value={controller}>
+      <StandardNavigationChromeAvailableContext.Provider value={standardChromeAvailable}>{children}</StandardNavigationChromeAvailableContext.Provider>
+    </ApplicationNavigationChromeContext.Provider>
   );
 }
 
 /** Registers one hierarchy owner against the nearest application-stage chrome. */
 export function useNSEApplicationNavigationChrome(state: NSEApplicationNavigationChromeState | null): void {
-  const controller = useContext(NSEApplicationNavigationChromeContext);
+  const controller = useContext(ApplicationNavigationChromeContext);
   useNavigationChromeClaim(controller, state);
 }
 
 /** @internal A default container owns the application boundary; embedded containers keep local chrome. */
-export function NSEControllerNavigationChromeBoundary({ children }: { readonly children: ReactNode }): ReactNode {
-  return <NSEControllerNavigationChromeBoundaryContext.Provider value={true}>{children}</NSEControllerNavigationChromeBoundaryContext.Provider>;
+export function ControllerNavigationChromeBoundary({ children }: { readonly children: ReactNode }): ReactNode {
+  return <ControllerNavigationChromeBoundaryContext.Provider value={true}>{children}</ControllerNavigationChromeBoundaryContext.Provider>;
 }
 
 /** @internal The default controller renderers need to know whether the stage accepted their claim. */
 export function useNSEControllerNavigationChrome(state: NSEApplicationNavigationChromeState | null): boolean {
-  const controller = useContext(NSEApplicationNavigationChromeContext);
-  const available = useContext(NSEStandardNavigationChromeAvailableContext);
-  const embedded = useContext(NSEControllerNavigationChromeBoundaryContext);
+  const controller = useContext(ApplicationNavigationChromeContext);
+  const available = useContext(StandardNavigationChromeAvailableContext);
+  const embedded = useContext(ControllerNavigationChromeBoundaryContext);
   const effectiveState = available && !embedded ? state : null;
   useNavigationChromeClaim(controller, effectiveState);
   const snapshot = useSyncExternalStore(controller?.subscribe ?? noNavigationChromeSubscription,
@@ -192,8 +192,8 @@ export function useNSEControllerNavigationChrome(state: NSEApplicationNavigation
 const noNavigationChromeSubscription = () => () => {};
 const noNavigationChromeSnapshot = () => null;
 
-function useNavigationChromeClaim(controller: NSEApplicationNavigationChromeController | null, state: NSEApplicationNavigationChromeState | null): void {
-  const claim = useRef<NSEApplicationNavigationChromeClaim | null>(null);
+function useNavigationChromeClaim(controller: ApplicationNavigationChromeController | null, state: NSEApplicationNavigationChromeState | null): void {
+  const claim = useRef<ApplicationNavigationChromeClaim | null>(null);
   const ownerId = state?.ownerId ?? null;
 
   const latestState = useRef(state);

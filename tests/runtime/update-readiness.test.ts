@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { NSEUpdateReadinessController } from '../../src/NSE/Controllers/NSEUpdateReadinessController';
+import { UpdateReadinessController } from '../../src/NSE/Controllers/NSEUpdateReadinessController';
 import { NSEObjectController } from '../../src/NSE/Controllers/NSEObjectController';
 import { NSEViewController } from '../../src/NSE/Application/NSEViewController';
 import { nseUnowned } from '../../src/NSE/Controllers/ownership';
@@ -26,7 +26,7 @@ function source(domain: UpdateReadinessAuthority['domain'] = 'tasks') {
   return { domain, signal: owner.signal, read: () => ({ known, blockers, revision }), subscribe: (listener: () => void) => { listeners.add(listener); return () => { listeners.delete(listener); }; }, set(next: readonly UpdateReadinessBlocker[], available = true) { blockers = next; known = available; revision++; for (const listener of [...listeners]) listener(); }, end: () => owner.abort(), get subscriptions() { return listeners.size; } };
 }
 function controller(inv?: UpdateReadinessInventory, owner = new AbortController()) {
-  const c = new NSEUpdateReadinessController({ id: 'update-observation', clientInstance: 'generated-instance-1', hostBuild: 'build-A', inventory: inv, ownerSignal: owner.signal });
+  const c = new UpdateReadinessController({ id: 'update-observation', clientInstance: 'generated-instance-1', hostBuild: 'build-A', inventory: inv, ownerSignal: owner.signal });
   releases.push(() => c.dispose()); return c;
 }
 async function documentFixture() {
@@ -173,7 +173,7 @@ describe('owned readonly update facts', () => {
   });
   it('belongs to an actual 6C view-controller owner and ends with that owner', () => {
     const view = new NSEViewController({ owner: nseUnowned }); const inv = inventory();
-    const c = new NSEUpdateReadinessController({ id: 'view-owned', owner: view, clientInstance: 'generated-view-instance', hostBuild: 'build-A', inventory: inv });
+    const c = new UpdateReadinessController({ id: 'view-owned', owner: view, clientInstance: 'generated-view-instance', hostBuild: 'build-A', inventory: inv });
     expect(c.inspect().readiness).toBe('ready'); view.dispose();
     expect(c.isDisposed).toBe(true); expect(c.inspect().blockers).toEqual(['owner-ended']); expect(inv.subscriptions).toBe(0);
   });

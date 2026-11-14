@@ -47,7 +47,7 @@ it("survives StrictMode replay with one committed owner and releases it on unmou
     facade = useMotion();
     useEffect(() => {
       const subscription = facade.startDeviceMotionUpdates(
-        { referenceFrame: "relative" },
+        { referenceFrame: "xArbitraryZVertical" },
         () => {},
       );
       return () => subscription.dispose();

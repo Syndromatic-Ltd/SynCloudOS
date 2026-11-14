@@ -78,6 +78,8 @@ export interface LifecycleRequestOptions {
   readonly commitGuard?: () => void;
   /** @internal Establish the enclosing operation's commit before publishing lifecycle state. */
   readonly onCommit?: () => void;
+  /** @internal Presents a launch (its main window) after commit and before the application's did callbacks. A failure fails the launch. */
+  readonly presentAfterCommit?: (context: { readonly signal: AbortSignal }) => void | Promise<void>;
   /** @internal Full pathname validated by RouteManager for this activation. */
   readonly routePath?: string;
   /** @internal Prepared host transaction. This is not projected by AppSDK. */

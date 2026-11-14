@@ -30,7 +30,7 @@ import type { NSEFormatter, NSEFormatterContext } from "../../../Foundation/publ
 import type { NSEActionReference } from "./actionReference";
 
 /** Typed action connection; dynamic string IDs keep their existing payload contract. */
-export interface NSEControlActionProps<Payload = unknown> {
+export interface ControlActionProps<Payload = unknown> {
   readonly action?: string | NSEActionReference<Payload>;
   readonly actionPayload?: NoInfer<Payload>;
 }
@@ -59,20 +59,20 @@ export interface NSEControlValueProps<T> {
 }
 
 /** Declarative command tuple. Resolution is always delegated to the active responder graph. */
-export interface NSEControlCommandBinding<P> {
+export interface ControlCommandBinding<P> {
   readonly id: CommandId;
   readonly payload: P;
   readonly responderId?: string;
 }
 
-export type NSECheckboxState = false | true | "mixed";
+export type CheckboxState = false | true | "mixed";
 
 /**
  * Runtime-neutral command capability used by NSE. The React runtime layer adapts
  * the canonical command service into this port; NSE never creates a
  * responder, focus, command, or lifecycle registry of its own.
  */
-export interface NSEControlRuntimePort {
+export interface ControlRuntimePort {
   readonly signal: AbortSignal;
   readonly scheduler?: {
     setTimeout(callback: () => void, delayMs: number): unknown;
@@ -100,7 +100,7 @@ export interface NSEControlRuntimePort {
   };
 }
 
-export interface NSEFormattedControlProps<T> extends NSEControlValueProps<T> {
+export interface FormattedControlProps<T> extends NSEControlValueProps<T> {
   readonly formatter: NSEFormatter<T>;
   readonly formatterContext: NSEFormatterContext;
 }

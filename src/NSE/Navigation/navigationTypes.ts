@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { NSETabStripPresentation } from "./tabStrip";
+import type { TabStripPresentation } from "./tabStrip";
 import type { ReactNode } from "react";
 
 /** Semantic icon data only. NavigationFoundation does not assign final visual treatment. */
@@ -30,7 +30,7 @@ export type NSENavigationIcon =
  * from `icon`: physical tabs retain their semantic template/vector icon while
  * a desktop sidebar may show app-owned artwork without treating it as control
  * chrome. */
-export interface NSENavigationSidebarItemDescriptor {
+export interface NavigationSidebarItemDescriptor {
   readonly glyph?: string;
   readonly glyphFramed?: boolean;
   readonly glyphSize?: "standard" | "large";
@@ -65,7 +65,7 @@ export function projectNSENavigationIcon(
 
 /** A declared destination is independent of any physical tab, source list, or
  * split pane. Its optional content factory is retained by its controller. */
-export interface NSENavigationDestination<TContent = unknown> {
+export interface NavigationDestination<TContent = unknown> {
   readonly id: string;
   readonly restorationId?: string;
   readonly label: ReactNode;
@@ -73,7 +73,7 @@ export interface NSENavigationDestination<TContent = unknown> {
   readonly compactLabel?: ReactNode;
   readonly accessibleLabel?: string;
   readonly icon: NSENavigationIcon;
-  readonly sidebarItem?: NSENavigationSidebarItemDescriptor;
+  readonly sidebarItem?: NavigationSidebarItemDescriptor;
   readonly groupId?: string;
   readonly disabled?: boolean;
   readonly badge?: string | number;
@@ -85,18 +85,18 @@ export interface NSENavigationDestination<TContent = unknown> {
  * of supplying panes: renderers project this semantic order into their own
  * physical structure.
  */
-export interface NSENavigationSection {
+export interface NavigationSection {
   readonly id: string;
   readonly label?: ReactNode;
   readonly destinationIds: readonly string[];
 }
 
-export interface NSENavigationSelectionOptions {
+export interface NavigationSelectionOptions {
   readonly signal?: AbortSignal;
   readonly source?: string;
 }
 
-export interface NSETabBarControllerSnapshot {
+export interface TabBarControllerSnapshot {
   readonly revision: number;
   readonly id: string;
   readonly selectedDestinationId: string;
@@ -104,15 +104,15 @@ export interface NSETabBarControllerSnapshot {
   readonly activeTabId: string;
   readonly directDestinationIds: readonly string[];
   readonly overflowDestinationIds: readonly string[];
-  readonly moreStack: NSENavigationStackSnapshot | null;
+  readonly moreStack: NavigationStackSnapshot | null;
 }
 
-export interface NSETabBarRestorationSnapshot {
+export interface TabBarRestorationSnapshot {
   readonly selectedDestinationId?: string | null;
-  readonly more?: NSENavigationStackRestorationSnapshot | null;
+  readonly more?: NavigationStackRestorationSnapshot | null;
 }
 
-export interface NSENavigationStackSnapshot {
+export interface NavigationStackSnapshot {
   readonly revision: number;
   readonly id: string;
   readonly rootDestinationId: string | null;
@@ -121,7 +121,7 @@ export interface NSENavigationStackSnapshot {
   readonly backDestinationId: string | null;
 }
 
-export interface NSENavigationStackRestorationSnapshot {
+export interface NavigationStackRestorationSnapshot {
   /** Version 1 is the first persisted stack-path representation. Omit only for pre-NavigationFoundation snapshots. */
   readonly version?: 1;
   readonly path: readonly string[];
@@ -154,7 +154,7 @@ export interface NSETabViewProps {
   readonly parentResponderId?: string;
   /** `tabStyle: "icons"` draws the tabs as a row of icons (the colour panel's
    * modes, a Preferences window's panes) instead of the joined capsule. */
-  readonly presentation?: NSETabStripPresentation;
+  readonly presentation?: TabStripPresentation;
   onSelectedIdChange?(id: string, reason: "pointer" | "keyboard"): void;
   onRequestClose?(id: string): void;
   onRequestReorder?(id: string, toIndex: number): void;

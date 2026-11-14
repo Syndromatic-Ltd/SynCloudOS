@@ -23,12 +23,12 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import React from "react";
 import { afterEach, describe, expect, it } from "vitest";
-import { NSETopBar, nseTopBarStyles } from "../../src/NSE/Windows/Chrome";
-import type { NSETopBarItem, NSETopBarVariant } from "../../src/NSE/Windows/Chrome";
+import { TopBar, nseTopBarStyles } from "../../src/NSE/Windows/Chrome";
+import type { TopBarItem, TopBarVariant } from "../../src/NSE/Windows/Chrome";
 
 afterEach(cleanup);
 
-const variants: Array<{ variant: NSETopBarVariant; glyph: string }> = [
+const variants: Array<{ variant: TopBarVariant; glyph: string }> = [
   { variant: "atmoCumulus", glyph: ".nse-app-topbar-button-icon" },
   { variant: "atmoMetal", glyph: ".nse-app-topbar-metal-pill-glyph" }
 ];
@@ -38,8 +38,8 @@ function maskOf(button: HTMLElement, glyphSelector: string): string | null {
   return glyph ? glyph.style.getPropertyValue("--nse-topbar-glyph") : null;
 }
 
-function renderBar(variant: NSETopBarVariant, item: NSETopBarItem) {
-  return render(<NSETopBar title="App" variant={variant} leadingItems={[item]} />);
+function renderBar(variant: TopBarVariant, item: TopBarItem) {
+  return render(<TopBar title="App" variant={variant} leadingItems={[item]} />);
 }
 
 describe.each(variants)("NSETopBar glyphs ($variant)", ({ variant, glyph }) => {
@@ -57,7 +57,7 @@ describe.each(variants)("NSETopBar glyphs ($variant)", ({ variant, glyph }) => {
 
   it("masks a custom item's icon and draws nothing for a custom item without one", () => {
     cleanup();
-    render(<NSETopBar title="App" variant={variant} trailingItems={[
+    render(<TopBar title="App" variant={variant} trailingItems={[
       { kind: "custom", label: "With icon", icon: "/art/tool.svg" },
       { kind: "custom", label: "Bare" }
     ]} />);

@@ -7,7 +7,7 @@ import { getNSEOutletBinding,requireNSEOutletOwner,type NSEViewOutlet } from './
 import { getNSETaskLifetime,subscribeNSEActivity } from './viewActivity';
 import { getNSEAuthoringContext } from './authoringContext';
 
-export interface NSEManagedAnimationHost {
+export interface ManagedAnimationHost {
   readonly client:{createRenderer(target:object,options?:Pick<AFXRendererOptions,'maximumQuads'|'onRenderError'> & Readonly<{layout?:'css'}>,signal?:AbortSignal):AFXRenderer};
   readonly frames:AFXFrameScheduler|null;
 }
@@ -65,7 +65,7 @@ class ManagedRenderer extends NSEObject<NSEManagedAFXRendererSnapshot> implement
   #cancelFrame:(()=>void)|undefined;#cancelResize:(()=>void)|undefined;
   readonly #observers=new Set<FrameObserver>();readonly #cleanup:Array<()=>void>=[];readonly #abort=new AbortController();
   readonly #canvas:HTMLCanvasElement;readonly #frames:AFXFrameScheduler;
-  constructor(readonly kind:ManagedKind,readonly owner:NSEViewController<unknown>,readonly outlet:NSEViewOutlet<HTMLCanvasElement>,readonly host:NSEManagedAnimationHost,readonly options:NSEManagedAFXRendererOptions) {
+  constructor(readonly kind:ManagedKind,readonly owner:NSEViewController<unknown>,readonly outlet:NSEViewOutlet<HTMLCanvasElement>,readonly host:ManagedAnimationHost,readonly options:NSEManagedAFXRendererOptions) {
     super();requireNSEOutletOwner(owner,outlet);this.#canvas=outlet.element;
     const Canvas=this.#canvas.ownerDocument.defaultView?.HTMLCanvasElement;
     if(!Canvas||!(this.#canvas instanceof Canvas))throw new TypeError(kind==='renderer'?'Managed renderers require a canvas outlet.':'Managed display links require a canvas outlet.');

@@ -3,14 +3,14 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { nseMenuModel } from "../../src/NSE/Menus/menuTypes";
 import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { NSEUserDefaultsController, nseUnowned, type NSEControllerOwnershipOptions } from "../../src/NSE/Controllers";
-import { enterClassApplication, instantiateInOwnerScope, NSEOwnershipScope } from "../../src/NSE/Controllers/ownership";
+import { enterClassApplication, instantiateInOwnerScope, OwnershipScope } from "../../src/NSE/Controllers/ownership";
 import { NSEMenu } from "../../src/NSE/Menus/NSEMenu";
 import { PageTurnController } from "../../src/NSE/Page/pageTurnController";
 import { NSEColourPanelController } from "../../src/NSE/Colour/ColourPanel/NSEColourPanelController";
-import { NSEApplicationNavigationChromeController } from "../../src/NSE/Navigation/NSEApplicationNavigationChrome";
+import { ApplicationNavigationChromeController } from "../../src/NSE/Navigation/NSEApplicationNavigationChrome";
 import { NSEScrollViewController } from "../../src/NSE/Scroll/scrollTypes";
 import { NSEToolbarController } from "../../src/NSE/Toolbars/NSEToolbarController";
-import type { NSEToolbarPreferences } from "../../src/NSE/Toolbars/toolbarTypes";
+import type { ToolbarPreferences } from "../../src/NSE/Toolbars/toolbarTypes";
 import { createInMemoryNSETextOwner } from "../../src/NSE/Text";
 import { TextEditingSession } from "../../src/NSE/TextEditing/TextEditingSession";
 import { createTestRuntime } from "./helpers";
@@ -39,13 +39,13 @@ function commandPort(host: SynCloudOSRuntime) {
   };
 }
 function preferences() {
-  const result = new NSEUserDefaultsController<NSEToolbarPreferences>({
+  const result = new NSEUserDefaultsController<ToolbarPreferences>({
     owner: nseUnowned, namespace: "ownership.toolbar", schema: {
       version: 1, defaults: { itemIds: [], displayMode: "icon-only", sizeMode: "regular" }, migrations: [],
       fields: {
         itemIds: { validate: (value: unknown): value is readonly string[] => Array.isArray(value) && value.every((item) => typeof item === "string") },
-        displayMode: { validate: (value: unknown): value is NSEToolbarPreferences["displayMode"] => value === "icon-only" || value === "icon-and-label" || value === "label-only" },
-        sizeMode: { validate: (value: unknown): value is NSEToolbarPreferences["sizeMode"] => value === "small" || value === "regular" },
+        displayMode: { validate: (value: unknown): value is ToolbarPreferences["displayMode"] => value === "icon-only" || value === "icon-and-label" || value === "label-only" },
+        sizeMode: { validate: (value: unknown): value is ToolbarPreferences["sizeMode"] => value === "small" || value === "regular" },
       },
     }, defaults: defaultsFrom({ read: () => null, write: () => undefined, remove: () => undefined }),
   });
@@ -63,7 +63,7 @@ const factories = {
   },
   page: (options: NSEControllerOwnershipOptions) => new PageTurnController(options),
   colour: (options: NSEControllerOwnershipOptions) => new NSEColourPanelController(runtime(), options),
-  navigationChrome: (options: NSEControllerOwnershipOptions) => new NSEApplicationNavigationChromeController(options),
+  navigationChrome: (options: NSEControllerOwnershipOptions) => new ApplicationNavigationChromeController(options),
   scroll: (options: NSEControllerOwnershipOptions) => new NSEScrollViewController(document.createElement("div"), undefined, options),
   text: (options: NSEControllerOwnershipOptions) => {
     const textOwner = createInMemoryNSETextOwner();
@@ -74,7 +74,7 @@ const factories = {
 
 describe.each(Object.entries(factories))("%s controller ownership", (name, create) => {
   it("adopts an ambient owner and is disposed when that owner is released", () => {
-    const scope = new NSEOwnershipScope("application", "ambient");
+    const scope = new OwnershipScope("application", "ambient");
     const controller = instantiateInOwnerScope(scope, () => create({}));
     expect(controller.isDisposed).toBe(false);
     scope.release("application-closed");

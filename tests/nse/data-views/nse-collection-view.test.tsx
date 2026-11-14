@@ -32,7 +32,7 @@ import {
   NSECollectionView,
   createAdaptiveCollectionLayout,
   createListCollectionLayout,
-  type NSECollectionViewItemProps,
+  type CollectionViewItemProps,
 } from "../../../src/NSE/DataViews/Collection";
 
 interface Card { readonly id: string; readonly label: string }
@@ -60,7 +60,7 @@ function source(content: readonly Card[] = cards) {
   return { controller, adapter };
 }
 
-const renderItem = ({ item, selected, focused, editing }: NSECollectionViewItemProps<Card, string>) => (
+const renderItem = ({ item, selected, focused, editing }: CollectionViewItemProps<Card, string>) => (
   <span>{item.label}:{String(selected)}:{String(focused)}:{String(editing)}</span>
 );
 

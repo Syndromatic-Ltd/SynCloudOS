@@ -23,7 +23,7 @@ import { useNSEAppearance } from "../../Appearance/NSEAppearanceProvider";
 import { NSEImage } from "./NSEImageResource";
 
 /** @internal The image cell shared by buttons and segments. Template tint inherits the control's colour. */
-export function NSEControlImage({ image }: { readonly image: ReactNode | NSEImage }): ReactNode {
+export function ControlImage({ image }: { readonly image: ReactNode | NSEImage }): ReactNode {
   const { theme } = useNSEAppearance();
   const resolved = image instanceof NSEImage ? NSEImage.named(image.name, theme) ?? image : null;
   const source = resolved ? Object.keys(resolved.files).length > 1 ? `image-set(${Object.entries(resolved.files).map(([scale, path]) => `url("${path}") ${scale}`).join(", ")})` : `url("${resolved.src}")` : "";

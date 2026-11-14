@@ -19,29 +19,29 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { NSEPopup, reportNSEWindowSurfaceError, useNSEWindowSurfaceLifecycle, useOptionalNSEWindowSurfaceBridge, type NSEOverlayDismissReason, type NSEWindowSurfaceBridge } from "../Overlays";
+import { NSEPopup, reportNSEWindowSurfaceError, useNSEWindowSurfaceLifecycle, useOptionalNSEWindowSurfaceBridge, type OverlayDismissReason, type WindowSurfaceBridge } from "../Overlays";
 import { useNSEPresentedContent } from "../Overlays/useNSEPresentedContent";
-import { NSEWindowFittingContent, centredWindowBounds, type NSEWindowFittingSize } from "../Overlays/NSEWindowFittingContent";
+import { WindowFittingContent, centredWindowBounds, type WindowFittingSize } from "../Overlays/NSEWindowFittingContent";
 import type { FilePanelResult, FilePanelSaveTarget } from "../../SynCloudOS/SynCloudOS";
 
-export type NSEFilePanelWindowRole = "panel" | "sheet";
+export type FilePanelWindowRole = "panel" | "sheet";
 
-export interface NSEFilePanelWindowRequest {
+export interface FilePanelWindowRequest {
   readonly id: string;
-  readonly role: NSEFilePanelWindowRole;
+  readonly role: FilePanelWindowRole;
   /** Null denotes a top-level application-stage panel. */
   readonly parentWindowControllerId: string | null;
 }
 
 /** Window-host seam: the application owns WindowManager records and renderers. */
-export interface NSEFilePanelWindowBridge {
-  open?(request: NSEFilePanelWindowRequest): void;
-  close?(request: NSEFilePanelWindowRequest): void;
-  present?: NSEWindowSurfaceBridge["present"];
-  dismiss?: NSEWindowSurfaceBridge["dismiss"];
+export interface FilePanelWindowBridge {
+  open?(request: FilePanelWindowRequest): void;
+  close?(request: FilePanelWindowRequest): void;
+  present?: WindowSurfaceBridge["present"];
+  dismiss?: WindowSurfaceBridge["dismiss"];
 }
 
-export interface NSEFilePanelViewProps {
+export interface FilePanelViewProps {
   readonly id: string;
   readonly open: boolean;
   readonly anchor: HTMLElement | null;
@@ -51,13 +51,13 @@ export interface NSEFilePanelViewProps {
   readonly parentWindowControllerId: string | null;
   readonly compact?: boolean;
   readonly title: string;
-  readonly windowBridge?: NSEFilePanelWindowBridge;
+  readonly windowBridge?: FilePanelWindowBridge;
   readonly result: FilePanelResult<unknown> | FilePanelResult<FilePanelSaveTarget> | null;
   readonly children: React.ReactNode;
-  onOpenChange(open: boolean, reason: NSEOverlayDismissReason): void;
+  onOpenChange(open: boolean, reason: OverlayDismissReason): void;
 }
 
-function resultMessage(result: NSEFilePanelViewProps["result"]): string | null {
+function resultMessage(result: FilePanelViewProps["result"]): string | null {
   if (!result || result.kind === "accepted" || result.kind === "cancelled") return null;
   if (result.kind === "choose-another") return "Choose another destination.";
   if (result.kind === "unavailable") return result.message;
@@ -70,7 +70,7 @@ function resultMessage(result: NSEFilePanelViewProps["result"]): string | null {
  * sheet through the explicit host bridge; this component never registers a
  * parallel window record.
  */
-export function NSEFilePanelView({
+export function FilePanelView({
   id,
   open,
   anchor,
@@ -83,7 +83,7 @@ export function NSEFilePanelView({
   result,
   children,
   onOpenChange,
-}: NSEFilePanelViewProps) {
+}: FilePanelViewProps) {
   if (!id.trim()) throw new TypeError("NSE file panel IDs must not be empty.");
   if (!parentResponderId.trim()) throw new TypeError("NSE file panels require a parent responder ID.");
   if (parentWindowControllerId !== null && !parentWindowControllerId.trim()) throw new TypeError("NSE file-panel parent window controller IDs must not be empty.");
@@ -93,7 +93,7 @@ export function NSEFilePanelView({
     parentWindowControllerId,
   }), [compact, id, parentWindowControllerId]);
   const hostedBridge = useOptionalNSEWindowSurfaceBridge();
-  const canonicalBridge = windowBridge?.present && windowBridge.dismiss ? windowBridge as NSEWindowSurfaceBridge : hostedBridge;
+  const canonicalBridge = windowBridge?.present && windowBridge.dismiss ? windowBridge as WindowSurfaceBridge : hostedBridge;
   const handleDidClose = useNSEWindowSurfaceLifecycle({
     bridge: canonicalBridge,
     requestId: id,
@@ -108,7 +108,7 @@ export function NSEFilePanelView({
   }, [bridgeRequest, canonicalBridge, open, windowBridge]);
   const message = resultMessage(result);
   const status = result ? result.kind : "ready";
-  const dismiss = useCallback((nextOpen: boolean, reason: NSEOverlayDismissReason) => {
+  const dismiss = useCallback((nextOpen: boolean, reason: OverlayDismissReason) => {
     onOpenChange(nextOpen, reason);
   }, [onOpenChange]);
 
@@ -120,8 +120,8 @@ export function NSEFilePanelView({
   );
   // The window follows the panel's content rather than a fixed frame; the
   // fallback size only stands until the first measurement.
-  const [fitting, setFitting] = useState<NSEWindowFittingSize | null>(null);
-  const onFittingSize = useCallback((next: NSEWindowFittingSize) => {
+  const [fitting, setFitting] = useState<WindowFittingSize | null>(null);
+  const onFittingSize = useCallback((next: WindowFittingSize) => {
     setFitting((current) => current && current.width === next.width && current.height === next.height ? current : next);
   }, []);
   const canonicalRequest = useMemo(() => ({
@@ -134,7 +134,7 @@ export function NSEFilePanelView({
     sizing: "content" as const,
     onDidClose: handleDidClose,
   }), [anchor, compact, fitting?.height, fitting?.width, handleDidClose, id, parentWindowControllerId, title]);
-  const presentedContent = useNSEPresentedContent(<NSEWindowFittingContent onFittingSize={onFittingSize}>{content}</NSEWindowFittingContent>);
+  const presentedContent = useNSEPresentedContent(<WindowFittingContent onFittingSize={onFittingSize}>{content}</WindowFittingContent>);
   useEffect(() => {
     if (!open || !canonicalBridge) return;
     canonicalBridge.present(canonicalRequest, presentedContent).catch((error: unknown) => {

@@ -48,7 +48,7 @@ import {
   coverFlowReflectionOpacity,
   type NSECollectionViewCoverFlowLayout,
 } from "./coverFlowLayout";
-import type { NSECollectionViewCoverFlowProps } from "./collectionTypes";
+import type { CollectionViewCoverFlowProps } from "./collectionTypes";
 
 /** Rings beyond the fan over which an item fades from full opacity to nothing. */
 const FADE_SPAN = 1;
@@ -321,7 +321,7 @@ export function CoverFlowCollectionView<T, TId extends NSEDataViewKey>({
   onPointerDown,
   onClick,
   ...props
-}: NSECollectionViewCoverFlowProps<T, TId>) {
+}: CollectionViewCoverFlowProps<T, TId>) {
   const view = useNSEDataView(adapter, { selectionMode, state: requestedState, onSelectionChange, delegate: { didActivate: onActivate } });
   const { layers, frames, reducedMotion } = useNSEAnimationEnvironment();
   const items = view.snapshot.items;

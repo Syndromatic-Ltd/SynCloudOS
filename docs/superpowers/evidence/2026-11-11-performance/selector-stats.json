@@ -1,0 +1,497 @@
+{
+  "base": "http://127.0.0.1:5387",
+  "route": "/__syncloudos/nse-gallery",
+  "elements": 982,
+  "recordedAt": "2026-11-12T05:01:45.103Z",
+  "totals": {
+    "selectors": 3769,
+    "elapsedMs": 92.63,
+    "attempts": 724523,
+    "fastRejects": 541174,
+    "matches": 10681
+  },
+  "byElapsed": [
+    {
+      "selector": ":where(:scope) .nse\\:part:where(.nse\\:control\\=text-field *):where(.nse\\:part\\=bezel > *):where(:not(.nse\\:part\\=field))",
+      "elapsedMs": 4.46,
+      "attempts": 1444,
+      "fastRejects": 0,
+      "matches": 0,
+      "rules": 4
+    },
+    {
+      "selector": ".nse\\:part:where(.nse\\:control\\=text-field *):where(.nse\\:part\\=bezel > *):where(:not(.nse\\:part\\=field)):where(:scope)",
+      "elapsedMs": 2.74,
+      "attempts": 1444,
+      "fastRejects": 0,
+      "matches": 0,
+      "rules": 4
+    },
+    {
+      "selector": ":where(:scope) :is(.nse\\:control\\=date-picker:where(.nse\\:date-picker-elements\\=yearMonthDay.nse\\:date-picker-mode\\=single.nse\\:role\\=field) > :where(.nse\\:part\\=button), .nse\\:control\\=date-picker:where([data-nse-date-picker-elements=\"yearMonthDay hourMinute\"].nse\\:role\\=field) > :where(.nse\\:part\\=button), .nse\\:control\\=date-picker:where(.nse\\:date-picker-mode\\=range.nse\\:role\\=field) > :where(.nse\\:part\\=button))::before",
+      "elapsedMs": 1.89,
+      "attempts": 5312,
+      "fastRejects": 2768,
+      "matches": 0,
+      "rules": 8
+    },
+    {
+      "selector": ":scope .nse\\:control\\=button:where(.nse\\:bezel-style):where(:not(.nse\\:bezel-style\\=disclosure)):where(:not(.nse\\:button-type\\=switch)):where(:not(.nse\\:control\\=button:where(.nse\\:part\\=background):where(.nse\\:pulls-down\\=false *)))::before",
+      "elapsedMs": 1.74,
+      "attempts": 432,
+      "fastRejects": 0,
+      "matches": 288,
+      "rules": 4
+    },
+    {
+      "selector": ":where(:scope) .nse\\:part\\=content:where(.nse\\:control\\=button *):where(.nse\\:button-type\\=momentaryPushIn *):where(:not(.nse\\:control))",
+      "elapsedMs": 1.44,
+      "attempts": 448,
+      "fastRejects": 0,
+      "matches": 0,
+      "rules": 4
+    },
+    {
+      "selector": "[data-perf-probe] *",
+      "elapsedMs": 1.37,
+      "attempts": 1280,
+      "fastRejects": 618,
+      "matches": 586,
+      "rules": 3
+    },
+    {
+      "selector": ":scope .nse\\:part\\=background:where(.nse\\:control\\=system-alert *):where(:not(.nse\\:control\\=system-alert .nse\\:control *))::before",
+      "elapsedMs": 1.36,
+      "attempts": 368,
+      "fastRejects": 0,
+      "matches": 0,
+      "rules": 4
+    },
+    {
+      "selector": ":scope .nse\\:part\\=title:where(.nse\\:control\\=window *):where(:not(.nse\\:control\\=window .nse\\:control *)):where(:not(.nse\\:part\\=header > *)):where(:not(.nse\\:part\\=content > *)):where(:not(.nse\\:part\\=document *)):where(:not(.nse\\:part\\=leading > *))",
+      "elapsedMs": 1.32,
+      "attempts": 384,
+      "fastRejects": 0,
+      "matches": 8,
+      "rules": 4
+    },
+    {
+      "selector": ".nse\\:part\\=content:where(.nse\\:control\\=button *):where(.nse\\:button-type\\=momentaryPushIn *):where(:not(.nse\\:control)):where(:scope)",
+      "elapsedMs": 1.22,
+      "attempts": 448,
+      "fastRejects": 0,
+      "matches": 0,
+      "rules": 4
+    },
+    {
+      "selector": ":where(:scope) .nse\\:part\\=title:where(.nse\\:control\\=switch *)",
+      "elapsedMs": 1.17,
+      "attempts": 384,
+      "fastRejects": 0,
+      "matches": 32,
+      "rules": 4
+    },
+    {
+      "selector": ":scope .nse\\:control\\=button:where(.nse\\:part\\=background):where(.nse\\:pulls-down\\=false *)::before",
+      "elapsedMs": 1.06,
+      "attempts": 368,
+      "fastRejects": 8,
+      "matches": 0,
+      "rules": 4
+    },
+    {
+      "selector": ".nse\\:part\\=title:where(.nse\\:control\\=switch *):where(:scope)",
+      "elapsedMs": 1,
+      "attempts": 384,
+      "fastRejects": 0,
+      "matches": 0,
+      "rules": 4
+    },
+    {
+      "selector": ":scope .nse\\:control\\=button:where(.nse\\:part\\=background):where(.nse\\:pulls-down\\=false *)::after",
+      "elapsedMs": 0.91,
+      "attempts": 368,
+      "fastRejects": 8,
+      "matches": 0,
+      "rules": 4
+    },
+    {
+      "selector": ":scope .nse\\:control\\=button:where(.nse\\:bezel-style):where(:not(.nse\\:bezel-style\\=disclosure)):where(:not(.nse\\:button-type\\=switch)):where(:not(.nse\\:control\\=button:where(.nse\\:part\\=background):where(.nse\\:pulls-down\\=false *)))::after",
+      "elapsedMs": 0.87,
+      "attempts": 432,
+      "fastRejects": 0,
+      "matches": 288,
+      "rules": 4
+    },
+    {
+      "selector": ":scope .nse\\:control\\=tab-view > :is(.nse\\:part\\=background:where(.nse\\:control\\=toolbar), .nse\\:part\\=header:where(.nse\\:control\\=tab-view:not(.nse\\:style\\=icons)), .nse\\:part\\=header:where(.nse\\:control-size\\=large), .nse\\:part\\=content:where(.nse\\:control\\=segmented-control.nse\\:position)) > :where(:is(.nse\\:control\\=button, .nse\\:part\\=overflow))::before",
+      "elapsedMs": 0.77,
+      "attempts": 10624,
+      "fastRejects": 7056,
+      "matches": 0,
+      "rules": 8
+    },
+    {
+      "selector": ":where(:scope) .nse\\:part\\=title:where(.nse\\:control\\=slider *):where(.nse\\:slider-type\\=linear *)",
+      "elapsedMs": 0.68,
+      "attempts": 192,
+      "fastRejects": 0,
+      "matches": 0,
+      "rules": 4
+    },
+    {
+      "selector": ".nse\\:control\\=tab-view:scope > :is(.nse\\:part\\=background:where(.nse\\:control\\=toolbar), .nse\\:part\\=header:where(.nse\\:control\\=tab-view:not(.nse\\:style\\=icons)), .nse\\:part\\=header:where(.nse\\:control-size\\=large), .nse\\:part\\=content:where(.nse\\:control\\=segmented-control.nse\\:position)) > :where(:is(.nse\\:control\\=button, .nse\\:part\\=overflow))::before",
+      "elapsedMs": 0.66,
+      "attempts": 10624,
+      "fastRejects": 7056,
+      "matches": 0,
+      "rules": 8
+    },
+    {
+      "selector": ".nse\\:control\\=tab-view:scope > :is(.nse\\:part\\=background:where(.nse\\:control\\=toolbar), .nse\\:part\\=header:where(.nse\\:control\\=tab-view:not(.nse\\:style\\=icons)), .nse\\:part\\=header:where(.nse\\:control-size\\=large), .nse\\:part\\=content:where(.nse\\:control\\=segmented-control.nse\\:position)) > :where(:is(.nse\\:control\\=button, .nse\\:part\\=overflow))::after",
+      "elapsedMs": 0.65,
+      "attempts": 10624,
+      "fastRejects": 7056,
+      "matches": 0,
+      "rules": 8
+    },
+    {
+      "selector": ":scope .nse\\:control\\=tab-view > :is(.nse\\:part\\=background:where(.nse\\:control\\=toolbar), .nse\\:part\\=header:where(.nse\\:control\\=tab-view:not(.nse\\:style\\=icons)), .nse\\:part\\=header:where(.nse\\:control-size\\=large), .nse\\:part\\=content:where(.nse\\:control\\=segmented-control.nse\\:position)) > :where(:is(.nse\\:control\\=button, .nse\\:part\\=overflow))::after",
+      "elapsedMs": 0.64,
+      "attempts": 10624,
+      "fastRejects": 7056,
+      "matches": 0,
+      "rules": 8
+    },
+    {
+      "selector": ":scope :is(.nse\\:control\\=date-picker:where(.nse\\:date-picker-elements\\=yearMonthDay.nse\\:date-picker-mode\\=single.nse\\:role\\=field) > :where(.nse\\:part\\=button), .nse\\:control\\=date-picker:where([data-nse-date-picker-elements=\"yearMonthDay hourMinute\"].nse\\:role\\=field) > :where(.nse\\:part\\=button), .nse\\:control\\=date-picker:where(.nse\\:date-picker-mode\\=range.nse\\:role\\=field) > :where(.nse\\:part\\=button))::before",
+      "elapsedMs": 0.61,
+      "attempts": 2656,
+      "fastRejects": 1384,
+      "matches": 0,
+      "rules": 8
+    },
+    {
+      "selector": ":where(:scope) .nse\\:part\\=title:where(.nse\\:control\\=box *):where(.nse\\:style\\=alpha *)",
+      "elapsedMs": 0.6,
+      "attempts": 192,
+      "fastRejects": 0,
+      "matches": 0,
+      "rules": 4
+    },
+    {
+      "selector": ".nse\\:part\\=title:where(.nse\\:control\\=slider *):where(:scope)",
+      "elapsedMs": 0.59,
+      "attempts": 192,
+      "fastRejects": 0,
+      "matches": 0,
+      "rules": 4
+    },
+    {
+      "selector": ":scope .nse\\:part\\=background:where(.nse\\:control\\=system-alert *):where(:not(.nse\\:control\\=system-alert .nse\\:control *))",
+      "elapsedMs": 0.58,
+      "attempts": 368,
+      "fastRejects": 0,
+      "matches": 0,
+      "rules": 4
+    },
+    {
+      "selector": ":where(:scope) .nse\\:part\\=title:where(.nse\\:part\\=document *)",
+      "elapsedMs": 0.58,
+      "attempts": 192,
+      "fastRejects": 0,
+      "matches": 0,
+      "rules": 4
+    },
+    {
+      "selector": ":where(:scope) .nse\\:part\\=title:where(.nse\\:control\\=slider *)",
+      "elapsedMs": 0.57,
+      "attempts": 192,
+      "fastRejects": 0,
+      "matches": 0,
+      "rules": 4
+    },
+    {
+      "selector": ".nse\\:part\\=title:where(.nse\\:control\\=box *):where(.nse\\:style\\=alpha *):where(:scope)",
+      "elapsedMs": 0.54,
+      "attempts": 192,
+      "fastRejects": 0,
+      "matches": 0,
+      "rules": 4
+    },
+    {
+      "selector": ".nse\\:part\\=title:where(.nse\\:control\\=slider *):where(.nse\\:slider-type\\=linear *):where(:scope)",
+      "elapsedMs": 0.54,
+      "attempts": 192,
+      "fastRejects": 0,
+      "matches": 0,
+      "rules": 4
+    },
+    {
+      "selector": ":scope .nse\\:control\\=tab-view > :is(.nse\\:part\\=background:where(.nse\\:control\\=toolbar), .nse\\:part\\=header:where(.nse\\:control\\=tab-view:not(.nse\\:style\\=icons)), .nse\\:part\\=header:where(.nse\\:control-size\\=large), .nse\\:part\\=content:where(.nse\\:control\\=segmented-control.nse\\:position)) > :where(:is(.nse\\:control\\=button, .nse\\:part\\=overflow))",
+      "elapsedMs": 0.53,
+      "attempts": 5312,
+      "fastRejects": 3528,
+      "matches": 0,
+      "rules": 8
+    },
+    {
+      "selector": ":scope .nse\\:tracking\\=false:is(.nse\\:control\\=button:where(:not(.nse\\:bezel-style\\=disclosure)):where(.nse\\:bezel-style):where(:not(.nse\\:button-type\\=switch)), .nse\\:part\\=cell:where(.nse\\:role\\=tab), .nse\\:control\\=route-picker-view:where(.nse\\:part\\=background)):where(:not(.nse\\:control\\=button:where(.nse\\:part\\=background):where(.nse\\:pulls-down\\=false *))):not(.nse\\:selected:where(:not(.nse\\:button-type))):not(:is(.nse\\:selected:where(.nse\\:button-type), .nse\\:highlighted:where(.nse\\:role\\=tab))):not(:disabled)::before",
+      "elapsedMs": 0.53,
+      "attempts": 152,
+      "fastRejects": 0,
+      "matches": 88,
+      "rules": 4
+    },
+    {
+      "selector": ":scope .nse\\:part\\=bezel:where(.nse\\:control\\=text-field *)::before",
+      "elapsedMs": 0.5,
+      "attempts": 168,
+      "fastRejects": 0,
+      "matches": 0,
+      "rules": 4
+    }
+  ],
+  "byAttempts": [
+    {
+      "selector": ":scope .nse\\:control\\=tab-view > :is(.nse\\:part\\=background:where(.nse\\:control\\=toolbar), .nse\\:part\\=header:where(.nse\\:control\\=tab-view:not(.nse\\:style\\=icons)), .nse\\:part\\=header:where(.nse\\:control-size\\=large), .nse\\:part\\=content:where(.nse\\:control\\=segmented-control.nse\\:position)) > :where(:is(.nse\\:control\\=button, .nse\\:part\\=overflow))::after",
+      "elapsedMs": 0.64,
+      "attempts": 10624,
+      "fastRejects": 7056,
+      "matches": 0,
+      "rules": 8
+    },
+    {
+      "selector": ":scope .nse\\:control\\=tab-view > :is(.nse\\:part\\=background:where(.nse\\:control\\=toolbar), .nse\\:part\\=header:where(.nse\\:control\\=tab-view:not(.nse\\:style\\=icons)), .nse\\:part\\=header:where(.nse\\:control-size\\=large), .nse\\:part\\=content:where(.nse\\:control\\=segmented-control.nse\\:position)) > :where(:is(.nse\\:control\\=button, .nse\\:part\\=overflow))::before",
+      "elapsedMs": 0.77,
+      "attempts": 10624,
+      "fastRejects": 7056,
+      "matches": 0,
+      "rules": 8
+    },
+    {
+      "selector": ".nse\\:control\\=tab-view:scope > :is(.nse\\:part\\=background:where(.nse\\:control\\=toolbar), .nse\\:part\\=header:where(.nse\\:control\\=tab-view:not(.nse\\:style\\=icons)), .nse\\:part\\=header:where(.nse\\:control-size\\=large), .nse\\:part\\=content:where(.nse\\:control\\=segmented-control.nse\\:position)) > :where(:is(.nse\\:control\\=button, .nse\\:part\\=overflow))::before",
+      "elapsedMs": 0.66,
+      "attempts": 10624,
+      "fastRejects": 7056,
+      "matches": 0,
+      "rules": 8
+    },
+    {
+      "selector": ".nse\\:control\\=tab-view:scope > :is(.nse\\:part\\=background:where(.nse\\:control\\=toolbar), .nse\\:part\\=header:where(.nse\\:control\\=tab-view:not(.nse\\:style\\=icons)), .nse\\:part\\=header:where(.nse\\:control-size\\=large), .nse\\:part\\=content:where(.nse\\:control\\=segmented-control.nse\\:position)) > :where(:is(.nse\\:control\\=button, .nse\\:part\\=overflow))::after",
+      "elapsedMs": 0.65,
+      "attempts": 10624,
+      "fastRejects": 7056,
+      "matches": 0,
+      "rules": 8
+    },
+    {
+      "selector": ":scope .nse\\:control\\=segmented-control:where(:not(.nse\\:segment-style\\=texturedRounded)) :where(:is(.nse\\:part\\=bezel, .nse\\:part\\=disclosure, .nse\\:part\\=overflow))::before",
+      "elapsedMs": 0.28,
+      "attempts": 7968,
+      "fastRejects": 7464,
+      "matches": 0,
+      "rules": 8
+    },
+    {
+      "selector": ".nse\\:control\\=segmented-control:scope:where(:not(.nse\\:segment-style\\=texturedRounded)) :where(:is(.nse\\:part\\=bezel, .nse\\:part\\=disclosure, .nse\\:part\\=overflow))::after",
+      "elapsedMs": 0.25,
+      "attempts": 7968,
+      "fastRejects": 7464,
+      "matches": 0,
+      "rules": 8
+    },
+    {
+      "selector": ":scope .nse\\:control\\=segmented-control:where(:not(.nse\\:segment-style\\=texturedRounded)) :where(:is(.nse\\:part\\=bezel, .nse\\:part\\=disclosure, .nse\\:part\\=overflow))::after",
+      "elapsedMs": 0.25,
+      "attempts": 7968,
+      "fastRejects": 7464,
+      "matches": 0,
+      "rules": 8
+    },
+    {
+      "selector": ".nse\\:control\\=segmented-control:scope:where(:not(.nse\\:segment-style\\=texturedRounded)) :where(:is(.nse\\:part\\=bezel, .nse\\:part\\=disclosure, .nse\\:part\\=overflow))::before",
+      "elapsedMs": 0.23,
+      "attempts": 7968,
+      "fastRejects": 7464,
+      "matches": 0,
+      "rules": 8
+    },
+    {
+      "selector": ":where(:scope) .nse\\:control\\=date-picker:where(.nse\\:role\\=calendar) > .nse\\:part\\=header > :where(:is(.nse\\:part\\=previous-month, .nse\\:part\\=today, .nse\\:part\\=next-month, .nse\\:part\\=previous-year, .nse\\:part\\=next-year))",
+      "elapsedMs": 0.12,
+      "attempts": 5312,
+      "fastRejects": 5312,
+      "matches": 0,
+      "rules": 8
+    },
+    {
+      "selector": ":where(:scope) .nse\\:control\\=stepper > .nse\\:part\\=bezel > :where(:is(.nse\\:part\\=increment, .nse\\:part\\=decrement))::before",
+      "elapsedMs": 0.11,
+      "attempts": 5312,
+      "fastRejects": 5312,
+      "matches": 0,
+      "rules": 8
+    },
+    {
+      "selector": ":scope .nse\\:control\\=tab-view > :is(.nse\\:part\\=background:where(.nse\\:control\\=toolbar), .nse\\:part\\=header:where(.nse\\:control\\=tab-view:not(.nse\\:style\\=icons)), .nse\\:part\\=header:where(.nse\\:control-size\\=large), .nse\\:part\\=content:where(.nse\\:control\\=segmented-control.nse\\:position)) > .nse\\:part\\=tab-item > :where(:is(.nse\\:control\\=button, .nse\\:part\\=button)):not(:is(.nse\\:control\\=button:where(:not(.nse\\:bezel-style\\=disclosure)):where(.nse\\:bezel-style):where(:not(.nse\\:button-type\\=switch)), .nse\\:part\\=cell:where(.nse\\:role\\=tab), .nse\\:control\\=route-picker-view:where(.nse\\:part\\=background)))",
+      "elapsedMs": 0.12,
+      "attempts": 5312,
+      "fastRejects": 5312,
+      "matches": 0,
+      "rules": 8
+    },
+    {
+      "selector": ".nse\\:control\\=date-picker:where(.nse\\:role\\=calendar):where(:scope) .nse\\:part\\=row > :where(:is(.nse\\:part\\=cell, .nse\\:part\\=column-caption))",
+      "elapsedMs": 0.1,
+      "attempts": 5312,
+      "fastRejects": 5312,
+      "matches": 0,
+      "rules": 8
+    },
+    {
+      "selector": ":where(:scope) .nse\\:control\\=date-picker:where(.nse\\:role\\=calendar) .nse\\:part\\=row > :where(:is(.nse\\:part\\=cell, .nse\\:part\\=column-caption))",
+      "elapsedMs": 0.1,
+      "attempts": 5312,
+      "fastRejects": 5312,
+      "matches": 0,
+      "rules": 8
+    },
+    {
+      "selector": ":scope .nse\\:control\\=segmented-control.nse\\:distribution\\=fill-equally:where(:not(.nse\\:segment-style\\=texturedRounded)) :where(:is(.nse\\:part\\=bezel, .nse\\:part\\=disclosure, .nse\\:part\\=overflow))",
+      "elapsedMs": 0.15,
+      "attempts": 5312,
+      "fastRejects": 5312,
+      "matches": 0,
+      "rules": 8
+    },
+    {
+      "selector": ":where(:scope) :is(.nse\\:control\\=date-picker:where(.nse\\:date-picker-elements\\=yearMonthDay.nse\\:date-picker-mode\\=single.nse\\:role\\=field) > :where(.nse\\:part\\=button), .nse\\:control\\=date-picker:where([data-nse-date-picker-elements=\"yearMonthDay hourMinute\"].nse\\:role\\=field) > :where(.nse\\:part\\=button), .nse\\:control\\=date-picker:where(.nse\\:date-picker-mode\\=range.nse\\:role\\=field) > :where(.nse\\:part\\=button))::before",
+      "elapsedMs": 1.89,
+      "attempts": 5312,
+      "fastRejects": 2768,
+      "matches": 0,
+      "rules": 8
+    },
+    {
+      "selector": ":where(:scope) .nse\\:control\\=stepper.nse\\:part\\=content > .nse\\:part\\=bezel > :where(:is(.nse\\:part\\=increment, .nse\\:part\\=decrement))",
+      "elapsedMs": 0.13,
+      "attempts": 5312,
+      "fastRejects": 5312,
+      "matches": 0,
+      "rules": 8
+    },
+    {
+      "selector": ".nse\\:control\\=date-picker:where(.nse\\:role\\=calendar):where(:scope) > .nse\\:part\\=header > :where(:is(.nse\\:part\\=previous-year, .nse\\:part\\=previous-month, .nse\\:part\\=today, .nse\\:part\\=next-month, .nse\\:part\\=next-year))",
+      "elapsedMs": 0.1,
+      "attempts": 5312,
+      "fastRejects": 5312,
+      "matches": 0,
+      "rules": 8
+    },
+    {
+      "selector": ".nse\\:control\\=tab-view:scope > :is(.nse\\:part\\=background:where(.nse\\:control\\=toolbar), .nse\\:part\\=header:where(.nse\\:control\\=tab-view:not(.nse\\:style\\=icons)), .nse\\:part\\=header:where(.nse\\:control-size\\=large), .nse\\:part\\=content:where(.nse\\:control\\=segmented-control.nse\\:position)) > .nse\\:part\\=tab-item > :where(:is(.nse\\:control\\=button, .nse\\:part\\=button)):not(:is(.nse\\:control\\=button:where(:not(.nse\\:bezel-style\\=disclosure)):where(.nse\\:bezel-style):where(:not(.nse\\:button-type\\=switch)), .nse\\:part\\=cell:where(.nse\\:role\\=tab), .nse\\:control\\=route-picker-view:where(.nse\\:part\\=background)))",
+      "elapsedMs": 0.14,
+      "attempts": 5312,
+      "fastRejects": 5312,
+      "matches": 0,
+      "rules": 8
+    },
+    {
+      "selector": ".nse\\:control\\=stepper:where(:scope) > .nse\\:part\\=bezel > :where(:is(.nse\\:part\\=increment, .nse\\:part\\=decrement))::before",
+      "elapsedMs": 0.1,
+      "attempts": 5312,
+      "fastRejects": 5312,
+      "matches": 0,
+      "rules": 8
+    },
+    {
+      "selector": ".nse\\:control\\=tab-view:scope > :is(.nse\\:part\\=background:where(.nse\\:control\\=toolbar), .nse\\:part\\=header:where(.nse\\:control\\=tab-view:not(.nse\\:style\\=icons)), .nse\\:part\\=header:where(.nse\\:control-size\\=large), .nse\\:part\\=content:where(.nse\\:control\\=segmented-control.nse\\:position)) > :where(:is(.nse\\:control\\=button, .nse\\:part\\=overflow))",
+      "elapsedMs": 0.29,
+      "attempts": 5312,
+      "fastRejects": 3528,
+      "matches": 0,
+      "rules": 8
+    },
+    {
+      "selector": ".nse\\:control\\=segmented-control.nse\\:distribution\\=fill-equally:scope:where(:not(.nse\\:segment-style\\=texturedRounded)) :where(:is(.nse\\:part\\=bezel, .nse\\:part\\=disclosure, .nse\\:part\\=overflow))",
+      "elapsedMs": 0.11,
+      "attempts": 5312,
+      "fastRejects": 5312,
+      "matches": 0,
+      "rules": 8
+    },
+    {
+      "selector": ":scope .nse\\:control\\=tab-view > :is(.nse\\:part\\=background:where(.nse\\:control\\=toolbar), .nse\\:part\\=header:where(.nse\\:control\\=tab-view:not(.nse\\:style\\=icons)), .nse\\:part\\=header:where(.nse\\:control-size\\=large), .nse\\:part\\=content:where(.nse\\:control\\=segmented-control.nse\\:position)) > :where(:is(.nse\\:control\\=button, .nse\\:part\\=overflow))",
+      "elapsedMs": 0.53,
+      "attempts": 5312,
+      "fastRejects": 3528,
+      "matches": 0,
+      "rules": 8
+    },
+    {
+      "selector": ".nse-toolbar-custom > :not(.nse-chrome-primitive)",
+      "elapsedMs": 0.05,
+      "attempts": 2656,
+      "fastRejects": 2656,
+      "matches": 0,
+      "rules": 8
+    },
+    {
+      "selector": ":scope .nse\\:control\\=segmented-control:where(:not(.nse\\:segment-style\\=texturedRounded)) > :first-child:where(:is(.nse\\:part\\=bezel, .nse\\:part\\=disclosure, .nse\\:part\\=overflow))::after",
+      "elapsedMs": 0.09,
+      "attempts": 2656,
+      "fastRejects": 2488,
+      "matches": 0,
+      "rules": 8
+    },
+    {
+      "selector": ".nse\\:role\\=application-menu:where(.nse\\:part\\=bezel):scope .nse\\:part\\=body:where(.nse\\:role\\=application-menu > *) > :not(.nse\\:enabled\\=false:where(:not(.nse\\:control\\=search-field)))",
+      "elapsedMs": 0.07,
+      "attempts": 2656,
+      "fastRejects": 2656,
+      "matches": 0,
+      "rules": 8
+    },
+    {
+      "selector": ".nse\\:control\\=segmented-control:scope:where(:not(.nse\\:segment-style\\=texturedRounded)):is(.nse\\:height, .nse\\:control-size\\=small) > .nse\\:part\\=segment:is(:last-child, :has(+ .nse\\:part\\=field:last-child)) > :last-child:where(:is(.nse\\:part\\=bezel, .nse\\:part\\=disclosure, .nse\\:part\\=overflow))::after",
+      "elapsedMs": 0.06,
+      "attempts": 2656,
+      "fastRejects": 2656,
+      "matches": 0,
+      "rules": 8
+    },
+    {
+      "selector": ".nse\\:control\\=segmented-control:scope:where(:not(.nse\\:segment-style\\=texturedRounded)):is(.nse\\:height, .nse\\:control-size\\=small) > :last-child:where(:is(.nse\\:part\\=bezel, .nse\\:part\\=disclosure, .nse\\:part\\=overflow)):is(*, ._)::after",
+      "elapsedMs": 0.07,
+      "attempts": 2656,
+      "fastRejects": 2488,
+      "matches": 0,
+      "rules": 8
+    },
+    {
+      "selector": ":where(.nse\\:contrast\\=high) :where(:disabled)",
+      "elapsedMs": 0.12,
+      "attempts": 2656,
+      "fastRejects": 2656,
+      "matches": 0,
+      "rules": 8
+    },
+    {
+      "selector": ":scope .nse\\:control\\=segmented-control:where(:not(.nse\\:segment-style\\=texturedRounded)):is(.nse\\:height, .nse\\:control-size\\=small) :where(:is(.nse\\:part\\=bezel, .nse\\:part\\=disclosure))::before",
+      "elapsedMs": 0.07,
+      "attempts": 2656,
+      "fastRejects": 2560,
+      "matches": 0,
+      "rules": 8
+    },
+    {
+      "selector": ".nse\\:control\\=segmented-control:scope:where(:not(.nse\\:segment-style\\=texturedRounded)):is(.nse\\:height, .nse\\:control-size\\=small) :where(:is(.nse\\:part\\=bezel, .nse\\:part\\=disclosure))::after",
+      "elapsedMs": 0.08,
+      "attempts": 2656,
+      "fastRejects": 2560,
+      "matches": 0,
+      "rules": 8
+    }
+  ]
+}

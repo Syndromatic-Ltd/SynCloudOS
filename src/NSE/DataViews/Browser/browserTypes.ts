@@ -22,9 +22,9 @@ import type { HTMLAttributes, ReactNode } from "react";
 
 import type { NSEDataViewKey, NSEDataViewState } from "../Core";
 
-export class NSEBrowserDataError extends TypeError {
+export class BrowserDataError extends TypeError {
   readonly code: "shape" | "identity" | "duplicate";
-  constructor(code: NSEBrowserDataError["code"], message: string) { super(message); this.name = "NSEBrowserDataError"; this.code = code; }
+  constructor(code: BrowserDataError["code"], message: string) { super(message); this.name = "NSEBrowserDataError"; this.code = code; }
 }
 
 export interface NSEBrowserDataSource<T, TId extends NSEDataViewKey> {
@@ -36,12 +36,12 @@ export interface NSEBrowserDataSource<T, TId extends NSEDataViewKey> {
   iconForItem?(item: T): ReactNode;
 }
 
-export interface NSEBrowserPathItem<T, TId extends NSEDataViewKey> {
+export interface BrowserPathItem<T, TId extends NSEDataViewKey> {
   readonly id: TId;
   readonly item: T;
 }
 
-export interface NSEBrowserItemPresentation<T, TId extends NSEDataViewKey> {
+export interface BrowserItemPresentation<T, TId extends NSEDataViewKey> {
   readonly item: T;
   readonly id: TId;
   readonly label: string;
@@ -49,14 +49,14 @@ export interface NSEBrowserItemPresentation<T, TId extends NSEDataViewKey> {
   readonly icon?: ReactNode;
 }
 
-export type NSEBrowserColumnStatus = "loading" | "ready" | "empty" | "denied" | "interrupted" | "error";
+export type BrowserColumnStatus = "loading" | "ready" | "empty" | "denied" | "interrupted" | "error";
 
-export interface NSEBrowserColumnState<T, TId extends NSEDataViewKey> {
+export interface BrowserColumnState<T, TId extends NSEDataViewKey> {
   readonly parentId: TId | null;
   readonly items: readonly T[];
-  readonly presentation: readonly NSEBrowserItemPresentation<T, TId>[];
+  readonly presentation: readonly BrowserItemPresentation<T, TId>[];
   readonly activeId: TId | null;
-  readonly status: NSEBrowserColumnStatus;
+  readonly status: BrowserColumnStatus;
   readonly message?: string;
   readonly retry?: () => void;
 }
@@ -65,10 +65,10 @@ export interface NSEBrowserProps<T, TId extends NSEDataViewKey>
   extends Omit<HTMLAttributes<HTMLDivElement>, "children" | "onChange"> {
   readonly dataSource: NSEBrowserDataSource<T, TId>;
   readonly presentation: "columns" | "compact";
-  readonly path?: readonly NSEBrowserPathItem<T, TId>[];
-  readonly defaultPath?: readonly NSEBrowserPathItem<T, TId>[];
-  readonly onPathChange?: (path: readonly NSEBrowserPathItem<T, TId>[]) => void;
-  readonly onActivateLeaf?: (item: NSEBrowserPathItem<T, TId>) => void;
+  readonly path?: readonly BrowserPathItem<T, TId>[];
+  readonly defaultPath?: readonly BrowserPathItem<T, TId>[];
+  readonly onPathChange?: (path: readonly BrowserPathItem<T, TId>[]) => void;
+  readonly onActivateLeaf?: (item: BrowserPathItem<T, TId>) => void;
   readonly columnWidths?: readonly number[];
   readonly defaultColumnWidth?: number;
   readonly onColumnWidthsChange?: (widths: readonly number[]) => void;

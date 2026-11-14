@@ -14,7 +14,7 @@ import { SynWareRuntimeMount } from "../../src/SynCloudOS/AppSDK/SynWareRuntimeM
 import { createMountedSynWareRuntime } from "../../src/SynCloudOS/AppSDK/appRuntimeFacade";
 import * as overlayBridge from "../../src/SynCloudOS/Runtime/MountedAppOverlayBridge";
 import { NSEPopover } from "../../src/NSE/Overlays/NSEPopover";
-import { NSEWindowSurfaceBridgeProvider } from "../../src/NSE/Overlays/NSEWindowSurfaceBridge";
+import { WindowSurfaceBridgeProvider } from "../../src/NSE/Overlays/NSEWindowSurfaceBridge";
 import { FocusScope, HostSiteBrandingProvider, ResponderScope, SynCloudOSProvider, useRuntimeNSEFocusPort } from "../../src/SynCloudOSReact";
 import { SynCloudOSRuntimeContext, SynWareRuntimeContext } from "../../src/SynCloudOSReact/runtimeContext";
 import { useResponderHierarchy } from "../../src/SynCloudOSReact/responderHierarchy";
@@ -100,11 +100,11 @@ function MountedSurface({ value, name, authoredId, closed }: {
 }) {
   return <SynCloudOSProvider runtime={value.runtime}>
     <HostSiteBrandingProvider value={branding}>
-      <NSEWindowSurfaceBridgeProvider bridge={value.bridge}>
+      <WindowSurfaceBridgeProvider bridge={value.bridge}>
         <SynWareRuntimeMount runtime={value.runtime} app={value.app} responderId={applicationResponder}>
           <PopoverProbe name={name} authoredId={authoredId} closed={closed} />
         </SynWareRuntimeMount>
-      </NSEWindowSurfaceBridgeProvider>
+      </WindowSurfaceBridgeProvider>
       <WindowLayer contentRegistry={value.registry} />
     </HostSiteBrandingProvider>
   </SynCloudOSProvider>;

@@ -20,12 +20,12 @@
 
 import { useCallback, useId, useLayoutEffect, useRef, type PointerEvent } from "react";
 import { NSEViewController, type NSEViewControllerOptions } from "../Application/NSEViewController";
-import { NSEPresence } from "../Animation/NSEPresentation";
+import { Presence } from "../Animation/NSEPresentation";
 import { useObserve } from "../Objects/useObserve";
 import { NSEButton } from "../Controls/Buttons/NSEButton";
-import { NSEControllerNavigationChromeBoundary, useNSEControllerNavigationChrome } from "../Navigation/NSEApplicationNavigationChrome";
-import { NSEPageCurlView } from "./NSEPageCurlView";
-import type { NSEPageEvent, NSEPageHandle } from "./nsePageTypes";
+import { ControllerNavigationChromeBoundary, useNSEControllerNavigationChrome } from "../Navigation/NSEApplicationNavigationChrome";
+import { PageCurlView } from "./PageCurlView";
+import type { PageEvent, PageHandle } from "./pageTypes";
 import { connectPageCurl } from "./pageCurlConnection";
 
 /** How far a horizontal swipe travels before it turns the page, in CSS pixels. */
@@ -75,7 +75,7 @@ export class NSEPageController<T = unknown> extends NSEViewController<NSEPageCon
   #turnProgress = 0;
   #turnDirection: "forward" | "backward" | null = null;
   #pendingIndex: number | null = null;
-  readonly #leaves: Partial<Record<"forward" | "backward", NSEPageHandle>> = {};
+  readonly #leaves: Partial<Record<"forward" | "backward", PageHandle>> = {};
   // Printed pages coexist. A history may reuse one controller for a kind of
   // object; a curl instead retains one child for each represented object.
   readonly #curlControllers = new Map<T, NSEViewController<unknown>>();
@@ -263,11 +263,11 @@ export class NSEPageController<T = unknown> extends NSEViewController<NSEPageCon
 
   /** @internal Renderer callbacks; no curl handle or engine is public. */
   readonly #curl = {
-    attach: (direction: "forward" | "backward", leaf: NSEPageHandle | null): void => {
+    attach: (direction: "forward" | "backward", leaf: PageHandle | null): void => {
       if (leaf) this.#leaves[direction] = leaf;
       else delete this.#leaves[direction];
     },
-    progress: (progress: number, event: NSEPageEvent): void => {
+    progress: (progress: number, event: PageEvent): void => {
       if (event.reason === "superseded" || event.reason === "reset") return;
       const { phase, direction } = event.snapshot;
       if (phase === "idle") {
@@ -288,7 +288,7 @@ export class NSEPageController<T = unknown> extends NSEViewController<NSEPageCon
       this.#turnProgress = Math.min(1, Math.max(0, progress));
       this.notifyObservers();
     },
-    end: (event: NSEPageEvent): void => {
+    end: (event: PageEvent): void => {
       if (event.reason === "superseded" || event.reason === "reset") return;
       const next = this.#pendingIndex;
       const completed = event.snapshot.progress >= 0.999 && next != null;
@@ -359,14 +359,14 @@ export class NSEPageController<T = unknown> extends NSEViewController<NSEPageCon
     this.notifyObservers();
   }
 
-  static override view = NSEPageControllerView;
+  static override view = PageControllerView;
 }
 
-function NSEPageControllerView({ controller }: { readonly controller: NSEPageController<unknown> }) {
-  return controller.transitionStyle === "pageCurl" ? <NSEPageCurlView controller={controller} /> : <NSEPageNavigationView controller={controller} />;
+function PageControllerView({ controller }: { readonly controller: NSEPageController<unknown> }) {
+  return controller.transitionStyle === "pageCurl" ? <PageCurlView controller={controller} /> : <PageNavigationView controller={controller} />;
 }
 
-function NSEPageNavigationView({ controller }: { readonly controller: NSEPageController<unknown> }) {
+function PageNavigationView({ controller }: { readonly controller: NSEPageController<unknown> }) {
   useObserve(controller);
   const swipe = useRef<{ readonly pointerId: number; readonly x: number; readonly y: number } | null>(null);
   const index = controller.selectedIndex;
@@ -396,7 +396,7 @@ function NSEPageNavigationView({ controller }: { readonly controller: NSEPageCon
     previousIndex.current = index;
   }, [compact, index]);
   return (
-    <NSEControllerNavigationChromeBoundary>
+    <ControllerNavigationChromeBoundary>
     <div
       className={strip ? "nse-page-controller nse-container-sliding-view" : "nse-page-controller"}
       aria-label={controller.title}
@@ -433,10 +433,10 @@ function NSEPageNavigationView({ controller }: { readonly controller: NSEPageCon
       ) : (
         <div ref={content} tabIndex={-1} role="region" aria-label={Selected?.title ?? "Page content"}
           style={compact ? { flex: "1 1 auto", minHeight: 0 } : { height: "100%" }}>
-          <NSEPresence>{Selected ? <Selected.view key={controller.identifierForObject(objects[index])} /> : null}</NSEPresence>
+          <Presence>{Selected ? <Selected.view key={controller.identifierForObject(objects[index])} /> : null}</Presence>
         </div>
       )}
     </div>
-    </NSEControllerNavigationChromeBoundary>
+    </ControllerNavigationChromeBoundary>
   );
 }

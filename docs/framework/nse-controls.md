@@ -113,7 +113,7 @@ Focused entries include `NSEDrawer` and `NSESplitViewController` in `nse/control
 | Component | Purpose |
 | --- | --- |
 | `NSEDatePicker` | `NSDatePicker`: a date, a date range, a time, or a date and time, as a text field or a graphical calendar and clock, with full keyboard support. See [Date pickers](nse/values-and-progress.md#date-pickers). |
-| `NSEColourWell`, `NSEColourSwatches`, `NSEColourSliderPicker`, `NSEColourWheelPicker` | Colour selection controls. |
+| `NSEColourWell` | Colour selection control. |
 | `NSEColourPanel` | The shared colour panel. Applications reach it through `useColourPanel`. |
 
 ## Containers and layout

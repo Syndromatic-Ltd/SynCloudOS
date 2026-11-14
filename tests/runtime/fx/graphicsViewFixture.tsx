@@ -3,7 +3,7 @@ import { render, type RenderOptions } from "@testing-library/react";
 import type { GFXDisplayList } from "../../../src/FX/GraphicsFX/graphicsTypes";
 import { createOwnedGFXIdentifierIssuer } from "../../../src/FX/GraphicsFX/identifierAuthority";
 import type { NSEViewProps } from "../../../src/NSE/Views/NSEView";
-import { NSEViewDrawingEnvironmentContext } from "../../../src/NSE/Views/NSEViewDrawingEnvironment";
+import { ViewDrawingEnvironmentContext } from "../../../src/NSE/Views/NSEViewDrawingEnvironment";
 
 let sequence = 0;
 const environment = {
@@ -11,7 +11,7 @@ const environment = {
   geometry: { measure: () => ({ width: 200, height: 100 }), observe: () => () => {} },
 };
 function DrawingEnvironment({ children }: PropsWithChildren) {
-  return <NSEViewDrawingEnvironmentContext.Provider value={environment}>{children}</NSEViewDrawingEnvironmentContext.Provider>;
+  return <ViewDrawingEnvironmentContext.Provider value={environment}>{children}</ViewDrawingEnvironmentContext.Provider>;
 }
 
 /** Exercise cached figure replay through NSEView.draw, at the figure's original size. */

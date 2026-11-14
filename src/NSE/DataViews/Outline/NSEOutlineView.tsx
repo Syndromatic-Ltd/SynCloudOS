@@ -37,10 +37,10 @@ import {
 
 import { createSelectionChange, dataViewAllowsMutation, dataViewAllowsNavigation, dataViewAnnouncement, dataViewEventIsComposing, dataViewIsBusy, dataViewIsDisabled, encodeNSEDataViewKey } from "../Core";
 import { dataViewDisposedControllerState, warnDisposedDataViewController } from "../Core/disposedController";
-import { useNSEVirtualiser } from "../Virtualisation";
+import { useVirtualiser } from "../Virtualisation";
 import { useNSEDataViewDragHost } from "../../Drag";
-import { NSEDivider } from "../../Controls/Selection/NSEDivider";
-import { NSEListItem } from "../../Controls/Selection/NSEListItem";
+import { Divider } from "../../Controls/Selection/NSEDivider";
+import { GroupedRow } from "../../Controls/Selection/GroupedRow";
 import { NSETableCellView } from "../Table/NSETableCellView";
 import type { NSETableCellViewProps } from "../Core/dataViewTypes";
 import { useNSERubberBandScroll } from "../../Scroll";
@@ -137,7 +137,7 @@ export function NSEOutlineView<T, TId extends string | number>({
   // A source list scrolls with the system rubber band, as the sidebar rail always has.
   useNSERubberBandScroll(viewportRef, sourceListContentRef);
   const activeIndex = activeId === null ? -1 : rows.findIndex(({ id }) => Object.is(id, activeId));
-  const virtualiser = useNSEVirtualiser({
+  const virtualiser = useVirtualiser({
     count: rows.length,
     axis: "block",
     overscan: 2,
@@ -420,7 +420,7 @@ export function NSEOutlineView<T, TId extends string | number>({
             <span className="nse-outline-group-label">{content}</span>
             <span className="nse-outline-group-line" aria-hidden="true" />
             {showsOutlineCell(row) ? (
-              <NSEDivider
+              <Divider
                 variant="arrow"
                 className="nse-outline-group-toggle"
                 expanded={row.expanded}
@@ -430,7 +430,7 @@ export function NSEOutlineView<T, TId extends string | number>({
             ) : null}
           </div>
         ) : (
-          <NSEListItem
+          <GroupedRow
             {...rowProps(row, selected)}
             className="nse-outline-source-row"
             data-nse-part="row"
@@ -443,7 +443,7 @@ export function NSEOutlineView<T, TId extends string | number>({
           >
             {cell ? cell.primary : content}
             {rowStatus(row)}
-          </NSEListItem>
+          </GroupedRow>
         )}
         {children.length ? (
           <div className="nse-outline-children" data-collapsed={row.expanded ? "false" : "true"} inert={!row.expanded}>

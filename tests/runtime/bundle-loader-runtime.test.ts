@@ -620,8 +620,8 @@ describe("BundleLoader dynamic runtime contracts", () => {
       ])
     );
 
-    AppManagerController.getManagerForApp("com.example.hooked-launch")?.suspend();
-    AppManagerController.getManagerForApp("com.example.hooked-launch")?.close();
+    await runtime.lifecycle.suspend("com.example.hooked-launch").result;
+    await runtime.lifecycle.close("com.example.hooked-launch").result;
 
     expect(hookOrder).toEqual([
       "willLaunch",

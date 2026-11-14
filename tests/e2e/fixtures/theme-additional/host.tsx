@@ -1,7 +1,7 @@
 import { createRoot } from "react-dom/client";
 import { NSEAppearanceProvider } from "../../../../src/NSE/Appearance/NSEAppearanceProvider";
 import { atmoTheme } from "../../../../src/NSE/Appearance/atmo";
-import { NSEStandaloneControlHost } from "../../../../src/NSE/Overlays";
+import { StandaloneControlHost } from "../../../../src/NSE/Overlays";
 import { createStaticPresentationPort } from "../../../fixtures/presentationTraits";
 import { additionalThemeCatalogue } from "./catalogue";
 import "../../../../src/NSE/public/styles.css";
@@ -15,4 +15,4 @@ document.documentElement.style.colorScheme = scheme;
 document.documentElement.style.background = scheme === "dark" ? "#20252c" : "#e7ebef";
 const presentation = createStaticPresentationPort({ width: innerWidth, height: innerHeight, reducedMotion: true });
 Object.assign(window, { additionalThemeCatalogue: additionalThemeCatalogue.map(({ render: _render, ...surface }) => surface) });
-createRoot(document.getElementById("root")!).render(<NSEAppearanceProvider theme={atmoTheme} colourScheme={scheme}><NSEStandaloneControlHost document={document} window={window} presentation={presentation}><main id="theme-additional-surface">{surface.render(scheme)}</main></NSEStandaloneControlHost></NSEAppearanceProvider>);
+createRoot(document.getElementById("root")!).render(<NSEAppearanceProvider theme={atmoTheme} colourScheme={scheme}><StandaloneControlHost document={document} window={window} presentation={presentation}><main id="theme-additional-surface">{surface.render(scheme)}</main></StandaloneControlHost></NSEAppearanceProvider>);

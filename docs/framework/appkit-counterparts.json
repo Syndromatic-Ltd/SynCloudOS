@@ -21,6 +21,27 @@
     "Metrics",
     "Spec"
   ],
+  "internalDerivedSuffixes": [
+    "Context",
+    "Provider",
+    "Port",
+    "Controller",
+    "Handle",
+    "Internals",
+    "Error"
+  ],
+  "internalCounterparts": {
+    "NSEAnimationTimingFunction": "CAMediaTimingFunction",
+    "NSECollectionLayoutItem": "NSCollectionLayoutItem",
+    "NSEColourList": "NSColorList",
+    "NSEColourPicker": "NSColorPicker",
+    "NSEController": "NSController",
+    "NSEPopoverBehavior": "NSPopover.Behavior",
+    "NSEPreferencePane": "NSPreferencePane",
+    "NSEScroller": "NSScroller",
+    "NSETableHeaderView": "NSTableHeaderView",
+    "NSETrackingOption": "NSTrackingArea.Options"
+  },
   "members": {
     "SCAuthorization.copyRights": "AuthorizationCopyRights",
     "ASAuthorizationController.performRequests": "ASAuthorizationController.performRequests()",

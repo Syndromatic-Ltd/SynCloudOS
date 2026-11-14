@@ -36,6 +36,7 @@ import type {
   SynCloudOSWebspringStateController,
 } from "../Runtime/runtimeInstanceTypes";
 import type { RuntimeSnapshot } from "../Runtime/runtimeTypes";
+import { sendWebspringLaunchPhase } from "./launchPhaseMachine";
 import type {
   SynCloudOSWebspringFolderConfiguration,
   SynCloudOSWebspringLayoutPreference,
@@ -124,13 +125,28 @@ function setWorkingPreference(
   return preference;
 }
 
-function syncSelector(draft: RuntimeSnapshot, appId: string | null) {
-  const app = appId ? draft.appInfo[normalizeBundleIdentifier(appId)] : null;
-  const slot = getDesktopWebspringSlotForApp(getProjection(draft), appId);
+function selectorFor(state: RuntimeSnapshot, appId: string | null) {
+  const app = appId ? state.appInfo[normalizeBundleIdentifier(appId)] : null;
+  const slot = getDesktopWebspringSlotForApp(getProjection(state), appId);
+  return {
+    activeIndicatorId: slot?.region === "dial" ? slot.id : null,
+    selectorAngle: slot?.angle ?? app?.webspring.selectorAngle ?? app?.webspring.dialPosition ?? 180,
+    selectorPosition: slot?.indicatorPosition ?? null,
+  };
+}
 
-  draft.webspring.activeIndicatorId = slot?.region === "dial" ? slot.id : null;
-  draft.webspring.selectorAngle = slot?.angle ?? app?.webspring.selectorAngle ?? app?.webspring.dialPosition ?? 180;
-  draft.webspring.selectorPosition = slot?.indicatorPosition ?? null;
+function syncSelector(draft: RuntimeSnapshot, appId: string | null) {
+  Object.assign(draft.webspring, selectorFor(draft, appId));
+}
+
+/** Whether hovering this app would leave every field it writes as it is. */
+function hoverAlreadyShown(state: RuntimeSnapshot, appId: string | null) {
+  const { webspring } = state;
+  if (webspring.hoveredAppId !== appId || webspring.previewAppId !== appId || webspring.hoverLabelAppId !== appId) return false;
+  if (webspring.lowerShelfMode !== (appId ? "preview" : "news")) return false;
+  const selector = selectorFor(state, appId);
+  return webspring.activeIndicatorId === selector.activeIndicatorId && webspring.selectorAngle === selector.selectorAngle
+    && webspring.selectorPosition?.x === selector.selectorPosition?.x && webspring.selectorPosition?.y === selector.selectorPosition?.y;
 }
 
 function persistPreference(preference: SynCloudOSWebspringLayoutPreference | null) {
@@ -210,7 +226,8 @@ const webspringState = {
 
   hoverApp(appId: string | null) {
     if (appId) appId = runtime.apps.getApp(appId)?.bundleIdentifier ?? appId;
-    RuntimeStore.mutate((draft) => {
+    // Pointer movement repeats the same hover many times a second. Every store write is published, so skip the ones that change nothing.
+    if (!hoverAlreadyShown(RuntimeStore.getSnapshot(), appId)) RuntimeStore.mutate((draft) => {
       draft.webspring.hoveredAppId = appId;
       draft.webspring.previewAppId = appId;
       draft.webspring.hoverLabelAppId = appId;
@@ -503,10 +520,9 @@ const webspringState = {
     if (appId) appId = runtime.apps.getApp(appId)?.bundleIdentifier ?? appId;
     RuntimeStore.mutate((draft) => {
       if (!appId) {
-        if (draft.webspring.launchPhase !== "staging") return;
+        if (!sendWebspringLaunchPhase(draft, "cancelStage")) return;
         draft.webspring.launchingAppId = null;
         draft.webspring.launchTransitionId = null;
-        draft.webspring.launchPhase = "idle";
         draft.webspring.isAnimating = false;
         draft.webspring.lowerShelfMode = draft.webspring.previewAppId ? "preview" : "news";
         syncSelector(draft, draft.webspring.previewAppId);
@@ -515,7 +531,7 @@ const webspringState = {
 
       draft.webspring.launchingAppId = appId;
       draft.webspring.launchTransitionId = launchTransitionId ?? draft.webspring.launchTransitionId;
-      draft.webspring.launchPhase = "staging";
+      sendWebspringLaunchPhase(draft, "stage");
       draft.webspring.returningAppId = null;
       draft.webspring.returnTransitionId = null;
       draft.webspring.isAnimating = true;
@@ -529,7 +545,7 @@ const webspringState = {
     RuntimeStore.mutate((draft) => {
       draft.webspring.launchingAppId = appId;
       draft.webspring.launchTransitionId = appId ? launchTransitionId ?? draft.webspring.launchTransitionId : null;
-      draft.webspring.launchPhase = appId ? "launching" : draft.webspring.launchPhase === "launching" ? "idle" : draft.webspring.launchPhase;
+      sendWebspringLaunchPhase(draft, appId ? "launch" : "cancelLaunch");
       draft.webspring.returningAppId = null;
       draft.webspring.returnTransitionId = null;
       draft.webspring.isAnimating = Boolean(appId);
@@ -552,7 +568,7 @@ const webspringState = {
       }
       draft.webspring.launchingAppId = null;
       draft.webspring.launchTransitionId = appId ? launchTransitionId ?? draft.webspring.launchTransitionId : null;
-      draft.webspring.launchPhase = appId && !contentMotion ? "covered" : "idle";
+      sendWebspringLaunchPhase(draft, appId && !contentMotion ? "cover" : "reset");
       draft.webspring.returningAppId = null;
       draft.webspring.returnTransitionId = null;
       draft.webspring.isAnimating = Boolean(appId) && !contentMotion;
@@ -566,7 +582,7 @@ const webspringState = {
     RuntimeStore.mutate((draft) => {
       draft.webspring.launchingAppId = null;
       draft.webspring.launchTransitionId = null;
-      draft.webspring.launchPhase = "returning";
+      sendWebspringLaunchPhase(draft, "beginReturn");
       draft.webspring.returningAppId = appId;
       draft.webspring.returnTransitionId = returnTransitionId;
       draft.webspring.isAnimating = true;
@@ -582,7 +598,7 @@ const webspringState = {
   finishReturn(returnTransitionId?: string | null) {
     RuntimeStore.mutate((draft) => {
       if (returnTransitionId && draft.webspring.returnTransitionId !== returnTransitionId) return;
-      draft.webspring.launchPhase = "idle";
+      sendWebspringLaunchPhase(draft, "finishReturn");
       draft.webspring.returningAppId = null;
       draft.webspring.returnTransitionId = null;
       draft.webspring.isAnimating = false;

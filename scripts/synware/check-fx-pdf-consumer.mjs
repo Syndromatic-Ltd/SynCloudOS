@@ -114,7 +114,7 @@ void (async () => {
     linkUrl: annotations.find(annotation => annotation.subtype === "Link")?.url ?? null,
     hasBDC: streamOperators.includes("BDC"),
     hasEMC: streamOperators.includes("EMC"),
-    embeddedBytes: embeddedBytes.length,
+    embeddedBytes: embeddedBytes.count,
     embeddedPageCount: reopened.pageCount,
     geometry: reopened.page(0).mediaBox,
   };

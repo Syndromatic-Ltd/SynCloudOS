@@ -22,7 +22,7 @@ import { nseControlHooks } from "../../Theme/contract/hooks";
 import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction";
 import { useEffect, useId, useRef, useState } from "react";
 
-import { NSEListboxPopup, useNSEOverlayProvider } from "../../Overlays";
+import { ListboxPopup, useNSEOverlayProvider } from "../../Overlays";
 import type { NSEComboBoxProps } from "./completionTypes";
 import { useNSEValueBinding } from "../Core/useNSEValueBinding";
 import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
@@ -30,13 +30,13 @@ import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
 /** A combo binding owns editable text; selected domain objects retain their own typed channel. */
 export function NSEComboBox<T>(props: NSEBoundValueProps<string,NSEComboBoxProps<T>,"inputValue"|"onInputValueChange"|"undoManager">) {
   const resolved=useNSEValueBinding<string,NSEComboBoxProps<T>,"inputValue"|"onInputValueChange"|"undoManager">(props,{value:"inputValue",change:"onInputValueChange",fallback:""});
-  return <NSEComboBoxControl {...resolved} onValueChange={(value,reason)=>{
+  return <ComboBoxControl {...resolved} onValueChange={(value,reason)=>{
     if(props.binding) resolved.onInputValueChange(reason==="completion" ? resolved.dataSource.labelForItem(value as T) : typeof value==="string"?value:"");
     resolved.onValueChange(value,reason);
   }} />;
 }
 
-function NSEComboBoxControl<T>(props: NSEComboBoxProps<T>) {
+function ComboBoxControl<T>(props: NSEComboBoxProps<T>) {
   const theme = useNSEThemeInteraction<HTMLSpanElement>(props.isEnabled !== false);
   const disabled = props.isEnabled === false;
   useNSEOverlayProvider();
@@ -167,7 +167,7 @@ function NSEComboBoxControl<T>(props: NSEComboBoxProps<T>) {
         }}
       />
       {props.name ? <input type="hidden" name={props.name} value={props.value ? props.dataSource.idForItem(props.value) : props.allowsFreeform ? draft : ""} /> : null}
-      <NSEListboxPopup id={popupId} open={items.length > 0} anchor={inputRef.current} parentResponderId={props.parentResponderId} direction={props.direction} options={options} selectedId={activeItem ? props.dataSource.idForItem(activeItem) : null} labelledBy={inputId} onOpenChange={(open) => { if (!open) { setItems([]); setActive(-1); } }} onSelect={(option) => { if (option.value !== undefined) commit(option.value); }} />
+      <ListboxPopup id={popupId} open={items.length > 0} anchor={inputRef.current} parentResponderId={props.parentResponderId} direction={props.direction} options={options} selectedId={activeItem ? props.dataSource.idForItem(activeItem) : null} labelledBy={inputId} onOpenChange={(open) => { if (!open) { setItems([]); setActive(-1); } }} onSelect={(option) => { if (option.value !== undefined) commit(option.value); }} />
     </span>
   );
 }

@@ -23,30 +23,30 @@ import { useId, useMemo, useRef } from "react";
 
 import { addCalendarDays, addCalendarMonths, calendarWeekStart, civilToEpochDay, comparePlainDates, epochDayToCivil } from "../calendarArithmetic";
 import { plainDateToday } from "../dateTimeFormatting";
-import type { NSECalendarMonth, NSEPlainDate } from "../dateTimeTypes";
-import type { NSECalendarNavigationRequest, NSECalendarNavigationUnit, NSECalendarSelection, NSEGraphicalCalendarProps } from "./calendarTypes";
+import type { CalendarMonth, NSEPlainDate } from "../dateTimeTypes";
+import type { CalendarNavigationRequest, CalendarNavigationUnit, CalendarSelection, GraphicalCalendarProps } from "./calendarTypes";
 
 const key = (date: NSEPlainDate) => `${String(date.year).padStart(4, "0")}-${String(date.month).padStart(2, "0")}-${String(date.day).padStart(2, "0")}`;
 const weekday = (date: NSEPlainDate) => ((civilToEpochDay(date) + 4) % 7 + 7) % 7;
-const monthBy = (month: NSECalendarMonth, unit: NSECalendarNavigationUnit, direction: -1 | 1): NSECalendarMonth => {
+const monthBy = (month: CalendarMonth, unit: CalendarNavigationUnit, direction: -1 | 1): CalendarMonth => {
   const moved = addCalendarMonths({ ...month, day: 1 }, direction * (unit === "month" ? 1 : unit === "year" ? 12 : 120));
   return Object.freeze({ year: moved.year, month: moved.month });
 };
 
-export function buildCalendarMonthGrid(month: NSECalendarMonth, locale: string): readonly NSEPlainDate[] {
+export function buildCalendarMonthGrid(month: CalendarMonth, locale: string): readonly NSEPlainDate[] {
   const first = { ...month, day: 1 };
   const offset = (weekday(first) - calendarWeekStart(locale) + 7) % 7;
   return Object.freeze(Array.from({ length: 42 }, (_, index) => addCalendarDays(first, index - offset)));
 }
 
-function activeDate(selection: NSECalendarSelection, month: NSECalendarMonth): NSEPlainDate {
+function activeDate(selection: CalendarSelection, month: CalendarMonth): NSEPlainDate {
   if (selection.kind === "single") return selection.value;
   if (selection.kind === "range") return selection.value.end;
   if (selection.kind === "multiple" && selection.value.length) return selection.value.at(-1)!;
   return { ...month, day: 1 };
 }
 
-export function NSEGraphicalCalendar(props: NSEGraphicalCalendarProps) {
+export function GraphicalCalendar(props: GraphicalCalendarProps) {
   const instanceId = useId().replace(/:/g, "");
   const gridRef = useRef<HTMLDivElement>(null);
   const swipe = useRef<{ readonly pointerId: number; readonly startX: number } | null>(null);
@@ -77,7 +77,7 @@ export function NSEGraphicalCalendar(props: NSEGraphicalCalendarProps) {
   const direction = props.dir ?? localeDirection ?? "ltr";
 
   const weekdayLabels = Array.from({ length: 7 }, (_, index) => formatters.weekday.format((3 + ((start + index) % 7)) * 86_400_000));
-  const navigate = (unit: NSECalendarNavigationUnit, direction: -1 | 1, reason: NSECalendarNavigationRequest["reason"]) => props.onVisibleMonthChange?.(monthBy(props.visibleMonth, unit, direction), { unit, direction, reason });
+  const navigate = (unit: CalendarNavigationUnit, direction: -1 | 1, reason: CalendarNavigationRequest["reason"]) => props.onVisibleMonthChange?.(monthBy(props.visibleMonth, unit, direction), { unit, direction, reason });
   const select = (date: NSEPlainDate, reason = "pointer") => {
     if (props.isDateDisabled(date)) return;
     if (props.selection.kind === "range") {

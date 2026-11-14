@@ -1,0 +1,3860 @@
+{
+  "base": "http://127.0.0.1:5387",
+  "runs": 1,
+  "chromium": "149.0.7827.55",
+  "recordedAt": "2026-11-12T10:25:42.004Z",
+  "apps": {
+    "About": {
+      "cold": {
+        "started": 0.6,
+        "authorised": 0.8,
+        "bundleLoadBegin": 2.4,
+        "bundleReady": 46,
+        "lifecycleCommitted": 66.2,
+        "complete": 188.7,
+        "firstFrame": 256.6,
+        "stylesheetsAdded": 1,
+        "resources": 25,
+        "longTaskMs": 167
+      },
+      "warm": {
+        "started": 0.3,
+        "authorised": 0.3,
+        "bundleLoadBegin": null,
+        "bundleReady": null,
+        "lifecycleCommitted": 16.1,
+        "complete": 114.9,
+        "firstFrame": 193.6,
+        "stylesheetsAdded": 0,
+        "resources": 0,
+        "longTaskMs": 0
+      },
+      "coldLog": [
+        {
+          "at": 0.2,
+          "type": "app.launch.requested",
+          "appId": "com.syndromatic.about"
+        },
+        {
+          "at": 0.5,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.about"
+        },
+        {
+          "at": 0.6,
+          "type": "app.launch.started",
+          "appId": "com.syndromatic.about"
+        },
+        {
+          "at": 0.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.about"
+        },
+        {
+          "at": 0.8,
+          "type": "app.launch.authorised",
+          "appId": "com.syndromatic.about"
+        },
+        {
+          "at": 1.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.about"
+        },
+        {
+          "at": 1.8,
+          "type": "lifecycle.transition.requested",
+          "appId": "com.syndromatic.about"
+        },
+        {
+          "at": 2.3,
+          "type": "app.lifecycle",
+          "stage": "preload",
+          "appId": "com.syndromatic.about"
+        },
+        {
+          "at": 2.3,
+          "type": "app.lifecycle.transition",
+          "appId": "com.syndromatic.about"
+        },
+        {
+          "at": 2.4,
+          "type": "bundle.load.begin",
+          "appId": "com.syndromatic.about"
+        },
+        {
+          "at": 19.6,
+          "type": "policy.decision",
+          "appId": "documentStore.listPublished"
+        },
+        {
+          "at": 2.9,
+          "type": "resource",
+          "ms": 3.9,
+          "name": "/src/SynWare/About.app/Contents/index.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 18.4,
+          "type": "resource",
+          "ms": 2.7,
+          "name": "/node_modules/@syndromatic/syncloudos/assets/spinner-mB64Y0EN.png",
+          "kind": "css"
+        },
+        {
+          "at": 23.2,
+          "type": "resource",
+          "ms": 4.5,
+          "name": "/src/SynWare/About.app/Contents/Resources/styles.css",
+          "kind": "script"
+        },
+        {
+          "at": 23.3,
+          "type": "resource",
+          "ms": 7.5,
+          "name": "/@id/__x00__virtual:syncloudos/app/com.syndromatic.about?import",
+          "kind": "script"
+        },
+        {
+          "at": 23.4,
+          "type": "resource",
+          "ms": 7.5,
+          "name": "/src/SynWare/About.app/Contents/Resources/assets.ts",
+          "kind": "script"
+        },
+        {
+          "at": 23.5,
+          "type": "resource",
+          "ms": 7.7,
+          "name": "/src/SynWare/About.app/Contents/aboutContent.ts",
+          "kind": "script"
+        },
+        {
+          "at": 23.5,
+          "type": "resource",
+          "ms": 8,
+          "name": "/src/SynWare/About.app/Contents/AboutPane.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 23.5,
+          "type": "resource",
+          "ms": 8.5,
+          "name": "/src/SynWare/About.app/Contents/AboutParticles.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 23.6,
+          "type": "resource",
+          "ms": 9.6,
+          "name": "/src/SynWare/About.app/Contents/AboutScene.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 31.4,
+          "type": "resource",
+          "ms": 3,
+          "name": "/src/SynWare/About.app/Contents/Resources/AppIcon.png?import",
+          "kind": "script"
+        },
+        {
+          "at": 31.5,
+          "type": "resource",
+          "ms": 4.6,
+          "name": "/src/SynWare/About.app/Contents/Resources/Images/kavish-passphoto.png?import",
+          "kind": "script"
+        },
+        {
+          "at": 31.5,
+          "type": "resource",
+          "ms": 7.8,
+          "name": "/src/SynWare/About.app/Contents/Resources/Images/webspring-tag.png?import",
+          "kind": "script"
+        },
+        {
+          "at": 31.6,
+          "type": "resource",
+          "ms": 7.9,
+          "name": "/src/SynWare/About.app/Contents/Resources/Images/syndromatic-orb.png?import",
+          "kind": "script"
+        },
+        {
+          "at": 31.7,
+          "type": "resource",
+          "ms": 7.8,
+          "name": "/src/SynWare/About.app/Contents/Resources/Navigation/company.svg?import",
+          "kind": "script"
+        },
+        {
+          "at": 31.8,
+          "type": "resource",
+          "ms": 7.8,
+          "name": "/src/SynWare/About.app/Contents/Resources/Navigation/framework.svg?import",
+          "kind": "script"
+        },
+        {
+          "at": 31.8,
+          "type": "resource",
+          "ms": 7.9,
+          "name": "/src/SynWare/About.app/Contents/Resources/Navigation/team.svg?import",
+          "kind": "script"
+        },
+        {
+          "at": 32.5,
+          "type": "resource",
+          "ms": 7.3,
+          "name": "/node_modules/@syndromatic/syncloudos/nse/scroll.js?v=b3406c56",
+          "kind": "script"
+        },
+        {
+          "at": 32.6,
+          "type": "resource",
+          "ms": 7.2,
+          "name": "/src/SynWare/About.app/Contents/aboutMotion.ts",
+          "kind": "script"
+        },
+        {
+          "at": 32.7,
+          "type": "resource",
+          "ms": 7.4,
+          "name": "/src/SynWare/About.app/Contents/aboutSectionIcons.ts",
+          "kind": "script"
+        },
+        {
+          "at": 32.6,
+          "type": "resource",
+          "ms": 7.5,
+          "name": "/src/SynWare/About.app/Contents/AboutParticleField.ts",
+          "kind": "script"
+        },
+        {
+          "at": 33.5,
+          "type": "resource",
+          "ms": 6.9,
+          "name": "/@id/__x00__virtual:syncloudos/app/com.syndromatic.about/fx/animation",
+          "kind": "script"
+        },
+        {
+          "at": 33.6,
+          "type": "resource",
+          "ms": 6.9,
+          "name": "/src/Effects/motionCurves.ts",
+          "kind": "script"
+        },
+        {
+          "at": 40.8,
+          "type": "resource",
+          "ms": 2.8,
+          "name": "/@id/__x00__virtual:syncloudos/app/com.syndromatic.about/fx/graphics",
+          "kind": "script"
+        },
+        {
+          "at": 45.3,
+          "type": "stylesheet",
+          "name": "Contents/Resources/styles.css"
+        },
+        {
+          "at": 46,
+          "type": "bundle.load.complete",
+          "appId": "com.syndromatic.about"
+        },
+        {
+          "at": 46.1,
+          "type": "lifecycle.transition.requested",
+          "appId": "com.syndromatic.about"
+        },
+        {
+          "at": 46.4,
+          "type": "app.lifecycle",
+          "stage": "preload",
+          "appId": "com.syndromatic.about"
+        },
+        {
+          "at": 46.4,
+          "type": "app.lifecycle.transition",
+          "appId": "com.syndromatic.about"
+        },
+        {
+          "at": 58,
+          "type": "policy.decision",
+          "appId": "documentStore.listPublished"
+        },
+        {
+          "at": 59.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.about"
+        },
+        {
+          "at": 65.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.about"
+        },
+        {
+          "at": 66.2,
+          "type": "app.lifecycle",
+          "stage": "launch",
+          "appId": "com.syndromatic.about"
+        },
+        {
+          "at": 66.2,
+          "type": "statechart.transition.complete",
+          "appId": "com.syndromatic.about"
+        },
+        {
+          "at": 139.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.about"
+        },
+        {
+          "at": 186.4,
+          "type": "policy.decision",
+          "appId": "documentStore.listPublished"
+        },
+        {
+          "at": 187.2,
+          "type": "webspring.select",
+          "appId": "com.syndromatic.about"
+        },
+        {
+          "at": 187.4,
+          "type": "webspring.hover",
+          "appId": "none"
+        },
+        {
+          "at": 188.6,
+          "type": "app.launch.complete",
+          "appId": "com.syndromatic.about"
+        },
+        {
+          "at": 207.5,
+          "type": "policy.decision",
+          "appId": "documentStore.listPublished"
+        },
+        {
+          "at": 43.9,
+          "type": "longtask",
+          "ms": 167
+        },
+        {
+          "at": 112.8,
+          "type": "resource",
+          "ms": 3,
+          "name": "/src/SynWare/About.app/Contents/Resources/Navigation/company.svg",
+          "kind": "css"
+        },
+        {
+          "at": 186.8,
+          "type": "resource",
+          "ms": 61.4,
+          "name": "/src/SynWare/About.app/Contents/Resources/Images/syndromatic-orb.png",
+          "kind": "img"
+        },
+        {
+          "at": 295.6,
+          "type": "app.launch.staged",
+          "appId": "com.syndromatic.about"
+        },
+        {
+          "at": 326.7,
+          "type": "policy.decision",
+          "appId": "documentStore.listPublished"
+        },
+        {
+          "at": 385.8,
+          "type": "longtask",
+          "ms": 65
+        },
+        {
+          "at": 1470.2,
+          "type": "app.launch.covered",
+          "appId": "com.syndromatic.about"
+        },
+        {
+          "at": 1491.4,
+          "type": "policy.decision",
+          "appId": "documentStore.listPublished"
+        }
+      ]
+    },
+    "Journal": {
+      "cold": {
+        "started": 0.4,
+        "authorised": 0.4,
+        "bundleLoadBegin": 1.5,
+        "bundleReady": 56.6,
+        "lifecycleCommitted": 82,
+        "complete": 184.2,
+        "firstFrame": 321.1,
+        "stylesheetsAdded": 6,
+        "resources": 61,
+        "longTaskMs": 267
+      },
+      "warm": {
+        "started": 0.1,
+        "authorised": 0.1,
+        "bundleLoadBegin": null,
+        "bundleReady": null,
+        "lifecycleCommitted": 15.4,
+        "complete": 73.3,
+        "firstFrame": 351.7,
+        "stylesheetsAdded": 0,
+        "resources": 0,
+        "longTaskMs": 248
+      },
+      "coldLog": [
+        {
+          "at": 0.1,
+          "type": "app.launch.requested",
+          "appId": "com.syndromatic.journal"
+        },
+        {
+          "at": 0.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.journal"
+        },
+        {
+          "at": 0.4,
+          "type": "app.launch.started",
+          "appId": "com.syndromatic.journal"
+        },
+        {
+          "at": 0.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.journal"
+        },
+        {
+          "at": 0.4,
+          "type": "app.launch.authorised",
+          "appId": "com.syndromatic.journal"
+        },
+        {
+          "at": 1.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.journal"
+        },
+        {
+          "at": 1.2,
+          "type": "lifecycle.transition.requested",
+          "appId": "com.syndromatic.journal"
+        },
+        {
+          "at": 1.5,
+          "type": "app.lifecycle",
+          "stage": "preload",
+          "appId": "com.syndromatic.journal"
+        },
+        {
+          "at": 1.5,
+          "type": "app.lifecycle.transition",
+          "appId": "com.syndromatic.journal"
+        },
+        {
+          "at": 1.5,
+          "type": "bundle.load.begin",
+          "appId": "com.syndromatic.journal"
+        },
+        {
+          "at": 15.6,
+          "type": "policy.decision",
+          "appId": "documentStore.listPublished"
+        },
+        {
+          "at": 1.8,
+          "type": "resource",
+          "ms": 4,
+          "name": "/src/SynWare/Journal.app/Contents/index.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 18.2,
+          "type": "resource",
+          "ms": 3.8,
+          "name": "/@id/__x00__virtual:syncloudos/app/com.syndromatic.journal?import",
+          "kind": "script"
+        },
+        {
+          "at": 18.2,
+          "type": "resource",
+          "ms": 6.1,
+          "name": "/src/SynWare/Journal.app/Contents/windowChromeVariant.ts",
+          "kind": "script"
+        },
+        {
+          "at": 18.3,
+          "type": "resource",
+          "ms": 6.7,
+          "name": "/src/SynWare/Journal.app/Contents/components/JournalDetachedNote.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 18.4,
+          "type": "resource",
+          "ms": 6.6,
+          "name": "/src/SynWare/Journal.app/Contents/components/JournalWindowChrome.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 18.4,
+          "type": "resource",
+          "ms": 6.7,
+          "name": "/src/SynWare/Journal.app/Contents/rematerialiseJournalProjection.ts",
+          "kind": "script"
+        },
+        {
+          "at": 18.2,
+          "type": "resource",
+          "ms": 6.7,
+          "name": "/src/SynWare/Journal.app/Contents/JournalWindowController.ts",
+          "kind": "script"
+        },
+        {
+          "at": 18.4,
+          "type": "resource",
+          "ms": 6.9,
+          "name": "/src/SynWare/Journal.app/Contents/Resources/styles.css",
+          "kind": "script"
+        },
+        {
+          "at": 18.4,
+          "type": "resource",
+          "ms": 7,
+          "name": "/src/SynWare/Journal.app/Contents/Resources/phone.css",
+          "kind": "script"
+        },
+        {
+          "at": 18.4,
+          "type": "resource",
+          "ms": 7.1,
+          "name": "/src/SynWare/Journal.app/Contents/Resources/materials.css",
+          "kind": "script"
+        },
+        {
+          "at": 18.4,
+          "type": "resource",
+          "ms": 7.2,
+          "name": "/src/SynWare/Journal.app/Contents/Resources/book.css",
+          "kind": "script"
+        },
+        {
+          "at": 26,
+          "type": "resource",
+          "ms": 2.2,
+          "name": "/src/SynWare/Journal.app/Contents/useJournalLocalisedStrings.ts",
+          "kind": "script"
+        },
+        {
+          "at": 26.1,
+          "type": "resource",
+          "ms": 3.7,
+          "name": "/src/SynWare/Journal.app/Contents/Resources/window-chrome.css",
+          "kind": "script"
+        },
+        {
+          "at": 26.1,
+          "type": "resource",
+          "ms": 3.6,
+          "name": "/src/SynWare/Journal.app/Contents/components/NotePad.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 26.3,
+          "type": "resource",
+          "ms": 3.6,
+          "name": "/src/SynWare/Journal.app/Contents/journalPublishedProjection.ts",
+          "kind": "script"
+        },
+        {
+          "at": 26.3,
+          "type": "resource",
+          "ms": 3.6,
+          "name": "/src/SynWare/Journal.app/Contents/components/AttachmentStrip.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 26.4,
+          "type": "resource",
+          "ms": 3.9,
+          "name": "/src/SynWare/Libraries/JournalPages/index.ts",
+          "kind": "script"
+        },
+        {
+          "at": 26.3,
+          "type": "resource",
+          "ms": 4,
+          "name": "/src/SynWare/Journal.app/Contents/components/JournalBody.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 26.5,
+          "type": "resource",
+          "ms": 4.1,
+          "name": "/src/SynWare/Journal.app/Contents/JournalViewControllers.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 30.3,
+          "type": "resource",
+          "ms": 3,
+          "name": "/src/SynWare/Libraries/PhoneChrome/glyphs.ts",
+          "kind": "script"
+        },
+        {
+          "at": 30.4,
+          "type": "resource",
+          "ms": 4.1,
+          "name": "/src/SynWare/Journal.app/Contents/journalReaderUrl.ts",
+          "kind": "script"
+        },
+        {
+          "at": 30.6,
+          "type": "resource",
+          "ms": 4.3,
+          "name": "/src/SynWare/Libraries/JournalPages/journalTextPresentation.ts",
+          "kind": "script"
+        },
+        {
+          "at": 30.6,
+          "type": "resource",
+          "ms": 4.3,
+          "name": "/src/SynWare/Libraries/JournalPages/JournalPageView.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 30.7,
+          "type": "resource",
+          "ms": 4.4,
+          "name": "/src/SynWare/Journal.app/Contents/readerPaperAppearance.ts",
+          "kind": "script"
+        },
+        {
+          "at": 31.3,
+          "type": "resource",
+          "ms": 12,
+          "name": "/src/SynWare/Journal.app/Contents/components/NoteList.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 31.3,
+          "type": "resource",
+          "ms": 12.2,
+          "name": "/src/SynWare/Journal.app/Contents/components/FolderTree.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 31.3,
+          "type": "resource",
+          "ms": 12.7,
+          "name": "/src/SynWare/Journal.app/Contents/components/JournalShell.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 33.9,
+          "type": "resource",
+          "ms": 10.1,
+          "name": "/src/SynWare/Libraries/PhoneChrome/Resources/home.svg?import",
+          "kind": "script"
+        },
+        {
+          "at": 33.9,
+          "type": "resource",
+          "ms": 10.3,
+          "name": "/src/SynWare/Libraries/PhoneChrome/Resources/settings.svg?import",
+          "kind": "script"
+        },
+        {
+          "at": 34,
+          "type": "resource",
+          "ms": 10.5,
+          "name": "/src/SynWare/Libraries/PhoneChrome/Resources/user-info.svg?import",
+          "kind": "script"
+        },
+        {
+          "at": 35.6,
+          "type": "resource",
+          "ms": 9.1,
+          "name": "/src/SynWare/Libraries/JournalPages/journal-pages.css",
+          "kind": "script"
+        },
+        {
+          "at": 44.6,
+          "type": "resource",
+          "ms": 3.7,
+          "name": "/src/SynWare/Journal.app/Contents/components/JournalPhoneChrome.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 44.7,
+          "type": "resource",
+          "ms": 3.7,
+          "name": "/src/SynWare/Journal.app/Contents/journal.transitions.ts",
+          "kind": "script"
+        },
+        {
+          "at": 31.3,
+          "type": "resource",
+          "ms": 17.9,
+          "name": "/node_modules/@syndromatic/syncloudos/nse/page.js?v=b3406c56",
+          "kind": "script"
+        },
+        {
+          "at": 56.2,
+          "type": "stylesheet",
+          "name": "Libraries/JournalPages/journal-pages.css"
+        },
+        {
+          "at": 56.2,
+          "type": "stylesheet",
+          "name": "Contents/Resources/window-chrome.css"
+        },
+        {
+          "at": 56.2,
+          "type": "stylesheet",
+          "name": "Contents/Resources/styles.css"
+        },
+        {
+          "at": 56.2,
+          "type": "stylesheet",
+          "name": "Contents/Resources/phone.css"
+        },
+        {
+          "at": 56.2,
+          "type": "stylesheet",
+          "name": "Contents/Resources/materials.css"
+        },
+        {
+          "at": 56.3,
+          "type": "stylesheet",
+          "name": "Contents/Resources/book.css"
+        },
+        {
+          "at": 56.6,
+          "type": "bundle.load.complete",
+          "appId": "com.syndromatic.journal"
+        },
+        {
+          "at": 56.6,
+          "type": "lifecycle.transition.requested",
+          "appId": "com.syndromatic.journal"
+        },
+        {
+          "at": 56.9,
+          "type": "app.lifecycle",
+          "stage": "preload",
+          "appId": "com.syndromatic.journal"
+        },
+        {
+          "at": 57,
+          "type": "app.lifecycle.transition",
+          "appId": "com.syndromatic.journal"
+        },
+        {
+          "at": 76.3,
+          "type": "policy.decision",
+          "appId": "documentStore.listPublished"
+        },
+        {
+          "at": 77.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.journal"
+        },
+        {
+          "at": 81,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.journal"
+        },
+        {
+          "at": 82,
+          "type": "app.lifecycle",
+          "stage": "launch",
+          "appId": "com.syndromatic.journal"
+        },
+        {
+          "at": 82,
+          "type": "statechart.transition.complete",
+          "appId": "com.syndromatic.journal"
+        },
+        {
+          "at": 110,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.journal"
+        },
+        {
+          "at": 111,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.journal"
+        },
+        {
+          "at": 180.4,
+          "type": "policy.decision",
+          "appId": "documentStore.listPublished"
+        },
+        {
+          "at": 182.9,
+          "type": "webspring.select",
+          "appId": "com.syndromatic.journal"
+        },
+        {
+          "at": 183.7,
+          "type": "webspring.hover",
+          "appId": "none"
+        },
+        {
+          "at": 184.1,
+          "type": "app.launch.complete",
+          "appId": "com.syndromatic.journal"
+        },
+        {
+          "at": 184.2,
+          "type": "policy.decision",
+          "appId": "documentStore.getDraft"
+        },
+        {
+          "at": 184.2,
+          "type": "policy.decision",
+          "appId": "documentStore.listPublished"
+        },
+        {
+          "at": 203.2,
+          "type": "policy.decision",
+          "appId": "documentStore.listPublished"
+        },
+        {
+          "at": 51.8,
+          "type": "longtask",
+          "ms": 191
+        },
+        {
+          "at": 132.5,
+          "type": "resource",
+          "ms": 111.4,
+          "name": "/src/SynWare/Journal.app/Contents/Resources/notepad/window-top-left@2x.png",
+          "kind": "css"
+        },
+        {
+          "at": 132.8,
+          "type": "resource",
+          "ms": 113.6,
+          "name": "/src/SynWare/Journal.app/Contents/Resources/notepad/window-top-right@2x.png",
+          "kind": "css"
+        },
+        {
+          "at": 133,
+          "type": "resource",
+          "ms": 113.4,
+          "name": "/src/SynWare/Journal.app/Contents/Resources/notepad/window-bottom-right@2x.png",
+          "kind": "css"
+        },
+        {
+          "at": 133.2,
+          "type": "resource",
+          "ms": 7.6,
+          "name": "/src/SynWare/Journal.app/Contents/Resources/notepad/window-top@2x.png",
+          "kind": "css"
+        },
+        {
+          "at": 133.4,
+          "type": "resource",
+          "ms": 7.7,
+          "name": "/src/SynWare/Journal.app/Contents/Resources/notepad/window-bottom@2x.png",
+          "kind": "css"
+        },
+        {
+          "at": 133.6,
+          "type": "resource",
+          "ms": 7.6,
+          "name": "/src/SynWare/Journal.app/Contents/Resources/notepad/window-left@2x.png",
+          "kind": "css"
+        },
+        {
+          "at": 134,
+          "type": "resource",
+          "ms": 7.4,
+          "name": "/src/SynWare/Journal.app/Contents/Resources/notepad/window-right@2x.png",
+          "kind": "css"
+        },
+        {
+          "at": 139.4,
+          "type": "resource",
+          "ms": 4,
+          "name": "/src/SynWare/Journal.app/Contents/Resources/notepad/whitebutton-active-left@2x.png",
+          "kind": "css"
+        },
+        {
+          "at": 139.5,
+          "type": "resource",
+          "ms": 5,
+          "name": "/src/SynWare/Journal.app/Contents/Resources/notepad/whitebutton-active-right@2x.png",
+          "kind": "css"
+        },
+        {
+          "at": 139.6,
+          "type": "resource",
+          "ms": 5.2,
+          "name": "/src/SynWare/Journal.app/Contents/Resources/notepad/whitebutton-active-center@2x.png",
+          "kind": "css"
+        },
+        {
+          "at": 139.8,
+          "type": "resource",
+          "ms": 5.2,
+          "name": "/src/SynWare/Journal.app/Contents/Resources/notepad/whitebutton-2col@2x.png",
+          "kind": "css"
+        },
+        {
+          "at": 140,
+          "type": "resource",
+          "ms": 5.1,
+          "name": "/src/SynWare/Journal.app/Contents/Resources/notepad/whitebutton-pressed-middle-right@2x.png",
+          "kind": "css"
+        },
+        {
+          "at": 140.1,
+          "type": "resource",
+          "ms": 5.1,
+          "name": "/src/SynWare/Journal.app/Contents/Resources/notepad/whitebutton-pressed-right@2x.png",
+          "kind": "css"
+        },
+        {
+          "at": 140.2,
+          "type": "resource",
+          "ms": 5,
+          "name": "/src/SynWare/Journal.app/Contents/Resources/notepad/whitebutton-pressed-center@2x.png",
+          "kind": "css"
+        },
+        {
+          "at": 140.3,
+          "type": "resource",
+          "ms": 5.1,
+          "name": "/src/SynWare/Journal.app/Contents/Resources/notepad/whitebutton-3col@2x.png",
+          "kind": "css"
+        },
+        {
+          "at": 140.5,
+          "type": "resource",
+          "ms": 104.6,
+          "name": "/src/SynWare/Journal.app/Contents/Resources/notepad/leather-gutter@2x.png",
+          "kind": "css"
+        },
+        {
+          "at": 140.6,
+          "type": "resource",
+          "ms": 105.8,
+          "name": "/src/SynWare/Journal.app/Contents/Resources/materials/light/paper@2x.png",
+          "kind": "css"
+        },
+        {
+          "at": 140.8,
+          "type": "resource",
+          "ms": 8.4,
+          "name": "/src/SynWare/Journal.app/Contents/Resources/materials/leather-header.png",
+          "kind": "css"
+        },
+        {
+          "at": 141,
+          "type": "resource",
+          "ms": 8.3,
+          "name": "/src/SynWare/Journal.app/Contents/Resources/materials/light/paper-torns@2x.png",
+          "kind": "css"
+        },
+        {
+          "at": 141.2,
+          "type": "resource",
+          "ms": 8.1,
+          "name": "/src/SynWare/Journal.app/Contents/Resources/materials/light/stack-left@2x.png",
+          "kind": "css"
+        },
+        {
+          "at": 141.3,
+          "type": "resource",
+          "ms": 8.3,
+          "name": "/src/SynWare/Journal.app/Contents/Resources/materials/light/stack-right@2x.png",
+          "kind": "css"
+        },
+        {
+          "at": 141.4,
+          "type": "resource",
+          "ms": 8.3,
+          "name": "/src/SynWare/Journal.app/Contents/Resources/materials/light/stack-middle@2x.png",
+          "kind": "css"
+        },
+        {
+          "at": 141.5,
+          "type": "resource",
+          "ms": 105,
+          "name": "/src/SynWare/Journal.app/Contents/Resources/notepad/pocket@2x.png",
+          "kind": "css"
+        },
+        {
+          "at": 144.4,
+          "type": "resource",
+          "ms": 6.3,
+          "name": "/src/Webspring/Contents/Resources/Fonts/Noteworthy/Noteworthy-Lt.woff",
+          "kind": "css"
+        },
+        {
+          "at": 224.9,
+          "type": "resource",
+          "ms": 3.4,
+          "name": "/src/SynWare/Journal.app/Contents/Resources/notepad/tornoff-windowcontrol@2x.png",
+          "kind": "css"
+        },
+        {
+          "at": 225.1,
+          "type": "resource",
+          "ms": 3.2,
+          "name": "/src/SynWare/Journal.app/Contents/Resources/notepad/share-glyph@2x.png",
+          "kind": "css"
+        },
+        {
+          "at": 225.2,
+          "type": "resource",
+          "ms": 3.3,
+          "name": "/src/SynWare/Journal.app/Contents/Resources/notepad/trash-glyph@2x.png",
+          "kind": "css"
+        },
+        {
+          "at": 285.9,
+          "type": "app.launch.staged",
+          "appId": "com.syndromatic.journal"
+        },
+        {
+          "at": 316.5,
+          "type": "policy.decision",
+          "appId": "documentStore.listPublished"
+        },
+        {
+          "at": 279.9,
+          "type": "longtask",
+          "ms": 76
+        },
+        {
+          "at": 1418.7,
+          "type": "app.launch.covered",
+          "appId": "com.syndromatic.journal"
+        },
+        {
+          "at": 1455.2,
+          "type": "policy.decision",
+          "appId": "documentStore.listPublished"
+        }
+      ]
+    },
+    "/__syncloudos/nse-gallery": {
+      "cold": {
+        "started": 0.2,
+        "authorised": 0.3,
+        "bundleLoadBegin": 0.8,
+        "bundleReady": 206.7,
+        "lifecycleCommitted": 243.3,
+        "complete": 755.8,
+        "firstFrame": 1167.9,
+        "stylesheetsAdded": 3,
+        "resources": 96,
+        "longTaskMs": 994
+      },
+      "warm": {
+        "started": 0.3,
+        "authorised": 0.3,
+        "bundleLoadBegin": null,
+        "bundleReady": null,
+        "lifecycleCommitted": 19.8,
+        "complete": 384,
+        "firstFrame": 664.1,
+        "stylesheetsAdded": 0,
+        "resources": 0,
+        "longTaskMs": 638
+      },
+      "coldLog": [
+        {
+          "at": 0,
+          "type": "app.launch.requested",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 0.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 0.2,
+          "type": "app.launch.started",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 0.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 0.3,
+          "type": "app.launch.authorised",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 0.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 0.6,
+          "type": "lifecycle.transition.requested",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 0.8,
+          "type": "app.lifecycle",
+          "stage": "preload",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 0.8,
+          "type": "app.lifecycle.transition",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 0.8,
+          "type": "bundle.load.begin",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 11.5,
+          "type": "policy.decision",
+          "appId": "documentStore.listPublished"
+        },
+        {
+          "at": 0.9,
+          "type": "resource",
+          "ms": 3.1,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/index.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 12.8,
+          "type": "resource",
+          "ms": 15.7,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Resources/styles.css",
+          "kind": "script"
+        },
+        {
+          "at": 12.8,
+          "type": "resource",
+          "ms": 15.9,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/GalleryApplication.ts",
+          "kind": "script"
+        },
+        {
+          "at": 12.8,
+          "type": "resource",
+          "ms": 16,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/GalleryWindowController.ts",
+          "kind": "script"
+        },
+        {
+          "at": 12.8,
+          "type": "resource",
+          "ms": 16.3,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/GalleryViewControllers.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 29.1,
+          "type": "resource",
+          "ms": 10.3,
+          "name": "/@id/__x00__virtual:syncloudos/app/com.syndromatic.nse-control-gallery?import",
+          "kind": "script"
+        },
+        {
+          "at": 29.1,
+          "type": "resource",
+          "ms": 10.5,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/routes.ts",
+          "kind": "script"
+        },
+        {
+          "at": 29.7,
+          "type": "resource",
+          "ms": 11,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Gallery/WeekendDays.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 29.8,
+          "type": "resource",
+          "ms": 12.8,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Gallery/ImageCarousel.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 29.8,
+          "type": "resource",
+          "ms": 13,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/GalleryViews.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 29.9,
+          "type": "resource",
+          "ms": 13.1,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/GalleryWindowExample.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 29.9,
+          "type": "resource",
+          "ms": 13.4,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Gallery/catalogue.ts",
+          "kind": "script"
+        },
+        {
+          "at": 29.9,
+          "type": "resource",
+          "ms": 13.6,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Gallery/navigation.ts",
+          "kind": "script"
+        },
+        {
+          "at": 29.9,
+          "type": "resource",
+          "ms": 13.7,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Resources/navigationAssets.ts",
+          "kind": "script"
+        },
+        {
+          "at": 29.9,
+          "type": "resource",
+          "ms": 13.7,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/GalleryTextImport.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 42.9,
+          "type": "resource",
+          "ms": 6.9,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Resources/softwareCoverFlow.ts",
+          "kind": "script"
+        },
+        {
+          "at": 43.6,
+          "type": "resource",
+          "ms": 7.3,
+          "name": "/node_modules/@syndromatic/syncloudos/nse/appearance.js?v=b3406c56",
+          "kind": "script"
+        },
+        {
+          "at": 43.6,
+          "type": "resource",
+          "ms": 7.9,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Gallery/GallerySourceList.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 43.7,
+          "type": "resource",
+          "ms": 8.3,
+          "name": "/node_modules/@syndromatic/syncloudos/nse/themes/atmo.js?v=b3406c56",
+          "kind": "script"
+        },
+        {
+          "at": 43.8,
+          "type": "resource",
+          "ms": 9,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Gallery/GallerySettings.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 43.8,
+          "type": "resource",
+          "ms": 9,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Gallery/sections.ts",
+          "kind": "script"
+        },
+        {
+          "at": 43.7,
+          "type": "resource",
+          "ms": 9.2,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Gallery/GalleryPrimitives.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 43.7,
+          "type": "resource",
+          "ms": 9.2,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Gallery/GalleryLocalisation.ts",
+          "kind": "script"
+        },
+        {
+          "at": 43.7,
+          "type": "resource",
+          "ms": 9.3,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Conformance/ConformanceSpecimen.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 44.2,
+          "type": "resource",
+          "ms": 8.7,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Resources/Navigation/home.svg?import",
+          "kind": "script"
+        },
+        {
+          "at": 44.3,
+          "type": "resource",
+          "ms": 8.7,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Resources/Navigation/library.svg?import",
+          "kind": "script"
+        },
+        {
+          "at": 44.3,
+          "type": "resource",
+          "ms": 8.8,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Resources/Navigation/search.svg?import",
+          "kind": "script"
+        },
+        {
+          "at": 44.3,
+          "type": "resource",
+          "ms": 8.8,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Resources/Navigation/settings.svg?import",
+          "kind": "script"
+        },
+        {
+          "at": 43.7,
+          "type": "resource",
+          "ms": 9.7,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Gallery/WindowSections.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 44.3,
+          "type": "resource",
+          "ms": 9.1,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Resources/Navigation/activity.svg?import",
+          "kind": "script"
+        },
+        {
+          "at": 44.3,
+          "type": "resource",
+          "ms": 9.5,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Resources/Navigation/sharing.svg?import",
+          "kind": "script"
+        },
+        {
+          "at": 50.2,
+          "type": "resource",
+          "ms": 5.8,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Resources/SoftwareCoverFlow/atmopad-weather.png?import",
+          "kind": "script"
+        },
+        {
+          "at": 50.2,
+          "type": "resource",
+          "ms": 6.1,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Resources/SoftwareCoverFlow/openxmb.png?import",
+          "kind": "script"
+        },
+        {
+          "at": 50.2,
+          "type": "resource",
+          "ms": 6.4,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Resources/SoftwareCoverFlow/synphone.png?import",
+          "kind": "script"
+        },
+        {
+          "at": 50.3,
+          "type": "resource",
+          "ms": 6.5,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Resources/SoftwareCoverFlow/synos-desktop.png?import",
+          "kind": "script"
+        },
+        {
+          "at": 50.3,
+          "type": "resource",
+          "ms": 6.4,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Resources/SoftwareCoverFlow/syncloudos.png?import",
+          "kind": "script"
+        },
+        {
+          "at": 53.6,
+          "type": "resource",
+          "ms": 13.6,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Gallery/InputSections.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 53.8,
+          "type": "resource",
+          "ms": 31.6,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Gallery/RuleSections.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 53.6,
+          "type": "resource",
+          "ms": 32.5,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Gallery/DateColourSections.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 53.8,
+          "type": "resource",
+          "ms": 32.1,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Gallery/TypographySection.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 53.6,
+          "type": "resource",
+          "ms": 32.7,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Gallery/FXCapabilitiesSection.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 53.8,
+          "type": "resource",
+          "ms": 32.3,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Gallery/StructureSections.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 53.8,
+          "type": "resource",
+          "ms": 32.7,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Gallery/MediaSections.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 54.8,
+          "type": "resource",
+          "ms": 31.6,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/GalleryAnimationSample.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 53.9,
+          "type": "resource",
+          "ms": 32.6,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Gallery/PresentationSections.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 54.9,
+          "type": "resource",
+          "ms": 32.1,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/ColourCalendarControls.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 54.9,
+          "type": "resource",
+          "ms": 32.2,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/StructuredDataViews.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 55,
+          "type": "resource",
+          "ms": 32.7,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Conformance/ConformanceSourceInspector.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 54.9,
+          "type": "resource",
+          "ms": 33,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Conformance/ConformanceCatalogue.ts",
+          "kind": "script"
+        },
+        {
+          "at": 54.9,
+          "type": "resource",
+          "ms": 37.1,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/TextTransferMedia.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 12.8,
+          "type": "resource",
+          "ms": 73.1,
+          "name": "/node_modules/@syndromatic/syncloudos/chronosphere/styles.css",
+          "kind": "script"
+        },
+        {
+          "at": 67.9,
+          "type": "resource",
+          "ms": 27,
+          "name": "/node_modules/@syndromatic/syncloudos/foundation.js?v=b3406c56",
+          "kind": "script"
+        },
+        {
+          "at": 86.2,
+          "type": "resource",
+          "ms": 8.3,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Gallery/GalleryList.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 86.6,
+          "type": "resource",
+          "ms": 8.1,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Gallery/RecordedFigure.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 86.6,
+          "type": "resource",
+          "ms": 8.4,
+          "name": "/@id/__x00__virtual:syncloudos/app/com.syndromatic.nse-control-gallery/fx/graphics",
+          "kind": "script"
+        },
+        {
+          "at": 87.6,
+          "type": "resource",
+          "ms": 7.8,
+          "name": "/@id/__x00__virtual:syncloudos/app/com.syndromatic.nse-control-gallery/fx/audio",
+          "kind": "script"
+        },
+        {
+          "at": 87.7,
+          "type": "resource",
+          "ms": 7.9,
+          "name": "/@id/__x00__virtual:syncloudos/app/com.syndromatic.nse-control-gallery/fx/crypto",
+          "kind": "script"
+        },
+        {
+          "at": 87.7,
+          "type": "resource",
+          "ms": 9.1,
+          "name": "/@id/__x00__virtual:syncloudos/app/com.syndromatic.nse-control-gallery/fx/compression",
+          "kind": "script"
+        },
+        {
+          "at": 87.8,
+          "type": "resource",
+          "ms": 9.9,
+          "name": "/@id/__x00__virtual:syncloudos/app/com.syndromatic.nse-control-gallery/fx/network",
+          "kind": "script"
+        },
+        {
+          "at": 87.7,
+          "type": "resource",
+          "ms": 11.7,
+          "name": "/@id/__x00__virtual:syncloudos/app/com.syndromatic.nse-control-gallery/fx/video",
+          "kind": "script"
+        },
+        {
+          "at": 87.8,
+          "type": "resource",
+          "ms": 11.6,
+          "name": "/@id/__x00__virtual:syncloudos/app/com.syndromatic.nse-control-gallery/fx/dispatch",
+          "kind": "script"
+        },
+        {
+          "at": 87.9,
+          "type": "resource",
+          "ms": 12.7,
+          "name": "/@id/__x00__virtual:syncloudos/app/com.syndromatic.nse-control-gallery/fx/speech",
+          "kind": "script"
+        },
+        {
+          "at": 87.9,
+          "type": "resource",
+          "ms": 13.3,
+          "name": "/@id/__x00__virtual:syncloudos/app/com.syndromatic.nse-control-gallery/fx/contacts",
+          "kind": "script"
+        },
+        {
+          "at": 87.9,
+          "type": "resource",
+          "ms": 13.4,
+          "name": "/@id/__x00__virtual:syncloudos/app/com.syndromatic.nse-control-gallery/fx/pass",
+          "kind": "script"
+        },
+        {
+          "at": 87.9,
+          "type": "resource",
+          "ms": 13.4,
+          "name": "/@id/__x00__virtual:syncloudos/app/com.syndromatic.nse-control-gallery/fx/nfc",
+          "kind": "script"
+        },
+        {
+          "at": 87.9,
+          "type": "resource",
+          "ms": 13.4,
+          "name": "/@id/__x00__virtual:syncloudos/app/com.syndromatic.nse-control-gallery/fx/xr",
+          "kind": "script"
+        },
+        {
+          "at": 87.9,
+          "type": "resource",
+          "ms": 13.4,
+          "name": "/@id/__x00__virtual:syncloudos/app/com.syndromatic.nse-control-gallery/fx/bluetooth",
+          "kind": "script"
+        },
+        {
+          "at": 88.2,
+          "type": "resource",
+          "ms": 13.6,
+          "name": "/node_modules/@syndromatic/syncloudos/nse/layout.js?v=b3406c56",
+          "kind": "script"
+        },
+        {
+          "at": 88.2,
+          "type": "resource",
+          "ms": 13.6,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Gallery/NavigationSpecimens.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 89,
+          "type": "resource",
+          "ms": 12.8,
+          "name": "/@id/__x00__virtual:syncloudos/app/com.syndromatic.nse-control-gallery/fx/image",
+          "kind": "script"
+        },
+        {
+          "at": 91.1,
+          "type": "resource",
+          "ms": 12.6,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Gallery/sampleHistory.ts",
+          "kind": "script"
+        },
+        {
+          "at": 95.6,
+          "type": "resource",
+          "ms": 9,
+          "name": "/@id/__x00__virtual:syncloudos/app/com.syndromatic.nse-control-gallery/fx/text",
+          "kind": "script"
+        },
+        {
+          "at": 95.6,
+          "type": "resource",
+          "ms": 9.6,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/FXLayerSpecimen.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 95.7,
+          "type": "resource",
+          "ms": 10.3,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/Info.ts",
+          "kind": "script"
+        },
+        {
+          "at": 95.7,
+          "type": "resource",
+          "ms": 10.2,
+          "name": "/src/SynWare/NSEControlGallery.app/Contents/FXTextSpecimen.tsx",
+          "kind": "script"
+        },
+        {
+          "at": 96.5,
+          "type": "resource",
+          "ms": 9.5,
+          "name": "/node_modules/@syndromatic/syncloudos/chunks/NSEPersonNameComponents-BFF1DWln.js?v=b3406c56",
+          "kind": "script"
+        },
+        {
+          "at": 96.5,
+          "type": "resource",
+          "ms": 9.7,
+          "name": "/node_modules/@syndromatic/syncloudos/fx/audio.js?v=b3406c56",
+          "kind": "script"
+        },
+        {
+          "at": 97,
+          "type": "resource",
+          "ms": 10,
+          "name": "/node_modules/@syndromatic/syncloudos/fx/compression.js?v=b3406c56",
+          "kind": "script"
+        },
+        {
+          "at": 98.4,
+          "type": "resource",
+          "ms": 9.4,
+          "name": "/node_modules/@syndromatic/syncloudos/fx/network.js?v=b3406c56",
+          "kind": "script"
+        },
+        {
+          "at": 99.7,
+          "type": "resource",
+          "ms": 8.1,
+          "name": "/node_modules/@syndromatic/syncloudos/fx/video.js?v=b3406c56",
+          "kind": "script"
+        },
+        {
+          "at": 100.8,
+          "type": "resource",
+          "ms": 7.2,
+          "name": "/node_modules/@syndromatic/syncloudos/fx/speech.js?v=b3406c56",
+          "kind": "script"
+        },
+        {
+          "at": 101.9,
+          "type": "resource",
+          "ms": 6.3,
+          "name": "/node_modules/@syndromatic/syncloudos/fx/contacts.js?v=b3406c56",
+          "kind": "script"
+        },
+        {
+          "at": 99.7,
+          "type": "resource",
+          "ms": 8.3,
+          "name": "/node_modules/@syndromatic/syncloudos/fx/dispatch.js?v=b3406c56",
+          "kind": "script"
+        },
+        {
+          "at": 102.1,
+          "type": "resource",
+          "ms": 6.3,
+          "name": "/node_modules/@syndromatic/syncloudos/fx/pass.js?v=b3406c56",
+          "kind": "script"
+        },
+        {
+          "at": 91,
+          "type": "resource",
+          "ms": 17.3,
+          "name": "/node_modules/@syndromatic/syncloudos/chronosphere.js?v=b3406c56",
+          "kind": "script"
+        },
+        {
+          "at": 102.1,
+          "type": "resource",
+          "ms": 6.6,
+          "name": "/node_modules/@syndromatic/syncloudos/fx/nfc.js?v=b3406c56",
+          "kind": "script"
+        },
+        {
+          "at": 102.2,
+          "type": "resource",
+          "ms": 6.4,
+          "name": "/node_modules/@syndromatic/syncloudos/fx/xr.js?v=b3406c56",
+          "kind": "script"
+        },
+        {
+          "at": 102.3,
+          "type": "resource",
+          "ms": 6.4,
+          "name": "/node_modules/@syndromatic/syncloudos/fx/bluetooth.js?v=b3406c56",
+          "kind": "script"
+        },
+        {
+          "at": 104.9,
+          "type": "resource",
+          "ms": 4.1,
+          "name": "/node_modules/@syndromatic/syncloudos/fx/text.js?v=b3406c56",
+          "kind": "script"
+        },
+        {
+          "at": 105.8,
+          "type": "resource",
+          "ms": 3.4,
+          "name": "/@id/__x00__virtual:syncloudos/app/com.syndromatic.nse-control-gallery/fx/animation",
+          "kind": "script"
+        },
+        {
+          "at": 96.5,
+          "type": "resource",
+          "ms": 12.7,
+          "name": "/node_modules/@syndromatic/syncloudos/fx/crypto.js?v=b3406c56",
+          "kind": "script"
+        },
+        {
+          "at": 108.7,
+          "type": "resource",
+          "ms": 1.8,
+          "name": "/node_modules/@syndromatic/syncloudos/chunks/PKFXContact-B5xW4O04.js?v=b3406c56",
+          "kind": "script"
+        },
+        {
+          "at": 52.2,
+          "type": "resource",
+          "ms": 77.7,
+          "name": "/node_modules/@syndromatic/syncloudos/assets/atmo-BFAb8SkO.css",
+          "kind": "script"
+        },
+        {
+          "at": 206.5,
+          "type": "stylesheet",
+          "name": "syncloudos/chronosphere/styles.css"
+        },
+        {
+          "at": 206.5,
+          "type": "stylesheet",
+          "name": "Contents/Resources/styles.css"
+        },
+        {
+          "at": 206.5,
+          "type": "stylesheet",
+          "name": "syncloudos/assets/atmo-BFAb8SkO.css"
+        },
+        {
+          "at": 206.7,
+          "type": "bundle.load.complete",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 206.8,
+          "type": "lifecycle.transition.requested",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 207,
+          "type": "app.lifecycle",
+          "stage": "preload",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 207,
+          "type": "app.lifecycle.transition",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 238.6,
+          "type": "policy.decision",
+          "appId": "documentStore.listPublished"
+        },
+        {
+          "at": 239.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 241,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 241.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 241.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 241.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 241.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 241.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 241.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 241.5,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 241.5,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 241.5,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 241.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 241.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 241.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 241.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 241.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 241.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 241.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 241.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 241.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 241.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 241.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 241.9,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 241.9,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 241.9,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 242,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 242,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 242.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 242.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 242.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 242.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 242.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 242.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 242.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 242.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 242.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 242.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 242.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 242.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 242.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 242.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 242.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 242.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 242.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 242.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 242.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 242.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 242.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 242.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 242.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 242.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 243.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 243.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 243.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 243.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 243.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 243.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 243.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 243.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 243.3,
+          "type": "app.lifecycle",
+          "stage": "launch",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 243.3,
+          "type": "statechart.transition.complete",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 243.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 243.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 243.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 243.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 243.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 243.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 243.5,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 243.5,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 254.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 745.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 745.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 745.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 745.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 745.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 745.5,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 745.5,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 745.5,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 745.5,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 745.5,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 745.5,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 745.5,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 745.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 745.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 745.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 745.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 745.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 746,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 746,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 746,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 746,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 746.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 746.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 746.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 746.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 746.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 746.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 746.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 746.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 746.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 746.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 746.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 746.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 750.7,
+          "type": "policy.decision",
+          "appId": "documentStore.listPublished"
+        },
+        {
+          "at": 754,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 754.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 754.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 754.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 754.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 754.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 754.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 754.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 754.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 754.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 754.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 754.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 754.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 754.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 754.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 754.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 754.5,
+          "type": "webspring.select",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 754.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 754.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 754.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 754.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 754.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 754.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 754.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 754.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 754.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 754.9,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 754.9,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 754.9,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 755,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 755,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 755,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 755,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 755.2,
+          "type": "webspring.hover",
+          "appId": "none"
+        },
+        {
+          "at": 755.8,
+          "type": "app.launch.complete",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 774,
+          "type": "policy.decision",
+          "appId": "documentStore.listPublished"
+        },
+        {
+          "at": 774.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 774.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 774.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 774.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 774.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 774.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 774.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 774.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 774.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 774.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 774.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 774.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 774.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 774.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 774.9,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 774.9,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 775.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 775.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 775.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 775.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 775.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 775.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 775.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 775.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 775.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 775.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 775.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 775.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 775.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 775.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 775.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 775.5,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 775.9,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 775.9,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 775.9,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 775.9,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 775.9,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 775.9,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 776,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 776,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 776,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 776,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 776.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 776.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 776.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 776.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 776.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 776.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 776.5,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 776.5,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 776.5,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 776.5,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 776.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 776.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 776.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 776.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 776.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 776.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 776.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 776.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 776.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 776.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 776.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 776.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 777,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 777,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 777,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 777,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 777.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 777.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 777.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 777.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 777.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 777.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 777.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 777.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 777.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 777.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 777.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 777.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 777.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 777.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 777.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 777.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 777.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 777.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 777.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 777.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 777.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 777.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 777.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 777.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 777.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 777.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 777.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 777.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 778.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 778.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 778.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 778.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 778.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 778.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 778.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 778.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 778.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 778.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 778.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 778.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 778.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 778.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 778.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 778.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 792.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 792.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 792.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 792.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 792.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 792.9,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 792.9,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 792.9,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 792.9,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 792.9,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 792.9,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 792.9,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 792.9,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 792.9,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 792.9,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 792.9,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 793.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 793.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 793.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 793.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 793.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 793.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 793.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 793.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 793.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 793.5,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 793.5,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 793.5,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 793.5,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 793.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 793.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 793.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 793.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 793.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 794,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 794,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 794,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 794,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 794,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 794,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 794,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 794,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 794,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 794,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 794,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 794.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 794.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 794.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 794.5,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 794.5,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 794.5,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 794.5,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 794.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 794.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 794.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 794.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 794.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 794.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 794.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 794.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 794.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 794.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 794.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 794.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 795.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 795.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 795.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 795.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 795.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 795.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 795.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 795.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 795.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 795.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 795.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 795.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 795.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 795.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 795.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 795.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 795.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 795.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 795.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 795.9,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 795.9,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 795.9,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 795.9,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 795.9,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 795.9,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 795.9,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 795.9,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 795.9,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 796,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 796,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 796,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 796.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 796.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 796.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 796.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 796.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 796.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 796.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 796.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 796.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 796.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 796.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 796.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 796.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 796.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 796.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 796.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 796.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 137.8,
+          "type": "longtask",
+          "ms": 659
+        },
+        {
+          "at": 797.7,
+          "type": "longtask",
+          "ms": 126
+        },
+        {
+          "at": 252.5,
+          "type": "resource",
+          "ms": 3.4,
+          "name": "/node_modules/@syndromatic/syncloudos/assets/header-endcap-right-BN5URN-3.png",
+          "kind": "css"
+        },
+        {
+          "at": 252.7,
+          "type": "resource",
+          "ms": 3.2,
+          "name": "/node_modules/@syndromatic/syncloudos/assets/header-middle-CWBOBlnr.png",
+          "kind": "css"
+        },
+        {
+          "at": 253.1,
+          "type": "resource",
+          "ms": 3,
+          "name": "/node_modules/@syndromatic/syncloudos/assets/header-endcap-left-e6RGACyh.png",
+          "kind": "css"
+        },
+        {
+          "at": 962.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 962.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 962.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 962.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 962.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 962.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 962.5,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 962.5,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 962.5,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 962.5,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 962.5,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 962.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 962.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 962.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 962.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 962.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 963.2,
+          "type": "app.launch.staged",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 1108.9,
+          "type": "policy.decision",
+          "appId": "documentStore.listPublished"
+        },
+        {
+          "at": 960.9,
+          "type": "longtask",
+          "ms": 209
+        },
+        {
+          "at": 2216.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 2216.1,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 2216.2,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 2216.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 2216.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 2216.3,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 2216.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 2216.4,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 2216.5,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 2216.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 2216.6,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 2216.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 2216.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 2216.7,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 2216.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 2216.8,
+          "type": "policy.decision",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 2217.7,
+          "type": "app.launch.covered",
+          "appId": "com.syndromatic.nse-control-gallery"
+        },
+        {
+          "at": 2275.1,
+          "type": "policy.decision",
+          "appId": "documentStore.listPublished"
+        },
+        {
+          "at": 2214.1,
+          "type": "longtask",
+          "ms": 104
+        }
+      ]
+    }
+  }
+}

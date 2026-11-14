@@ -69,7 +69,7 @@ describe("MotionFX shared privacy authorisation", () => {
     expect(manager.authorizationStatus).toBe("permission-required");
     expect(manager.capabilities.deviceMotion.state).toBe("permission-required");
     expect(fixture.adapter.requestAuthorization).not.toHaveBeenCalled();
-    expect(() => manager.startDeviceMotionUpdates({ referenceFrame: "relative" }, () => {})).toThrowError(DOMException);
+    expect(() => manager.startDeviceMotionUpdates({ referenceFrame: "xArbitraryZVertical" }, () => {})).toThrowError(DOMException);
     expect(fixture.listeners.size).toBe(0);
     manager.dispose();
   });
@@ -79,7 +79,7 @@ describe("MotionFX shared privacy authorisation", () => {
     expect(await manager.requestAuthorization()).toBe("available");
     expect(manager.authorizationStatus).toBe("available");
     const receive = vi.fn();
-    manager.startDeviceMotionUpdates({ referenceFrame: "relative" }, receive);
+    manager.startDeviceMotionUpdates({ referenceFrame: "xArbitraryZVertical" }, receive);
     fixture.emit(0);
     expect(receive).toHaveBeenCalledOnce();
     expect(manager.deviceMotion).not.toBeNull();

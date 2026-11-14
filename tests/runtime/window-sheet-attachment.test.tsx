@@ -173,3 +173,32 @@ it("presents a view controller as a centred modal window (presentAsModalWindow)"
   expect(presented.isDisposed).toBe(true);
   expect(content.presentedViewControllers).toEqual([]);
 });
+
+it("gives a full-size content view the whole sheet: no system title heading, still named and attached", async () => {
+  class Paper extends NSEViewController {
+    override title = "New Collection";
+    override sheetHasFullSizeContentView = true;
+    static override view = function PaperView() { return <div data-testid="paper">Paper</div>; };
+  }
+  class Content extends NSEViewController {
+    static override view = function ContentView({ controller }: { readonly controller: Content }) {
+      return <button onClick={() => { controller.presentAsSheet(Paper); }}>New…</button>;
+    };
+  }
+  class MainWindow extends NSEWindowController {
+    constructor() { super(); this.contentViewController = new Content(); }
+  }
+  class Application extends NSEApplication { static override mainWindow = MainWindow; }
+  const host = createClassApplicationHost(Application, "com.example.full-size-sheet");
+  hosts.push(host);
+  await host.launch();
+  host.mountWindows();
+  await act(async () => { await host.openMainWindow(); });
+  await act(async () => { fireEvent.click(await screen.findByRole("button", { name: "New…" })); });
+
+  const sheet = await screen.findByRole("dialog", { name: "New Collection" });
+  expect(sheet.hasAttribute("data-nse-full-size-content-view")).toBe(true);
+  expect(sheet.querySelector(".nse-sheet-title")).toBeNull();
+  expect(sheet.contains(screen.getByTestId("paper"))).toBe(true);
+  expect((sheet.closest(".nse-window-sheet-layer") as HTMLElement).dataset.sheetAttached).toBe("true");
+});

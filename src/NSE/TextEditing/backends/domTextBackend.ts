@@ -25,7 +25,7 @@ import { nseTextListPlugin } from "./domTextLists";
 import { nseAttachmentUpdateOperations, nseParagraphSpansInRange } from "../textStructureCommands";
 import type { NSEAttributedAttachmentRun, NSEAttributedTextAttributes } from "../../Text";
 import type { NSETextAttachmentResolver, NSETextFileDropHandler, NSETextFontResolver, NSETextResolvedFont } from "../textViewTypes";
-import { nseAttachmentNodeViews, type NSEAttachmentCellEditing } from "./attachmentCell";
+import { nseAttachmentNodeViews, type AttachmentCellEditing } from "./attachmentCell";
 import { keymap } from "@tiptap/pm/keymap";
 import { baseKeymap } from "@tiptap/pm/commands";
 import type { TextEditingSession } from "../TextEditingSession";
@@ -160,7 +160,7 @@ export function mountDOMTextBackend(host: HTMLElement, options: DOMTextBackendOp
       return structural(() => session.changeListLevel(-1, span.range));
     },
   };
-  const attachmentEditing: NSEAttachmentCellEditing = {
+  const attachmentEditing: AttachmentCellEditing = {
     editable: () => !disposed && session.getSnapshot().editable && !session.getSnapshot().disposed,
     resize(position, bounds, actionName) {
       if (!attachmentEditing.editable() || composing || session.getSnapshot().marked) return;

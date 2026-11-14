@@ -18,25 +18,25 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEViewSafeAreaContext, useNSEViewSafeArea } from "../Layout/useNSESafeArea";
+import { ViewSafeAreaContext, useNSEViewSafeArea } from "../Layout/useNSESafeArea";
 import type { NSEEdgeInsets } from "../Layout/NSEEdgeInsets";
 import { useCallback, useContext, useEffect, useId, useMemo, useRef, useState, type HTMLAttributes, type KeyboardEvent, type MouseEvent, type PointerEvent, type ReactNode, type Ref } from "react";
 import { NSEAppearanceProvider, useNSEAppearance } from "../Appearance/NSEAppearanceProvider";
 import type { NSEAppearance } from "../Appearance/NSEAppearance";
-import { useOptionalNSEOverlayProvider } from "../Overlays";
-import { NSEActionResponderContext } from "../Controls/Core/useNSEControlAction";
-import { NSEMenuView } from "../Menus/NSEMenuView";
+import { useOptionalOverlayProvider } from "../Overlays";
+import { ActionResponderContext } from "../Controls/Core/useNSEControlAction";
+import { MenuView } from "../Menus/MenuView";
 import type { NSEMenu } from "../Menus/NSEMenu";
-import { NSEMenuOverlay } from "../Menus/NSEMenuOverlay";
-import type { NSEMenuOverlayOptions } from "../Menus/menuTypes";
-import type { NSEOverlayAnchorPoint } from "../Overlays/computeNSEOverlayPosition";
+import { MenuOverlay } from "../Menus/MenuOverlay";
+import type { MenuOverlayOptions } from "../Menus/menuTypes";
+import type { OverlayAnchorPoint } from "../Overlays/computeOverlayPosition";
 import { GFXContext } from "../../FX/GraphicsFX/GFXContext";
 import type { GFXRect } from "../../FX/GraphicsFX/GFXGeometry";
 import { useIFXImageBox } from "../../FX/ImageFX/IFXImageViewport";
-import { NSEViewDrawingEnvironmentContext } from "./NSEViewDrawingEnvironment";
+import { ViewDrawingEnvironmentContext } from "./NSEViewDrawingEnvironment";
 import type { GFXIdentifierIssuer } from "../../FX/GraphicsFX/identifierAuthority";
-import { NSEViewDisplayList } from "./NSEViewDisplayList";
-import { useNSEViewLayerProperties, type NSEViewLayerProperties } from "./viewLayerProperties";
+import { ViewDisplayList } from "./NSEViewDisplayList";
+import { useNSEViewLayerProperties, type ViewLayerProperties } from "./viewLayerProperties";
 
 /** NSView.LayerContentsPlacement. Positional placements keep the content's natural size. */
 export type NSEViewLayerContentsPlacement = "scaleAxesIndependently" | "scaleProportionallyToFit" | "scaleProportionallyToFill"
@@ -47,7 +47,7 @@ const layerContentsPlacements: readonly NSEViewLayerContentsPlacement[] = [
   "right", "bottomRight", "bottom", "bottomLeft", "left", "topLeft",
 ];
 
-export interface NSEViewProps extends HTMLAttributes<HTMLDivElement>, NSEViewLayerProperties {
+export interface NSEViewProps extends HTMLAttributes<HTMLDivElement>, ViewLayerProperties {
   readonly additionalSafeAreaInsets?: NSEEdgeInsets;
   readonly onSafeAreaInsetsChange?: (insets: NSEEdgeInsets) => void;
   /** NSView.draw(_:). A React re-render redraws the whole bounds with a fresh recording context. */
@@ -62,7 +62,7 @@ export interface NSEViewProps extends HTMLAttributes<HTMLDivElement>, NSEViewLay
   /** NSView.toolTip. */
   readonly toolTip?: string;
   /** Overlay provenance for the menu, when the nearest responder is not its parent. */
-  readonly menuOverlay?: NSEMenuOverlayOptions;
+  readonly menuOverlay?: MenuOverlayOptions;
   /** How long a touch must rest before the menu opens. */
   readonly longPressDelayMs?: number;
   readonly direction?: "ltr" | "rtl";
@@ -76,10 +76,10 @@ export interface NSEViewProps extends HTMLAttributes<HTMLDivElement>, NSEViewLay
 
 /** NSView: a region of a window, with drawing, contextual menu, tooltip and appearance. */
 export function NSEView({ appearance, ...props }: NSEViewProps) {
-  return appearance ? <NSEViewAppearance appearance={appearance}><NSEViewContent {...props} /></NSEViewAppearance> : <NSEViewContent {...props} />;
+  return appearance ? <ViewAppearance appearance={appearance}><ViewContent {...props} /></ViewAppearance> : <ViewContent {...props} />;
 }
 
-function NSEViewContent({ additionalSafeAreaInsets, onSafeAreaInsetsChange, shadow, cornerRadius, cornerCurve, style, draw, layerContentsPlacement = "scaleProportionallyToFit", menu, toolTip, menuOverlay, longPressDelayMs = 600, direction = "ltr", children, ref, ...htmlAttributes }: NSEViewProps) {
+function ViewContent({ additionalSafeAreaInsets, onSafeAreaInsetsChange, shadow, cornerRadius, cornerCurve, style, draw, layerContentsPlacement = "scaleProportionallyToFit", menu, toolTip, menuOverlay, longPressDelayMs = 600, direction = "ltr", children, ref, ...htmlAttributes }: NSEViewProps) {
   const layer = useNSEViewLayerProperties({ shadow, cornerRadius, cornerCurve });
   const hostRef = useRef<HTMLDivElement>(null);
   const safeArea = useNSEViewSafeArea(hostRef, additionalSafeAreaInsets, onSafeAreaInsetsChange);
@@ -88,7 +88,7 @@ function NSEViewContent({ additionalSafeAreaInsets, onSafeAreaInsetsChange, shad
     if (typeof ref === "function") return ref(element);
     if (ref) ref.current = element;
   }, [ref]);
-  const environment = useContext(NSEViewDrawingEnvironmentContext);
+  const environment = useContext(ViewDrawingEnvironmentContext);
   if (draw && !environment) throw new Error("An NSEView with draw needs a SynCloudOSProvider.");
   // Without the runtime's geometry port (a test runtime, a server render) the view cannot measure its bounds, so it draws nothing, as it does at zero size.
   const draws = Boolean(draw);
@@ -96,24 +96,24 @@ function NSEViewContent({ additionalSafeAreaInsets, onSafeAreaInsetsChange, shad
   // Measure in the host component's layout effect, after its div ref is attached.
   const bounds = useIFXImageBox(hostRef, draws ? environment?.geometry ?? undefined : undefined, null, [draws, Boolean(menu)]);
   if (!layerContentsPlacements.includes(layerContentsPlacement)) throw new TypeError(`Unknown NSEView layerContentsPlacement ${String(layerContentsPlacement)}.`);
-  const content = <NSEViewSafeAreaContext.Provider value={safeArea.value}>
+  const content = <ViewSafeAreaContext.Provider value={safeArea.value}>
     {draw && identifiers && Number.isFinite(bounds.width) && Number.isFinite(bounds.height) && bounds.width > 0 && bounds.height > 0
-      ? <NSEViewDrawing draw={draw} bounds={bounds} identifiers={identifiers} placement={layerContentsPlacement} accessibility={htmlAttributes.role ? {} : {
+      ? <ViewDrawing draw={draw} bounds={bounds} identifiers={identifiers} placement={layerContentsPlacement} accessibility={htmlAttributes.role ? {} : {
         "aria-label": htmlAttributes["aria-label"], "aria-labelledby": htmlAttributes["aria-labelledby"],
         "aria-description": htmlAttributes["aria-description"], "aria-describedby": htmlAttributes["aria-describedby"],
       }} /> : null}
     {children}
-  </NSEViewSafeAreaContext.Provider>;
+  </ViewSafeAreaContext.Provider>;
   const attributes = { "data-nse-control": "view", "data-nse-part": "content", ...htmlAttributes, ...layer.attributes, style: { ...safeArea.properties, ...style, ...layer.style }, ref: attachHost, "data-nse-view-drawing": draw ? "" : undefined };
   if (!menu) return <div title={toolTip} {...attributes}>{content}</div>;
   return (
-    <NSEMenuHostView menu={menu} toolTip={toolTip} menuOverlay={menuOverlay} longPressDelayMs={longPressDelayMs} direction={direction} {...attributes}>
+    <MenuHostView menu={menu} toolTip={toolTip} menuOverlay={menuOverlay} longPressDelayMs={longPressDelayMs} direction={direction} {...attributes}>
       {content}
-    </NSEMenuHostView>
+    </MenuHostView>
   );
 }
 
-function NSEViewDrawing({ draw, bounds, identifiers, placement, accessibility }: {
+function ViewDrawing({ draw, bounds, identifiers, placement, accessibility }: {
   readonly draw: NonNullable<NSEViewProps["draw"]>;
   readonly bounds: { readonly width: number; readonly height: number };
   readonly identifiers: GFXIdentifierIssuer;
@@ -123,12 +123,12 @@ function NSEViewDrawing({ draw, bounds, identifiers, placement, accessibility }:
   const context = GFXContext.recording({ size: bounds, identifiers });
   draw(Object.freeze({ x: 0, y: 0, ...bounds }), context);
   return <div data-nse-part="image" data-nse-view-drawing-layer="">
-    <NSEViewDisplayList displayList={context.displayList} placement={placement} accessibility={accessibility} />
+    <ViewDisplayList displayList={context.displayList} placement={placement} accessibility={accessibility} />
   </div>;
 }
 
 /** The appearance boundary a view with its own appearance draws its subviews in. */
-function NSEViewAppearance({ appearance, children }: { readonly appearance: NSEAppearance; readonly children?: ReactNode }) {
+function ViewAppearance({ appearance, children }: { readonly appearance: NSEAppearance; readonly children?: ReactNode }) {
   const inherited = useNSEAppearance();
   const scheme = appearance.name === "darkAqua" ? "dark" : "light";
   return (
@@ -145,10 +145,10 @@ function NSEViewAppearance({ appearance, children }: { readonly appearance: NSEA
   );
 }
 
-function NSEMenuHostView({ menu, toolTip, menuOverlay, longPressDelayMs, direction, children, className, ref, ...htmlAttributes }: NSEViewProps & { readonly menu: NSEMenu }) {
+function MenuHostView({ menu, toolTip, menuOverlay, longPressDelayMs, direction, children, className, ref, ...htmlAttributes }: NSEViewProps & { readonly menu: NSEMenu }) {
   const [open, setOpen] = useState(false);
   // NSMenu.popUpContextMenu(_:with:for:): a pointer opens the menu at its location; the keyboard opens it on the view.
-  const [anchorPoint, setAnchorPoint] = useState<NSEOverlayAnchorPoint | null>(null);
+  const [anchorPoint, setAnchorPoint] = useState<OverlayAnchorPoint | null>(null);
   const hostRef = useRef<HTMLDivElement>(null);
   const attachHost = useCallback((element: HTMLDivElement | null) => {
     hostRef.current = element;
@@ -157,8 +157,8 @@ function NSEMenuHostView({ menu, toolTip, menuOverlay, longPressDelayMs, directi
   }, [ref]);
   const longPressRef = useRef<unknown | null>(null);
   const instanceId = useId();
-  const provider = useOptionalNSEOverlayProvider();
-  const nearestResponderId = useContext(NSEActionResponderContext);
+  const provider = useOptionalOverlayProvider();
+  const nearestResponderId = useContext(ActionResponderContext);
   const viewId = htmlAttributes.id ?? `nse-view-${menu.identifier}-${instanceId}`;
   if (!provider) throw new Error("An NSEView with a menu needs an NSEOverlayProvider.");
   const parentResponderId = menuOverlay?.parentResponderId ?? nearestResponderId ?? provider.defaultParentResponderId;
@@ -222,7 +222,7 @@ function NSEMenuHostView({ menu, toolTip, menuOverlay, longPressDelayMs, directi
       }}
     >
       {children}
-      <NSEMenuOverlay
+      <MenuOverlay
         overlay={overlay}
         controller={menu}
         open={open}
@@ -232,8 +232,8 @@ function NSEMenuHostView({ menu, toolTip, menuOverlay, longPressDelayMs, directi
         kind="context-menu"
         onOpenChange={(nextOpen) => setOpen(nextOpen)}
       >
-        <NSEMenuView model={menu.model} controller={menu} open={open} labelledBy={viewId} onOpenChange={setOpen} direction={direction} />
-      </NSEMenuOverlay>
+        <MenuView model={menu.model} controller={menu} open={open} labelledBy={viewId} onOpenChange={setOpen} direction={direction} />
+      </MenuOverlay>
     </div>
   );
 }

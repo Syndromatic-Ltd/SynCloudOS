@@ -33,8 +33,8 @@ import {
   type NSESplitViewPreferences,
 } from "../../../src/NSE/DataViews/Split";
 import { nseSplitViewLayout } from "../../../src/NSE/DataViews/Split/NSESplitViewController";
-import { NSESplitViewControllerView } from "../../../src/NSE/DataViews/Split/splitViewControllerView";
-import { NSEViewControllerView } from "../../../src/SynCloudOS/AppHosting/applicationHosting";
+import { SplitViewControllerView } from "../../../src/NSE/DataViews/Split/splitViewControllerView";
+import { ViewControllerView } from "../../../src/SynCloudOS/AppHosting/applicationHosting";
 import { createStaticPresentationTraits } from "../../fixtures/presentationTraits";
 import { defaultsFrom } from "../../fixtures/userDefaults";
 import { SourceListFrameProvider } from "../../../src/NSE/Navigation/SourceList/sourceListFrameContext";
@@ -100,7 +100,7 @@ describe("NSESplitViewController", () => {
   it("measures the controller wrapper when a custom split view does not render the default layout", () => {
     class CustomSplit extends NSESplitViewController { static override view = () => <p>Custom layout</p>; }
     const controller = new CustomSplit({ id: "controller-allocation", splitViewItems: [item("content", "Content", () => null)] });
-    render(<NSEViewControllerView controller={controller} />);
+    render(<ViewControllerView controller={controller} />);
     setWidth(controller, 1440);
     Object.defineProperty(controller.view.element, "clientWidth", { configurable: true, value: 430 });
     Object.defineProperty(controller.view.element, "clientHeight", { configurable: true, value: 700 });
@@ -112,7 +112,7 @@ describe("NSESplitViewController", () => {
   it.each(["default", "embedded", "strict"] as const)("lets the %s split renderer own valid inset bounds without competing wrapper measurements", (mode) => {
     let showDefault = true;
     class FramedSplit extends NSESplitViewController {
-      static override view = ({ controller }: { controller: NSESplitViewController }) => <section data-testid="custom-frame">{showDefault ? <NSESplitViewControllerView controller={controller} /> : <p>Custom layout only</p>}</section>;
+      static override view = ({ controller }: { controller: NSESplitViewController }) => <section data-testid="custom-frame">{showDefault ? <SplitViewControllerView controller={controller} /> : <p>Custom layout only</p>}</section>;
     }
     const Controller = mode === "default" ? NSESplitViewController : FramedSplit;
     const controller = new Controller({ id: `inset-${mode}`, splitViewItems: [item("content", "Content", () => <p>Editor</p>)] });
@@ -128,7 +128,7 @@ describe("NSESplitViewController", () => {
       observe(element: Element) { observations.set(element, this.callback); }
       disconnect() {}
     });
-    const content = () => <NSEViewControllerView controller={controller} />;
+    const content = () => <ViewControllerView controller={controller} />;
     try {
       const view = render(mode === "strict" ? <React.StrictMode>{content()}</React.StrictMode> : content());
       setWidth(controller, 1440);
@@ -182,7 +182,7 @@ describe("NSESplitViewController", () => {
       item("sidebar", "Sources", () => <p>Sources</p>, { behavior: "sidebar", minimumThickness: 208, maximumThickness: 460 }),
       item("content", "Content", () => <p>Content</p>, { minimumThickness: 320 }),
     ] });
-    render(<SourceListFrameProvider value={{ railWidth: 264, setRailWidth, setCompactNavigation, minWidth: 208, maxWidth: 460, defaultWidth: 264, railLabel: "Library", scheme: "light" }}><NSEViewControllerView controller={controller} /></SourceListFrameProvider>);
+    render(<SourceListFrameProvider value={{ railWidth: 264, setRailWidth, setCompactNavigation, minWidth: 208, maxWidth: 460, defaultWidth: 264, railLabel: "Library", scheme: "light" }}><ViewControllerView controller={controller} /></SourceListFrameProvider>);
     setWidth(controller, 900);
     const divider = screen.getByRole("separator");
     expect(divider.getAttribute("aria-valuenow")).toBe("264");
@@ -196,7 +196,7 @@ describe("NSESplitViewController", () => {
     const sidebar = item("sidebar", "Folders", () => <button onClick={() => controller.showDetail(detail.viewController)}>Open note</button>, { behavior: "sidebar", minimumThickness: 208 });
     const detail = item("detail", "Note", () => <input aria-label="Note text" defaultValue="Keep me" />, { minimumThickness: 320 });
     controller = new NSESplitViewController({ id: "compact-detail", splitViewItems: [sidebar, detail] });
-    render(<NSEViewControllerView controller={controller} />);
+    render(<ViewControllerView controller={controller} />);
     setWidth(controller, 390);
     expect(controller.compactItem).toBe(sidebar);
     const open = screen.getByRole("button", { name: "Open note" });
@@ -223,7 +223,7 @@ describe("NSESplitViewController", () => {
     const height = vi.spyOn(HTMLElement.prototype, "clientHeight", "get").mockImplementation(() => 700);
     vi.stubGlobal("ResizeObserver", class { constructor(callback: () => void) { resize = callback; } observe() {} disconnect() {} });
     try {
-      render(<NSEViewControllerView controller={controller} />);
+      render(<ViewControllerView controller={controller} />);
       setWidth(controller, 1440);
       expect(controller.snapshot.presentation).toBe("single-pane");
       widthValue = 900;
@@ -245,7 +245,7 @@ describe("NSESplitViewController", () => {
     const traits = { ...createStaticPresentationTraits({ width: 669, height: 867 }), viewportFeatures: { posture: "folded" as const, segments: [
       { x: 0, y: 0, width: 329, height: 867 }, { x: 340, y: 0, width: 329, height: 867 },
     ] } };
-    render(<div dir="rtl"><NSEViewControllerView controller={controller} /></div>);
+    render(<div dir="rtl"><ViewControllerView controller={controller} /></div>);
     act(() => controller[nseUpdateTraits]({ reducedMotion: false, presentation: traits }));
     expect(controller.snapshot.presentation).toBe("split");
     const split = document.querySelector('[data-book-regions="true"]');
@@ -366,7 +366,7 @@ describe("NSESplitViewController", () => {
     }
     const controller = inspectorSplit("keep-mounted", { content: () => <Pane name="content" />, inspector: () => <Pane name="inspector" /> });
     controller[nseSplitViewLayout].resize(900);
-    render(<NSEViewControllerView controller={controller} />);
+    render(<ViewControllerView controller={controller} />);
     fireEvent.click(screen.getByRole("button", { name: "inspector 0" }));
 
     setWidth(controller, 390);
@@ -401,7 +401,7 @@ describe("NSESplitViewController", () => {
         item("inspector", "Inspector", () => <p>Inspector</p>, { behavior: "inspector", minimumThickness: 200 }),
       ],
     });
-    render(<NSEViewControllerView controller={outer} />);
+    render(<ViewControllerView controller={outer} />);
     setWidth(outer, 390);
     setWidth(inner, 390);
     expect(outer.getSnapshot().presentation).toBe("single-pane");
@@ -414,7 +414,7 @@ describe("NSESplitViewController", () => {
     const activateSecret = vi.fn();
     const controller = inspectorSplit("denied", { content: () => <button type="button" onClick={activateSecret}>Secret action</button>, inspector: () => <p>Secret inspector</p> });
     controller[nseSplitViewLayout].resize(900);
-    render(<NSEViewControllerView controller={controller} />);
+    render(<ViewControllerView controller={controller} />);
     expect(screen.getByRole("button", { name: "Secret action" })).not.toBeNull();
     expect(screen.getByRole("separator")).not.toBeNull();
 
@@ -452,7 +452,7 @@ describe("NSESplitViewController", () => {
     });
     vi.stubGlobal("ResizeObserver", class { constructor(callback: () => void) { observed = callback; } observe() {} disconnect() {} });
     try {
-      render(<div dir="rtl"><NSEViewControllerView controller={controller} /></div>);
+      render(<div dir="rtl"><ViewControllerView controller={controller} /></div>);
       expect(controller.getSnapshot().availableSize).toBe(500);
       expect(thicknesses(controller)).toEqual([300, 200]);
       const divider = screen.getByRole("separator", { name: "Resize Canvas and Analysis" });
@@ -478,7 +478,7 @@ describe("NSESplitViewController", () => {
       ],
     });
     controller[nseSplitViewLayout].resize(900);
-    render(<NSEViewControllerView controller={controller} />);
+    render(<ViewControllerView controller={controller} />);
     expect(document.querySelector(".nse-split-view-sidebar > [data-pane-id=\"plots\"]")?.getAttribute("data-nse-part")).toBe("split-pane");
     expect(document.querySelector(".nse-split-view-main > [data-pane-id=\"slice\"]")?.getAttribute("data-nse-part")).toBe("split-pane");
     expect(document.querySelector("[data-pane-id=\"plots\"] [data-nse-view-controller]")?.textContent).toBe("Plots");

@@ -18,24 +18,24 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEWindowLayoutContext, NSEWindowLayoutModel } from "../../NSE/hostComposition";
+import { WindowLayoutContext, WindowLayoutModel } from "../../NSE/hostComposition";
 
 import React, { useCallback, useLayoutEffect, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { useNSEPresenceExiting, useNSEPresentation, type NSEPresentationSpec } from "../../NSE/Animation";
+import { useNSEPresenceExiting, useNSEPresentation, type PresentationSpec } from "../../NSE/Animation";
 import {
-  NSEControlRuntimeProvider,
-  NSEFocusPortProvider,
-  NSEOverlayProvider,
-  NSETooltipProvider,
-  NSEWindowSurfaceBridgeProvider,
-  NSEBorderlessWindowView,
-  NSEHUDWindowView,
-  NSEModalWindowView,
-  NSEPanelView,
-  NSEPopoverWindowView,
-  NSESheetView,
-  NSEStandardWindowView,
-  type NSEWindowHost,
+  ControlRuntimeProvider,
+  FocusPortProvider,
+  OverlayProvider,
+  TooltipProvider,
+  WindowSurfaceBridgeProvider,
+  BorderlessWindowView,
+  HUDWindowView,
+  ModalWindowView,
+  PanelView,
+  PopoverWindowView,
+  SheetView,
+  StandardWindowView,
+  type WindowViewRenderer,
   useNSEDeferredDisposal,
 } from "../../NSE/NSE";
 import {
@@ -72,14 +72,14 @@ export interface WindowHostProps {
   readonly onDiagnostic?: (diagnostic: WindowLayerDiagnostic) => void;
 }
 
-const viewByRole: Readonly<Record<WindowRole, NSEWindowHost>> = Object.freeze({
-  standard: NSEStandardWindowView,
-  panel: NSEPanelView,
-  hud: NSEHUDWindowView,
-  modal: NSEModalWindowView,
-  sheet: NSESheetView,
-  popover: NSEPopoverWindowView,
-  borderless: NSEBorderlessWindowView,
+const viewByRole: Readonly<Record<WindowRole, WindowViewRenderer>> = Object.freeze({
+  standard: StandardWindowView,
+  panel: PanelView,
+  hud: HUDWindowView,
+  modal: ModalWindowView,
+  sheet: SheetView,
+  popover: PopoverWindowView,
+  borderless: BorderlessWindowView,
 });
 
 /** A closing window dissolves over 0.16 s. */
@@ -90,7 +90,7 @@ const windowHostMotion = Object.freeze({
     duration: 0.16,
     timing: "linear",
     tracks: Object.freeze([Object.freeze({ keyPath: "opacity", values: Object.freeze([1, 0]) })]),
-  }) satisfies NSEPresentationSpec,
+  }) satisfies PresentationSpec,
 });
 const popoverWindowMotion = { exit: { duration: 0.15, timing: "linear", tracks: [{ keyPath: "opacity", values: [1, 1] }] } } satisfies Parameters<typeof useNSEPresentation>[1];
 
@@ -216,7 +216,7 @@ export function WindowHost({
     });
   }, [controller.id, geometryIsValid, invalidBounds, onDiagnostic]);
   const hostRef = useRef<HTMLDivElement>(null);
-  const layout = useMemo(() => new NSEWindowLayoutModel(), [controller.id]);
+  const layout = useMemo(() => new WindowLayoutModel(), [controller.id]);
   useNSEDeferredDisposal(layout);
   // A host with invalid geometry is omitted and reported, so it has no bounds to lay out against.
   useLayoutEffect(() => { layout.setLogicalScreenInsets(screen.safeAreaInsets, screen.layoutViewport); if (geometryIsValid) layout.setBounds(presentation.bounds); }, [layout, screen.safeAreaInsets, screen.layoutViewport, presentation.bounds, geometryIsValid]);
@@ -297,7 +297,7 @@ export function WindowHost({
     // The same provider as the open frame keeps the tree's shape, so the exit
     // keeps the mounted contents rather than remounting them empty.
     return (
-      <NSEWindowLayoutContext.Provider value={layout}>
+      <WindowLayoutContext.Provider value={layout}>
       <div
         ref={hostRef}
         className="webspring-window-host"
@@ -315,7 +315,7 @@ export function WindowHost({
           externallyManagedScope externallyManagedInert
         >{lastFrame.contents}</FocusScope> : lastFrame.contents}
       </div>
-      </NSEWindowLayoutContext.Provider>
+      </WindowLayoutContext.Provider>
     );
   }
 
@@ -355,21 +355,21 @@ export function WindowHost({
   const chromeSlotWanted = record.chromeMode === "custom" && !chromeFailed;
   const runtimeHostedContent = (
     <WindowChromeSlotContext.Provider value={chromeSlot}>
-      <NSEOverlayProvider
+      <OverlayProvider
         runtimePort={overlayPort}
         defaultParentResponderId={controller.windowResponderId}
         portalContainer={overlayLayerNode}
       >
-        <NSETooltipProvider>
-        <NSEControlRuntimeProvider port={controlPort}>
-          <NSEFocusPortProvider port={focusPort}>
+        <TooltipProvider>
+        <ControlRuntimeProvider port={controlPort}>
+          <FocusPortProvider port={focusPort}>
             {childTransientBridge ? (
-              <NSEWindowSurfaceBridgeProvider bridge={childTransientBridge}>{surfaceContent}</NSEWindowSurfaceBridgeProvider>
+              <WindowSurfaceBridgeProvider bridge={childTransientBridge}>{surfaceContent}</WindowSurfaceBridgeProvider>
             ) : surfaceContent}
-          </NSEFocusPortProvider>
-        </NSEControlRuntimeProvider>
-      </NSETooltipProvider>
-      </NSEOverlayProvider>
+          </FocusPortProvider>
+        </ControlRuntimeProvider>
+      </TooltipProvider>
+      </OverlayProvider>
     </WindowChromeSlotContext.Provider>
   );
   const view = popoverSurface ? runtimeHostedContent : (
@@ -414,7 +414,7 @@ export function WindowHost({
     ...(ownsPopoverFocus ? { popoverScope: { parentScopeId, parentResponderId: popoverSurface?.request.parentResponderId ?? parentResponderId } } : {}),
   };
   return (
-    <NSEWindowLayoutContext.Provider value={layout}>
+    <WindowLayoutContext.Provider value={layout}>
     {/* Exit fade only (no enter animation): a closing window dissolves instead
      * of cutting, so Quit-with-windows reads as one continuous exit rather
      * than a flash. NSEPresence in WindowLayer owns the unmount. */}
@@ -447,6 +447,6 @@ export function WindowHost({
         </FocusScope>
       ) : windowContents}
     </div>
-    </NSEWindowLayoutContext.Provider>
+    </WindowLayoutContext.Provider>
   );
 }

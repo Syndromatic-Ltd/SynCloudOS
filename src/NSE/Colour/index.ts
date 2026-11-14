@@ -20,7 +20,7 @@
 
 export * from "./ColourPanel";
 export * from "./Controls";
-export * from "./Pickers/NSEEyeDropperAdapter";
+export * from "./Pickers/eyeDropperAdapter";
 export * from "./Pickers/browserEyeDropper";
 export * from "./Transfer";
 import "./colour-controls.css";

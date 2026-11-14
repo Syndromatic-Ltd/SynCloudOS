@@ -22,11 +22,11 @@ import { useId, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import "./components.css";
 import "./nseSystemDialogs.css";
-import { NSEFocusScope } from "../Focus";
-import { NSEButton, nseButtonToneProps, type NSEButtonTone } from "../Controls/Buttons/NSEButton";
-import { NSEAlertSurface } from "./NSEAlertSurface";
-import { NSEAlertBackdrop } from "./NSEAlertBackdrop";
-import type { NSEOverlayPresentationSource } from "../Overlays/overlayRegion";
+import { FocusScope } from "../Focus";
+import { NSEButton, nseButtonToneProps, type ButtonTone } from "../Controls/Buttons/NSEButton";
+import { AlertSurface } from "./NSEAlertSurface";
+import { AlertBackdrop } from "./NSEAlertBackdrop";
+import type { OverlayPresentationSource } from "../Overlays/overlayRegion";
 import { useNSEAppearance } from "../Appearance";
 
 /** A system dialog takes the host's light or dark appearance unless told otherwise. */
@@ -46,7 +46,7 @@ function useSystemDialogAppearance(appearance: "dark" | "light" | undefined): "d
  * rewritten per dialog.
  */
 
-export interface NSEAboutInfo {
+export interface AboutInfo {
   /** CFBundleName equivalent. */
   name: string;
   /** CFBundleIconFile equivalent. */
@@ -64,9 +64,9 @@ export interface NSEAboutInfo {
 }
 
 export interface NSEAboutDialogProps {
-  readonly presentation?: NSEOverlayPresentationSource;
+  readonly presentation?: OverlayPresentationSource;
   open: boolean;
-  info: NSEAboutInfo;
+  info: AboutInfo;
   /** Runtime hosts can provide a stable logical scope identity. */
   focusScopeId?: string;
   /** Defaults to "OK"; pass the localised string. */
@@ -77,7 +77,7 @@ export interface NSEAboutDialogProps {
   onDismiss: () => void;
 }
 
-export function NSEAboutDialog({
+export function AboutDialog({
   presentation,
   open,
   info,
@@ -98,9 +98,9 @@ export function NSEAboutDialog({
     : `Version ${info.version}${info.build ? ` (${info.build})` : ""}`;
 
   return createPortal(
-    <NSEFocusScope options={{ scopeId: focusScopeId ?? `nse-system-about:${titleId}`, kind: "modal", modal: true, trapFocus: true, asChild: true }}>
-    <NSEAlertBackdrop presentation={presentation} onSafeDismiss={onDismiss}>
-      <NSEAlertSurface
+    <FocusScope options={{ scopeId: focusScopeId ?? `nse-system-about:${titleId}`, kind: "modal", modal: true, trapFocus: true, asChild: true }}>
+    <AlertBackdrop presentation={presentation} onSafeDismiss={onDismiss}>
+      <AlertSurface
         appearance={appearance}
         role="dialog"
         data-nse-control="panel" data-nse-style="about" className="nse-about-dialog"
@@ -133,15 +133,15 @@ export function NSEAboutDialog({
             onClick={onDismiss}
           />
         </div>
-      </NSEAlertSurface>
-    </NSEAlertBackdrop>
-    </NSEFocusScope>,
+      </AlertSurface>
+    </AlertBackdrop>
+    </FocusScope>,
     document.body
   );
 }
 
 export interface NSEConfirmDialogProps {
-  readonly presentation?: NSEOverlayPresentationSource;
+  readonly presentation?: OverlayPresentationSource;
   open: boolean;
   /** Runtime hosts can provide a stable logical scope identity. */
   focusScopeId?: string;
@@ -151,7 +151,7 @@ export interface NSEConfirmDialogProps {
   /** The confirmation choice; defaults to the destructive negative tone. */
   confirmLabel: string;
   /** Non-destructive handoffs can retain their normal action tone. */
-  confirmTone?: NSEButtonTone;
+  confirmTone?: ButtonTone;
   cancelLabel: string;
   /** Defaults to the host's resolved light or dark appearance. */
   appearance?: "dark" | "light";
@@ -182,9 +182,9 @@ export function NSEConfirmDialog({
   return createPortal(
     // Escape and a backdrop click both CANCEL, never confirm — the safe choice
     // is the one that happens by accident.
-    <NSEFocusScope options={{ scopeId: focusScopeId ?? `nse-system-confirm:${titleId}`, kind: "modal", modal: true, trapFocus: true, asChild: true }}>
-    <NSEAlertBackdrop presentation={presentation} onSafeDismiss={onCancel}>
-      <NSEAlertSurface
+    <FocusScope options={{ scopeId: focusScopeId ?? `nse-system-confirm:${titleId}`, kind: "modal", modal: true, trapFocus: true, asChild: true }}>
+    <AlertBackdrop presentation={presentation} onSafeDismiss={onCancel}>
+      <AlertSurface
         appearance={appearance}
         labelledBy={titleId}
         describedBy={message ? messageId : undefined}
@@ -212,9 +212,9 @@ export function NSEConfirmDialog({
             onClick={onCancel}
           />
         </div>
-      </NSEAlertSurface>
-    </NSEAlertBackdrop>
-    </NSEFocusScope>,
+      </AlertSurface>
+    </AlertBackdrop>
+    </FocusScope>,
     document.body
   );
 }

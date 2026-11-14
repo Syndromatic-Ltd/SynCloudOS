@@ -20,10 +20,10 @@
 
 import type {
   NSEToolbarItem,
-  NSEToolbarLayout,
-  NSEToolbarLayoutEntry,
-  NSEToolbarLayoutOptions,
-  NSEToolbarPresentedItem,
+  ToolbarLayout,
+  ToolbarLayoutEntry,
+  ToolbarLayoutOptions,
+  ToolbarPresentedItem,
 } from "./toolbarTypes";
 
 // Reserve the 10x15 glyph inside a 20px toolbar
@@ -36,8 +36,8 @@ function finiteWidth(width: number): number {
 }
 
 function commandWidth(
-  item: Extract<NSEToolbarItem | NSEToolbarPresentedItem, { readonly kind: "command" }>,
-  options: NSEToolbarLayoutOptions,
+  item: Extract<NSEToolbarItem | ToolbarPresentedItem, { readonly kind: "command" }>,
+  options: ToolbarLayoutOptions,
 ): number {
   const minimum = finiteWidth(item.minimumWidth ?? 32);
   const ideal = finiteWidth(item.idealWidth ?? minimum);
@@ -46,7 +46,7 @@ function commandWidth(
   return Math.max(minimum, ideal);
 }
 
-function entryWidth(item: NSEToolbarPresentedItem, options: NSEToolbarLayoutOptions): number {
+function entryWidth(item: ToolbarPresentedItem, options: ToolbarLayoutOptions): number {
   if (item.kind === "command") return commandWidth(item, options);
   if (item.kind === "custom") return Math.max(item.minimumWidth, item.idealWidth);
   if (item.kind === "space") return item.width;
@@ -54,23 +54,23 @@ function entryWidth(item: NSEToolbarPresentedItem, options: NSEToolbarLayoutOpti
   return separatorWidth;
 }
 
-function isOverflowable(item: NSEToolbarPresentedItem): boolean {
+function isOverflowable(item: ToolbarPresentedItem): boolean {
   return item.kind === "command" || item.kind === "custom";
 }
 
-function isTrailingStructure(item: NSEToolbarPresentedItem): boolean {
+function isTrailingStructure(item: ToolbarPresentedItem): boolean {
   return item.kind === "space" || item.kind === "flexible-space" || item.kind === "separator";
 }
 
-function sum(entries: readonly NSEToolbarLayoutEntry[]): number {
+function sum(entries: readonly ToolbarLayoutEntry[]): number {
   return entries.reduce((total, entry) => total + entry.allocatedWidth, 0);
 }
 
-function freezeEntries(entries: readonly NSEToolbarLayoutEntry[]): readonly NSEToolbarLayoutEntry[] {
+function freezeEntries(entries: readonly ToolbarLayoutEntry[]): readonly ToolbarLayoutEntry[] {
   return Object.freeze(entries.map((entry) => Object.freeze({ ...entry })));
 }
 
-function makeEntries(items: readonly NSEToolbarPresentedItem[], options: NSEToolbarLayoutOptions): NSEToolbarLayoutEntry[] {
+function makeEntries(items: readonly ToolbarPresentedItem[], options: ToolbarLayoutOptions): ToolbarLayoutEntry[] {
   return items.map((item) => ({
     id: item.id,
     instanceId: item.instanceId,
@@ -80,7 +80,7 @@ function makeEntries(items: readonly NSEToolbarPresentedItem[], options: NSETool
   }));
 }
 
-function removeTrailingStructure(entries: NSEToolbarLayoutEntry[]): void {
+function removeTrailingStructure(entries: ToolbarLayoutEntry[]): void {
   while (entries.length > 0 && isTrailingStructure(entries[entries.length - 1]!.item)) entries.pop();
 }
 
@@ -90,17 +90,17 @@ function removeTrailingStructure(entries: NSEToolbarLayoutEntry[]): void {
  * renderer mirrors the visual flex direction for RTL rather than mutating the
  * command/persistence ordering.
  */
-export function allocateNSEToolbarItems(
-  items: readonly (NSEToolbarPresentedItem | NSEToolbarItem)[],
+export function allocateToolbarItems(
+  items: readonly (ToolbarPresentedItem | NSEToolbarItem)[],
   availableWidth: number,
-  options: NSEToolbarLayoutOptions,
-): NSEToolbarLayout {
+  options: ToolbarLayoutOptions,
+): ToolbarLayout {
   const width = finiteWidth(availableWidth);
-  const presented: NSEToolbarPresentedItem[] = items.map((item, index) => toPresented(item, index));
+  const presented: ToolbarPresentedItem[] = items.map((item, index) => toPresented(item, index));
   const candidates = makeEntries(presented, options);
   const idealWidth = sum(candidates);
   let visible = [...candidates];
-  const overflow: NSEToolbarLayoutEntry[] = [];
+  const overflow: ToolbarLayoutEntry[] = [];
   let clipped = false;
 
   if (idealWidth > width) {
@@ -148,7 +148,7 @@ export function allocateNSEToolbarItems(
   });
 }
 
-function toPresented(item: NSEToolbarPresentedItem | NSEToolbarItem, index: number): NSEToolbarPresentedItem {
+function toPresented(item: ToolbarPresentedItem | NSEToolbarItem, index: number): ToolbarPresentedItem {
   if ("instanceId" in item) return item;
   const instanceId = `${item.id}:${index}`;
   if (item.kind === "command") return {

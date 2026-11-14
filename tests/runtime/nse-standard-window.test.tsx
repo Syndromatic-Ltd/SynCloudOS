@@ -26,7 +26,7 @@ import React from "react";
 import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { WindowPresentation, WindowRecord } from "../../src/SynCloudOS/Windows";
-import { NSEStandardWindowView } from "../../src/NSE/Windows";
+import { StandardWindowView } from "../../src/NSE/Windows";
 import { standardWindow } from "../fixtures/windowTestDependencies";
 
 const windowCSS = withoutScopeTwins(readFileSync("src/NSE/Windows/nse-windows.css", "utf8"));
@@ -66,9 +66,9 @@ describe("NSEStandardWindowView", () => {
   it("renders real labelled controls and keeps Webspring return separate", () => {
     const props = standardWindowViewProps();
     render(
-      <NSEStandardWindowView {...props}>
+      <StandardWindowView {...props}>
         <p>Diagnostics content</p>
-      </NSEStandardWindowView>,
+      </StandardWindowView>,
     );
 
     fireEvent.click(screen.getByRole("button", { name: "Close Diagnostics" }));
@@ -86,9 +86,9 @@ describe("NSEStandardWindowView", () => {
   it("emits the complete root semantic contract and native blocked state", () => {
     const props = standardWindowViewProps({ isKey: false, isMain: true, level: "floating" });
     render(
-      <NSEStandardWindowView {...props} blocked dirty>
+      <StandardWindowView {...props} blocked dirty>
         <p>Content</p>
-      </NSEStandardWindowView>,
+      </StandardWindowView>,
     );
 
     const dialog = screen.getByRole("dialog", { name: "Diagnostics", hidden: true });
@@ -112,7 +112,7 @@ describe("NSEStandardWindowView", () => {
 
   it("publishes inactive, unsaved and highlighted control recipes without replacing controls", () => {
     const props = standardWindowViewProps({ isKey: false });
-    render(<NSEStandardWindowView {...props} dirty><p>Content</p></NSEStandardWindowView>);
+    render(<StandardWindowView {...props} dirty><p>Content</p></StandardWindowView>);
     const close = screen.getByRole("button", { name: "Close Diagnostics" });
 
     expect(close.getAttribute("data-window-control")).toBe("close");
@@ -129,12 +129,12 @@ describe("NSEStandardWindowView", () => {
     const props = standardWindowViewProps();
     const onPointerDown = vi.fn();
     const { container, rerender } = render(
-      <NSEStandardWindowView
+      <StandardWindowView
         {...props}
         resizeHandleProps={{ "block-end-inline-end": { onPointerDown } }}
       >
         <p>Content</p>
-      </NSEStandardWindowView>,
+      </StandardWindowView>,
     );
     const handle = container.querySelector('[data-window-resize-edge="block-end-inline-end"]');
     expect(handle).not.toBeNull();
@@ -142,13 +142,13 @@ describe("NSEStandardWindowView", () => {
     expect(onPointerDown).toHaveBeenCalledTimes(1);
 
     rerender(
-      <NSEStandardWindowView
+      <StandardWindowView
         {...props}
         presentation={{ ...props.presentation, kind: "mobile-fullscreen", resizable: false }}
         resizeHandleProps={{ "block-end-inline-end": { onPointerDown } }}
       >
         <p>Content</p>
-      </NSEStandardWindowView>,
+      </StandardWindowView>,
     );
     expect(container.querySelector("[data-window-resize-edge]")).toBeNull();
   });
@@ -162,7 +162,7 @@ describe("NSEStandardWindowView", () => {
   });
   it("paints system chrome when customChromeActive is omitted even if chromeMode is custom", () => {
     const props = standardWindowViewProps({ chromeMode: "custom" });
-    const { container } = render(<NSEStandardWindowView {...props}><p>Content</p></NSEStandardWindowView>);
+    const { container } = render(<StandardWindowView {...props}><p>Content</p></StandardWindowView>);
     const section = container.querySelector(".nse-window-view");
     expect(section?.getAttribute("data-window-chrome-mode")).toBe("custom");
     expect(section?.getAttribute("data-window-custom-chrome-active")).toBe("false");
@@ -172,7 +172,7 @@ describe("NSEStandardWindowView", () => {
 
   it("keeps concrete appearance identity on the surrounding NSE appearance boundary", () => {
     const props = standardWindowViewProps();
-    const { container } = render(<NSEStandardWindowView {...props}><p>Content</p></NSEStandardWindowView>);
+    const { container } = render(<StandardWindowView {...props}><p>Content</p></StandardWindowView>);
     expect(container.querySelector(".nse-window-view")?.hasAttribute("data-window-chrome-appearance")).toBe(false);
     expect(container.querySelector(".nse-window__titlebar")).not.toBeNull();
   });
@@ -184,15 +184,15 @@ describe("NSEStandardWindowView", () => {
     Object.defineProperty(HTMLElement.prototype, "offsetHeight", { configurable: true, get: () => 220 });
     try {
       const closed = standardWindowViewProps({ state: "closed", smoothSurface: { radius: 12 } });
-      const { container, rerender } = render(<NSEStandardWindowView {...closed}><p>Content</p></NSEStandardWindowView>);
+      const { container, rerender } = render(<StandardWindowView {...closed}><p>Content</p></StandardWindowView>);
       expect(container.querySelector(".nse-window__surface")).toBeNull();
       const opened = standardWindowViewProps({ state: "open", smoothSurface: { radius: 12 } });
-      rerender(<NSEStandardWindowView {...opened}><p>Content</p></NSEStandardWindowView>);
+      rerender(<StandardWindowView {...opened}><p>Content</p></StandardWindowView>);
       await waitFor(() => expect(container.querySelector<HTMLElement>(".nse-window__surface")?.dataset.nseSmoothSurfaceState).toBe("ready"));
       const surface = container.querySelector<HTMLElement>(".nse-window__surface")!;
       expect(surface.style.clipPath).toContain("path(");
       const disabled = standardWindowViewProps({ state: "open", smoothSurface: "off" });
-      rerender(<NSEStandardWindowView {...disabled}><p>Content</p></NSEStandardWindowView>);
+      rerender(<StandardWindowView {...disabled}><p>Content</p></StandardWindowView>);
       await waitFor(() => expect(surface.hasAttribute("data-nse-smooth-surface-state")).toBe(false));
       expect(surface.style.clipPath).toBe("");
     } finally {
@@ -217,7 +217,7 @@ describe("NSEStandardWindowView", () => {
 
     try {
       const first = standardWindowViewProps({ smoothSurface: { radius: 6 } });
-      const { container, rerender } = render(<NSEStandardWindowView {...first}><p>Content</p></NSEStandardWindowView>);
+      const { container, rerender } = render(<StandardWindowView {...first}><p>Content</p></StandardWindowView>);
       const surface = container.querySelector<HTMLElement>(".nse-window__surface")!;
       expect(scheduled).toHaveLength(1);
       act(() => scheduled.shift()!(0));
@@ -225,7 +225,7 @@ describe("NSEStandardWindowView", () => {
       expect(firstClip).toContain("path(");
 
       const changed = standardWindowViewProps({ smoothSurface: { radius: 18 } });
-      rerender(<NSEStandardWindowView {...changed}><p>Content</p></NSEStandardWindowView>);
+      rerender(<StandardWindowView {...changed}><p>Content</p></StandardWindowView>);
 
       expect(surface.style.clipPath).toBe(firstClip);
       expect(surface.dataset.nseSmoothSurfaceState).toBe("pending");

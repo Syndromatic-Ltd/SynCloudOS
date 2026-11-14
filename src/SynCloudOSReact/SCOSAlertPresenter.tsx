@@ -1,7 +1,7 @@
 /* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
 import { useId, useSyncExternalStore } from "react";
-import { NSEAlertSurface } from "../NSE/hostComposition";
-import { NSEAlertBackdrop } from "../NSE/hostComposition";
+import { AlertSurface } from "../NSE/hostComposition";
+import { AlertBackdrop } from "../NSE/hostComposition";
 import { NSEButton } from "../NSE/public/controls";
 import type { SynCloudOSPresentationTraitsService } from "../SynCloudOS/SynCloudOS";
 import type { SynCloudOSAlertCenter } from "../SynCloudOS/SystemUI/alertCenter";
@@ -23,8 +23,8 @@ export function SCOSAlertPresenter({ center, appearance: requestedAppearance, pr
   if (!current) return null;
   const primary = current.buttons.find(button => button.role === "default" || button.role === "destructive") ?? current.buttons[0];
   return <FocusScope asChild key={current.id} scopeId={`scos-alert:${current.id}`} kind="modal" parentResponderId="runtime" trapFocus>
-    <NSEAlertBackdrop presentation={presentation} onSafeDismiss={() => center.dismiss(current.id)}>
-      <NSEAlertSurface appearance={appearance} labelledBy={titleId} describedBy={current.message ? messageId : undefined} initialFocusSelector="[data-scos-alert-primary]">
+    <AlertBackdrop presentation={presentation} onSafeDismiss={() => center.dismiss(current.id)}>
+      <AlertSurface appearance={appearance} labelledBy={titleId} describedBy={current.message ? messageId : undefined} initialFocusSelector="[data-scos-alert-primary]">
         {/* Without an icon the copy would otherwise sit in the alert's fixed icon column. */}
         <div data-nse-part="content" className={`nse-system-alert-content${current.iconUrl ? "" : " nse-confirm-content-textonly"}`}>
           {current.iconUrl ? <img data-nse-part="image" className="syncloudos-alert-logo" src={current.iconUrl} alt="" /> : null}
@@ -45,7 +45,7 @@ export function SCOSAlertPresenter({ center, appearance: requestedAppearance, pr
             onClick={() => center.dismiss(current.id, button.id)}
           />)}
         </div>
-      </NSEAlertSurface>
-    </NSEAlertBackdrop>
+      </AlertSurface>
+    </AlertBackdrop>
   </FocusScope>;
 }

@@ -19,7 +19,7 @@
  */
 
 import React, { useEffect, useRef, useSyncExternalStore } from "react";
-import { NSEPresence } from "../../NSE/Animation";
+import { Presence } from "../../NSE/Animation";
 import { useNSEAppearanceProjection } from "../../NSE/Appearance";
 import { useKernelSynCloudOS } from "../../SynCloudOSReact";
 import { WindowHost, type WindowLayerDiagnostic } from "./WindowHost";
@@ -156,7 +156,7 @@ export function WindowLayer({ contentRegistry, onDiagnostic }: WindowLayerProps)
           onPointerDown={(event) => event.stopPropagation()}
         />
       ) : null}
-      <NSEPresence>
+      <Presence>
         {managerSnapshot.windowControllerIds.map((windowControllerId) => (
           <WindowHost
             key={windowControllerId}
@@ -169,7 +169,7 @@ export function WindowLayer({ contentRegistry, onDiagnostic }: WindowLayerProps)
             onDiagnostic={onDiagnostic}
           />
         ))}
-      </NSEPresence>
+      </Presence>
     </div>
   );
 }

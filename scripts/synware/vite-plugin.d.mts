@@ -38,6 +38,11 @@ export interface SynCloudOSViteOptions {
   webspringEntry?: string | false;
   /** Default-exported FontDeclaration; resource paths resolve beside this module. */
   typography?: string;
+  /** DispatchFX closure-conversion build options. */
+  dispatch?: {
+    /** Turn non-sendable closure diagnostics into build errors. */
+    strict?: boolean;
+  };
 }
 
 /** Discover site-owned bundles and serve installed package workers and artwork. */

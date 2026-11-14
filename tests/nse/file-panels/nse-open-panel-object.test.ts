@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEOpenPanel } from "../../../src/NSE/FilePanels/NSEOpenPanel";
-import { registerNSEOpenPanelHost, type NSEOpenPanelHost } from "../../../src/NSE/FilePanels/openPanelHost";
+import { registerNSEOpenPanelHost, type OpenPanelHost } from "../../../src/NSE/FilePanels/openPanelHost";
 import { NSEModalResponse } from "../../../src/NSE/Application/NSEAlert";
 import type { NSEWindow } from "../../../src/NSE/Application/NSEWindowController";
 
@@ -12,7 +12,7 @@ function host() {
     hasTransientUserActivation: () => true, compact: () => false, frame: () => ({ x: 100, y: 80, width: 1000, height: 720 }), focusedElement: () => null,
     fileSystem: { capabilities: () => ({ folders: true, applicationStorage: false }) } as any,
     bridge: { present: vi.fn(async () => "window:panel"), dismiss: vi.fn(async () => ({ outcome: "closed" as const })) },
-  } satisfies NSEOpenPanelHost;
+  } satisfies OpenPanelHost;
   cleanup.push(registerNSEOpenPanelHost(result)); return result;
 }
 describe("NSEOpenPanel object", () => {

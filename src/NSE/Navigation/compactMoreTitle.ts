@@ -6,13 +6,13 @@ import { nsePresentWindowTitle, type NSEWindow } from "../Application/NSEWindowC
 const noSubscription = () => () => {};
 
 /** @internal Localisation supplied by the owning host, without an application SDK dependency. */
-interface NSELocalisationPort {
+interface LocalisationPort {
   getSnapshot(): unknown;
   subscribe(listener: () => void): () => void;
   t(key: string): string;
 }
-const LocalisationContext = createContext<NSELocalisationPort | null>(null);
-export const NSELocalisationProvider = LocalisationContext.Provider;
+const LocalisationContext = createContext<LocalisationPort | null>(null);
+export const LocalisationProvider = LocalisationContext.Provider;
 
 /** @internal System navigation text uses the framework dictionary, never an app-owned title. */
 export function useNSEMoreTitle(): string {

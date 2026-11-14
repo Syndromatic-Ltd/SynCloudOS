@@ -1,4 +1,4 @@
-import { useNSEValueBinding, type NSEValueBindingControlProps } from "../Core/useNSEValueBinding";
+import { useNSEValueBinding, type ValueBindingControlProps } from "../Core/useNSEValueBinding";
 import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
 /*
  * SynCloudOS
@@ -56,10 +56,10 @@ function numericContract(options: NumericStepperOptions): NSEStepperValueContrac
 }
 
 export function NSEStepper<T = number>(props: NSEBoundValueProps<T, NSEStepperProps<T>, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>) {
-  return <NSEStepperControl {...useNSEValueBinding<T, NSEStepperProps<T>, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>(props, {fallback:0 as T,cancellable:true})} />;
+  return <StepperControl {...useNSEValueBinding<T, NSEStepperProps<T>, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>(props, {fallback:0 as T,cancellable:true})} />;
 }
 
-function NSEStepperControl<T = number>(props: NSEStepperProps<T> & NSEValueBindingControlProps<T>) {
+function StepperControl<T = number>(props: NSEStepperProps<T> & ValueBindingControlProps<T>) {
   const theme = useNSEThemeInteraction<HTMLSpanElement>(props.isEnabled !== false);
   const bezel = useRef<HTMLSpanElement>(null);
   const runtime = useOptionalNSEControlRuntimePort();

@@ -20,22 +20,22 @@
 
 import { nseSmoothSurfaceRadiusTokens } from "./smoothSurfaceTokens";
 import type {
-  NSESmoothSurfaceCorner,
-  NSESmoothSurfaceCurve,
-  NSESmoothSurfaceOptions,
-  NSESmoothSurfaceRadius,
-  NSESmoothSurfaceResolvedCorner,
-  NSESmoothSurfaceResolvedCorners
+  SmoothSurfaceCorner,
+  SmoothSurfaceCurve,
+  SmoothSurfaceOptions,
+  SmoothSurfaceRadius,
+  SmoothSurfaceResolvedCorner,
+  SmoothSurfaceResolvedCorners
 } from "./smoothSurfaceTypes";
 
-const DEFAULT_CURVE: NSESmoothSurfaceCurve = "squircle";
+const DEFAULT_CURVE: SmoothSurfaceCurve = "squircle";
 const DEFAULT_SMOOTHING = 0.6;
 const DEFAULT_EXPONENT = 4;
 const DEFAULT_PRESERVE_SMOOTHING = true;
 const ARC_KAPPA = 0.5522847498;
 const SAMPLE_COUNT = 10;
 
-type CornerName = keyof NSESmoothSurfaceResolvedCorners;
+type CornerName = keyof SmoothSurfaceResolvedCorners;
 
 interface NormalizedCorner {
   radius: number;
@@ -57,16 +57,16 @@ function round(value: number) {
   return Number.isInteger(value) ? String(value) : value.toFixed(4).replace(/\.?0+$/, "");
 }
 
-function radiusToNumber(radius: NSESmoothSurfaceRadius): number {
+function radiusToNumber(radius: SmoothSurfaceRadius): number {
   if (typeof radius === "number") return Math.max(0, radius);
   const token = nseSmoothSurfaceRadiusTokens[radius];
   return Number.parseFloat(token) || 0;
 }
 
 function cornerToConfig(
-  corner: NSESmoothSurfaceCorner | undefined,
-  fallback: NSESmoothSurfaceResolvedCorner
-): NSESmoothSurfaceResolvedCorner {
+  corner: SmoothSurfaceCorner | undefined,
+  fallback: SmoothSurfaceResolvedCorner
+): SmoothSurfaceResolvedCorner {
   if (corner === undefined) return fallback;
   if (typeof corner === "number" || typeof corner === "string") {
     return { ...fallback, radius: radiusToNumber(corner) };
@@ -81,8 +81,8 @@ function cornerToConfig(
   };
 }
 
-export function resolveNSESmoothSurfaceCorners(options: NSESmoothSurfaceOptions = {}): NSESmoothSurfaceResolvedCorners {
-  const base: NSESmoothSurfaceResolvedCorner = {
+export function resolveSmoothSurfaceCorners(options: SmoothSurfaceOptions = {}): SmoothSurfaceResolvedCorners {
+  const base: SmoothSurfaceResolvedCorner = {
     radius: radiusToNumber(options.radius ?? "md"),
     curve: options.curve ?? DEFAULT_CURVE,
     smoothing: clamp(0, options.smoothing ?? DEFAULT_SMOOTHING, 1),
@@ -98,7 +98,7 @@ export function resolveNSESmoothSurfaceCorners(options: NSESmoothSurfaceOptions 
   };
 }
 
-function distributeRadii(width: number, height: number, corners: NSESmoothSurfaceResolvedCorners): NormalizedCorners {
+function distributeRadii(width: number, height: number, corners: SmoothSurfaceResolvedCorners): NormalizedCorners {
   const radii = {
     topLeft: Math.min(corners.topLeft.radius, width / 2, height / 2),
     topRight: Math.min(corners.topRight.radius, width / 2, height / 2),
@@ -159,7 +159,7 @@ function cornerSegment(
   name: CornerName,
   width: number,
   height: number,
-  corner: NSESmoothSurfaceResolvedCorner,
+  corner: SmoothSurfaceResolvedCorner,
   normalized: NormalizedCorner
 ) {
   const radius = normalized.radius;
@@ -186,14 +186,14 @@ function cornerSegment(
   return sampledCorner(radius, radius, radius, Math.PI, Math.PI * 1.5, exponent);
 }
 
-export function generateNSESmoothSurfacePath(
+export function generateSmoothSurfacePath(
   width: number,
   height: number,
-  options: NSESmoothSurfaceOptions = {}
+  options: SmoothSurfaceOptions = {}
 ) {
   if (width <= 0 || height <= 0) return "M 0 0 H 0 V 0 H 0 Z";
 
-  const corners = resolveNSESmoothSurfaceCorners(options);
+  const corners = resolveSmoothSurfaceCorners(options);
   const normalized = distributeRadii(width, height, corners);
   const { topLeft, topRight, bottomRight, bottomLeft } = normalized;
 
@@ -215,14 +215,14 @@ export function generateNSESmoothSurfacePath(
   ].filter(Boolean).join(" ");
 }
 
-export function generateNSESmoothSurfaceClipPath(
+export function generateSmoothSurfaceClipPath(
   width: number,
   height: number,
-  options: NSESmoothSurfaceOptions = {}
+  options: SmoothSurfaceOptions = {}
 ) {
-  return `path("${generateNSESmoothSurfacePath(width, height, options)}")`;
+  return `path("${generateSmoothSurfacePath(width, height, options)}")`;
 }
 
-export function getNSESmoothSurfaceRadiusNumber(radius: NSESmoothSurfaceRadius) {
+export function getSmoothSurfaceRadiusNumber(radius: SmoothSurfaceRadius) {
   return radiusToNumber(radius);
 }

@@ -23,15 +23,15 @@ import type { SynWareOwnedWindowSnapshot, SynWareWindowCloseGuard } from "../../
 import {
   nseDisposeFor,
   type NSEControllerOwnershipOptions,
-  type NSEOwnedObject,
+  type OwnedObject,
   type NSEOwner,
 } from "../Controllers/ownership";
 import { NSEObject } from "../Objects/NSEObject";
-import { NSELayoutGuideStore, type NSELayoutGuide } from "../Layout/NSELayoutGuide";
+import { LayoutGuideStore, type NSELayoutGuide } from "../Layout/NSELayoutGuide";
 import type { NSEScrollRect } from "../Scroll/scrollTypes";
 import type { NSEApplication, NSEOpenWindowOptions } from "./NSEApplication";
-import { NSEObjectLifetime } from "./objectLifetime";
-import { ownNSEFactory, type NSEDisposable, type NSESynchronousDisposable } from "./ownedFactory";
+import { ObjectLifetime } from "./objectLifetime";
+import { ownNSEFactory, type Disposable, type SynchronousDisposable } from "./ownedFactory";
 import type { NSEToolbar } from "../Toolbars/NSEToolbar";
 import type { ReactNode } from "react";
 import type { NSETitlebarAccessoryViewController } from "./NSETitlebarAccessoryViewController";
@@ -95,11 +95,11 @@ export interface NSEWindow {
    * resolves with `returnCode`, or, when omitted, with the response Escape would give. Does nothing when the
    * sheet is not presented on this window.
    */
-  endSheet(sheet: NSESheet, returnCode?: number): void;
+  endSheet(sheet: Sheet, returnCode?: number): void;
 }
 
 /** @internal What `NSEWindow.endSheet` ends: a sheet presented on a window. */
-export interface NSESheet {
+export interface Sheet {
   [nseEndSheet](window: NSEWindow, returnCode?: number): void;
 }
 
@@ -130,7 +130,7 @@ export function validateNSEWindowControllerClass(Controller: NSEWindowController
 }
 
 /** What the React host gives a window controller while its window is mounted. */
-export interface NSEWindowMount {
+export interface WindowMount {
   readonly contentLayoutGuide?: NSELayoutGuide;
   /** The window's identity, or `null` on the stage. */
   readonly windowId: string | null;
@@ -144,20 +144,20 @@ export interface NSEWindowMount {
   /** Lets the controller veto the window's close and learn it is closing. Does nothing on the stage. Returns the function that removes the guard. */
   registerCloseGuard(guard: SynWareWindowCloseGuard): () => void;
   /** Presents an alert sheet for the window and resolves with the chosen button's id; aborting `signal` dismisses it. */
-  presentAlert(request: NSEWindowAlertRequest, signal: AbortSignal): Promise<string>;
+  presentAlert(request: WindowAlertRequest, signal: AbortSignal): Promise<string>;
   /** Presents an application-modal alert (NSAlert.runModal()) for the window's application, centred over it. */
-  presentModalAlert(request: NSEWindowAlertRequest, signal: AbortSignal): Promise<string>;
+  presentModalAlert(request: WindowAlertRequest, signal: AbortSignal): Promise<string>;
 }
 
 /** An alert as the window's host presents it. Not part of the public API. */
-export interface NSEWindowAlertRequest {
+export interface WindowAlertRequest {
   readonly title: string;
   readonly message?: string;
   readonly style: "warning" | "informational" | "critical";
   readonly buttons: readonly { readonly id: string; readonly label: string; readonly role?: "default" | "cancel" | "destructive" }[];
 }
 
-const windowAlertPresenters = new WeakMap<NSEWindow, (request: NSEWindowAlertRequest, signal: AbortSignal) => Promise<string>>();
+const windowAlertPresenters = new WeakMap<NSEWindow, (request: WindowAlertRequest, signal: AbortSignal) => Promise<string>>();
 const windowChromeSubscriptions = new WeakMap<NSEWindow, (listener: () => void) => () => void>();
 const windowTitlePresenters = new WeakMap<NSEWindow, (title: string) => () => void>();
 const presentedWindowTitles = new WeakMap<NSEWindow, string>();
@@ -178,27 +178,27 @@ export function nseSubscribeWindowChrome(window: NSEWindow, listener: () => void
 }
 
 /** @internal Presents an NSEAlert as a sheet on a window a window controller manages; aborting `signal` ends it. */
-export function nsePresentWindowAlert(window: NSEWindow, request: NSEWindowAlertRequest, signal: AbortSignal): Promise<string> {
+export function nsePresentWindowAlert(window: NSEWindow, request: WindowAlertRequest, signal: AbortSignal): Promise<string> {
   const present = windowAlertPresenters.get(window);
   if (!present) return Promise.reject(new TypeError("An alert is presented on a window controller's window (this.window)."));
   return present(request, signal);
 }
 
-type NSEAlertPresenter = (request: NSEWindowAlertRequest, signal: AbortSignal) => Promise<string>;
-let keyWindowModalPresenter: { readonly owner: object; readonly present: NSEAlertPresenter } | null = null;
+type AlertPresenter = (request: WindowAlertRequest, signal: AbortSignal) => Promise<string>;
+let keyWindowModalPresenter: { readonly owner: object; readonly present: AlertPresenter } | null = null;
 
 /**
  * @internal The key window reports its application's modal-alert presenter: an application-modal alert
  * (NSAlert.runModal()) belongs to the active application, NSApp, whose window is key. `null` withdraws
  * the owner's presenter when it is still the current one.
  */
-export function nseSetKeyWindowModalPresenter(owner: object, present: NSEAlertPresenter | null): void {
+export function nseSetKeyWindowModalPresenter(owner: object, present: AlertPresenter | null): void {
   if (present) keyWindowModalPresenter = { owner, present };
   else if (keyWindowModalPresenter?.owner === owner) keyWindowModalPresenter = null;
 }
 
 /** @internal Presents an application-modal alert for the active application. */
-export function nsePresentModalAlert(request: NSEWindowAlertRequest, signal: AbortSignal): Promise<string> {
+export function nsePresentModalAlert(request: WindowAlertRequest, signal: AbortSignal): Promise<string> {
   if (!keyWindowModalPresenter) return Promise.reject(new TypeError("runModal needs an active application with a key window."));
   return keyWindowModalPresenter.present(request, signal);
 }
@@ -214,7 +214,7 @@ export interface NSEWindowControllerInternals {
   /** Whether `windowDidLoad` has run. */
   readonly isLoaded: boolean;
   /** Binds the mounted window; the first call runs `windowDidLoad`. Returns the unbind function. */
-  attach(mount: NSEWindowMount): () => void;
+  attach(mount: WindowMount): () => void;
   /** Reports a key-window change to `windowDidBecomeKey` / `windowDidResignKey`. */
   setKey(isKey: boolean): void;
   /** Consults `windowShouldClose`. */
@@ -245,17 +245,17 @@ let windowControllerSequence = 0;
  * whose root is a view controller. Declare `@action` methods for commands
  * scoped to the window.
  */
-export class NSEWindowController<TApp extends NSEApplication = NSEApplication> extends NSEObject implements NSEOwner, NSEOwnedObject {
+export class NSEWindowController<TApp extends NSEApplication = NSEApplication> extends NSEObject implements NSEOwner, OwnedObject {
   /** The component that renders this window's content. */
   static view?: NSEViewComponent;
   /** The class constructed in a fresh scope for this window's initial root. */
   static contentViewControllerClass?: NSEViewControllerClass;
 
-  readonly #lifetime: NSEObjectLifetime;
+  readonly #lifetime: ObjectLifetime;
   readonly #window: NSEWindow;
   readonly #internals: NSEWindowControllerInternals;
-  #mount: NSEWindowMount | null = null;
-  readonly #contentLayout = new NSELayoutGuideStore();
+  #mount: WindowMount | null = null;
+  readonly #contentLayout = new LayoutGuideStore();
   #stopContentLayout: (() => void) | null = null;
   #loaded = false;
   #key = false;
@@ -275,14 +275,14 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
 
   constructor(options: NSEWindowControllerOptions = {}) {
     super();
-    this.#lifetime = new NSEObjectLifetime(
+    this.#lifetime = new ObjectLifetime(
       this,
       "NSEWindowController",
       `${new.target.name || "NSEWindowController"}#${++windowControllerSequence}`,
       options,
     );
     const controller = this as NSEWindowController<NSEApplication>;
-    const requireMount = (member: string): NSEWindowMount => {
+    const requireMount = (member: string): WindowMount => {
       const mount = controller.#mount;
       if (mount) return mount;
       throw controller.#lifetime.record.error({
@@ -376,7 +376,7 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
       minimise: () => requireMount("minimise").minimise(),
       zoom: () => requireMount("zoom").zoom(),
       focus: () => requireMount("focus").focus(),
-      endSheet: (sheet: NSESheet, returnCode?: number) => {
+      endSheet: (sheet: Sheet, returnCode?: number) => {
         if (returnCode !== undefined && !Number.isInteger(returnCode)) throw new TypeError("A sheet's return code must be an integer.");
         sheet?.[nseEndSheet]?.(controller.#window, returnCode);
       },
@@ -460,7 +460,7 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
   }
 
   /** Constructs and owns a disposable synchronously, including after await. */
-  own<T extends NSEDisposable>(factory: (signal: AbortSignal) => NSESynchronousDisposable<T>): T {
+  own<T extends Disposable>(factory: (signal: AbortSignal) => SynchronousDisposable<T>): T {
     return ownNSEFactory(this, factory);
   }
 
@@ -517,7 +517,7 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
     return this.#internals;
   }
 
-  #attach(mount: NSEWindowMount): () => void {
+  #attach(mount: WindowMount): () => void {
     this.#assertLive("window", "get");
     this.#mount = mount;
     this.#stopContentLayout?.();

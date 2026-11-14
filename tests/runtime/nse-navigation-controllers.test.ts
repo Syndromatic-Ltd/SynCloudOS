@@ -20,10 +20,10 @@
 
 import { describe, expect, it, vi } from "vitest";
 import {
-  NSENavigationStackController,
-  NSETabBarController,
-  NSETabBarMoreDestinationId,
-  type NSENavigationDestination,
+  NavigationStackController,
+  TabBarController,
+  TabBarMoreDestinationId,
+  type NavigationDestination,
 } from "../../src/NSE/Navigation";
 import { NSEViewController, nseUpdateTraits } from "../../src/NSE/Application/NSEViewController";
 import { NSETabViewController, NSETabViewItem } from "../../src/NSE/Navigation/NSETabViewController";
@@ -55,7 +55,7 @@ function traits(horizontalSizeClass: SynCloudOSPresentationTraits["horizontalSiz
   });
 }
 
-function destinations(created: string[]): readonly NSENavigationDestination[] {
+function destinations(created: string[]): readonly NavigationDestination[] {
   return Object.freeze([
     "home", "library", "search", "settings", "sharing", "activity",
   ].map((id, index) => Object.freeze({
@@ -88,7 +88,7 @@ function deferred<T = void>() {
 describe("semantic presentation-navigation controllers", () => {
   it("validates stable destinations, retains lazily constructed content, and puts six-plus destinations behind More", async () => {
     const created: string[] = [];
-    const controller = new NSETabBarController({ id: "fixture-tabs", destinations: destinations(created) });
+    const controller = new TabBarController({ id: "fixture-tabs", destinations: destinations(created) });
 
     expect(controller.getSnapshot()).toMatchObject({
       selectedDestinationId: "home",
@@ -107,19 +107,19 @@ describe("semantic presentation-navigation controllers", () => {
     expect(created).toEqual(["home"]);
 
     await controller.select("activity", { source: "pointer" });
-    expect(controller.getSnapshot()).toMatchObject({ selectedDestinationId: "activity", activeTabId: NSETabBarMoreDestinationId });
+    expect(controller.getSnapshot()).toMatchObject({ selectedDestinationId: "activity", activeTabId: TabBarMoreDestinationId });
     expect(controller.moreStack?.getSnapshot().path).toEqual([]);
     expect(controller.getContent("activity")).toEqual(expect.objectContaining({ form: { draft: "activity-draft" } }));
     await expect(controller.select("settings")).rejects.toMatchObject({ name: "InvalidStateError" });
 
     controller.restore({ selectedDestinationId: "missing", more: { path: ["missing", "sharing"] } });
-    expect(controller.getSnapshot()).toMatchObject({ selectedDestinationId: "sharing", activeTabId: NSETabBarMoreDestinationId });
+    expect(controller.getSnapshot()).toMatchObject({ selectedDestinationId: "sharing", activeTabId: TabBarMoreDestinationId });
     expect(controller.moreStack?.getSnapshot().path).toEqual([]);
-    expect(() => new NSETabBarController({
+    expect(() => new TabBarController({
       id: "duplicate-tabs",
       destinations: [destinations(created)[0]!, { ...destinations(created)[0]!, label: "Duplicate" }],
     })).toThrow(/unique/i);
-    expect(() => new NSETabBarController({
+    expect(() => new TabBarController({
       id: "invalid-icon-tabs",
       destinations: [{ id: "missing-icon", label: "Missing icon", icon: { kind: "template", name: "" } }],
     })).toThrow(/icon/i);
@@ -127,7 +127,7 @@ describe("semantic presentation-navigation controllers", () => {
 
   it("cancels unresolved selection and stack work without publishing after disposal", async () => {
     let resolveSelection: (() => void) | null = null;
-    const controller = new NSETabBarController({
+    const controller = new TabBarController({
       id: "cancellation-tabs",
       destinations: destinations([]),
       onSelect: () => new Promise<void>((resolve) => { resolveSelection = resolve; }),
@@ -141,7 +141,7 @@ describe("semantic presentation-navigation controllers", () => {
     expect(publicationCount).toEqual([]);
 
     let resolvePush: (() => void) | null = null;
-    const stack = new NSENavigationStackController({
+    const stack = new NavigationStackController({
       id: "details-stack",
       rootDestinationId: "home",
       destinationIds: ["home", "details", "advanced"],
@@ -156,7 +156,7 @@ describe("semantic presentation-navigation controllers", () => {
 
   it("cancels a deferred selection for every later tab-navigation intent", async () => {
     const pendingFor = new Map<string, ReturnType<typeof deferred>>();
-    const createController = (id: string) => new NSETabBarController({
+    const createController = (id: string) => new TabBarController({
       id,
       destinations: destinations([]),
       onSelect: (destination) => {
@@ -171,8 +171,8 @@ describe("semantic presentation-navigation controllers", () => {
     await opened.openOverflow({ source: "more" });
     pendingFor.get("intent-open:library")?.resolve();
     await expect(staleBeforeOpen).rejects.toMatchObject({ name: "AbortError" });
-    expect(opened.getSnapshot()).toMatchObject({ selectedDestinationId: "home", activeTabId: NSETabBarMoreDestinationId });
-    expect(opened.moreStack?.getSnapshot().path).toEqual([NSETabBarMoreDestinationId]);
+    expect(opened.getSnapshot()).toMatchObject({ selectedDestinationId: "home", activeTabId: TabBarMoreDestinationId });
+    expect(opened.moreStack?.getSnapshot().path).toEqual([TabBarMoreDestinationId]);
     opened.dispose();
 
     const backed = createController("intent-back");
@@ -190,7 +190,7 @@ describe("semantic presentation-navigation controllers", () => {
     restored.restore({ selectedDestinationId: "sharing", more: { path: [] } });
     pendingFor.get("intent-restore:library")?.resolve();
     await expect(staleBeforeRestore).rejects.toMatchObject({ name: "AbortError" });
-    expect(restored.getSnapshot()).toMatchObject({ selectedDestinationId: "sharing", activeTabId: NSETabBarMoreDestinationId });
+    expect(restored.getSnapshot()).toMatchObject({ selectedDestinationId: "sharing", activeTabId: TabBarMoreDestinationId });
     restored.dispose();
 
     const superseded = createController("intent-newer-selection");
@@ -207,7 +207,7 @@ describe("semantic presentation-navigation controllers", () => {
   it("invalidates a pending stack push before root back and equal-path restoration intents", async () => {
     const createPendingStack = () => {
       let resolvePush: (() => void) | null = null;
-      const stack = new NSENavigationStackController({
+      const stack = new NavigationStackController({
         id: `pending-stack-${Math.random()}`,
         rootDestinationId: "home",
         destinationIds: ["home", "details"],
@@ -247,7 +247,7 @@ describe("semantic presentation-navigation controllers", () => {
 
   it("makes a newer stack push supersede an older unresolved intent", async () => {
     const resolvers = new Map<string, () => void>();
-    const stack = new NSENavigationStackController({
+    const stack = new NavigationStackController({
       id: "newer-stack-intent",
       rootDestinationId: "home",
       destinationIds: ["home", "details", "advanced"],
@@ -266,7 +266,7 @@ describe("semantic presentation-navigation controllers", () => {
 
   it("retains undefined lazy content and pushes an overflow selection through the real More hierarchy", async () => {
     const emptyFactory = vi.fn<() => undefined>(() => undefined);
-    const controller = new NSETabBarController<undefined>({
+    const controller = new TabBarController<undefined>({
       id: "undefined-content-tabs",
       destinations: [
         { id: "empty", label: "Empty", icon: { kind: "template", name: "empty" }, createContent: emptyFactory },
@@ -277,15 +277,15 @@ describe("semantic presentation-navigation controllers", () => {
     expect(emptyFactory).toHaveBeenCalledTimes(1);
     controller.dispose();
 
-    const retained = new NSETabBarController({ id: "retained-more-tabs", destinations: destinations([]) });
+    const retained = new TabBarController({ id: "retained-more-tabs", destinations: destinations([]) });
     await retained.openOverflow();
-    expect(retained.moreStack?.getSnapshot().path).toEqual([NSETabBarMoreDestinationId]);
+    expect(retained.moreStack?.getSnapshot().path).toEqual([TabBarMoreDestinationId]);
     await retained.select("activity");
-    expect(retained.moreStack?.getSnapshot().path).toEqual([NSETabBarMoreDestinationId, "activity"]);
+    expect(retained.moreStack?.getSnapshot().path).toEqual([TabBarMoreDestinationId, "activity"]);
     // The shared hierarchy Back transition returns to the retained More list,
     // rather than closing the hierarchy or recreating a popup.
     retained.moreStack?.pop();
-    expect(retained.moreStack?.getSnapshot().path).toEqual([NSETabBarMoreDestinationId]);
+    expect(retained.moreStack?.getSnapshot().path).toEqual([TabBarMoreDestinationId]);
     retained.closeOverflow();
     expect(retained.moreStack?.getSnapshot().path).toEqual([]);
     await retained.select("library");
@@ -294,7 +294,7 @@ describe("semantic presentation-navigation controllers", () => {
   });
 
   it("retains stack restoration internals while public split and tab controllers retain real child state", async () => {
-    const stack = new NSENavigationStackController({ id: "restore-stack", rootDestinationId: "library", destinationIds: ["library", "detail", "nested"] });
+    const stack = new NavigationStackController({ id: "restore-stack", rootDestinationId: "library", destinationIds: ["library", "detail", "nested"] });
     await stack.push("detail"); await stack.push("nested");
     expect(stack.getSnapshot()).toMatchObject({ path: ["detail", "nested"], backDestinationId: "detail" });
     stack.pop(); expect(stack.getSnapshot()).toMatchObject({ path: ["detail"], backDestinationId: "library" });
@@ -344,7 +344,7 @@ describe("semantic presentation-navigation controllers", () => {
 
   it("retitles destinations and sections in place for a locale change", async () => {
     const created: string[] = [];
-    const tabs = new NSETabBarController({
+    const tabs = new TabBarController({
       id: "fixture:retitle",
       destinations: destinations(created),
       sections: [{ id: "all", label: "All", destinationIds: ["home", "library", "search", "settings", "sharing", "activity"] }],

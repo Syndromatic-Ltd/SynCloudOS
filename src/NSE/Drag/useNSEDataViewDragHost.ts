@@ -22,8 +22,8 @@ import { useEffect, type DragEvent } from "react";
 import type { DragEndpoint } from "../../SynCloudOS/SynCloudOS";
 import type {
   NSEDataViewDragBinding,
-  NSEDataViewDropLocation,
-  NSEDataViewDropProposal,
+  DataViewDropLocation,
+  DataViewDropProposal,
 } from "../DataViews/Drag";
 import { writeNSEDragRepresentations } from "./useNSEDragSource";
 
@@ -33,7 +33,7 @@ function eventLocation<TId extends TransferKey>(
   event: DragEvent<HTMLElement>,
   targetId: TId,
   index: number,
-): NSEDataViewDropLocation<TId> {
+): DataViewDropLocation<TId> {
   const rect = event.currentTarget.getBoundingClientRect();
   const ratio = rect.height > 0 ? (event.clientY - rect.top) / rect.height : 0.5;
   const operation = ratio < 0.25 ? "above" : ratio > 0.75 ? "below" : "on";
@@ -49,8 +49,8 @@ function eventLocation<TId extends TransferKey>(
 export function useNSEDataViewDragHost<TId extends TransferKey>(options: {
   readonly binding?: NSEDataViewDragBinding<TId>;
   readonly endpoint?: DragEndpoint;
-  readonly validate?: (proposal: NSEDataViewDropProposal<TId>) => boolean | Promise<boolean>;
-  readonly accept?: (proposal: NSEDataViewDropProposal<TId>) => void | Promise<void>;
+  readonly validate?: (proposal: DataViewDropProposal<TId>) => boolean | Promise<boolean>;
+  readonly accept?: (proposal: DataViewDropProposal<TId>) => void | Promise<void>;
   readonly onStatus?: (status: string) => void;
   readonly onError?: (error: unknown) => void;
   readonly enabled?: boolean;

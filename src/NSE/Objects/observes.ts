@@ -1,7 +1,7 @@
 import { registerNSEAuthoringFinalizer } from "../Application/authoringLifecycle";
 import { getNSEAuthoringContext } from "../Application/authoringContext";
 import { getNSEObjectLifetime } from "../Application/objectLifetime";
-import { getNSETaskLifetime, subscribeNSEActivity, type NSEActivitySnapshot, type NSETaskLifetime } from "../Application/viewActivity";
+import { getNSETaskLifetime, subscribeNSEActivity, type ActivitySnapshot, type NSETaskLifetime } from "../Application/viewActivity";
 import type { NSEObservable } from "./observable";
 
 export interface NSEObservationOptions { readonly lifetime: NSETaskLifetime; readonly initial?: boolean; }
@@ -27,7 +27,7 @@ export function observes(source: string | Function, options: NSEObservationOptio
 function connectObservation(owner: object & NSEObservable, source: string | Function, options: NSEObservationOptions & { readonly select?: Function }, name: string): void {
   const lifetime = getNSEObjectLifetime(owner);
   if (!lifetime) throw new TypeError("@observes requires an NSE lifetime owner.");
-  let epoch: NSEActivitySnapshot | undefined;
+  let epoch: ActivitySnapshot | undefined;
   let currentSource: NSEObservable | undefined;
   let stopSource: (() => void) | undefined;
   let stopOwner: (() => void) | undefined;

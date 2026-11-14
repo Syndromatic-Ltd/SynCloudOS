@@ -973,6 +973,19 @@ function ownedResponder(runtime: SynCloudOSRuntime, appId: string, responderId: 
   return false;
 }
 
+/** True when the responder, or an ancestor it hangs from, is no longer registered. */
+function departedResponder(runtime: SynCloudOSRuntime, responderId: string): boolean {
+  let current: string | null = responderId;
+  const visited = new Set<string>();
+  while (current && !visited.has(current)) {
+    visited.add(current);
+    const registration = runtime.responders.get(current);
+    if (!registration) return true;
+    current = registration.parentId;
+  }
+  return false;
+}
+
 function ownedCanonicalDocumentResponder(
   runtime: SynCloudOSRuntime,
   appId: string,
@@ -3960,7 +3973,15 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
       workspaceDocuments,
       commands,
       focus: Object.freeze({
-        requestFocus(target, focusOptions) { ownResponder(target); return runtime.focus.requestFocus(target, focusOptions); },
+        requestFocus(target, focusOptions) {
+          assertLive();
+          // Like makeFirstResponder(_:), a view that has left the hierarchy declines; only another app's responder is refused.
+          if (!ownedResponder(runtime, app.bundleIdentifier, target) && departedResponder(runtime, target)) {
+            return { status: "missing", responderId: target, reason: "The responder is no longer registered." };
+          }
+          ownResponder(target);
+          return runtime.focus.requestFocus(target, focusOptions);
+        },
         openScope(scope) {
           assertLive();
           ownResponder(scope.parentResponderId);

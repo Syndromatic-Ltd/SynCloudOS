@@ -21,19 +21,19 @@
 import type { SynCloudOSPresentationTraits } from "../../SynCloudOS/SynCloudOS";
 import { selectViewportFoldRegion } from "../../SynCloudOS/nseRuntimeContracts";
 
-export type NSEOverlayRegionBounds = SynCloudOSPresentationTraits["contentBounds"];
-export type NSEOverlayPresentationSource = Readonly<{
+export type OverlayRegionBounds = SynCloudOSPresentationTraits["contentBounds"];
+export type OverlayPresentationSource = Readonly<{
   getSnapshot(): SynCloudOSPresentationTraits;
   subscribe(listener: () => void): () => void;
 }>;
 
 /** Selection shares the same pure Windows geometry used by physical hosts. */
-export function resolveNSEOverlayRegion(traits: SynCloudOSPresentationTraits, origin?: NSEOverlayRegionBounds | null,
-  direction: "ltr" | "rtl" = "ltr", purpose: "contextual" | "alert" = "contextual"): NSEOverlayRegionBounds | null {
+export function resolveNSEOverlayRegion(traits: SynCloudOSPresentationTraits, origin?: OverlayRegionBounds | null,
+  direction: "ltr" | "rtl" = "ltr", purpose: "contextual" | "alert" = "contextual"): OverlayRegionBounds | null {
   return selectViewportFoldRegion(traits, traits.contentBounds, origin, direction, purpose);
 }
 
-export function nseOverlayRegionInsets(region: NSEOverlayRegionBounds, host: NSEOverlayRegionBounds) {
+export function nseOverlayRegionInsets(region: OverlayRegionBounds, host: OverlayRegionBounds) {
   return Object.freeze({ top: Math.max(0, region.y - host.y), left: Math.max(0, region.x - host.x),
     right: Math.max(0, host.x + host.width - region.x - region.width), bottom: Math.max(0, host.y + host.height - region.y - region.height) });
 }

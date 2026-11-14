@@ -23,9 +23,9 @@ import type { GFXIdentifierIssuer } from "../../FX/GraphicsFX/identifierAuthorit
 import type { IFXImageGeometryPort } from "../../FX/ImageFX/IFXImageViewport";
 
 /** Private host-to-view drawing authority. Never exported from an SDK entry. */
-export interface NSEViewDrawingEnvironment {
+export interface ViewDrawingEnvironment {
   createGraphicsIdentifierIssuer(): GFXIdentifierIssuer;
   readonly geometry: IFXImageGeometryPort | null | undefined;
 }
 
-export const NSEViewDrawingEnvironmentContext = createContext<NSEViewDrawingEnvironment | null>(null);
+export const ViewDrawingEnvironmentContext = createContext<ViewDrawingEnvironment | null>(null);

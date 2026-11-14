@@ -29,10 +29,10 @@ import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEAppearanceProvider } from "../../src/NSE/Appearance";
 import { atmoTheme } from "../../src/NSE/Appearance/atmo";
-import { NSEMenuView, NSEPopUpButton } from "../../src/NSE/Menus";
+import { MenuView, NSEPopUpButton } from "../../src/NSE/Menus";
 import { NSELevelIndicator, NSEStepper } from "../../src/NSE/Controls/Values";
 import { NSEComboBox } from "../../src/NSE/Controls/Completion";
-import { NSEStandaloneControlHost, NSEPopup } from "../../src/NSE/Overlays";
+import { StandaloneControlHost, NSEPopup } from "../../src/NSE/Overlays";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 
 const customAppearance = createTestTheme("com.example.custom-test", "Custom test");
@@ -44,7 +44,7 @@ afterEach(() => {
 
 const presentation = createStaticPresentationPort({ width: 1024, height: 768 });
 function InteractionHost({ children }: React.PropsWithChildren) {
-  return <NSEStandaloneControlHost document={document} window={window} presentation={presentation} parentResponderId="workspace">{children}</NSEStandaloneControlHost>;
+  return <StandaloneControlHost document={document} window={window} presentation={presentation} parentResponderId="workspace">{children}</StandaloneControlHost>;
 }
 
 describe("NSE menu and picker interactions", () => {
@@ -113,7 +113,7 @@ describe("NSE menu and picker interactions", () => {
     render(
       <InteractionHost>
         <NSEAppearanceProvider theme={customAppearance}>
-          <NSEMenuView
+          <MenuView
             label="Actions"
             items={[
               { value: "pin", label: "Pin Surface", checked: true },

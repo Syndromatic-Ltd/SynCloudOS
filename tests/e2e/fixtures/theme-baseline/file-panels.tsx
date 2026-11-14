@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { NSEOpenPanel, type NSEFilePanelService, type OpenPanelSession } from "../../../../src/NSE/FilePanels/NSEOpenPanel";
-import { NSEOpenPanelContent } from "../../../../src/NSE/FilePanels/NSEOpenPanelContent";
+import { NSEOpenPanel, type OpenPanelService, type OpenPanelSession } from "../../../../src/NSE/FilePanels/NSEOpenPanel";
+import { OpenPanelContent } from "../../../../src/NSE/FilePanels/NSEOpenPanelContent";
 import { NSESavePanel } from "../../../../src/NSE/FilePanels/NSESavePanel";
 import type { ThemeBaselineSurface } from "./catalogue";
 
 // Drawing fixtures never invoke the native chooser. Its backend is explicitly cancelled.
-const service: NSEFilePanelService = { open: async () => ({ kind: "cancelled" }), save: async () => ({ kind: "cancelled" }), release() {}, dispose() {} };
+const service: OpenPanelService = { open: async () => ({ kind: "cancelled" }), save: async () => ({ kind: "cancelled" }), release() {}, dispose() {} };
 const noop = () => undefined;
 function OpenPanelSurface({ compact }: { compact: boolean }) {
   const [session] = useState<OpenPanelSession>(() => {
@@ -19,7 +19,7 @@ function OpenPanelSurface({ compact }: { compact: boolean }) {
     };
   });
   useEffect(() => () => session.panel.dispose(), [session]);
-  return <NSEOpenPanelContent session={session} />;
+  return <OpenPanelContent session={session} />;
 }
 export function filePanelThemeBaselineCatalogue(): ThemeBaselineSurface[] {
   return [false, true].flatMap(compact => [

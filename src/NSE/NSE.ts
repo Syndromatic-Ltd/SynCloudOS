@@ -20,8 +20,8 @@
 
 import "./Typography/fonts.css";
 
-import { NSEAlertSurface } from "./Components/NSEAlertSurface";
-import { NSEAlertBackdrop } from "./Components/NSEAlertBackdrop";
+import { AlertSurface } from "./Components/NSEAlertSurface";
+import { AlertBackdrop } from "./Components/NSEAlertBackdrop";
 import { Badge } from "./Components/Badge";
 import { IconWell } from "./Components/IconWell";
 import { LinenSurface } from "./Components/LinenSurface";
@@ -30,21 +30,21 @@ export {
   Badge,
   IconWell,
   LoadingSpinner,
-  NSEAlertSurface,
-  NSEAlertBackdrop,
+  AlertSurface,
+  AlertBackdrop,
 };
 import * as NSEText from "./Text";
 import * as NSETextEditing from "./TextEditing";
 export * from "./Text";
 export * from "./TextEditing";
-export { NSEFocusPortProvider, NSEFocusScope, useNSEFocusPort } from "./Focus";
-export type { NSEFocusPort, NSEFocusScopeKind, NSEFocusScopeOptions } from "./Focus";
-export { NSEConformanceEvidenceProvider, useNSEConformanceEvidence } from "./Developer/NSEConformanceEvidence";
-export type { NSEConformanceEvidencePort, NSEConformanceEvidenceProviderProps } from "./Developer/NSEConformanceEvidence";
+export { FocusPortProvider, FocusScope, useNSEFocusPort } from "./Focus";
+export type { FocusPort, FocusScopeKind, FocusScopeOptions } from "./Focus";
+export { ConformanceEvidenceProvider, useNSEConformanceEvidence } from "./Developer/NSEConformanceEvidence";
+export type { ConformanceEvidencePort, ConformanceEvidenceProviderProps } from "./Developer/NSEConformanceEvidence";
 /** Lifecycle cleanup is part of the public interaction layer for host shells. */
 export { useNSEDeferredDisposal } from "./interactionLifecycle";
-export type { NSEDisposable, NSEDisposalScheduler } from "./interactionLifecycle";
-import { NSEFeedbackProvider, useNSEFeedback } from "./Feedback";
+export type { Disposable, NSEDisposalScheduler } from "./interactionLifecycle";
+import { FeedbackProvider, useNSEFeedback } from "./Feedback";
 import * as NSEContainers from "./Containers";
 import * as NSEControllers from "./Controllers";
 export * from "./Controllers";
@@ -98,7 +98,7 @@ import * as NSEAppearance from "./Appearance";
 export * from "./Appearance";
 export * from "./Controls/Images";
 
-const NSEControlCatalogue = {
+const ControlCatalogue = {
   ...NSEControlButtons,
   ...NSEControlFields,
   ...NSEControlImages,
@@ -168,7 +168,7 @@ export const NSE = {
   ...NSEWebContent,
   ...NSEContainers,
   ...NSEWindows,
-  ...NSEControlCatalogue,
+  ...ControlCatalogue,
   Appearance: NSEAppearance,
   ControlCore: NSEControlCore,
   Colour: NSEColourControls,
@@ -198,17 +198,17 @@ export const NSE = {
   NSEObjectController: NSEControllers.NSEObjectController,
   NSEUserDefaultsController: NSEControllers.NSEUserDefaultsController,
   NSETreeController: NSEControllers.NSETreeController,
-  NSEUpdateReadinessController: NSEControllers.NSEUpdateReadinessController,
+  NSEUpdateReadinessController: NSEControllers.UpdateReadinessController,
   useNSEController: NSEControllers.useNSEController,
-  NSEAlertSurface,
-  NSEAlertBackdrop,
+  AlertSurface,
+  AlertBackdrop,
   IconWell,
   LinenSurface,
   LoadingSpinner,
   Badge,
   Text: NSEText,
   TextEditing: NSETextEditing,
-  NSEFeedbackProvider,
+  FeedbackProvider,
   Material: {
     Provider: MaterialProvider,
     tokens: materialTokens,

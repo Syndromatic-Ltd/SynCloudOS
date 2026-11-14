@@ -26,14 +26,14 @@ import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEScroller, NSEScrollView, NSEScrollViewController, computeScrollRectTarget, normalizeRTLScrollLeft } from "../../../src/NSE/Scroll";
 import { NSEProgressIndicator } from "../../../src/NSE/Progress";
-import { NSESpinner } from "../../../src/NSE/Progress/spinnerSprite";
-import { NSEAnimationEnvironmentProvider } from "../../../src/NSE/Animation/NSEAnimationEnvironment";
+import { Spinner } from "../../../src/NSE/Progress/spinnerSprite";
+import { AnimationEnvironmentProvider } from "../../../src/NSE/Animation/NSEAnimationEnvironment";
 import { NSETabView } from "../../../src/NSE/Navigation";
 import { NSESegmentedControl } from "../../../src/NSE/Controls/Values";
 import { NSEButton } from "../../../src/NSE/Controls/Buttons/NSEButton";
 import { NSEStackItem, NSEStackView } from "../../../src/NSE/Layout";
-import { NSEOverlayProvider } from "../../../src/NSE/Overlays";
-import { NSEControlRuntimeProvider } from "../../../src/NSE/Controls/Core";
+import { OverlayProvider } from "../../../src/NSE/Overlays";
+import { ControlRuntimeProvider } from "../../../src/NSE/Controls/Core";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
 
 afterEach(() => { cleanup(); vi.restoreAllMocks(); });
@@ -41,7 +41,7 @@ const navigationWorkArea = Object.freeze({ width: 1280, height: 720, safeArea: O
 const navigationPresentation = createStaticPresentationPort({ width: 1280, height: 720 });
 function NavigationOverlay({ children }: { readonly children: React.ReactNode }) {
   const runtimePort = { runtimeId: "runtime:navigation", signal: new AbortController().signal, environment: { browser: { getDocument: () => document, getWindow: () => window }, workArea: { getSnapshot: () => navigationWorkArea, subscribe: () => () => undefined }, visualViewport: { getSnapshot: () => null, subscribe: () => () => undefined }, presentation: navigationPresentation, setTimeout: (callback: () => void) => { callback(); return 0; }, clearTimeout: () => undefined }, restoreFocus: (_responderId: string, anchor: HTMLElement | null) => anchor?.focus(), reportPlacementFailure: () => undefined, wrapFocusScope: (_options: unknown, node: React.ReactNode) => node };
-  return <NSEOverlayProvider runtimePort={runtimePort} defaultParentResponderId="workspace">{children}</NSEOverlayProvider>;
+  return <OverlayProvider runtimePort={runtimePort} defaultParentResponderId="workspace">{children}</OverlayProvider>;
 }
 
 describe("scroll progress and navigation", () => {
@@ -169,7 +169,7 @@ describe("scroll progress and navigation", () => {
   });
   it("keeps an always-visible zero-range scroller disabled", () => { render(<NSEScroller orientation="vertical" policy="always" value={0} maximum={0} onValueChange={() => {}} />); expect(screen.getByRole("slider")).toHaveProperty("disabled", true); });
   it("exposes the system chrome spinner's accessible status and visual variant", () => {
-    render(<NSESpinner size="large" tone="dark" label="Loading records" />);
+    render(<Spinner size="large" tone="dark" label="Loading records" />);
     const spinner = screen.getByRole("status", { name: "Loading records" });
     expect(spinner.getAttribute("data-size")).toBe("large");
     expect(spinner.getAttribute("data-tone")).toBe("dark");
@@ -226,11 +226,11 @@ describe("scroll progress and navigation", () => {
     expect(screen.getByRole("progressbar").getAttribute("data-variant")).toBe("circular");
     expect(screen.getByRole("progressbar").getAttribute("data-size")).toBe("64");
   });
-  it("uses a static indeterminate fallback under reduced motion", () => { render(<NSEAnimationEnvironmentProvider reducedMotion><NSEProgressIndicator aria-label="Load" /></NSEAnimationEnvironmentProvider>); expect(screen.getByRole("progressbar").getAttribute("data-motion")).toBe("static"); });
+  it("uses a static indeterminate fallback under reduced motion", () => { render(<AnimationEnvironmentProvider reducedMotion><NSEProgressIndicator aria-label="Load" /></AnimationEnvironmentProvider>); expect(screen.getByRole("progressbar").getAttribute("data-motion")).toBe("static"); });
   it("moves tab focus with roving keys and lazily renders content", () => { const change = vi.fn(); render(<NSETabView aria-label="Pages" items={[{ id: "a", label: "A", render: () => "Alpha" }, { id: "b", label: "B", render: () => "Beta" }]} selectedId="a" onSelectedIdChange={change} />); fireEvent.keyDown(screen.getByRole("tab", { name: "A" }), { key: "ArrowRight" }); expect(change).toHaveBeenCalledWith("b", "keyboard"); expect(screen.getByRole("tabpanel").textContent).toBe("Alpha"); });
   it("supports tab Home/End and keep-alive panel lifecycle", () => { const change = vi.fn(); render(<NSETabView aria-label="Pages" keepAlive items={[{ id: "a", label: "A", render: () => "Alpha" }, { id: "off", label: "Off", disabled: true, render: () => "Off" }, { id: "b", label: "B", render: () => "Beta" }]} selectedId="a" onSelectedIdChange={change} />); fireEvent.keyDown(screen.getByRole("tab", { name: "A" }), { key: "End" }); expect(change).toHaveBeenLastCalledWith("b", "keyboard"); expect(screen.getAllByRole("tabpanel", { hidden: true })).toHaveLength(2); });
   it("hosts tab overflow in an overlay and selects an overflow item", () => { const change = vi.fn(); render(<NavigationOverlay><NSETabView aria-label="Pages" maximumVisibleTabs={2} items={[{ id: "a", label: "A", render: () => "Alpha" }, { id: "b", label: "B", render: () => "Beta" }, { id: "c", label: "C", render: () => "Gamma" }]} selectedId="a" onSelectedIdChange={change} /></NavigationOverlay>); fireEvent.click(screen.getByRole("button", { name: "More Pages" })); expect(screen.getByRole("listbox")).not.toBeNull(); fireEvent.click(screen.getByRole("option", { name: "C" })); expect(change).toHaveBeenCalledWith("c", "pointer"); });
   it("requests tab close and keyboard reorder with deterministic focus", () => { const close = vi.fn(); const reorder = vi.fn(); const change = vi.fn(); render(<NSETabView aria-label="Pages" items={[{ id: "a", label: "A", closable: true, render: () => "Alpha" }, { id: "b", label: "B", closable: true, render: () => "Beta" }]} selectedId="a" onSelectedIdChange={change} onRequestClose={close} onRequestReorder={reorder} />); const tab = screen.getByRole("tab", { name: "A" }); fireEvent.keyDown(tab, { key: "ArrowRight", altKey: true }); expect(reorder).toHaveBeenCalledWith("a", 1); fireEvent.click(screen.getByRole("button", { name: "Close A" })); expect(change).toHaveBeenCalledWith("b", "keyboard"); expect(close).toHaveBeenCalledWith("a"); });
-  it("selects command tabs only after canonical command execution", async () => { const change = vi.fn(); const dispatch = vi.fn(async () => ({ status: "executed" as const, commandId: "tabs.open", responderId: "workspace", operationId: "op", correlationId: "correlation", value: undefined })); const port = { signal: new AbortController().signal, commands: { getPresentationGeneration: () => ({ registryGeneration: 1, responderGeneration: 1 }), validate: vi.fn(async () => ({ commandId: "tabs.open", responderId: "workspace", title: "Open B", enabled: true, denied: false, hidden: false, state: "off" as const })), prepareDispatch: vi.fn(async () => ({ status: "accepted" as const, acceptance: { commandId: "tabs.open", responderId: "workspace" } as never })), dispatch } }; render(<NSEControlRuntimeProvider port={port}><NSETabView aria-label="Pages" items={[{ id: "a", label: "A", render: () => "Alpha" }, { id: "b", label: "B", commandId: "tabs.open", commandPayload: { id: "b" }, render: () => "Beta" }]} selectedId="a" onSelectedIdChange={change} /></NSEControlRuntimeProvider>); const tab = screen.getByRole("tab", { name: "B" }); await waitFor(() => expect((tab as HTMLButtonElement).disabled).toBe(false)); fireEvent.click(tab); await waitFor(() => expect(dispatch).toHaveBeenCalled()); expect(change).toHaveBeenCalledWith("b", "pointer"); });
+  it("selects command tabs only after canonical command execution", async () => { const change = vi.fn(); const dispatch = vi.fn(async () => ({ status: "executed" as const, commandId: "tabs.open", responderId: "workspace", operationId: "op", correlationId: "correlation", value: undefined })); const port = { signal: new AbortController().signal, commands: { getPresentationGeneration: () => ({ registryGeneration: 1, responderGeneration: 1 }), validate: vi.fn(async () => ({ commandId: "tabs.open", responderId: "workspace", title: "Open B", enabled: true, denied: false, hidden: false, state: "off" as const })), prepareDispatch: vi.fn(async () => ({ status: "accepted" as const, acceptance: { commandId: "tabs.open", responderId: "workspace" } as never })), dispatch } }; render(<ControlRuntimeProvider port={port}><NSETabView aria-label="Pages" items={[{ id: "a", label: "A", render: () => "Alpha" }, { id: "b", label: "B", commandId: "tabs.open", commandPayload: { id: "b" }, render: () => "Beta" }]} selectedId="a" onSelectedIdChange={change} /></ControlRuntimeProvider>); const tab = screen.getByRole("tab", { name: "B" }); await waitFor(() => expect((tab as HTMLButtonElement).disabled).toBe(false)); fireEvent.click(tab); await waitFor(() => expect(dispatch).toHaveBeenCalled()); expect(change).toHaveBeenCalledWith("b", "pointer"); });
   it("uses per-instance tab relationship ids", () => { render(<><NSETabView aria-label="First pages" items={[{ id: "a", label: "A", render: () => "Alpha" }]} selectedId="a" onSelectedIdChange={() => {}} /><NSETabView aria-label="Second pages" items={[{ id: "a", label: "A", render: () => "Alpha" }]} selectedId="a" onSelectedIdChange={() => {}} /></>); const ids = [...document.querySelectorAll("[id]")].map((node) => node.id); expect(new Set(ids).size).toBe(ids.length); });
 });

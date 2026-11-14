@@ -10,13 +10,13 @@ import { createApplicationMenuStore } from "../../../../src/SynCloudOSReact/Appl
 import { ApplicationHostTitlebar } from "../../../../src/SynCloudOSReact/ApplicationHostTitlebar";
 import { NSEMenu } from "../../../../src/NSE/Menus/NSEMenu";
 import { NSEMenuBar } from "../../../../src/NSE/Menus/NSEMenuBar";
-import { NSEApplicationMenu } from "../../../../src/NSE/Menus/NSEApplicationMenu";
+import { ApplicationMenu } from "../../../../src/NSE/Menus/ApplicationMenu";
 import { NSEPopUpButton } from "../../../../src/NSE/Menus/NSEPopUpButton";
 import { nseUnowned } from "../../../../src/NSE/Controllers/ownership";
-import { NSEDialogSurface } from "../../../../src/NSE/Overlays/NSEDialogSurface";
-import { NSEDivider } from "../../../../src/NSE/Controls/Selection/NSEDivider";
-import { NSETopBar } from "../../../../src/NSE/Windows/Chrome/NSETopBar";
-import { NSEMediaCollectionPresenter } from "../../../../src/NSE/MediaPanels/NSEMediaCollectionPresenter";
+import { DialogSurface } from "../../../../src/NSE/Overlays/NSEDialogSurface";
+import { Divider } from "../../../../src/NSE/Controls/Selection/NSEDivider";
+import { TopBar } from "../../../../src/NSE/Windows/Chrome/TopBar";
+import { MediaCollectionPresenter } from "../../../../src/NSE/MediaPanels/NSEMediaCollectionPresenter";
 import { supplementalThemeCatalogue } from "../theme-additional/supplemental";
 import { additionalThemeCatalogue } from "../theme-additional/catalogue";
 
@@ -64,7 +64,7 @@ function ApplicationMenu({ open }: { open: boolean }) {
   const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null);
   return <SynCloudOSProvider runtime={runtime}>
     <button ref={setAnchor} type="button">Parity</button>
-    <NSEApplicationMenu model={menu.model} controller={menu} overlay={{ id: "parity-app-menu", parentResponderId: "parity", placement: "block-end-inline-end" } as never} open={open && anchor !== null} anchor={anchor} title="Parity" onOpenChange={noop} />
+    <ApplicationMenu model={menu.model} controller={menu} overlay={{ id: "parity-app-menu", parentResponderId: "parity", placement: "block-end-inline-end" } as never} open={open && anchor !== null} anchor={anchor} title="Parity" onOpenChange={noop} />
   </SynCloudOSProvider>;
 }
 function HostTitlebar({ material, scheme }: { material: "metal" | "cumulus"; scheme: "light" | "dark" }) {
@@ -80,12 +80,12 @@ const own: ThemePortParitySurface[] = [
   { id: "application-menu-open", render: () => <ApplicationMenu open />, ready: '[data-nse-application-menu]' },
   { id: "application-menu-submenu", render: () => <ApplicationMenu open />, ready: '[data-nse-application-menu]', hoverSelector: '[data-nse-application-menu] [aria-haspopup]' },
   ...(["metal", "cumulus"] as const).map(material => ({ id: `host-titlebar-${material}`, render: (scheme: "light" | "dark") => <HostTitlebar material={material} scheme={scheme} /> })),
-  { id: "topbar-metal-centre", render: () => <NSETopBar variant="atmoMetal" title="Library" center={<span>Centre</span>} {...({} as Record<string, never>)} /> },
-  { id: "dialog-surface", render: () => <NSEDialogSurface title="Dialog"><p>Dialog body</p></NSEDialogSurface> },
-  ...(["plain", "soft", "grey", "alpha", "arrow"] as const).map(variant => ({ id: `divider-toggle-${variant}`, render: () => <NSEDivider variant={variant} expanded={false} onToggle={noop} {...({} as Record<string, never>)} /> })),
-  { id: "divider-toggle-arrow-expanded", render: () => <NSEDivider variant="arrow" expanded onToggle={noop} {...({} as Record<string, never>)} /> },
+  { id: "topbar-metal-centre", render: () => <TopBar variant="atmoMetal" title="Library" center={<span>Centre</span>} {...({} as Record<string, never>)} /> },
+  { id: "dialog-surface", render: () => <DialogSurface title="Dialog"><p>Dialog body</p></DialogSurface> },
+  ...(["plain", "soft", "grey", "alpha", "arrow"] as const).map(variant => ({ id: `divider-toggle-${variant}`, render: () => <Divider variant={variant} expanded={false} onToggle={noop} {...({} as Record<string, never>)} /> })),
+  { id: "divider-toggle-arrow-expanded", render: () => <Divider variant="arrow" expanded onToggle={noop} {...({} as Record<string, never>)} /> },
   { id: "pop-up-images-open", render: () => <NSEPopUpButton aria-label="Format" items={[{ title: "Picture", value: "p", image: <img alt="" src="/assets/webspring/Panel.png" width={16} height={16} /> }, { title: "Movie", value: "m", image: <span>M</span> }]} defaultValue="p" />, clickSelector: '[data-nse-control="pop-up-button"] button' },
-  { id: "media-grid", render: () => <NSEMediaCollectionPresenter items={media as never} selectedIds={new Set(["5:local2:m1"])} selection="multiple" direction="ltr" onSelectionChange={noop} onActivate={noop} /> },
+  { id: "media-grid", render: () => <MediaCollectionPresenter items={media as never} selectedIds={new Set(["5:local2:m1"])} selection="multiple" direction="ltr" onSelectionChange={noop} onActivate={noop} /> },
 ];
 
 export const themePortParityCatalogue: readonly ThemePortParitySurface[] = [

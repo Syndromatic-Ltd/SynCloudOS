@@ -27,7 +27,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import * as sdk from "../../src/SynCloudOS/AppSDK/sdkPackageEntry";
 import { SynWareProvider } from "../../src/SynCloudOS/AppSDK/SynWareContext";
 import { HostFontsProvider } from "../../src/SynCloudOSReact/hostFontsContext";
-import { NSEFontLibrary } from "../../src/NSE/Typography/NSEFontLibrary";
+import { FontLibrary } from "../../src/NSE/Typography/NSEFontLibrary";
 import { NSEFontManager } from "../../src/NSE/Typography/NSEFontManager";
 import { TFXFontDescriptor } from "../../src/FX/TextFX/TFXFontDescriptor";
 import { createRuntimeCacheRegistry } from "../../src/SynCloudOS/Cache";
@@ -46,7 +46,7 @@ describe("managed font access", () => {
     expect(screen.getByTestId("first").textContent).toBe("example"); expect(screen.getByTestId("second").textContent).toBe("");
   });
   it("retains imported bytes as owned copies and releases them with their face", async () => {
-    const library = new NSEFontLibrary({ storage:null, preferences:null, faceHost:{register:async()=>()=>{}} });
+    const library = new FontLibrary({ storage:null, preferences:null, faceHost:{register:async()=>()=>{}} });
     const source = new Uint8Array(readFileSync(resolve("tests/fixtures/fx/fonts/notosans-NotoSans[wdth,wght].ttf")));
     const result = await library.addFonts([{ name:"Noto.ttf", size:source.length, arrayBuffer:async()=>source.slice().buffer as ArrayBuffer }]);
     const id = result.added[0]!.id;
@@ -56,7 +56,7 @@ describe("managed font access", () => {
     await library.removeFont(id); expect((library as any).fontBytes(id)).toBeNull();
   });
   it("updates mounted catalogue consumers when a person imports or removes a face",async()=>{
-    const library=new NSEFontLibrary({storage:null,preferences:null,faceHost:{register:async()=>()=>{}}});
+    const library=new FontLibrary({storage:null,preferences:null,faceHost:{register:async()=>()=>{}}});
     const manager=new NSEFontManager({library});
     const context={signal:new AbortController().signal,textLayout:{}} as any;
     function Probe(){const fonts=(sdk as any).useFonts();return <output data-testid="catalogue">{fonts.manager.allFamilies().flatMap((family:any)=>family.presets.map((preset:any)=>preset.id)).join(",")}</output>;}

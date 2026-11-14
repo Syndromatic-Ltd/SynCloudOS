@@ -29,7 +29,7 @@ import { WindowContentRendererRegistry, WindowLayer } from "../../src/Webspring/
 import { WindowChromeSlotContext } from "../../src/Webspring/WindowLayer/windowChromeSlotContext";
 import { createWindowLayerFixture } from "../fixtures/windowLayerFixture";
 import { standardWindow } from "../fixtures/windowTestDependencies";
-import { NSEStandardWindowView } from "../../src/NSE/Windows";
+import { StandardWindowView } from "../../src/NSE/Windows";
 import { readFileSync } from "node:fs";
 import type { SynCloudOSRuntime, WindowManager } from "../../src/SynCloudOS/SynCloudOS";
 import { createWindowTestDependencies, panelWindow } from "../fixtures/windowTestDependencies";
@@ -387,7 +387,7 @@ describe("Webspring WindowLayer", () => {
       isKey: true,
       isMain: true,
       zIndex: 2,
-    } as React.ComponentProps<typeof NSEStandardWindowView>["record"];
+    } as React.ComponentProps<typeof StandardWindowView>["record"];
     const presentation = {
       kind: "desktop-window",
       visible: true,
@@ -396,9 +396,9 @@ describe("Webspring WindowLayer", () => {
       movable: true,
       resizable: false,
       titleBarVisible: true,
-    } as React.ComponentProps<typeof NSEStandardWindowView>["presentation"];
+    } as React.ComponentProps<typeof StandardWindowView>["presentation"];
     const { container } = render(
-      <NSEStandardWindowView
+      <StandardWindowView
         record={record}
         presentation={presentation}
         blocked={false}
@@ -407,7 +407,7 @@ describe("Webspring WindowLayer", () => {
         dispatchCommand={() => Promise.resolve(null)}
       >
         <p>content</p>
-      </NSEStandardWindowView>,
+      </StandardWindowView>,
     );
     const section = container.querySelector('[data-window-chrome-mode="custom"]');
     expect(section?.hasAttribute("data-window-chrome-appearance")).toBe(false);

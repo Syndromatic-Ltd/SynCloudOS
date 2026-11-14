@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { NSEAppearanceProvider } from "../../src/NSE/Appearance/NSEAppearanceProvider";
 import { NSEAppearance } from "../../src/NSE/Appearance/NSEAppearance";
 import { NSEView } from "../../src/NSE/Views/NSEView";
-import { NSEControlImage } from "../../src/NSE/Controls/Images/NSEControlImage";
+import { ControlImage } from "../../src/NSE/Controls/Images/NSEControlImage";
 import { NSEImage } from "../../src/NSE/Controls/Images/NSEImageResource";
 import { LoginWindow } from "../../src/NSE/SystemUI/LoginWindow";
 import { atmoTheme } from "../../src/NSE/Appearance/atmoTheme";
@@ -24,7 +24,7 @@ describe("theme boundaries", () => {
   });
   it("resolves a named image against the view's theme and falls back part by part", () => {
     const image = NSEImage.named(NSEImage.goBackTemplateName)!;
-    render(<NSEAppearanceProvider theme={inner}><NSEControlImage image={image} /></NSEAppearanceProvider>);
+    render(<NSEAppearanceProvider theme={inner}><ControlImage image={image} /></NSEAppearanceProvider>);
     const element = document.querySelector<HTMLElement>('[data-nse-image-template="NSGoBackTemplate"]')!;
     expect(element.style.maskImage).toContain("/inner.svg"); expect(NSEImage.named(image.name, inner)?.files["2x"]).toBe("/inner@2x.svg");
     expect(element.style.width).toBe("17px"); expect(element.style.height).toBe("19px");

@@ -18,8 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { createNSEApplicationMenuModel as createWebspringAppMenuModel } from "../NSE/NSE";
+export { createApplicationMenuModel as createWebspringAppMenuModel } from "../NSE/NSE";
 export type {
-  NSEApplicationMenuLabels as WebspringAppMenuLabels,
-  NSEApplicationMenuModelOptions as WebspringAppMenuModelOptions,
+  ApplicationMenuLabels as WebspringAppMenuLabels,
+  ApplicationMenuModelOptions as WebspringAppMenuModelOptions,
 } from "../NSE/NSE";

@@ -22,8 +22,8 @@
 import React, { useMemo, useRef, useState } from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { NSEOverlayProvider } from "../../../src/NSE/Overlays";
-import { NSESavePanel, type NSEFilePanelService } from "../../../src/NSE/FilePanels";
+import { OverlayProvider } from "../../../src/NSE/Overlays";
+import { NSESavePanel, type OpenPanelService } from "../../../src/NSE/FilePanels";
 import { createBrowserFilePanelAdapter, createFilePanelService, FilePanelReferenceError } from "../../../src/SynCloudOS/FilePanels";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
 
@@ -48,10 +48,10 @@ function OverlayHarness({ children }: { readonly children: React.ReactNode }) {
     reportPlacementFailure: vi.fn(),
     wrapFocusScope: (_options: unknown, node: React.ReactNode) => node,
   }), []);
-  return <NSEOverlayProvider runtimePort={runtimePort}>{children}</NSEOverlayProvider>;
+  return <OverlayProvider runtimePort={runtimePort}>{children}</OverlayProvider>;
 }
 
-function service(): NSEFilePanelService {
+function service(): OpenPanelService {
   return {
     open: vi.fn(async () => ({ kind: "accepted" as const, values: [] })),
     save: vi.fn(async () => ({ kind: "accepted" as const, values: [{ kind: "download-export" as const, suggestedName: "copy.txt", exists: false, sink: { kind: "download-export" as const, write: async () => ({ kind: "exported" as const, fileName: "copy.txt" }) } }] })),
@@ -93,7 +93,7 @@ describe("NSE file panels", () => {
       location: { kind: "memory" as const, namespace: "memo", key: "memo-copy" },
       version: { id: "version:1", sequence: 1, savedAt: "2026-01-01T00:00:00.000Z", etag: "one" },
     }));
-    const fileService: NSEFilePanelService = {
+    const fileService: OpenPanelService = {
       ...service(),
       save: vi.fn(async () => ({
         kind: "accepted" as const,
@@ -150,7 +150,7 @@ describe("NSE file panels", () => {
     let resolveDestination!: (value: { readonly location: { readonly kind: "memory"; readonly namespace: string; readonly key: string } }) => void;
     const destination = new Promise<{ readonly location: { readonly kind: "memory"; readonly namespace: string; readonly key: string } }>((resolve) => { resolveDestination = resolve; });
     const saveAsDocument = vi.fn();
-    const fileService: NSEFilePanelService = {
+    const fileService: OpenPanelService = {
       ...service(),
       save: vi.fn(async () => ({
         kind: "accepted" as const,
@@ -204,7 +204,7 @@ describe("NSE file panels", () => {
     const repeatedSave = vi.fn()
       .mockResolvedValueOnce({ kind: "choose-another" as const })
       .mockResolvedValueOnce({ kind: "cancelled" as const });
-    const fileService: NSEFilePanelService = { ...service(), save: repeatedSave };
+    const fileService: OpenPanelService = { ...service(), save: repeatedSave };
     const panelBridge = { open: vi.fn(), close: vi.fn() };
     render(
       <OverlayHarness>

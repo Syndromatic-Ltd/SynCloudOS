@@ -105,7 +105,7 @@
 :where(:scope):is(.nse-open-phone-header)>:last-child { justify-self: end; }
 .nse-open-phone-header strong,
 :where(:scope):is(.nse-open-phone-header) strong { min-width: 0; text-align: center; font-size: 16px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-/* Reuse NSEMenuOverlay's actual menu plate, frame, dimming and shadow, ending at the bottom edge. */
+/* Reuse MenuOverlay's actual menu plate, frame, dimming and shadow, ending at the bottom edge. */
 .nse-overlay-popup.nse-open-compact-sheet[data-nse-presentation="sheet"][data-nse-overlay-kind="action-sheet"][data-nse-theme],
 :where(:scope):is(.nse-overlay-popup.nse-open-compact-sheet[data-nse-presentation="sheet"][data-nse-overlay-kind="action-sheet"][data-nse-theme]) {
   inset-block: auto 0; inset-inline: 8px; inline-size: auto; max-inline-size: none; min-inline-size: 0;

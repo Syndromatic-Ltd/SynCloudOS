@@ -32,7 +32,7 @@ function useGradientId(name: string) {
   return `${name}-${useId().replace(/:/g, "")}`;
 }
 
-export function NSEColourWheelModeIcon() {
+export function ColourWheelModeIcon() {
   const shade = useGradientId("wheel-shade");
   const segments = Array.from({ length: 24 }, (_, index) => {
     const start = (index * 15 - 90) * Math.PI / 180;
@@ -53,7 +53,7 @@ export function NSEColourWheelModeIcon() {
   </svg>;
 }
 
-export function NSEColourSlidersModeIcon() {
+export function ColourSlidersModeIcon() {
   const red = useGradientId("sliders-red");
   const green = useGradientId("sliders-green");
   const knob = useGradientId("sliders-knob");
@@ -71,7 +71,7 @@ export function NSEColourSlidersModeIcon() {
   </svg>;
 }
 
-export function NSEColourPalettesModeIcon() {
+export function ColourPalettesModeIcon() {
   const colours = ["#e8322b", "#f4c230", "#3aa83c", "#2f6fd6", "#8b3fc2", "#f07c1f", "#1b1b1b", "#8d8d8d", "#ffffff"];
   return <svg {...svgProps}>
     <rect x="2.5" y="3.5" width="23" height="21" rx="2" fill="#e9eaec" stroke="rgba(0,0,0,0.4)" strokeWidth="0.75" />
@@ -79,7 +79,7 @@ export function NSEColourPalettesModeIcon() {
   </svg>;
 }
 
-export function NSEColourImageModeIcon() {
+export function ColourImageModeIcon() {
   const sky = useGradientId("image-sky");
   const hill = useGradientId("image-hill");
   return <svg {...svgProps}>
@@ -94,7 +94,7 @@ export function NSEColourImageModeIcon() {
   </svg>;
 }
 
-export function NSEColourCrayonsModeIcon() {
+export function ColourCrayonsModeIcon() {
   const box = useGradientId("crayons-box");
   const tips = ["#d8322b", "#f2b531", "#3aa83c", "#2f6fd6", "#8b3fc2"];
   return <svg {...svgProps}>
@@ -112,7 +112,7 @@ export function NSEColourCrayonsModeIcon() {
   </svg>;
 }
 
-export function NSEColourMagnifierIcon() {
+export function ColourMagnifierIcon() {
   const glass = useGradientId("magnifier-glass");
   return <svg data-nse-part="image" viewBox="0 0 20 20" width="18" height="18" aria-hidden focusable={false}>
     <defs>

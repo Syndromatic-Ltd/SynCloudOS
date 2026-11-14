@@ -4,13 +4,15 @@ Generated from `tooling/nse-theme-contract.json` by `scripts/synware/build-theme
 
 A theme draws controls through these hooks only: `[data-nse-control]`, `[data-nse-part]`, the state and variant attributes listed here, and the appearance attributes on the theme boundary. [Themes](themes.md) explains how to use them.
 
-Contract version 1: 72 controls, 48 colours.
+Each hook is also mirrored on its element as a class token beginning `nse:`, and the build rewrites hook selectors to those classes so the browser can index them. The classes are private and may change without notice: write the attributes, and never select on the classes.
+
+Contract version 1: 73 controls, 48 colours.
 
 ## Controls
 
 ### `app-icon`
 
-- Parts: `bezel`, `cell`, `content`, `image`, `shadow`, `title`
+- Parts: `bezel`, `cell`, `content`, `image`, `title`
 - States: `enabled=false`, `selected`
 - Variants:
   - `data-nse-type`: `application`, `folder`
@@ -160,6 +162,11 @@ Contract version 1: 72 controls, 48 colours.
 ### `grid-view`
 
 - Parts: `background`, `cell`, `content`, `row`
+- States: none
+
+### `icon-well`
+
+- Parts: `background`, `image`, `shadow`
 - States: none
 
 ### `image-view`
@@ -449,6 +456,7 @@ Contract version 1: 72 controls, 48 colours.
 - Variants:
   - `data-nse-appearance-name`: `aqua`
   - `data-nse-chrome`: `standard`
+  - `data-nse-presentation`: `sheet`
 
 ### `tab-view`
 

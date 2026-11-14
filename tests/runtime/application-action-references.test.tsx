@@ -9,11 +9,11 @@ import { createSynWareContextValue } from "../../src/SynCloudOS/AppSDK/createSyn
 import { SynWareProvider } from "../../src/SynCloudOS/AppSDK/SynWareContext";
 import { createSynWareMenuRuntime } from "../../src/SynCloudOS/AppSDK/SynWareNSEMenuPort";
 import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
-import { NSEActionScopeProvider, NSEControlRuntimeProvider } from "../../src/NSE/Controls/Core";
+import { ActionScopeProvider, ControlRuntimeProvider } from "../../src/NSE/Controls/Core";
 import { NSEMenu } from "../../src/NSE/Menus/NSEMenu";
 import { NSEToolbarController } from "../../src/NSE/Toolbars/NSEToolbarController";
 import { NSEUserDefaultsController } from "../../src/NSE/Controllers/NSEUserDefaultsController";
-import type { NSEToolbarPreferences } from "../../src/NSE/Toolbars/toolbarTypes";
+import type { ToolbarPreferences } from "../../src/NSE/Toolbars/toolbarTypes";
 import { createTestRuntime, mountTestSynWareRuntime, registerTestSynWare } from "./helpers";
 import { defaultsFrom } from "../fixtures/userDefaults";
 
@@ -52,7 +52,7 @@ function fixture() {
     subscribePresentation: context.commands.subscribePresentation.bind(context.commands),
   } };
   const wrapper = ({ children }: { children: React.ReactNode }) => <SynWareProvider value={context}>
-    <NSEActionScopeProvider appId={appId}><NSEControlRuntimeProvider port={controlPort}>{children}</NSEControlRuntimeProvider></NSEActionScopeProvider>
+    <ActionScopeProvider appId={appId}><ControlRuntimeProvider port={controlPort}>{children}</ControlRuntimeProvider></ActionScopeProvider>
   </SynWareProvider>;
   return { appId, runtime, context, port, wrapper, app, window, child, controllers };
 }
@@ -114,12 +114,12 @@ it("preserves standard IDs and uses refreshed methods without a stale implementa
 it("projects toolbar action entries into canonical commands for dispatch and overflow", async () => {
   const f = fixture();
   f.runtime.focus.requestFocus(f.child);
-  const preferences = new NSEUserDefaultsController<NSEToolbarPreferences>({
+  const preferences = new NSEUserDefaultsController<ToolbarPreferences>({
     standalone: true, namespace: "refs-toolbar", defaults: defaultsFrom({ read: () => null, write: () => {}, remove: () => {} }),
     schema: { version: 1, defaults: { itemIds: ["choose"], displayMode: "icon-and-label", sizeMode: "regular" }, fields: {
       itemIds: { validate: (value: unknown): value is readonly string[] => Array.isArray(value) },
-      displayMode: { validate: (value: unknown): value is NSEToolbarPreferences["displayMode"] => value === "icon-and-label" },
-      sizeMode: { validate: (value: unknown): value is NSEToolbarPreferences["sizeMode"] => value === "regular" },
+      displayMode: { validate: (value: unknown): value is ToolbarPreferences["displayMode"] => value === "icon-and-label" },
+      sizeMode: { validate: (value: unknown): value is ToolbarPreferences["sizeMode"] => value === "regular" },
     }, migrations: [] },
   });
   disposers.push(() => preferences.dispose());

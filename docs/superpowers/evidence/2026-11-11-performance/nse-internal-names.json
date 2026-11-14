@@ -1,0 +1,4164 @@
+{
+  "totalDeclarationsInSrc": 1264,
+  "unmappedCount": 693,
+  "unmapped": [
+    {
+      "name": "NSEAboutDialog",
+      "file": "src/NSE/Components/NSESystemDialogs.tsx",
+      "line": 80,
+      "disposition": "rename:AboutDialog"
+    },
+    {
+      "name": "NSEAboutInfo",
+      "file": "src/NSE/Components/NSESystemDialogs.tsx",
+      "line": 49,
+      "disposition": "rename:AboutInfo"
+    },
+    {
+      "name": "NSEActionBinding",
+      "file": "src/SynCloudOS/AppSDK/actions.ts",
+      "line": 154,
+      "disposition": "rename:ActionBinding"
+    },
+    {
+      "name": "NSEActionHost",
+      "file": "src/SynCloudOS/AppSDK/actions.ts",
+      "line": 147,
+      "disposition": "rename:ActionHost"
+    },
+    {
+      "name": "NSEActionResponderContext",
+      "file": "src/NSE/Controls/Core/useNSEControlAction.tsx",
+      "line": 34,
+      "disposition": "rename:ActionResponderContext"
+    },
+    {
+      "name": "NSEActionScope",
+      "file": "src/NSE/Controls/Core/useNSEControlAction.tsx",
+      "line": 27,
+      "disposition": "rename:ActionScope"
+    },
+    {
+      "name": "NSEActionScopeContext",
+      "file": "src/NSE/Controls/Core/useNSEControlAction.tsx",
+      "line": 31,
+      "disposition": "rename:ActionScopeContext"
+    },
+    {
+      "name": "NSEActionScopeProvider",
+      "file": "src/NSE/Controls/Core/useNSEControlAction.tsx",
+      "line": 46,
+      "disposition": "rename:ActionScopeProvider"
+    },
+    {
+      "name": "NSEActionScopeProviderProps",
+      "file": "src/NSE/Controls/Core/useNSEControlAction.tsx",
+      "line": 36,
+      "disposition": "rename:ActionScopeProviderProps"
+    },
+    {
+      "name": "NSEActionSheet",
+      "file": "src/NSE/Overlays/NSEActionSheet.tsx",
+      "line": 66,
+      "disposition": "rename:ActionSheet"
+    },
+    {
+      "name": "NSEActionSheetProps",
+      "file": "src/NSE/Overlays/NSEActionSheet.tsx",
+      "line": 29,
+      "disposition": "rename:ActionSheetProps"
+    },
+    {
+      "name": "NSEActivityEpoch",
+      "file": "src/NSE/Application/viewActivity.ts",
+      "line": 4,
+      "disposition": "rename:ActivityEpoch"
+    },
+    {
+      "name": "NSEActivitySnapshot",
+      "file": "src/NSE/Application/viewActivity.ts",
+      "line": 8,
+      "disposition": "rename:ActivitySnapshot"
+    },
+    {
+      "name": "NSEAdaptiveTabOutlineItem",
+      "file": "src/NSE/Navigation/adaptiveTabView.tsx",
+      "line": 27,
+      "disposition": "rename:AdaptiveTabOutlineItem"
+    },
+    {
+      "name": "NSEAdaptiveTabView",
+      "file": "src/NSE/Navigation/adaptiveTabView.tsx",
+      "line": 44,
+      "disposition": "rename:AdaptiveTabView"
+    },
+    {
+      "name": "NSEAlertBackdrop",
+      "file": "src/NSE/Components/NSEAlertBackdrop.tsx",
+      "line": 47,
+      "disposition": "rename:AlertBackdrop"
+    },
+    {
+      "name": "NSEAlertBackdropProps",
+      "file": "src/NSE/Components/NSEAlertBackdrop.tsx",
+      "line": 34,
+      "disposition": "rename:AlertBackdropProps"
+    },
+    {
+      "name": "NSEAlertMotion",
+      "file": "src/NSE/Components/NSEAlert.transitions.ts",
+      "line": 24,
+      "disposition": "rename:AlertMotion"
+    },
+    {
+      "name": "NSEAlertPresenter",
+      "file": "src/NSE/Application/NSEWindowController.ts",
+      "line": 187,
+      "disposition": "rename:AlertPresenter"
+    },
+    {
+      "name": "NSEAlertSurface",
+      "file": "src/NSE/Components/NSEAlertSurface.tsx",
+      "line": 33,
+      "disposition": "rename:AlertSurface"
+    },
+    {
+      "name": "NSEAnimationDefaults",
+      "file": "src/NSE/Appearance/NSEAnimationDefaults.ts",
+      "line": 24,
+      "disposition": "rename:AnimationDefaults"
+    },
+    {
+      "name": "NSEAnimationEnvironment",
+      "file": "src/NSE/Animation/NSEAnimationEnvironment.tsx",
+      "line": 47,
+      "disposition": "rename:AnimationEnvironment"
+    },
+    {
+      "name": "NSEAnimationEnvironmentContext",
+      "file": "src/NSE/Animation/NSEAnimationEnvironment.tsx",
+      "line": 71,
+      "disposition": "rename:AnimationEnvironmentContext"
+    },
+    {
+      "name": "NSEAnimationEnvironmentProvider",
+      "file": "src/NSE/Animation/NSEAnimationEnvironment.tsx",
+      "line": 101,
+      "disposition": "rename:AnimationEnvironmentProvider"
+    },
+    {
+      "name": "NSEAnimationEnvironmentProviderProps",
+      "file": "src/NSE/Animation/NSEAnimationEnvironment.tsx",
+      "line": 56,
+      "disposition": "rename:AnimationEnvironmentProviderProps"
+    },
+    {
+      "name": "NSEAnimationLayers",
+      "file": "src/NSE/Animation/NSEAnimationEnvironment.tsx",
+      "line": 35,
+      "disposition": "rename:AnimationLayers"
+    },
+    {
+      "name": "NSEAnimationTimingFunction",
+      "file": "src/NSE/Animation/NSEAnimationContext.ts",
+      "line": 27,
+      "disposition": "maps:CAMediaTimingFunction"
+    },
+    {
+      "name": "NSEAnimator",
+      "file": "src/NSE/Animation/NSEAnimationEnvironment.tsx",
+      "line": 42,
+      "disposition": "rename:Animator"
+    },
+    {
+      "name": "NSEAppearanceNineSlice",
+      "file": "src/NSE/Appearance/NSEAppearanceNineSlice.tsx",
+      "line": 41,
+      "disposition": "rename:AppearanceNineSlice"
+    },
+    {
+      "name": "NSEAppearanceNineSliceProps",
+      "file": "src/NSE/Appearance/NSEAppearanceNineSlice.tsx",
+      "line": 35,
+      "disposition": "rename:AppearanceNineSliceProps"
+    },
+    {
+      "name": "NSEAppFrame",
+      "file": "src/NSE/Windows/NSEAppFrame.tsx",
+      "line": 37,
+      "disposition": "rename:AppFrame"
+    },
+    {
+      "name": "NSEAppFrameProps",
+      "file": "src/NSE/Windows/NSEAppFrame.tsx",
+      "line": 29,
+      "disposition": "rename:AppFrameProps"
+    },
+    {
+      "name": "NSEAppFrameVariant",
+      "file": "src/NSE/Windows/NSEAppFrame.tsx",
+      "line": 27,
+      "disposition": "rename:AppFrameVariant"
+    },
+    {
+      "name": "NSEApplicationMenu",
+      "file": "src/NSE/Menus/NSEApplicationMenu.tsx",
+      "line": 43,
+      "disposition": "rename:ApplicationMenu"
+    },
+    {
+      "name": "NSEApplicationMenuLabels",
+      "file": "src/NSE/Menus/createApplicationMenuModel.ts",
+      "line": 23,
+      "disposition": "rename:ApplicationMenuLabels"
+    },
+    {
+      "name": "NSEApplicationMenuModelOptions",
+      "file": "src/NSE/Menus/createApplicationMenuModel.ts",
+      "line": 31,
+      "disposition": "rename:ApplicationMenuModelOptions"
+    },
+    {
+      "name": "NSEApplicationMenuProps",
+      "file": "src/NSE/Menus/NSEApplicationMenu.tsx",
+      "line": 31,
+      "disposition": "rename:ApplicationMenuProps"
+    },
+    {
+      "name": "NSEApplicationNavigationChromeClaim",
+      "file": "src/NSE/Navigation/NSEApplicationNavigationChrome.tsx",
+      "line": 44,
+      "disposition": "rename:ApplicationNavigationChromeClaim"
+    },
+    {
+      "name": "NSEApplicationNavigationChromeClaimState",
+      "file": "src/NSE/Navigation/NSEApplicationNavigationChrome.tsx",
+      "line": 39,
+      "disposition": "rename:ApplicationNavigationChromeClaimState"
+    },
+    {
+      "name": "NSEApplicationNavigationChromeContext",
+      "file": "src/NSE/Navigation/NSEApplicationNavigationChrome.tsx",
+      "line": 148,
+      "disposition": "rename:ApplicationNavigationChromeContext"
+    },
+    {
+      "name": "NSEApplicationNavigationChromeController",
+      "file": "src/NSE/Navigation/NSEApplicationNavigationChrome.tsx",
+      "line": 71,
+      "disposition": "rename:ApplicationNavigationChromeController"
+    },
+    {
+      "name": "NSEApplicationNavigationChromeProvider",
+      "file": "src/NSE/Navigation/NSEApplicationNavigationChrome.tsx",
+      "line": 152,
+      "disposition": "rename:ApplicationNavigationChromeProvider"
+    },
+    {
+      "name": "NSEApplicationNavigationChromeSnapshot",
+      "file": "src/NSE/Navigation/NSEApplicationNavigationChrome.tsx",
+      "line": 34,
+      "disposition": "rename:ApplicationNavigationChromeSnapshot"
+    },
+    {
+      "name": "NSEApplicationRoot",
+      "file": "src/SynCloudOS/AppHosting/applicationRoot.tsx",
+      "line": 33,
+      "disposition": "rename:ApplicationRoot"
+    },
+    {
+      "name": "NSEAppMenuSurface",
+      "file": "src/NSE/Menus/NSEAppMenuSurface.tsx",
+      "line": 28,
+      "disposition": "rename:AppMenuSurface"
+    },
+    {
+      "name": "NSEAppMenuSurfaceProps",
+      "file": "src/NSE/Menus/NSEAppMenuSurface.tsx",
+      "line": 24,
+      "disposition": "rename:AppMenuSurfaceProps"
+    },
+    {
+      "name": "NSEArrangedStackView",
+      "file": "src/NSE/Layout/NSEStackView.tsx",
+      "line": 282,
+      "disposition": "rename:ArrangedStackView"
+    },
+    {
+      "name": "NSEAttachmentCellEditing",
+      "file": "src/NSE/TextEditing/backends/attachmentCell.ts",
+      "line": 27,
+      "disposition": "rename:AttachmentCellEditing"
+    },
+    {
+      "name": "NSEAuthoringContext",
+      "file": "src/NSE/Application/authoringContext.ts",
+      "line": 4,
+      "disposition": "rename:AuthoringContext"
+    },
+    {
+      "name": "NSEBorderlessWindowView",
+      "file": "src/NSE/Windows/NSEBorderlessWindowView.tsx",
+      "line": 31,
+      "disposition": "rename:BorderlessWindowView"
+    },
+    {
+      "name": "NSEBorderlessWindowViewProps",
+      "file": "src/NSE/Windows/NSEBorderlessWindowView.tsx",
+      "line": 26,
+      "disposition": "rename:BorderlessWindowViewProps"
+    },
+    {
+      "name": "NSEBrowserColumn",
+      "file": "src/NSE/DataViews/Browser/NSEBrowserColumn.tsx",
+      "line": 38,
+      "disposition": "rename:BrowserColumn"
+    },
+    {
+      "name": "NSEBrowserColumnProps",
+      "file": "src/NSE/DataViews/Browser/NSEBrowserColumn.tsx",
+      "line": 27,
+      "disposition": "rename:BrowserColumnProps"
+    },
+    {
+      "name": "NSEBrowserColumnState",
+      "file": "src/NSE/DataViews/Browser/browserTypes.ts",
+      "line": 54,
+      "disposition": "rename:BrowserColumnState"
+    },
+    {
+      "name": "NSEBrowserColumnStatus",
+      "file": "src/NSE/DataViews/Browser/browserTypes.ts",
+      "line": 52,
+      "disposition": "rename:BrowserColumnStatus"
+    },
+    {
+      "name": "NSEBrowserDataError",
+      "file": "src/NSE/DataViews/Browser/browserTypes.ts",
+      "line": 25,
+      "disposition": "rename:BrowserDataError"
+    },
+    {
+      "name": "NSEBrowserDragSnapshotError",
+      "file": "src/NSE/Drag/browserDragBridge.ts",
+      "line": 45,
+      "disposition": "rename:BrowserDragSnapshotError"
+    },
+    {
+      "name": "NSEBrowserItemPresentation",
+      "file": "src/NSE/DataViews/Browser/browserTypes.ts",
+      "line": 44,
+      "disposition": "rename:BrowserItemPresentation"
+    },
+    {
+      "name": "NSEBrowserPathItem",
+      "file": "src/NSE/DataViews/Browser/browserTypes.ts",
+      "line": 39,
+      "disposition": "rename:BrowserPathItem"
+    },
+    {
+      "name": "NSEBrowserRequestGate",
+      "file": "src/NSE/DataViews/Browser/browserRequestGate.ts",
+      "line": 21,
+      "disposition": "rename:BrowserRequestGate"
+    },
+    {
+      "name": "NSEButtonControl",
+      "file": "src/NSE/Controls/Buttons/NSEButton.tsx",
+      "line": 414,
+      "disposition": "rename:ButtonControl"
+    },
+    {
+      "name": "NSEButtonTone",
+      "file": "src/NSE/Controls/Buttons/NSEButton.tsx",
+      "line": 134,
+      "disposition": "rename:ButtonTone"
+    },
+    {
+      "name": "NSECalendarMonth",
+      "file": "src/NSE/DateTime/dateTimeTypes.ts",
+      "line": 25,
+      "disposition": "rename:CalendarMonth"
+    },
+    {
+      "name": "NSECalendarNavigationRequest",
+      "file": "src/NSE/DateTime/Calendar/calendarTypes.ts",
+      "line": 30,
+      "disposition": "rename:CalendarNavigationRequest"
+    },
+    {
+      "name": "NSECalendarNavigationUnit",
+      "file": "src/NSE/DateTime/Calendar/calendarTypes.ts",
+      "line": 29,
+      "disposition": "rename:CalendarNavigationUnit"
+    },
+    {
+      "name": "NSECalendarSelection",
+      "file": "src/NSE/DateTime/Calendar/calendarTypes.ts",
+      "line": 24,
+      "disposition": "rename:CalendarSelection"
+    },
+    {
+      "name": "NSECalendarSelectionMode",
+      "file": "src/NSE/DateTime/Calendar/calendarTypes.ts",
+      "line": 23,
+      "disposition": "rename:CalendarSelectionMode"
+    },
+    {
+      "name": "NSECalendarSystem",
+      "file": "src/NSE/DateTime/dateTimeTypes.ts",
+      "line": 26,
+      "disposition": "rename:CalendarSystem"
+    },
+    {
+      "name": "NSECapsuleSizing",
+      "file": "src/NSE/Controls/Buttons/NSEButtonFamilies.tsx",
+      "line": 29,
+      "disposition": "rename:CapsuleSizing"
+    },
+    {
+      "name": "NSECheckboxState",
+      "file": "src/NSE/Controls/Core/controlTypes.ts",
+      "line": 68,
+      "disposition": "rename:CheckboxState"
+    },
+    {
+      "name": "NSECheckedMenuItems",
+      "file": "src/NSE/Menus/menuTypes.ts",
+      "line": 158,
+      "disposition": "rename:CheckedMenuItems"
+    },
+    {
+      "name": "NSEChildrenToolbar",
+      "file": "src/NSE/Toolbars/NSEToolbarView.tsx",
+      "line": 352,
+      "disposition": "rename:ChildrenToolbar"
+    },
+    {
+      "name": "NSEChildTransition",
+      "file": "src/NSE/Application/viewControllerTransition.tsx",
+      "line": 41,
+      "disposition": "rename:ChildTransition"
+    },
+    {
+      "name": "NSEChildViewControllerView",
+      "file": "src/NSE/Application/viewControllerRenderer.tsx",
+      "line": 54,
+      "disposition": "rename:ChildViewControllerView"
+    },
+    {
+      "name": "NSEChromeBevel",
+      "file": "src/NSE/Appearance/NSEChromePrimitives.tsx",
+      "line": 92,
+      "disposition": "rename:ChromeBevel"
+    },
+    {
+      "name": "NSEChromeCap",
+      "file": "src/NSE/Appearance/NSEChromePrimitives.tsx",
+      "line": 93,
+      "disposition": "rename:ChromeCap"
+    },
+    {
+      "name": "NSEChromeGloss",
+      "file": "src/NSE/Appearance/NSEChromePrimitives.tsx",
+      "line": 96,
+      "disposition": "rename:ChromeGloss"
+    },
+    {
+      "name": "NSEChromeInnerShadow",
+      "file": "src/NSE/Appearance/NSEChromePrimitives.tsx",
+      "line": 97,
+      "disposition": "rename:ChromeInnerShadow"
+    },
+    {
+      "name": "NSEChromeLayerProps",
+      "file": "src/NSE/Appearance/NSEChromePrimitives.tsx",
+      "line": 50,
+      "disposition": "rename:ChromeLayerProps"
+    },
+    {
+      "name": "NSEChromeObstruction",
+      "file": "src/NSE/Layout/safeAreaModel.ts",
+      "line": 5,
+      "disposition": "rename:ChromeObstruction"
+    },
+    {
+      "name": "NSEChromePrimitive",
+      "file": "src/NSE/Appearance/NSEChromePrimitives.tsx",
+      "line": 63,
+      "disposition": "rename:ChromePrimitive"
+    },
+    {
+      "name": "NSEChromePrimitiveKind",
+      "file": "src/NSE/Appearance/NSEChromePrimitives.tsx",
+      "line": 25,
+      "disposition": "rename:ChromePrimitiveKind"
+    },
+    {
+      "name": "NSEChromePrimitiveProps",
+      "file": "src/NSE/Appearance/NSEChromePrimitives.tsx",
+      "line": 43,
+      "disposition": "rename:ChromePrimitiveProps"
+    },
+    {
+      "name": "NSEChromeSeparator",
+      "file": "src/NSE/Appearance/NSEChromePrimitives.tsx",
+      "line": 95,
+      "disposition": "rename:ChromeSeparator"
+    },
+    {
+      "name": "NSEChromeSplice",
+      "file": "src/NSE/Appearance/NSEChromePrimitives.tsx",
+      "line": 94,
+      "disposition": "rename:ChromeSplice"
+    },
+    {
+      "name": "NSEChromeSurface",
+      "file": "src/NSE/Appearance/NSEChromePrimitives.tsx",
+      "line": 91,
+      "disposition": "rename:ChromeSurface"
+    },
+    {
+      "name": "NSEChromeVisualState",
+      "file": "src/NSE/Appearance/NSEChromePrimitives.tsx",
+      "line": 34,
+      "disposition": "rename:ChromeVisualState"
+    },
+    {
+      "name": "NSECircularSlider",
+      "file": "src/NSE/Controls/Values/circularSlider.tsx",
+      "line": 52,
+      "disposition": "rename:CircularSlider"
+    },
+    {
+      "name": "NSECircularSliderControl",
+      "file": "src/NSE/Controls/Values/circularSlider.tsx",
+      "line": 58,
+      "disposition": "rename:CircularSliderControl"
+    },
+    {
+      "name": "NSECircularSliderProps",
+      "file": "src/NSE/Controls/Values/circularSlider.tsx",
+      "line": 33,
+      "disposition": "rename:CircularSliderProps"
+    },
+    {
+      "name": "NSEClipboardEventPort",
+      "file": "src/NSE/Drag/browserDragBridge.ts",
+      "line": 38,
+      "disposition": "rename:ClipboardEventPort"
+    },
+    {
+      "name": "NSECollectionDropProposal",
+      "file": "src/NSE/DataViews/Collection/collectionTypes.ts",
+      "line": 64,
+      "disposition": "rename:CollectionDropProposal"
+    },
+    {
+      "name": "NSECollectionLayoutItem",
+      "file": "src/NSE/DataViews/Collection/collectionTypes.ts",
+      "line": 29,
+      "disposition": "maps:NSCollectionLayoutItem"
+    },
+    {
+      "name": "NSECollectionViewCommonProps",
+      "file": "src/NSE/DataViews/Collection/collectionTypes.ts",
+      "line": 73,
+      "disposition": "rename:CollectionViewCommonProps"
+    },
+    {
+      "name": "NSECollectionViewCoverFlowProps",
+      "file": "src/NSE/DataViews/Collection/collectionTypes.ts",
+      "line": 105,
+      "disposition": "rename:CollectionViewCoverFlowProps"
+    },
+    {
+      "name": "NSECollectionViewGridProps",
+      "file": "src/NSE/DataViews/Collection/collectionTypes.ts",
+      "line": 83,
+      "disposition": "rename:CollectionViewGridProps"
+    },
+    {
+      "name": "NSECollectionViewItemProps",
+      "file": "src/NSE/DataViews/Collection/collectionTypes.ts",
+      "line": 56,
+      "disposition": "rename:CollectionViewItemProps"
+    },
+    {
+      "name": "NSEColourChange",
+      "file": "src/NSE/Colour/ColourPanel/colourPanelTypes.ts",
+      "line": 29,
+      "disposition": "rename:ColourChange"
+    },
+    {
+      "name": "NSEColourCommitCompensationError",
+      "file": "src/NSE/Colour/ColourPanel/NSEColourPanelController.ts",
+      "line": 43,
+      "disposition": "rename:ColourCommitCompensationError"
+    },
+    {
+      "name": "NSEColourCommitUnknownStateError",
+      "file": "src/NSE/Colour/ColourPanel/NSEColourPanelController.ts",
+      "line": 34,
+      "disposition": "rename:ColourCommitUnknownStateError"
+    },
+    {
+      "name": "NSEColourCrayonsMode",
+      "file": "src/NSE/Colour/ColourPanel/NSEColourPanelModes.tsx",
+      "line": 268,
+      "disposition": "rename:ColourCrayonsMode"
+    },
+    {
+      "name": "NSEColourCrayonsModeIcon",
+      "file": "src/NSE/Colour/ColourPanel/colourPanelIcons.tsx",
+      "line": 97,
+      "disposition": "rename:ColourCrayonsModeIcon"
+    },
+    {
+      "name": "NSEColourImageMode",
+      "file": "src/NSE/Colour/ColourPanel/NSEColourPanelModes.tsx",
+      "line": 150,
+      "disposition": "rename:ColourImageMode"
+    },
+    {
+      "name": "NSEColourImageModeIcon",
+      "file": "src/NSE/Colour/ColourPanel/colourPanelIcons.tsx",
+      "line": 82,
+      "disposition": "rename:ColourImageModeIcon"
+    },
+    {
+      "name": "NSEColourList",
+      "file": "src/NSE/Colour/ColourPanel/colourPalettes.ts",
+      "line": 33,
+      "disposition": "maps:NSColorList"
+    },
+    {
+      "name": "NSEColourMagnifierIcon",
+      "file": "src/NSE/Colour/ColourPanel/colourPanelIcons.tsx",
+      "line": 115,
+      "disposition": "rename:ColourMagnifierIcon"
+    },
+    {
+      "name": "NSEColourPalettesMode",
+      "file": "src/NSE/Colour/ColourPanel/NSEColourPanelModes.tsx",
+      "line": 73,
+      "disposition": "rename:ColourPalettesMode"
+    },
+    {
+      "name": "NSEColourPalettesModeIcon",
+      "file": "src/NSE/Colour/ColourPanel/colourPanelIcons.tsx",
+      "line": 74,
+      "disposition": "rename:ColourPalettesModeIcon"
+    },
+    {
+      "name": "NSEColourPanelCommandsContext",
+      "file": "src/NSE/Colour/ColourPanel/NSEColourPanelProvider.tsx",
+      "line": 40,
+      "disposition": "rename:ColourPanelCommandsContext"
+    },
+    {
+      "name": "NSEColourPanelDragContext",
+      "file": "src/NSE/Colour/ColourPanel/NSEColourPanelProvider.tsx",
+      "line": 48,
+      "disposition": "rename:ColourPanelDragContext"
+    },
+    {
+      "name": "NSEColourPanelDragPort",
+      "file": "src/NSE/Colour/ColourPanel/NSEColourPanelProvider.tsx",
+      "line": 41,
+      "disposition": "rename:ColourPanelDragPort"
+    },
+    {
+      "name": "NSEColourPanelPreferencePersistence",
+      "file": "src/NSE/Colour/ColourPanel/colourPanelPreferences.ts",
+      "line": 32,
+      "disposition": "rename:ColourPanelPreferencePersistence"
+    },
+    {
+      "name": "NSEColourPanelPreferences",
+      "file": "src/NSE/Colour/ColourPanel/colourPanelPreferences.ts",
+      "line": 25,
+      "disposition": "rename:ColourPanelPreferences"
+    },
+    {
+      "name": "NSEColourPanelPreferencesController",
+      "file": "src/NSE/Colour/ColourPanel/colourPanelPreferences.ts",
+      "line": 30,
+      "disposition": "rename:ColourPanelPreferencesController"
+    },
+    {
+      "name": "NSEColourPanelResponderContext",
+      "file": "src/NSE/Colour/ColourPanel/NSEColourPanelProvider.tsx",
+      "line": 39,
+      "disposition": "rename:ColourPanelResponderContext"
+    },
+    {
+      "name": "NSEColourPanelServiceContext",
+      "file": "src/NSE/Colour/ColourPanel/NSEColourPanelProvider.tsx",
+      "line": 37,
+      "disposition": "rename:ColourPanelServiceContext"
+    },
+    {
+      "name": "NSEColourPanelServicePort",
+      "file": "src/NSE/Colour/ColourPanel/NSEColourPanelController.ts",
+      "line": 28,
+      "disposition": "rename:ColourPanelServicePort"
+    },
+    {
+      "name": "NSEColourPicker",
+      "file": "src/NSE/Colour/ColourPanel/colourPanelTypes.ts",
+      "line": 54,
+      "disposition": "maps:NSColorPicker"
+    },
+    {
+      "name": "NSEColourPickerContext",
+      "file": "src/NSE/Colour/ColourPanel/colourPanelTypes.ts",
+      "line": 48,
+      "disposition": "derived:NSEColourPicker"
+    },
+    {
+      "name": "NSEColourSliderModel",
+      "file": "src/NSE/Colour/Pickers/NSEColourSliderPicker.tsx",
+      "line": 32,
+      "disposition": "rename:ColourSliderModel"
+    },
+    {
+      "name": "NSEColourSliderPicker",
+      "file": "src/NSE/Colour/Pickers/NSEColourSliderPicker.tsx",
+      "line": 65,
+      "disposition": "rename:ColourSliderPicker"
+    },
+    {
+      "name": "NSEColourSliderPickerProps",
+      "file": "src/NSE/Colour/Pickers/NSEColourSliderPicker.tsx",
+      "line": 34,
+      "disposition": "rename:ColourSliderPickerProps"
+    },
+    {
+      "name": "NSEColourSlidersMode",
+      "file": "src/NSE/Colour/ColourPanel/NSEColourPanelModes.tsx",
+      "line": 61,
+      "disposition": "rename:ColourSlidersMode"
+    },
+    {
+      "name": "NSEColourSlidersModeIcon",
+      "file": "src/NSE/Colour/ColourPanel/colourPanelIcons.tsx",
+      "line": 56,
+      "disposition": "rename:ColourSlidersModeIcon"
+    },
+    {
+      "name": "NSEColourSwatches",
+      "file": "src/NSE/Colour/Pickers/NSEColourSwatches.tsx",
+      "line": 30,
+      "disposition": "rename:ColourSwatches"
+    },
+    {
+      "name": "NSEColourSwatchesProps",
+      "file": "src/NSE/Colour/Pickers/NSEColourSwatches.tsx",
+      "line": 23,
+      "disposition": "rename:ColourSwatchesProps"
+    },
+    {
+      "name": "NSEColourSwatchStrip",
+      "file": "src/NSE/Colour/ColourPanel/NSEColourSwatchStrip.tsx",
+      "line": 59,
+      "disposition": "rename:ColourSwatchStrip"
+    },
+    {
+      "name": "NSEColourSwatchStripProps",
+      "file": "src/NSE/Colour/ColourPanel/NSEColourSwatchStrip.tsx",
+      "line": 30,
+      "disposition": "rename:ColourSwatchStripProps"
+    },
+    {
+      "name": "NSEColourTarget",
+      "file": "src/NSE/Colour/ColourPanel/colourPanelTypes.ts",
+      "line": 36,
+      "disposition": "rename:ColourTarget"
+    },
+    {
+      "name": "NSEColourTransferAdapter",
+      "file": "src/NSE/Colour/Transfer/colourTransferTypes.ts",
+      "line": 32,
+      "disposition": "rename:ColourTransferAdapter"
+    },
+    {
+      "name": "NSEColourTransferPayload",
+      "file": "src/NSE/Colour/Transfer/colourTransferTypes.ts",
+      "line": 21,
+      "disposition": "rename:ColourTransferPayload"
+    },
+    {
+      "name": "NSEColourTransferResult",
+      "file": "src/NSE/Colour/Transfer/colourTransferTypes.ts",
+      "line": 26,
+      "disposition": "rename:ColourTransferResult"
+    },
+    {
+      "name": "NSEColourWheelMode",
+      "file": "src/NSE/Colour/ColourPanel/NSEColourPanelModes.tsx",
+      "line": 46,
+      "disposition": "rename:ColourWheelMode"
+    },
+    {
+      "name": "NSEColourWheelModeIcon",
+      "file": "src/NSE/Colour/ColourPanel/colourPanelIcons.tsx",
+      "line": 35,
+      "disposition": "rename:ColourWheelModeIcon"
+    },
+    {
+      "name": "NSEColourWheelPicker",
+      "file": "src/NSE/Colour/Pickers/NSEColourWheelPicker.tsx",
+      "line": 54,
+      "disposition": "rename:ColourWheelPicker"
+    },
+    {
+      "name": "NSEColourWheelPickerProps",
+      "file": "src/NSE/Colour/Pickers/NSEColourWheelPicker.tsx",
+      "line": 27,
+      "disposition": "rename:ColourWheelPickerProps"
+    },
+    {
+      "name": "NSEComboBoxControl",
+      "file": "src/NSE/Controls/Completion/NSEComboBox.tsx",
+      "line": 39,
+      "disposition": "rename:ComboBoxControl"
+    },
+    {
+      "name": "NSECommandMenuProps",
+      "file": "src/NSE/Menus/NSEMenuView.tsx",
+      "line": 92,
+      "disposition": "rename:CommandMenuProps"
+    },
+    {
+      "name": "NSECommandMenuSurface",
+      "file": "src/NSE/Menus/NSEMenuView.tsx",
+      "line": 155,
+      "disposition": "rename:CommandMenuSurface"
+    },
+    {
+      "name": "NSEComparisonPredicateEditor",
+      "file": "src/NSE/DataViews/RuleEditor/NSEPredicateEditor.tsx",
+      "line": 42,
+      "disposition": "rename:ComparisonPredicateEditor"
+    },
+    {
+      "name": "NSEConfiguredToolbar",
+      "file": "src/NSE/Toolbars/NSEToolbarView.tsx",
+      "line": 104,
+      "disposition": "rename:ConfiguredToolbar"
+    },
+    {
+      "name": "NSEConformanceEvidenceContext",
+      "file": "src/NSE/Developer/NSEConformanceEvidence.tsx",
+      "line": 39,
+      "disposition": "rename:ConformanceEvidenceContext"
+    },
+    {
+      "name": "NSEConformanceEvidencePort",
+      "file": "src/NSE/Developer/NSEConformanceEvidence.tsx",
+      "line": 28,
+      "disposition": "rename:ConformanceEvidencePort"
+    },
+    {
+      "name": "NSEConformanceEvidenceProvider",
+      "file": "src/NSE/Developer/NSEConformanceEvidence.tsx",
+      "line": 50,
+      "disposition": "rename:ConformanceEvidenceProvider"
+    },
+    {
+      "name": "NSEConformanceEvidenceProviderProps",
+      "file": "src/NSE/Developer/NSEConformanceEvidence.tsx",
+      "line": 41,
+      "disposition": "rename:ConformanceEvidenceProviderProps"
+    },
+    {
+      "name": "NSEContainerContentLayout",
+      "file": "src/NSE/Containers/NSEContainers.tsx",
+      "line": 52,
+      "disposition": "rename:ContainerContentLayout"
+    },
+    {
+      "name": "NSEContainerElement",
+      "file": "src/NSE/Containers/NSEContainers.tsx",
+      "line": 37,
+      "disposition": "rename:ContainerElement"
+    },
+    {
+      "name": "NSEControlActionProps",
+      "file": "src/NSE/Controls/Core/controlTypes.ts",
+      "line": 33,
+      "disposition": "rename:ControlActionProps"
+    },
+    {
+      "name": "NSEControlCatalogue",
+      "file": "src/NSE/NSE.ts",
+      "line": 101,
+      "disposition": "rename:ControlCatalogue"
+    },
+    {
+      "name": "NSEControlCommandBinding",
+      "file": "src/NSE/Controls/Core/controlTypes.ts",
+      "line": 62,
+      "disposition": "rename:ControlCommandBinding"
+    },
+    {
+      "name": "NSEControlCommandFailure",
+      "file": "src/NSE/Controls/Core/useNSEControlCommand.tsx",
+      "line": 62,
+      "disposition": "rename:ControlCommandFailure"
+    },
+    {
+      "name": "NSEControlCommandState",
+      "file": "src/NSE/Controls/Core/useNSEControlCommand.tsx",
+      "line": 52,
+      "disposition": "rename:ControlCommandState"
+    },
+    {
+      "name": "NSEControlImage",
+      "file": "src/NSE/Controls/Images/NSEControlImage.tsx",
+      "line": 26,
+      "disposition": "rename:ControlImage"
+    },
+    {
+      "name": "NSEController",
+      "file": "src/NSE/Controllers/NSEController.ts",
+      "line": 132,
+      "disposition": "maps:NSController"
+    },
+    {
+      "name": "NSEControllerLifetime",
+      "file": "src/NSE/Controllers/controllerLifetime.ts",
+      "line": 11,
+      "disposition": "rename:ControllerLifetime"
+    },
+    {
+      "name": "NSEControllerNavigationChromeBoundary",
+      "file": "src/NSE/Navigation/NSEApplicationNavigationChrome.tsx",
+      "line": 176,
+      "disposition": "rename:ControllerNavigationChromeBoundary"
+    },
+    {
+      "name": "NSEControllerNavigationChromeBoundaryContext",
+      "file": "src/NSE/Navigation/NSEApplicationNavigationChrome.tsx",
+      "line": 150,
+      "disposition": "rename:ControllerNavigationChromeBoundaryContext"
+    },
+    {
+      "name": "NSEControllerResponder",
+      "file": "src/SynCloudOS/AppHosting/applicationHosting.tsx",
+      "line": 171,
+      "disposition": "rename:ControllerResponder"
+    },
+    {
+      "name": "NSEControllerSheetSurface",
+      "file": "src/NSE/Windows/windowSheetSurfaces.tsx",
+      "line": 13,
+      "disposition": "rename:ControllerSheetSurface"
+    },
+    {
+      "name": "NSEControlRuntimeContext",
+      "file": "src/NSE/Controls/Core/useNSEControlCommand.tsx",
+      "line": 36,
+      "disposition": "rename:ControlRuntimeContext"
+    },
+    {
+      "name": "NSEControlRuntimePort",
+      "file": "src/NSE/Controls/Core/controlTypes.ts",
+      "line": 75,
+      "disposition": "rename:ControlRuntimePort"
+    },
+    {
+      "name": "NSEControlRuntimeProvider",
+      "file": "src/NSE/Controls/Core/useNSEControlCommand.tsx",
+      "line": 44,
+      "disposition": "rename:ControlRuntimeProvider"
+    },
+    {
+      "name": "NSEControlRuntimeProviderProps",
+      "file": "src/NSE/Controls/Core/useNSEControlCommand.tsx",
+      "line": 38,
+      "disposition": "rename:ControlRuntimeProviderProps"
+    },
+    {
+      "name": "NSEControlValueState",
+      "file": "src/NSE/Controls/Core/useNSEControlValue.ts",
+      "line": 32,
+      "disposition": "rename:ControlValueState"
+    },
+    {
+      "name": "NSECursorDescriptor",
+      "file": "src/NSE/Pointer/cursorTypes.ts",
+      "line": 29,
+      "disposition": "rename:CursorDescriptor"
+    },
+    {
+      "name": "NSECustomPresentation",
+      "file": "src/SynCloudOS/AppHosting/applicationHosting.tsx",
+      "line": 305,
+      "disposition": "rename:CustomPresentation"
+    },
+    {
+      "name": "NSEDataTransferReadPort",
+      "file": "src/NSE/Drag/browserDragBridge.ts",
+      "line": 24,
+      "disposition": "rename:DataTransferReadPort"
+    },
+    {
+      "name": "NSEDataTransferWritePort",
+      "file": "src/NSE/Drag/browserDragBridge.ts",
+      "line": 33,
+      "disposition": "rename:DataTransferWritePort"
+    },
+    {
+      "name": "NSEDataViewCoordinator",
+      "file": "src/NSE/DataViews/Core/NSEDataViewCoordinator.ts",
+      "line": 65,
+      "disposition": "rename:DataViewCoordinator"
+    },
+    {
+      "name": "NSEDataViewDropLocation",
+      "file": "src/NSE/DataViews/Drag/useNSEDataViewDrag.ts",
+      "line": 77,
+      "disposition": "rename:DataViewDropLocation"
+    },
+    {
+      "name": "NSEDataViewDropProposal",
+      "file": "src/NSE/DataViews/Drag/useNSEDataViewDrag.ts",
+      "line": 83,
+      "disposition": "rename:DataViewDropProposal"
+    },
+    {
+      "name": "NSEDateEntry",
+      "file": "src/NSE/DateTime/Pickers/dateEntry.tsx",
+      "line": 104,
+      "disposition": "rename:DateEntry"
+    },
+    {
+      "name": "NSEDateEntryEditorContext",
+      "file": "src/NSE/DateTime/Pickers/datePickerTypes.ts",
+      "line": 27,
+      "disposition": "rename:DateEntryEditorContext"
+    },
+    {
+      "name": "NSEDateEntryEditorMode",
+      "file": "src/NSE/DateTime/Pickers/datePickerTypes.ts",
+      "line": 26,
+      "disposition": "rename:DateEntryEditorMode"
+    },
+    {
+      "name": "NSEDateEntryField",
+      "file": "src/NSE/DateTime/Pickers/datePickerTypes.ts",
+      "line": 25,
+      "disposition": "rename:DateEntryField"
+    },
+    {
+      "name": "NSEDateEntryMode",
+      "file": "src/NSE/DateTime/Pickers/datePickerTypes.ts",
+      "line": 24,
+      "disposition": "rename:DateEntryMode"
+    },
+    {
+      "name": "NSEDateEntryProps",
+      "file": "src/NSE/DateTime/Pickers/datePickerTypes.ts",
+      "line": 31,
+      "disposition": "rename:DateEntryProps"
+    },
+    {
+      "name": "NSEDateParseResult",
+      "file": "src/NSE/DateTime/dateTimeTypes.ts",
+      "line": 34,
+      "disposition": "rename:DateParseResult"
+    },
+    {
+      "name": "NSEDatePickerBaseProps",
+      "file": "src/NSE/DateTime/Pickers/datePickerTypes.ts",
+      "line": 42,
+      "disposition": "rename:DatePickerBaseProps"
+    },
+    {
+      "name": "NSEDatePickerContent",
+      "file": "src/NSE/DateTime/Pickers/NSEDatePicker.tsx",
+      "line": 58,
+      "disposition": "rename:DatePickerContent"
+    },
+    {
+      "name": "NSEDatePickerDrawingContext",
+      "file": "src/NSE/DateTime/Pickers/datePickerDrawing.ts",
+      "line": 8,
+      "disposition": "rename:DatePickerDrawingContext"
+    },
+    {
+      "name": "NSEDateRangeEntry",
+      "file": "src/NSE/DateTime/Pickers/dateRangeEntry.tsx",
+      "line": 45,
+      "disposition": "rename:DateRangeEntry"
+    },
+    {
+      "name": "NSEDateRangeEntryProps",
+      "file": "src/NSE/DateTime/Pickers/datePickerTypes.ts",
+      "line": 37,
+      "disposition": "rename:DateRangeEntryProps"
+    },
+    {
+      "name": "NSEDateSegmentEditor",
+      "file": "src/NSE/DateTime/Pickers/dateEntry.tsx",
+      "line": 66,
+      "disposition": "rename:DateSegmentEditor"
+    },
+    {
+      "name": "NSEDateSegmentEditorProps",
+      "file": "src/NSE/DateTime/Pickers/dateEntry.tsx",
+      "line": 53,
+      "disposition": "rename:DateSegmentEditorProps"
+    },
+    {
+      "name": "NSEDateTimeEntry",
+      "file": "src/NSE/DateTime/Pickers/dateTimeEntry.tsx",
+      "line": 78,
+      "disposition": "rename:DateTimeEntry"
+    },
+    {
+      "name": "NSEDateTimeEntryMode",
+      "file": "src/NSE/DateTime/Pickers/datePickerTypes.ts",
+      "line": 35,
+      "disposition": "rename:DateTimeEntryMode"
+    },
+    {
+      "name": "NSEDateTimeEntryProps",
+      "file": "src/NSE/DateTime/Pickers/datePickerTypes.ts",
+      "line": 36,
+      "disposition": "rename:DateTimeEntryProps"
+    },
+    {
+      "name": "NSEDialogSurface",
+      "file": "src/NSE/Overlays/NSEDialogSurface.tsx",
+      "line": 29,
+      "disposition": "rename:DialogSurface"
+    },
+    {
+      "name": "NSEDialogSurfaceProps",
+      "file": "src/NSE/Overlays/NSEDialogSurface.tsx",
+      "line": 24,
+      "disposition": "rename:DialogSurfaceProps"
+    },
+    {
+      "name": "NSEDisclosureOptions",
+      "file": "src/NSE/Containers/NSEContainers.tsx",
+      "line": 41,
+      "disposition": "rename:DisclosureOptions"
+    },
+    {
+      "name": "NSEDisposable",
+      "file": "src/NSE/Application/ownedFactory.ts",
+      "line": 4,
+      "disposition": "rename:Disposable"
+    },
+    {
+      "name": "NSEDivider",
+      "file": "src/NSE/Controls/Selection/NSEDivider.tsx",
+      "line": 42,
+      "disposition": "rename:Divider"
+    },
+    {
+      "name": "NSEDividerProps",
+      "file": "src/NSE/Controls/Selection/NSEDivider.tsx",
+      "line": 24,
+      "disposition": "rename:DividerProps"
+    },
+    {
+      "name": "NSEDragCommandPort",
+      "file": "src/NSE/Drag/dragCommandPort.ts",
+      "line": 27,
+      "disposition": "rename:DragCommandPort"
+    },
+    {
+      "name": "NSEDragSessionHandle",
+      "file": "src/NSE/Drag/dragSessionPort.ts",
+      "line": 24,
+      "disposition": "rename:DragSessionHandle"
+    },
+    {
+      "name": "NSEDragSessionPort",
+      "file": "src/NSE/Drag/dragSessionPort.ts",
+      "line": 31,
+      "disposition": "rename:DragSessionPort"
+    },
+    {
+      "name": "NSEEditableTextField",
+      "file": "src/NSE/Controls/Fields/NSEFields.tsx",
+      "line": 195,
+      "disposition": "rename:EditableTextField"
+    },
+    {
+      "name": "NSEEditableTextFieldProps",
+      "file": "src/NSE/Controls/Fields/NSEFields.tsx",
+      "line": 188,
+      "disposition": "rename:EditableTextFieldProps"
+    },
+    {
+      "name": "NSEEyeDropperAdapter",
+      "file": "src/NSE/Colour/Pickers/NSEEyeDropperAdapter.ts",
+      "line": 30,
+      "disposition": "rename:EyeDropperAdapter"
+    },
+    {
+      "name": "NSEEyeDropperResult",
+      "file": "src/NSE/Colour/Pickers/NSEEyeDropperAdapter.ts",
+      "line": 23,
+      "disposition": "rename:EyeDropperResult"
+    },
+    {
+      "name": "NSEFeedbackProvider",
+      "file": "src/NSE/Feedback/index.ts",
+      "line": 25,
+      "disposition": "rename:FeedbackProvider"
+    },
+    {
+      "name": "NSEFilePanelService",
+      "file": "src/NSE/FilePanels/NSEOpenPanel.tsx",
+      "line": 30,
+      "disposition": "rename:FilePanelService"
+    },
+    {
+      "name": "NSEFilePanelView",
+      "file": "src/NSE/FilePanels/NSEFilePanelView.tsx",
+      "line": 73,
+      "disposition": "rename:FilePanelView"
+    },
+    {
+      "name": "NSEFilePanelViewProps",
+      "file": "src/NSE/FilePanels/NSEFilePanelView.tsx",
+      "line": 44,
+      "disposition": "rename:FilePanelViewProps"
+    },
+    {
+      "name": "NSEFilePanelWindowBridge",
+      "file": "src/NSE/FilePanels/NSEFilePanelView.tsx",
+      "line": 37,
+      "disposition": "rename:FilePanelWindowBridge"
+    },
+    {
+      "name": "NSEFilePanelWindowRequest",
+      "file": "src/NSE/FilePanels/NSEFilePanelView.tsx",
+      "line": 29,
+      "disposition": "rename:FilePanelWindowRequest"
+    },
+    {
+      "name": "NSEFilePanelWindowRole",
+      "file": "src/NSE/FilePanels/NSEFilePanelView.tsx",
+      "line": 27,
+      "disposition": "rename:FilePanelWindowRole"
+    },
+    {
+      "name": "NSEFilterComponents",
+      "file": "src/NSE/Animation/NSEPresentation.tsx",
+      "line": 61,
+      "disposition": "rename:FilterComponents"
+    },
+    {
+      "name": "NSEFlowStackView",
+      "file": "src/NSE/Layout/flowStackView.tsx",
+      "line": 61,
+      "disposition": "rename:FlowStackView"
+    },
+    {
+      "name": "NSEFocusPort",
+      "file": "src/NSE/Focus/NSEFocusPort.tsx",
+      "line": 41,
+      "disposition": "rename:FocusPort"
+    },
+    {
+      "name": "NSEFocusPortContext",
+      "file": "src/NSE/Focus/NSEFocusPort.tsx",
+      "line": 46,
+      "disposition": "rename:FocusPortContext"
+    },
+    {
+      "name": "NSEFocusPortProvider",
+      "file": "src/NSE/Focus/NSEFocusPort.tsx",
+      "line": 48,
+      "disposition": "rename:FocusPortProvider"
+    },
+    {
+      "name": "NSEFocusScope",
+      "file": "src/NSE/Focus/NSEFocusPort.tsx",
+      "line": 56,
+      "disposition": "rename:FocusScope"
+    },
+    {
+      "name": "NSEFocusScopeKind",
+      "file": "src/NSE/Focus/NSEFocusPort.tsx",
+      "line": 27,
+      "disposition": "rename:FocusScopeKind"
+    },
+    {
+      "name": "NSEFocusScopeOptions",
+      "file": "src/NSE/Focus/NSEFocusPort.tsx",
+      "line": 29,
+      "disposition": "rename:FocusScopeOptions"
+    },
+    {
+      "name": "NSEFontCommandPayload",
+      "file": "src/NSE/Typography/typographyTypes.ts",
+      "line": 27,
+      "disposition": "rename:FontCommandPayload"
+    },
+    {
+      "name": "NSEFontImportResult",
+      "file": "src/NSE/Typography/NSEFontLibrary.ts",
+      "line": 71,
+      "disposition": "rename:FontImportResult"
+    },
+    {
+      "name": "NSEFontLibrary",
+      "file": "src/NSE/Typography/NSEFontLibrary.ts",
+      "line": 175,
+      "disposition": "rename:FontLibrary"
+    },
+    {
+      "name": "NSEFontLibraryOptions",
+      "file": "src/NSE/Typography/NSEFontLibrary.ts",
+      "line": 82,
+      "disposition": "rename:FontLibraryOptions"
+    },
+    {
+      "name": "NSEFontLibrarySnapshot",
+      "file": "src/NSE/Typography/NSEFontLibrary.ts",
+      "line": 76,
+      "disposition": "rename:FontLibrarySnapshot"
+    },
+    {
+      "name": "NSEFontPanelCommandId",
+      "file": "src/NSE/Typography/NSEFontPanel.tsx",
+      "line": 53,
+      "disposition": "rename:FontPanelCommandId"
+    },
+    {
+      "name": "NSEFontPanelCommandPort",
+      "file": "src/NSE/Typography/NSEFontPanel.tsx",
+      "line": 55,
+      "disposition": "rename:FontPanelCommandPort"
+    },
+    {
+      "name": "NSEFontPanelCommandResult",
+      "file": "src/NSE/Typography/NSEFontPanel.tsx",
+      "line": 54,
+      "disposition": "rename:FontPanelCommandResult"
+    },
+    {
+      "name": "NSEFontPreferenceStore",
+      "file": "src/NSE/Typography/NSEFontLibrary.ts",
+      "line": 66,
+      "disposition": "rename:FontPreferenceStore"
+    },
+    {
+      "name": "NSEFormattedControlProps",
+      "file": "src/NSE/Controls/Core/controlTypes.ts",
+      "line": 103,
+      "disposition": "rename:FormattedControlProps"
+    },
+    {
+      "name": "NSEGlassPanel",
+      "file": "src/NSE/Components/NSEGlassPanel.tsx",
+      "line": 28,
+      "disposition": "rename:GlassPanel"
+    },
+    {
+      "name": "NSEGraphicalCalendar",
+      "file": "src/NSE/DateTime/Calendar/graphicalCalendar.tsx",
+      "line": 49,
+      "disposition": "rename:GraphicalCalendar"
+    },
+    {
+      "name": "NSEGraphicalCalendarMonth",
+      "file": "src/NSE/DateTime/Calendar/graphicalCalendarMonth.tsx",
+      "line": 26,
+      "disposition": "rename:GraphicalCalendarMonth"
+    },
+    {
+      "name": "NSEGraphicalCalendarProps",
+      "file": "src/NSE/DateTime/Calendar/calendarTypes.ts",
+      "line": 32,
+      "disposition": "rename:GraphicalCalendarProps"
+    },
+    {
+      "name": "NSEGraphicalClock",
+      "file": "src/NSE/DateTime/Calendar/graphicalClock.tsx",
+      "line": 29,
+      "disposition": "rename:GraphicalClock"
+    },
+    {
+      "name": "NSEGraphicalClockProps",
+      "file": "src/NSE/DateTime/Calendar/calendarTypes.ts",
+      "line": 51,
+      "disposition": "rename:GraphicalClockProps"
+    },
+    {
+      "name": "NSEGridPlacements",
+      "file": "src/NSE/Layout/NSEGridView.tsx",
+      "line": 57,
+      "disposition": "rename:GridPlacements"
+    },
+    {
+      "name": "NSEGroupedList",
+      "file": "src/NSE/Controls/Selection/NSEGroupedList.tsx",
+      "line": 48,
+      "disposition": "rename:GroupedRows"
+    },
+    {
+      "name": "NSEGroupedListEdge",
+      "file": "src/NSE/Controls/Selection/NSEGroupedList.tsx",
+      "line": 26,
+      "disposition": "rename:GroupedRowsEdge"
+    },
+    {
+      "name": "NSEGroupedListProps",
+      "file": "src/NSE/Controls/Selection/NSEGroupedList.tsx",
+      "line": 28,
+      "disposition": "rename:GroupedRowsProps"
+    },
+    {
+      "name": "NSEHierarchyStack",
+      "file": "src/NSE/Navigation/NSEHierarchyStack.tsx",
+      "line": 52,
+      "disposition": "rename:HierarchyStack"
+    },
+    {
+      "name": "NSEHierarchyStackProps",
+      "file": "src/NSE/Navigation/NSEHierarchyStack.tsx",
+      "line": 34,
+      "disposition": "rename:HierarchyStackProps"
+    },
+    {
+      "name": "NSEHUDWindowView",
+      "file": "src/NSE/Windows/NSEHUDWindowView.tsx",
+      "line": 64,
+      "disposition": "rename:HUDWindowView"
+    },
+    {
+      "name": "NSEInlineSelect",
+      "file": "src/NSE/DateTime/Pickers/timeEntry.tsx",
+      "line": 79,
+      "disposition": "rename:InlineSelect"
+    },
+    {
+      "name": "NSEInlineSelectProps",
+      "file": "src/NSE/DateTime/Pickers/timeEntry.tsx",
+      "line": 70,
+      "disposition": "rename:InlineSelectProps"
+    },
+    {
+      "name": "NSEInputBox",
+      "file": "src/NSE/Controls/Fields/NSEFields.tsx",
+      "line": 443,
+      "disposition": "rename:InputBox"
+    },
+    {
+      "name": "NSEInputBoxProps",
+      "file": "src/NSE/Controls/Fields/NSEFields.tsx",
+      "line": 413,
+      "disposition": "rename:InputBoxProps"
+    },
+    {
+      "name": "NSEItemMenu",
+      "file": "src/NSE/Menus/NSEMenuView.tsx",
+      "line": 642,
+      "disposition": "rename:ItemMenu"
+    },
+    {
+      "name": "NSEItemMenuProps",
+      "file": "src/NSE/Menus/NSEMenuView.tsx",
+      "line": 106,
+      "disposition": "rename:ItemMenuProps"
+    },
+    {
+      "name": "NSEKeyframes",
+      "file": "src/NSE/Animation/NSEPresentation.tsx",
+      "line": 66,
+      "disposition": "rename:Keyframes"
+    },
+    {
+      "name": "NSELabelHelp",
+      "file": "src/NSE/Tooltips/NSELabelHelp.tsx",
+      "line": 28,
+      "disposition": "rename:LabelHelp"
+    },
+    {
+      "name": "NSELabelTextField",
+      "file": "src/NSE/Controls/Fields/NSEFields.tsx",
+      "line": 170,
+      "disposition": "rename:LabelTextField"
+    },
+    {
+      "name": "NSELayoutGuideStore",
+      "file": "src/NSE/Layout/NSELayoutGuide.ts",
+      "line": 13,
+      "disposition": "rename:LayoutGuideStore"
+    },
+    {
+      "name": "NSELayoutTransitionTiming",
+      "file": "src/NSE/Animation/NSELayoutView.tsx",
+      "line": 27,
+      "disposition": "rename:LayoutTransitionTiming"
+    },
+    {
+      "name": "NSELayoutView",
+      "file": "src/NSE/Animation/NSELayoutView.tsx",
+      "line": 170,
+      "disposition": "rename:LayoutView"
+    },
+    {
+      "name": "NSELayoutViewProps",
+      "file": "src/NSE/Animation/NSELayoutView.tsx",
+      "line": 32,
+      "disposition": "rename:LayoutViewProps"
+    },
+    {
+      "name": "NSELinearSlider",
+      "file": "src/NSE/Controls/Values/NSESlider.tsx",
+      "line": 61,
+      "disposition": "rename:LinearSlider"
+    },
+    {
+      "name": "NSEListboxOption",
+      "file": "src/NSE/Overlays/NSEListboxPopup.tsx",
+      "line": 29,
+      "disposition": "rename:ListboxOption"
+    },
+    {
+      "name": "NSEListboxPopup",
+      "file": "src/NSE/Overlays/NSEListboxPopup.tsx",
+      "line": 123,
+      "disposition": "rename:ListboxPopup"
+    },
+    {
+      "name": "NSEListboxPopupProps",
+      "file": "src/NSE/Overlays/NSEListboxPopup.tsx",
+      "line": 41,
+      "disposition": "rename:ListboxPopupProps"
+    },
+    {
+      "name": "NSEListItem",
+      "file": "src/NSE/Controls/Selection/NSEListItem.tsx",
+      "line": 41,
+      "disposition": "rename:GroupedRow"
+    },
+    {
+      "name": "NSEListItemProps",
+      "file": "src/NSE/Controls/Selection/NSEListItem.tsx",
+      "line": 29,
+      "disposition": "rename:GroupedRowProps"
+    },
+    {
+      "name": "NSELocalisationPort",
+      "file": "src/NSE/Navigation/compactMoreTitle.ts",
+      "line": 9,
+      "disposition": "rename:LocalisationPort"
+    },
+    {
+      "name": "NSELocalisationProvider",
+      "file": "src/NSE/Navigation/compactMoreTitle.ts",
+      "line": 15,
+      "disposition": "rename:LocalisationProvider"
+    },
+    {
+      "name": "NSELogicalPlacement",
+      "file": "src/NSE/Overlays/overlayTypes.ts",
+      "line": 32,
+      "disposition": "rename:LogicalPlacement"
+    },
+    {
+      "name": "NSEManagedAnimationHost",
+      "file": "src/NSE/Application/managedAnimationRenderer.ts",
+      "line": 10,
+      "disposition": "rename:ManagedAnimationHost"
+    },
+    {
+      "name": "NSEManagedWindowTitleBar",
+      "file": "src/NSE/Windows/NSEWindowTitleBar.tsx",
+      "line": 93,
+      "disposition": "rename:ManagedWindowTitleBar"
+    },
+    {
+      "name": "NSEMaterialLight",
+      "file": "src/NSE/Appearance/NSEMaterialLighting.ts",
+      "line": 24,
+      "disposition": "rename:MaterialLight"
+    },
+    {
+      "name": "NSEMaterialLighting",
+      "file": "src/NSE/Appearance/NSEMaterialLighting.ts",
+      "line": 39,
+      "disposition": "rename:MaterialLighting"
+    },
+    {
+      "name": "NSEMaterialLightingPort",
+      "file": "src/NSE/Appearance/NSEMaterialLighting.ts",
+      "line": 34,
+      "disposition": "rename:MaterialLightingPort"
+    },
+    {
+      "name": "NSEMaterialLightingProvider",
+      "file": "src/NSE/Appearance/NSEMetalThumb.tsx",
+      "line": 38,
+      "disposition": "rename:MaterialLightingProvider"
+    },
+    {
+      "name": "NSEMeasuredVirtualItem",
+      "file": "src/NSE/DataViews/Virtualisation/NSEVirtualViewport.tsx",
+      "line": 42,
+      "disposition": "rename:MeasuredVirtualItem"
+    },
+    {
+      "name": "NSEMediaCollectionPresenter",
+      "file": "src/NSE/MediaPanels/NSEMediaCollectionPresenter.tsx",
+      "line": 43,
+      "disposition": "rename:MediaCollectionPresenter"
+    },
+    {
+      "name": "NSEMenuActionEntry",
+      "file": "src/NSE/Menus/menuTypes.ts",
+      "line": 102,
+      "disposition": "rename:MenuActionEntry"
+    },
+    {
+      "name": "NSEMenuDismissReason",
+      "file": "src/NSE/Menus/menuTypes.ts",
+      "line": 261,
+      "disposition": "rename:MenuDismissReason"
+    },
+    {
+      "name": "NSEMenuEntry",
+      "file": "src/NSE/Menus/menuTypes.ts",
+      "line": 73,
+      "disposition": "rename:MenuEntry"
+    },
+    {
+      "name": "NSEMenuEntryInput",
+      "file": "src/NSE/Menus/menuTypes.ts",
+      "line": 114,
+      "disposition": "rename:MenuEntryInput"
+    },
+    {
+      "name": "NSEMenuHostView",
+      "file": "src/NSE/Views/NSEView.tsx",
+      "line": 148,
+      "disposition": "rename:MenuHostView"
+    },
+    {
+      "name": "NSEMenuItemDefinition",
+      "file": "src/NSE/Menus/menuTypes.ts",
+      "line": 119,
+      "disposition": "rename:MenuItemDefinition"
+    },
+    {
+      "name": "NSEMenuKeyEquivalent",
+      "file": "src/NSE/Menus/menuTypes.ts",
+      "line": 282,
+      "disposition": "rename:MenuKeyEquivalent"
+    },
+    {
+      "name": "NSEMenuKeyEquivalentClaim",
+      "file": "src/NSE/Menus/menuTypes.ts",
+      "line": 287,
+      "disposition": "rename:MenuKeyEquivalentClaim"
+    },
+    {
+      "name": "NSEMenuKeyEquivalentResult",
+      "file": "src/NSE/Menus/menuTypes.ts",
+      "line": 292,
+      "disposition": "rename:MenuKeyEquivalentResult"
+    },
+    {
+      "name": "NSEMenuModel",
+      "file": "src/NSE/Menus/menuTypes.ts",
+      "line": 132,
+      "disposition": "rename:MenuModel"
+    },
+    {
+      "name": "NSEMenuModelActionCheck",
+      "file": "src/NSE/Menus/menuTypes.ts",
+      "line": 151,
+      "disposition": "rename:MenuModelActionCheck"
+    },
+    {
+      "name": "NSEMenuModelOptions",
+      "file": "src/NSE/Menus/menuTypes.ts",
+      "line": 277,
+      "disposition": "rename:MenuModelOptions"
+    },
+    {
+      "name": "NSEMenuOverlay",
+      "file": "src/NSE/Menus/NSEMenuOverlay.tsx",
+      "line": 57,
+      "disposition": "rename:MenuOverlay"
+    },
+    {
+      "name": "NSEMenuOverlayOptions",
+      "file": "src/NSE/Menus/menuTypes.ts",
+      "line": 183,
+      "disposition": "rename:MenuOverlayOptions"
+    },
+    {
+      "name": "NSEMenuOverlayPresentationContext",
+      "file": "src/NSE/Menus/menuPresentationContext.tsx",
+      "line": 29,
+      "disposition": "rename:MenuOverlayPresentationContext"
+    },
+    {
+      "name": "NSEMenuOverlayPresentationScope",
+      "file": "src/NSE/Menus/menuPresentationContext.tsx",
+      "line": 31,
+      "disposition": "rename:MenuOverlayPresentationScope"
+    },
+    {
+      "name": "NSEMenuOverlayProps",
+      "file": "src/NSE/Menus/NSEMenuOverlay.tsx",
+      "line": 29,
+      "disposition": "rename:MenuOverlayProps"
+    },
+    {
+      "name": "NSEMenuPresentedEntry",
+      "file": "src/NSE/Menus/menuTypes.ts",
+      "line": 221,
+      "disposition": "rename:MenuPresentedEntry"
+    },
+    {
+      "name": "NSEMenuRuntimeContext",
+      "file": "src/NSE/Menus/menuRuntimeContext.tsx",
+      "line": 24,
+      "disposition": "rename:MenuRuntimeContext"
+    },
+    {
+      "name": "NSEMenuRuntimeProvider",
+      "file": "src/NSE/Menus/menuRuntimeContext.tsx",
+      "line": 33,
+      "disposition": "rename:MenuRuntimeProvider"
+    },
+    {
+      "name": "NSEMenuScheduler",
+      "file": "src/NSE/Menus/menuTypes.ts",
+      "line": 173,
+      "disposition": "rename:MenuScheduler"
+    },
+    {
+      "name": "NSEMenuSection",
+      "file": "src/NSE/Menus/menuTypes.ts",
+      "line": 165,
+      "disposition": "rename:MenuSection"
+    },
+    {
+      "name": "NSEMenuSegment",
+      "file": "src/NSE/Controls/Values/NSESegmentStyles.tsx",
+      "line": 150,
+      "disposition": "rename:MenuSegment"
+    },
+    {
+      "name": "NSEMenuView",
+      "file": "src/NSE/Menus/NSEMenuView.tsx",
+      "line": 779,
+      "disposition": "rename:MenuView"
+    },
+    {
+      "name": "NSEMetalSurface",
+      "file": "src/NSE/Material/NSEMetalSurface.tsx",
+      "line": 36,
+      "disposition": "rename:MetalSurface"
+    },
+    {
+      "name": "NSEMetalThumb",
+      "file": "src/NSE/Appearance/NSEMetalThumb.tsx",
+      "line": 48,
+      "disposition": "rename:MetalThumb"
+    },
+    {
+      "name": "NSEMicrotaskDisposalHandle",
+      "file": "src/NSE/interactionLifecycle.ts",
+      "line": 32,
+      "disposition": "rename:MicrotaskDisposalHandle"
+    },
+    {
+      "name": "NSEModalWindowBridge",
+      "file": "src/NSE/Overlays/NSEActionSheet.tsx",
+      "line": 58,
+      "disposition": "rename:ModalWindowBridge"
+    },
+    {
+      "name": "NSEModalWindowRequest",
+      "file": "src/NSE/Overlays/NSEActionSheet.tsx",
+      "line": 50,
+      "disposition": "rename:ModalWindowRequest"
+    },
+    {
+      "name": "NSEModalWindowView",
+      "file": "src/NSE/Windows/NSEModalWindowView.tsx",
+      "line": 27,
+      "disposition": "rename:ModalWindowView"
+    },
+    {
+      "name": "NSENamedColour",
+      "file": "src/NSE/Colour/ColourPanel/colourPalettes.ts",
+      "line": 28,
+      "disposition": "rename:NamedColour"
+    },
+    {
+      "name": "NSENavigationDestination",
+      "file": "src/NSE/Navigation/navigationTypes.ts",
+      "line": 68,
+      "disposition": "rename:NavigationDestination"
+    },
+    {
+      "name": "NSENavigationDestinationHost",
+      "file": "src/NSE/Navigation/NSENavigationDestinationHost.tsx",
+      "line": 53,
+      "disposition": "rename:NavigationDestinationHost"
+    },
+    {
+      "name": "NSENavigationDestinationHostProps",
+      "file": "src/NSE/Navigation/NSENavigationDestinationHost.tsx",
+      "line": 37,
+      "disposition": "rename:NavigationDestinationHostProps"
+    },
+    {
+      "name": "NSENavigationSection",
+      "file": "src/NSE/Navigation/navigationTypes.ts",
+      "line": 88,
+      "disposition": "rename:NavigationSection"
+    },
+    {
+      "name": "NSENavigationSelectionOptions",
+      "file": "src/NSE/Navigation/navigationTypes.ts",
+      "line": 94,
+      "disposition": "rename:NavigationSelectionOptions"
+    },
+    {
+      "name": "NSENavigationSidebarItemDescriptor",
+      "file": "src/NSE/Navigation/navigationTypes.ts",
+      "line": 33,
+      "disposition": "rename:NavigationSidebarItemDescriptor"
+    },
+    {
+      "name": "NSENavigationStackController",
+      "file": "src/NSE/Navigation/NSENavigationStackController.ts",
+      "line": 73,
+      "disposition": "rename:NavigationStackController"
+    },
+    {
+      "name": "NSENavigationStackControllerOptions",
+      "file": "src/NSE/Navigation/NSENavigationStackController.ts",
+      "line": 30,
+      "disposition": "rename:NavigationStackControllerOptions"
+    },
+    {
+      "name": "NSENavigationStackRestorationSnapshot",
+      "file": "src/NSE/Navigation/navigationTypes.ts",
+      "line": 124,
+      "disposition": "rename:NavigationStackRestorationSnapshot"
+    },
+    {
+      "name": "NSENavigationStackSnapshot",
+      "file": "src/NSE/Navigation/navigationTypes.ts",
+      "line": 115,
+      "disposition": "rename:NavigationStackSnapshot"
+    },
+    {
+      "name": "NSEObjectLifetime",
+      "file": "src/NSE/Application/objectLifetime.ts",
+      "line": 80,
+      "disposition": "rename:ObjectLifetime"
+    },
+    {
+      "name": "NSEOpenPanelApplicationHost",
+      "file": "src/SynCloudOS/AppHosting/openPanelHosting.tsx",
+      "line": 17,
+      "disposition": "rename:OpenPanelApplicationHost"
+    },
+    {
+      "name": "NSEOpenPanelCollection",
+      "file": "src/NSE/FilePanels/NSEOpenPanelCollection.tsx",
+      "line": 12,
+      "disposition": "rename:OpenPanelCollection"
+    },
+    {
+      "name": "NSEOpenPanelContent",
+      "file": "src/NSE/FilePanels/NSEOpenPanelContent.tsx",
+      "line": 21,
+      "disposition": "rename:OpenPanelContent"
+    },
+    {
+      "name": "NSEOpenPanelHost",
+      "file": "src/NSE/FilePanels/openPanelHost.ts",
+      "line": 15,
+      "disposition": "rename:OpenPanelHost"
+    },
+    {
+      "name": "NSEOpenPanelImagePort",
+      "file": "src/NSE/FilePanels/openPanelHost.ts",
+      "line": 10,
+      "disposition": "rename:OpenPanelImagePort"
+    },
+    {
+      "name": "NSEOpenPanelItemImage",
+      "file": "src/NSE/FilePanels/NSEOpenPanelItemImage.tsx",
+      "line": 11,
+      "disposition": "rename:OpenPanelItemImage"
+    },
+    {
+      "name": "NSEOpenPanelSheetSurface",
+      "file": "src/NSE/Windows/windowSheetSurfaces.tsx",
+      "line": 36,
+      "disposition": "rename:OpenPanelSheetSurface"
+    },
+    {
+      "name": "NSEOpenPanelSources",
+      "file": "src/NSE/FilePanels/NSEOpenPanelSources.tsx",
+      "line": 9,
+      "disposition": "rename:OpenPanelSources"
+    },
+    {
+      "name": "NSEOpenPanelWindowHost",
+      "file": "src/SynCloudOS/AppHosting/openPanelHosting.tsx",
+      "line": 50,
+      "disposition": "rename:OpenPanelWindowHost"
+    },
+    {
+      "name": "NSEOptionalSmoothSurfaceProps",
+      "file": "src/NSE/SmoothSurface/smoothSurfaceTypes.ts",
+      "line": 173,
+      "disposition": "rename:OptionalSmoothSurfaceProps"
+    },
+    {
+      "name": "NSEOverlayAnchorPoint",
+      "file": "src/NSE/Overlays/computeNSEOverlayPosition.ts",
+      "line": 52,
+      "disposition": "rename:OverlayAnchorPoint"
+    },
+    {
+      "name": "NSEOverlayCollisionPadding",
+      "file": "src/NSE/Overlays/computeNSEOverlayPosition.ts",
+      "line": 39,
+      "disposition": "rename:OverlayCollisionPadding"
+    },
+    {
+      "name": "NSEOverlayContext",
+      "file": "src/NSE/Overlays/NSEOverlayProvider.tsx",
+      "line": 44,
+      "disposition": "rename:OverlayContext"
+    },
+    {
+      "name": "NSEOverlayDirection",
+      "file": "src/NSE/Overlays/computeNSEOverlayPosition.ts",
+      "line": 38,
+      "disposition": "rename:OverlayDirection"
+    },
+    {
+      "name": "NSEOverlayDismissReason",
+      "file": "src/NSE/Overlays/overlayTypes.ts",
+      "line": 42,
+      "disposition": "rename:OverlayDismissReason"
+    },
+    {
+      "name": "NSEOverlayFocusScopeOptions",
+      "file": "src/NSE/Overlays/overlayTypes.ts",
+      "line": 79,
+      "disposition": "rename:OverlayFocusScopeOptions"
+    },
+    {
+      "name": "NSEOverlayId",
+      "file": "src/NSE/Overlays/overlayTypes.ts",
+      "line": 21,
+      "disposition": "rename:OverlayId"
+    },
+    {
+      "name": "NSEOverlayKind",
+      "file": "src/NSE/Overlays/overlayTypes.ts",
+      "line": 23,
+      "disposition": "rename:OverlayKind"
+    },
+    {
+      "name": "NSEOverlayManager",
+      "file": "src/NSE/Overlays/overlayTypes.ts",
+      "line": 68,
+      "disposition": "rename:OverlayManager"
+    },
+    {
+      "name": "NSEOverlayParent",
+      "file": "src/NSE/Overlays/useNSEOverlay.tsx",
+      "line": 91,
+      "disposition": "rename:OverlayParent"
+    },
+    {
+      "name": "NSEOverlayParentContext",
+      "file": "src/NSE/Overlays/useNSEOverlay.tsx",
+      "line": 97,
+      "disposition": "rename:OverlayParentContext"
+    },
+    {
+      "name": "NSEOverlayPositionOptions",
+      "file": "src/NSE/Overlays/computeNSEOverlayPosition.ts",
+      "line": 57,
+      "disposition": "rename:OverlayPositionOptions"
+    },
+    {
+      "name": "NSEOverlayPositionScheduler",
+      "file": "src/NSE/Overlays/computeNSEOverlayPosition.ts",
+      "line": 46,
+      "disposition": "rename:OverlayPositionScheduler"
+    },
+    {
+      "name": "NSEOverlayPresentationSource",
+      "file": "src/NSE/Overlays/overlayRegion.ts",
+      "line": 25,
+      "disposition": "rename:OverlayPresentationSource"
+    },
+    {
+      "name": "NSEOverlayProvider",
+      "file": "src/NSE/Overlays/NSEOverlayProvider.tsx",
+      "line": 69,
+      "disposition": "rename:OverlayProvider"
+    },
+    {
+      "name": "NSEOverlayProviderContextValue",
+      "file": "src/NSE/Overlays/NSEOverlayProvider.tsx",
+      "line": 30,
+      "disposition": "rename:OverlayProviderContextValue"
+    },
+    {
+      "name": "NSEOverlayProviderProps",
+      "file": "src/NSE/Overlays/NSEOverlayProvider.tsx",
+      "line": 55,
+      "disposition": "rename:OverlayProviderProps"
+    },
+    {
+      "name": "NSEOverlayRegionBounds",
+      "file": "src/NSE/Overlays/overlayRegion.ts",
+      "line": 24,
+      "disposition": "rename:OverlayRegionBounds"
+    },
+    {
+      "name": "NSEOverlayRegistration",
+      "file": "src/NSE/Overlays/overlayTypes.ts",
+      "line": 51,
+      "disposition": "rename:OverlayRegistration"
+    },
+    {
+      "name": "NSEOverlayRuntimePort",
+      "file": "src/NSE/Overlays/overlayTypes.ts",
+      "line": 90,
+      "disposition": "rename:OverlayRuntimePort"
+    },
+    {
+      "name": "NSEOverlaySnapshot",
+      "file": "src/NSE/Overlays/overlayTypes.ts",
+      "line": 62,
+      "disposition": "rename:OverlaySnapshot"
+    },
+    {
+      "name": "NSEOwnedObject",
+      "file": "src/NSE/Controllers/ownership.ts",
+      "line": 72,
+      "disposition": "rename:OwnedObject"
+    },
+    {
+      "name": "NSEOwnershipScope",
+      "file": "src/NSE/Controllers/ownership.ts",
+      "line": 84,
+      "disposition": "rename:OwnershipScope"
+    },
+    {
+      "name": "NSEPageAxis",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 42,
+      "disposition": "rename:PageAxis"
+    },
+    {
+      "name": "NSEPageBookEdge",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 49,
+      "disposition": "rename:PageBookEdge"
+    },
+    {
+      "name": "NSEPageBookStripGeometry",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 306,
+      "disposition": "rename:PageBookStripGeometry"
+    },
+    {
+      "name": "NSEPageBookStripGeometryInput",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 297,
+      "disposition": "rename:PageBookStripGeometryInput"
+    },
+    {
+      "name": "NSEPageBookStripPoint",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 292,
+      "disposition": "rename:PageBookStripPoint"
+    },
+    {
+      "name": "NSEPageCompletionReason",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 45,
+      "disposition": "rename:PageCompletionReason"
+    },
+    {
+      "name": "NSEPageControllerView",
+      "file": "src/NSE/Page/NSEPageController.tsx",
+      "line": 365,
+      "disposition": "rename:PageControllerView"
+    },
+    {
+      "name": "NSEPageCorner",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 41,
+      "disposition": "rename:PageCorner"
+    },
+    {
+      "name": "NSEPageCurlCylinder",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 171,
+      "disposition": "rename:PageCurlCylinder"
+    },
+    {
+      "name": "NSEPageCurlFrame",
+      "file": "src/NSE/Page/NSEPageCurlRenderer.ts",
+      "line": 24,
+      "disposition": "rename:PageCurlFrame"
+    },
+    {
+      "name": "NSEPageCurlLeaf",
+      "file": "src/NSE/Page/NSEPageCurlLeaf.tsx",
+      "line": 58,
+      "disposition": "rename:PageCurlLeaf"
+    },
+    {
+      "name": "NSEPageCurlMargin",
+      "file": "src/NSE/Page/NSEPageCurlRenderer.ts",
+      "line": 45,
+      "disposition": "rename:PageCurlMargin"
+    },
+    {
+      "name": "NSEPageCurlRenderer",
+      "file": "src/NSE/Page/NSEPageCurlRenderer.ts",
+      "line": 408,
+      "disposition": "rename:PageCurlRenderer"
+    },
+    {
+      "name": "NSEPageCurlRendererKind",
+      "file": "src/NSE/Page/useNSEPageCurlSurface.ts",
+      "line": 59,
+      "disposition": "rename:PageCurlRendererKind"
+    },
+    {
+      "name": "NSEPageCurlSurface",
+      "file": "src/NSE/Page/useNSEPageCurlSurface.ts",
+      "line": 61,
+      "disposition": "rename:PageCurlSurface"
+    },
+    {
+      "name": "NSEPageCurlSurfaceOptions",
+      "file": "src/NSE/Page/useNSEPageCurlSurface.ts",
+      "line": 45,
+      "disposition": "rename:PageCurlSurfaceOptions"
+    },
+    {
+      "name": "NSEPageCurlView",
+      "file": "src/NSE/Page/NSEPageCurlView.tsx",
+      "line": 62,
+      "disposition": "rename:PageCurlView"
+    },
+    {
+      "name": "NSEPageDirection",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 43,
+      "disposition": "rename:PageDirection"
+    },
+    {
+      "name": "NSEPageDogEarHandlers",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 419,
+      "disposition": "rename:PageDogEarHandlers"
+    },
+    {
+      "name": "NSEPageEdge",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 40,
+      "disposition": "rename:PageEdge"
+    },
+    {
+      "name": "NSEPageElement",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 46,
+      "disposition": "rename:PageElement"
+    },
+    {
+      "name": "NSEPageEvent",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 365,
+      "disposition": "rename:PageEvent"
+    },
+    {
+      "name": "NSEPageFoldLine",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 63,
+      "disposition": "rename:PageFoldLine"
+    },
+    {
+      "name": "NSEPageGeometry",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 220,
+      "disposition": "rename:PageGeometry"
+    },
+    {
+      "name": "NSEPageGeometryInput",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 145,
+      "disposition": "rename:PageGeometryInput"
+    },
+    {
+      "name": "NSEPageGestureOptions",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 355,
+      "disposition": "rename:PageGestureOptions"
+    },
+    {
+      "name": "NSEPageHandle",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 370,
+      "disposition": "rename:PageHandle"
+    },
+    {
+      "name": "NSEPageHinge",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 47,
+      "disposition": "rename:PageHinge"
+    },
+    {
+      "name": "NSEPageInteractionPreset",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 110,
+      "disposition": "rename:PageInteractionPreset"
+    },
+    {
+      "name": "NSEPageMaterialPreset",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 97,
+      "disposition": "rename:PageMaterialPreset"
+    },
+    {
+      "name": "NSEPageMode",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 39,
+      "disposition": "rename:PageMode"
+    },
+    {
+      "name": "NSEPageMotionPreset",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 70,
+      "disposition": "rename:PageMotionPreset"
+    },
+    {
+      "name": "NSEPageNavigationView",
+      "file": "src/NSE/Page/NSEPageController.tsx",
+      "line": 369,
+      "disposition": "rename:PageNavigationView"
+    },
+    {
+      "name": "NSEPagePhase",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 44,
+      "disposition": "rename:PagePhase"
+    },
+    {
+      "name": "NSEPagePoint",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 53,
+      "disposition": "rename:PagePoint"
+    },
+    {
+      "name": "NSEPagePointerHandler",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 507,
+      "disposition": "rename:PagePointerHandler"
+    },
+    {
+      "name": "NSEPagePreset",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 122,
+      "disposition": "rename:PagePreset"
+    },
+    {
+      "name": "NSEPagePresetName",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 29,
+      "disposition": "rename:PagePresetName"
+    },
+    {
+      "name": "NSEPagePresetOverrides",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 134,
+      "disposition": "rename:PagePresetOverrides"
+    },
+    {
+      "name": "NSEPageProjection",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 48,
+      "disposition": "rename:PageProjection"
+    },
+    {
+      "name": "NSEPageProps",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 443,
+      "disposition": "rename:PageProps"
+    },
+    {
+      "name": "NSEPageSize",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 58,
+      "disposition": "rename:PageSize"
+    },
+    {
+      "name": "NSEPageStyle",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 51,
+      "disposition": "rename:PageStyle"
+    },
+    {
+      "name": "NSEPageTearFlight",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 191,
+      "disposition": "rename:PageTearFlight"
+    },
+    {
+      "name": "NSEPageTearPose",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 207,
+      "disposition": "rename:PageTearPose"
+    },
+    {
+      "name": "NSEPageTurnControllerOptions",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 335,
+      "disposition": "rename:PageTurnControllerOptions"
+    },
+    {
+      "name": "NSEPageTurnOptions",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 344,
+      "disposition": "rename:PageTurnOptions"
+    },
+    {
+      "name": "NSEPageTurnSnapshot",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 322,
+      "disposition": "rename:PageTurnSnapshot"
+    },
+    {
+      "name": "NSEPageTurnSurface",
+      "file": "src/NSE/Page/nsePageTypes.ts",
+      "line": 283,
+      "disposition": "rename:PageTurnSurface"
+    },
+    {
+      "name": "NSEPanelView",
+      "file": "src/NSE/Windows/NSEPanelView.tsx",
+      "line": 27,
+      "disposition": "rename:PanelView"
+    },
+    {
+      "name": "NSEParagraphAlignment",
+      "file": "src/NSE/Typography/typographyTypes.ts",
+      "line": 32,
+      "disposition": "rename:ParagraphAlignment"
+    },
+    {
+      "name": "NSEPickerTransaction",
+      "file": "src/NSE/DateTime/Pickers/pickerTransaction.ts",
+      "line": 21,
+      "disposition": "rename:PickerTransaction"
+    },
+    {
+      "name": "NSEPickerTransactionAction",
+      "file": "src/NSE/DateTime/Pickers/pickerTransaction.ts",
+      "line": 29,
+      "disposition": "rename:PickerTransactionAction"
+    },
+    {
+      "name": "NSEPopoverBehavior",
+      "file": "src/NSE/Overlays/NSEWindowSurfaceBridge.tsx",
+      "line": 26,
+      "disposition": "maps:NSPopover.Behavior"
+    },
+    {
+      "name": "NSEPopoverFrame",
+      "file": "src/NSE/Overlays/NSEPopoverFrame.tsx",
+      "line": 24,
+      "disposition": "rename:PopoverFrame"
+    },
+    {
+      "name": "NSEPopoverPreferredEdge",
+      "file": "src/NSE/Overlays/NSEWindowSurfaceBridge.tsx",
+      "line": 25,
+      "disposition": "rename:PopoverPreferredEdge"
+    },
+    {
+      "name": "NSEPopoverWindowBridge",
+      "file": "src/NSE/Overlays/NSEPopover.tsx",
+      "line": 45,
+      "disposition": "rename:PopoverWindowBridge"
+    },
+    {
+      "name": "NSEPopoverWindowRequest",
+      "file": "src/NSE/Overlays/NSEPopover.tsx",
+      "line": 32,
+      "disposition": "rename:PopoverWindowRequest"
+    },
+    {
+      "name": "NSEPopoverWindowView",
+      "file": "src/NSE/Windows/NSEPopoverWindowView.tsx",
+      "line": 27,
+      "disposition": "rename:PopoverWindowView"
+    },
+    {
+      "name": "NSEPopUpButtonChoiceItem",
+      "file": "src/NSE/Menus/NSEPopUpButton.tsx",
+      "line": 95,
+      "disposition": "rename:PopUpButtonChoiceItem"
+    },
+    {
+      "name": "NSEPopUpButtonControl",
+      "file": "src/NSE/Menus/NSEPopUpButton.tsx",
+      "line": 133,
+      "disposition": "rename:PopUpButtonControl"
+    },
+    {
+      "name": "NSEPopUpButtonRow",
+      "file": "src/NSE/Menus/NSEPopUpButton.tsx",
+      "line": 96,
+      "disposition": "rename:PopUpButtonRow"
+    },
+    {
+      "name": "NSEPopupPresentation",
+      "file": "src/NSE/Overlays/NSEPopup.tsx",
+      "line": 53,
+      "disposition": "rename:PopupPresentation"
+    },
+    {
+      "name": "NSEPredicateCompilationError",
+      "file": "src/NSE/DataViews/RuleEditor/predicateTemplates.ts",
+      "line": 119,
+      "disposition": "rename:PredicateCompilationError"
+    },
+    {
+      "name": "NSEPredicateOperatorOption",
+      "file": "src/NSE/DataViews/RuleEditor/ruleEditorTypes.ts",
+      "line": 26,
+      "disposition": "rename:PredicateOperatorOption"
+    },
+    {
+      "name": "NSEPredicateTemplate",
+      "file": "src/NSE/DataViews/RuleEditor/ruleEditorTypes.ts",
+      "line": 32,
+      "disposition": "rename:PredicateTemplate"
+    },
+    {
+      "name": "NSEPreferencePane",
+      "file": "src/NSE/Components/NSEPreferencesToast.tsx",
+      "line": 50,
+      "disposition": "maps:NSPreferencePane"
+    },
+    {
+      "name": "NSEPreferencesPaneDirection",
+      "file": "src/NSE/Components/NSEPreferencesToast.transitions.ts",
+      "line": 30,
+      "disposition": "rename:PreferencesPaneDirection"
+    },
+    {
+      "name": "NSEPreferencesPresentation",
+      "file": "src/NSE/Components/NSEPreferencesToast.transitions.ts",
+      "line": 33,
+      "disposition": "rename:PreferencesPresentation"
+    },
+    {
+      "name": "NSEPreferencesToast",
+      "file": "src/NSE/Components/NSEPreferencesToast.tsx",
+      "line": 174,
+      "disposition": "rename:PreferencesToast"
+    },
+    {
+      "name": "NSEPreferencesToastProps",
+      "file": "src/NSE/Components/NSEPreferencesToast.tsx",
+      "line": 65,
+      "disposition": "rename:PreferencesToastProps"
+    },
+    {
+      "name": "NSEPreferencesTransitions",
+      "file": "src/NSE/Components/NSEPreferencesToast.transitions.ts",
+      "line": 38,
+      "disposition": "rename:PreferencesTransitions"
+    },
+    {
+      "name": "NSEPresence",
+      "file": "src/NSE/Animation/NSEPresentation.tsx",
+      "line": 604,
+      "disposition": "rename:Presence"
+    },
+    {
+      "name": "NSEPresenceBoundary",
+      "file": "src/NSE/Animation/NSEPresentation.tsx",
+      "line": 542,
+      "disposition": "rename:PresenceBoundary"
+    },
+    {
+      "name": "NSEPresentationEnter",
+      "file": "src/NSE/Animation/NSEPresentation.tsx",
+      "line": 371,
+      "disposition": "rename:PresentationEnter"
+    },
+    {
+      "name": "NSEPresentationLayout",
+      "file": "src/NSE/Animation/NSEPresentation.tsx",
+      "line": 110,
+      "disposition": "rename:PresentationLayout"
+    },
+    {
+      "name": "NSEPresentationMotion",
+      "file": "src/NSE/Animation/NSEPresentation.tsx",
+      "line": 376,
+      "disposition": "rename:PresentationMotion"
+    },
+    {
+      "name": "NSEPresentationOrigin",
+      "file": "src/NSE/Animation/NSEPresentation.tsx",
+      "line": 301,
+      "disposition": "rename:PresentationOrigin"
+    },
+    {
+      "name": "NSEPresentationSpec",
+      "file": "src/NSE/Animation/NSEPresentation.tsx",
+      "line": 99,
+      "disposition": "rename:PresentationSpec"
+    },
+    {
+      "name": "NSEPresentationStyle",
+      "file": "src/NSE/Application/NSEViewController.ts",
+      "line": 84,
+      "disposition": "rename:PresentationStyle"
+    },
+    {
+      "name": "NSEPresentationTrack",
+      "file": "src/NSE/Animation/NSEPresentation.tsx",
+      "line": 82,
+      "disposition": "rename:PresentationTrack"
+    },
+    {
+      "name": "NSEPresentedContent",
+      "file": "src/NSE/Overlays/useNSEPresentedContent.tsx",
+      "line": 56,
+      "disposition": "rename:PresentedContent"
+    },
+    {
+      "name": "NSEPresentedContentProvider",
+      "file": "src/NSE/Overlays/useNSEPresentedContent.tsx",
+      "line": 27,
+      "disposition": "rename:PresentedContentProvider"
+    },
+    {
+      "name": "NSEPresentedContentStore",
+      "file": "src/NSE/Overlays/useNSEPresentedContent.tsx",
+      "line": 34,
+      "disposition": "rename:PresentedContentStore"
+    },
+    {
+      "name": "NSEPresentedModalWindow",
+      "file": "src/SynCloudOS/AppHosting/applicationHosting.tsx",
+      "line": 353,
+      "disposition": "rename:PresentedModalWindow"
+    },
+    {
+      "name": "NSEPresentedPopover",
+      "file": "src/SynCloudOS/AppHosting/applicationHosting.tsx",
+      "line": 326,
+      "disposition": "rename:PresentedPopover"
+    },
+    {
+      "name": "NSEPresentedSheet",
+      "file": "src/SynCloudOS/AppHosting/applicationHosting.tsx",
+      "line": 382,
+      "disposition": "rename:PresentedSheet"
+    },
+    {
+      "name": "NSEProgressMetrics",
+      "file": "src/NSE/Progress/progressCore.ts",
+      "line": 33,
+      "disposition": "rename:ProgressMetrics"
+    },
+    {
+      "name": "NSEProgressRangeInput",
+      "file": "src/NSE/Progress/progressCore.ts",
+      "line": 25,
+      "disposition": "rename:ProgressRangeInput"
+    },
+    {
+      "name": "NSEPushButtonCell",
+      "file": "src/NSE/Controls/Buttons/NSEButton.tsx",
+      "line": 168,
+      "disposition": "rename:PushButtonCell"
+    },
+    {
+      "name": "NSERadioGroup",
+      "file": "src/NSE/Controls/Fields/NSEFields.tsx",
+      "line": 763,
+      "disposition": "rename:RadioGroup"
+    },
+    {
+      "name": "NSERadioGroupControl",
+      "file": "src/NSE/Controls/Fields/NSEFields.tsx",
+      "line": 767,
+      "disposition": "rename:RadioGroupControl"
+    },
+    {
+      "name": "NSERadioGroupProps",
+      "file": "src/NSE/Controls/Fields/NSEFields.tsx",
+      "line": 684,
+      "disposition": "rename:RadioGroupProps"
+    },
+    {
+      "name": "NSERadioOption",
+      "file": "src/NSE/Controls/Fields/NSEFields.tsx",
+      "line": 677,
+      "disposition": "rename:RadioOption"
+    },
+    {
+      "name": "NSERadioOptionControl",
+      "file": "src/NSE/Controls/Fields/NSEFields.tsx",
+      "line": 712,
+      "disposition": "rename:RadioOptionControl"
+    },
+    {
+      "name": "NSERadioOptionControlProps",
+      "file": "src/NSE/Controls/Fields/NSEFields.tsx",
+      "line": 698,
+      "disposition": "rename:RadioOptionControlProps"
+    },
+    {
+      "name": "NSERegistryItem",
+      "file": "src/NSE/registry/index.ts",
+      "line": 23,
+      "disposition": "rename:RegistryItem"
+    },
+    {
+      "name": "NSERegistryItemType",
+      "file": "src/NSE/registry/index.ts",
+      "line": 21,
+      "disposition": "rename:RegistryItemType"
+    },
+    {
+      "name": "NSERoundedSegments",
+      "file": "src/NSE/Controls/Values/NSESegmentedControl.tsx",
+      "line": 104,
+      "disposition": "rename:RoundedSegments"
+    },
+    {
+      "name": "NSERTLScrollModel",
+      "file": "src/NSE/Scroll/scrollTypes.ts",
+      "line": 42,
+      "disposition": "rename:RTLScrollModel"
+    },
+    {
+      "name": "NSERubberBandProvider",
+      "file": "src/NSE/Scroll/NSERubberBandProvider.tsx",
+      "line": 80,
+      "disposition": "rename:RubberBandProvider"
+    },
+    {
+      "name": "NSERubberBandProviderProps",
+      "file": "src/NSE/Scroll/NSERubberBandProvider.tsx",
+      "line": 24,
+      "disposition": "rename:RubberBandProviderProps"
+    },
+    {
+      "name": "NSERuleEditorValidation",
+      "file": "src/NSE/DataViews/RuleEditor/ruleEditorTypes.ts",
+      "line": 65,
+      "disposition": "rename:RuleEditorValidation"
+    },
+    {
+      "name": "NSERuleEditorValue",
+      "file": "src/NSE/DataViews/RuleEditor/ruleEditorTypes.ts",
+      "line": 63,
+      "disposition": "rename:RuleEditorValue"
+    },
+    {
+      "name": "NSERuleRow",
+      "file": "src/NSE/DataViews/RuleEditor/ruleEditorTypes.ts",
+      "line": 42,
+      "disposition": "rename:RuleRow"
+    },
+    {
+      "name": "NSEScroller",
+      "file": "src/NSE/Scroll/NSEScroller.tsx",
+      "line": 22,
+      "disposition": "maps:NSScroller"
+    },
+    {
+      "name": "NSEScrollerPolicy",
+      "file": "src/NSE/Scroll/scrollTypes.ts",
+      "line": 25,
+      "disposition": "rename:ScrollerPolicy"
+    },
+    {
+      "name": "NSEScrollGeometry",
+      "file": "src/NSE/Scroll/scrollTypes.ts",
+      "line": 44,
+      "disposition": "rename:ScrollGeometry"
+    },
+    {
+      "name": "NSEScrollViewGeometrySnapshot",
+      "file": "src/NSE/Scroll/NSEScrollView.tsx",
+      "line": 38,
+      "disposition": "rename:ScrollViewGeometrySnapshot"
+    },
+    {
+      "name": "NSESearchFieldControl",
+      "file": "src/NSE/Controls/Fields/NSESearchField.tsx",
+      "line": 90,
+      "disposition": "rename:SearchFieldControl"
+    },
+    {
+      "name": "NSESecureTextFieldControl",
+      "file": "src/NSE/Controls/Fields/NSESecureTextField.tsx",
+      "line": 75,
+      "disposition": "rename:SecureTextFieldControl"
+    },
+    {
+      "name": "NSESegmentedControlControl",
+      "file": "src/NSE/Controls/Values/NSESegmentedControl.tsx",
+      "line": 99,
+      "disposition": "rename:SegmentedControlControl"
+    },
+    {
+      "name": "NSESheet",
+      "file": "src/NSE/Application/NSEWindowController.ts",
+      "line": 102,
+      "disposition": "rename:Sheet"
+    },
+    {
+      "name": "NSESheetView",
+      "file": "src/NSE/Windows/NSESheetView.tsx",
+      "line": 27,
+      "disposition": "rename:SheetView"
+    },
+    {
+      "name": "NSESizeableImage",
+      "file": "src/NSE/Controls/Images/NSEImage.tsx",
+      "line": 82,
+      "disposition": "rename:SizeableImage"
+    },
+    {
+      "name": "NSESizeableImageHandle",
+      "file": "src/NSE/Controls/Images/NSEImage.tsx",
+      "line": 46,
+      "disposition": "rename:SizeableImageHandle"
+    },
+    {
+      "name": "NSESizeableImageProps",
+      "file": "src/NSE/Controls/Images/NSEImage.tsx",
+      "line": 55,
+      "disposition": "rename:SizeableImageProps"
+    },
+    {
+      "name": "NSESliderControl",
+      "file": "src/NSE/Controls/Values/NSESlider.tsx",
+      "line": 65,
+      "disposition": "rename:SliderControl"
+    },
+    {
+      "name": "NSESmoothSurface",
+      "file": "src/NSE/SmoothSurface/NSESmoothSurface.tsx",
+      "line": 149,
+      "disposition": "rename:SmoothSurface"
+    },
+    {
+      "name": "NSESmoothSurfaceAPI",
+      "file": "src/NSE/SmoothSurface/smoothSurface.ts",
+      "line": 317,
+      "disposition": "rename:SmoothSurfaceAPI"
+    },
+    {
+      "name": "NSESmoothSurfaceBorderConfig",
+      "file": "src/NSE/SmoothSurface/smoothSurfaceTypes.ts",
+      "line": 76,
+      "disposition": "rename:SmoothSurfaceBorderConfig"
+    },
+    {
+      "name": "NSESmoothSurfaceBorderStyle",
+      "file": "src/NSE/SmoothSurface/smoothSurfaceTypes.ts",
+      "line": 74,
+      "disposition": "rename:SmoothSurfaceBorderStyle"
+    },
+    {
+      "name": "NSESmoothSurfaceComponentProps",
+      "file": "src/NSE/SmoothSurface/smoothSurfaceTypes.ts",
+      "line": 178,
+      "disposition": "rename:SmoothSurfaceComponentProps"
+    },
+    {
+      "name": "NSESmoothSurfaceCorner",
+      "file": "src/NSE/SmoothSurface/smoothSurfaceTypes.ts",
+      "line": 49,
+      "disposition": "rename:SmoothSurfaceCorner"
+    },
+    {
+      "name": "NSESmoothSurfaceCornerConfig",
+      "file": "src/NSE/SmoothSurface/smoothSurfaceTypes.ts",
+      "line": 41,
+      "disposition": "rename:SmoothSurfaceCornerConfig"
+    },
+    {
+      "name": "NSESmoothSurfaceCurve",
+      "file": "src/NSE/SmoothSurface/smoothSurfaceTypes.ts",
+      "line": 25,
+      "disposition": "rename:SmoothSurfaceCurve"
+    },
+    {
+      "name": "NSESmoothSurfaceEffectsConfig",
+      "file": "src/NSE/SmoothSurface/smoothSurfaceTypes.ts",
+      "line": 95,
+      "disposition": "rename:SmoothSurfaceEffectsConfig"
+    },
+    {
+      "name": "NSESmoothSurfaceFocus",
+      "file": "src/NSE/SmoothSurface/smoothSurfaceTypes.ts",
+      "line": 27,
+      "disposition": "rename:SmoothSurfaceFocus"
+    },
+    {
+      "name": "NSESmoothSurfaceGeometry",
+      "file": "src/NSE/SmoothSurface/useNSESmoothSurface.ts",
+      "line": 35,
+      "disposition": "rename:SmoothSurfaceGeometry"
+    },
+    {
+      "name": "NSESmoothSurfaceOptions",
+      "file": "src/NSE/SmoothSurface/smoothSurfaceTypes.ts",
+      "line": 103,
+      "disposition": "rename:SmoothSurfaceOptions"
+    },
+    {
+      "name": "NSESmoothSurfaceOverflow",
+      "file": "src/NSE/SmoothSurface/smoothSurfaceTypes.ts",
+      "line": 29,
+      "disposition": "rename:SmoothSurfaceOverflow"
+    },
+    {
+      "name": "NSESmoothSurfacePerCornerConfig",
+      "file": "src/NSE/SmoothSurface/smoothSurfaceTypes.ts",
+      "line": 51,
+      "disposition": "rename:SmoothSurfacePerCornerConfig"
+    },
+    {
+      "name": "NSESmoothSurfacePerformance",
+      "file": "src/NSE/SmoothSurface/smoothSurfaceTypes.ts",
+      "line": 35,
+      "disposition": "rename:SmoothSurfacePerformance"
+    },
+    {
+      "name": "NSESmoothSurfacePhysicality",
+      "file": "src/NSE/SmoothSurface/smoothSurfaceTypes.ts",
+      "line": 72,
+      "disposition": "rename:SmoothSurfacePhysicality"
+    },
+    {
+      "name": "NSESmoothSurfacePhysicalityConfig",
+      "file": "src/NSE/SmoothSurface/smoothSurfaceTypes.ts",
+      "line": 67,
+      "disposition": "rename:SmoothSurfacePhysicalityConfig"
+    },
+    {
+      "name": "NSESmoothSurfacePhysicalityStop",
+      "file": "src/NSE/SmoothSurface/smoothSurfaceTypes.ts",
+      "line": 58,
+      "disposition": "rename:SmoothSurfacePhysicalityStop"
+    },
+    {
+      "name": "NSESmoothSurfaceProps",
+      "file": "src/NSE/SmoothSurface/smoothSurfaceTypes.ts",
+      "line": 168,
+      "disposition": "rename:SmoothSurfaceProps"
+    },
+    {
+      "name": "NSESmoothSurfaceRadius",
+      "file": "src/NSE/SmoothSurface/smoothSurfaceTypes.ts",
+      "line": 23,
+      "disposition": "rename:SmoothSurfaceRadius"
+    },
+    {
+      "name": "NSESmoothSurfaceRequest",
+      "file": "src/NSE/SmoothSurface/smoothSurfaceTypes.ts",
+      "line": 124,
+      "disposition": "rename:SmoothSurfaceRequest"
+    },
+    {
+      "name": "NSESmoothSurfaceResolution",
+      "file": "src/NSE/SmoothSurface/smoothSurfaceTypes.ts",
+      "line": 162,
+      "disposition": "rename:SmoothSurfaceResolution"
+    },
+    {
+      "name": "NSESmoothSurfaceResolvedCorner",
+      "file": "src/NSE/SmoothSurface/smoothSurfaceTypes.ts",
+      "line": 126,
+      "disposition": "rename:SmoothSurfaceResolvedCorner"
+    },
+    {
+      "name": "NSESmoothSurfaceResolvedCorners",
+      "file": "src/NSE/SmoothSurface/smoothSurfaceTypes.ts",
+      "line": 134,
+      "disposition": "rename:SmoothSurfaceResolvedCorners"
+    },
+    {
+      "name": "NSESmoothSurfaceResolvedOptions",
+      "file": "src/NSE/SmoothSurface/smoothSurfaceTypes.ts",
+      "line": 141,
+      "disposition": "rename:SmoothSurfaceResolvedOptions"
+    },
+    {
+      "name": "NSESmoothSurfaceScroll",
+      "file": "src/NSE/SmoothSurface/smoothSurfaceTypes.ts",
+      "line": 31,
+      "disposition": "rename:SmoothSurfaceScroll"
+    },
+    {
+      "name": "NSESmoothSurfaceShadow",
+      "file": "src/NSE/SmoothSurface/smoothSurfaceTypes.ts",
+      "line": 33,
+      "disposition": "rename:SmoothSurfaceShadow"
+    },
+    {
+      "name": "NSESmoothSurfaceShadowConfig",
+      "file": "src/NSE/SmoothSurface/smoothSurfaceTypes.ts",
+      "line": 86,
+      "disposition": "rename:SmoothSurfaceShadowConfig"
+    },
+    {
+      "name": "NSESmoothSurfaceStyle",
+      "file": "src/NSE/SmoothSurface/smoothSurfaceTypes.ts",
+      "line": 39,
+      "disposition": "rename:SmoothSurfaceStyle"
+    },
+    {
+      "name": "NSESmoothSurfaceStyleValue",
+      "file": "src/NSE/SmoothSurface/smoothSurfaceTypes.ts",
+      "line": 37,
+      "disposition": "rename:SmoothSurfaceStyleValue"
+    },
+    {
+      "name": "NSESpinner",
+      "file": "src/NSE/Progress/spinnerSprite.tsx",
+      "line": 39,
+      "disposition": "rename:Spinner"
+    },
+    {
+      "name": "NSESpinnerProps",
+      "file": "src/NSE/Progress/spinnerSprite.tsx",
+      "line": 27,
+      "disposition": "rename:SpinnerProps"
+    },
+    {
+      "name": "NSESplitViewControllerView",
+      "file": "src/NSE/DataViews/Split/splitViewControllerView.tsx",
+      "line": 66,
+      "disposition": "rename:SplitViewControllerView"
+    },
+    {
+      "name": "NSESplitViewItemHost",
+      "file": "src/NSE/DataViews/Split/NSESplitViewItem.ts",
+      "line": 64,
+      "disposition": "rename:SplitViewItemHost"
+    },
+    {
+      "name": "NSESplitViewLayout",
+      "file": "src/NSE/DataViews/Split/NSESplitViewController.ts",
+      "line": 150,
+      "disposition": "rename:SplitViewLayout"
+    },
+    {
+      "name": "NSEStackItemPortal",
+      "file": "src/NSE/Layout/NSEStackView.tsx",
+      "line": 169,
+      "disposition": "rename:StackItemPortal"
+    },
+    {
+      "name": "NSEStandaloneControlHost",
+      "file": "src/NSE/Overlays/NSEStandaloneControlHost.tsx",
+      "line": 42,
+      "disposition": "rename:StandaloneControlHost"
+    },
+    {
+      "name": "NSEStandaloneControlHostProps",
+      "file": "src/NSE/Overlays/NSEStandaloneControlHost.tsx",
+      "line": 30,
+      "disposition": "rename:StandaloneControlHostProps"
+    },
+    {
+      "name": "NSEStandaloneControlRuntime",
+      "file": "src/NSE/Overlays/createStandaloneNSEControlRuntime.ts",
+      "line": 46,
+      "disposition": "rename:StandaloneControlRuntime"
+    },
+    {
+      "name": "NSEStandaloneControlRuntimeOptions",
+      "file": "src/NSE/Overlays/createStandaloneNSEControlRuntime.ts",
+      "line": 37,
+      "disposition": "rename:StandaloneControlRuntimeOptions"
+    },
+    {
+      "name": "NSEStandardNavigationChromeAvailableContext",
+      "file": "src/NSE/Navigation/NSEApplicationNavigationChrome.tsx",
+      "line": 149,
+      "disposition": "rename:StandardNavigationChromeAvailableContext"
+    },
+    {
+      "name": "NSEStandardWindowView",
+      "file": "src/NSE/Windows/NSEStandardWindowView.tsx",
+      "line": 38,
+      "disposition": "rename:StandardWindowView"
+    },
+    {
+      "name": "NSEStepperControl",
+      "file": "src/NSE/Controls/Values/NSEStepper.tsx",
+      "line": 62,
+      "disposition": "rename:StepperControl"
+    },
+    {
+      "name": "NSEStoredUserFont",
+      "file": "src/NSE/Typography/NSEFontLibrary.ts",
+      "line": 47,
+      "disposition": "rename:StoredUserFont"
+    },
+    {
+      "name": "NSESwitchButton",
+      "file": "src/NSE/Controls/Buttons/NSEButton.tsx",
+      "line": 412,
+      "disposition": "rename:SwitchButton"
+    },
+    {
+      "name": "NSESwitchButtonCell",
+      "file": "src/NSE/Controls/Buttons/NSEButton.tsx",
+      "line": 288,
+      "disposition": "rename:SwitchButtonCell"
+    },
+    {
+      "name": "NSESwitchControl",
+      "file": "src/NSE/Controls/Fields/NSEFields.tsx",
+      "line": 511,
+      "disposition": "rename:SwitchControl"
+    },
+    {
+      "name": "NSESwitchControlProps",
+      "file": "src/NSE/Controls/Fields/NSEFields.tsx",
+      "line": 485,
+      "disposition": "rename:SwitchControlProps"
+    },
+    {
+      "name": "NSESynchronousDisposable",
+      "file": "src/NSE/Application/ownedFactory.ts",
+      "line": 6,
+      "disposition": "rename:SynchronousDisposable"
+    },
+    {
+      "name": "NSESystemCursor",
+      "file": "src/NSE/Pointer/cursorTypes.ts",
+      "line": 28,
+      "disposition": "rename:SystemCursor"
+    },
+    {
+      "name": "NSETabBar",
+      "file": "src/NSE/Navigation/NSETabBar.tsx",
+      "line": 196,
+      "disposition": "rename:TabBar"
+    },
+    {
+      "name": "NSETabBarController",
+      "file": "src/NSE/Navigation/NSETabBarController.ts",
+      "line": 174,
+      "disposition": "rename:TabBarController"
+    },
+    {
+      "name": "NSETabBarControllerOptions",
+      "file": "src/NSE/Navigation/NSETabBarController.ts",
+      "line": 34,
+      "disposition": "rename:TabBarControllerOptions"
+    },
+    {
+      "name": "NSETabBarControllerSnapshot",
+      "file": "src/NSE/Navigation/navigationTypes.ts",
+      "line": 99,
+      "disposition": "rename:TabBarControllerSnapshot"
+    },
+    {
+      "name": "NSETabBarMoreDestinationId",
+      "file": "src/NSE/Navigation/NSETabBarController.ts",
+      "line": 454,
+      "disposition": "rename:TabBarMoreDestinationId"
+    },
+    {
+      "name": "NSETabBarOverflowList",
+      "file": "src/NSE/Navigation/NSETabBar.tsx",
+      "line": 546,
+      "disposition": "rename:TabBarOverflowList"
+    },
+    {
+      "name": "NSETabBarOverflowListProps",
+      "file": "src/NSE/Navigation/NSETabBar.tsx",
+      "line": 528,
+      "disposition": "rename:TabBarOverflowListProps"
+    },
+    {
+      "name": "NSETabBarOverflowRootDestinationId",
+      "file": "src/NSE/Navigation/NSETabBarController.ts",
+      "line": 456,
+      "disposition": "rename:TabBarOverflowRootDestinationId"
+    },
+    {
+      "name": "NSETabBarProps",
+      "file": "src/NSE/Navigation/NSETabBar.tsx",
+      "line": 175,
+      "disposition": "rename:TabBarProps"
+    },
+    {
+      "name": "NSETabBarRestorationSnapshot",
+      "file": "src/NSE/Navigation/navigationTypes.ts",
+      "line": 110,
+      "disposition": "rename:TabBarRestorationSnapshot"
+    },
+    {
+      "name": "NSETabBarTitles",
+      "file": "src/NSE/Navigation/NSETabBarController.ts",
+      "line": 50,
+      "disposition": "rename:TabBarTitles"
+    },
+    {
+      "name": "NSETabChromeSegment",
+      "file": "src/NSE/Navigation/NSETabBar.tsx",
+      "line": 88,
+      "disposition": "rename:TabChromeSegment"
+    },
+    {
+      "name": "NSETabChromeState",
+      "file": "src/NSE/Navigation/NSETabBar.tsx",
+      "line": 117,
+      "disposition": "rename:TabChromeState"
+    },
+    {
+      "name": "NSETabIconMaterial",
+      "file": "src/NSE/Navigation/NSETabBar.tsx",
+      "line": 151,
+      "disposition": "rename:TabIconMaterial"
+    },
+    {
+      "name": "NSETabIconStyle",
+      "file": "src/NSE/Navigation/NSETabBar.tsx",
+      "line": 97,
+      "disposition": "rename:TabIconStyle"
+    },
+    {
+      "name": "NSETableCell",
+      "file": "src/NSE/DataViews/Table/NSETableCell.tsx",
+      "line": 35,
+      "disposition": "rename:TableCell"
+    },
+    {
+      "name": "NSETableCellProps",
+      "file": "src/NSE/DataViews/Table/NSETableCell.tsx",
+      "line": 23,
+      "disposition": "rename:TableCellProps"
+    },
+    {
+      "name": "NSETableHeaderColumn",
+      "file": "src/NSE/DataViews/Table/NSETableHeaderView.tsx",
+      "line": 26,
+      "disposition": "rename:TableHeaderColumn"
+    },
+    {
+      "name": "NSETableHeaderView",
+      "file": "src/NSE/DataViews/Table/NSETableHeaderView.tsx",
+      "line": 46,
+      "disposition": "maps:NSTableHeaderView"
+    },
+    {
+      "name": "NSETableHeaderViewProps",
+      "file": "src/NSE/DataViews/Table/NSETableHeaderView.tsx",
+      "line": 38,
+      "disposition": "derived:NSETableHeaderView"
+    },
+    {
+      "name": "NSETabStrip",
+      "file": "src/NSE/Navigation/tabStrip.tsx",
+      "line": 167,
+      "disposition": "rename:TabStrip"
+    },
+    {
+      "name": "NSETabStripItem",
+      "file": "src/NSE/Navigation/tabStrip.tsx",
+      "line": 38,
+      "disposition": "rename:TabStripItem"
+    },
+    {
+      "name": "NSETabStripPresentation",
+      "file": "src/NSE/Navigation/tabStrip.tsx",
+      "line": 57,
+      "disposition": "rename:TabStripPresentation"
+    },
+    {
+      "name": "NSETabStripProps",
+      "file": "src/NSE/Navigation/tabStrip.tsx",
+      "line": 65,
+      "disposition": "rename:TabStripProps"
+    },
+    {
+      "name": "NSETabStripRenderState",
+      "file": "src/NSE/Navigation/tabStrip.tsx",
+      "line": 51,
+      "disposition": "rename:TabStripRenderState"
+    },
+    {
+      "name": "NSETabStyle",
+      "file": "src/NSE/Navigation/tabStrip.tsx",
+      "line": 36,
+      "disposition": "rename:TabStyle"
+    },
+    {
+      "name": "NSETabToolbarView",
+      "file": "src/NSE/Navigation/tabToolbarView.tsx",
+      "line": 38,
+      "disposition": "rename:TabToolbarView"
+    },
+    {
+      "name": "NSETabViewControllerView",
+      "file": "src/NSE/Navigation/NSETabViewController.tsx",
+      "line": 283,
+      "disposition": "rename:TabViewControllerView"
+    },
+    {
+      "name": "NSETextAttributesMutation",
+      "file": "src/NSE/Typography/typographyTypes.ts",
+      "line": 114,
+      "disposition": "rename:TextAttributesMutation"
+    },
+    {
+      "name": "NSETextFieldControl",
+      "file": "src/NSE/Controls/Fields/NSEFields.tsx",
+      "line": 199,
+      "disposition": "rename:TextFieldControl"
+    },
+    {
+      "name": "NSETextLayoutService",
+      "file": "src/NSE/TextLayout/NSELayoutManager.ts",
+      "line": 31,
+      "disposition": "rename:TextLayoutService"
+    },
+    {
+      "name": "NSETexturedRadioSegments",
+      "file": "src/NSE/Controls/Values/NSESegmentStyles.tsx",
+      "line": 72,
+      "disposition": "rename:TexturedRadioSegments"
+    },
+    {
+      "name": "NSETexturedSegmentCells",
+      "file": "src/NSE/Controls/Values/NSESegmentStyles.tsx",
+      "line": 185,
+      "disposition": "rename:TexturedSegmentCells"
+    },
+    {
+      "name": "NSETexturedSegments",
+      "file": "src/NSE/Controls/Values/NSESegmentStyles.tsx",
+      "line": 100,
+      "disposition": "rename:TexturedSegments"
+    },
+    {
+      "name": "NSETimeEntry",
+      "file": "src/NSE/DateTime/Pickers/timeEntry.tsx",
+      "line": 289,
+      "disposition": "rename:TimeEntry"
+    },
+    {
+      "name": "NSETimeEntryEditorContext",
+      "file": "src/NSE/DateTime/Pickers/datePickerTypes.ts",
+      "line": 28,
+      "disposition": "rename:TimeEntryEditorContext"
+    },
+    {
+      "name": "NSETimeEntryEditorMode",
+      "file": "src/NSE/DateTime/Pickers/datePickerTypes.ts",
+      "line": 30,
+      "disposition": "rename:TimeEntryEditorMode"
+    },
+    {
+      "name": "NSETimeEntryProps",
+      "file": "src/NSE/DateTime/Pickers/datePickerTypes.ts",
+      "line": 32,
+      "disposition": "rename:TimeEntryProps"
+    },
+    {
+      "name": "NSETimeFieldEditor",
+      "file": "src/NSE/DateTime/Pickers/timeEntry.tsx",
+      "line": 189,
+      "disposition": "rename:TimeFieldEditor"
+    },
+    {
+      "name": "NSETimeFieldEditorProps",
+      "file": "src/NSE/DateTime/Pickers/timeEntry.tsx",
+      "line": 167,
+      "disposition": "rename:TimeFieldEditorProps"
+    },
+    {
+      "name": "NSETimeSegment",
+      "file": "src/NSE/DateTime/Pickers/timeEntry.tsx",
+      "line": 84,
+      "disposition": "rename:TimeSegment"
+    },
+    {
+      "name": "NSETimeSegmentEditor",
+      "file": "src/NSE/DateTime/Pickers/timeEntry.tsx",
+      "line": 100,
+      "disposition": "rename:TimeSegmentEditor"
+    },
+    {
+      "name": "NSETimeSegmentEditorProps",
+      "file": "src/NSE/DateTime/Pickers/timeEntry.tsx",
+      "line": 86,
+      "disposition": "rename:TimeSegmentEditorProps"
+    },
+    {
+      "name": "NSETitlebarAccessoryLayoutAttribute",
+      "file": "src/NSE/Application/NSETitlebarAccessoryViewController.ts",
+      "line": 28,
+      "disposition": "rename:TitlebarAccessoryLayoutAttribute"
+    },
+    {
+      "name": "NSETokenFieldControl",
+      "file": "src/NSE/Controls/Completion/NSETokenField.tsx",
+      "line": 34,
+      "disposition": "rename:TokenFieldControl"
+    },
+    {
+      "name": "NSEToolbarChildrenProps",
+      "file": "src/NSE/Toolbars/NSEToolbarView.tsx",
+      "line": 66,
+      "disposition": "rename:ToolbarChildrenProps"
+    },
+    {
+      "name": "NSEToolbarConfigurationSession",
+      "file": "src/NSE/Toolbars/toolbarTypes.ts",
+      "line": 239,
+      "disposition": "rename:ToolbarConfigurationSession"
+    },
+    {
+      "name": "NSEToolbarConfigurationSheet",
+      "file": "src/NSE/Toolbars/NSEToolbarConfigurationSheet.tsx",
+      "line": 60,
+      "disposition": "rename:ToolbarConfigurationSheet"
+    },
+    {
+      "name": "NSEToolbarConfigurationSheetProps",
+      "file": "src/NSE/Toolbars/NSEToolbarConfigurationSheet.tsx",
+      "line": 27,
+      "disposition": "rename:ToolbarConfigurationSheetProps"
+    },
+    {
+      "name": "NSEToolbarConfigurationSheetWindowBridge",
+      "file": "src/NSE/Toolbars/toolbarTypes.ts",
+      "line": 232,
+      "disposition": "rename:ToolbarConfigurationSheetWindowBridge"
+    },
+    {
+      "name": "NSEToolbarConfigurationSheetWindowRequest",
+      "file": "src/NSE/Toolbars/toolbarTypes.ts",
+      "line": 219,
+      "disposition": "rename:ToolbarConfigurationSheetWindowRequest"
+    },
+    {
+      "name": "NSEToolbarConfiguredProps",
+      "file": "src/NSE/Toolbars/NSEToolbarView.tsx",
+      "line": 79,
+      "disposition": "rename:ToolbarConfiguredProps"
+    },
+    {
+      "name": "NSEToolbarInteraction",
+      "file": "src/NSE/Toolbars/NSEToolbarView.tsx",
+      "line": 60,
+      "disposition": "rename:ToolbarInteraction"
+    },
+    {
+      "name": "NSEToolbarLayout",
+      "file": "src/NSE/Toolbars/toolbarTypes.ts",
+      "line": 202,
+      "disposition": "rename:ToolbarLayout"
+    },
+    {
+      "name": "NSEToolbarLayoutEntry",
+      "file": "src/NSE/Toolbars/toolbarTypes.ts",
+      "line": 194,
+      "disposition": "rename:ToolbarLayoutEntry"
+    },
+    {
+      "name": "NSEToolbarLayoutOptions",
+      "file": "src/NSE/Toolbars/toolbarTypes.ts",
+      "line": 213,
+      "disposition": "rename:ToolbarLayoutOptions"
+    },
+    {
+      "name": "NSEToolbarOverflowMenu",
+      "file": "src/NSE/Toolbars/NSEToolbarOverflowMenu.tsx",
+      "line": 81,
+      "disposition": "rename:ToolbarOverflowMenu"
+    },
+    {
+      "name": "NSEToolbarOverflowMenuProps",
+      "file": "src/NSE/Toolbars/NSEToolbarOverflowMenu.tsx",
+      "line": 36,
+      "disposition": "rename:ToolbarOverflowMenuProps"
+    },
+    {
+      "name": "NSEToolbarOwner",
+      "file": "src/NSE/Toolbars/toolbarTypes.ts",
+      "line": 87,
+      "disposition": "rename:ToolbarOwner"
+    },
+    {
+      "name": "NSEToolbarPreferences",
+      "file": "src/NSE/Toolbars/toolbarTypes.ts",
+      "line": 46,
+      "disposition": "rename:ToolbarPreferences"
+    },
+    {
+      "name": "NSEToolbarPresentedItem",
+      "file": "src/NSE/Toolbars/toolbarTypes.ts",
+      "line": 138,
+      "disposition": "rename:ToolbarPresentedItem"
+    },
+    {
+      "name": "NSEToolbarRefreshResult",
+      "file": "src/NSE/Toolbars/toolbarTypes.ts",
+      "line": 189,
+      "disposition": "rename:ToolbarRefreshResult"
+    },
+    {
+      "name": "NSEToolbarRuntimePort",
+      "file": "src/NSE/Toolbars/toolbarTypes.ts",
+      "line": 109,
+      "disposition": "rename:ToolbarRuntimePort"
+    },
+    {
+      "name": "NSEToolbarServices",
+      "file": "src/NSE/Toolbars/NSEToolbar.ts",
+      "line": 52,
+      "disposition": "rename:ToolbarServices"
+    },
+    {
+      "name": "NSEToolbarView",
+      "file": "src/NSE/Toolbars/NSEToolbarView.tsx",
+      "line": 430,
+      "disposition": "rename:ToolbarView"
+    },
+    {
+      "name": "NSEToolbarViewProps",
+      "file": "src/NSE/Toolbars/NSEToolbarView.tsx",
+      "line": 93,
+      "disposition": "rename:ToolbarViewProps"
+    },
+    {
+      "name": "NSEToolButtonGroup",
+      "file": "src/NSE/Controls/Buttons/NSEButtonFamilies.tsx",
+      "line": 45,
+      "disposition": "rename:ToolButtonGroup"
+    },
+    {
+      "name": "NSEToolButtonGroupProps",
+      "file": "src/NSE/Controls/Buttons/NSEButtonFamilies.tsx",
+      "line": 40,
+      "disposition": "rename:ToolButtonGroupProps"
+    },
+    {
+      "name": "NSETooltip",
+      "file": "src/NSE/Tooltips/NSETooltip.tsx",
+      "line": 28,
+      "disposition": "rename:Tooltip"
+    },
+    {
+      "name": "NSETooltipBinding",
+      "file": "src/NSE/Tooltips/tooltipTypes.ts",
+      "line": 35,
+      "disposition": "rename:TooltipBinding"
+    },
+    {
+      "name": "NSETooltipContent",
+      "file": "src/NSE/Tooltips/tooltipTypes.ts",
+      "line": 24,
+      "disposition": "rename:TooltipContent"
+    },
+    {
+      "name": "NSETooltipContext",
+      "file": "src/NSE/Tooltips/NSETooltipProvider.tsx",
+      "line": 63,
+      "disposition": "rename:TooltipContext"
+    },
+    {
+      "name": "NSETooltipOptions",
+      "file": "src/NSE/Tooltips/tooltipTypes.ts",
+      "line": 26,
+      "disposition": "rename:TooltipOptions"
+    },
+    {
+      "name": "NSETooltipProps",
+      "file": "src/NSE/Tooltips/tooltipTypes.ts",
+      "line": 41,
+      "disposition": "rename:TooltipProps"
+    },
+    {
+      "name": "NSETooltipProvider",
+      "file": "src/NSE/Tooltips/NSETooltipProvider.tsx",
+      "line": 82,
+      "disposition": "rename:TooltipProvider"
+    },
+    {
+      "name": "NSETooltipProviderContextValue",
+      "file": "src/NSE/Tooltips/NSETooltipProvider.tsx",
+      "line": 52,
+      "disposition": "rename:TooltipProviderContextValue"
+    },
+    {
+      "name": "NSETooltipProviderProps",
+      "file": "src/NSE/Tooltips/NSETooltipProvider.tsx",
+      "line": 65,
+      "disposition": "rename:TooltipProviderProps"
+    },
+    {
+      "name": "NSETooltipRegistration",
+      "file": "src/NSE/Tooltips/NSETooltipProvider.tsx",
+      "line": 26,
+      "disposition": "rename:TooltipRegistration"
+    },
+    {
+      "name": "NSETooltipScheduler",
+      "file": "src/NSE/Tooltips/tooltipTypes.ts",
+      "line": 52,
+      "disposition": "rename:TooltipScheduler"
+    },
+    {
+      "name": "NSETopBar",
+      "file": "src/NSE/Windows/Chrome/NSETopBar.tsx",
+      "line": 198,
+      "disposition": "rename:TopBar"
+    },
+    {
+      "name": "NSETopBarButton",
+      "file": "src/NSE/Windows/Chrome/NSETopBarButton.tsx",
+      "line": 25,
+      "disposition": "rename:TopBarButton"
+    },
+    {
+      "name": "NSETopBarCumulus",
+      "file": "src/NSE/Windows/Chrome/NSETopBar.tsx",
+      "line": 206,
+      "disposition": "rename:TopBarCumulus"
+    },
+    {
+      "name": "NSETopBarItem",
+      "file": "src/NSE/Windows/Chrome/nseTopBarTypes.ts",
+      "line": 45,
+      "disposition": "rename:TopBarItem"
+    },
+    {
+      "name": "NSETopBarItemKind",
+      "file": "src/NSE/Windows/Chrome/nseTopBarTypes.ts",
+      "line": 26,
+      "disposition": "rename:TopBarItemKind"
+    },
+    {
+      "name": "NSETopBarItemPosition",
+      "file": "src/NSE/Windows/Chrome/nseTopBarTypes.ts",
+      "line": 27,
+      "disposition": "rename:TopBarItemPosition"
+    },
+    {
+      "name": "NSETopBarMetal",
+      "file": "src/NSE/Windows/Chrome/NSETopBar.tsx",
+      "line": 111,
+      "disposition": "rename:TopBarMetal"
+    },
+    {
+      "name": "NSETopBarMetalPill",
+      "file": "src/NSE/Windows/Chrome/NSETopBar.tsx",
+      "line": 79,
+      "disposition": "rename:TopBarMetalPill"
+    },
+    {
+      "name": "NSETopBarProps",
+      "file": "src/NSE/Windows/Chrome/nseTopBarTypes.ts",
+      "line": 75,
+      "disposition": "rename:TopBarProps"
+    },
+    {
+      "name": "NSETopBarRail",
+      "file": "src/NSE/Windows/Chrome/nseTopBarTypes.ts",
+      "line": 37,
+      "disposition": "rename:TopBarRail"
+    },
+    {
+      "name": "NSETopBarStyleDefinition",
+      "file": "src/NSE/Windows/Chrome/nseTopBarTypes.ts",
+      "line": 105,
+      "disposition": "rename:TopBarStyleDefinition"
+    },
+    {
+      "name": "NSETopBarTitle",
+      "file": "src/NSE/Windows/Chrome/NSETopBar.tsx",
+      "line": 43,
+      "disposition": "rename:TopBarTitle"
+    },
+    {
+      "name": "NSETopBarTitleAction",
+      "file": "src/NSE/Windows/Chrome/nseTopBarTypes.ts",
+      "line": 67,
+      "disposition": "rename:TopBarTitleAction"
+    },
+    {
+      "name": "NSETopBarVariant",
+      "file": "src/NSE/Windows/Chrome/nseTopBarTypes.ts",
+      "line": 25,
+      "disposition": "rename:TopBarVariant"
+    },
+    {
+      "name": "NSETrackingOption",
+      "file": "src/NSE/Pointer/cursorTypes.ts",
+      "line": 30,
+      "disposition": "maps:NSTrackingArea.Options"
+    },
+    {
+      "name": "NSETrackingRegionPort",
+      "file": "src/NSE/Pointer/useNSETrackingRegion.ts",
+      "line": 27,
+      "disposition": "rename:TrackingRegionPort"
+    },
+    {
+      "name": "NSETransferKey",
+      "file": "src/NSE/DataViews/Drag/useNSEDataViewDrag.ts",
+      "line": 24,
+      "disposition": "rename:TransferKey"
+    },
+    {
+      "name": "NSETransformComponentKeyPath",
+      "file": "src/NSE/Animation/NSEPresentation.tsx",
+      "line": 73,
+      "disposition": "rename:TransformComponentKeyPath"
+    },
+    {
+      "name": "NSETransformComponents",
+      "file": "src/NSE/Animation/NSEPresentation.tsx",
+      "line": 49,
+      "disposition": "rename:TransformComponents"
+    },
+    {
+      "name": "NSETransitionSlot",
+      "file": "src/NSE/Application/viewControllerTransition.tsx",
+      "line": 64,
+      "disposition": "rename:TransitionSlot"
+    },
+    {
+      "name": "NSETranslationUnit",
+      "file": "src/NSE/Animation/NSEPresentation.tsx",
+      "line": 97,
+      "disposition": "rename:TranslationUnit"
+    },
+    {
+      "name": "NSEUntransitionedChildView",
+      "file": "src/NSE/Application/viewControllerRenderer.tsx",
+      "line": 44,
+      "disposition": "rename:UntransitionedChildView"
+    },
+    {
+      "name": "NSEUpdateReadinessController",
+      "file": "src/NSE/Controllers/NSEUpdateReadinessController.ts",
+      "line": 8,
+      "disposition": "rename:UpdateReadinessController"
+    },
+    {
+      "name": "NSEUserFontFace",
+      "file": "src/NSE/Typography/NSEFontLibrary.ts",
+      "line": 37,
+      "disposition": "rename:UserFontFace"
+    },
+    {
+      "name": "NSEUserFontFaceHost",
+      "file": "src/NSE/Typography/NSEFontLibrary.ts",
+      "line": 61,
+      "disposition": "rename:UserFontFaceHost"
+    },
+    {
+      "name": "NSEUserFontStorage",
+      "file": "src/NSE/Typography/NSEFontLibrary.ts",
+      "line": 54,
+      "disposition": "rename:UserFontStorage"
+    },
+    {
+      "name": "NSEUtilityPanel",
+      "file": "src/NSE/Overlays/NSEUtilityPanel.tsx",
+      "line": 125,
+      "disposition": "rename:UtilityPanel"
+    },
+    {
+      "name": "NSEUtilityPanelProps",
+      "file": "src/NSE/Overlays/NSEUtilityPanel.tsx",
+      "line": 34,
+      "disposition": "rename:UtilityPanelProps"
+    },
+    {
+      "name": "NSEValueBindingControlProps",
+      "file": "src/NSE/Controls/Core/useNSEValueBinding.ts",
+      "line": 23,
+      "disposition": "rename:ValueBindingControlProps"
+    },
+    {
+      "name": "NSEValueControlCompensationError",
+      "file": "src/NSE/Controls/Values/valueControlTransaction.ts",
+      "line": 33,
+      "disposition": "rename:ValueControlCompensationError"
+    },
+    {
+      "name": "NSEValueControlUnknownStateError",
+      "file": "src/NSE/Controls/Values/valueControlTransaction.ts",
+      "line": 24,
+      "disposition": "rename:ValueControlUnknownStateError"
+    },
+    {
+      "name": "NSEViewActivity",
+      "file": "src/NSE/Application/viewActivity.ts",
+      "line": 46,
+      "disposition": "rename:ViewActivity"
+    },
+    {
+      "name": "NSEViewActivityProvider",
+      "file": "src/NSE/Application/viewActivityContext.tsx",
+      "line": 11,
+      "disposition": "rename:ViewActivityProvider"
+    },
+    {
+      "name": "NSEViewActivitySource",
+      "file": "src/NSE/Application/viewActivityContext.tsx",
+      "line": 4,
+      "disposition": "rename:ViewActivitySource"
+    },
+    {
+      "name": "NSEViewAppearance",
+      "file": "src/NSE/Views/NSEView.tsx",
+      "line": 131,
+      "disposition": "rename:ViewAppearance"
+    },
+    {
+      "name": "NSEViewContent",
+      "file": "src/NSE/Views/NSEView.tsx",
+      "line": 82,
+      "disposition": "rename:ViewContent"
+    },
+    {
+      "name": "NSEViewControllerBinding",
+      "file": "src/NSE/Application/NSEViewController.ts",
+      "line": 164,
+      "disposition": "rename:ViewControllerBinding"
+    },
+    {
+      "name": "NSEViewControllerRenderer",
+      "file": "src/NSE/Application/viewControllerRenderer.tsx",
+      "line": 28,
+      "disposition": "rename:ViewControllerRenderer"
+    },
+    {
+      "name": "NSEViewControllerRendererContext",
+      "file": "src/NSE/Application/viewControllerRenderer.tsx",
+      "line": 33,
+      "disposition": "rename:ViewControllerRendererContext"
+    },
+    {
+      "name": "NSEViewControllerRendererProvider",
+      "file": "src/NSE/Application/viewControllerRenderer.tsx",
+      "line": 40,
+      "disposition": "rename:ViewControllerRendererProvider"
+    },
+    {
+      "name": "NSEViewControllerView",
+      "file": "src/SynCloudOS/AppHosting/applicationHosting.tsx",
+      "line": 192,
+      "disposition": "rename:ViewControllerView"
+    },
+    {
+      "name": "NSEViewControllerViewProps",
+      "file": "src/SynCloudOS/AppHosting/applicationHosting.tsx",
+      "line": 180,
+      "disposition": "rename:ViewControllerViewProps"
+    },
+    {
+      "name": "NSEViewDisplayList",
+      "file": "src/NSE/Views/NSEViewDisplayList.tsx",
+      "line": 61,
+      "disposition": "rename:ViewDisplayList"
+    },
+    {
+      "name": "NSEViewDrawing",
+      "file": "src/NSE/Views/NSEView.tsx",
+      "line": 116,
+      "disposition": "rename:ViewDrawing"
+    },
+    {
+      "name": "NSEViewDrawingEnvironment",
+      "file": "src/NSE/Views/NSEViewDrawingEnvironment.ts",
+      "line": 26,
+      "disposition": "rename:ViewDrawingEnvironment"
+    },
+    {
+      "name": "NSEViewDrawingEnvironmentContext",
+      "file": "src/NSE/Views/NSEViewDrawingEnvironment.ts",
+      "line": 31,
+      "disposition": "rename:ViewDrawingEnvironmentContext"
+    },
+    {
+      "name": "NSEViewLayerProperties",
+      "file": "src/NSE/Views/viewLayerProperties.ts",
+      "line": 27,
+      "disposition": "rename:ViewLayerProperties"
+    },
+    {
+      "name": "NSEViewportCornerPositionOptions",
+      "file": "src/NSE/Overlays/computeNSEOverlayPosition.ts",
+      "line": 81,
+      "disposition": "rename:ViewportCornerPositionOptions"
+    },
+    {
+      "name": "NSEViewSafeAreaContext",
+      "file": "src/NSE/Layout/useNSESafeArea.ts",
+      "line": 15,
+      "disposition": "rename:ViewSafeAreaContext"
+    },
+    {
+      "name": "NSEViewSnapshotRender",
+      "file": "src/NSE/Graphics/snapshotNSEView.ts",
+      "line": 88,
+      "disposition": "rename:ViewSnapshotRender"
+    },
+    {
+      "name": "NSEVirtualAxis",
+      "file": "src/NSE/DataViews/Virtualisation/virtualisationTypes.ts",
+      "line": 23,
+      "disposition": "rename:VirtualAxis"
+    },
+    {
+      "name": "NSEVirtualIndexRange",
+      "file": "src/NSE/DataViews/Virtualisation/virtualisationTypes.ts",
+      "line": 21,
+      "disposition": "rename:VirtualIndexRange"
+    },
+    {
+      "name": "NSEVirtualiser",
+      "file": "src/NSE/DataViews/Virtualisation/virtualisationTypes.ts",
+      "line": 58,
+      "disposition": "rename:Virtualiser"
+    },
+    {
+      "name": "NSEVirtualiserHookOptions",
+      "file": "src/NSE/DataViews/Virtualisation/useNSEVirtualiser.ts",
+      "line": 26,
+      "disposition": "rename:VirtualiserHookOptions"
+    },
+    {
+      "name": "NSEVirtualiserOptions",
+      "file": "src/NSE/DataViews/Virtualisation/virtualisationTypes.ts",
+      "line": 40,
+      "disposition": "rename:VirtualiserOptions"
+    },
+    {
+      "name": "NSEVirtualiserSnapshot",
+      "file": "src/NSE/DataViews/Virtualisation/virtualisationTypes.ts",
+      "line": 52,
+      "disposition": "rename:VirtualiserSnapshot"
+    },
+    {
+      "name": "NSEVirtualItem",
+      "file": "src/NSE/DataViews/Virtualisation/virtualisationTypes.ts",
+      "line": 26,
+      "disposition": "rename:VirtualItem"
+    },
+    {
+      "name": "NSEVirtualRange",
+      "file": "src/NSE/DataViews/Virtualisation/virtualisationTypes.ts",
+      "line": 34,
+      "disposition": "rename:VirtualRange"
+    },
+    {
+      "name": "NSEVirtualRangeOptions",
+      "file": "src/NSE/DataViews/Virtualisation/virtualisationTypes.ts",
+      "line": 65,
+      "disposition": "rename:VirtualRangeOptions"
+    },
+    {
+      "name": "NSEVirtualSizeEstimate",
+      "file": "src/NSE/DataViews/Virtualisation/virtualisationTypes.ts",
+      "line": 24,
+      "disposition": "rename:VirtualSizeEstimate"
+    },
+    {
+      "name": "NSEVirtualSizeIndex",
+      "file": "src/NSE/DataViews/Virtualisation/computeVirtualRange.ts",
+      "line": 51,
+      "disposition": "rename:VirtualSizeIndex"
+    },
+    {
+      "name": "NSEVirtualViewport",
+      "file": "src/NSE/DataViews/Virtualisation/NSEVirtualViewport.tsx",
+      "line": 80,
+      "disposition": "rename:VirtualViewport"
+    },
+    {
+      "name": "NSEVirtualViewportProps",
+      "file": "src/NSE/DataViews/Virtualisation/NSEVirtualViewport.tsx",
+      "line": 33,
+      "disposition": "rename:VirtualViewportProps"
+    },
+    {
+      "name": "NSEWebContentSessionViewProps",
+      "file": "src/NSE/WebContent/NSEWebView.tsx",
+      "line": 30,
+      "disposition": "rename:WebContentSessionViewProps"
+    },
+    {
+      "name": "NSEWindowAlertContent",
+      "file": "src/NSE/Windows/windowSheetSurfaces.tsx",
+      "line": 52,
+      "disposition": "rename:WindowAlertContent"
+    },
+    {
+      "name": "NSEWindowAlertQueue",
+      "file": "src/SynCloudOS/AppHosting/windowAlertSheet.tsx",
+      "line": 39,
+      "disposition": "rename:WindowAlertQueue"
+    },
+    {
+      "name": "NSEWindowAlertRequest",
+      "file": "src/NSE/Application/NSEWindowController.ts",
+      "line": 153,
+      "disposition": "rename:WindowAlertRequest"
+    },
+    {
+      "name": "NSEWindowAlertSheet",
+      "file": "src/SynCloudOS/AppHosting/windowAlertSheet.tsx",
+      "line": 86,
+      "disposition": "rename:WindowAlertSheet"
+    },
+    {
+      "name": "NSEWindowContentBorder",
+      "file": "src/SynCloudOS/AppHosting/windowChrome.tsx",
+      "line": 122,
+      "disposition": "rename:WindowContentBorder"
+    },
+    {
+      "name": "NSEWindowControl",
+      "file": "src/NSE/Windows/NSEWindowTitleBar.tsx",
+      "line": 42,
+      "disposition": "rename:WindowControl"
+    },
+    {
+      "name": "NSEWindowControllerView",
+      "file": "src/SynCloudOS/AppHosting/applicationHosting.tsx",
+      "line": 449,
+      "disposition": "rename:WindowControllerView"
+    },
+    {
+      "name": "NSEWindowControllerViewProps",
+      "file": "src/SynCloudOS/AppHosting/applicationHosting.tsx",
+      "line": 440,
+      "disposition": "rename:WindowControllerViewProps"
+    },
+    {
+      "name": "NSEWindowFittingContent",
+      "file": "src/NSE/Overlays/NSEWindowFittingContent.tsx",
+      "line": 31,
+      "disposition": "rename:WindowFittingContent"
+    },
+    {
+      "name": "NSEWindowFittingSize",
+      "file": "src/NSE/Overlays/NSEWindowFittingContent.tsx",
+      "line": 23,
+      "disposition": "rename:WindowFittingSize"
+    },
+    {
+      "name": "NSEWindowFrameProps",
+      "file": "src/NSE/Windows/NSEWindowView.tsx",
+      "line": 34,
+      "disposition": "rename:WindowFrameProps"
+    },
+    {
+      "name": "NSEWindowHost",
+      "file": "src/NSE/Windows/windowViewTypes.ts",
+      "line": 53,
+      "disposition": "rename:WindowHost"
+    },
+    {
+      "name": "NSEWindowLayoutContext",
+      "file": "src/NSE/Layout/windowChromeObstructions.ts",
+      "line": 144,
+      "disposition": "rename:WindowLayoutContext"
+    },
+    {
+      "name": "NSEWindowLayoutModel",
+      "file": "src/NSE/Layout/windowChromeObstructions.ts",
+      "line": 17,
+      "disposition": "rename:WindowLayoutModel"
+    },
+    {
+      "name": "NSEWindowMount",
+      "file": "src/NSE/Application/NSEWindowController.ts",
+      "line": 133,
+      "disposition": "rename:WindowMount"
+    },
+    {
+      "name": "NSEWindowSheetFrame",
+      "file": "src/SynCloudOS/AppHosting/windowChrome.tsx",
+      "line": 340,
+      "disposition": "rename:WindowSheetFrame"
+    },
+    {
+      "name": "NSEWindowSheetHost",
+      "file": "src/SynCloudOS/AppHosting/windowChrome.tsx",
+      "line": 257,
+      "disposition": "rename:WindowSheetHost"
+    },
+    {
+      "name": "NSEWindowSheetHostContext",
+      "file": "src/SynCloudOS/AppHosting/windowChrome.tsx",
+      "line": 263,
+      "disposition": "rename:WindowSheetHostContext"
+    },
+    {
+      "name": "NSEWindowSurfaceBridge",
+      "file": "src/NSE/Overlays/NSEWindowSurfaceBridge.tsx",
+      "line": 62,
+      "disposition": "rename:WindowSurfaceBridge"
+    },
+    {
+      "name": "NSEWindowSurfaceBridgeProvider",
+      "file": "src/NSE/Overlays/NSEWindowSurfaceBridge.tsx",
+      "line": 70,
+      "disposition": "rename:WindowSurfaceBridgeProvider"
+    },
+    {
+      "name": "NSEWindowSurfaceDismissResult",
+      "file": "src/NSE/Overlays/NSEWindowSurfaceBridge.tsx",
+      "line": 53,
+      "disposition": "rename:WindowSurfaceDismissResult"
+    },
+    {
+      "name": "NSEWindowSurfaceErrorContext",
+      "file": "src/NSE/Overlays/NSEWindowSurfaceBridge.tsx",
+      "line": 57,
+      "disposition": "rename:WindowSurfaceErrorContext"
+    },
+    {
+      "name": "NSEWindowSurfaceLifecycleOptions",
+      "file": "src/NSE/Overlays/useNSEWindowSurfaceLifecycle.ts",
+      "line": 33,
+      "disposition": "rename:WindowSurfaceLifecycleOptions"
+    },
+    {
+      "name": "NSEWindowSurfaceRequest",
+      "file": "src/NSE/Overlays/NSEWindowSurfaceBridge.tsx",
+      "line": 28,
+      "disposition": "rename:WindowSurfaceRequest"
+    },
+    {
+      "name": "NSEWindowTitleBar",
+      "file": "src/NSE/Windows/NSEWindowTitleBar.tsx",
+      "line": 85,
+      "disposition": "rename:WindowTitleBar"
+    },
+    {
+      "name": "NSEWindowTitlebarAccessories",
+      "file": "src/SynCloudOS/AppHosting/windowChrome.tsx",
+      "line": 81,
+      "disposition": "rename:WindowTitlebarAccessories"
+    },
+    {
+      "name": "NSEWindowTitlebarContent",
+      "file": "src/NSE/Windows/windowTitlebarContext.tsx",
+      "line": 33,
+      "disposition": "rename:WindowTitlebarContent"
+    },
+    {
+      "name": "NSEWindowTitlebarDocument",
+      "file": "src/NSE/Windows/windowTitlebarContext.tsx",
+      "line": 8,
+      "disposition": "rename:WindowTitlebarDocument"
+    },
+    {
+      "name": "NSEWindowTitlebarDocumentContext",
+      "file": "src/NSE/Windows/windowTitlebarContext.tsx",
+      "line": 22,
+      "disposition": "rename:WindowTitlebarDocumentContext"
+    },
+    {
+      "name": "NSEWindowTitlebarHost",
+      "file": "src/NSE/Windows/windowTitlebarContext.tsx",
+      "line": 16,
+      "disposition": "rename:WindowTitlebarHost"
+    },
+    {
+      "name": "NSEWindowTitlebarHostContext",
+      "file": "src/NSE/Windows/windowTitlebarContext.tsx",
+      "line": 24,
+      "disposition": "rename:WindowTitlebarHostContext"
+    },
+    {
+      "name": "NSEWindowTitleBarProps",
+      "file": "src/NSE/Windows/NSEWindowTitleBar.tsx",
+      "line": 30,
+      "disposition": "rename:WindowTitleBarProps"
+    },
+    {
+      "name": "NSEWindowTitleSlotContext",
+      "file": "src/NSE/Windows/windowTitlebarContext.tsx",
+      "line": 27,
+      "disposition": "rename:WindowTitleSlotContext"
+    },
+    {
+      "name": "NSEWindowToolbar",
+      "file": "src/SynCloudOS/AppHosting/windowChrome.tsx",
+      "line": 145,
+      "disposition": "rename:WindowToolbar"
+    },
+    {
+      "name": "NSEWindowView",
+      "file": "src/NSE/Windows/NSEWindowView.tsx",
+      "line": 65,
+      "disposition": "rename:WindowView"
+    },
+    {
+      "name": "NSEWindowViewProps",
+      "file": "src/NSE/Windows/windowViewTypes.ts",
+      "line": 34,
+      "disposition": "rename:WindowViewProps"
+    },
+    {
+      "name": "NSEZonedDateTime",
+      "file": "src/NSE/DateTime/dateTimeTypes.ts",
+      "line": 23,
+      "disposition": "rename:ZonedDateTime"
+    },
+    {
+      "name": "NSEZonedDateTimeResolution",
+      "file": "src/NSE/DateTime/dateTimeTypes.ts",
+      "line": 28,
+      "disposition": "rename:ZonedDateTimeResolution"
+    }
+  ]
+}

@@ -1,11 +1,11 @@
 import type { AppAnimationClient } from '../../src/SynCloudOS/AppSDK/appEnvironmentClientTypes';
 import type { AnimationLayerHost } from '../../src/SynCloudOS/HostServices/AppSDKHostServiceTypes';
-import type { NSEManagedAnimationHost, NSEManagedAFXRendererOptions } from '../../src/NSE/Application/managedAnimationRenderer';
+import type { ManagedAnimationHost, NSEManagedAFXRendererOptions } from '../../src/NSE/Application/managedAnimationRenderer';
 import { createMountedAnimationLayers } from '../../src/SynCloudOS/HostServices/mountedAnimationLayers';
 
 declare const app: AppAnimationClient;
 declare const host: AnimationLayerHost;
-declare const managedHost: NSEManagedAnimationHost;
+declare const managedHost: ManagedAnimationHost;
 declare const target: object;
 declare const signal: AbortSignal;
 app.createRenderer(target);

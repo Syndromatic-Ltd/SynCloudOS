@@ -2,7 +2,7 @@
 import { NSEEdgeInsetsMake, type NSEEdgeInsets } from "./NSEEdgeInsets";
 import type { NSEScrollRect } from "../Scroll/scrollTypes";
 
-export interface NSEChromeObstruction {
+export interface ChromeObstruction {
   readonly edge: "top" | "left" | "bottom" | "right";
   readonly thickness: number;
   readonly translucent: boolean;
@@ -15,7 +15,7 @@ export function physicalSafeAreaInsets(insets: Readonly<{ blockStart: number; in
 
 export function resolveSafeAreaInsets(input: {
   readonly screen: NSEEdgeInsets;
-  readonly chrome: readonly NSEChromeObstruction[];
+  readonly chrome: readonly ChromeObstruction[];
   readonly additional: NSEEdgeInsets;
   readonly bounds: NSEScrollRect;
 }): NSEEdgeInsets {

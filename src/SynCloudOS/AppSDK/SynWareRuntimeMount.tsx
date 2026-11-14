@@ -21,17 +21,17 @@ import { useInsertionEffect, useLayoutEffect, useMemo, useRef, useState, useSync
 import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { SynCloudOSAppInfo, SynCloudOSRuntime } from "../SynCloudOS";
 import { SynWareRuntimeContext, SynCloudOSRuntimeContext, useRuntimeNSEControlPort, useRuntimeNSEFocusPort, useRuntimeNSEOverlayPort } from "../../SynCloudOSReact";
-import { NSEControlRuntimeProvider, NSEFocusPortProvider, NSEOverlayProvider, NSEConformanceEvidenceProvider, type NSEConformanceEvidencePort } from "../../NSE/NSE";
+import { ControlRuntimeProvider, FocusPortProvider, OverlayProvider, ConformanceEvidenceProvider, type ConformanceEvidencePort } from "../../NSE/NSE";
 import type { MountedSynWareRuntime } from "./appRuntimeFacade";
 import { createMountedSynWareRuntime } from "./appRuntimeFacade";
 import type { SynWareRuntime } from "./appRuntimeTypes";
 import { createSynWareContextValue } from "./createSynWareContextValue";
 import { SynWareProvider } from "./SynWareContext";
-import { NSEOpenPanelApplicationHost } from "../AppHosting/openPanelHosting";
+import { OpenPanelApplicationHost } from "../AppHosting/openPanelHosting";
 import { useSCOS } from "./scos/useSCOS";
 import { createFontCatalogueResourceLoader, FontCatalogueProvider, useFontCatalogue } from "./fontAccess";
 import { createSynWareNSEAnimations } from "./SynWareNSEMediaAdapters";
-import { NSEAnimationEnvironmentProvider, NSEPresenceBoundary, type NSEAnimator } from "../../NSE/Animation";
+import { AnimationEnvironmentProvider, PresenceBoundary, type Animator } from "../../NSE/Animation";
 import type { SynWareContextValue } from "./appContextTypes";
 import { getMountedAppEnvironmentClients } from "./mountedEnvironmentClientRegistry";
 import { hasTrustedBundlePrivilege } from "../BundleLoader/trustedBundleProvenance";
@@ -44,16 +44,16 @@ import type { InspectorRouteInspectionPort } from "../Inspector/inspectorOwnerSo
 import type { AFXFrameScheduler } from "../../FX/AnimationFX/AFXLayer";
 import { createRuntimeAnimationState, createScopedAnimationFrames } from "../AnimationFX/scopedAnimationFrames";
 import { controllerServicesFor, installControllerServices } from "./controllerServices";
-import { NSEMenuRuntimeProvider } from "../../NSE/applicationHostInterop";
-import { NSEViewActivityProvider } from "../../NSE/applicationHostInterop";
-import { NSEPresentedContentProvider } from "../../NSE/applicationHostInterop";
-import { NSEActionScopeProvider } from "../../NSE/applicationHostInterop";
+import { MenuRuntimeProvider } from "../../NSE/applicationHostInterop";
+import { ViewActivityProvider } from "../../NSE/applicationHostInterop";
+import { PresentedContentProvider } from "../../NSE/applicationHostInterop";
+import { ActionScopeProvider } from "../../NSE/applicationHostInterop";
 import { useRuntimeNSEMenuPort } from "../../SynCloudOSReact";
 
 function PresentedApplicationControls({ children }: { readonly children: ReactNode }) {
   const controls = useRuntimeNSEControlPort();
   const menus = useRuntimeNSEMenuPort();
-  return <NSEControlRuntimeProvider port={controls}><NSEMenuRuntimeProvider port={menus}>{children}</NSEMenuRuntimeProvider></NSEControlRuntimeProvider>;
+  return <ControlRuntimeProvider port={controls}><MenuRuntimeProvider port={menus}>{children}</MenuRuntimeProvider></ControlRuntimeProvider>;
 }
 
 // Host-only bridge entrypoint. This is deliberately not exported from the
@@ -98,14 +98,14 @@ function MountedAppPresentationBoundary({
   const controlPort = useRuntimeNSEControlPort();
   const trusted = getMountedAppEnvironmentClients(runtime).trusted;
   const conformance = trusted.conformance;
-  const conformanceEvidencePort = useMemo<NSEConformanceEvidencePort | null>(() => {
+  const conformanceEvidencePort = useMemo<ConformanceEvidencePort | null>(() => {
     if (!conformance || !hasTrustedBundlePrivilege(kernelRuntime, runtime.app.bundleIdentifier, "conformance", "diagnostics.view")) return null;
     return Object.freeze({
-      registerAppearanceFact: (fact: Parameters<NSEConformanceEvidencePort["registerAppearanceFact"]>[0]) => {
+      registerAppearanceFact: (fact: Parameters<ConformanceEvidencePort["registerAppearanceFact"]>[0]) => {
         const handle = conformance.registerAppearanceFact(fact);
         return () => { void handle.dispose(); };
       },
-      registerAccessibilityFinding: (finding: Parameters<NSEConformanceEvidencePort["registerAccessibilityFinding"]>[0]) => {
+      registerAccessibilityFinding: (finding: Parameters<ConformanceEvidencePort["registerAccessibilityFinding"]>[0]) => {
         const handle = conformance.registerAccessibilityFinding(finding);
         return () => { void handle.dispose(); };
       },
@@ -127,26 +127,26 @@ function MountedAppPresentationBoundary({
     // milliseconds and native RAF timestamps, so it cannot be this clock.
     return timing ? createScopedAnimationFrames(runtime.signal, animationState, timing) : null;
   }, [animationState, kernelRuntime, runtime]);
-  const animator = useMemo<NSEAnimator>(() => Object.freeze({
+  const animator = useMemo<Animator>(() => Object.freeze({
     animations: createSynWareNSEAnimations(appAnimations),
     ownerAppId: runtime.app.bundleIdentifier,
   }), [appAnimations, runtime.app.bundleIdentifier]);
   return (
-    <NSEPresenceBoundary>
-    <NSEViewActivityProvider source={animationState}>
-    <NSEAnimationEnvironmentProvider reducedMotion={reducedMotion} animator={animator} layers={appAnimations} frames={appFrames}>
-    <NSEConformanceEvidenceProvider port={conformanceEvidencePort}>
-      <NSEOverlayProvider runtimePort={overlayPort} defaultParentResponderId={`application:${runtime.app.bundleIdentifier}`}>
-        <NSEControlRuntimeProvider port={controlPort}>
-          <NSEMenuRuntimeProvider port={menuPort}>
-            <NSEFocusPortProvider port={focusPort}>{children}</NSEFocusPortProvider>
-          </NSEMenuRuntimeProvider>
-        </NSEControlRuntimeProvider>
-      </NSEOverlayProvider>
-    </NSEConformanceEvidenceProvider>
-    </NSEAnimationEnvironmentProvider>
-    </NSEViewActivityProvider>
-    </NSEPresenceBoundary>
+    <PresenceBoundary>
+    <ViewActivityProvider source={animationState}>
+    <AnimationEnvironmentProvider reducedMotion={reducedMotion} animator={animator} layers={appAnimations} frames={appFrames}>
+    <ConformanceEvidenceProvider port={conformanceEvidencePort}>
+      <OverlayProvider runtimePort={overlayPort} defaultParentResponderId={`application:${runtime.app.bundleIdentifier}`}>
+        <ControlRuntimeProvider port={controlPort}>
+          <MenuRuntimeProvider port={menuPort}>
+            <FocusPortProvider port={focusPort}>{children}</FocusPortProvider>
+          </MenuRuntimeProvider>
+        </ControlRuntimeProvider>
+      </OverlayProvider>
+    </ConformanceEvidenceProvider>
+    </AnimationEnvironmentProvider>
+    </ViewActivityProvider>
+    </PresenceBoundary>
   );
 }
 
@@ -158,6 +158,9 @@ function MountedAppPresentationBoundary({
  * the authoritative React ownership boundary and disposes synchronously on a
  * real unmount or identity replacement.
  */
+/** Subscribes a committed route session to the runtime's authority changes. */
+const routeAuthorityObservers = new WeakMap<object, () => void>();
+
 export function SynWareRuntimeMount({ runtime, app, responderId, windowControllerId, children }: SynWareRuntimeMountProps) {
   const branding = useHostSiteBranding();
   const fontCatalogue = useFontCatalogue(runtime);
@@ -300,6 +303,10 @@ export function SynWareRuntimeMount({ runtime, app, responderId, windowControlle
     let bundleIdentity = runtime.bundles.getBundle(app.bundleIdentifier);
     let bundleGeneration = 0;
     let session: ReturnType<typeof createAppRouteSession> | null = null;
+    // The session is made during render, and React may discard that render without any cleanup.
+    // So it only records its authority listener here; the runtime is subscribed once the session commits.
+    let authorityListener: (() => void) | null = null;
+    let releaseAuthority: (() => void) | null = null;
     const created = createAppRouteSession({
       graph: routeGraph,
       getBundleGeneration() {
@@ -313,15 +320,14 @@ export function SynWareRuntimeMount({ runtime, app, responderId, windowControlle
       getAuthorizationGeneration: runtime.routes.routeGraph.getAuthorizationGeneration,
       getSessionId: () => context.sessionId,
       subscribeAuthorityChanges(listener) {
-        const notify = () => {
+        authorityListener = () => {
           listener();
           if (session) trackRouteSessionCleanup(session);
         };
-        const identity = runtime.identity.session.subscribe(notify);
-        const updated = runtime.events.subscribe("bundle.update", notify);
-        const removed = runtime.events.subscribe("bundle.unregister", notify);
         return () => {
-          identity(); updated(); removed();
+          authorityListener = null;
+          releaseAuthority?.();
+          releaseAuthority = null;
         };
       },
       createLoaderServices: ({ signal }) => createRouteServiceScope(runtime, app.bundleIdentifier, signal, "mounted"),
@@ -331,6 +337,16 @@ export function SynWareRuntimeMount({ runtime, app, responderId, windowControlle
       clearTimeout: runtime.environment.clearTimeout,
     });
     session = created;
+    routeAuthorityObservers.set(created, () => {
+      const notify = authorityListener;
+      if (!notify || releaseAuthority) return;
+      const identity = runtime.identity.session.subscribe(notify);
+      const updated = runtime.events.subscribe("bundle.update", notify);
+      const removed = runtime.events.subscribe("bundle.unregister", notify);
+      releaseAuthority = () => { identity(); updated(); removed(); };
+      // Authority may have changed between the render and its commit.
+      notify();
+    });
     return created;
   }, [app.bundleIdentifier, context, mounted, routeGraph, runtime]);
   const routeParticipant = useMemo(() => routeSession && context ? createMountedRouteParticipant({
@@ -340,10 +356,13 @@ export function SynWareRuntimeMount({ runtime, app, responderId, windowControlle
     clearTimeout: runtime.environment.clearTimeout,
   }) : null, [routeSession, context, runtime]);
   // Session disposal follows actual ownership, not StrictMode layout probes.
-  useInsertionEffect(() => () => {
+  useInsertionEffect(() => {
     if (!routeSession) return;
-    routeSession.dispose();
-    trackRouteSessionCleanup(routeSession);
+    routeAuthorityObservers.get(routeSession)?.();
+    return () => {
+      routeSession.dispose();
+      trackRouteSessionCleanup(routeSession);
+    };
   }, [routeSession, runtime, app.bundleIdentifier]);
   useLayoutEffect(() => {
     if (!routeParticipant || !context) return;
@@ -487,22 +506,22 @@ export function SynWareRuntimeMount({ runtime, app, responderId, windowControlle
   const wrapPresentedContent = (content: ReactNode) => (
     <SynCloudOSRuntimeContext.Provider value={null}>
       <SynWareRuntimeContext.Provider value={mounted.mount.runtime}>
-        <SynWareProvider value={context}><NSEOpenPanelApplicationHost value={context}>
-          <FontCatalogueProvider catalogue={fontCatalogue}><NSEActionScopeProvider appId={app.bundleIdentifier}><PresentedApplicationControls>{content}</PresentedApplicationControls></NSEActionScopeProvider></FontCatalogueProvider>
-        </NSEOpenPanelApplicationHost></SynWareProvider>
+        <SynWareProvider value={context}><OpenPanelApplicationHost value={context}>
+          <FontCatalogueProvider catalogue={fontCatalogue}><ActionScopeProvider appId={app.bundleIdentifier}><PresentedApplicationControls>{content}</PresentedApplicationControls></ActionScopeProvider></FontCatalogueProvider>
+        </OpenPanelApplicationHost></SynWareProvider>
       </SynWareRuntimeContext.Provider>
     </SynCloudOSRuntimeContext.Provider>
   );
   return (
     <SynCloudOSRuntimeContext.Provider value={null}>
       <SynWareRuntimeContext.Provider value={mounted.mount.runtime}>
-        <SynWareProvider value={context}><NSEOpenPanelApplicationHost value={context}>
+        <SynWareProvider value={context}><OpenPanelApplicationHost value={context}>
           <FontCatalogueProvider catalogue={fontCatalogue}>
             <MountedAppPresentationBoundary runtime={mounted.mount.runtime} kernelRuntime={runtime} context={mounted.contextBase}>
-              <NSEPresentedContentProvider value={wrapPresentedContent}>{presentedChildren}</NSEPresentedContentProvider>
+              <PresentedContentProvider value={wrapPresentedContent}>{presentedChildren}</PresentedContentProvider>
             </MountedAppPresentationBoundary>
           </FontCatalogueProvider>
-        </NSEOpenPanelApplicationHost></SynWareProvider>
+        </OpenPanelApplicationHost></SynWareProvider>
       </SynWareRuntimeContext.Provider>
     </SynCloudOSRuntimeContext.Provider>
   );

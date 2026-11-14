@@ -31,7 +31,7 @@ export type WindowResizeEdge =
   | "block-end-inline-start"
   | "block-end-inline-end";
 
-export interface NSEWindowViewProps {
+export interface WindowViewProps {
   readonly record: WindowRecord;
   readonly presentation: WindowPresentation;
   readonly zoomed?: boolean;
@@ -50,4 +50,4 @@ export interface NSEWindowViewProps {
   readonly children: React.ReactNode;
 }
 
-export type NSEWindowHost = React.ComponentType<NSEWindowViewProps>;
+export type WindowViewRenderer = React.ComponentType<WindowViewProps>;

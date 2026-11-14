@@ -31,10 +31,10 @@ import {
 
 import { NSESortDescriptor } from "../../../Foundation/public";
 import { dataViewAllowsMutation, dataViewAnnouncement, dataViewEventIsComposing, dataViewIsBusy, encodeNSEDataViewKey, useNSEDataView } from "../Core";
-import { useNSEVirtualiser } from "../Virtualisation";
+import { useVirtualiser } from "../Virtualisation";
 import { nseDragCommandIds, nseDragNoPayload, useNSEDataViewDragHost } from "../../Drag";
 
-import { NSETableCell } from "./NSETableCell";
+import { TableCell } from "./NSETableCell";
 import { NSETableHeaderView } from "./NSETableHeaderView";
 import type {
   NSETableColumn,
@@ -167,7 +167,7 @@ export function NSETableView<T, TId extends string | number>({
   const activeRowIndex = view.snapshot.activeId === null
     ? 0
     : Math.max(0, view.coordinator.indexForId(view.snapshot.activeId));
-  const virtualiser = useNSEVirtualiser({
+  const virtualiser = useVirtualiser({
     count: view.snapshot.items.length,
     axis: "block",
     overscan: 2,
@@ -516,7 +516,7 @@ export function NSETableView<T, TId extends string | number>({
                   ? column.render(value, entry.item, entry.id)
                   : column.format?.string(value, { locale }) ?? String(value ?? "");
                 return (
-                  <NSETableCell
+                  <TableCell
                     key={column.id}
                     id={cellId(entry.id, column.id)}
                     columnIndex={columnIndex}
@@ -532,7 +532,7 @@ export function NSETableView<T, TId extends string | number>({
                   >
                     {content}
                     {editing?.error ? <span id={`${cellId(entry.id, column.id)}-error`} hidden>{editing.error}</span> : null}
-                  </NSETableCell>
+                  </TableCell>
                 );
               })}
             </div>

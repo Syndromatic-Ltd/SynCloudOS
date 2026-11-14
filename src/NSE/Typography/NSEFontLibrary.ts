@@ -34,7 +34,7 @@ import type { NSEFontFamily, NSEFontPreset } from "../Text/fontDescriptors";
  * once, and a document's reference to it survives a reload.
  */
 
-export interface NSEUserFontFace {
+export interface UserFontFace {
   readonly id: string;
   readonly familyName: string;
   readonly styleName: string;
@@ -44,45 +44,45 @@ export interface NSEUserFontFace {
   readonly fileName: string;
 }
 
-export interface NSEStoredUserFont {
+export interface StoredUserFont {
   readonly id: string;
   readonly fileName: string;
   readonly bytes: NSEData;
 }
 
 /** Where added fonts are kept between sessions. */
-export interface NSEUserFontStorage {
-  load(): Promise<readonly NSEStoredUserFont[]>;
-  save(font: Omit<NSEStoredUserFont, "bytes"> & { readonly bytes: NSEDataConvertible }): Promise<void>;
+export interface UserFontStorage {
+  load(): Promise<readonly StoredUserFont[]>;
+  save(font: Omit<StoredUserFont, "bytes"> & { readonly bytes: NSEDataConvertible }): Promise<void>;
   delete(id: string): Promise<void>;
 }
 
 /** Makes a font's bytes renderable under a CSS family; returns its release. */
-export interface NSEUserFontFaceHost {
+export interface UserFontFaceHost {
   register(cssFamily: string, bytes: NSEDataConvertible): Promise<() => void>;
 }
 
 /** Small persisted lists (favourites, recents). */
-export interface NSEFontPreferenceStore {
+export interface FontPreferenceStore {
   read(key: string): readonly string[];
   write(key: string, value: readonly string[]): void;
 }
 
-export interface NSEFontImportResult {
-  readonly added: readonly NSEUserFontFace[];
+export interface FontImportResult {
+  readonly added: readonly UserFontFace[];
   readonly rejected: readonly { readonly fileName: string; readonly reason: string }[];
 }
 
-export interface NSEFontLibrarySnapshot {
+export interface FontLibrarySnapshot {
   readonly userFamilies: readonly NSEFontFamily[];
   readonly favourites: readonly string[];
   readonly recents: readonly string[];
 }
 
-export interface NSEFontLibraryOptions {
-  readonly storage?: NSEUserFontStorage | null;
-  readonly faceHost?: NSEUserFontFaceHost | null;
-  readonly preferences?: NSEFontPreferenceStore | null;
+export interface FontLibraryOptions {
+  readonly storage?: UserFontStorage | null;
+  readonly faceHost?: UserFontFaceHost | null;
+  readonly preferences?: FontPreferenceStore | null;
 }
 
 const userFontIdPattern = /^user-[0-9a-f]{12}$/;
@@ -172,18 +172,18 @@ function freezeList(values: readonly string[]): readonly string[] {
   return Object.freeze([...values]);
 }
 
-export class NSEFontLibrary {
-  readonly #storage: NSEUserFontStorage | null;
-  readonly #faceHost: NSEUserFontFaceHost | null;
-  readonly #preferences: NSEFontPreferenceStore | null;
-  readonly #faces = new Map<string, { readonly face: NSEUserFontFace; readonly preset: NSEFontPreset; readonly bytes: Uint8Array; readonly release: () => void }>();
+export class FontLibrary {
+  readonly #storage: UserFontStorage | null;
+  readonly #faceHost: UserFontFaceHost | null;
+  readonly #preferences: FontPreferenceStore | null;
+  readonly #faces = new Map<string, { readonly face: UserFontFace; readonly preset: NSEFontPreset; readonly bytes: Uint8Array; readonly release: () => void }>();
   readonly #listeners = new Set<() => void>();
   #favourites: readonly string[];
   #recents: readonly string[];
-  #snapshot: NSEFontLibrarySnapshot;
+  #snapshot: FontLibrarySnapshot;
   #restoring: Promise<void> | null = null;
 
-  constructor(options: NSEFontLibraryOptions = {}) {
+  constructor(options: FontLibraryOptions = {}) {
     this.#storage = options.storage ?? null;
     this.#faceHost = options.faceHost ?? null;
     this.#preferences = options.preferences ?? null;
@@ -197,7 +197,7 @@ export class NSEFontLibrary {
     return () => { this.#listeners.delete(listener); };
   };
 
-  getSnapshot = (): NSEFontLibrarySnapshot => this.#snapshot;
+  getSnapshot = (): FontLibrarySnapshot => this.#snapshot;
 
   get canAddFonts(): boolean {
     return this.#faceHost !== null;
@@ -207,7 +207,7 @@ export class NSEFontLibrary {
     return typeof id === "string" ? this.#faces.get(id)?.preset : undefined;
   }
 
-  userFace(id: unknown): NSEUserFontFace | undefined {
+  userFace(id: unknown): UserFontFace | undefined {
     return typeof id === "string" ? this.#faces.get(id)?.face : undefined;
   }
 
@@ -222,7 +222,7 @@ export class NSEFontLibrary {
   restore(): Promise<void> {
     if (!this.#storage || !this.#faceHost) return Promise.resolve();
     this.#restoring ??= (async () => {
-      let stored: readonly NSEStoredUserFont[] = [];
+      let stored: readonly StoredUserFont[] = [];
       try { stored = await this.#storage!.load(); } catch { return; }
       let changed = false;
       for (const record of stored.slice(0, maximumUserFonts)) {
@@ -240,8 +240,8 @@ export class NSEFontLibrary {
     return this.#restoring;
   }
 
-  async addFonts(files: readonly Pick<File, "name" | "size" | "arrayBuffer">[]): Promise<NSEFontImportResult> {
-    const added: NSEUserFontFace[] = [];
+  async addFonts(files: readonly Pick<File, "name" | "size" | "arrayBuffer">[]): Promise<FontImportResult> {
+    const added: UserFontFace[] = [];
     const rejected: { fileName: string; reason: string }[] = [];
     for (const file of files) {
       const fileName = String(file.name).slice(0, 255) || "Untitled";
@@ -302,7 +302,7 @@ export class NSEFontLibrary {
     this.#publish();
   }
 
-  async #install(id: string, fileName: string, data: NSEDataConvertible): Promise<NSEUserFontFace> {
+  async #install(id: string, fileName: string, data: NSEDataConvertible): Promise<UserFontFace> {
     const bytes = NSEData.from(data).bytes.buffer;
     const names = await readNames(bytes, fileName);
     const cssFamily = cssFamilyForNSEUserFont(id);
@@ -312,7 +312,7 @@ export class NSEFontLibrary {
     } catch {
       throw new TypeError("The browser couldn't load this font.");
     }
-    const face: NSEUserFontFace = Object.freeze({ id, familyName: names.familyName, styleName: names.styleName, weight: names.weight, italic: names.italic, cssFamily, fileName });
+    const face: UserFontFace = Object.freeze({ id, familyName: names.familyName, styleName: names.styleName, weight: names.weight, italic: names.italic, cssFamily, fileName });
     // The face is registered alone under its private family, so the preset
     // names no weight or style: asking for one would only synthesise it.
     const preset: NSEFontPreset = Object.freeze({ id, label: face.styleName, familyId: `user.${slug(face.familyName)}`, family: stackFor(cssFamily) });
@@ -336,8 +336,8 @@ export class NSEFontLibrary {
     } catch { /* preferences are a convenience */ }
   }
 
-  #buildSnapshot(): NSEFontLibrarySnapshot {
-    const families = new Map<string, { label: string; faces: { face: NSEUserFontFace; preset: NSEFontPreset }[] }>();
+  #buildSnapshot(): FontLibrarySnapshot {
+    const families = new Map<string, { label: string; faces: { face: UserFontFace; preset: NSEFontPreset }[] }>();
     for (const entry of this.#faces.values()) {
       const family = families.get(entry.preset.familyId) ?? { label: entry.face.familyName, faces: [] };
       family.faces.push(entry);
@@ -362,7 +362,7 @@ export class NSEFontLibrary {
 }
 
 /** FontFace in the page's document.fonts. */
-export function createNSEBrowserFontFaceHost(): NSEUserFontFaceHost | null {
+export function createNSEBrowserFontFaceHost(): UserFontFaceHost | null {
   const FontFaceConstructor = (globalThis as { FontFace?: typeof FontFace }).FontFace;
   // `in` asks without reading: document.fonts is only touched to register.
   if (!FontFaceConstructor || typeof document === "undefined" || !("fonts" in document)) return null;
@@ -381,7 +381,7 @@ const databaseName = "nse-user-fonts";
 const storeName = "fonts";
 
 /** IndexedDB, one record per font keyed by its id. */
-export function createNSEIndexedDBUserFontStorage(): NSEUserFontStorage | null {
+export function createNSEIndexedDBUserFontStorage(): UserFontStorage | null {
   const factory = (globalThis as { indexedDB?: IDBFactory }).indexedDB;
   if (!factory) return null;
   let opening: Promise<IDBDatabase> | null = null;
@@ -403,11 +403,11 @@ export function createNSEIndexedDBUserFontStorage(): NSEUserFontStorage | null {
     async load() {
       const records = await run<unknown[]>("readonly", (store) => store.getAll());
       return records.filter((record): record is { id: string; fileName: string; bytes: ArrayBuffer } => {
-        const candidate = record as Partial<NSEStoredUserFont> | null;
+        const candidate = record as Partial<StoredUserFont> | null;
         return !!candidate && isNSEUserFontId(candidate.id) && typeof candidate.fileName === "string" && candidate.bytes instanceof ArrayBuffer;
       }).map(record => ({ ...record, bytes: NSEData.from(record.bytes) }));
     },
-    async save(font: Omit<NSEStoredUserFont, "bytes"> & { readonly bytes: NSEDataConvertible }) {
+    async save(font: Omit<StoredUserFont, "bytes"> & { readonly bytes: NSEDataConvertible }) {
       await run("readwrite", (store) => store.put({ id: font.id, fileName: font.fileName, bytes: NSEData.from(font.bytes).bytes.buffer }));
     },
     async delete(id: string) {
@@ -417,7 +417,7 @@ export function createNSEIndexedDBUserFontStorage(): NSEUserFontStorage | null {
 }
 
 /** localStorage, read and written defensively: it may be absent or refuse. */
-export function createNSELocalFontPreferenceStore(): NSEFontPreferenceStore | null {
+export function createNSELocalFontPreferenceStore(): FontPreferenceStore | null {
   let storage: Storage | undefined;
   try { storage = (globalThis as { localStorage?: Storage }).localStorage; } catch { return null; }
   if (!storage) return null;
@@ -439,10 +439,10 @@ export function createNSELocalFontPreferenceStore(): NSEFontPreferenceStore | nu
 /** The shared library, as NSFontManager.shared: the one text clients resolve
  * user fonts from. Its browser ports are created on first use, so importing
  * NSE never touches document.fonts, IndexedDB or storage. */
-let sharedLibrary: NSEFontLibrary | null = null;
+let sharedLibrary: FontLibrary | null = null;
 
-export function sharedNSEFontLibrary(): NSEFontLibrary {
-  sharedLibrary ??= new NSEFontLibrary({
+export function sharedNSEFontLibrary(): FontLibrary {
+  sharedLibrary ??= new FontLibrary({
     storage: createNSEIndexedDBUserFontStorage(),
     faceHost: createNSEBrowserFontFaceHost(),
     preferences: createNSELocalFontPreferenceStore(),

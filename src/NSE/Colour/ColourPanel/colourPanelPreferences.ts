@@ -20,16 +20,16 @@
 
 import { NSEUserDefaults } from "../../../Foundation/NSEUserDefaults";
 import { NSEUserDefaultsController, PreferencePersistenceError, type NSEControllerOwnership } from "../../Controllers";
-import { GFXColour } from "../../../FX/GraphicsFX/public";
+import { GFXColour } from "../../../FX/GraphicsFX/GFXColour";
 
-export interface NSEColourPanelPreferences {
+export interface ColourPanelPreferences {
   readonly recents: readonly string[];
   readonly swatches: readonly string[];
 }
 
-export type NSEColourPanelPreferencesController = NSEUserDefaultsController<NSEColourPanelPreferences>;
+export type ColourPanelPreferencesController = NSEUserDefaultsController<ColourPanelPreferences>;
 
-export interface NSEColourPanelPreferencePersistence {
+export interface ColourPanelPreferencePersistence {
   getPreference<T>(key: string, fallback: T): T;
   setPreference<T>(key: string, value: T): boolean;
   removePreference(key: string): void;
@@ -45,11 +45,11 @@ const validPalette = (maximum: number) => (value: unknown): value is readonly st
   });
 
 export function createNSEColourPanelPreferences(
-  persistence: NSEColourPanelPreferencePersistence,
+  persistence: ColourPanelPreferencePersistence,
   namespace = "nse.colour-panel.palette",
   ownership: NSEControllerOwnership = {},
-): NSEColourPanelPreferencesController {
-  return new NSEUserDefaultsController<NSEColourPanelPreferences>({
+): ColourPanelPreferencesController {
+  return new NSEUserDefaultsController<ColourPanelPreferences>({
     ...ownership,
     namespace,
     schema: {

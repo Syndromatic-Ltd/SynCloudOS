@@ -21,18 +21,18 @@
 import type { HTMLAttributes, ReactNode } from "react";
 import { classes } from "../Controls/Core/nseControlsShared";
 
-export interface NSEDialogSurfaceProps extends Omit<HTMLAttributes<HTMLElement>, "title"> {
+export interface DialogSurfaceProps extends Omit<HTMLAttributes<HTMLElement>, "title"> {
   variant?: "dialog" | "confirm" | "toaster";
   title?: ReactNode;
 }
 
-export function NSEDialogSurface({
+export function DialogSurface({
   variant = "dialog",
   title,
   className = "",
   children,
   ...props
-}: NSEDialogSurfaceProps) {
+}: DialogSurfaceProps) {
   return (
     <section className={classes("nse-control-dialog-surface", className)} data-nse-control="system-alert" data-nse-part="bezel" data-nse-style={variant} data-variant={variant} {...props}>
       {title ? <div data-nse-part="title" className="nse-control-dialog-title">{title}</div> : null}

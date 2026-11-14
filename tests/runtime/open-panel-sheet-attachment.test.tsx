@@ -3,14 +3,14 @@ import React, { useState } from "react";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import { NSEOpenPanel } from "../../src/NSE/FilePanels/NSEOpenPanel";
-import { NSEOpenPanelWindowHost } from "../../src/SynCloudOS/AppHosting/openPanelHosting";
-import { NSEOpenPanelApplicationHost } from "../../src/SynCloudOS/AppHosting/openPanelHosting";
+import { OpenPanelWindowHost } from "../../src/SynCloudOS/AppHosting/openPanelHosting";
+import { OpenPanelApplicationHost } from "../../src/SynCloudOS/AppHosting/openPanelHosting";
 import { SynWareProvider } from "../../src/SynCloudOS/AppSDK/SynWareContext";
-import { NSEWindowSheetHostContext, useNSEWindowSheetHost } from "../../src/SynCloudOS/AppHosting/windowChrome";
-import { NSEWindowSurfaceBridgeProvider } from "../../src/NSE/Overlays/NSEWindowSurfaceBridge";
+import { WindowSheetHostContext, useNSEWindowSheetHost } from "../../src/SynCloudOS/AppHosting/windowChrome";
+import { WindowSurfaceBridgeProvider } from "../../src/NSE/Overlays/NSEWindowSurfaceBridge";
 import { createOpenPanelFileSystem, registerOpenPanelFileSystem } from "../../src/SynCloudOS/FilePanels/OpenPanelFileSystem";
 import type { NSEWindow } from "../../src/NSE/Application/NSEWindowController";
-import { NSEStandaloneControlHost } from "../../src/NSE/Overlays";
+import { StandaloneControlHost } from "../../src/NSE/Overlays";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 import { resolveNSEOpenPanelHost } from "../../src/NSE/FilePanels/openPanelHost";
 afterEach(cleanup);
@@ -26,12 +26,12 @@ it.each([[false, false, false, false], [true, false, false, false], [false, true
   function Parent() {
     const [attached, setAttached] = useState(false);
     const sheets = useNSEWindowSheetHost(setAttached);
-    return <div><NSEWindowSheetHostContext.Provider value={sheets.host}><NSEOpenPanelWindowHost window={window}>
+    return <div><WindowSheetHostContext.Provider value={sheets.host}><OpenPanelWindowHost window={window}>
       <button onClick={() => { response = application ? panel.begin() : panel.beginSheetModal(window); if (immediate) panel.cancel(); }}>Import…</button>
-    </NSEOpenPanelWindowHost></NSEWindowSheetHostContext.Provider><div ref={sheets.layerRef} className="nse-window-sheet-layer" data-sheet-attached={attached} /></div>;
+    </OpenPanelWindowHost></WindowSheetHostContext.Provider><div ref={sheets.layerRef} className="nse-window-sheet-layer" data-sheet-attached={attached} /></div>;
   }
-  render(<NSEStandaloneControlHost document={document} window={globalThis.window} presentation={createStaticPresentationPort({ width: compact ? 390 : 1000, height: compact ? 844 : 720 })}>
-    <NSEWindowSurfaceBridgeProvider bridge={bridge}><SynWareProvider value={value}><NSEOpenPanelApplicationHost value={value}><Parent /></NSEOpenPanelApplicationHost></SynWareProvider></NSEWindowSurfaceBridgeProvider></NSEStandaloneControlHost>);
+  render(<StandaloneControlHost document={document} window={globalThis.window} presentation={createStaticPresentationPort({ width: compact ? 390 : 1000, height: compact ? 844 : 720 })}>
+    <WindowSurfaceBridgeProvider bridge={bridge}><SynWareProvider value={value}><OpenPanelApplicationHost value={value}><Parent /></OpenPanelApplicationHost></SynWareProvider></WindowSurfaceBridgeProvider></StandaloneControlHost>);
   const trigger = screen.getByRole("button", { name: "Import…" }); trigger.focus();
   if (immediate) {
     const host = resolveNSEOpenPanelHost(application ? null : window);

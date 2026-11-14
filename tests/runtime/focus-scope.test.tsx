@@ -26,7 +26,7 @@ import { createPortal } from "react-dom";
 import React, { StrictMode } from "react";
 import { FocusScope, ResponderScope, RuntimeInputBoundary, SynCloudOSProvider } from "../../src/SynCloudOSReact";
 import { createTestRuntime } from "./helpers";
-import { NSEAlertBackdrop } from "../../src/NSE/Components/NSEAlertBackdrop";
+import { AlertBackdrop } from "../../src/NSE/Components/NSEAlertBackdrop";
 import { registerNSEFocusOrigin } from "../../src/NSE/Focus";
 import { registerNSEInspectorOrigin } from "../../src/NSE/Focus/focusOrigin";
 import type { FocusScopeHandle } from "../../src/SynCloudOS/Focus/focusTypes";
@@ -429,7 +429,7 @@ describe("focus scopes", () => {
     runtime.responders.register({ id: "app", kind: "application", parentId: "runtime", scopeId: "root" });
     render(
       <SynCloudOSProvider runtime={runtime}>
-        <NSEAlertBackdrop><button>Try again</button></NSEAlertBackdrop>
+        <AlertBackdrop><button>Try again</button></AlertBackdrop>
         <div data-testid="background"><button>Outside</button></div>
         <FocusScope scopeId="modal:sign-in" kind="modal" parentResponderId="app">
           <button>Sign in</button>

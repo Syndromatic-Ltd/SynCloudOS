@@ -299,7 +299,8 @@ export function inspectStyleErrors({ file = "", text, themeSiblings }) {
     let privateClass = false, hook = false;
     try {
       walkCss(parseCss(selector, { context: "selectorList" }), node => {
-        if (node.type === "ClassSelector" && /^nse-/u.test(node.name)) privateClass = true;
+        // "nse:" tokens are the private mirror of contract hooks; authored CSS selects the attributes.
+        if (node.type === "ClassSelector" && /^nse(?:-|\\?:)/u.test(node.name)) privateClass = true;
         if (node.type === "AttributeSelector" && /^data-nse-/u.test(node.name.name) && !APPEARANCE_ATTRIBUTES.has(node.name.name)) hook = true;
       });
     } catch { /* Incomplete CSS is left to stylesheet validation. */ }

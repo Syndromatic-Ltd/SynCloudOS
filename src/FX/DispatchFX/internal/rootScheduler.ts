@@ -154,7 +154,7 @@ function next(upTo?: Entry | ReadonlySet<Entry>): Entry | undefined {
     const held =
       isExecuting(entry.job.queue) ||
       entry.chain.some(queue => isExecuting(queue, true) || objectState(queue).workerInFlight) ||
-      (entry.job.barrier && isExecuting(entry.job.queue));
+      (entry.job.barrier && (isExecuting(entry.job.queue) || objectState(entry.job.queue).workerActiveInFlight));
     if (blockers.size === 0 && !held) ready.push(entry);
     if (entry === lastLimit) break;
   }

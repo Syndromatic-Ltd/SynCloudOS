@@ -73,54 +73,47 @@
    METAL MATERIAL — the steel source list (ported from Software's `sn-*`, keyed by global data-mode)
    ============================================================================================= */
 
-:where([data-nse-material="metal"]) .nse-control-list-item,
-:where(:scope):is(:where([data-nse-material="metal"])) .nse-control-list-item {
+.nse-control-list-item:where([data-nse-material="metal"] *) {
   cursor: pointer;
   padding: 10px 12px;
   color: #1b2733;
 }
 
-:where([data-nse-material="metal"]) .nse-control-list-item:focus-visible,
-:where(:scope):is(:where([data-nse-material="metal"])) .nse-control-list-item:focus-visible {
+.nse-control-list-item:focus-visible:where([data-nse-material="metal"] *) {
   outline: 2px solid rgba(90, 150, 215, 0.85);
   outline-offset: -2px;
 }
 
 /* Dark rail: row text + softened bevel so seams settle into the sidebar. */
-[data-mode="dark"] :where([data-nse-material="metal"]) .nse-control-list-item,
-:where(:scope):is([data-mode="dark"]) :where([data-nse-material="metal"]) .nse-control-list-item,
-[data-mode="dark"]:is(:where([data-nse-material="metal"])) .nse-control-list-item {
+[data-mode="dark"] .nse-control-list-item:where([data-nse-material="metal"] *),
+:where(:scope):is([data-mode="dark"]) .nse-control-list-item:where([data-nse-material="metal"] *) {
   color: #cdd9e6;
   border-top-color: rgba(150, 180, 214, 0.14);
   border-bottom-color: rgba(0, 0, 0, 0.22);
 }
 
 /* Embossed labels on unselected rows: raised in light, engraved in dark. */
-[data-mode="light"] :where([data-nse-material="metal"]) .nse-control-list-item[data-selected="false"] .nse-control-list-primary,
-:where(:scope):is([data-mode="light"]) :where([data-nse-material="metal"]) .nse-control-list-item[data-selected="false"] .nse-control-list-primary,
-[data-mode="light"]:is(:where([data-nse-material="metal"])) .nse-control-list-item[data-selected="false"] .nse-control-list-primary {
+[data-mode="light"] .nse-control-list-item[data-selected="false"]:where([data-nse-material="metal"] *) .nse-control-list-primary,
+:where(:scope):is([data-mode="light"]) .nse-control-list-item[data-selected="false"]:where([data-nse-material="metal"] *) .nse-control-list-primary {
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75);
 }
-[data-mode="dark"] :where([data-nse-material="metal"]) .nse-control-list-item[data-selected="false"] .nse-control-list-primary,
-:where(:scope):is([data-mode="dark"]) :where([data-nse-material="metal"]) .nse-control-list-item[data-selected="false"] .nse-control-list-primary,
-[data-mode="dark"]:is(:where([data-nse-material="metal"])) .nse-control-list-item[data-selected="false"] .nse-control-list-primary {
+[data-mode="dark"] .nse-control-list-item[data-selected="false"]:where([data-nse-material="metal"] *) .nse-control-list-primary,
+:where(:scope):is([data-mode="dark"]) .nse-control-list-item[data-selected="false"]:where([data-nse-material="metal"] *) .nse-control-list-primary {
   color: #cdd9e6;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.78);
 }
 
 /* Selection: stock pale Onyx gloss in light; deeper steel gradient + engraved text in dark. */
-[data-mode="light"] :where([data-nse-material="metal"]) .nse-control-list-item:not(.is-disabled):is([data-selected="true"],[data-pressed="true"],:active),
-:where(:scope):is([data-mode="light"]) :where([data-nse-material="metal"]) .nse-control-list-item:not(.is-disabled):is([data-selected="true"],[data-pressed="true"],:active),
-[data-mode="light"]:is(:where([data-nse-material="metal"])) .nse-control-list-item:not(.is-disabled):is([data-selected="true"],[data-pressed="true"],:active) {
+[data-mode="light"] .nse-control-list-item:not(.is-disabled):is([data-selected="true"],[data-pressed="true"],:active):where([data-nse-material="metal"] *),
+:where(:scope):is([data-mode="light"]) .nse-control-list-item:not(.is-disabled):is([data-selected="true"],[data-pressed="true"],:active):where([data-nse-material="metal"] *) {
   background: linear-gradient(180deg, rgba(218, 235, 251, 0.85) 0%, rgba(197, 224, 249, 0.85) 100%);
   /* Stated, not inherited. atmo-controls paints selected rows white for Heritage's
      DARK selection; on this pale gloss that is invisible, and the material owns
      both halves of the pair or neither. */
   color: #1b2733;
 }
-[data-mode="dark"] :where([data-nse-material="metal"]) .nse-control-list-item:not(.is-disabled):is([data-selected="true"],[data-pressed="true"],:active),
-:where(:scope):is([data-mode="dark"]) :where([data-nse-material="metal"]) .nse-control-list-item:not(.is-disabled):is([data-selected="true"],[data-pressed="true"],:active),
-[data-mode="dark"]:is(:where([data-nse-material="metal"])) .nse-control-list-item:not(.is-disabled):is([data-selected="true"],[data-pressed="true"],:active) {
+[data-mode="dark"] .nse-control-list-item:not(.is-disabled):is([data-selected="true"],[data-pressed="true"],:active):where([data-nse-material="metal"] *),
+:where(:scope):is([data-mode="dark"]) .nse-control-list-item:not(.is-disabled):is([data-selected="true"],[data-pressed="true"],:active):where([data-nse-material="metal"] *) {
   background: linear-gradient(180deg, #5c6f7f 0%, #233242 100%);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.22),
@@ -171,7 +164,7 @@
   outline-offset: -2px;
 }
 
-/* Preferences derives its row seams from the adjacent NSEListItem bevels,
+/* Preferences derives its row seams from the adjacent GroupedRow bevels,
    rather than placing a generic divider control between rows. Retaining the
    canonical top/bottom borders gives one crisp internal joined bevel, omits
    the outer first/last edges, and lets selected/held/focused row paint cover
@@ -181,9 +174,8 @@
    rgba(42,55,70,.68) — a dark slate authored for a light rail, which on the dark
    one leaves badges and counts almost invisible against the steel. Mirrors what
    the row's primary line already does per mode just above. */
-[data-mode="dark"] :where([data-nse-material="metal"]) .nse-control-list-item[data-selected="false"] .nse-control-list-meta,
-:where(:scope):is([data-mode="dark"]) :where([data-nse-material="metal"]) .nse-control-list-item[data-selected="false"] .nse-control-list-meta,
-[data-mode="dark"]:is(:where([data-nse-material="metal"])) .nse-control-list-item[data-selected="false"] .nse-control-list-meta {
+[data-mode="dark"] .nse-control-list-item[data-selected="false"]:where([data-nse-material="metal"] *) .nse-control-list-meta,
+:where(:scope):is([data-mode="dark"]) .nse-control-list-item[data-selected="false"]:where([data-nse-material="metal"] *) .nse-control-list-meta {
   color: rgba(205, 217, 230, 0.62);
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.6);
 }
@@ -194,14 +186,12 @@
    Onyx lineage hit on 2026-07-29; it surfaced here once the vector layer stopped
    overriding metal's selection (canonical Atmo). (0,4,0) so it clears
    atmo-controls' (0,3,0). */
-[data-mode="light"] :where([data-nse-material="metal"]) .nse-control-list-item[data-selected="true"] .nse-control-list-meta,
-:where(:scope):is([data-mode="light"]) :where([data-nse-material="metal"]) .nse-control-list-item[data-selected="true"] .nse-control-list-meta,
-[data-mode="light"]:is(:where([data-nse-material="metal"])) .nse-control-list-item[data-selected="true"] .nse-control-list-meta {
+[data-mode="light"] .nse-control-list-item[data-selected="true"]:where([data-nse-material="metal"] *) .nse-control-list-meta,
+:where(:scope):is([data-mode="light"]) .nse-control-list-item[data-selected="true"]:where([data-nse-material="metal"] *) .nse-control-list-meta {
   color: #5a6b7d;
 }
-[data-mode="dark"] :where([data-nse-material="metal"]) .nse-control-list-item[data-selected="true"] .nse-control-list-meta,
-:where(:scope):is([data-mode="dark"]) :where([data-nse-material="metal"]) .nse-control-list-item[data-selected="true"] .nse-control-list-meta,
-[data-mode="dark"]:is(:where([data-nse-material="metal"])) .nse-control-list-item[data-selected="true"] .nse-control-list-meta {
+[data-mode="dark"] .nse-control-list-item[data-selected="true"]:where([data-nse-material="metal"] *) .nse-control-list-meta,
+:where(:scope):is([data-mode="dark"]) .nse-control-list-item[data-selected="true"]:where([data-nse-material="metal"] *) .nse-control-list-meta {
   color: rgba(241, 246, 251, 0.72);
 }
 

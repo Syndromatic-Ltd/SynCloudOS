@@ -20,50 +20,52 @@
 
 /** SynCloudOS shell composition surface. This is not a SynWare package entry. */
 export {
-  NSEMaterialLighting,
+  MaterialLighting,
   staticNSEMaterialLight,
 } from "./Appearance/NSEMaterialLighting";
 export type {
-  NSEMaterialLight,
-  NSEMaterialLightingPort,
+  MaterialLight,
+  MaterialLightingPort,
 } from "./Appearance/NSEMaterialLighting";
-export { NSEMaterialLightingProvider } from "./Appearance/NSEMetalThumb";
+export { MaterialLightingProvider } from "./Appearance/MetalThumb";
 export {
-  NSEFeedbackProvider,
+  FeedbackProvider,
   useNSEFeedback,
 } from "./Feedback";
 export { resolveNSEFocusReturnTarget, isWithinNSEFocusOrigin } from "./Focus/focusOrigin";
 
-export { NSEAlertSurface } from "./Components/NSEAlertSurface";
+export { AlertSurface } from "./Components/NSEAlertSurface";
 export { SourceListFrameProvider } from "./Navigation/SourceList/sourceListFrameContext";
 export type { SourceListFrameContextValue } from "./Navigation/SourceList/sourceListFrameContext";
 
-export { NSEAlertBackdrop } from "./SystemUI";
-export { nseTopBarHeightCssValue } from "./Windows/Chrome/nseTopBarStyles";
-export { NSEFocusScope } from "./Focus";
+export { AlertBackdrop } from "./SystemUI";
+export { nseTopBarHeightCssValue } from "./Windows/Chrome/topBarStyles";
+export { FocusScope } from "./Focus";
 export { NSEPopover } from "./Overlays/NSEPopover";
 export { NSEPopup } from "./Overlays/NSEPopup";
 
 // Window chrome and transient surfaces are drawn by NSE for framework hosts.
-export { NSETopBar } from "./Windows/Chrome/NSETopBar";
-export { NSEWindowTitlebarHostContext } from "./Windows/windowTitlebarContext";
-export type { NSEWindowTitlebarDocument, NSEWindowTitlebarHost } from "./Windows/windowTitlebarContext";
-export { NSEPopoverFrame } from "./Overlays/NSEPopoverFrame";
+export { TopBar } from "./Windows/Chrome/TopBar";
+export { WindowTitlebarHostContext } from "./Windows/windowTitlebarContext";
+export type { WindowTitlebarDocument, WindowTitlebarHost } from "./Windows/windowTitlebarContext";
+export { PopoverFrame } from "./Overlays/NSEPopoverFrame";
 export { applyNSEPopoverPosition, computeNSEPopoverPosition, nsePopoverEdgePlacement, nsePopoverReference } from "./Overlays/popoverPosition";
 export type { NSEPopoverPosition } from "./Overlays/popoverPosition";
 export { nsePopoverSpringEasing, useNSEPopoverSurface } from "./Overlays/useNSEPopoverSurface";
-export { NSEWindowSurfaceBridgeProvider } from "./Overlays/NSEWindowSurfaceBridge";
-export type { NSEWindowSurfaceRequest } from "./Overlays/NSEWindowSurfaceBridge";
-export { logicalPlacementToFloatingPlacement } from "./Overlays/computeNSEOverlayPosition";
+export { WindowSurfaceBridgeProvider } from "./Overlays/NSEWindowSurfaceBridge";
+export type { WindowSurfaceRequest } from "./Overlays/NSEWindowSurfaceBridge";
+export { logicalPlacementToFloatingPlacement } from "./Overlays/computeOverlayPosition";
 export { registerNSEHapticFeedbackEngine } from "./Feedback/NSEHapticFeedbackManager";
-export { NSEViewDrawingEnvironmentContext } from "./Views/NSEViewDrawingEnvironment";
+export { ViewDrawingEnvironmentContext } from "./Views/NSEViewDrawingEnvironment";
 // Window layout and safe areas for framework chrome, and the theme hooks system surfaces publish.
-export { NSEWindowLayoutContext, NSEWindowLayoutModel, useNSEContentLayoutProperties } from "./Layout/windowChromeObstructions";
-export { useNSEViewSafeArea } from "./Layout/useNSESafeArea";
+export { WindowLayoutContext, WindowLayoutModel, useNSEContentLayoutProperties } from "./Layout/windowChromeObstructions";
+export { SafeAreaMeasurementProvider, useNSEViewSafeArea } from "./Layout/useNSESafeArea";
 export { useNSEDeferredDisposal } from "./interactionLifecycle";
+export { createReactOwnedNSEMenu } from "./Menus/NSEMenu";
+export { useMenuLifetime } from "./Menus/useMenuLifetime";
 export { nseStateHooks } from "./Theme/contract/hooks";
 export { useNSEThemeInteraction } from "./Theme/contract/useThemeInteraction";
 export type { NSETheme } from "./Theme/NSETheme";
-export type { NSEViewDrawingEnvironment } from "./Views/NSEViewDrawingEnvironment";
+export type { ViewDrawingEnvironment } from "./Views/NSEViewDrawingEnvironment";
 
-export { NSEWindowTitleBar } from "./Windows/NSEWindowTitleBar";
+export { WindowTitleBar } from "./Windows/WindowTitleBar";

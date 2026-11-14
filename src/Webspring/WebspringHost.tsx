@@ -21,14 +21,15 @@
 import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
 import { Component, createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ErrorInfo, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { NSEFocusPortProvider, useNSEDeferredDisposal } from "../NSE/NSE";
+import { FocusPortProvider, useNSEDeferredDisposal } from "../NSE/NSE";
 import { useNSEAnimationEnvironment } from "../NSE/Animation";
 import { useNSEFeedback } from "../NSE/hostComposition";
 import { MaterialProvider } from "../NSE/Material";
 import { HostLoginGate } from "./HostLoginGate";
 import type { RuntimeSnapshot } from "../SynCloudOS/SynCloudOS";
 import type { AuthenticationInput, Presentation, WebspringDefinition, WebspringViewComponent } from "./webspringTypes";
-import { SystemStartupLayer, type SystemStartupPhase } from "./SystemStartupLayer";
+import { SystemStartupLayer } from "./SystemStartupLayer";
+import type { SystemStartupPhase } from "../SynCloudOS/RootRuntime";
 import { ApplicationStageLayer } from "./ApplicationStageLayer";
 import { syncApplicationWindowContentRenderers, WindowContentRendererRegistry, WindowLayer, type ApplicationWindowRendererRegistrations } from "./WindowLayer";
 import { HostSiteBrandingProvider, useKernelSynCloudOS, useRuntimeNSEFocusPort, useRuntimeSelector } from "../SynCloudOSReact";
@@ -321,9 +322,9 @@ export function WebspringHost({
       fallbackViewId={fallbackViewId}
       onFallback={() => { if (fallbackViewId) setViewOverride({ presentation, id: fallbackViewId }); }}
     >
-      <NSEFocusPortProvider port={viewFocusPort}>
+      <FocusPortProvider port={viewFocusPort}>
         <View model={model} actions={viewActions} applicationOutlet={applicationOutlet} folderPresentation={shell.folderPresentation} />
-      </NSEFocusPortProvider>
+      </FocusPortProvider>
     </WebspringViewBoundary> : <section role="alert" className="webspring-view-recovery">
       <h1>Webspring host unavailable</h1>
       <p>{controllerOutcome.error?.message}</p>

@@ -19,11 +19,11 @@
  */
 
 import { useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { GFXColour } from "../../../FX/GraphicsFX/public";
+import { GFXColour } from "../../../FX/GraphicsFX/GFXColour";
 
 import { useNSEColourPanelController, useNSEColourPanelService, useOptionalNSEColourPanelCommands, useOptionalNSEColourPanelDrag, useOptionalNSEColourPanelResponderId } from "../ColourPanel/NSEColourPanelProvider";
-import type { NSEEyeDropperAdapter } from "../Pickers/NSEEyeDropperAdapter";
-import type { NSEColourTransferAdapter } from "../Transfer";
+import type { EyeDropperAdapter } from "../Pickers/eyeDropperAdapter";
+import type { ColourTransferAdapter } from "../Transfer";
 import { parseNSEColourTransfer, serialiseNSEColourTransfer } from "../Transfer";
 import { nseDragCommandIds, nseDragNoPayload, useNSEDragSource, useNSEDropTarget } from "../../Drag";
 import { useNSEDeferredDisposal } from "../../interactionLifecycle";
@@ -40,8 +40,8 @@ export interface NSEColourWellProps {
   readonly isEnabled?: boolean;
   readonly readOnly?: boolean;
   readonly showAlpha?: boolean;
-  readonly eyeDropper?: NSEEyeDropperAdapter;
-  readonly transfer?: NSEColourTransferAdapter;
+  readonly eyeDropper?: EyeDropperAdapter;
+  readonly transfer?: ColourTransferAdapter;
   readonly "aria-label": string;
   onValueChange?(colour: GFXColour, phase: "preview" | "commit"): void;
 }

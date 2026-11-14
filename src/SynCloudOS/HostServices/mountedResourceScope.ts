@@ -64,7 +64,7 @@ function normaliseCharge(charge: MountedResourceCharge | undefined): Record<Moun
 
 /** Host-only leases link caller cancellation to mount/runtime revocation while
  * keeping accounting charged until the host reports actual release. */
-export function createMountedResourceScope(owner: AbortSignal, options: number | MountedResourceScopeOptions = 8) {
+export function createMountedResourceScope(owner: AbortSignal, options: number | MountedResourceScopeOptions = 8, observeImmediately = true) {
   const maxResources = typeof options === "number"
     ? checkedCount(options, 8, "Mounted resource limit")
     : checkedCount(options.maxResources, 8, "Mounted resource limit");
@@ -103,10 +103,20 @@ export function createMountedResourceScope(owner: AbortSignal, options: number |
       },
     });
   };
-  owner.addEventListener("abort", () => {
+  const revokeAll = () => {
     for (const entry of [...entries]) entry.revoke(owner.reason);
-  }, { once: true });
+  };
+  const observeOwner = () => {
+    if (owner.aborted) revokeAll();
+    else owner.addEventListener("abort", revokeAll, { once: true });
+    return () => {
+      owner.removeEventListener("abort", revokeAll);
+      revokeAll();
+    };
+  };
+  if (observeImmediately) observeOwner();
   return {
+    observeOwner,
     reserve,
     snapshot(): MountedResourceScopeSnapshot {
       return Object.freeze({

@@ -6,14 +6,14 @@
  */
 
 import { useNSEAppearance } from "../Appearance/NSEAppearanceProvider";
-import { NSEWindowLayoutContext, useNSEWindowChromeElement } from "../Layout/windowChromeObstructions";
+import { WindowLayoutContext, useNSEWindowChromeElement } from "../Layout/windowChromeObstructions";
 import { useNSEViewSafeArea } from "../Layout/useNSESafeArea";
 import { useContext, useCallback, useLayoutEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
 import { NSEOutlineView } from "../DataViews/Outline/NSEOutlineView";
 import { NSESplitView } from "../DataViews/Split/NSESplitView";
 import { NSETableCellView } from "../DataViews/Table/NSETableCellView";
-import { NSETabBar, NSETabBarOverflowList } from "./NSETabBar";
-import { NSETabBarMoreDestinationId } from "./NSETabBarController";
+import { TabBar, TabBarOverflowList } from "./TabBar";
+import { TabBarMoreDestinationId } from "./TabBarController";
 import { getNSETabBarPanelId, getNSETabBarTabId } from "./NSENavigationDestinationHost";
 import { resolveNSEBookRegions } from "./bookRegions";
 import { useSourceListFrame } from "./SourceList/sourceListFrameContext";
@@ -24,7 +24,7 @@ import "./adaptiveTabView.css";
 import { useNSECompactMoreTitle } from "./compactMoreTitle";
 
 /** @internal Plain source-list data; view controllers stay with the tab view items. */
-export interface NSEAdaptiveTabOutlineItem {
+export interface AdaptiveTabOutlineItem {
   readonly identifier: string;
   readonly label: string;
   readonly image: NSENavigationIcon | undefined;
@@ -41,13 +41,13 @@ const maximumRailHeight = 480;
 const sidebarMinimumWidth = 768;
 
 /** @internal The sidebar-adaptable theme projection of NSTabViewController's items. */
-export function NSEAdaptiveTabView({ controller, scope }: { readonly controller: NSETabViewController; readonly scope: string }) {
+export function AdaptiveTabView({ controller, scope }: { readonly controller: NSETabViewController; readonly scope: string }) {
   const frame = useSourceListFrame();
   const { theme } = useNSEAppearance();
   const root = useRef<HTMLDivElement>(null);
   const chrome = useRef<HTMLDivElement>(null);
   const sidebar = useRef<HTMLDivElement>(null);
-  const layout = useContext(NSEWindowLayoutContext);
+  const layout = useContext(WindowLayoutContext);
   const safeArea = useNSEViewSafeArea(root);
   const [allocation, setAllocation] = useState<Bounds | null>(null);
   const traits = controller.traitCollection.presentation;
@@ -78,8 +78,8 @@ export function NSEAdaptiveTabView({ controller, scope }: { readonly controller:
   // The compact bar's More list stands in for the selected panel while it is open.
   const subscribeModel = useCallback((listener: () => void) => model?.subscribe(listener) ?? (() => undefined), [model]);
   const modelSnapshot = useSyncExternalStore(subscribeModel, () => model?.getSnapshot() ?? null, () => model?.getSnapshot() ?? null);
-  const moreListOpen = compact && modelSnapshot?.activeTabId === NSETabBarMoreDestinationId
-    && modelSnapshot.moreStack?.currentDestinationId === NSETabBarMoreDestinationId;
+  const moreListOpen = compact && modelSnapshot?.activeTabId === TabBarMoreDestinationId
+    && modelSnapshot.moreStack?.currentDestinationId === TabBarMoreDestinationId;
   useNSECompactMoreTitle(controller.view.window, Boolean(moreListOpen), root);
   const visited = useRef(new Set<string>());
   if (selected) visited.current.add(selected.identifier);
@@ -159,14 +159,14 @@ export function NSEAdaptiveTabView({ controller, scope }: { readonly controller:
           <item.viewController.view />
         </div>)}
         {model && compact && modelSnapshot && modelSnapshot.overflowDestinationIds.length > 0
-          ? <NSETabBarOverflowList controller={model} aria-label={controller.title ?? "Tabs"} idScope={scope} />
+          ? <TabBarOverflowList controller={model} aria-label={controller.title ?? "Tabs"} idScope={scope} />
           : null}
       </div>
     </NSESplitView>
     <div ref={chrome} className={`nse-adaptive-tab-chrome${renderer === "tabs" && placement === "block-end" && flow === "overlay" ? " nse-compact-bottom-chrome-mount" : ""}`}
       hidden={!showsCompactChrome} inert={!showsCompactChrome} data-nse-adaptive-tabs-chrome="true"
       data-nse-compact-bottom-chrome={renderer === "tabs" && placement === "block-end" && flow === "overlay" ? "tabs-only" : undefined}>
-      {model ? <NSETabBar controller={model} aria-label={controller.title ?? "Tabs"} renderPanels={false}
+      {model ? <TabBar controller={model} aria-label={controller.title ?? "Tabs"} renderPanels={false}
         orientation={renderer === "rail" ? "vertical" : "horizontal"} reducedMotion={controller.traitCollection.reducedMotion} idScope={scope} /> : null}
     </div>
   </div>;

@@ -24,11 +24,11 @@ import { createContext, useContext, type PropsWithChildren, type ReactNode } fro
  * NSE remains usable without SynCloudOS. Hosts that do have a logical focus
  * graph inject this port so portalled controls retain their command scope.
  */
-export type NSEFocusScopeKind = "menu" | "popover" | "modal";
+export type FocusScopeKind = "menu" | "popover" | "modal";
 
-export interface NSEFocusScopeOptions {
+export interface FocusScopeOptions {
   readonly scopeId: string;
-  readonly kind: NSEFocusScopeKind;
+  readonly kind: FocusScopeKind;
   readonly parentResponderId?: string;
   readonly parentScopeId?: string;
   readonly modal?: boolean;
@@ -38,22 +38,22 @@ export interface NSEFocusScopeOptions {
   readonly asChild?: boolean;
 }
 
-export interface NSEFocusPort {
+export interface FocusPort {
   readonly runtimeId: string;
-  wrapFocusScope(options: NSEFocusScopeOptions, children: ReactNode): ReactNode;
+  wrapFocusScope(options: FocusScopeOptions, children: ReactNode): ReactNode;
 }
 
-const NSEFocusPortContext = createContext<NSEFocusPort | null>(null);
+const FocusPortContext = createContext<FocusPort | null>(null);
 
-export function NSEFocusPortProvider({ port, children }: PropsWithChildren<{ port: NSEFocusPort | null }>) {
-  return <NSEFocusPortContext.Provider value={port}>{children}</NSEFocusPortContext.Provider>;
+export function FocusPortProvider({ port, children }: PropsWithChildren<{ port: FocusPort | null }>) {
+  return <FocusPortContext.Provider value={port}>{children}</FocusPortContext.Provider>;
 }
 
 export function useNSEFocusPort() {
-  return useContext(NSEFocusPortContext);
+  return useContext(FocusPortContext);
 }
 
-export function NSEFocusScope({ options, children }: PropsWithChildren<{ options: NSEFocusScopeOptions }>) {
+export function FocusScope({ options, children }: PropsWithChildren<{ options: FocusScopeOptions }>) {
   const port = useNSEFocusPort();
   return <>{port ? port.wrapFocusScope(options, children) : children}</>;
 }

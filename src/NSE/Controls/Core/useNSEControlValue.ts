@@ -29,7 +29,7 @@ export interface UseNSEControlValueOptions<T> extends NSEControlValueProps<T> {
   readonly fallback: T;
 }
 
-export interface NSEControlValueState<T> {
+export interface ControlValueState<T> {
   readonly value: T;
   readonly isControlled: boolean;
   readonly validation: NSEControlValidation | undefined;
@@ -45,7 +45,7 @@ export interface NSEControlValueState<T> {
  * default. This is the one shared reset mechanism used by the foundational
  * controls so browser form semantics do not fork by control kind.
  */
-export function useNSEControlValue<T>(options: UseNSEControlValueOptions<T>): NSEControlValueState<T> {
+export function useNSEControlValue<T>(options: UseNSEControlValueOptions<T>): ControlValueState<T> {
   const {
     value,
     defaultValue,

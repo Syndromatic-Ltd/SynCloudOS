@@ -23,14 +23,14 @@ import React, { useLayoutEffect, useMemo, useState, type PropsWithChildren } fro
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
-  NSEOverlayProvider,
-  computeNSEOverlayPosition,
-  createNSEOverlayManager,
+  OverlayProvider,
+  computeOverlayPosition,
+  createOverlayManager,
   logicalPlacementToFloatingPlacement,
   useNSEOverlay,
-  type NSEOverlayDismissReason,
-  type NSEOverlayKind,
-  type NSEOverlayRuntimePort,
+  type OverlayDismissReason,
+  type OverlayKind,
+  type OverlayRuntimePort,
 } from "../../../src/NSE/Overlays";
 import { belongsToNearestNSEOverlayProvider, isWithinNSEOverlay, nseOverlayEventPath } from "../../../src/NSE/Overlays/overlayEventOwnership";
 import { SynCloudOSProvider, useRuntimeNSEOverlayPort } from "../../../src/SynCloudOSReact";
@@ -41,27 +41,27 @@ import { SynCloudOSLifecycleError } from "../../../src/SynCloudOS/nseRuntimeCont
 afterEach(cleanup);
 
 it("diagnoses registration after overlay manager disposal", () => {
-  const manager = createNSEOverlayManager(); manager.dispose(); manager.dispose();
-  const registration = { id: "late", kind: "menu" as const, parentId: null, anchor: null, surface: document.createElement("div"), restoreFocus: false, dismissOn: new Set<NSEOverlayDismissReason>(), onDismiss: vi.fn() };
+  const manager = createOverlayManager(); manager.dispose(); manager.dispose();
+  const registration = { id: "late", kind: "menu" as const, parentId: null, anchor: null, surface: document.createElement("div"), restoreFocus: false, dismissOn: new Set<OverlayDismissReason>(), onDismiss: vi.fn() };
   expect(() => manager.register(registration)).toThrow(SynCloudOSLifecycleError);
   expect(() => manager.register(registration)).toThrow(expect.objectContaining({ code: "NSE_OVERLAY_MANAGER_DISPOSED", operation: "register", disposal: expect.objectContaining({ reason: "explicit" }) }));
 });
 
-function RuntimeOverlayProvider({ manager, children }: PropsWithChildren<{ readonly manager: ReturnType<typeof createNSEOverlayManager> }>) {
+function RuntimeOverlayProvider({ manager, children }: PropsWithChildren<{ readonly manager: ReturnType<typeof createOverlayManager> }>) {
   const runtimePort = useRuntimeNSEOverlayPort();
-  return <NSEOverlayProvider manager={manager} runtimePort={runtimePort}>{children}</NSEOverlayProvider>;
+  return <OverlayProvider manager={manager} runtimePort={runtimePort}>{children}</OverlayProvider>;
 }
 
 interface OverlayFixtureProps {
   readonly id: string;
   readonly label: string;
-  readonly kind?: NSEOverlayKind;
+  readonly kind?: OverlayKind;
   readonly parentId?: string | null;
   readonly parentScopeId?: string;
   readonly parentResponderId: string;
   readonly anchor: HTMLElement | null;
-  readonly dismissOn?: readonly NSEOverlayDismissReason[];
-  readonly onDismiss?: (reason: NSEOverlayDismissReason) => void;
+  readonly dismissOn?: readonly OverlayDismissReason[];
+  readonly onDismiss?: (reason: OverlayDismissReason) => void;
 }
 
 function OverlayFixture({
@@ -115,7 +115,7 @@ function TeardownFocusScope({ children }: PropsWithChildren) {
   return <>{children}</>;
 }
 
-function ControlledCloseOverlay({ onDismiss }: { readonly onDismiss: (reason: NSEOverlayDismissReason) => void }) {
+function ControlledCloseOverlay({ onDismiss }: { readonly onDismiss: (reason: OverlayDismissReason) => void }) {
   const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null);
   const [open, setOpen] = useState(false);
   const overlay = useNSEOverlay({
@@ -143,8 +143,8 @@ function ControlledCloseOverlay({ onDismiss }: { readonly onDismiss: (reason: NS
   );
 }
 
-function ControlledCloseHarness({ onDismiss }: { readonly onDismiss: (reason: NSEOverlayDismissReason) => void }) {
-  const runtimePort = useMemo<NSEOverlayRuntimePort>(() => {
+function ControlledCloseHarness({ onDismiss }: { readonly onDismiss: (reason: OverlayDismissReason) => void }) {
+  const runtimePort = useMemo<OverlayRuntimePort>(() => {
     const signal = new AbortController().signal;
     const snapshot = Object.freeze({ width: 1200, height: 800, safeArea: Object.freeze({ top: 0, right: 0, bottom: 0, left: 0 }) });
     const presentation = createStaticPresentationPort({ width: 1200, height: 800 });
@@ -164,10 +164,10 @@ function ControlledCloseHarness({ onDismiss }: { readonly onDismiss: (reason: NS
       wrapFocusScope: (_options, children) => <TeardownFocusScope>{children}</TeardownFocusScope>,
     };
   }, []);
-  return <NSEOverlayProvider runtimePort={runtimePort}><ControlledCloseOverlay onDismiss={onDismiss} /></NSEOverlayProvider>;
+  return <OverlayProvider runtimePort={runtimePort}><ControlledCloseOverlay onDismiss={onDismiss} /></OverlayProvider>;
 }
 
-function NestedOverlayFixture({ manager }: { readonly manager: ReturnType<typeof createNSEOverlayManager> }) {
+function NestedOverlayFixture({ manager }: { readonly manager: ReturnType<typeof createOverlayManager> }) {
   const [showFormat, setShowFormat] = useState(true);
   const [applicationAnchor, setApplicationAnchor] = useState<HTMLButtonElement | null>(null);
   const [formatAnchor, setFormatAnchor] = useState<HTMLButtonElement | null>(null);
@@ -219,7 +219,7 @@ function UpdatedRegistrationFixture({ dismissed }: { readonly dismissed: ReturnT
   );
 }
 
-function LateIdleProvider({ manager }: { readonly manager: ReturnType<typeof createNSEOverlayManager> }) {
+function LateIdleProvider({ manager }: { readonly manager: ReturnType<typeof createOverlayManager> }) {
   const [mounted, setMounted] = useState(false);
   React.useEffect(() => setMounted(true), []);
   return mounted ? <RuntimeOverlayProvider manager={manager}><span>Idle nested runtime surface</span></RuntimeOverlayProvider> : null;
@@ -278,7 +278,7 @@ describe("NSEOverlayManager", () => {
   });
 
   it("rejects missing, self, and cyclic parents before publishing a corrupt graph", () => {
-    const manager = createNSEOverlayManager();
+    const manager = createOverlayManager();
     const surface = document.createElement("div");
     const registration = (id: string, parentId: string | null) => ({
       id,
@@ -286,7 +286,7 @@ describe("NSEOverlayManager", () => {
       parentId,
       anchor: null,
       surface,
-      dismissOn: new Set<NSEOverlayDismissReason>(["programmatic"]),
+      dismissOn: new Set<OverlayDismissReason>(["programmatic"]),
       restoreFocus: false,
       onDismiss: vi.fn(),
     });
@@ -300,7 +300,7 @@ describe("NSEOverlayManager", () => {
   });
 
   it("removes descendants topmost-first when a parent registration disappears", () => {
-    const manager = createNSEOverlayManager();
+    const manager = createOverlayManager();
     const surface = document.createElement("div");
     const dismissed: string[] = [];
     const register = (id: string, parentId: string | null) => manager.register({
@@ -327,7 +327,7 @@ describe("NSEOverlayManager", () => {
   });
 
   it("dismisses a parent branch in topmost-first order and remains idempotent", () => {
-    const manager = createNSEOverlayManager();
+    const manager = createOverlayManager();
     const dismissed: string[] = [];
     const surface = document.createElement("div");
     const register = (id: string, parentId: string | null) => manager.register({
@@ -362,7 +362,7 @@ describe("NSEOverlayManager", () => {
     runtime.responders.register({ id: "application-trigger", kind: "control", parentId: "runtime", scopeId: "root" });
     runtime.responders.register({ id: "format-trigger", kind: "control", parentId: "application-trigger", scopeId: "nse-overlay:application" });
     runtime.focus.requestFocus("format-trigger");
-    const manager = createNSEOverlayManager();
+    const manager = createOverlayManager();
 
     render(
       <SynCloudOSProvider runtime={runtime}>
@@ -381,7 +381,7 @@ describe("NSEOverlayManager", () => {
   it("classifies outside pointer and focus-left dismissal through the provider listener set", async () => {
     const runtime = createTestRuntime();
     runtime.responders.register({ id: "trigger", kind: "control", parentId: "runtime", scopeId: "root" });
-    const manager = createNSEOverlayManager();
+    const manager = createOverlayManager();
     const dismissed = vi.fn();
     const anchor = document.createElement("button");
 
@@ -398,7 +398,7 @@ describe("NSEOverlayManager", () => {
     fireEvent.pointerDown(document.body);
     await waitFor(() => expect(dismissed).toHaveBeenCalledWith("outside-pointer"));
 
-    const secondManager = createNSEOverlayManager();
+    const secondManager = createOverlayManager();
     const focusDismissed = vi.fn();
     const focusAnchor = document.createElement("button");
     render(
@@ -419,7 +419,7 @@ describe("NSEOverlayManager", () => {
 
   it("uses the manager's live anchor and dismissal policy after an open registration update", async () => {
     const runtime = createTestRuntime({ id: "runtime:overlay-update" });
-    const manager = createNSEOverlayManager();
+    const manager = createOverlayManager();
     const dismissed = vi.fn();
     render(
       <SynCloudOSProvider runtime={runtime}>
@@ -439,8 +439,8 @@ describe("NSEOverlayManager", () => {
 
   it("routes a markerless body event to an active outer provider instead of an idle later provider", async () => {
     const runtime = createTestRuntime({ id: "runtime:markerless-owner" });
-    const outerManager = createNSEOverlayManager();
-    const idleInnerManager = createNSEOverlayManager();
+    const outerManager = createOverlayManager();
+    const idleInnerManager = createOverlayManager();
     const dismissed = vi.fn();
     render(
       <SynCloudOSProvider runtime={runtime}>
@@ -459,8 +459,8 @@ describe("NSEOverlayManager", () => {
 
   it("lets an outer provider dismiss from idle nested application content", async () => {
     const runtime = createTestRuntime({ id: "runtime:nested-idle-boundary" });
-    const outerManager = createNSEOverlayManager();
-    const innerManager = createNSEOverlayManager();
+    const outerManager = createOverlayManager();
+    const innerManager = createOverlayManager();
     const dismissed = vi.fn();
     render(
       <SynCloudOSProvider runtime={runtime}>
@@ -481,8 +481,8 @@ describe("NSEOverlayManager", () => {
 
   it("routes markerless events by latest provider activation instead of mount order", async () => {
     const runtime = createTestRuntime({ id: "runtime:markerless-activation" });
-    const firstManager = createNSEOverlayManager();
-    const secondManager = createNSEOverlayManager();
+    const firstManager = createOverlayManager();
+    const secondManager = createOverlayManager();
     const firstDismissed = vi.fn();
     const secondDismissed = vi.fn();
     render(
@@ -493,7 +493,7 @@ describe("NSEOverlayManager", () => {
       </SynCloudOSProvider>,
     );
     const surface = document.createElement("div");
-    const registration = (id: string, onDismiss: (reason: NSEOverlayDismissReason) => void) => ({
+    const registration = (id: string, onDismiss: (reason: OverlayDismissReason) => void) => ({
       id,
       kind: "popover" as const,
       parentId: null,
@@ -501,7 +501,7 @@ describe("NSEOverlayManager", () => {
       parentResponderId: "runtime",
       anchor: null,
       surface,
-      dismissOn: new Set<NSEOverlayDismissReason>(["outside-pointer"]),
+      dismissOn: new Set<OverlayDismissReason>(["outside-pointer"]),
       restoreFocus: false,
       onDismiss,
     });
@@ -538,8 +538,8 @@ describe("NSEOverlayManager", () => {
     const innerRuntime = createTestRuntime({ id: "runtime:inner" });
     outerRuntime.responders.register({ id: "outer-trigger", kind: "control", parentId: "runtime", scopeId: "root" });
     innerRuntime.responders.register({ id: "inner-trigger", kind: "control", parentId: "runtime", scopeId: "root" });
-    const outerManager = createNSEOverlayManager();
-    const innerManager = createNSEOverlayManager();
+    const outerManager = createOverlayManager();
+    const innerManager = createOverlayManager();
     const outerDismissed = vi.fn();
     const anchor = document.createElement("button");
 
@@ -575,7 +575,7 @@ describe("NSEOverlayManager", () => {
     const anchor = document.createElement("button");
     const floating = document.createElement("div");
     document.body.append(anchor, floating);
-    const stop = computeNSEOverlayPosition({
+    const stop = computeOverlayPosition({
       anchor,
       floating,
       placement: "block-end-inline-end",
@@ -594,7 +594,7 @@ describe("NSEOverlayManager", () => {
     const floating = document.createElement("div");
     document.body.append(anchor, floating);
 
-    computeNSEOverlayPosition({
+    computeOverlayPosition({
       anchor,
       floating,
       signal: controller.signal,
@@ -621,7 +621,7 @@ describe("NSEOverlayManager", () => {
       clearTimeout: vi.fn(),
     };
 
-    const stop = computeNSEOverlayPosition({ anchor, floating, scheduler });
+    const stop = computeOverlayPosition({ anchor, floating, scheduler });
 
     // The opening placement is written before the surface first paints.
     expect(floating.style.position).toBe("fixed");

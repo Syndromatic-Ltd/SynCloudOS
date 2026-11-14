@@ -27,7 +27,7 @@ import type {
   RuntimeScopedWebContentSessionRequest,
 } from "../../SynCloudOS/SynCloudOS";
 
-interface NSEWebContentSessionViewProps {
+interface WebContentSessionViewProps {
   readonly session: RuntimeWebContentSession;
   readonly className?: string;
   readonly ownership?: "parent" | "view";
@@ -41,7 +41,7 @@ export interface NSEWebContentSourceViewProps extends Omit<RuntimeScopedWebConte
   readonly onMessage?: RuntimeScopedWebContentSessionRequest["onMessage"];
 }
 
-export type NSEWebViewProps = NSEWebContentSessionViewProps | NSEWebContentSourceViewProps;
+export type NSEWebViewProps = WebContentSessionViewProps | NSEWebContentSourceViewProps;
 
 function frameMatchesSnapshot(frame: HTMLIFrameElement, frameSource: string): boolean {
   if (!frameSource || frameSource === "about:blank") return false;
@@ -53,7 +53,7 @@ function frameMatchesSnapshot(frame: HTMLIFrameElement, frameSource: string): bo
   return attributed === frameSource || live === frameSource;
 }
 
-function SessionView({ session, className, ownership = "parent" }: NSEWebContentSessionViewProps) {
+function SessionView({ session, className, ownership = "parent" }: WebContentSessionViewProps) {
   const snapshot = useSyncExternalStore(
     (listener) => session.subscribe(listener),
     session.getSnapshot,

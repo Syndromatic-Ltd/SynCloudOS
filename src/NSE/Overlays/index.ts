@@ -18,43 +18,43 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { createNSEOverlayManager } from "./NSEOverlayManager";
-export { NSEOverlayProvider, useNSEOverlayProvider, useOptionalNSEOverlayProvider } from "./NSEOverlayProvider";
-export type { NSEOverlayProviderProps } from "./NSEOverlayProvider";
-export { NSEStandaloneControlHost } from "./NSEStandaloneControlHost";
-export type { NSEStandaloneControlHostProps } from "./NSEStandaloneControlHost";
+export { createOverlayManager } from "./overlayManager";
+export { OverlayProvider, useNSEOverlayProvider, useOptionalOverlayProvider } from "./OverlayProvider";
+export type { OverlayProviderProps } from "./OverlayProvider";
+export { StandaloneControlHost } from "./NSEStandaloneControlHost";
+export type { StandaloneControlHostProps } from "./NSEStandaloneControlHost";
 export { createStandaloneNSEControlRuntime } from "./createStandaloneNSEControlRuntime";
 export type {
-  NSEStandaloneControlRuntime,
-  NSEStandaloneControlRuntimeOptions,
+  StandaloneControlRuntime,
+  StandaloneControlRuntimeOptions,
 } from "./createStandaloneNSEControlRuntime";
-export { computeNSEOverlayPosition, computeNSEViewportCornerPosition, logicalPlacementToFloatingPlacement } from "./computeNSEOverlayPosition";
-export type { NSEOverlayDirection, NSEOverlayPositionOptions, NSEOverlayPositionScheduler, NSEViewportCornerPositionOptions } from "./computeNSEOverlayPosition";
+export { computeOverlayPosition, computeNSEViewportCornerPosition, logicalPlacementToFloatingPlacement } from "./computeOverlayPosition";
+export type { OverlayDirection, OverlayPositionOptions, OverlayPositionScheduler, ViewportCornerPositionOptions } from "./computeOverlayPosition";
 export { useNSEOverlay } from "./useNSEOverlay";
 export type { UseNSEOverlayOptions, UseNSEOverlayResult } from "./useNSEOverlay";
 export { NSEPopup, useNSEPopupOpenState } from "./NSEPopup";
-export type { NSEPopupPresentation, NSEPopupProps } from "./NSEPopup";
+export type { PopupPresentation, NSEPopupProps } from "./NSEPopup";
 export { NSEPopover } from "./NSEPopover";
 export type { NSEPopoverProps } from "./NSEPopover";
-export { NSEUtilityPanel } from "./NSEUtilityPanel";
-export type { NSEUtilityPanelProps } from "./NSEUtilityPanel";
-export { NSEListboxPopup } from "./NSEListboxPopup";
-export type { NSEListboxOption, NSEListboxPopupProps } from "./NSEListboxPopup";
-export { NSEActionSheet } from "./NSEActionSheet";
-export type { NSEActionSheetProps, NSEModalWindowBridge, NSEModalWindowRequest } from "./NSEActionSheet";
-export { NSEWindowSurfaceBridgeProvider, useOptionalNSEWindowSurfaceBridge } from "./NSEWindowSurfaceBridge";
-export type { NSEWindowSurfaceBridge, NSEWindowSurfaceRequest, NSEWindowSurfaceDismissResult, NSEWindowSurfaceErrorContext } from "./NSEWindowSurfaceBridge";
+export { UtilityPanel } from "./NSEUtilityPanel";
+export type { UtilityPanelProps } from "./NSEUtilityPanel";
+export { ListboxPopup } from "./NSEListboxPopup";
+export type { ListboxOption, ListboxPopupProps } from "./NSEListboxPopup";
+export { ActionSheet } from "./NSEActionSheet";
+export type { ActionSheetProps, ModalWindowBridge, ModalWindowRequest } from "./NSEActionSheet";
+export { WindowSurfaceBridgeProvider, useOptionalNSEWindowSurfaceBridge } from "./NSEWindowSurfaceBridge";
+export type { WindowSurfaceBridge, WindowSurfaceRequest, WindowSurfaceDismissResult, WindowSurfaceErrorContext } from "./NSEWindowSurfaceBridge";
 export { reportNSEWindowSurfaceError, useNSEWindowSurfaceLifecycle } from "./useNSEWindowSurfaceLifecycle";
 export type {
-  NSELogicalPlacement,
-  NSEOverlayDismissReason,
-  NSEOverlayId,
-  NSEOverlayKind,
-  NSEOverlayManager,
-  NSEOverlayRegistration,
-  NSEOverlayRuntimePort,
-  NSEOverlaySnapshot,
-  NSEOverlayFocusScopeOptions,
+  LogicalPlacement,
+  OverlayDismissReason,
+  OverlayId,
+  OverlayKind,
+  OverlayManager,
+  OverlayRegistration,
+  OverlayRuntimePort,
+  OverlaySnapshot,
+  OverlayFocusScopeOptions,
 } from "./overlayTypes";
-export { NSEDialogSurface } from "./NSEDialogSurface";
-export type { NSEDialogSurfaceProps } from "./NSEDialogSurface";
+export { DialogSurface } from "./NSEDialogSurface";
+export type { DialogSurfaceProps } from "./NSEDialogSurface";

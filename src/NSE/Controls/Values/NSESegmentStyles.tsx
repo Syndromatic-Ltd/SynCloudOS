@@ -28,14 +28,14 @@ import { nseControlHooks } from "../../Theme/contract/hooks";
 import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction";
 import { useContext, useId, useMemo, useState } from "react";
 import { NSEMenu } from "../../Menus/NSEMenu";
-import { NSEMenuOverlay } from "../../Menus/NSEMenuOverlay";
-import { NSEMenuView } from "../../Menus/NSEMenuView";
-import { useOptionalNSEOverlayProvider } from "../../Overlays";
-import { NSEActionResponderContext } from "../Core/useNSEControlAction";
+import { MenuOverlay } from "../../Menus/MenuOverlay";
+import { MenuView } from "../../Menus/MenuView";
+import { useOptionalOverlayProvider } from "../../Overlays";
+import { ActionResponderContext } from "../Core/useNSEControlAction";
 import { NSEButton } from "../Buttons/NSEButton";
-import { NSEToolButtonGroup } from "../Buttons/NSEButtonFamilies";
+import { ToolButtonGroup } from "../Buttons/NSEButtonFamilies";
 import { sizedControlStyle } from "../Core/nseControlsShared";
-import { NSERadioGroup } from "../Fields/NSEFields";
+import { RadioGroup } from "../Fields/NSEFields";
 import type { NSESegmentedControlProps, NSESegmentedItem, NSESegmentedSelection } from "./valueControlTypes";
 
 /**
@@ -69,11 +69,11 @@ function selectOne(props: NSESegmentedControlProps, id: string) {
 }
 
 /** Text segments that track one selection, in the textured radio strip (Atmo's small uppercase tool band). */
-function NSETexturedRadioSegments({ props }: { readonly props: NSESegmentedControlProps }) {
+function TexturedRadioSegments({ props }: { readonly props: NSESegmentedControlProps }) {
   const theme = useNSEThemeInteraction<HTMLDivElement>(props.isEnabled !== false, true);
   const selected = props.items.find((item) => props.selection.selectedIds.has(item.id))?.id ?? "";
   return (
-    <NSERadioGroup
+    <RadioGroup
       {...theme.events}
       {...nseControlHooks({ control: "segmented-control", enabled: props.isEnabled !== false, highlighted: theme.highlighted, hovered: theme.hovered, focused: theme.focused, variants: { "segment-style": "texturedRounded", "control-size": props.controlSize ?? "regular" } })}
       className={["nse-extended-radio-tool-button-group", props.className].filter(Boolean).join(" ")}
@@ -97,7 +97,7 @@ function NSETexturedRadioSegments({ props }: { readonly props: NSESegmentedContr
 }
 
 /** Textured segments with images: the joined tool-button band. */
-function NSETexturedSegments({ props }: { readonly props: NSESegmentedControlProps }) {
+function TexturedSegments({ props }: { readonly props: NSESegmentedControlProps }) {
   const theme = useNSEThemeInteraction<HTMLDivElement>(props.isEnabled !== false, true);
   const { mode, selectedIds } = props.selection;
   const select = (id: string) => {
@@ -111,7 +111,7 @@ function NSETexturedSegments({ props }: { readonly props: NSESegmentedControlPro
   };
   const items = useSegmentActions(props);
   return (
-    <NSEToolButtonGroup
+    <ToolButtonGroup
       data-nse-part="content"
       {...theme.events}
       {...nseControlHooks({ control: "segmented-control", enabled: props.isEnabled !== false, highlighted: theme.highlighted, hovered: theme.hovered, focused: theme.focused, variants: { "segment-style": "texturedRounded", "control-size": props.controlSize ?? "regular" } })}
@@ -122,7 +122,7 @@ function NSETexturedSegments({ props }: { readonly props: NSESegmentedControlPro
       data-segment-style="texturedRounded"
     >
       {items.map((item) => {
-        if (item.menu instanceof NSEMenu) return <NSEMenuSegment key={item.id} item={item} menu={item.menu} props={props} />;
+        if (item.menu instanceof NSEMenu) return <MenuSegment key={item.id} item={item} menu={item.menu} props={props} />;
         return (
           <NSEButton
             key={item.id}
@@ -142,16 +142,16 @@ function NSETexturedSegments({ props }: { readonly props: NSESegmentedControlPro
           />
         );
       })}
-    </NSEToolButtonGroup>
+    </ToolButtonGroup>
   );
 }
 
 /** A textured segment with a command menu (setMenu(_:forSegment:)): a pull-down that keeps its place in the group. */
-function NSEMenuSegment({ item, menu, props }: { readonly item: NSESegmentedItem; readonly menu: NSEMenu; readonly props: NSESegmentedControlProps }) {
+function MenuSegment({ item, menu, props }: { readonly item: NSESegmentedItem; readonly menu: NSEMenu; readonly props: NSESegmentedControlProps }) {
   const [open, setOpen] = useState(false);
   const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null);
-  const provider = useOptionalNSEOverlayProvider();
-  const nearestResponderId = useContext(NSEActionResponderContext);
+  const provider = useOptionalOverlayProvider();
+  const nearestResponderId = useContext(ActionResponderContext);
   const baseId = `nse-segment-menu:${useId().replace(/:/g, "")}`;
   const parentResponderId = props.parentResponderId ?? nearestResponderId ?? provider?.defaultParentResponderId;
   if (!provider || !parentResponderId) throw new Error("A segment with a command menu needs an overlay host and a parent responder.");
@@ -174,17 +174,17 @@ function NSEMenuSegment({ item, menu, props }: { readonly item: NSESegmentedItem
         onClick={() => setOpen((current) => !current)}
         style={item.width === undefined ? undefined : { boxSizing: "border-box", inlineSize: item.width, minInlineSize: item.width }}
       />
-      <NSEMenuOverlay overlay={{ id: `${baseId}:overlay`, parentResponderId }} controller={menu} open={open} anchor={anchor} labelledBy={`${baseId}-button`} onOpenChange={setOpen}>
-        <NSEMenuView model={menu.model} controller={menu} open={open} labelledBy={`${baseId}-button`} onOpenChange={setOpen} initialFocus="first" />
-      </NSEMenuOverlay>
+      <MenuOverlay overlay={{ id: `${baseId}:overlay`, parentResponderId }} controller={menu} open={open} anchor={anchor} labelledBy={`${baseId}-button`} onOpenChange={setOpen}>
+        <MenuView model={menu.model} controller={menu} open={open} labelledBy={`${baseId}-button`} onOpenChange={setOpen} initialFocus="first" />
+      </MenuOverlay>
     </>
   );
 }
 
 /** @internal Textured segments; capsule segments are the rounded markup in their own type. */
-export function NSETexturedSegmentCells(props: NSESegmentedControlProps) {
+export function TexturedSegmentCells(props: NSESegmentedControlProps) {
   if (props.selection.mode === "select-one" && props.items.every((item) => item.image === undefined)) {
-    return <NSETexturedRadioSegments props={props} />;
+    return <TexturedRadioSegments props={props} />;
   }
-  return <NSETexturedSegments props={props} />;
+  return <TexturedSegments props={props} />;
 }

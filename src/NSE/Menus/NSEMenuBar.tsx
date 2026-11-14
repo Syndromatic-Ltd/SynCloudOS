@@ -19,16 +19,16 @@
  */
 
 import { useContext, useId, useMemo, useRef, useState, type KeyboardEvent } from "react";
-import { NSEActionResponderContext } from "../Controls/Core/useNSEControlAction";
-import { useOptionalNSEOverlayProvider } from "../Overlays";
-import { NSEMenuView } from "./NSEMenuView";
-import { NSEMenu } from "./NSEMenu";
-import { useNSEDeferredDisposal } from "../interactionLifecycle";
+import { ActionResponderContext } from "../Controls/Core/useNSEControlAction";
+import { useOptionalOverlayProvider } from "../Overlays";
+import { MenuView } from "./MenuView";
+import { createReactOwnedNSEMenu, type NSEMenu } from "./NSEMenu";
+import { useMenuLifetime } from "./useMenuLifetime";
 import { useOptionalNSEMenuRuntimePort } from "./menuRuntimeContext";
-import { NSEMenuOverlay } from "./NSEMenuOverlay";
-import { nseMenuModel, type NSEMenuOverlayOptions } from "./menuTypes";
+import { MenuOverlay } from "./MenuOverlay";
+import { nseMenuModel, type MenuOverlayOptions } from "./menuTypes";
 
-export interface NSEMenuBarOverlayOptions extends Omit<NSEMenuOverlayOptions, "id" | "parentResponderId"> {
+export interface NSEMenuBarOverlayOptions extends Omit<MenuOverlayOptions, "id" | "parentResponderId"> {
   /** Defaults to the nearest responder: in a class application, the view
    * controller whose view renders the menu bar. */
   readonly parentResponderId?: string;
@@ -58,16 +58,13 @@ export interface NSEMenuBarProps {
  */
 function useBarMenus(mainMenu: NSEMenu): readonly NSEMenu[] {
   const runtime = useOptionalNSEMenuRuntimePort() ?? mainMenu.runtime;
-  const menus = useMemo(() => {
-    const menus = mainMenu.model.entries.flatMap((entry) => entry.kind === "submenu"
-      ? [new NSEMenu({
-          [nseMenuModel]: { id: `${mainMenu.model.id}:${entry.id}`, label: typeof entry.label === "string" ? entry.label : entry.id, entries: entry.entries },
-          runtime,
-        })]
-      : []);
-    return Object.assign(menus, { dispose: () => { for (const menu of menus) menu.dispose(); } });
-  }, [mainMenu, runtime]);
-  useNSEDeferredDisposal(menus, runtime.scheduler);
+  const menus = useMemo(() => mainMenu.model.entries.flatMap((entry) => entry.kind === "submenu"
+    ? [createReactOwnedNSEMenu({
+        [nseMenuModel]: { id: `${mainMenu.model.id}:${entry.id}`, label: typeof entry.label === "string" ? entry.label : entry.id, entries: entry.entries },
+        runtime,
+      })]
+    : []), [mainMenu, runtime]);
+  useMenuLifetime(menus);
   return menus;
 }
 
@@ -78,9 +75,9 @@ export function NSEMenuBar({ menu: mainMenu, overlay, direction = "ltr" }: NSEMe
   const [initialFocus, setInitialFocus] = useState<"first" | "last">("first");
   const buttonRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const instanceId = useId();
-  const provider = useOptionalNSEOverlayProvider();
+  const provider = useOptionalOverlayProvider();
   if (!provider) throw new Error("NSEMenuBar requires an NSEOverlayProvider.");
-  const nearestResponderId = useContext(NSEActionResponderContext);
+  const nearestResponderId = useContext(ActionResponderContext);
   const focus = (index: number) => buttonRefs.current[index]?.focus({ preventScroll: true });
   const move = (current: number, delta: 1 | -1) => {
     if (items.length === 0) return;
@@ -128,7 +125,7 @@ export function NSEMenuBar({ menu: mainMenu, overlay, direction = "ltr" }: NSEMe
         const model = item.model;
         const open = openIndex === index;
         const triggerId = `nse-menu-bar-${instanceId}-${index}`;
-        const menu = <NSEMenuView model={model} controller={controller} open={open} labelledBy={triggerId} onOpenChange={() => setOpenIndex(null)} direction={direction} initialFocus={initialFocus} />;
+        const menu = <MenuView model={model} controller={controller} open={open} labelledBy={triggerId} onOpenChange={() => setOpenIndex(null)} direction={direction} initialFocus={initialFocus} />;
         const overlayOptions = {
           ...overlay,
           parentResponderId: overlay?.parentResponderId ?? nearestResponderId ?? provider.defaultParentResponderId ?? "",
@@ -155,7 +152,7 @@ export function NSEMenuBar({ menu: mainMenu, overlay, direction = "ltr" }: NSEMe
             >
               {model.label}
             </button>
-            <NSEMenuOverlay
+            <MenuOverlay
               overlay={overlayOptions}
               controller={controller}
               open={open}
@@ -164,7 +161,7 @@ export function NSEMenuBar({ menu: mainMenu, overlay, direction = "ltr" }: NSEMe
               onOpenChange={(nextOpen) => setOpenIndex(nextOpen ? index : null)}
             >
               {menu}
-            </NSEMenuOverlay>
+            </MenuOverlay>
           </span>
         );
       })}

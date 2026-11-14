@@ -5,13 +5,13 @@ import { NSECollectionView, createAdaptiveCollectionLayout, type NSEDataViewAdap
 import type { FilePanelDirectory } from "../../SynCloudOS/nseRuntimeContracts";
 import type { FilePanelFileHandle } from "../../SynCloudOS/nseRuntimeContracts";
 import type { MediaPanelItem } from "../../SynCloudOS/nseRuntimeContracts";
-import type { NSEOpenPanelImagePort } from "./openPanelHost";
-import { NSEOpenPanelItemImage } from "./NSEOpenPanelItemImage";
+import type { OpenPanelImagePort } from "./openPanelHost";
+import { OpenPanelItemImage } from "./NSEOpenPanelItemImage";
 
 export interface OpenPanelItem { readonly id: string; readonly name: string; readonly kind: "file" | "directory" | "media"; readonly handle?: FilePanelDirectory | FilePanelFileHandle; readonly media?: MediaPanelItem }
-export function NSEOpenPanelCollection({ items, selectedIds, multiple, compact, width, height, title, images, onSelect, onActivate }: {
+export function OpenPanelCollection({ items, selectedIds, multiple, compact, width, height, title, images, onSelect, onActivate }: {
   items: readonly OpenPanelItem[]; selectedIds: ReadonlySet<string>; multiple: boolean; compact: boolean; width: number; height: number; title: string;
-  images?: NSEOpenPanelImagePort;
+  images?: OpenPanelImagePort;
   onSelect(ids: ReadonlySet<string>): void; onActivate(item: OpenPanelItem): void;
 }) {
   const id = useId();
@@ -29,7 +29,7 @@ export function NSEOpenPanelCollection({ items, selectedIds, multiple, compact, 
     selectionMode={multiple ? "multiple" : "single"} pointerActivation={compact ? "single-click" : "double-click"}
     onSelectionChange={({ snapshot }) => onSelect(snapshot.selectedIds)} onActivate={(id) => { const item = items.find(item => item.id === id); if (item && (!compact || item.kind === "directory")) onActivate(item); }}
     renderItem={({ item, selected }) => <div className="nse-open-item" data-kind={item.kind} data-selected={selected || undefined}>
-      <div className="nse-open-item-picture">{items.some(source => source.id === item.id) ? <NSEOpenPanelItemImage item={items.find(source => source.id === item.id)!} images={images} /> : null}</div>
+      <div className="nse-open-item-picture">{items.some(source => source.id === item.id) ? <OpenPanelItemImage item={items.find(source => source.id === item.id)!} images={images} /> : null}</div>
       <span className="nse-open-item-name">{item.name}</span>
     </div>} />;
 }

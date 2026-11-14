@@ -69,10 +69,10 @@ export interface NSESecureTextFieldProps extends Omit<InputHTMLAttributes<HTMLIn
 }
 
 export function NSESecureTextField(props: NSEBoundValueProps<string, NSESecureTextFieldProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>) {
-  return <NSESecureTextFieldControl {...useNSEValueBinding<string, NSESecureTextFieldProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>(props, {fallback:''})} />;
+  return <SecureTextFieldControl {...useNSEValueBinding<string, NSESecureTextFieldProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>(props, {fallback:''})} />;
 }
 
-function NSESecureTextFieldControl(props: NSESecureTextFieldProps) {
+function SecureTextFieldControl(props: NSESecureTextFieldProps) {
   const theme = useNSEThemeInteraction<HTMLLabelElement>(props.isEnabled !== false);
   const controlled = props.value !== undefined;
   const [stored, setStored] = useState(props.defaultValue ?? "");

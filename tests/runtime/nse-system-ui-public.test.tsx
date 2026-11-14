@@ -37,7 +37,8 @@ describe("public system UI boundary", () => {
       expect(namespace).not.toHaveProperty(name);
       expect(namespace.NSE).not.toHaveProperty(name);
     }
-    expect(typeof namespace.NSE.NSEAlertSurface).toBe("function");
+    expect(typeof namespace.NSE.AlertSurface).toBe("function");
+    expect(namespace.NSE.AlertSurface).toBe(namespace.AlertSurface);
   });
 
   it("keeps recovery composition out of the internal NSE SystemUI barrel", () => {

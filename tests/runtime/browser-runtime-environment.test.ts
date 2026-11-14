@@ -24,6 +24,44 @@ import { describe, expect, it, vi } from "vitest";
 import { createBrowserRuntimeEnvironment } from "../../src/SynCloudOS/PlatformAdapters/BrowserRuntimeEnvironment";
 
 describe("BrowserRuntimeEnvironment snapshot sources", () => {
+  it("observes a media query only while it has subscribers", () => {
+    const media = Object.assign(new EventTarget(), { matches: true });
+    const add = vi.spyOn(media, "addEventListener");
+    const remove = vi.spyOn(media, "removeEventListener");
+    vi.stubGlobal("matchMedia", () => media);
+    try {
+      const query = createBrowserRuntimeEnvironment().matchMedia!("(any-pointer: coarse)");
+      expect(query.matches).toBe(true);
+      expect(add).not.toHaveBeenCalled();
+
+      const first = vi.fn();
+      const second = vi.fn();
+      const stopFirst = query.subscribe(first);
+      const stopSecond = query.subscribe(second);
+      const change = Object.assign(new Event("change"), { matches: false });
+      expect(add).toHaveBeenCalledTimes(1);
+      media.dispatchEvent(change);
+      expect(first).toHaveBeenCalledWith(false);
+      expect(second).toHaveBeenCalledWith(false);
+
+      stopFirst();
+      expect(remove).not.toHaveBeenCalled();
+      stopSecond();
+      stopSecond();
+      expect(remove).toHaveBeenCalledTimes(1);
+      media.dispatchEvent(change);
+      expect(second).toHaveBeenCalledTimes(1);
+
+      const stopAgain = query.subscribe(first);
+      expect(add).toHaveBeenCalledTimes(2);
+      query.dispose();
+      stopAgain();
+      expect(remove).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
   it("returns referentially stable browser snapshots until its injected event source publishes a change", () => {
     const environment = createBrowserRuntimeEnvironment();
 

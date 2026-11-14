@@ -34,6 +34,7 @@ import type {
 } from "../Lifecycle/lifecycleTypes";
 import type { AppManagerLaunchExplanation, AppManagerRuntimeRecord, SynCloudOSAppLifecycleState } from "./appManagerTypes";
 import type { ApplicationSessionMutationTicket } from "../Documents";
+import { appReadinessByLifecycleState } from "./AppLifecycle";
 import { DocumentUnavailableError } from "../Documents/DocumentErrors";
 
 type AppManagerLifecyclePort = Pick<SynCloudOSLifecycle, "launch" | "activate"> & {
@@ -87,16 +88,7 @@ export class AppManager {
   createRecord(previousRecord: AppManagerRuntimeRecord | null = null, lifecycleState: SynCloudOSAppLifecycleState = this.getState()): AppManagerRuntimeRecord {
     const appInfo = this.getCurrentAppInfo();
     const disabled = appInfo.isDisabled || lifecycleState === "disabled";
-    const readiness =
-      disabled
-        ? "cold"
-        : lifecycleState === "failed"
-          ? "failed"
-          : lifecycleState === "loading"
-            ? "loading"
-            : lifecycleState === "ready" || lifecycleState === "launching" || lifecycleState === "active" || lifecycleState === "suspended"
-              ? "ready"
-              : previousRecord?.readiness ?? "cold";
+    const readiness = disabled ? "cold" : appReadinessByLifecycleState[lifecycleState] ?? previousRecord?.readiness ?? "cold";
 
     return {
       appId: this.bundleIdentifier,
@@ -272,22 +264,4 @@ export class AppManager {
     return ok;
   }
 
-  suspend() {
-    void this.dependencies.bundleLoader.invokeLifecycleHook(this.bundleIdentifier, "applicationWillSuspend", { reason: "WindowManager.closeWindow" });
-    const ok = this.transition("suspended", "WindowManager.closeWindow");
-    if (ok) void this.dependencies.bundleLoader.invokeLifecycleHook(this.bundleIdentifier, "applicationDidSuspend", { reason: "WindowManager.closeWindow" });
-  }
-
-  async suspendForApplicationClose(reason = "WindowManager.closeApplication") {
-    await this.dependencies.bundleLoader.invokeLifecycleHook(this.bundleIdentifier, "applicationWillSuspend", { reason });
-    const ok = this.transition("suspended", reason);
-    if (ok) await this.dependencies.bundleLoader.invokeLifecycleHook(this.bundleIdentifier, "applicationDidSuspend", { reason });
-    return ok;
-  }
-
-  close() {
-    void this.dependencies.bundleLoader.invokeLifecycleHook(this.bundleIdentifier, "applicationWillClose", { reason: "close" });
-    const ok = this.transition("closed", "close");
-    if (ok) void this.dependencies.bundleLoader.invokeLifecycleHook(this.bundleIdentifier, "applicationDidClose", { reason: "close" });
-  }
 }

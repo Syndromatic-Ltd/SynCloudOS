@@ -2,6 +2,6 @@
 export { createSynWareDefinitionFromApplicationClass, createSynWareDefinitionFromComponent, isNSEApplicationClass } from "./applicationClass";
 export { applicationSessionFor } from "./applicationSession";
 
-export { NSEViewControllerView } from "./applicationHosting";
+export { ViewControllerView } from "./applicationHosting";
 
 export { installedApplicationMenuSections } from "./installedApplicationMenus";

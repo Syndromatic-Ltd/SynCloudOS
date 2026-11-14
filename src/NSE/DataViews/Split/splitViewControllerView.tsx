@@ -33,16 +33,16 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 
-import { NSEChildViewControllerView } from "../../Application/viewControllerRenderer";
+import { ChildViewControllerView } from "../../Application/viewControllerRenderer";
 import { NSEButton } from "../../Controls/Buttons/NSEButton";
 import { dataViewAllowsMutation, dataViewIsBusy, dataViewPresentsContent } from "../Core";
 import { NSESplitView } from "./NSESplitView";
 import { nseSplitViewLayout, type NSESplitViewController } from "./NSESplitViewController";
 import type { NSESplitViewItem } from "./NSESplitViewItem";
 import { useSourceListFrame } from "../../Navigation/SourceList/sourceListFrameContext";
-import { NSEControllerNavigationChromeBoundary, useNSEControllerNavigationChrome } from "../../Navigation/NSEApplicationNavigationChrome";
+import { ControllerNavigationChromeBoundary, useNSEControllerNavigationChrome } from "../../Navigation/NSEApplicationNavigationChrome";
 import "./splitViewController.css";
-import { NSEWindowTitleSlotContext } from "../../Windows/windowTitlebarContext";
+import { WindowTitleSlotContext } from "../../Windows/windowTitlebarContext";
 
 /**
  * Places an item's persistent host element in whichever layout slot currently shows the item. Moving
@@ -63,9 +63,9 @@ function PaneSlot({ host }: { readonly host: HTMLDivElement }) {
 const labelOf = (item: NSESplitViewItem) => item.viewController.title ?? item.identifier;
 
 /** @internal The view an `NSESplitViewController` renders. */
-export function NSESplitViewControllerView({ controller }: { readonly controller: NSESplitViewController }) {
+export function SplitViewControllerView({ controller }: { readonly controller: NSESplitViewController }) {
   const snapshot = useSyncExternalStore(controller.subscribe, controller.getSnapshot, controller.getSnapshot);
-  const titleSlot = useContext(NSEWindowTitleSlotContext);
+  const titleSlot = useContext(WindowTitleSlotContext);
   const ownsTitleSlot = titleSlot?.root === controller && controller.splitViewItems[0]?.behavior === "sidebar";
   const titleSlotView = ownsTitleSlot ? <div ref={titleSlot.setSlot} className="nse-window-title-slot" /> : null;
   const layout = controller[nseSplitViewLayout];
@@ -194,7 +194,7 @@ export function NSESplitViewControllerView({ controller }: { readonly controller
   const paneContent = (identifier: string) => {
     const host = hostFor(identifier);
     const item = definitions.get(identifier);
-    return host ? <PaneSlot host={host} /> : item ? <NSEChildViewControllerView controller={item.viewController} /> : null;
+    return host ? <PaneSlot host={host} /> : item ? <ChildViewControllerView controller={item.viewController} /> : null;
   };
   const paneRef = (identifier: string) => (node: HTMLDivElement | null) => {
     if (node) paneNodes.current.set(identifier, node);
@@ -235,9 +235,9 @@ export function NSESplitViewControllerView({ controller }: { readonly controller
 
   // Denied, loading and error states expose no item views at all.
   const keepAlive = presentsContent && ownerDocument
-    ? items.map((item) => createPortal(<NSEChildViewControllerView controller={item.viewController} />, hostFor(item.identifier)!, item.identifier))
+    ? items.map((item) => createPortal(<ChildViewControllerView controller={item.viewController} />, hostFor(item.identifier)!, item.identifier))
     : null;
-  return <NSEControllerNavigationChromeBoundary>{keepAlive}{renderPresentation()}</NSEControllerNavigationChromeBoundary>;
+  return <ControllerNavigationChromeBoundary>{keepAlive}{renderPresentation()}</ControllerNavigationChromeBoundary>;
 
   function renderPresentation() {
     if (!presentsContent) {

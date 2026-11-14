@@ -22,8 +22,8 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import React from "react";
-import { NSEMenuView } from "../../src/NSE/Menus/NSEMenuView";
-import { NSEOverlayProvider } from "../../src/NSE/Overlays";
+import { MenuView } from "../../src/NSE/Menus/MenuView";
+import { OverlayProvider } from "../../src/NSE/Overlays";
 import type { CommandDeclaration } from "../../src/SynCloudOS/Commands";
 import { SynCloudOSProvider, useCommandMenuItems, useRuntimeNSEOverlayPort } from "../../src/SynCloudOSReact";
 import { createTestRuntime } from "./helpers";
@@ -40,12 +40,12 @@ function TestMenu({ open }: { open: boolean }) {
     { key: "separator", separator: true },
     { key: "parent", label: "Parent", children: [{ key: "custom", label: "Custom" }] },
   ], open);
-  return <NSEMenuView label="Actions" open={open} items={[...menu.items]} onSelect={(value) => { void menu.dispatch(value); }} />;
+  return <MenuView label="Actions" open={open} items={[...menu.items]} onSelect={(value) => { void menu.dispatch(value); }} />;
 }
 
 function RuntimeOverlayHost({ children }: { children: React.ReactNode }) {
   const runtimePort = useRuntimeNSEOverlayPort("runtime");
-  return <NSEOverlayProvider runtimePort={runtimePort} defaultParentResponderId="runtime">{children}</NSEOverlayProvider>;
+  return <OverlayProvider runtimePort={runtimePort} defaultParentResponderId="runtime">{children}</OverlayProvider>;
 }
 
 afterEach(cleanup);
@@ -147,7 +147,7 @@ describe("command menu validation", () => {
         { key: "hidden", commandId: "menu.payload", payload: { variant: "hidden" } },
         { key: "disabled", commandId: "menu.payload", payload: { variant: "disabled" } },
       ], true);
-      return <NSEMenuView label="Payloads" open items={[...menu.items]} onSelect={(value) => { void menu.dispatch(value); }} />;
+      return <MenuView label="Payloads" open items={[...menu.items]} onSelect={(value) => { void menu.dispatch(value); }} />;
     }
     render(<SynCloudOSProvider runtime={runtime}><RuntimeOverlayHost><PayloadMenu /></RuntimeOverlayHost></SynCloudOSProvider>);
     expect(await screen.findByRole("menuitem", { name: "First" })).toBeTruthy();

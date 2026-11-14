@@ -21,7 +21,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { GFXColour } from "../../../src/FX/GraphicsFX/public";
-import { NSEColourCommitCompensationError, NSEColourPanelController, createNSEColourPanelPreferences } from "../../../src/NSE/Colour";
+import { ColourCommitCompensationError, NSEColourPanelController, createNSEColourPanelPreferences } from "../../../src/NSE/Colour";
 import { createUndoManager } from "../../../src/SynCloudOS/Undo/UndoManager";
 import { createSynCloudOS } from "../../../src/SynCloudOS/Runtime/createSynCloudOS";
 import { createTestRuntimeEnvironment } from "../../runtime/helpers";
@@ -57,7 +57,7 @@ describe("NSEColourPanelController", () => {
     });
 
     expect(() => controller.commit(GFXColour.parse("#ff0000"), "keyboard"))
-      .toThrow(NSEColourCommitCompensationError);
+      .toThrow(ColourCommitCompensationError);
     expect(value.toHex()).toBe("#000000");
     expect(runtime.colourPanel.getSnapshot().currentCSS).toBe(GFXColour.parse("#000000").toCSS());
     expect(commits).toHaveBeenCalledTimes(2);

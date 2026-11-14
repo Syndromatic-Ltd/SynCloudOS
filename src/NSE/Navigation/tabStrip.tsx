@@ -23,9 +23,9 @@ import { nseControlHooks } from "../Theme/contract/hooks";
 import { useId, useMemo, useRef, useState, type MutableRefObject, type ReactNode } from "react";
 
 import type { HFXFeedbackRequest } from "../Feedback";
-import { NSEListboxPopup, useOptionalNSEOverlayProvider } from "../Overlays";
+import { ListboxPopup, useOptionalOverlayProvider } from "../Overlays";
 import { useNSEControlCommand, useNSEControlFeedback } from "../Controls/Core";
-import { useNSETooltip, useOptionalNSETooltipProvider } from "../Tooltips";
+import { useNSETooltip, useOptionalTooltipProvider } from "../Tooltips";
 
 /**
  * How the tabs are drawn. "capsule" is the joined segmented capsule; "icons"
@@ -33,9 +33,9 @@ import { useNSETooltip, useOptionalNSETooltipProvider } from "../Tooltips";
  * Preferences window's panes: a row of icons whose chosen one sits in a
  * recessed well, named by a tooltip or, with captions, beneath each icon.
  */
-export type NSETabStyle = "capsule" | "icons";
+export type TabStyle = "capsule" | "icons";
 
-export interface NSETabStripItem {
+export interface TabStripItem {
   readonly id: string;
   readonly label: ReactNode;
   readonly accessibleLabel?: string;
@@ -48,57 +48,57 @@ export interface NSETabStripItem {
   readonly closable?: boolean;
 }
 
-export interface NSETabStripRenderState {
+export interface TabStripRenderState {
   readonly instanceId: string;
-  readonly enabled: readonly NSETabStripItem[];
-  readonly selected?: NSETabStripItem;
+  readonly enabled: readonly TabStripItem[];
+  readonly selected?: TabStripItem;
 }
 
-export interface NSETabStripPresentation {
+export interface TabStripPresentation {
   readonly tabListClassName?: string;
   readonly directTabButtons?: boolean;
-  readonly tabStyle?: NSETabStyle;
+  readonly tabStyle?: TabStyle;
   /** Icons style: name each tab beneath its icon rather than in a tooltip. */
   readonly showsCaptions?: boolean;
 }
 
-export interface NSETabStripProps {
+export interface TabStripProps {
   readonly "aria-label": string;
-  readonly items: readonly NSETabStripItem[];
+  readonly items: readonly TabStripItem[];
   readonly tone?: "medium" | "light" | "dark" | "affirmative" | "negative";
   readonly selectedId?: string;
   readonly defaultSelectedId?: string;
   readonly maximumVisibleTabs?: number;
   readonly parentResponderId?: string;
   readonly panelIdentity?: boolean;
-  readonly presentation?: NSETabStripPresentation;
+  readonly presentation?: TabStripPresentation;
   readonly selectionHaptic?: HFXFeedbackRequest;
   onSelectedIdChange?(id: string, reason: "pointer" | "keyboard"): void;
   onRequestClose?(id: string): void;
   onRequestReorder?(id: string, toIndex: number): void;
-  children?(state: NSETabStripRenderState): ReactNode;
+  children?(state: TabStripRenderState): ReactNode;
 }
 
 interface TabButtonProps {
-  readonly item: NSETabStripItem;
+  readonly item: TabStripItem;
   readonly selected: boolean;
   readonly instanceId: string;
-  readonly tone: NonNullable<NSETabStripProps["tone"]>;
+  readonly tone: NonNullable<TabStripProps["tone"]>;
   readonly panelIdentity: boolean;
-  readonly tabStyle: NSETabStyle;
+  readonly tabStyle: TabStyle;
   readonly showsCaptions: boolean;
   readonly tabRefs: MutableRefObject<Map<string, HTMLButtonElement>>;
   readonly onActivate: () => void;
   readonly onKeyDown: (event: React.KeyboardEvent<HTMLButtonElement>) => void;
 }
 
-function tabName(item: NSETabStripItem): string {
+function tabName(item: TabStripItem): string {
   return item.accessibleLabel ?? (typeof item.label === "string" ? item.label : item.id);
 }
 
 /** An icon tab named only by its picture carries its name in a tooltip. */
 function IconTabButton(props: TabButtonProps) {
-  const tooltips = useOptionalNSETooltipProvider();
+  const tooltips = useOptionalTooltipProvider();
   return !props.showsCaptions && tooltips ? <TooltipTabButton {...props} /> : <TabButton {...props} title={props.showsCaptions ? undefined : tabName(props.item)} />;
 }
 
@@ -164,7 +164,7 @@ function TabButton({ item, selected, instanceId, tone, panelIdentity, tabStyle, 
   </button>;
 }
 
-export function NSETabStrip({
+export function TabStrip({
   "aria-label": ariaLabel,
   items,
   tone = "dark",
@@ -179,14 +179,14 @@ export function NSETabStrip({
   onRequestClose,
   onRequestReorder,
   children,
-}: NSETabStripProps) {
+}: TabStripProps) {
   const { triggerNSEControlHaptic } = useNSEControlFeedback();
   const instanceId = useId().replace(/:/g, "");
   const tabRefs = useRef(new Map<string, HTMLButtonElement>());
   const overflowRef = useRef<HTMLButtonElement>(null);
   const [overflowOpen, setOverflowOpen] = useState(false);
   const [storedSelectedId, setStoredSelectedId] = useState(() => defaultSelectedId ?? suppliedSelectedId ?? items.find((item) => !item.disabled)?.id ?? "");
-  const overlay = useOptionalNSEOverlayProvider();
+  const overlay = useOptionalOverlayProvider();
   const enabled = items.filter((item) => !item.disabled);
   const selectedId = suppliedSelectedId ?? storedSelectedId;
   const selected = enabled.find((item) => item.id === selectedId) ?? enabled[0];
@@ -224,7 +224,7 @@ export function NSETabStrip({
   };
   const tabStyle = presentation?.tabStyle ?? "capsule";
   const TabElement = tabStyle === "icons" ? IconTabButton : TabButton;
-  const tabButton = (item: NSETabStripItem) => (
+  const tabButton = (item: TabStripItem) => (
     <TabElement
       key={item.id}
       item={item}
@@ -265,7 +265,7 @@ export function NSETabStrip({
   const directTabButtons = presentation?.directTabButtons === true;
   // The icons style is not a toolbar capsule and takes none of its skin.
   const tabListClassName = [tabStyle === "icons" ? "nse-icon-tabs" : "nse-control-toolbar", presentation?.tabListClassName].filter(Boolean).join(" ");
-  const renderState: NSETabStripRenderState = { instanceId, enabled, selected };
+  const renderState: TabStripRenderState = { instanceId, enabled, selected };
   return <>
     <div data-nse-control="tab-view" data-nse-part="header" data-nse-style={tabStyle} className={tabListClassName} role="tablist" aria-label={ariaLabel} data-position="inline" data-grouped={tabStyle === "icons" ? undefined : "true"} data-tab-style={tabStyle} data-captions={tabStyle === "icons" && presentation?.showsCaptions ? "true" : undefined}>
       {directTabButtons ? visible.map(tabButton) : visible.map((item) => (
@@ -280,7 +280,7 @@ export function NSETabStrip({
       {visible.filter((item) => item.closable).map((item) => <button key={item.id} type="button" data-nse-part="button" data-nse-role="close" aria-label={`Close ${item.accessibleLabel ?? (typeof item.label === "string" ? item.label : item.id)}`} disabled={item.disabled} onClick={() => close(item.id)}>×</button>)}
       {overflowButton}
     </div> : null}
-    {overflow.length ? <NSEListboxPopup id={`tab-overflow-${instanceId}`} open={overflowOpen} anchor={overflowRef.current} parentResponderId={parentResponderId} options={overflow.map((item) => ({ id: item.id, label: item.label, value: item.id, disabled: item.disabled }))} selectedId={selected?.id} onOpenChange={setOverflowOpen} onSelect={(option) => { if (option.value) publishSelection(option.value, "pointer"); }} /> : null}
+    {overflow.length ? <ListboxPopup id={`tab-overflow-${instanceId}`} open={overflowOpen} anchor={overflowRef.current} parentResponderId={parentResponderId} options={overflow.map((item) => ({ id: item.id, label: item.label, value: item.id, disabled: item.disabled }))} selectedId={selected?.id} onOpenChange={setOverflowOpen} onSelect={(option) => { if (option.value) publishSelection(option.value, "pointer"); }} /> : null}
     {children?.(renderState)}
   </>;
 }

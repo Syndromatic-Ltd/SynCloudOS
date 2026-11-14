@@ -19,7 +19,7 @@
  */
 
 import { normaliseRuntimeCursorDescriptor } from "../../SynCloudOS/nseRuntimeContracts";
-import type { NSECursorDescriptor, NSESystemCursor } from "./cursorTypes";
+import type { CursorDescriptor, SystemCursor } from "./cursorTypes";
 
 function imageField(descriptors: PropertyDescriptorMap, key: string): unknown {
   const descriptor = descriptors[key];
@@ -30,14 +30,14 @@ function imageField(descriptors: PropertyDescriptorMap, key: string): unknown {
 }
 
 export const NSECursor = Object.freeze({
-  system(kind: NSESystemCursor): NSECursorDescriptor {
+  system(kind: SystemCursor): CursorDescriptor {
     return normaliseRuntimeCursorDescriptor({ kind });
   },
   image(input: {
     readonly resourceId: string;
     readonly hotspot: Readonly<{ readonly x: number; readonly y: number }>;
-    readonly fallback: NSESystemCursor;
-  }): NSECursorDescriptor {
+    readonly fallback: SystemCursor;
+  }): CursorDescriptor {
     if (!input || typeof input !== "object" || Array.isArray(input)) throw new TypeError("Cursor image must be a plain data-property record.");
     const prototype = Object.getPrototypeOf(input);
     if (prototype !== Object.prototype && prototype !== null) throw new TypeError("Cursor image must be a plain data-property record.");

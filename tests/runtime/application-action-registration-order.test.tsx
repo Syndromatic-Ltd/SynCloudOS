@@ -8,12 +8,12 @@ import { NSEWindowController } from "../../src/NSE/Application/NSEWindowControll
 import { observable } from "../../src/NSE/Objects";
 import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
 import { NSEPopUpButton } from "../../src/NSE/Menus/NSEPopUpButton";
-import { NSEMenuView } from "../../src/NSE/Menus/NSEMenuView";
+import { MenuView } from "../../src/NSE/Menus/MenuView";
 import { action, useAction } from "../../src/SynCloudOS/AppSDK/actions";
 import { useCommands } from "../../src/SynCloudOS/AppSDK/hooks/useCommands";
 import { createClassApplicationHost, type ClassApplicationHost } from "./fixtures/classApplicationHost";
 import { NSEPopup } from "../../src/NSE/Overlays/NSEPopup";
-import { NSEViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
+import { ViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
 
 const hosts: ClassApplicationHost[] = [];
 afterEach(async () => { for (const host of hosts.splice(0)) await host.dispose(); vi.restoreAllMocks(); });
@@ -26,7 +26,7 @@ it.each(["picker", "menu"] as const)("performs a custom %s callback while its ne
     const perform = (value: string) => { void choose.perform(value); };
     return <NSEPopup defaultOpen modal title="Settings">{kind === "picker"
       ? <NSEPopUpButton label="Appearance" defaultValue="light" items={[{ value: "light", title: "Light" }, { value: "dark", title: "Dark" }]} onValueChange={perform} />
-      : <NSEMenuView label="Appearance" items={[{ value: "dark", label: "Dark" }]} onSelect={perform} />}</NSEPopup>;
+      : <MenuView label="Appearance" items={[{ value: "dark", label: "Dark" }]} onSelect={perform} />}</NSEPopup>;
   }
   class MainWindow extends NSEWindowController {
     static override view = View;

@@ -18,6 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { sendWebspringLaunchPhase } from "../WebspringState/launchPhaseMachine";
+import { beginMultiSwitchSettlement, type MultiSwitchSettlement } from "./multiSwitchSettlement";
+import { advanceLaunchRequest, isLaunchRequestStep } from "./launchRequestMachine";
+import { toHistoryOptions } from "./launchHistoryOptions";
 import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import { getCanonicalExternalHref } from "../Routing/routeNormalization";
 import { WEBSPRING_PRESENTATION_ROLES } from "../WebspringState/webspringPresentation";
@@ -42,7 +46,6 @@ import type {
   SynCloudOSExternalAppExplanation,
   SynCloudOSLaunchExplanation,
   SynCloudOSLaunchHistoryAction,
-  SynCloudOSLaunchHistoryOptions,
   SynCloudOSLaunchHistoryRecord,
   SynCloudOSLaunchQueueItem,
   SynCloudOSLaunchQueueSnapshot,
@@ -94,7 +97,9 @@ type LaunchWindowManagerPort = Pick<
   | "validateApplicationCloseAuthority"
   | "endApplicationClose"
   | "openApplicationWindow"
-  | "requestCloseApplication"
+  | "prepareCloseApplication"
+  | "commitCloseApplication"
+  | "rollbackCloseApplication"
   | "requestClose"
   | "list"
 >;
@@ -146,12 +151,7 @@ const launchHistoryLimit = 140;
 const launchAttempts = new Map<string, number>(launchServicesHotData?.launchAttempts ?? []);
 let deferredAuthorisationWatcherArmed = false;
 let launchServicesDisposed = false;
-type MultiSwitchFallback = {
-  firstFrame: unknown | null;
-  presentationFrame: unknown | null;
-  settleTimer: unknown | null;
-};
-const multiSwitchFallbackTimers = new Map<string, MultiSwitchFallback>();
+const multiSwitchSettlements = new Map<string, MultiSwitchSettlement>();
 const launchStageFallbackTimers = new Map<string, unknown>();
 const launchCoverFallbackTimers = new Map<string, unknown>();
 
@@ -268,8 +268,10 @@ function settleMultiSwitch(
     snapshot.application.activeAppId === switchDetails.toAppId &&
     snapshot.application.routePath === switchDetails.toRoute;
 
-  if (targetStillActive) {
-    AppManagerController.getManagerForApp(switchDetails.fromAppId)?.suspend();
+  // Activating the target already resigned the outgoing application through the lifecycle.
+  // Only one that became active again without the switch noticing still needs suspending.
+  if (targetStillActive && RuntimeStore.getSnapshot().lifecycle[normalizeBundleIdentifier(switchDetails.fromAppId)] === "active") {
+    void runtime.lifecycle.suspend(switchDetails.fromAppId, { reason: "LaunchServices.multiSwitch" }).result;
   }
 
   ApplicationState.finishMultiSwitch(switchId);
@@ -296,48 +298,26 @@ function settleMultiSwitch(
 }
 
 function clearMultiSwitchFallback(switchId: string) {
-  const pending = multiSwitchFallbackTimers.get(switchId);
-  if (!pending) return;
-  if (pending.firstFrame !== null) runtime.environment.cancelAnimationFrame(pending.firstFrame);
-  if (pending.presentationFrame !== null) runtime.environment.cancelAnimationFrame(pending.presentationFrame);
-  if (pending.settleTimer !== null) runtime.environment.clearTimeout(pending.settleTimer);
-  multiSwitchFallbackTimers.delete(switchId);
+  multiSwitchSettlements.get(switchId)?.cancel();
+  multiSwitchSettlements.delete(switchId);
 }
 
 function finishMultiSwitchLater(switchId: string, switchDetails: RouteAwareMultiSwitch) {
   clearMultiSwitchFallback(switchId);
-  const pending: MultiSwitchFallback = { firstFrame: null, presentationFrame: null, settleTimer: null };
-  multiSwitchFallbackTimers.set(switchId, pending);
-  const stillSwitching = () => {
-    const current = RuntimeStore.getSnapshot().application.multiSwitch;
-    return current.id === switchId && current.status === "switching";
-  };
-  const armSettleTimer = () => {
-    if (multiSwitchFallbackTimers.get(switchId) !== pending || !stillSwitching()) {
-      clearMultiSwitchFallback(switchId);
-      return;
-    }
-    pending.settleTimer = runtime.environment.setTimeout(() => {
-      if (multiSwitchFallbackTimers.get(switchId) !== pending) return;
-      pending.settleTimer = null;
-      settleMultiSwitch(switchId, switchDetails, "fallback");
-    }, choreographyTimings.multiSwitchSettleFallbackMs);
-  };
-  // Direct public LaunchServices calls use the same visual contract as route
-  // launches: first let the mounted stage reach a paint opportunity, then
-  // begin the bounded liveness watchdog.
-  pending.firstFrame = runtime.environment.requestAnimationFrame(() => {
-    pending.firstFrame = null;
-    if (multiSwitchFallbackTimers.get(switchId) !== pending || !stillSwitching()) {
-      clearMultiSwitchFallback(switchId);
-      return;
-    }
-    pending.presentationFrame = runtime.environment.requestAnimationFrame(() => {
-      pending.presentationFrame = null;
-      armSettleTimer();
-    });
+  // Direct public LaunchServices calls use the same visual contract as route launches:
+  // let the mounted stage reach a paint opportunity, then begin the bounded liveness watchdog.
+  const settlement = beginMultiSwitchSettlement({
+    clock: runtime.environment,
+    settleAfterMs: choreographyTimings.multiSwitchSettleFallbackMs,
+    stillSwitching: () => {
+      const current = RuntimeStore.getSnapshot().application.multiSwitch;
+      return multiSwitchSettlements.get(switchId) === settlement && current.id === switchId && current.status === "switching";
+    },
+    onTimedOut: () => { settleMultiSwitch(switchId, switchDetails, "fallback"); },
   });
+  multiSwitchSettlements.set(switchId, settlement);
 }
+
 function completeLaunchCoverTransition(
   launchTransitionId: string,
   appId: string | null | undefined,
@@ -541,19 +521,6 @@ function getLaunchQueueSnapshot(): SynCloudOSLaunchQueueSnapshot {
   };
 }
 
-function toHistoryOptions(options: SynCloudOSOpenAppOptions): SynCloudOSLaunchHistoryOptions {
-  return {
-    source: options.source,
-    focus: options.focus,
-    syncRoute: options.syncRoute,
-    queue: options.queue,
-    deferUntilAuthorised: options.deferUntilAuthorised,
-    hold: options.hold,
-    reason: options.reason,
-    context: options.context ? { ...options.context } : undefined
-  };
-}
-
 function recordLaunchHistory(
   action: SynCloudOSLaunchHistoryAction,
   details: {
@@ -591,6 +558,9 @@ function recordLaunchHistory(
 }
 
 function recordRequestHistory(action: SynCloudOSLaunchHistoryAction, request: SynCloudOSLaunchRequestDetails, notes: string[] = [], code?: string) {
+  // The record is kept either way; a step the table does not allow is marked rather than dropped.
+  const step = isLaunchRequestStep(action) ? advanceLaunchRequest(request, action) : null;
+  if (step && !step.legal) notes = [...notes, `Out of order: "${action}" after "${step.previous}".`];
   return recordLaunchHistory(action, {
     appId: request.appId,
     packageName: request.app.packageName,
@@ -864,7 +834,7 @@ function reconcileAbandonedHotLaunch(request: SynCloudOSLaunchRequestDetails | n
     if (normalizeBundleIdentifier(draft.application.launchingAppId) === normalizeBundleIdentifier(request.appId)) draft.application.launchingAppId = null;
     if (normalizeBundleIdentifier(draft.webspring.launchingAppId) === normalizeBundleIdentifier(request.appId)) {
       draft.webspring.launchingAppId = null;
-      draft.webspring.launchPhase = "idle";
+      sendWebspringLaunchPhase(draft, "reset");
       draft.webspring.isAnimating = false;
     }
   });
@@ -949,14 +919,36 @@ async function runLaunch(request: SynCloudOSLaunchRequestDetails) {
     // Lifecycle validation and will hooks must finish before windows or routes
     // become observable. Its commit callback establishes the parent's authority.
     const requestedLifecycle = request.options.lifecycle;
-    await request.manager.launch(request.applicationMutation, multiSwitch ? {
+    // The lifecycle presents between commit and the did callbacks. An application that is
+    // already active runs no lifecycle, so it is presented directly afterwards.
+    let presentation: Promise<boolean> | null = null;
+    await request.manager.launch(request.applicationMutation, {
       ...requestedLifecycle,
-      onCommit: () => {
-        requestedLifecycle?.onCommit?.();
-        multiSwitchId = ApplicationState.beginMultiSwitch(multiSwitch!);
-      },
-    } : requestedLifecycle);
+      ...(multiSwitch ? {
+        onCommit: () => {
+          requestedLifecycle?.onCommit?.();
+          multiSwitchId = ApplicationState.beginMultiSwitch(multiSwitch!);
+        },
+      } : {}),
+      presentAfterCommit: async () => { await (presentation = present()); },
+    });
+    // The window's own outcome decides the launch, even when the lifecycle stopped waiting for it.
+    if (!await (presentation ?? present())) return;
+    recordRequestHistory("complete", request, [`${app.packageName} is active.`]);
+  } catch (error) {
+    clearLaunchTimers(request.requestId);
+    if (multiSwitchId) ApplicationState.clearMultiSwitch(multiSwitchId);
     if (!launchAuthorityIsCurrent(request)) return;
+    const captured = ErrorManager.createAppLaunchFailedError(app, error, {
+      source: "SynCloudOS.LaunchServices.openApp",
+      request: toQueueItem(request)
+    });
+    failRunningLaunch(request, error, "APP_LAUNCH_FAILED", captured);
+  }
+
+  /** Opens the main window and publishes the launch; false when the request lost its authority. */
+  async function present(): Promise<boolean> {
+    if (!launchAuthorityIsCurrent(request)) return false;
     const hadWindowBeforeLaunch = WindowManager.list({ applicationId: request.appId }).length > 0;
     const openedWindow = await WindowManager.openApplicationWindow(
       request.appId,
@@ -966,7 +958,7 @@ async function runLaunch(request: SynCloudOSLaunchRequestDetails) {
     const openedWindowId = !hadWindowBeforeLaunch ? openedWindow?.id ?? null : null;
     if (!launchAuthorityIsCurrent(request)) {
       if (openedWindowId) await WindowManager.requestClose(openedWindowId, { reason: "application-quit" });
-      return;
+      return false;
     }
     if (multiSwitch) {
       if (!multiSwitchId) throw new Error("Route-aware MultiSwitch did not establish presentation ownership at lifecycle commit.");
@@ -996,16 +988,7 @@ async function runLaunch(request: SynCloudOSLaunchRequestDetails) {
       },
       app.packageName
     );
-    recordRequestHistory("complete", request, [`${app.packageName} is active.`]);
-  } catch (error) {
-    clearLaunchTimers(request.requestId);
-    if (multiSwitchId) ApplicationState.clearMultiSwitch(multiSwitchId);
-    if (!launchAuthorityIsCurrent(request)) return;
-    const captured = ErrorManager.createAppLaunchFailedError(app, error, {
-      source: "SynCloudOS.LaunchServices.openApp",
-      request: toQueueItem(request)
-    });
-    failRunningLaunch(request, error, "APP_LAUNCH_FAILED", captured);
+    return true;
   }
 }
 
@@ -1459,28 +1442,47 @@ const launchServices = {
 
   async closeApp(appId: string) {
     appId = AppRegistry.getApp(appId)?.bundleIdentifier ?? appId;
+    // The lease is held for the whole quit, so nothing can admit a window or document meanwhile.
     const authority = WindowManager.beginApplicationClose(appId);
+    let preparation: Awaited<ReturnType<typeof WindowManager.prepareCloseApplication>> = null;
+    let committed = false;
     try {
       const manager = AppManagerController.getManagerForApp(appId);
       cancelPendingLaunchesForApplication(appId);
       if (manager) await manager.cancelApplicationWorkForClose("LaunchServices.closeApp");
-      const closeResult = await WindowManager.requestCloseApplication(
-        appId,
-        { reason: "application-quit" },
-        authority,
-      );
-      if (closeResult && closeResult.outcome !== "closed") return closeResult;
+      const hadWindows = WindowManager.list({ applicationId: appId }).length > 0;
+      // Preparation reviews documents and reserves the windows; nothing closes until the lifecycle commits.
+      preparation = await WindowManager.prepareCloseApplication(appId, { reason: "application-quit" }, authority);
+      if (preparation?.status === "cancelled") return { outcome: "cancelled" as const, windowControllerId: preparation.windowControllerId };
+      if (preparation?.status === "refused") return { outcome: "refused" as const, windowControllerId: preparation.windowControllerId, reason: preparation.reason };
       WindowManager.validateApplicationCloseAuthority(authority);
       if (manager && AppManagerController.getManagerForApp(appId) !== manager) {
         throw new Error(`Application "${appId}" manager changed during close.`);
       }
-      if (manager) await manager.suspendForApplicationClose("LaunchServices.closeApp");
+      const windowControllerId = preparation?.token.resultWindowControllerId ?? `application:${appId}`;
+      const state = RuntimeStore.getSnapshot().lifecycle[normalizeBundleIdentifier(appId)] ?? "registered";
+      if (state !== "active" && state !== "suspended") {
+        // An application that is not running has nobody to ask; only its windows and documents close.
+        if (preparation) await WindowManager.commitCloseApplication(preparation.token, authority);
+        committed = true;
+        return hadWindows ? { outcome: "closed" as const, windowControllerId } : null;
+      }
+      const result = await runtime.lifecycle.close(appId, {
+        reason: "LaunchServices.closeApp",
+        ...(preparation ? { closeTransaction: { authority, preparation: preparation.token } } : {}),
+      }).result;
+      if (!result.committed) {
+        // applicationShouldTerminate declined, or a will hook failed: the application keeps its windows.
+        return { outcome: "refused" as const, windowControllerId, reason: "delegate-refused" as const };
+      }
+      committed = true;
       WindowManager.validateApplicationCloseAuthority(authority);
       if (manager && AppManagerController.getManagerForApp(appId) !== manager) {
-        throw new Error(`Application "${appId}" manager changed during suspension.`);
+        throw new Error(`Application "${appId}" manager changed during termination.`);
       }
-      return closeResult;
+      return hadWindows ? { outcome: "closed" as const, windowControllerId } : null;
     } finally {
+      if (!committed && preparation?.status === "ready") await WindowManager.rollbackCloseApplication(preparation.token, authority);
       WindowManager.endApplicationClose(authority);
     }
   },
@@ -1641,7 +1643,7 @@ const launchServices = {
 
   dispose() {
     launchServicesDisposed = true;
-    for (const switchId of [...multiSwitchFallbackTimers.keys()]) clearMultiSwitchFallback(switchId);
+    for (const switchId of [...multiSwitchSettlements.keys()]) clearMultiSwitchFallback(switchId);
     clearAllLaunchTimers();
     unsubscribeWebspringReturn();
     queuedLaunches.splice(0, queuedLaunches.length);

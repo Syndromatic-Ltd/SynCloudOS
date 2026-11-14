@@ -29,7 +29,7 @@ import { NSESortDescriptor } from "../../../src/Foundation/public";
 import {
   decodeNSEDataViewKey,
   encodeNSEDataViewKey,
-  NSEDataViewCoordinator,
+  DataViewCoordinator,
   useNSEDataView,
   type NSEDataViewAdapter,
   type NSEDataViewSelectionEvent,
@@ -106,6 +106,25 @@ function CoreHarness({
 afterEach(cleanup);
 
 describe("structured data-view coordination", () => {
+  it("releases all controller subscriptions after a StrictMode unmount", async () => {
+    const { adapter, controller } = createAdapter();
+    const held = new Set<() => boolean>();
+    const subscribeChanges = controller.subscribeChanges.bind(controller);
+    const onDispose = controller.onDispose.bind(controller);
+    vi.spyOn(controller, "subscribeChanges").mockImplementation(listener => track(subscribeChanges(listener)));
+    vi.spyOn(controller, "onDispose").mockImplementation(listener => track(onDispose(listener)));
+    function track(release: () => boolean) {
+      held.add(release);
+      return () => { held.delete(release); return release(); };
+    }
+    const before = held.size;
+    const view = render(<React.StrictMode><CoreHarness adapter={adapter} /></React.StrictMode>);
+    expect(held.size).toBeGreaterThan(before);
+    view.unmount();
+    await Promise.resolve();
+    expect(held.size).toBe(before);
+  });
+
   it("projects controller content and publishes pointer and keyboard-range selection", () => {
     const { adapter } = createAdapter();
     const changes = vi.fn();
@@ -175,7 +194,7 @@ describe("structured data-view coordination", () => {
 
   it("publishes a coherent cancelled state exactly once when cancellation throws", () => {
     const { adapter } = createAdapter();
-    const coordinator = new NSEDataViewCoordinator(adapter, { selectionMode: "multiple" });
+    const coordinator = new DataViewCoordinator(adapter, { selectionMode: "multiple" });
     const listener = vi.fn();
     coordinator.subscribe(listener);
     const failure = new Error("cancel failed");
@@ -190,7 +209,7 @@ describe("structured data-view coordination", () => {
 
   it("runs cancellation even when a subscriber throws and reports both failures deterministically", () => {
     const { adapter } = createAdapter();
-    const coordinator = new NSEDataViewCoordinator(adapter, { selectionMode: "multiple" });
+    const coordinator = new DataViewCoordinator(adapter, { selectionMode: "multiple" });
     const cancel = vi.fn(() => { throw new Error("cancel failure"); });
     coordinator.subscribe(() => { throw new Error("listener failure"); });
     expect(() => coordinator.beginEditing("ada", cancel)).toThrow("listener failure");
@@ -201,7 +220,7 @@ describe("structured data-view coordination", () => {
 
   it("reconciles a deleted active edit before reporting cancellation and subscriber failures", () => {
     const { adapter, controller } = createAdapter();
-    const coordinator = new NSEDataViewCoordinator(adapter, { selectionMode: "multiple" });
+    const coordinator = new DataViewCoordinator(adapter, { selectionMode: "multiple" });
     const cancel = vi.fn(() => { throw new Error("cancel failure"); });
     coordinator.setActive("grace");
     coordinator.beginEditing("grace", cancel);
@@ -232,14 +251,14 @@ describe("structured data-view coordination", () => {
 
   it("rejects duplicate adapter identities before publishing a projection", () => {
     const controller = new NSEArrayController({ id: "duplicate-adapter-ids", content: [{ id: "one" }, { id: "two" }], getId: (item) => item.id, selection: { mode: "single", allowsEmpty: true } });
-    expect(() => new NSEDataViewCoordinator({ controller, idForItem: () => "duplicate", labelForItem: (item) => item.id }, { selectionMode: "single" })).toThrow(/duplicate.*identity/i);
+    expect(() => new DataViewCoordinator({ controller, idForItem: () => "duplicate", labelForItem: (item) => item.id }, { selectionMode: "single" })).toThrow(/duplicate.*identity/i);
   });
 
   it("reuses projected entries for active-only movement", () => {
     const disabled = vi.fn(() => false);
     const content = Array.from({ length: 50_000 }, (_, index) => ({ id: `id-${index}`, name: `Name ${index}` }));
     const controller = new NSEArrayController({ id: "projection-work", content, getId: (item) => item.id, selection: { mode: "multiple", allowsEmpty: true } });
-    const coordinator = new NSEDataViewCoordinator({ controller, idForItem: (item) => item.id, labelForItem: (item) => item.name, isItemDisabled: disabled }, { selectionMode: "multiple" });
+    const coordinator = new DataViewCoordinator({ controller, idForItem: (item) => item.id, labelForItem: (item) => item.name, isItemDisabled: disabled }, { selectionMode: "multiple" });
     const before = coordinator.getSnapshot().items[25_000];
     const initialCalls = disabled.mock.calls.length;
     coordinator.moveActiveTo("end");
@@ -287,7 +306,7 @@ describe("structured data-view coordination", () => {
 
   it("cancels an active edit before applying a conflicting controller arrangement", () => {
     const { adapter, controller } = createAdapter();
-    const coordinator = new NSEDataViewCoordinator(adapter, { selectionMode: "multiple" });
+    const coordinator = new DataViewCoordinator(adapter, { selectionMode: "multiple" });
     const cancel = vi.fn();
     coordinator.beginEditing("ada", cancel);
 

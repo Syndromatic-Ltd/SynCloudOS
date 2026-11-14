@@ -22,7 +22,7 @@ import { useLayoutEffect, useState, type CSSProperties, type ReactNode } from "r
 import { useNSEAppearanceProjection } from "../../NSE/Appearance";
 import { useNSEAnimationEnvironment } from "../../NSE/Animation";
 import { useNSEPresenceExiting } from "../../NSE/Animation";
-import { NSEPopoverFrame } from "../../NSE/hostComposition";
+import { PopoverFrame } from "../../NSE/hostComposition";
 import { applyNSEPopoverPosition } from "../../NSE/hostComposition";
 import { nsePopoverSpringEasing, useNSEPopoverSurface } from "../../NSE/hostComposition";
 import { useKernelSynCloudOS } from "../../SynCloudOSReact";
@@ -80,7 +80,7 @@ export function PopoverWindowSurface({ surface, windowControllerId, anchored, ch
       void runtime.windows.requestClose(windowControllerId, { reason: "command" });
     }}
   >
-    <NSEPopoverFrame arrowRef={setArrow} anchored={anchored} />
+    <PopoverFrame arrowRef={setArrow} anchored={anchored} />
     <div className="nse-overlay-popup-content" dangerouslySetInnerHTML={exiting ? { __html: closingContent?.innerHTML ?? "" } : undefined}>{exiting ? undefined : children}</div>
   </div>;
 }

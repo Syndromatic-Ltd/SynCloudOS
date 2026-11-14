@@ -21,12 +21,12 @@
 import { Children, Fragment, useCallback, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
 import { nseFlashMenuSelection } from "../Menus/menuSelectionFlash";
 import { useNSERubberBandScroll } from "../Scroll";
-import { NSEPopup, useNSEPopupOpenState, type NSEPopupPresentation } from "./NSEPopup";
-import { useNSEOverlayProvider } from "./NSEOverlayProvider";
-import type { NSEOverlayDismissReason } from "./overlayTypes";
-import { NSEActionResponderContext } from "../Controls/Core/useNSEControlAction";
+import { NSEPopup, useNSEPopupOpenState, type PopupPresentation } from "./NSEPopup";
+import { useNSEOverlayProvider } from "./OverlayProvider";
+import type { OverlayDismissReason } from "./overlayTypes";
+import { ActionResponderContext } from "../Controls/Core/useNSEControlAction";
 
-export interface NSEListboxOption<T = unknown> {
+export interface ListboxOption<T = unknown> {
   readonly id: string;
   readonly label: ReactNode;
   readonly value?: T;
@@ -38,7 +38,7 @@ export interface NSEListboxOption<T = unknown> {
   readonly kind?: "option" | "action";
 }
 
-export interface NSEListboxPopupProps<T = unknown> {
+export interface ListboxPopupProps<T = unknown> {
   readonly id?: string;
   readonly open?: boolean;
   readonly defaultOpen?: boolean;
@@ -46,19 +46,19 @@ export interface NSEListboxPopupProps<T = unknown> {
   readonly parentResponderId?: string;
   readonly parentId?: string | null;
   readonly parentScopeId?: string;
-  readonly options: readonly NSEListboxOption<T>[];
+  readonly options: readonly ListboxOption<T>[];
   readonly selectedId?: string | null;
   readonly labelledBy?: string;
   readonly describedBy?: string;
-  readonly presentation?: NSEPopupPresentation;
+  readonly presentation?: PopupPresentation;
   readonly direction?: "ltr" | "rtl";
   readonly popupAlign?: "left" | "right";
   /** "small" rows, for the menu of a small picker. */
   readonly controlSize?: "regular" | "small";
   readonly virtualize?: boolean;
   readonly overscan?: number;
-  onOpenChange?(open: boolean, reason: NSEOverlayDismissReason): void;
-  onSelect?(option: NSEListboxOption<T>): void;
+  onOpenChange?(open: boolean, reason: OverlayDismissReason): void;
+  onSelect?(option: ListboxOption<T>): void;
 }
 
 interface ListboxWindow {
@@ -86,7 +86,7 @@ function textFromNode(node: ReactNode): string {
   }, "");
 }
 
-function nextEnabledIndex(options: readonly NSEListboxOption[], start: number, delta: number): number {
+function nextEnabledIndex(options: readonly ListboxOption[], start: number, delta: number): number {
   if (options.length === 0) return -1;
   let index = start;
   for (let count = 0; count < options.length; count += 1) {
@@ -96,11 +96,11 @@ function nextEnabledIndex(options: readonly NSEListboxOption[], start: number, d
   return -1;
 }
 
-function firstEnabledIndex(options: readonly NSEListboxOption[]): number {
+function firstEnabledIndex(options: readonly ListboxOption[]): number {
   return options.findIndex((option) => !option.disabled);
 }
 
-function useResolvedListboxPresentation(presentation: NSEPopupPresentation | undefined): NSEPopupPresentation {
+function useResolvedListboxPresentation(presentation: PopupPresentation | undefined): PopupPresentation {
   const { runtime } = useNSEOverlayProvider();
   const traits = useSyncExternalStore(
     (listener) => runtime.environment.presentation.subscribe(listener),
@@ -120,7 +120,7 @@ function useResolvedListboxPresentation(presentation: NSEPopupPresentation | und
 }
 
 /** DOM-only listbox presentations stay in the overlay stack, not physical windows. */
-export function NSEListboxPopup<T = unknown>({
+export function ListboxPopup<T = unknown>({
   id,
   open,
   defaultOpen,
@@ -140,9 +140,9 @@ export function NSEListboxPopup<T = unknown>({
   overscan = 4,
   onOpenChange,
   onSelect,
-}: NSEListboxPopupProps<T>) {
+}: ListboxPopupProps<T>) {
   const provider = useNSEOverlayProvider();
-  const nearestResponderId = useContext(NSEActionResponderContext);
+  const nearestResponderId = useContext(ActionResponderContext);
   const generatedId = useId().replace(/:/g, "");
   const resolvedId = id ?? `nse-listbox:${generatedId}`;
   const resolvedParentResponderId = parentResponderId ?? nearestResponderId ?? provider.defaultParentResponderId;
@@ -268,7 +268,7 @@ export function NSEListboxPopup<T = unknown>({
     content.addEventListener("mousemove", onMove);
     return () => content.removeEventListener("mousemove", onMove);
   }, [contentElement, options, state.open]);
-  const select = useCallback((option: NSEListboxOption<T>) => {
+  const select = useCallback((option: ListboxOption<T>) => {
     if (option.disabled || flashing.current) return;
     // On a desktop the chosen row flashes before the list chooses it and fades; an action sheet does not.
     const row = resolvedPresentation.mode === "sheet" ? null : optionRefs.current.get(option.id);

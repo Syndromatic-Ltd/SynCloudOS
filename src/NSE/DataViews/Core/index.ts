@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { NSEDataViewCoordinator, createSelectionChange } from "./NSEDataViewCoordinator";
+export { DataViewCoordinator, createSelectionChange } from "./NSEDataViewCoordinator";
 export { useNSEDataView } from "./useNSEDataView";
 export { dataViewAllowsMutation, dataViewAllowsNavigation, dataViewAnnouncement, dataViewEventIsComposing, dataViewIsBusy, dataViewIsDisabled, dataViewPresentsContent } from "./dataViewAccessibility";
 export { encodeNSEDataViewKey, decodeNSEDataViewKey } from "./dataViewIdentity";

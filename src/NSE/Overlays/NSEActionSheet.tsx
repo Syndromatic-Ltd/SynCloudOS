@@ -19,14 +19,14 @@
  */
 
 import { useEffect, useMemo, useState, type HTMLAttributes, type ReactNode } from "react";
-import { NSEPopup, useNSEPopupOpenState, type NSEPopupPresentation, type NSEPopupProps } from "./NSEPopup";
-import type { NSEOverlayDismissReason } from "./overlayTypes";
-import { useOptionalNSEWindowSurfaceBridge, type NSEWindowSurfaceBridge } from "./NSEWindowSurfaceBridge";
+import { NSEPopup, useNSEPopupOpenState, type PopupPresentation, type NSEPopupProps } from "./NSEPopup";
+import type { OverlayDismissReason } from "./overlayTypes";
+import { useOptionalNSEWindowSurfaceBridge, type WindowSurfaceBridge } from "./NSEWindowSurfaceBridge";
 import { reportNSEWindowSurfaceError, useNSEWindowSurfaceLifecycle } from "./useNSEWindowSurfaceLifecycle";
 import { useNSEPresentedContent } from "./useNSEPresentedContent";
 import { PresentedDialogContent, PresentedDialogTitle, usePresentedDialogContent } from "./presentedDialogContent";
 
-export interface NSEActionSheetProps extends Omit<HTMLAttributes<HTMLDivElement>, "title"> {
+export interface ActionSheetProps extends Omit<HTMLAttributes<HTMLDivElement>, "title"> {
   readonly id: string;
   readonly open?: boolean;
   readonly defaultOpen?: boolean;
@@ -40,30 +40,30 @@ export interface NSEActionSheetProps extends Omit<HTMLAttributes<HTMLDivElement>
   readonly dismissOnOutside?: boolean;
   readonly dismissOnEscape?: boolean;
   readonly restoreFocus?: boolean;
-  readonly presentation?: NSEPopupPresentation;
+  readonly presentation?: PopupPresentation;
   /** Optional window-host seam for a real NSEModalWindowView-backed record. */
   readonly parentWindowControllerId?: string;
-  readonly windowBridge?: NSEModalWindowBridge;
-  onOpenChange?(open: boolean, reason: NSEOverlayDismissReason): void;
+  readonly windowBridge?: ModalWindowBridge;
+  onOpenChange?(open: boolean, reason: OverlayDismissReason): void;
 }
 
-export interface NSEModalWindowRequest {
+export interface ModalWindowRequest {
   readonly id: string;
   readonly role: "sheet";
   readonly parentWindowControllerId: string | null;
-  readonly presentation: NSEPopupPresentation;
+  readonly presentation: PopupPresentation;
 }
 
 /** Window-host seam; the host owns renderer registration and WindowManager.create/open/close. */
-export interface NSEModalWindowBridge {
-  open?(request: NSEModalWindowRequest): void;
-  close?(request: NSEModalWindowRequest): void;
-  present?: NSEWindowSurfaceBridge["present"];
-  dismiss?: NSEWindowSurfaceBridge["dismiss"];
+export interface ModalWindowBridge {
+  open?(request: ModalWindowRequest): void;
+  close?(request: ModalWindowRequest): void;
+  present?: WindowSurfaceBridge["present"];
+  dismiss?: WindowSurfaceBridge["dismiss"];
 }
 
 /** A modal surface; it is an overlay record, never an ad hoc window registry. */
-export function NSEActionSheet({
+export function ActionSheet({
   anchor = null,
   presentation,
   open,
@@ -72,13 +72,13 @@ export function NSEActionSheet({
   parentWindowControllerId,
   windowBridge,
   ...props
-}: NSEActionSheetProps) {
+}: ActionSheetProps) {
   const state = useNSEPopupOpenState({ open, defaultOpen, onOpenChange });
   const contentOwner = usePresentedDialogContent();
   const [renderedTitle, setRenderedTitle] = useState("");
   const accessibleTitle = typeof props.title === "string" ? props.title : renderedTitle || "Dialog";
   const hostedBridge = useOptionalNSEWindowSurfaceBridge();
-  const canonicalBridge = windowBridge?.present && windowBridge.dismiss ? windowBridge as NSEWindowSurfaceBridge : hostedBridge;
+  const canonicalBridge = windowBridge?.present && windowBridge.dismiss ? windowBridge as WindowSurfaceBridge : hostedBridge;
   const handleDidClose = useNSEWindowSurfaceLifecycle({
     bridge: canonicalBridge,
     requestId: props.id,
@@ -87,7 +87,7 @@ export function NSEActionSheet({
     onDidClose: () => state.requestOpen(false, "programmatic"),
   });
   const resolvedPresentation = presentation ?? { mode: "sheet" as const };
-  const windowRequest = useMemo<NSEModalWindowRequest>(() => ({
+  const windowRequest = useMemo<ModalWindowRequest>(() => ({
     id: props.id,
     role: "sheet",
     parentWindowControllerId: parentWindowControllerId ?? null,

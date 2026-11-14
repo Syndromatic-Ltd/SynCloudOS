@@ -20,15 +20,15 @@
 
 import { useNSEDatePickerDrawing } from "./datePickerDrawing";
 import { useEffect, useId, useReducer, useRef, useState } from "react";
-import { useOptionalNSEOverlayProvider } from "../../Overlays";
+import { useOptionalOverlayProvider } from "../../Overlays";
 import { NSEPopover } from "../../Overlays/NSEPopover";
-import { NSEGraphicalCalendar } from "../Calendar/graphicalCalendar";
-import { NSEGraphicalClock } from "../Calendar/graphicalClock";
+import { GraphicalCalendar } from "../Calendar/graphicalCalendar";
+import { GraphicalClock } from "../Calendar/graphicalClock";
 import { NSEPopUpButton } from "../../Menus/NSEPopUpButton";
 import { civilToEpochDay, comparePlainDates, resolveZonedDateTime } from "../calendarArithmetic";
 import { formatPlainDate, parsePlainDate, plainDateToday } from "../dateTimeFormatting";
-import type { NSECalendarMonth, NSEPlainDate } from "../dateTimeTypes";
-import type { NSEDateTimeEntryMode, NSEDateTimeEntryProps, NSEDateTimeValue } from "./datePickerTypes";
+import type { CalendarMonth, NSEPlainDate } from "../dateTimeTypes";
+import type { DateTimeEntryMode, DateTimeEntryProps, NSEDateTimeValue } from "./datePickerTypes";
 import { serializePlainDate } from "./dateEntry";
 import { serializePlainTime } from "./timeEntry";
 import { createPickerTransaction, reducePickerTransaction } from "./pickerTransaction";
@@ -75,7 +75,7 @@ const parseTextValue = (text: string, locale: string, baseline: NSEDateTimeValue
   return { ...baseline, date: date.value, time: { hour, minute, second } };
 };
 
-export function NSEDateTimeEntry({ value, defaultValue = null, mode = "combined", onValueChange, ...props }: NSEDateTimeEntryProps) {
+export function DateTimeEntry({ value, defaultValue = null, mode = "combined", onValueChange, ...props }: DateTimeEntryProps) {
   const drawing = useNSEDatePickerDrawing("date-time", props.isEnabled !== false);
   const disabled = props.isEnabled === false;
   const controlled = value !== undefined;
@@ -90,7 +90,7 @@ export function NSEDateTimeEntry({ value, defaultValue = null, mode = "combined"
   const triggerRef = useRef<HTMLButtonElement>(null);
   const lastPublishedRef = useRef<NSEDateTimeValue | null | undefined>(undefined);
   const instanceId = useId().replace(/:/g, "");
-  const overlay = useOptionalNSEOverlayProvider();
+  const overlay = useOptionalOverlayProvider();
   if (mode === "automatic" && !overlay) throw new Error("Automatic date-time pickers require an NSEOverlayProvider.");
   const localeHourCycle = new Intl.DateTimeFormat(props.locale, { hour: "numeric" }).resolvedOptions().hourCycle;
   const hourCycle = props.hourCycle ?? (localeHourCycle === "h11" || localeHourCycle === "h12" ? "h12" : "h24");
@@ -189,9 +189,9 @@ export function NSEDateTimeEntry({ value, defaultValue = null, mode = "combined"
 
   const editorValue = draft ?? emptyValue(props.timeZone);
   // Paging the calendar moves the view, never the chosen date.
-  const [visibleMonth, setVisibleMonth] = useState<NSECalendarMonth>({ year: editorValue.date.year, month: editorValue.date.month });
+  const [visibleMonth, setVisibleMonth] = useState<CalendarMonth>({ year: editorValue.date.year, month: editorValue.date.month });
   useEffect(() => { setVisibleMonth({ year: editorValue.date.year, month: editorValue.date.month }); }, [editorValue.date.year, editorValue.date.month, open]);
-  const editorMode: Exclude<NSEDateTimeEntryMode, "automatic"> = mode === "automatic" ? "combined" : mode;
+  const editorMode: Exclude<DateTimeEntryMode, "automatic"> = mode === "automatic" ? "combined" : mode;
   const showText = editorMode === "text";
   const showCalendar = editorMode === "calendar" || editorMode === "calendar-clock" || editorMode === "combined";
   const showClock = editorMode === "clock" || editorMode === "calendar-clock" || editorMode === "combined";
@@ -205,7 +205,7 @@ export function NSEDateTimeEntry({ value, defaultValue = null, mode = "combined"
       if (!parsed) { setError("Enter a valid date and time."); return; }
       commit(parsed);
     }} /> : null}
-    {showCalendar ? <NSEGraphicalCalendar
+    {showCalendar ? <GraphicalCalendar
       aria-label={`${props["aria-label"]} calendar`}
       locale={props.locale}
       timeZone={editorValue.timeZone}
@@ -215,7 +215,7 @@ export function NSEDateTimeEntry({ value, defaultValue = null, mode = "combined"
       onVisibleMonthChange={setVisibleMonth}
       onSelectionChange={(selection) => { if (selection.kind === "single") preview({ ...editorValue, date: selection.value }); }}
     /> : null}
-    {showClock ? <NSEGraphicalClock aria-label={props["aria-label"]} locale={props.locale} timeZone={editorValue.timeZone} date={editorValue.date} value={editorValue.time} disambiguation={editorValue.disambiguation} isEnabled={!(disabled || props.readOnly)} showValidationMessage={false} hourCycle={hourCycle} onValueChange={(time) => preview({ ...editorValue, time })} /> : null}
+    {showClock ? <GraphicalClock aria-label={props["aria-label"]} locale={props.locale} timeZone={editorValue.timeZone} date={editorValue.date} value={editorValue.time} disambiguation={editorValue.disambiguation} isEnabled={!(disabled || props.readOnly)} showValidationMessage={false} hourCycle={hourCycle} onValueChange={(time) => preview({ ...editorValue, time })} /> : null}
     {showZone ? <>
       <NSEPopUpButton label="Time zone" accessibleLabel={`${props["aria-label"]} time zone`} value={editorValue.timeZone} isEnabled={!(disabled || props.readOnly)} items={[{ value: props.timeZone, title: props.timeZone }, ...(props.timeZone !== "UTC" ? [{ value: "UTC", title: "UTC" }] : [])]} onValueChange={(timeZone) => preview({ ...editorValue, timeZone })} />
       <NSEPopUpButton label="Disambiguation" accessibleLabel={`${props["aria-label"]} disambiguation`} value={editorValue.disambiguation} isEnabled={!(disabled || props.readOnly)} items={[{ value: "earlier", title: "Earlier" }, { value: "later", title: "Later" }, { value: "reject", title: "Reject" }]} onValueChange={(disambiguation) => preview({ ...editorValue, disambiguation: disambiguation as NSEDateTimeValue["disambiguation"] })} />

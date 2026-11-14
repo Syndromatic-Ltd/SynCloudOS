@@ -126,7 +126,7 @@ describe("canonical route commit authority", () => {
     mounted.dispose("route commit test complete");
   });
 
-  it("retains a committed route when cancelled during its did hook", async () => {
+  it("completes and retains a route while the application's did hook is still running", async () => {
     let entered = false;
     const runtime = fixture([createTestBundle({ bundleIdentifier: "com.example.committed-reader" }, {
       lifecycleHooks: { launch: { did: ({ signal }) => new Promise<void>((resolve) => {
@@ -137,8 +137,9 @@ describe("canonical route commit authority", () => {
     const route = runtime.routes.openRoute("/committed-reader", { syncRoute: false });
     await vi.waitFor(() => expect(entered).toBe(true));
     expect(runtime.store.getSnapshot().application.routePath).toBe("/committed-reader");
-    route.cancel("cancel post-commit work");
-    await expect(route.result).resolves.toMatchObject({ status: "completed", committed: true, postCommit: "cancelled" });
+    // The route ends when the application is presented; the did hook is the application's own time.
+    await expect(route.result).resolves.toMatchObject({ status: "completed", committed: true, postCommit: "completed" });
+    route.cancel("cancel after completion");
     expect(runtime.store.getSnapshot().lifecycle["com.example.committed-reader"]).toBe("active");
     expect(runtime.store.getSnapshot().application.routePath).toBe("/committed-reader");
   });

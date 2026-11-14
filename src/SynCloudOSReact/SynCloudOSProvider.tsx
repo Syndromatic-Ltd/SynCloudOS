@@ -19,23 +19,25 @@
  */
 
 import {
-  NSEFeedbackProvider,
-  NSEMaterialLighting,
-  NSEMaterialLightingProvider,
+  FeedbackProvider,
+  MaterialLighting,
+  MaterialLightingProvider,
+  SafeAreaMeasurementProvider,
 } from "../NSE/hostComposition";
-import { NSEAnimationEnvironmentProvider, type NSEAnimator } from "../NSE/Animation";
-import { NSEViewControllerRendererProvider } from "../NSE/applicationHostInterop";
-import { NSEViewControllerView } from "../SynCloudOS/AppHosting/runtimeEntry";
+import { AnimationEnvironmentProvider, type Animator } from "../NSE/Animation";
+import { ViewControllerRendererProvider } from "../NSE/applicationHostInterop";
+import { ViewControllerView } from "../SynCloudOS/AppHosting/runtimeEntry";
 import { registerNSEHapticFeedbackEngine } from "../NSE/hostComposition";
-import { NSEViewDrawingEnvironmentContext, type NSEViewDrawingEnvironment } from "../NSE/hostComposition";
+import { ViewDrawingEnvironmentContext, type ViewDrawingEnvironment } from "../NSE/hostComposition";
 import {
+  useInsertionEffect,
   useLayoutEffect,
   useMemo,
   useSyncExternalStore,
   type PropsWithChildren,
 } from "react";
 import type { SynCloudOSRuntime } from "../SynCloudOS/SynCloudOS";
-import { createMountedAnimationLayers } from "../SynCloudOS/HostServices/mountedAnimationLayers";
+import { createMountedAnimationLayers, observeMountedAnimationLayers } from "../SynCloudOS/HostServices/mountedAnimationLayers";
 import type { AFXFrameScheduler } from "../FX/AnimationFX/AFXLayer";
 import { createRuntimeAnimationState, createScopedAnimationFrames } from "../SynCloudOS/AnimationFX/scopedAnimationFrames";
 import { ResponderHierarchyContext } from "./responderHierarchy";
@@ -66,7 +68,7 @@ export function SynCloudOSProvider({
   // Shell NSE presentations (system alerts, dialogs) animate through the
   // runtime's AnimationFX service as the system; mounted apps replace this
   // with their own application-owned animator.
-  const shellAnimator = useMemo<NSEAnimator>(
+  const shellAnimator = useMemo<Animator>(
     () => Object.freeze({ animations: runtime.animations, ownerAppId: "syncloudos.system" }),
     [runtime],
   );
@@ -74,7 +76,9 @@ export function SynCloudOSProvider({
     runtime.environment.animationLayers, runtime.signal,
     () => runtime.signal.throwIfAborted(),
     { owner: "syncloudos.system", register: participant => runtime.resources.register(participant) },
+    false,
   ), [runtime]);
+  useInsertionEffect(() => observeMountedAnimationLayers(shellLayers), [shellLayers]);
   const shellFrames = useMemo<AFXFrameScheduler | null>(() => {
     const frames = runtime.environment.animationFrames;
     if (!frames) return null;
@@ -82,14 +86,14 @@ export function SynCloudOSProvider({
   }, [runtime, animationState]);
   // NSEHapticFeedbackManager.defaultPerformer performs through this runtime's engine while it is mounted.
   useLayoutEffect(() => (runtime.haptics ? registerNSEHapticFeedbackEngine(runtime.haptics) : undefined), [runtime.haptics]);
-  const drawingEnvironment = useMemo<NSEViewDrawingEnvironment>(() => ({
+  const drawingEnvironment = useMemo<ViewDrawingEnvironment>(() => ({
     createGraphicsIdentifierIssuer: () => runtime.images.createGraphicsIdentifierIssuer(),
     // The kernel owns the same geometry exposed to mounted apps as images.geometry.
     geometry: runtime.environment.imageGeometry,
   }), [runtime]);
   const lighting = useMemo(() => {
     if (!shellFrames) return null;
-    return new NSEMaterialLighting(
+    return new MaterialLighting(
       () =>
         runtime.motion.createManager({
           signal: runtime.signal,
@@ -100,19 +104,21 @@ export function SynCloudOSProvider({
   }, [runtime, shellFrames]);
   return (
     <SynCloudOSRuntimeContext.Provider value={runtime}>
-      <NSEAnimationEnvironmentProvider reducedMotion={reducedMotion} animator={shellAnimator} layers={shellLayers} frames={shellFrames}>
+      <AnimationEnvironmentProvider reducedMotion={reducedMotion} animator={shellAnimator} layers={shellLayers} frames={shellFrames}>
         <ResponderHierarchyContext.Provider
           value={{ runtimeId: runtime.runtimeId, responderId: null }}
         >
-          <NSEFeedbackProvider value={runtime.haptics}>
-            <NSEMaterialLightingProvider value={lighting}>
-              <NSEViewDrawingEnvironmentContext.Provider value={drawingEnvironment}>
-                <NSEViewControllerRendererProvider value={NSEViewControllerView}>{children}</NSEViewControllerRendererProvider>
-              </NSEViewDrawingEnvironmentContext.Provider>
-            </NSEMaterialLightingProvider>
-          </NSEFeedbackProvider>
+          <FeedbackProvider value={runtime.haptics}>
+            <MaterialLightingProvider value={lighting}>
+              <ViewDrawingEnvironmentContext.Provider value={drawingEnvironment}>
+                <ViewControllerRendererProvider value={ViewControllerView}>
+                  <SafeAreaMeasurementProvider>{children}</SafeAreaMeasurementProvider>
+                </ViewControllerRendererProvider>
+              </ViewDrawingEnvironmentContext.Provider>
+            </MaterialLightingProvider>
+          </FeedbackProvider>
         </ResponderHierarchyContext.Provider>
-      </NSEAnimationEnvironmentProvider>
+      </AnimationEnvironmentProvider>
     </SynCloudOSRuntimeContext.Provider>
   );
 }

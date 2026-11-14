@@ -26,8 +26,8 @@ import { nseMenuModel } from "../../src/NSE/Menus/menuTypes";
 import { act, cleanup, render, waitFor } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 
-import { NSEMenuView, NSEMenu, NSEMenuOverlay, type NSEMenuModel, type NSEMenuRuntimePort } from "../../src/NSE/Menus";
-import { NSEOverlayProvider, createNSEOverlayManager, type NSEOverlayRuntimePort } from "../../src/NSE/Overlays";
+import { MenuView, NSEMenu, MenuOverlay, type MenuModel, type NSEMenuRuntimePort } from "../../src/NSE/Menus";
+import { OverlayProvider, createOverlayManager, type OverlayRuntimePort } from "../../src/NSE/Overlays";
 import budgets from "../fixtures/conformance-performance-budgets.json";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 import { runStructuralScenario } from "./structural-performance-scenario";
@@ -35,7 +35,7 @@ import { runStructuralScenario } from "./structural-performance-scenario";
 afterEach(cleanup);
 
 const scenarioId = "overlays.menu-open-painted";
-const menuModel: NSEMenuModel = Object.freeze({
+const menuModel: MenuModel = Object.freeze({
   id: "performance-menu",
   label: "Performance menu",
   entries: Object.freeze([
@@ -56,7 +56,7 @@ function presentation(commandId: string) {
   };
 }
 
-function createRuntimePort(validateMany: NSEMenuRuntimePort["commands"]["validateMany"]): NSEOverlayRuntimePort & NSEMenuRuntimePort {
+function createRuntimePort(validateMany: NSEMenuRuntimePort["commands"]["validateMany"]): OverlayRuntimePort & NSEMenuRuntimePort {
   const signal = new AbortController().signal;
   const workArea = Object.freeze({
     width: 1280,
@@ -101,24 +101,24 @@ function CycleFixture({
   open,
 }: {
   readonly controller: NSEMenu;
-  readonly manager: ReturnType<typeof createNSEOverlayManager>;
-  readonly runtimePort: NSEOverlayRuntimePort;
+  readonly manager: ReturnType<typeof createOverlayManager>;
+  readonly runtimePort: OverlayRuntimePort;
   readonly open: boolean;
 }) {
   const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null);
   return (
-    <NSEOverlayProvider manager={manager} runtimePort={runtimePort}>
+    <OverlayProvider manager={manager} runtimePort={runtimePort}>
       <button ref={setAnchor} type="button">Performance menu trigger</button>
-      <NSEMenuOverlay
+      <MenuOverlay
         overlay={{ id: "performance-menu-overlay", parentResponderId: "application:performance" }}
         controller={controller}
         open={open}
         anchor={anchor}
         onOpenChange={() => undefined}
       >
-        <NSEMenuView model={menuModel} controller={controller} open={open} onOpenChange={() => undefined} />
-      </NSEMenuOverlay>
-    </NSEOverlayProvider>
+        <MenuView model={menuModel} controller={controller} open={open} onOpenChange={() => undefined} />
+      </MenuOverlay>
+    </OverlayProvider>
   );
 }
 
@@ -174,7 +174,7 @@ it("opens and paints 100 menu generations without retained portals, listener set
       ));
       const runtimePort = createRuntimePort(validateMany);
       const controller = new NSEMenu({ [nseMenuModel]: menuModel, runtime: runtimePort });
-      const manager = createNSEOverlayManager();
+      const manager = createOverlayManager();
       let menuPublications = 0;
       let overlayPublications = 0;
       const unsubscribeMenu = controller.subscribe(() => { menuPublications += 1; });

@@ -19,14 +19,14 @@
  */
 
 import type {
-  NSESmoothSurfaceFocus,
-  NSESmoothSurfaceOverflow,
-  NSESmoothSurfacePerformance,
-  NSESmoothSurfacePhysicalityConfig,
-  NSESmoothSurfaceRadius,
-  NSESmoothSurfaceScroll,
-  NSESmoothSurfaceShadow,
-  NSESmoothSurfaceStyle
+  SmoothSurfaceFocus,
+  SmoothSurfaceOverflow,
+  SmoothSurfacePerformance,
+  SmoothSurfacePhysicalityConfig,
+  SmoothSurfaceRadius,
+  SmoothSurfaceScroll,
+  SmoothSurfaceShadow,
+  SmoothSurfaceStyle
 } from "./smoothSurfaceTypes";
 
 export const nseSmoothSurfaceRadiusTokens = {
@@ -39,7 +39,7 @@ export const nseSmoothSurfaceRadiusTokens = {
   xxl: "24px",
   app: "38px",
   pill: "999px"
-} as const satisfies Record<Exclude<NSESmoothSurfaceRadius, number>, string>;
+} as const satisfies Record<Exclude<SmoothSurfaceRadius, number>, string>;
 
 export const nseSmoothSurfaceFocusTokens = {
   none: {},
@@ -55,7 +55,7 @@ export const nseSmoothSurfaceFocusTokens = {
     "--nse-smooth-surface-focus-ring": "inset 0 0 0 2px rgba(255, 255, 255, 0.72)",
     "--nse-smooth-surface-focus-offset": "0px"
   }
-} as const satisfies Record<NSESmoothSurfaceFocus, NSESmoothSurfaceStyle>;
+} as const satisfies Record<SmoothSurfaceFocus, SmoothSurfaceStyle>;
 
 export const nseSmoothSurfaceOverflowTokens = {
   visible: { overflow: "visible" },
@@ -63,7 +63,7 @@ export const nseSmoothSurfaceOverflowTokens = {
   clip: { overflow: "clip" },
   auto: { overflow: "auto" },
   scroll: { overflow: "scroll" }
-} as const satisfies Record<NSESmoothSurfaceOverflow, NSESmoothSurfaceStyle>;
+} as const satisfies Record<SmoothSurfaceOverflow, SmoothSurfaceStyle>;
 
 export const nseSmoothSurfaceScrollTokens = {
   none: {},
@@ -80,7 +80,7 @@ export const nseSmoothSurfaceScrollTokens = {
     overscrollBehavior: "contain",
     scrollbarGutter: "stable"
   }
-} as const satisfies Record<NSESmoothSurfaceScroll, NSESmoothSurfaceStyle>;
+} as const satisfies Record<SmoothSurfaceScroll, SmoothSurfaceStyle>;
 
 export const nseSmoothSurfaceShadowTokens = {
   none: "none",
@@ -90,12 +90,12 @@ export const nseSmoothSurfaceShadowTokens = {
   floating: "0 22px 52px rgba(6, 10, 18, 0.42), 0 1px 0 rgba(255, 255, 255, 0.24) inset",
   inset: "inset 0 1px 5px rgba(6, 10, 18, 0.42)",
   physical: "inset 0 2px 0 rgba(255,255,255,0.65), inset 0 -2px 0 rgba(0,0,0,0.45)"
-} as const satisfies Record<NSESmoothSurfaceShadow, string>;
+} as const satisfies Record<SmoothSurfaceShadow, string>;
 
 export const nseSmoothSurfaceDefaultPhysicality = {
   top: { offsetX: 0, offsetY: 2, blur: 0, spread: 0, color: "#ffffff", opacity: 0.65 },
   bottom: { offsetX: 0, offsetY: -2, blur: 0, spread: 0, color: "#000000", opacity: 0.45 }
-} as const satisfies NSESmoothSurfacePhysicalityConfig;
+} as const satisfies SmoothSurfacePhysicalityConfig;
 
 export const nseSmoothSurfacePerformanceTokens = {
   auto: {},
@@ -114,7 +114,7 @@ export const nseSmoothSurfacePerformanceTokens = {
     contain: "layout paint style",
     contentVisibility: "auto"
   }
-} as const satisfies Record<NSESmoothSurfacePerformance, NSESmoothSurfaceStyle>;
+} as const satisfies Record<SmoothSurfacePerformance, SmoothSurfaceStyle>;
 
 export const nseSmoothSurfaceTokens = {
   radius: nseSmoothSurfaceRadiusTokens,

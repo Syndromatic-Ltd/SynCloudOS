@@ -20,18 +20,18 @@
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type HTMLAttributes, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { NSEPanelView } from "../Windows/NSEPanelView";
+import { PanelView } from "../Windows/PanelView";
 import { createCanonicalWindowRecord, freezeWindowRecord } from "../../SynCloudOS/nseRuntimeContracts";
 import type { SynCloudOSRuntimeId, WindowPresentation, WindowRecord } from "../../SynCloudOS/SynCloudOS";
 import { useNSEAppearanceProjection } from "../Appearance";
-import { useNSEOverlayProvider } from "./NSEOverlayProvider";
+import { useNSEOverlayProvider } from "./OverlayProvider";
 import { useOptionalNSEWindowSurfaceBridge } from "./NSEWindowSurfaceBridge";
 import { reportNSEWindowSurfaceError, useNSEWindowSurfaceLifecycle } from "./useNSEWindowSurfaceLifecycle";
 import { useNSEPresentedContent } from "./useNSEPresentedContent";
-import { NSEWindowFittingContent, type NSEWindowFittingSize } from "./NSEWindowFittingContent";
+import { WindowFittingContent, type WindowFittingSize } from "./NSEWindowFittingContent";
 import { registerNSEInspectorOrigin } from "../Focus/focusOrigin";
 
-export interface NSEUtilityPanelProps {
+export interface UtilityPanelProps {
   readonly id: string;
   readonly open: boolean;
   readonly title: string;
@@ -56,13 +56,13 @@ const ANCHOR_GAP = 12;
 /** A dragged panel keeps this much of its title bar on screen. */
 const MINIMUM_VISIBLE = 48;
 /** The frame used until the content has been measured (or where it cannot be). */
-const PROVISIONAL_SIZE: NSEWindowFittingSize = { width: 320, height: 420 };
+const PROVISIONAL_SIZE: WindowFittingSize = { width: 320, height: 420 };
 
 /**
  * The panel's frame: its content's size, no taller than the screen allows. A
  * taller panel scrolls its content area, as an NSPanel on a short screen does.
  */
-function panelSize(fitting: NSEWindowFittingSize | null, view: Window | null): NSEWindowFittingSize {
+function panelSize(fitting: WindowFittingSize | null, view: Window | null): WindowFittingSize {
   const size = fitting && fitting.width > 0 && fitting.height > 0 ? fitting : PROVISIONAL_SIZE;
   const height = view?.innerHeight;
   return height && size.height > height - 2 * EDGE_MARGIN ? { width: size.width, height: Math.max(120, height - 2 * EDGE_MARGIN) } : size;
@@ -77,7 +77,7 @@ function viewOf(anchor: HTMLElement | null): Window | null {
  * it inspects: to the inline end if it fits, else the inline start, top
  * aligned with the control and kept on screen.
  */
-function frameBeside(anchor: HTMLElement | null, size: NSEWindowFittingSize): Frame {
+function frameBeside(anchor: HTMLElement | null, size: WindowFittingSize): Frame {
   const view = viewOf(anchor);
   const width = view?.innerWidth ?? 1280;
   const height = view?.innerHeight ?? 800;
@@ -91,7 +91,7 @@ function frameBeside(anchor: HTMLElement | null, size: NSEWindowFittingSize): Fr
 }
 
 /** The whole frame on screen, as a window is brought back when it or the screen changes size. */
-function keepOnScreen(frame: Frame, size: NSEWindowFittingSize, view: Window | null): Frame {
+function keepOnScreen(frame: Frame, size: WindowFittingSize, view: Window | null): Frame {
   const width = view?.innerWidth ?? 1280;
   const height = view?.innerHeight ?? 800;
   const x = Math.max(EDGE_MARGIN, Math.min(frame.x, width - EDGE_MARGIN - size.width));
@@ -102,7 +102,7 @@ function keepOnScreen(frame: Frame, size: NSEWindowFittingSize, view: Window | n
 /** A closing panel fades out over the same 0.16 s as a closing window. */
 const CLOSE_FADE_MS = 160;
 
-function clampFrame(frame: Frame, size: NSEWindowFittingSize, view: Window | null): Frame {
+function clampFrame(frame: Frame, size: WindowFittingSize, view: Window | null): Frame {
   const width = view?.innerWidth ?? 1280;
   const height = view?.innerHeight ?? 800;
   return {
@@ -122,7 +122,7 @@ function clampFrame(frame: Frame, size: NSEWindowFittingSize, view: Window | nul
  * and moved here; it is not an overlay registration, so clicks elsewhere and
  * focus moving on leave it open.
  */
-export function NSEUtilityPanel({ id, open, title, anchor, parentWindowControllerId = null, children, contentInset = "standard", onClose, onDismissRefused }: NSEUtilityPanelProps) {
+export function UtilityPanel({ id, open, title, anchor, parentWindowControllerId = null, children, contentInset = "standard", onClose, onDismissRefused }: UtilityPanelProps) {
   const bridge = useOptionalNSEWindowSurfaceBridge();
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
@@ -133,8 +133,8 @@ export function NSEUtilityPanel({ id, open, title, anchor, parentWindowControlle
     onDismissRefused: () => onDismissRefused?.(),
     onDidClose: () => onCloseRef.current(),
   });
-  const [fitting, setFitting] = useState<NSEWindowFittingSize | null>(null);
-  const onFittingSize = useCallback((next: NSEWindowFittingSize) => {
+  const [fitting, setFitting] = useState<WindowFittingSize | null>(null);
+  const onFittingSize = useCallback((next: WindowFittingSize) => {
     setFitting((current) => current && current.width === next.width && current.height === next.height ? current : next);
   }, []);
   // Register before the host's initial focus effect. The whole window belongs
@@ -146,7 +146,7 @@ export function NSEUtilityPanel({ id, open, title, anchor, parentWindowControlle
       ? registerNSEInspectorOrigin(body.closest("[data-window-host], .nse-utility-panel") ?? body, anchor)
       : null;
   }, [anchor, open]);
-  const presentedContent = useNSEPresentedContent(<NSEWindowFittingContent onFittingSize={onFittingSize}><div ref={bindOrigin} className="nse-utility-panel-body" data-content-inset={contentInset}>{children}</div></NSEWindowFittingContent>);
+  const presentedContent = useNSEPresentedContent(<WindowFittingContent onFittingSize={onFittingSize}><div ref={bindOrigin} className="nse-utility-panel-body" data-content-inset={contentInset}>{children}</div></WindowFittingContent>);
   const request = useMemo(() => {
     const size = panelSize(fitting, viewOf(anchor));
     return {
@@ -179,7 +179,7 @@ function StandaloneUtilityPanel({ id, title, anchor, fitting, closing, onExited,
   readonly id: string;
   readonly title: string;
   readonly anchor: HTMLElement | null;
-  readonly fitting: NSEWindowFittingSize | null;
+  readonly fitting: WindowFittingSize | null;
   readonly closing: boolean;
   readonly children: ReactNode;
   onExited(): void;
@@ -308,9 +308,9 @@ function StandaloneUtilityPanel({ id, title, anchor, fitting, closing, onExited,
         visibility: frame ? undefined : "hidden",
       }}
     >
-      <NSEPanelView record={record} presentation={presentation} blocked={false} dirty={false} dispatchCommand={dispatchCommand} moveHandleProps={moveHandleProps}>
+      <PanelView record={record} presentation={presentation} blocked={false} dirty={false} dispatchCommand={dispatchCommand} moveHandleProps={moveHandleProps}>
         {children}
-      </NSEPanelView>
+      </PanelView>
     </div>,
     portalHost,
   );

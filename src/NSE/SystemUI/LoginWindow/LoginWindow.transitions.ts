@@ -18,13 +18,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEAnimationDefaults, type NSEPresentationSpec, type NSEPresentationTrack } from "../../Animation";
+import { AnimationDefaults, type PresentationSpec, type PresentationTrack } from "../../Animation";
 
-const { emphasized } = NSEAnimationDefaults.easing;
+const { emphasized } = AnimationDefaults.easing;
 // Framer tweens given only a duration ease with easeInOut (CSS ease-in-out).
 const framerTween = "ease-in-out";
 
-type Presentation = Readonly<{ enter: NSEPresentationSpec; exit: NSEPresentationSpec }>;
+type Presentation = Readonly<{ enter: PresentationSpec; exit: PresentationSpec }>;
 
 type LoginWindowTransitions = {
   /** The whole window fades in and out. */
@@ -32,12 +32,12 @@ type LoginWindowTransitions = {
   /** The placard swings in on its ropes and lifts away. */
   readonly enter: Presentation;
   /** Feedback for a visible sign-in error. */
-  readonly shake: NSEPresentationSpec;
+  readonly shake: PresentationSpec;
 };
 
-const track = (keyPath: NSEPresentationTrack["keyPath"], values: readonly number[]) =>
-  Object.freeze({ keyPath, values: Object.freeze(values) }) as NSEPresentationTrack;
-const spec = (duration: number, timing: NSEPresentationSpec["timing"], tracks: readonly NSEPresentationTrack[]): NSEPresentationSpec =>
+const track = (keyPath: PresentationTrack["keyPath"], values: readonly number[]) =>
+  Object.freeze({ keyPath, values: Object.freeze(values) }) as PresentationTrack;
+const spec = (duration: number, timing: PresentationSpec["timing"], tracks: readonly PresentationTrack[]): PresentationSpec =>
   Object.freeze({ duration, timing, tracks: Object.freeze(tracks) });
 const fade = (from: number, to: number, duration: number) => spec(duration, framerTween, [track("opacity", [from, to])]);
 

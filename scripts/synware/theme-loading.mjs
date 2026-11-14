@@ -3,6 +3,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import * as cssTree from "css-tree";
 import ts from "typescript";
+import { optimiseSelectors } from "./selector-performance.mjs";
 const stateHooks = ["highlighted", "hovered", "focused", "selected"];
 function gates(selector) {
   let result = "";
@@ -40,7 +41,8 @@ export function scopeThemeCSS(source, bundleIdentifier) {
     list.replace(item, next.children);
     return cssTree.walk.skip;
   } });
-  return `@layer nse.theme { @scope ([data-nse-theme="${bundleIdentifier}"]) to ([data-nse-theme]:not([data-nse-theme="${bundleIdentifier}"])) {\n${cssTree.generate(ast)}\n} }\n`;
+  // The style engine files the twins above under nothing; optimiseSelectors re-files them.
+  return optimiseSelectors(`@layer nse.theme { @scope ([data-nse-theme="${bundleIdentifier}"]) to ([data-nse-theme]:not([data-nse-theme="${bundleIdentifier}"])) {\n${cssTree.generate(ast)}\n} }\n`);
 }
 /** Resolve local imports before wrapping: @import is not valid inside a scope. */
 export function themeStylesheet(bundle, fileImport) {

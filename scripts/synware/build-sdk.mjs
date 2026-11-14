@@ -37,6 +37,7 @@ import { build } from "vite";
 import { synWareSdkEntries, synWareSdkGeneratedStyles, synWareSdkStyles, synWarePackageName } from "./sdk-entries.mjs";
 import react from "@vitejs/plugin-react";
 import { builtInThemeCSS } from "./built-in-theme-css.mjs";
+import { selectorPerformance } from "./selector-performance.mjs";
 import {
   assertReviewedPackageFiles, assertSdkSourceUnchanged, assertFxPackageExports,
   captureSdkSourceFingerprint, createSdkPackageManifest, fingerprintSdkFiles, sdkDirectoryFiles,
@@ -151,7 +152,7 @@ async function bundle({ entry, packageDirectory, themeNames }) {
       define: { "process.env.NODE_ENV": JSON.stringify("production") },
       resolve: { alias: publicAliases },
       esbuild: { jsxDev: false },
-      css: { postcss: { plugins: [builtInThemeCSS()] } },
+      css: { postcss: { plugins: [builtInThemeCSS(), selectorPerformance()] } },
       plugins: [react(), bundledDependencyNotices(), sdkPackageStyles({
         themeNames,
         publicStyleEntries: synWareSdkGeneratedStyles,
@@ -395,10 +396,18 @@ async function main() {
     .replace("../../src/SynCloudOS/AppSDK/fx/fxAppModuleSource.mjs", "./fx-app-module-source.mjs")
     .replace("../../src/SynCloudOS/AppSDK/fx/runtime.ts", "./fx-attribution-runtime.js")
     .replace("../../src/SynCloudOS/AppSDK/manifest/synappManifestValidator.generated.mjs", "./manifest-validator.mjs")
-    .replace("../../src/SynCloudOS/Identity/bundleIdentifier.mjs", "./bundleIdentifier.mjs"));
-  for (const file of ["theme-bundles.mjs","theme-loading.mjs","built-in-theme-css.mjs","bundle-paths.mjs","project-derivation.mjs","manifest-source.mjs","application-toolchain.mjs","decorators.mjs","hot-applications.mjs","pwa-plugin.mjs"]) {
+    .replace("../../src/SynCloudOS/Identity/bundleIdentifier.mjs", "./bundleIdentifier.mjs")
+    .replace("./dispatch/closureConversion.mjs", "./dispatch-closure-conversion.mjs")
+    .replace("../../src/FX/DispatchFX/internal/workerSafeEntries.json", "./dispatch-worker-safe-entries.json"));
+  writeFileSync(resolve(directory, "dispatch-closure-conversion.mjs"), readFileSync(resolve(repositoryRoot, "scripts/synware/dispatch/closureConversion.mjs"), "utf8")
+    .replace("./workerGlobals.mjs", "./dispatch-worker-globals.mjs")
+    .replace("../../../src/FX/DispatchFX/internal/workerSafeEntries.json", "./dispatch-worker-safe-entries.json"));
+  cpSync(resolve(repositoryRoot, "scripts/synware/dispatch/workerGlobals.mjs"), resolve(directory, "dispatch-worker-globals.mjs"));
+  cpSync(resolve(repositoryRoot, "src/FX/DispatchFX/internal/workerSafeEntries.json"), resolve(directory, "dispatch-worker-safe-entries.json"));
+  for (const file of ["theme-bundles.mjs","theme-loading.mjs","selector-performance.mjs","hook-mirror-jsx.mjs","built-in-theme-css.mjs","bundle-paths.mjs","project-derivation.mjs","manifest-source.mjs","application-toolchain.mjs","decorators.mjs","hot-applications.mjs","pwa-plugin.mjs"]) {
     writeFileSync(resolve(directory, file), readFileSync(resolve(repositoryRoot, "scripts/synware", file), "utf8")
       .replace("../../src/SynCloudOS/Identity/bundleIdentifier.mjs", "./bundleIdentifier.mjs")
+      .replaceAll("../../src/NSE/Theme/contract/hookMirror", "./hookMirror")
       .replace("../../src/SynCloudOS/InstalledApplications/webAppManifest.mjs", "./web-app-manifest.mjs")
       .replace("../../src/SynCloudOS/InstalledApplications/serviceWorker.mjs", "./service-worker.mjs")
       .replace('new URL("../../tooling/nse-theme-contract.json", import.meta.url)', 'new URL("./tooling/nse-theme-contract.json", import.meta.url)'));
@@ -406,6 +415,8 @@ async function main() {
   cpSync(resolve(repositoryRoot, "src/SynCloudOS/InstalledApplications/webAppManifest.mjs"), resolve(directory, "web-app-manifest.mjs"));
   cpSync(resolve(repositoryRoot, "src/SynCloudOS/InstalledApplications/serviceWorker.mjs"), resolve(directory, "service-worker.mjs"));
   cpSync(resolve(repositoryRoot, "src/SynCloudOS/Identity/bundleIdentifier.mjs"), resolve(directory, "bundleIdentifier.mjs"));
+  // The mirroring JSX runtime is served to the browser from the package, beside the plugin that resolves it.
+  for (const file of ["hookMirror.mjs","hookMirrorJSXRuntime.mjs","hookMirrorJSXDevRuntime.mjs"]) cpSync(resolve(repositoryRoot, "src/NSE/Theme/contract", file), resolve(directory, file));
   mkdirSync(resolve(typesDirectory, "SynCloudOS/Identity"), { recursive: true });
   for (const extension of ["mjs", "d.mts"]) cpSync(resolve(repositoryRoot, `src/SynCloudOS/Identity/bundleIdentifier.${extension}`), resolve(typesDirectory, `SynCloudOS/Identity/bundleIdentifier.${extension}`));
   cpSync(resolve(repositoryRoot, "src/SynCloudOS/AppSDK/scos/appModuleSource.mjs"), resolve(directory, "app-module-source.mjs"));

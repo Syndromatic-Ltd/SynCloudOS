@@ -22,7 +22,7 @@
 import React from "react";
 import { render } from "@testing-library/react";
 import { expect, it } from "vitest";
-import { NSEAnimationEnvironmentProvider, useNSEAnimationEnvironment } from "../../src/NSE/Animation";
+import { AnimationEnvironmentProvider, useNSEAnimationEnvironment } from "../../src/NSE/Animation";
 import type { AFXFrameScheduler } from "../../src/FX/AnimationFX/AFXLayer";
 
 it("inherits scoped FX capabilities and lets a mounted app replace or explicitly clear them", () => {
@@ -30,10 +30,10 @@ it("inherits scoped FX capabilities and lets a mounted app replace or explicitly
   const layers = { createRenderer: () => { throw new Error("not called"); } };
   const seen: ReturnType<typeof useNSEAnimationEnvironment>[] = [];
   function Probe() { seen.push(useNSEAnimationEnvironment()); return null; }
-  const view = render(<NSEAnimationEnvironmentProvider frames={frames} layers={layers}><NSEAnimationEnvironmentProvider><Probe /></NSEAnimationEnvironmentProvider></NSEAnimationEnvironmentProvider>);
+  const view = render(<AnimationEnvironmentProvider frames={frames} layers={layers}><AnimationEnvironmentProvider><Probe /></AnimationEnvironmentProvider></AnimationEnvironmentProvider>);
   expect(seen.at(-1)?.frames).toBe(frames);
   expect(seen.at(-1)?.layers).toBe(layers);
-  view.rerender(<NSEAnimationEnvironmentProvider frames={frames} layers={layers}><NSEAnimationEnvironmentProvider frames={null} layers={null}><Probe /></NSEAnimationEnvironmentProvider></NSEAnimationEnvironmentProvider>);
+  view.rerender(<AnimationEnvironmentProvider frames={frames} layers={layers}><AnimationEnvironmentProvider frames={null} layers={null}><Probe /></AnimationEnvironmentProvider></AnimationEnvironmentProvider>);
   expect(seen.at(-1)?.frames).toBeNull();
   expect(seen.at(-1)?.layers).toBeNull();
   view.unmount();

@@ -28,6 +28,8 @@ import type {
 } from "../Runtime/runtimeInstanceTypes";
 import type { RuntimeDiagnosticLog } from "../Diagnostics/RuntimeDiagnosticLog";
 import { createRuntimeDiagnostics } from "../Diagnostics/runtimeDiagnostics";
+import { toHistoryOptions } from "../LaunchServices/launchHistoryOptions";
+import type { SynCloudOSOpenAppOptions } from "../LaunchServices/launchTypes";
 
 export interface SynCloudOSRuntimeEventListenerFailure {
   event: SynCloudOSRuntimeEvent;
@@ -45,6 +47,14 @@ export interface EventBusFactoryOptions {
   readonly historyLimit?: number;
   /** Runtime-owned bounded history; a private log is created when omitted. */
   readonly history?: RuntimeDiagnosticLog<SynCloudOSRuntimeEvent>;
+}
+
+function projectEventForHistory(event: SynCloudOSRuntimeEvent): SynCloudOSRuntimeEvent {
+  const { type, payload } = event;
+  if (type !== "app.launch.requested" || !payload || typeof payload !== "object"
+    || !("appId" in payload) || typeof payload.appId !== "string"
+    || !("options" in payload) || !payload.options || typeof payload.options !== "object") return event;
+  return { ...event, payload: { appId: payload.appId, options: toHistoryOptions(payload.options as SynCloudOSOpenAppOptions) } };
 }
 
 function errorMessage(error: unknown) {
@@ -115,7 +125,7 @@ export function createEventBus({
       };
       // History is diagnostic data outside the reactive snapshot: recording
       // an event does not publish runtime state.
-      history.append(event);
+      history.append(projectEventForHistory(event));
       if (!disposed) notify(event);
       return event;
     },

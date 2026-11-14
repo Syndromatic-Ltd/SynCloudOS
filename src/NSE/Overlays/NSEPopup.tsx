@@ -19,7 +19,6 @@
  */
 
 import {
-  createElement,
   useCallback,
   useContext,
   useEffect,
@@ -30,29 +29,30 @@ import {
   type HTMLAttributes,
   type ReactNode,
 } from "react";
+import { createElement } from "../Theme/contract/hookMirrorReact";
 import { useNSEAnimationEnvironment } from "../Animation/NSEAnimationEnvironment";
 import { nsePopoverSpringEasing, useNSEPopoverSurface } from "./useNSEPopoverSurface";
-import { NSEPopoverFrame } from "./NSEPopoverFrame";
+import { PopoverFrame } from "./NSEPopoverFrame";
 import { nseMenuChosenAttribute, nseMenuChosenFadeMs } from "../Menus/menuSelectionFlash";
 import { createPortal } from "react-dom";
-import type { NSEOverlayAnchorPoint } from "./computeNSEOverlayPosition";
+import type { OverlayAnchorPoint } from "./computeOverlayPosition";
 import { useNSEOverlay } from "./useNSEOverlay";
-import { useNSEOverlayProvider } from "./NSEOverlayProvider";
-import { NSEActionResponderContext } from "../Controls/Core/useNSEControlAction";
+import { useNSEOverlayProvider } from "./OverlayProvider";
+import { ActionResponderContext } from "../Controls/Core/useNSEControlAction";
 import { useNSEAppearanceProjection } from "../Appearance";
 import type {
-  NSELogicalPlacement,
-  NSEOverlayDismissReason,
-  NSEOverlayKind,
+  LogicalPlacement,
+  OverlayDismissReason,
+  OverlayKind,
 } from "./overlayTypes";
 
 function classNames(...values: readonly (string | false | null | undefined)[]): string {
   return values.filter(Boolean).join(" ");
 }
 
-export interface NSEPopupPresentation {
+export interface PopupPresentation {
   readonly mode: "automatic" | "anchored" | "sheet" | "viewport-block-start-inline-end";
-  readonly placement?: NSELogicalPlacement;
+  readonly placement?: LogicalPlacement;
   readonly collisionPadding?: number;
   readonly viewportCornerBleed?: Readonly<{ blockStart: number; inlineEnd: number }>;
 }
@@ -64,14 +64,14 @@ export interface NSEPopupProps extends Omit<HTMLAttributes<HTMLDivElement>, "tit
   readonly defaultOpen?: boolean;
   readonly anchor?: HTMLElement | null;
   /** @internal Place against this viewport point instead of the anchor's box (a context menu at the pointer). */
-  readonly anchorPoint?: NSEOverlayAnchorPoint | null;
+  readonly anchorPoint?: OverlayAnchorPoint | null;
   /** @internal NSEPopover's positioning rectangle in the anchor view. */
   readonly relativeTo?: Pick<DOMRectReadOnly, "x" | "y" | "width" | "height">;
   /** Defaults to the nearest class controller, then the branch's host responder. */
   readonly parentResponderId?: string;
   readonly parentId?: string | null;
   readonly parentScopeId?: string;
-  readonly presentation?: NSEPopupPresentation;
+  readonly presentation?: PopupPresentation;
   readonly title?: ReactNode;
   readonly labelledBy?: string;
   readonly describedBy?: string;
@@ -90,22 +90,22 @@ export interface NSEPopupProps extends Omit<HTMLAttributes<HTMLDivElement>, "tit
   /** The content is still arriving; the surface is not painted until it has. */
   readonly contentPending?: boolean;
   /** Internal family specialisation; callers should prefer family entry points. */
-  readonly overlayKind?: NSEOverlayKind;
+  readonly overlayKind?: OverlayKind;
   /** @internal NSEPopover owns the continuous plate and arrow frame. */
   readonly drawsBackground?: boolean;
-  onOpenChange?(open: boolean, reason: NSEOverlayDismissReason): void;
+  onOpenChange?(open: boolean, reason: OverlayDismissReason): void;
 }
 
 interface NSEPopupState {
   readonly open: boolean;
-  requestOpen(open: boolean, reason: NSEOverlayDismissReason): void;
+  requestOpen(open: boolean, reason: OverlayDismissReason): void;
 }
 
 function useNSEPopupState({ open, defaultOpen = false, onOpenChange }: Pick<NSEPopupProps, "open" | "defaultOpen" | "onOpenChange">): NSEPopupState {
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
   const controlled = open !== undefined;
   const resolvedOpen = controlled ? open : uncontrolledOpen;
-  const requestOpen = useCallback((nextOpen: boolean, reason: NSEOverlayDismissReason) => {
+  const requestOpen = useCallback((nextOpen: boolean, reason: OverlayDismissReason) => {
     if (!controlled) setUncontrolledOpen(nextOpen);
     onOpenChange?.(nextOpen, reason);
   }, [controlled, onOpenChange]);
@@ -116,7 +116,7 @@ function dismissalReasons({
   dismissOnEscape,
   dismissOnOutside,
   anchored,
-}: Pick<NSEPopupProps, "dismissOnEscape" | "dismissOnOutside"> & { readonly anchored: boolean }): readonly NSEOverlayDismissReason[] {
+}: Pick<NSEPopupProps, "dismissOnEscape" | "dismissOnOutside"> & { readonly anchored: boolean }): readonly OverlayDismissReason[] {
   return [
     ...(dismissOnEscape ? ["escape" as const] : []),
     ...(dismissOnOutside ? ["outside-pointer" as const, "focus-left" as const] : []),
@@ -169,7 +169,7 @@ export function NSEPopup({
   const titleId = `nse-popup-title:${generatedId}`;
   const state = useNSEPopupState({ open, defaultOpen, onOpenChange });
   const { runtime, defaultParentResponderId } = useNSEOverlayProvider();
-  const nearestResponderId = useContext(NSEActionResponderContext);
+  const nearestResponderId = useContext(ActionResponderContext);
   const resolvedParentResponderId = parentResponderId ?? nearestResponderId ?? defaultParentResponderId;
   if (!resolvedParentResponderId) {
     throw new Error("NSEPopup requires parentResponderId or an NSEStandaloneControlHost.");
@@ -180,7 +180,7 @@ export function NSEPopup({
   const hasPopoverFrame = drawsBackground !== undefined;
   const [surfaceElement, setSurfaceElement] = useState<HTMLElement | null>(null);
   const [arrow, setArrow] = useState<HTMLElement | null>(null);
-  const kind: NSEOverlayKind = overlayKind ?? (modal ? "action-sheet" : "popover");
+  const kind: OverlayKind = overlayKind ?? (modal ? "action-sheet" : "popover");
   const resolvedPresentation = presentation ?? { mode: kind === "action-sheet" ? "sheet" as const : "anchored" as const };
   const isModal = kind === "action-sheet" || modal;
   const overlay = useNSEOverlay({
@@ -283,7 +283,7 @@ export function NSEPopup({
       "data-nse-presentation": resolvedPresentation.mode,
       tabIndex: htmlAttributes.tabIndex ?? -1,
     },
-    hasPopoverFrame ? createElement(NSEPopoverFrame, { arrowRef: setArrow, anchored: kind === "popover" }) : null,
+    hasPopoverFrame ? createElement(PopoverFrame, { arrowRef: setArrow, anchored: kind === "popover" }) : null,
     title ? createElement("div", { id: titleId, "data-nse-part": "title", className: "nse-overlay-popup-title" }, title) : null,
     createElement("div", { "data-nse-part": "content", className: "nse-overlay-popup-content" }, children),
   );

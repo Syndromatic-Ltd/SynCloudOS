@@ -22,7 +22,7 @@
 import React from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { NSERadioGroup } from "../../../src/NSE/Controls/Fields/NSEFields";
+import { RadioGroup } from "../../../src/NSE/Controls/Fields/NSEFields";
 import { NSEButton } from "../../../src/NSE/Controls/Buttons/NSEButton";
 
 describe("NSE foundational native form controls", () => {
@@ -55,7 +55,7 @@ describe("NSE foundational native form controls", () => {
     const changes = vi.fn();
     render(
       <form aria-label="layout form">
-        <NSERadioGroup
+        <RadioGroup
           name="layout"
           required
           defaultValue="grid"

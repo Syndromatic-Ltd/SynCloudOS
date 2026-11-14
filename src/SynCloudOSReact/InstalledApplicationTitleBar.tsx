@@ -19,7 +19,7 @@
  */
 
 import { useEffect, useState } from "react";
-import { NSEWindowTitleBar } from "../NSE/hostComposition";
+import { WindowTitleBar } from "../NSE/hostComposition";
 import { useKernelSynCloudOS } from "./SynCloudOSProvider";
 interface WindowControlsOverlay extends EventTarget { readonly visible: boolean; getTitlebarAreaRect(): DOMRect }
 /** The browser owns native window buttons; Atmo paints the declared draggable title area. */
@@ -37,6 +37,6 @@ export function InstalledApplicationTitleBar() {
   }, [overlay, browserWindow, document]);
   if (!geometry) return null;
   return <div data-syncloudos-window-controls-overlay="" style={{ position: "fixed", zIndex: 10000, left: geometry.x, top: geometry.y, width: geometry.width, height: geometry.height, "--nse-window-titlebar-height": `${geometry.height}px`, overflow: "hidden", WebkitAppRegion: "drag" } as import("react").CSSProperties}>
-    <NSEWindowTitleBar title={document?.title ?? "Webspring"} isKeyWindow={geometry.active} />
+    <WindowTitleBar title={document?.title ?? "Webspring"} isKeyWindow={geometry.active} />
   </div>;
 }

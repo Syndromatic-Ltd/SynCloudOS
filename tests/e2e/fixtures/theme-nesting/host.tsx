@@ -9,12 +9,12 @@ import { NSEImage } from '../../../../src/NSE/Controls/Images/NSEImageResource';
 import { LoginWindow } from '../../../../src/NSE/SystemUI/LoginWindow';
 import { atmoTheme } from '../../../../src/NSE/Appearance/atmo';
 import { freezeNSETheme } from '../../../../src/NSE/Theme/NSETheme';
-import { NSEStandaloneControlHost } from '../../../../src/NSE/Overlays';
+import { StandaloneControlHost } from '../../../../src/NSE/Overlays';
 import { NSEViewController, nseUpdateTraits } from '../../../../src/NSE/Application/NSEViewController';
-import { NSEViewControllerView } from '../../../../src/SynCloudOS/AppHosting/applicationHosting';
+import { ViewControllerView } from '../../../../src/SynCloudOS/AppHosting/applicationHosting';
 import { NSETabViewController, NSETabViewItem } from '../../../../src/NSE/Navigation/NSETabViewController';
 import { NSEScrollView } from '../../../../src/NSE/Scroll/NSEScrollView';
-import { NSEWindowLayoutContext, NSEWindowLayoutModel } from '../../../../src/NSE/Layout/windowChromeObstructions';
+import { WindowLayoutContext, WindowLayoutModel } from '../../../../src/NSE/Layout/windowChromeObstructions';
 import { createStaticPresentationPort, createStaticPresentationTraits } from '../../../fixtures/presentationTraits';
 import '../../../../src/NSE/public/styles.css';
 const parameters = new URLSearchParams(location.search);
@@ -27,7 +27,7 @@ class DocumentPage extends NSEViewController {
 }
 function Navigation() {
   const root = useRef<HTMLDivElement>(null);
-  const [model] = useState(() => new NSEWindowLayoutModel({bounds:{x:0,y:0,width,height}}));
+  const [model] = useState(() => new WindowLayoutModel({bounds:{x:0,y:0,width,height}}));
   const [tabs] = useState(() => {
     const tabs = new NSETabViewController(); tabs.tabStyle='sidebarAdaptable';
     tabs[nseUpdateTraits]({reducedMotion:true,presentation:createStaticPresentationTraits({width,height})});
@@ -38,7 +38,7 @@ function Navigation() {
   const flow = parameters.get('flow') as 'in-flow' | 'overlay';
   const theme=freezeNSETheme({...atmoTheme,bundleIdentifier:'com.example.navigation',navigation:{...atmoTheme.navigation,[widthClass]:{placement,flow}}} as typeof atmoTheme);
   useLayoutEffect(()=> { const stop=model.connectRoot(root.current!); return ()=>{stop();model.dispose();tabs.dispose();}; },[model,tabs]);
-  return <NSEAppearanceProvider theme={theme}><div ref={root} dir={parameters.get('dir') ?? 'ltr'} style={{position:'relative',width,height}}><NSEWindowLayoutContext.Provider value={model}><NSEViewControllerView controller={tabs}/></NSEWindowLayoutContext.Provider></div></NSEAppearanceProvider>;
+  return <NSEAppearanceProvider theme={theme}><div ref={root} dir={parameters.get('dir') ?? 'ltr'} style={{position:'relative',width,height}}><WindowLayoutContext.Provider value={model}><ViewControllerView controller={tabs}/></WindowLayoutContext.Provider></div></NSEAppearanceProvider>;
 }
 function Contents() {
   if(parameters.has('placement')) return <Navigation/>;
@@ -46,4 +46,4 @@ function Contents() {
   return <NSEAppearanceProvider theme={themes['com.example.outer']} colourScheme="light"><div id="outer"><NSEButton id="outer-button">Outer</NSEButton></div><NSEView id="inner" appearance={new NSEAppearance('aqua',{theme:themes['com.example.inner']})}><NSEButton id="inner-button" image={NSEImage.named(NSEImage.goBackTemplateName)}>Inner</NSEButton></NSEView><NSEView appearance={new NSEAppearance('aqua',{theme:themes['com.example.partial']})}><NSEButton id="partial-button">Partial</NSEButton></NSEView><NSEView appearance={new NSEAppearance('aqua',{theme:atmoTheme})}><NSEButton id="atmo-button">Atmo</NSEButton></NSEView></NSEAppearanceProvider>;
 }
 document.body.style.margin='0';
-createRoot(document.getElementById('root')!).render(<NSEStandaloneControlHost document={document} window={window} presentation={presentation}><Contents/></NSEStandaloneControlHost>);
+createRoot(document.getElementById('root')!).render(<StandaloneControlHost document={document} window={window} presentation={presentation}><Contents/></StandaloneControlHost>);

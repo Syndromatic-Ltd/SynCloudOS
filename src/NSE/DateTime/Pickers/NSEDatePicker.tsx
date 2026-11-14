@@ -18,19 +18,19 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEDatePickerDrawingContext } from "./datePickerDrawing";
+import { DatePickerDrawingContext } from "./datePickerDrawing";
 import { useEffect, useState, type ReactElement } from "react";
 
 import { useNSEAnimationEnvironment } from "../../Animation/NSEAnimationEnvironment";
 import { addCalendarMonths, clampPlainDate, comparePlainDates } from "../calendarArithmetic";
 import { plainDateToday } from "../dateTimeFormatting";
-import { NSEGraphicalCalendar } from "../Calendar/graphicalCalendar";
-import type { NSECalendarMonth, NSEDateRange, NSEPlainDate } from "../dateTimeTypes";
-import { NSEDateEntry } from "./dateEntry";
-import { NSEDateRangeEntry } from "./dateRangeEntry";
-import { NSEDateTimeEntry } from "./dateTimeEntry";
+import { GraphicalCalendar } from "../Calendar/graphicalCalendar";
+import type { CalendarMonth, NSEDateRange, NSEPlainDate } from "../dateTimeTypes";
+import { DateEntry } from "./dateEntry";
+import { DateRangeEntry } from "./dateRangeEntry";
+import { DateTimeEntry } from "./dateTimeEntry";
 import type { NSEDatePickerDateProps, NSEDatePickerDateTimeProps, NSEDatePickerProps, NSEDatePickerRangeProps, NSEDatePickerTimeProps } from "./datePickerTypes";
-import { NSETimeEntry } from "./timeEntry";
+import { TimeEntry } from "./timeEntry";
 
 const isTime = (props: NSEDatePickerProps): props is NSEDatePickerTimeProps =>
   props.datePickerElements?.length === 1 && props.datePickerElements[0] === "hourMinute";
@@ -53,25 +53,25 @@ export function NSEDatePicker(props: NSEDatePickerDateTimeProps): ReactElement;
 export function NSEDatePicker(props: NSEDatePickerRangeProps): ReactElement;
 export function NSEDatePicker(props: NSEDatePickerDateProps): ReactElement;
 export function NSEDatePicker(props: NSEDatePickerProps): ReactElement {
-  return <NSEDatePickerDrawingContext.Provider value={{ style: props.datePickerStyle ?? "textFieldAndStepper", enabled: props.isEnabled !== false, datePickerMode: isRange(props) ? "range" : "single" }}><NSEDatePickerContent {...props} /></NSEDatePickerDrawingContext.Provider>;
+  return <DatePickerDrawingContext.Provider value={{ style: props.datePickerStyle ?? "textFieldAndStepper", enabled: props.isEnabled !== false, datePickerMode: isRange(props) ? "range" : "single" }}><DatePickerContent {...props} /></DatePickerDrawingContext.Provider>;
 }
-function NSEDatePickerContent(props: NSEDatePickerProps): ReactElement {
+function DatePickerContent(props: NSEDatePickerProps): ReactElement {
   const { datePickerStyle = "textFieldAndStepper", presentsCalendarOverlay = true, isEnabled = true, isEditable = true } = props;
   const disabled = !isEnabled;
   const readOnly = !isEditable;
   const common = { "aria-label": props["aria-label"], locale: props.locale, timeZone: props.timeZone, name: props.name, required: props.required, isEnabled, readOnly };
   if (isDateTime(props)) {
-    return <NSEDateTimeEntry {...common} mode={datePickerStyle === "clockAndCalendar" ? "combined" : presentsCalendarOverlay ? "automatic" : "text"} value={props.value} defaultValue={props.defaultValue} minimum={props.minimum} maximum={props.maximum} hourCycle={props.hourCycle} onValueChange={props.onValueChange} />;
+    return <DateTimeEntry {...common} mode={datePickerStyle === "clockAndCalendar" ? "combined" : presentsCalendarOverlay ? "automatic" : "text"} value={props.value} defaultValue={props.defaultValue} minimum={props.minimum} maximum={props.maximum} hourCycle={props.hourCycle} onValueChange={props.onValueChange} />;
   }
   if (isTime(props)) {
-    return <NSETimeEntry {...common} editor={datePickerStyle === "clockAndCalendar" ? "clock" : "field"} presentsClockOverlay={presentsCalendarOverlay} parentResponderId={props.parentResponderId} value={props.value} defaultValue={props.defaultValue} minimum={props.minimum} maximum={props.maximum} date={props.date} minuteStep={props.minuteStep} hourCycle={props.hourCycle} onValueChange={props.onValueChange} />;
+    return <TimeEntry {...common} editor={datePickerStyle === "clockAndCalendar" ? "clock" : "field"} presentsClockOverlay={presentsCalendarOverlay} parentResponderId={props.parentResponderId} value={props.value} defaultValue={props.defaultValue} minimum={props.minimum} maximum={props.maximum} date={props.date} minuteStep={props.minuteStep} hourCycle={props.hourCycle} onValueChange={props.onValueChange} />;
   }
   if (datePickerStyle === "clockAndCalendar") return <GraphicalDatePicker {...props} />;
   if (isRange(props)) {
-    return <NSEDateRangeEntry {...common} parentResponderId={props.parentResponderId} value={props.value} defaultValue={props.defaultValue} minimum={props.minimum} maximum={props.maximum} onValueChange={props.onValueChange} />;
+    return <DateRangeEntry {...common} parentResponderId={props.parentResponderId} value={props.value} defaultValue={props.defaultValue} minimum={props.minimum} maximum={props.maximum} onValueChange={props.onValueChange} />;
   }
   const date = props as NSEDatePickerDateProps;
-  return <NSEDateEntry {...common} mode={presentsCalendarOverlay ? "automatic" : "text"} editor={datePickerStyle === "textField" ? "segments" : "text"} parentResponderId={date.parentResponderId} value={date.value} defaultValue={date.defaultValue} minimum={date.minimum} maximum={date.maximum} onValueChange={date.onValueChange} />;
+  return <DateEntry {...common} mode={presentsCalendarOverlay ? "automatic" : "text"} editor={datePickerStyle === "textField" ? "segments" : "text"} parentResponderId={date.parentResponderId} value={date.value} defaultValue={date.defaultValue} minimum={date.minimum} maximum={date.maximum} onValueChange={date.onValueChange} />;
 }
 
 /**
@@ -86,8 +86,8 @@ function GraphicalDatePicker(props: NSEDatePickerDateProps | NSEDatePickerRangeP
   const [stored, setStored] = useState<NSEPlainDate | NSEDateRange | null>(props.defaultValue ?? null);
   const current = (controlled ? props.value : stored) ?? null;
   const anchor = current ? ("start" in current ? current.start : current) : null;
-  const seed = (): NSECalendarMonth => { const date = anchor ?? props.minimum ?? props.today ?? plainDateToday(props.timeZone); return { year: date.year, month: date.month }; };
-  const [visibleMonth, setVisibleMonth] = useState<NSECalendarMonth>(seed);
+  const seed = (): CalendarMonth => { const date = anchor ?? props.minimum ?? props.today ?? plainDateToday(props.timeZone); return { year: date.year, month: date.month }; };
+  const [visibleMonth, setVisibleMonth] = useState<CalendarMonth>(seed);
   useEffect(() => { setVisibleMonth(seed()); }, [anchor?.year, anchor?.month]);
   const inert = props.isEnabled === false || props.isEditable === false;
   const publish = (next: NSEPlainDate | NSEDateRange) => {
@@ -96,7 +96,7 @@ function GraphicalDatePicker(props: NSEDatePickerDateProps | NSEDatePickerRangeP
   };
   const outside = (date: NSEPlainDate) => Boolean((props.minimum && comparePlainDates(date, props.minimum) < 0) || (props.maximum && comparePlainDates(date, props.maximum) > 0));
   const eventIndicators = range ? undefined : (props as NSEDatePickerDateProps).eventIndicatorsForDate;
-  return <NSEGraphicalCalendar
+  return <GraphicalCalendar
     aria-label={props["aria-label"]}
     locale={props.locale}
     timeZone={props.timeZone}

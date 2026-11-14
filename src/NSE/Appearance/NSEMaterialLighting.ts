@@ -21,22 +21,44 @@
 import type { AFXFrameScheduler } from "../../FX/AnimationFX/AFXLayer";
 import { normalisePoint, type GFXPoint } from "../../FX/GraphicsFX/GFXGeometry";
 import type { MFXMotionManager } from "../../FX/MotionFX/MFXMotionManager";
-export interface NSEMaterialLight {
+type Quaternion = { readonly x: number; readonly y: number; readonly z: number; readonly w: number };
+/** The rotation carrying `from` to `to`, as radians about the device's own x, y and z axes. */
+function rotationFrom(from: Quaternion, to: Quaternion): { x: number; y: number; z: number } | null {
+  const x = from.w * to.x - from.x * to.w - from.y * to.z + from.z * to.y,
+    y = from.w * to.y + from.x * to.z - from.y * to.w - from.z * to.x,
+    z = from.w * to.z - from.x * to.y + from.y * to.x - from.z * to.w,
+    w = from.w * to.w + from.x * to.x + from.y * to.y + from.z * to.z;
+  const length = Math.hypot(x, y, z);
+  if (!Number.isFinite(length) || !Number.isFinite(w)) return null;
+  if (length < 1e-9) return { x: 0, y: 0, z: 0 };
+  const scale = (2 * Math.atan2(length, Math.abs(w)) * Math.sign(w || 1)) / length;
+  return { x: x * scale, y: y * scale, z: z * scale };
+}
+function settle(from: Quaternion, to: Quaternion, amount: number): Quaternion {
+  const side = from.x * to.x + from.y * to.y + from.z * to.z + from.w * to.w < 0 ? -1 : 1;
+  const x = from.x + (side * to.x - from.x) * amount,
+    y = from.y + (side * to.y - from.y) * amount,
+    z = from.z + (side * to.z - from.z) * amount,
+    w = from.w + (side * to.w - from.w) * amount;
+  const length = Math.hypot(x, y, z, w) || 1;
+  return { x: x / length, y: y / length, z: z / length, w: w / length };
+}
+export interface MaterialLight {
   readonly offset: GFXPoint;
   readonly angle: number;
   readonly active: boolean;
 }
-export const staticNSEMaterialLight: NSEMaterialLight = Object.freeze({
+export const staticNSEMaterialLight: MaterialLight = Object.freeze({
   offset: normalisePoint({ x: 0, y: 0 }),
   angle: 0,
   active: false,
 });
-export interface NSEMaterialLightingPort {
-  getSnapshot(): NSEMaterialLight;
+export interface MaterialLightingPort {
+  getSnapshot(): MaterialLight;
   subscribe(listener: () => void): () => void;
 }
 /** One passive device subscription and frame loop for every visible metal thumb in a provider. */
-export class NSEMaterialLighting implements NSEMaterialLightingPort {
+export class MaterialLighting implements MaterialLightingPort {
   readonly #listeners = new Set<() => void>();
   readonly #createManager: () => MFXMotionManager;
   readonly #scheduler: AFXFrameScheduler;
@@ -45,6 +67,10 @@ export class NSEMaterialLighting implements NSEMaterialLightingPort {
   #cancelFrame: (() => void) | null = null;
   #value = staticNSEMaterialLight;
   #target = { x: 0, y: 0 };
+  #spinTarget = 0;
+  #spin = 0;
+  #rest: Quaternion | null = null;
+  #restTime = 0;
   #received = -Infinity;
   #last = 0;
   constructor(
@@ -74,7 +100,7 @@ export class NSEMaterialLighting implements NSEMaterialLightingPort {
       }
     };
   };
-  #publish(value: NSEMaterialLight) {
+  #publish(value: MaterialLight) {
     this.#value = value;
     for (const listener of this.#listeners) {
       try {
@@ -96,6 +122,8 @@ export class NSEMaterialLighting implements NSEMaterialLightingPort {
     }
     this.#received = -Infinity;
     this.#target = { x: 0, y: 0 };
+    this.#spinTarget = this.#spin = 0;
+    this.#rest = null;
     this.#publish(staticNSEMaterialLight);
   }
   #syncState() {
@@ -113,17 +141,25 @@ export class NSEMaterialLighting implements NSEMaterialLightingPort {
       this.#manager = manager;
       manager.setDeviceMotionUpdateInterval(1 / 30);
       manager.startDeviceMotionUpdates(
-        { referenceFrame: "relative" },
+        { referenceFrame: "xArbitraryZVertical" },
         (sample) => {
           if (!sample.attitude || this.#manager !== manager) return;
-          const x = Math.sin(sample.attitude.pitch),
-            y = Math.sin(sample.attitude.roll);
-          if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+          const now = this.#scheduler.now();
+          const pose = sample.attitude.quaternion;
+          // The pose the device is held in is rest; it follows slowly, so the light answers movement, not posture.
+          const rest = (this.#rest = this.#rest
+            ? settle(this.#rest, pose, 1 - Math.exp(-Math.max(0, now - this.#restTime) / 5))
+            : pose);
+          this.#restTime = now;
+          const turn = rotationFrom(rest, pose);
+          if (!turn) return;
+          const reach = Math.PI / 3;
           this.#target = {
-            x: Math.max(-1, Math.min(1, x)),
-            y: Math.max(-1, Math.min(1, y)),
+            x: Math.max(-1, Math.min(1, turn.y / reach)),
+            y: Math.max(-1, Math.min(1, turn.x / reach)),
           };
-          this.#received = this.#scheduler.now();
+          this.#spinTarget = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, turn.z));
+          this.#received = now;
           if (!this.#cancelFrame) {
             this.#last = this.#received;
             this.#cancelFrame = this.#scheduler.requestFrame(this.#tick);
@@ -158,10 +194,12 @@ export class NSEMaterialLighting implements NSEMaterialLightingPort {
       x: this.#value.offset.x + (this.#target.x - this.#value.offset.x) * gain,
       y: this.#value.offset.y + (this.#target.y - this.#value.offset.y) * gain,
     });
+    this.#spin += (this.#spinTarget - this.#spin) * gain;
     this.#publish(
       Object.freeze({
         offset,
-        angle: offset.x * 0.16 + offset.y * 0.08,
+        // Turning the device sideways leads; spinning it in its own plane leaves the light where it was in the room.
+        angle: offset.x * 0.9 + offset.y * 0.45 - this.#spin,
         active: true,
       }),
     );

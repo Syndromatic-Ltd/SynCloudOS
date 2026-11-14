@@ -25,13 +25,13 @@ import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { WindowPresentation, WindowRecord, WindowRole } from "../../src/SynCloudOS/Windows";
 import {
-  NSEBorderlessWindowView,
-  NSEHUDWindowView,
-  NSEModalWindowView,
-  NSEPanelView,
-  NSEPopoverWindowView,
-  NSESheetView,
-  NSEStandardWindowView,
+  BorderlessWindowView,
+  HUDWindowView,
+  ModalWindowView,
+  PanelView,
+  PopoverWindowView,
+  SheetView,
+  StandardWindowView,
 } from "../../src/NSE/Windows";
 import { standardWindow } from "../fixtures/windowTestDependencies";
 
@@ -83,7 +83,7 @@ function roleProps(role: WindowRole, title: string, overrides: Partial<WindowRec
 
 describe("NSE dedicated window roles", () => {
   it("mounts a dedicated pointer-inert shadow behind the standard window surface", () => {
-    render(<NSEStandardWindowView {...roleProps("standard", "Documents")}><p>Documents</p></NSEStandardWindowView>);
+    render(<StandardWindowView {...roleProps("standard", "Documents")}><p>Documents</p></StandardWindowView>);
     const window = screen.getByRole("dialog", { name: "Documents" });
     const shadow = window.querySelector<HTMLElement>("[data-window-shadow-layer]");
     const surface = window.querySelector<HTMLElement>("[data-window-surface]");
@@ -99,7 +99,7 @@ describe("NSE dedicated window roles", () => {
 
   it("renders HUD and panel as distinct structures with role-limited controls", () => {
     const { rerender } = render(
-      <NSEHUDWindowView {...roleProps("hud", "Levels")}><p>Levels</p></NSEHUDWindowView>,
+      <HUDWindowView {...roleProps("hud", "Levels")}><p>Levels</p></HUDWindowView>,
     );
     const hud = screen.getByRole("dialog", { name: "Levels" });
 
@@ -107,7 +107,7 @@ describe("NSE dedicated window roles", () => {
     expect(screen.queryByRole("button", { name: /Minimise/ })).toBeNull();
     expect(screen.queryByRole("button", { name: /Zoom/ })).toBeNull();
 
-    rerender(<NSEPanelView {...roleProps("panel", "Inspector")}><p>Inspector</p></NSEPanelView>);
+    rerender(<PanelView {...roleProps("panel", "Inspector")}><p>Inspector</p></PanelView>);
     const panel = screen.getByRole("dialog", { name: "Inspector" });
     expect(panel.getAttribute("data-window-role")).toBe("panel");
     expect(panel.querySelector("[data-window-panel-titlebar]")).not.toBeNull();
@@ -117,14 +117,14 @@ describe("NSE dedicated window roles", () => {
 
   it("marks modal and sheets with focus-scope and relationship semantics", () => {
     const { rerender } = render(
-      <NSEModalWindowView {...roleProps("modal", "Authentication")}><p>Authentication</p></NSEModalWindowView>,
+      <ModalWindowView {...roleProps("modal", "Authentication")}><p>Authentication</p></ModalWindowView>,
     );
     const modal = screen.getByRole("dialog", { name: "Authentication" });
     expect(modal.getAttribute("aria-modal")).toBe("true");
     expect(modal.getAttribute("data-window-focus-scope")).toBe("modal");
     expect(modal.hasAttribute("data-window-outside-dismiss")).toBe(false);
 
-    rerender(<NSESheetView {...roleProps("sheet", "Save changes?")}><p>Save changes?</p></NSESheetView>);
+    rerender(<SheetView {...roleProps("sheet", "Save changes?")}><p>Save changes?</p></SheetView>);
     const sheet = screen.getByRole("dialog", { name: "Save changes?" });
     expect(sheet.getAttribute("aria-modal")).toBe("true");
     expect(sheet.getAttribute("data-window-parent-id")).toBe("parent-window");
@@ -133,7 +133,7 @@ describe("NSE dedicated window roles", () => {
 
   it("retains popover anchor, arrow and outside-dismiss provenance", () => {
     render(
-      <NSEPopoverWindowView {...roleProps("popover", "Share")}><p>Share options</p></NSEPopoverWindowView>,
+      <PopoverWindowView {...roleProps("popover", "Share")}><p>Share options</p></PopoverWindowView>,
     );
     const popover = screen.getByRole("dialog", { name: "Share" });
     expect(popover.getAttribute("data-window-anchor-id")).toBe("share-button");
@@ -148,22 +148,22 @@ describe("NSE dedicated window roles", () => {
   it("keeps passive borderless content out of the dialog tree and requires a name when interactive", () => {
     const passive = roleProps("borderless", "Drag preview");
     const { rerender } = render(
-      <NSEBorderlessWindowView {...passive}><div>Drag preview</div></NSEBorderlessWindowView>,
+      <BorderlessWindowView {...passive}><div>Drag preview</div></BorderlessWindowView>,
     );
     expect(screen.queryByRole("dialog")).toBeNull();
     expect(screen.getByText("Drag preview").closest("section")?.getAttribute("role")).toBe("presentation");
     expect(screen.getByText("Drag preview").closest("section")?.hasAttribute("data-window-appearance-recipe")).toBe(false);
 
     rerender(
-      <NSEBorderlessWindowView {...passive} interactive accessibleName="Canvas tools">
+      <BorderlessWindowView {...passive} interactive accessibleName="Canvas tools">
         <div>Tools</div>
-      </NSEBorderlessWindowView>,
+      </BorderlessWindowView>,
     );
     expect(screen.getByRole("dialog", { name: "Canvas tools" })).not.toBeNull();
   });
 
   it("rejects records mounted through the wrong dedicated view", () => {
     const wrong = roleProps("panel", "Inspector");
-    expect(() => render(<NSESheetView {...wrong}><p>Wrong</p></NSESheetView>)).toThrow(/NSESheetView.*sheet/i);
+    expect(() => render(<SheetView {...wrong}><p>Wrong</p></SheetView>)).toThrow(/NSESheetView.*sheet/i);
   });
 });

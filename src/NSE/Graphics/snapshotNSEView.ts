@@ -85,7 +85,7 @@ export async function snapshotNSEView(element: Element, options: NSEViewSnapshot
 
 /** The drawn view and the boxes it was measured with. Framework-internal: callers that
  * upload the pixels (a page curl's texture) skip the PNG round trip. */
-export interface NSEViewSnapshotRender {
+export interface ViewSnapshotRender {
   readonly canvas: HTMLCanvasElement;
   readonly width: number;
   readonly height: number;
@@ -100,7 +100,7 @@ function abortBetweenStages(signal: AbortSignal) {
 }
 
 /** Draws a view as {@link snapshotNSEView} does, returning the canvas instead of a PNG. */
-export async function renderNSEViewSnapshot(element: Element, options: NSEViewSnapshotOptions = {}): Promise<NSEViewSnapshotRender> {
+export async function renderNSEViewSnapshot(element: Element, options: NSEViewSnapshotOptions = {}): Promise<ViewSnapshotRender> {
   const { signal } = options;
   signal?.throwIfAborted();
   if (!element.isConnected) throw new TypeError("snapshotNSEView needs an element that is in the document.");

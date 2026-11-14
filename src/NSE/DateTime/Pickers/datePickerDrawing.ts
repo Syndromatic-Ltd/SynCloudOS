@@ -5,9 +5,9 @@ import { nseControlHooks } from "../../Theme/contract/hooks";
 import type { NSEDatePickerStyle } from "./datePickerTypes";
 
 /** @internal Drawing metadata crosses portals without adding a layout element. */
-export const NSEDatePickerDrawingContext = createContext<{ readonly style: NSEDatePickerStyle; readonly enabled: boolean; readonly datePickerMode: "single" | "range" } | null>(null);
+export const DatePickerDrawingContext = createContext<{ readonly style: NSEDatePickerStyle; readonly enabled: boolean; readonly datePickerMode: "single" | "range" } | null>(null);
 export function useNSEDatePickerDrawing(mode: "date" | "time" | "date-time" | "date-range", enabled: boolean, style?: NSEDatePickerStyle, handlers: DOMAttributes<HTMLElement> = {}, role: "field" | "calendar" = "field", selectionMode?: "single" | "range") {
-  const inherited = useContext(NSEDatePickerDrawingContext);
+  const inherited = useContext(DatePickerDrawingContext);
   const available = enabled && inherited?.enabled !== false;
   const interaction = useNSEThemeInteraction<HTMLElement>(available, false, handlers);
   return { events: interaction.events, attributes: { ...nseControlHooks({ control: "date-picker", enabled: available, hovered: interaction.hovered, focused: interaction.focused,

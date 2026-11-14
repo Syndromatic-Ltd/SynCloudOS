@@ -25,7 +25,7 @@ import { NSEViewController } from "./NSEViewController";
  * `trailing` at the far edge of the title bar, `bottom` across the bottom of the title bar,
  * under the toolbar.
  */
-export type NSETitlebarAccessoryLayoutAttribute = "leading" | "trailing" | "bottom";
+export type TitlebarAccessoryLayoutAttribute = "leading" | "trailing" | "bottom";
 
 /**
  * NSTitlebarAccessoryViewController: a view controller whose view the window draws in its title bar.
@@ -39,15 +39,15 @@ export type NSETitlebarAccessoryLayoutAttribute = "leading" | "trailing" | "bott
  * ```
  */
 export class NSETitlebarAccessoryViewController<TSnapshot = number> extends NSEViewController<TSnapshot> {
-  #layoutAttribute: NSETitlebarAccessoryLayoutAttribute = "bottom";
+  #layoutAttribute: TitlebarAccessoryLayoutAttribute = "bottom";
   #isHidden = false;
 
   /** Where the window places the accessory; `bottom`, as AppKit's default, until set. */
-  get layoutAttribute(): NSETitlebarAccessoryLayoutAttribute {
+  get layoutAttribute(): TitlebarAccessoryLayoutAttribute {
     return this.#layoutAttribute;
   }
 
-  set layoutAttribute(attribute: NSETitlebarAccessoryLayoutAttribute) {
+  set layoutAttribute(attribute: TitlebarAccessoryLayoutAttribute) {
     if (attribute !== "leading" && attribute !== "trailing" && attribute !== "bottom") {
       throw new TypeError("A titlebar accessory's layoutAttribute is leading, trailing or bottom.");
     }

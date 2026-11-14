@@ -35,7 +35,7 @@ import type {
   KeyBindingHandleResult,
   KeyBindingManager,
 } from "../../SynCloudOS/SynCloudOS";
-import type { NSELogicalPlacement } from "../Overlays/overlayTypes";
+import type { LogicalPlacement } from "../Overlays/overlayTypes";
 
 /**
  * An item of an NSEMenu (NSMenuItem). A command item sends its `action` along
@@ -70,7 +70,7 @@ export type NSEMenuItem<Payload = unknown> =
     };
 
 /** @internal A menu entry has one unambiguous presentation kind. */
-export type NSEMenuEntry =
+export type MenuEntry =
   | {
       readonly kind: "command";
       readonly id: string;
@@ -86,7 +86,7 @@ export type NSEMenuEntry =
       readonly kind: "submenu";
       readonly id: string;
       readonly label: ReactNode;
-      readonly entries: readonly NSEMenuEntry[];
+      readonly entries: readonly MenuEntry[];
       readonly icon?: ReactNode;
       readonly enabled?: boolean;
       readonly disabledReason?: string;
@@ -99,7 +99,7 @@ export type NSEMenuEntry =
  * command ID. The menu's runtime port turns the name into the command ID of the
  * application that declared the action.
  */
-export interface NSEMenuActionEntry<Payload = unknown> {
+export interface MenuActionEntry<Payload = unknown> {
   readonly kind: "command";
   readonly id: string;
   readonly action: string | NSEActionReference<Payload>;
@@ -111,12 +111,12 @@ export interface NSEMenuActionEntry<Payload = unknown> {
 }
 
 /** An entry as authored: command entries may name an action instead of a command ID. */
-export type NSEMenuEntryInput =
-  | Exclude<NSEMenuEntry, { readonly kind: "submenu" }>
-  | NSEMenuActionEntry
-  | (Omit<Extract<NSEMenuEntry, { readonly kind: "submenu" }>, "entries"> & { readonly entries: readonly NSEMenuEntryInput[] });
+export type MenuEntryInput =
+  | Exclude<MenuEntry, { readonly kind: "submenu" }>
+  | MenuActionEntry
+  | (Omit<Extract<MenuEntry, { readonly kind: "submenu" }>, "entries"> & { readonly entries: readonly MenuEntryInput[] });
 
-export interface NSEMenuItemDefinition {
+export interface MenuItemDefinition {
   readonly value: string;
   readonly label: ReactNode;
   readonly icon?: ReactNode;
@@ -126,43 +126,43 @@ export interface NSEMenuItemDefinition {
   readonly disabledReason?: string;
   readonly checked?: boolean;
   readonly separator?: boolean;
-  readonly children?: readonly NSEMenuItemDefinition[];
+  readonly children?: readonly MenuItemDefinition[];
 }
 
-export interface NSEMenuModel {
+export interface MenuModel {
   readonly id: string;
   readonly label: string;
-  readonly entries: readonly NSEMenuEntryInput[];
+  readonly entries: readonly MenuEntryInput[];
   /**
    * Optional contributions are inserted deterministically by their stable
    * section ID and weight. They are a presentation extension point only: all
    * command validation continues through the same visible branch generation.
    */
-  readonly sections?: readonly NSEMenuSection[];
+  readonly sections?: readonly MenuSection[];
 }
 
 /** @internal Preserve payload correlation for each inferred authored entry, including submenus/sections. */
-type CheckedMenuEntries<Entries extends readonly NSEMenuEntryInput[]> = {
-  readonly [K in keyof Entries]: NSEMenuEntryInput extends Entries[K] ? Entries[K]
+type CheckedMenuEntries<Entries extends readonly MenuEntryInput[]> = {
+  readonly [K in keyof Entries]: MenuEntryInput extends Entries[K] ? Entries[K]
     : Entries[K] & NSEActionPayloadCheck<Entries[K], "payload"> &
-      (Entries[K] extends { readonly entries: infer Children extends readonly NSEMenuEntryInput[] }
+      (Entries[K] extends { readonly entries: infer Children extends readonly MenuEntryInput[] }
         ? { readonly entries: CheckedMenuEntries<Children> } : unknown);
 };
-export type NSEMenuModelActionCheck<Model extends NSEMenuModel> = {
+export type MenuModelActionCheck<Model extends MenuModel> = {
   readonly entries: CheckedMenuEntries<Model["entries"]>;
-} & (Model extends { readonly sections: infer Sections extends readonly NSEMenuSection[] }
+} & (Model extends { readonly sections: infer Sections extends readonly MenuSection[] }
   ? { readonly sections: { readonly [K in keyof Sections]: Sections[K] & { readonly entries: CheckedMenuEntries<Sections[K]["entries"]> } } }
   : unknown);
 
 /** @internal Preserve payload correlation for each authored item, including submenus. */
-export type NSECheckedMenuItems<Items extends readonly NSEMenuItem[]> = {
+export type CheckedMenuItems<Items extends readonly NSEMenuItem[]> = {
   readonly [K in keyof Items]: NSEMenuItem extends Items[K] ? Items[K]
     : Items[K] & NSEActionPayloadCheck<Items[K], "actionPayload"> &
       (Items[K] extends { readonly submenu: infer Children extends readonly NSEMenuItem[] }
-        ? { readonly submenu: NSECheckedMenuItems<Children> } : unknown);
+        ? { readonly submenu: CheckedMenuItems<Children> } : unknown);
 };
 
-export interface NSEMenuSection<TEntry = NSEMenuEntryInput> {
+export interface MenuSection<TEntry = MenuEntryInput> {
   readonly id: string;
   readonly entries: readonly TEntry[];
   readonly weight?: number;
@@ -170,7 +170,7 @@ export interface NSEMenuSection<TEntry = NSEMenuEntryInput> {
   readonly afterId?: string;
 }
 
-export interface NSEMenuScheduler {
+export interface MenuScheduler {
   setTimeout(callback: () => void, delayMs: number): unknown;
   clearTimeout(handle: unknown): void;
 }
@@ -180,12 +180,12 @@ export interface NSEMenuScheduler {
  * A host that does not own an overlay provider may render `NSEMenu` as a pure
  * semantic surface, but it may not invent responder or scope ownership.
  */
-export interface NSEMenuOverlayOptions {
+export interface MenuOverlayOptions {
   readonly id: string;
   readonly parentResponderId: string;
   readonly parentId?: string | null;
   readonly parentScopeId?: string;
-  readonly placement?: NSELogicalPlacement;
+  readonly placement?: LogicalPlacement;
 }
 
 export interface NSEMenuRuntimePort {
@@ -213,12 +213,12 @@ export interface NSEMenuRuntimePort {
   /** Canonical key binding authority; menus never hand-match commands. */
   readonly keyBindings?: Pick<KeyBindingManager, "claimKeyboardEvent" | "handleKeyboardEvent">;
   /** Optional injected scheduler for submenu aim delay. No ambient timer use. */
-  readonly scheduler?: NSEMenuScheduler;
+  readonly scheduler?: MenuScheduler;
   /** Turns an action name into the command ID of the application that declared it. Required for menus with `{ action }` entries. */
   readonly resolveAction?: (action: string) => CommandId;
 }
 
-export type NSEMenuPresentedEntry =
+export type MenuPresentedEntry =
   | {
       readonly kind: "command";
       readonly id: string;
@@ -255,10 +255,10 @@ export interface NSEMenuSnapshot {
   readonly validating: boolean;
   readonly generation: number;
   readonly branchPath: readonly string[];
-  readonly entries: readonly NSEMenuPresentedEntry[];
+  readonly entries: readonly MenuPresentedEntry[];
 }
 
-export type NSEMenuDismissReason = "escape" | "selection" | "programmatic" | "parent-dismissed";
+export type MenuDismissReason = "escape" | "selection" | "programmatic" | "parent-dismissed";
 
 /** @internal The menu's internal model, for the framework's own menus (application menus, item menus). */
 export const nseMenuModel: unique symbol = Symbol("nse.menuModel");
@@ -274,19 +274,19 @@ export interface NSEMenuOptions extends NSEControllerOwnershipOptions {
 }
 
 /** @internal */
-export interface NSEMenuModelOptions extends NSEControllerOwnershipOptions {
-  readonly [nseMenuModel]: NSEMenuModel;
+export interface MenuModelOptions extends NSEControllerOwnershipOptions {
+  readonly [nseMenuModel]: MenuModel;
   readonly runtime: NSEMenuRuntimePort;
 }
 
-export interface NSEMenuKeyEquivalent {
+export interface MenuKeyEquivalent {
   readonly event: KeyBindingEvent;
   readonly context?: KeyBindingContext;
 }
 
-export interface NSEMenuKeyEquivalentClaim {
+export interface MenuKeyEquivalentClaim {
   readonly claim: KeyBindingClaim;
   readonly context: KeyBindingContext;
 }
 
-export type NSEMenuKeyEquivalentResult = KeyBindingHandleResult | null;
+export type MenuKeyEquivalentResult = KeyBindingHandleResult | null;

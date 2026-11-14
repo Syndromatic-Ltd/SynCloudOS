@@ -96,7 +96,7 @@ const appOptions: TextSystemExampleAppOptions = {
         if (prepared.status !== "prepared") throw new Error(`Output ${prepared.status}: ${prepared.receipt.reason}`);
         const output = await prepared.output.exportPDF();
         if (output.status !== "exported") throw new Error(`Output ${output.status}`);
-        pdf = { revision: output.receipt.revision!, byteLength: output.bytes.length }; return pdf;
+        pdf = { revision: output.receipt.revision!, byteLength: output.bytes.count }; return pdf;
       },
       async dispose() { value.dispose(); const result = await host.dispose(); if (persistence) window.customHostReceipt = { ...persistence.getReceipt(), previousLease };
         if (result && typeof result === "object" && "status" in result && result.status !== "disposed") throw new Error(`Host disposal ${result.status}`); },

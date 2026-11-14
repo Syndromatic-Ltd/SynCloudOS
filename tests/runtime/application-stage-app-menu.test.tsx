@@ -28,7 +28,7 @@ import { useResolvedMode as useScopedResolvedMode } from "../../src/SynCloudOS/A
 import { clearOwnedResponderAnchor, SynCloudOSProvider } from "../../src/SynCloudOSReact";
 import { useSCOS, useQuickSwitchTrigger } from "../../src/SynCloudOS/AppSDK";
 import { createInMemoryNSETextOwner, plainNSETextContent, NSETextCommands, NSETextView, TextEditingSession } from "@syndromatic/syncloudos/nse/text";
-import { NSEHierarchyStack, NSENavigationStackController, NSETabBarController } from "../../src/NSE/Navigation";
+import { HierarchyStack, NavigationStackController, TabBarController } from "../../src/NSE/Navigation";
 import { useNSEDeferredDisposal, type NSEDisposalScheduler } from "../../src/NSE/NSE";
 import { ResponderScope, useStrings } from "@syndromatic/syncloudos/sdk";
 import { SynWareProvider } from "../../src/SynCloudOS/AppSDK/SynWareContext";
@@ -37,8 +37,8 @@ import { createSynWare } from "@syndromatic/syncloudos/sdk/testing";
 import { ApplicationStageView } from "../../src/Webspring/ApplicationStageView";
 import { tabViewController } from "../fixtures/tabViewController";
 import { nseUpdateTraits } from "../../src/NSE/Application/NSEViewController";
-import { NSEViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
-import { NSEWindowTitlebarHostContext } from "../../src/SynCloudOS/AppHosting/windowChrome";
+import { ViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
+import { WindowTitlebarHostContext } from "../../src/SynCloudOS/AppHosting/windowChrome";
 import { authoriseTestRuntime, createTestBundle, createTestRuntime, createTestRuntimeEnvironment, mountTestSynWareRuntime } from "./helpers";
 import { HostSiteBrandingProvider } from "../../src/SynCloudOSReact";
 
@@ -124,14 +124,14 @@ function renderFrame(beforeRender?: (runtime: ReturnType<typeof createTestRuntim
 }
 
 function ApplicationStageHierarchyFixture() {
-  const [tabs] = React.useState(() => new NSETabBarController<React.ReactNode>({
+  const [tabs] = React.useState(() => new TabBarController<React.ReactNode>({
     id: "stage-hierarchy-tabs",
     destinations: [
       { id: "home", label: "Home", accessibleLabel: "Home destination", icon: { kind: "template", name: "home" } },
       { id: "library", label: "Library", accessibleLabel: "Library destination", icon: { kind: "template", name: "library" } },
     ],
   }));
-  const [stack] = React.useState(() => new NSENavigationStackController({
+  const [stack] = React.useState(() => new NavigationStackController({
     id: "stage-hierarchy-stack",
     rootDestinationId: "home",
     destinationIds: ["home", "library"],
@@ -146,7 +146,7 @@ function ApplicationStageHierarchyFixture() {
   return (
     <section>
       <button data-testid="stage-open-library" type="button" onClick={() => { void stack.push("library"); }}>Open Library destination</button>
-      <NSEHierarchyStack
+      <HierarchyStack
         controller={tabs}
         stackController={stack}
         applicationChrome={{ ownerId: "test-app:application-hierarchy" }}
@@ -201,12 +201,12 @@ describe("ApplicationStageView app menu", () => {
       useNSEDeferredDisposal(controller, fixtureDisposalScheduler);
       React.useLayoutEffect(() => { controller[nseUpdateTraits]({ presentation: traits, reducedMotion: traits.reducedMotion }); }, [controller, traits]);
       // Stands in for a window titled "Buttons" (NSWindow.title), as the window controller's mount does.
-      const titlebar = React.useContext(NSEWindowTitlebarHostContext);
+      const titlebar = React.useContext(WindowTitlebarHostContext);
       React.useLayoutEffect(() => {
         titlebar?.setDocument({ title: "Buttons", subtitle: "", documentEdited: false });
         return () => titlebar?.setDocument(null);
       }, [titlebar]);
-      return <NSEViewControllerView controller={controller} />;
+      return <ViewControllerView controller={controller} />;
     }
     runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.test-app", route: "/test" }, {
       loadModule: async () => ({ default: SourceListFixture }),
