@@ -1664,6 +1664,7 @@
         "accessory",
         "background",
         "bezel",
+        "body",
         "content",
         "content-border",
         "content-view",

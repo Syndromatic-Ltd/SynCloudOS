@@ -2896,6 +2896,7 @@
 :scope [data-nse-control="search-field"]:where([data-nse-part="content"]):not([data-nse-enabled="false"]):focus-within [data-nse-part="bezel"]:where([data-nse-control="search-field"] *):where([data-nse-contrast="high"] *),
 :scope:is([data-nse-control="search-field"]:where([data-nse-part="content"]):not([data-nse-enabled="false"]):focus-within) [data-nse-part="bezel"]:where([data-nse-control="search-field"] *):where([data-nse-contrast="high"] *),
 :scope[data-nse-control="search-field"]:where([data-nse-part="content"]):not([data-nse-enabled="false"]):focus-within [data-nse-part="bezel"]:where([data-nse-control="search-field"] *):where([data-nse-contrast="high"] *) {
+  border-radius: 999px;
   outline: 3px solid var(--nse-contrast-accent);
   outline-offset: 2px;
   box-shadow: none;
@@ -2904,8 +2905,19 @@
 :scope [data-nse-control="search-field"]:where([data-nse-part="content"]):not([data-nse-enabled="false"]):focus-within [data-nse-part="bezel"]:where([data-nse-control="search-field"] *):where([data-nse-contrast="forced"] *),
 :scope:is([data-nse-control="search-field"]:where([data-nse-part="content"]):not([data-nse-enabled="false"]):focus-within) [data-nse-part="bezel"]:where([data-nse-control="search-field"] *):where([data-nse-contrast="forced"] *),
 :scope[data-nse-control="search-field"]:where([data-nse-part="content"]):not([data-nse-enabled="false"]):focus-within [data-nse-part="bezel"]:where([data-nse-control="search-field"] *):where([data-nse-contrast="forced"] *) {
+  border-radius: 999px;
   outline: 2px solid Highlight;
   outline-offset: 2px;
+  box-shadow: none;
+}
+
+/* The contrast outline replaces the glow layer, which would otherwise fade in beside it. */
+:scope [data-nse-control="search-field"]:where([data-nse-part="content"]):not([data-nse-enabled="false"]):focus-within [data-nse-part="bezel"]:where([data-nse-control="search-field"] *):where([data-nse-contrast="high"] *)::before,
+:scope:is([data-nse-control="search-field"]:where([data-nse-part="content"]):not([data-nse-enabled="false"]):focus-within) [data-nse-part="bezel"]:where([data-nse-control="search-field"] *):where([data-nse-contrast="high"] *)::before,
+:scope[data-nse-control="search-field"]:where([data-nse-part="content"]):not([data-nse-enabled="false"]):focus-within [data-nse-part="bezel"]:where([data-nse-control="search-field"] *):where([data-nse-contrast="high"] *)::before,
+:scope [data-nse-control="search-field"]:where([data-nse-part="content"]):not([data-nse-enabled="false"]):focus-within [data-nse-part="bezel"]:where([data-nse-control="search-field"] *):where([data-nse-contrast="forced"] *)::before,
+:scope:is([data-nse-control="search-field"]:where([data-nse-part="content"]):not([data-nse-enabled="false"]):focus-within) [data-nse-part="bezel"]:where([data-nse-control="search-field"] *):where([data-nse-contrast="forced"] *)::before,
+:scope[data-nse-control="search-field"]:where([data-nse-part="content"]):not([data-nse-enabled="false"]):focus-within [data-nse-part="bezel"]:where([data-nse-control="search-field"] *):where([data-nse-contrast="forced"] *)::before {
   box-shadow: none;
 }
 

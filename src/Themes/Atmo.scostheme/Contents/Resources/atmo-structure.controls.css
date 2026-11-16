@@ -2546,18 +2546,18 @@
 :where(:scope) [data-nse-part="toolbar"][data-nse-colour-scheme-resolved="dark"]::after,
 :where(:scope):is([data-nse-part="toolbar"][data-nse-colour-scheme-resolved="dark"]::after) { background: linear-gradient(to top, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0)); }
 /* A unified toolbar shares the top bar's row, so it sits on the bar's glass or metal rather than its own strip. */
-:where(:scope) [data-nse-part="toolbar"]:where(.nse-app-topbar *),
-:where(:scope):is([data-nse-part="toolbar"]:where(.nse-app-topbar *)),
-:where(:scope) [data-nse-part="toolbar"][data-nse-colour-scheme-resolved]:where(.nse-app-topbar *),
-:where(:scope):is([data-nse-part="toolbar"][data-nse-colour-scheme-resolved]:where(.nse-app-topbar *)) {
+:where(:scope) [data-nse-part="toolbar"]:where([data-nse-control="window"][data-nse-part="header"]:not([data-nse-style]) *),
+:where(:scope):is([data-nse-part="toolbar"]:where([data-nse-control="window"][data-nse-part="header"]:not([data-nse-style]) *)),
+:where(:scope) [data-nse-part="toolbar"][data-nse-colour-scheme-resolved]:where([data-nse-control="window"][data-nse-part="header"]:not([data-nse-style]) *),
+:where(:scope):is([data-nse-part="toolbar"][data-nse-colour-scheme-resolved]:where([data-nse-control="window"][data-nse-part="header"]:not([data-nse-style]) *)) {
   min-height: 0;
   padding: 0;
   background: none;
   border: 0;
   box-shadow: none;
 }
-:where(:scope) [data-nse-part="toolbar"][data-nse-colour-scheme-resolved]:where(.nse-app-topbar *)::after,
-:where(:scope):is([data-nse-part="toolbar"][data-nse-colour-scheme-resolved]:where(.nse-app-topbar *)::after) { background: none; }
+:where(:scope) [data-nse-part="toolbar"][data-nse-colour-scheme-resolved]:where([data-nse-control="window"][data-nse-part="header"]:not([data-nse-style]) *)::after,
+:where(:scope):is([data-nse-part="toolbar"][data-nse-colour-scheme-resolved]:where([data-nse-control="window"][data-nse-part="header"]:not([data-nse-style]) *)::after) { background: none; }
 /* Bottom titlebar accessories continue the strip under the toolbar, which hands them its foot rule. */
 :where(:scope) [data-nse-part="titlebar-accessories"],
 :where(:scope):is([data-nse-part="titlebar-accessories"]) {

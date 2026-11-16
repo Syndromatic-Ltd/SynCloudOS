@@ -62,9 +62,10 @@ describe("Atmo vector coverage", () => {
     expect(generatedBlock).toContain("padding-inline-start: var(--nse-tab-chrome-start-width);");
     expect(generatedBlock).toContain("padding-inline-end: var(--nse-tab-chrome-end-width);");
     expect(generatedBlock).not.toMatch(/padding-(?:left|right):\s*var\(--nse-tab-chrome-(?:start|end)-width\)/);
-    expect(generatedBlock).toContain("--nse-tab-chrome-outer-cap: 36px;");
-    expect(generatedBlock).toContain("--nse-tab-chrome-join: 1.714286px;");
-    expect(generatedBlock).toContain("--nse-tab-chrome-elevation: 0 16px 20px rgba(0, 0, 0, 0.48);");
+    // The caps scale with the bar: half its height, and the 72px source join in proportion.
+    expect(generatedBlock).toContain("--nse-tab-chrome-outer-cap: calc(var(--nse-tab-chrome-cap-diameter, 72px) / 2);");
+    expect(generatedBlock).toContain("--nse-tab-chrome-join: calc(var(--nse-tab-chrome-cap-diameter, 72px) * 1.714286 / 72);");
+    expect(generatedBlock).toContain("--nse-tab-chrome-elevation: 0 12px 16px rgba(0, 0, 0, 0.48);");
     expect(generatedBlock).toContain("-webkit-backdrop-filter: blur(6px) saturate(1.25);");
     expect(generatedBlock).toContain("backdrop-filter: blur(6px) saturate(1.25);");
     for (const state of ["up", "down", "sel", "seldown", "dis"]) {
