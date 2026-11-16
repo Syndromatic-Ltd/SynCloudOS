@@ -1,17 +1,17 @@
 :scope :is([data-nse-button-type]:where(:not([data-nse-button-type="switch"],[data-nse-button-type="radio"],[data-nse-bezel-style="disclosure"])),[data-nse-role="tab"]:where([data-nse-control-size="large"]),[data-nse-control="button"]:where([data-nse-part="cell"][data-nse-bezel-style="rounded"])):where(:not([data-nse-control="button"]:where([data-nse-control="pop-up-button"][data-nse-pulls-down="false"] *))),
 :scope:is(:is([data-nse-button-type]:where(:not([data-nse-button-type="switch"],[data-nse-button-type="radio"],[data-nse-bezel-style="disclosure"])),[data-nse-role="tab"]:where([data-nse-control-size="large"]),[data-nse-control="button"]:where([data-nse-part="cell"][data-nse-bezel-style="rounded"])):where(:not([data-nse-control="button"]:where([data-nse-control="pop-up-button"][data-nse-pulls-down="false"] *)))),
 :scope:is([data-nse-button-type]:where(:not([data-nse-button-type="switch"],[data-nse-button-type="radio"],[data-nse-bezel-style="disclosure"])),[data-nse-role="tab"]:where([data-nse-control-size="large"]),[data-nse-control="button"]:where([data-nse-part="cell"][data-nse-bezel-style="rounded"])):where(:not([data-nse-control="button"]:where([data-nse-control="pop-up-button"][data-nse-pulls-down="false"] *))) {
-  min-width:76px;
-  --nse-control-minimum-inline-size:76px;
+  min-width:calc(var(--nse-control-height, var(--nse-atmo-control-h)) * 1.46);
+  --nse-control-minimum-inline-size:calc(var(--nse-control-height, var(--nse-atmo-control-h)) * 1.46);
   max-width:100%;
   margin:0;
-  height:var(--nse-atmo-control-h);
-  min-height:var(--nse-atmo-control-h);
-  --nse-control-minimum-block-size:var(--nse-atmo-control-h);
-  padding:0 27px;
+  height:var(--nse-control-height, var(--nse-atmo-control-h));
+  min-height:var(--nse-control-height, var(--nse-atmo-control-h));
+  --nse-control-minimum-block-size:var(--nse-control-height, var(--nse-atmo-control-h));
+  padding:0 calc(var(--nse-control-height, var(--nse-atmo-control-h)) * 0.52);
   border:0;
   border-image:none;
-  border-radius:18px;
+  border-radius:calc(var(--nse-control-height, var(--nse-atmo-control-h)) * 0.346);
   background:transparent;
   color:#fff;
   text-shadow:0-1px 0 rgba(0,0,0,0.72),0 1px 1px rgba(255,255,255,0.16);
@@ -62,7 +62,7 @@
 :scope :is([data-nse-button-type]:where(:not([data-nse-button-type="switch"],[data-nse-button-type="radio"],[data-nse-bezel-style="disclosure"])),[data-nse-role="tab"]:where([data-nse-control-size="large"]),[data-nse-control="button"]:where([data-nse-part="cell"][data-nse-bezel-style="rounded"])):where(:not([data-nse-control="button"]:where([data-nse-control="pop-up-button"][data-nse-pulls-down="false"] *)))::before,
 :scope:is(:is([data-nse-button-type]:where(:not([data-nse-button-type="switch"],[data-nse-button-type="radio"],[data-nse-bezel-style="disclosure"])),[data-nse-role="tab"]:where([data-nse-control-size="large"]),[data-nse-control="button"]:where([data-nse-part="cell"][data-nse-bezel-style="rounded"])):where(:not([data-nse-control="button"]:where([data-nse-control="pop-up-button"][data-nse-pulls-down="false"] *)))::before),
 :scope:is([data-nse-button-type]:where(:not([data-nse-button-type="switch"],[data-nse-button-type="radio"],[data-nse-bezel-style="disclosure"])),[data-nse-role="tab"]:where([data-nse-control-size="large"]),[data-nse-control="button"]:where([data-nse-part="cell"][data-nse-bezel-style="rounded"])):where(:not([data-nse-control="button"]:where([data-nse-control="pop-up-button"][data-nse-pulls-down="false"] *)))::before {
-  border-radius:16px;
+  border-radius:calc(var(--nse-control-height, var(--nse-atmo-control-h)) * 0.307);
   border:2px solid;
   border-color:var(--nse-atmo-btn-stroke-t) var(--nse-atmo-btn-stroke-side) var(--nse-atmo-btn-stroke-b);
   padding:2px;
@@ -73,7 +73,7 @@
 :scope :is([data-nse-button-type]:where(:not([data-nse-button-type="switch"],[data-nse-button-type="radio"],[data-nse-bezel-style="disclosure"])),[data-nse-role="tab"]:where([data-nse-control-size="large"]),[data-nse-control="button"]:where([data-nse-part="cell"][data-nse-bezel-style="rounded"])):where(:not([data-nse-control="button"]:where([data-nse-control="pop-up-button"][data-nse-pulls-down="false"] *)))::after,
 :scope:is(:is([data-nse-button-type]:where(:not([data-nse-button-type="switch"],[data-nse-button-type="radio"],[data-nse-bezel-style="disclosure"])),[data-nse-role="tab"]:where([data-nse-control-size="large"]),[data-nse-control="button"]:where([data-nse-part="cell"][data-nse-bezel-style="rounded"])):where(:not([data-nse-control="button"]:where([data-nse-control="pop-up-button"][data-nse-pulls-down="false"] *)))::after),
 :scope:is([data-nse-button-type]:where(:not([data-nse-button-type="switch"],[data-nse-button-type="radio"],[data-nse-bezel-style="disclosure"])),[data-nse-role="tab"]:where([data-nse-control-size="large"]),[data-nse-control="button"]:where([data-nse-part="cell"][data-nse-bezel-style="rounded"])):where(:not([data-nse-control="button"]:where([data-nse-control="pop-up-button"][data-nse-pulls-down="false"] *)))::after {
-  border-radius:14px;
+  border-radius:calc(var(--nse-control-height, var(--nse-atmo-control-h)) * 0.27);
   border:2px solid transparent;
   background:linear-gradient(var(--nse-atmo-btn-bevel)0,var(--nse-atmo-btn-bevel) 2px,color-mix(in srgb,var(--nse-atmo-btn-bevel) 70%,var(--nse-atmo-btn-fill-a)) 10px,color-mix(in srgb,var(--nse-atmo-btn-fill-b) 42%,var(--nse-atmo-btn-fill-a)) 17px,color-mix(in srgb,var(--nse-atmo-btn-fill-b) 72%,var(--nse-atmo-btn-fill-a)) calc(100% - 12px),var(--nse-atmo-btn-fill-b) calc(100% - 3px),var(--nse-atmo-btn-shoe) calc(100% - 2px),var(--nse-atmo-btn-shoe) 100%) border-box;
   -webkit-mask:linear-gradient(#fff 0 0) padding-box,linear-gradient(#fff 0 0);

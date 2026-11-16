@@ -22,7 +22,7 @@
  */
 
 [data-nse-control="search-field"],
-:where(:scope):is([data-nse-control="search-field"]) { display: inline-flex; min-block-size: 50px; }
+:where(:scope):is([data-nse-control="search-field"]) { display: inline-flex; min-block-size: var(--nse-control-height, 50px); }
 [data-nse-control="search-field"][data-size],
 :where(:scope):is([data-nse-control="search-field"][data-size]) { min-block-size: var(--nse-control-height, 26px); }
 [data-nse-control="secure-text-field"],
@@ -67,6 +67,20 @@
 :where(:scope):is(.nse-control-search-frame) input[type="search"]::-webkit-search-cancel-button {
   -webkit-appearance: none;
   appearance: none;
+}
+
+/* A search field's focus layers fade in and out with focus; reduced motion cancels it globally. */
+[data-nse-control="search-field"] > [data-nse-part="bezel"]::before,
+[data-nse-control="search-field"] > [data-nse-part="bezel"]::after,
+:where(:scope):is([data-nse-control="search-field"]) > [data-nse-part="bezel"]::before,
+:where(:scope):is([data-nse-control="search-field"]) > [data-nse-part="bezel"]::after {
+  transition: opacity 180ms ease;
+}
+
+/* The field draws its own clear button, so WebKit's is removed rather than just unstyled. */
+[data-nse-control="search-field"] input[type="search"]::-webkit-search-cancel-button,
+:where(:scope):is([data-nse-control="search-field"]) input[type="search"]::-webkit-search-cancel-button {
+  display: none;
 }
 
 .nse-control-search-affordance,

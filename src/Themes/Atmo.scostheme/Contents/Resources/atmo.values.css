@@ -1,16 +1,55 @@
+/* Switch well: a translucent inset bevel, so it takes the tone of whatever surface it is pressed into.
+   Dark under the top lip, a light lip below; the thumb casts a real shadow into it, and slider knobs share that shadow. */
+:scope [data-nse-control="switch"],
+:scope:is([data-nse-control="switch"]),
+:scope[data-nse-control="switch"],
+:scope [data-nse-control="slider"],
+:scope:is([data-nse-control="slider"]),
+:scope[data-nse-control="slider"] {
+  --nse-atmo-toggle-well:linear-gradient(180deg,rgba(0,0,0,0.36),rgba(0,0,0,0.22) 55%,rgba(0,0,0,0.17));
+  --nse-atmo-toggle-well-shadow:inset 0 1px 2px rgba(0,0,0,0.5),inset 0 3px 6px -2px rgba(0,0,0,0.3),inset 0 0 0 1px rgba(0,0,0,0.2),0 1px 0 rgba(255,255,255,0.62);
+  --nse-atmo-toggle-thumb-shadow:drop-shadow(0 1.5px 1.2px rgba(0,0,0,0.36)) drop-shadow(0 3px 5px rgba(0,0,0,0.2));
+}
+
+:scope[data-nse-colour-scheme-resolved="dark"] [data-nse-control="switch"],
+:scope [data-nse-colour-scheme-resolved="dark"] [data-nse-control="switch"],
+:scope[data-nse-colour-scheme-resolved="dark"]:is([data-nse-control="switch"]),
+:scope[data-nse-colour-scheme-resolved="dark"] [data-nse-control="slider"],
+:scope [data-nse-colour-scheme-resolved="dark"] [data-nse-control="slider"],
+:scope[data-nse-colour-scheme-resolved="dark"]:is([data-nse-control="slider"]) {
+  --nse-atmo-toggle-well:linear-gradient(180deg,rgba(0,0,0,0.5),rgba(0,0,0,0.34) 55%,rgba(0,0,0,0.28));
+  --nse-atmo-toggle-well-shadow:inset 0 1px 2px rgba(0,0,0,0.7),inset 0 3px 6px -2px rgba(0,0,0,0.45),inset 0 0 0 1px rgba(0,0,0,0.4),0 1px 0 rgba(255,255,255,0.12);
+  --nse-atmo-toggle-thumb-shadow:drop-shadow(0 1.5px 1.2px rgba(0,0,0,0.6)) drop-shadow(0 3px 6px rgba(0,0,0,0.38));
+}
+
+:scope [data-nse-part="track"]:where([data-nse-control="switch"] *),
+:scope:is([data-nse-part="track"]:where([data-nse-control="switch"] *)),
+:scope[data-nse-part="track"]:where([data-nse-control="switch"] *) {
+  background:var(--nse-atmo-toggle-well);
+  box-shadow:var(--nse-atmo-toggle-well-shadow);
+}
+
+/* The baked sprite halves are replaced by the well above; the occlusion blob by the thumb's own shadow. */
+:scope [data-nse-part="fill"]:where([data-nse-control="switch"] *),
+:scope:is([data-nse-part="fill"]:where([data-nse-control="switch"] *)),
+:scope[data-nse-part="fill"]:where([data-nse-control="switch"] *),
 :scope [data-nse-part="track"]:where([data-nse-control="switch"] *)::after,
 :scope:is([data-nse-part="track"]:where([data-nse-control="switch"] *)::after),
 :scope[data-nse-part="track"]:where([data-nse-control="switch"] *)::after {
-  width:var(--nse-control-toggle-unit);
-  height:var(--nse-control-toggle-unit);
-  background:radial-gradient(ellipse 47% 44%at 50% 58%,rgba(22,30,40,0.26),rgba(22,30,40,0.11) 58%,transparent 74%);
-  transform:translateX(calc(-100%*var(--nse-control-toggle-ratio,0)));
+  display:none;
 }
 
-:scope [data-nse-control="switch"]:disabled [data-nse-part="track"]:where([data-nse-control="switch"] *)::after,
-:scope:is([data-nse-control="switch"]:disabled) [data-nse-part="track"]:where([data-nse-control="switch"] *)::after,
-:scope[data-nse-control="switch"]:disabled [data-nse-part="track"]:where([data-nse-control="switch"] *)::after {
-  opacity:0.5;
+:scope [data-nse-part="knob"]:where([data-nse-control="switch"] *),
+:scope:is([data-nse-part="knob"]:where([data-nse-control="switch"] *)),
+:scope[data-nse-part="knob"]:where([data-nse-control="switch"] *) {
+  filter:var(--nse-atmo-toggle-thumb-shadow);
+}
+
+/* Labels sit in the well, so they are debossed rather than embossed. */
+:scope [data-nse-part="title"]:where([data-nse-control="switch"] *),
+:scope:is([data-nse-part="title"]:where([data-nse-control="switch"] *)),
+:scope[data-nse-part="title"]:where([data-nse-control="switch"] *) {
+  text-shadow:0 -1px 0 rgba(0,0,0,0.42);
 }
 
 :scope [data-nse-segment-style="texturedRounded"]:where([data-nse-control="segmented-control"]:has([data-nse-button-type="radio"])) [data-nse-button-type="radio"],
@@ -323,7 +362,7 @@
 :scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])),
 :scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))),
 :scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) {
-  block-size:50px;
+  block-size:var(--nse-control-height, 50px);
   max-inline-size:100%;
 }
 
@@ -331,7 +370,7 @@
 :scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) :is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"],[data-nse-part="increment"],[data-nse-part="decrement"]),
 :scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) :is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"],[data-nse-part="increment"],[data-nse-part="decrement"]) {
   min-inline-size:44px;
-  block-size:50px;
+  block-size:var(--nse-control-height, 50px);
   margin:0;
   padding:0 14px;
   border:0;

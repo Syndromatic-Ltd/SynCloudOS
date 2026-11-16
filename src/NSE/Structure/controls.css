@@ -6,6 +6,17 @@
 @layer nse.atmo {
 @scope ([data-nse-theme]) to ([data-nse-theme]) {
 
+/* controlSize sets the height a fixed-height control draws at; an explicit height prop, set inline, still wins.
+   A pop-up's own button inherits the pop-up's height. */
+:where(:scope) :is([data-nse-control="button"]:not([data-nse-button-type="switch"],[data-nse-button-type="radio"],[data-nse-bezel-style="disclosure"],[data-nse-control="pop-up-button"] *),[data-nse-control="pop-up-button"],[data-nse-control="segmented-control"],[data-nse-control="text-field"],[data-nse-control="secure-text-field"],[data-nse-control="search-field"],[data-nse-control="combo-box"],[data-nse-control="token-field"])[data-nse-control-size="mini"],
+:where(:scope):is(:is([data-nse-control="button"]:not([data-nse-button-type="switch"],[data-nse-button-type="radio"],[data-nse-bezel-style="disclosure"],[data-nse-control="pop-up-button"] *),[data-nse-control="pop-up-button"],[data-nse-control="segmented-control"],[data-nse-control="text-field"],[data-nse-control="secure-text-field"],[data-nse-control="search-field"],[data-nse-control="combo-box"],[data-nse-control="token-field"])[data-nse-control-size="mini"]) { --nse-control-height: var(--nse-control-size-mini); }
+:where(:scope) :is([data-nse-control="button"]:not([data-nse-button-type="switch"],[data-nse-button-type="radio"],[data-nse-bezel-style="disclosure"],[data-nse-control="pop-up-button"] *),[data-nse-control="pop-up-button"],[data-nse-control="segmented-control"],[data-nse-control="text-field"],[data-nse-control="secure-text-field"],[data-nse-control="search-field"],[data-nse-control="combo-box"],[data-nse-control="token-field"])[data-nse-control-size="small"],
+:where(:scope):is(:is([data-nse-control="button"]:not([data-nse-button-type="switch"],[data-nse-button-type="radio"],[data-nse-bezel-style="disclosure"],[data-nse-control="pop-up-button"] *),[data-nse-control="pop-up-button"],[data-nse-control="segmented-control"],[data-nse-control="text-field"],[data-nse-control="secure-text-field"],[data-nse-control="search-field"],[data-nse-control="combo-box"],[data-nse-control="token-field"])[data-nse-control-size="small"]) { --nse-control-height: var(--nse-control-size-small); }
+:where(:scope) :is([data-nse-control="button"]:not([data-nse-button-type="switch"],[data-nse-button-type="radio"],[data-nse-bezel-style="disclosure"],[data-nse-control="pop-up-button"] *),[data-nse-control="pop-up-button"],[data-nse-control="segmented-control"],[data-nse-control="text-field"],[data-nse-control="secure-text-field"],[data-nse-control="search-field"],[data-nse-control="combo-box"],[data-nse-control="token-field"])[data-nse-control-size="regular"],
+:where(:scope):is(:is([data-nse-control="button"]:not([data-nse-button-type="switch"],[data-nse-button-type="radio"],[data-nse-bezel-style="disclosure"],[data-nse-control="pop-up-button"] *),[data-nse-control="pop-up-button"],[data-nse-control="segmented-control"],[data-nse-control="text-field"],[data-nse-control="secure-text-field"],[data-nse-control="search-field"],[data-nse-control="combo-box"],[data-nse-control="token-field"])[data-nse-control-size="regular"]) { --nse-control-height: var(--nse-control-size-regular); }
+:where(:scope) :is([data-nse-control="button"]:not([data-nse-button-type="switch"],[data-nse-button-type="radio"],[data-nse-bezel-style="disclosure"],[data-nse-control="pop-up-button"] *),[data-nse-control="pop-up-button"],[data-nse-control="segmented-control"],[data-nse-control="text-field"],[data-nse-control="secure-text-field"],[data-nse-control="search-field"],[data-nse-control="combo-box"],[data-nse-control="token-field"])[data-nse-control-size="large"],
+:where(:scope):is(:is([data-nse-control="button"]:not([data-nse-button-type="switch"],[data-nse-button-type="radio"],[data-nse-bezel-style="disclosure"],[data-nse-control="pop-up-button"] *),[data-nse-control="pop-up-button"],[data-nse-control="segmented-control"],[data-nse-control="text-field"],[data-nse-control="secure-text-field"],[data-nse-control="search-field"],[data-nse-control="combo-box"],[data-nse-control="token-field"])[data-nse-control-size="large"]) { --nse-control-height: var(--nse-control-size-large); }
+
 /* atmo-structure.boxes.css */
 :where(:scope) [data-nse-control="box"]:where([data-nse-part="bezel"])[data-nse-control="box"]:where([data-nse-part="bezel"],[data-nse-part="separator"])>[data-nse-part="title"]:where([data-nse-control="box"]>*):where([data-nse-part="bezel"]>*):where(:where([data-nse-part="title"])[data-nse-part="title"]:where([data-nse-control="box"]>*):where([data-nse-part="bezel"]>*)),
 :where(:scope):is([data-nse-control="box"]:where([data-nse-part="bezel"])[data-nse-control="box"]:where([data-nse-part="bezel"],[data-nse-part="separator"]))>[data-nse-part="title"]:where([data-nse-control="box"]>*):where([data-nse-part="bezel"]>*):where(:where([data-nse-part="title"])[data-nse-part="title"]:where([data-nse-control="box"]>*):where([data-nse-part="bezel"]>*)) {
@@ -45,7 +56,7 @@
   justify-content:center;
   overflow:hidden;
   font:inherit;
-  font-size:18px;
+  font-size: calc(var(--nse-control-height, 52px) * 0.25 + 5px);
   font-weight:700;
   line-height:52px;
   cursor:pointer;
@@ -220,7 +231,8 @@
   z-index:2;
   line-height:1;
   pointer-events:none;
-  transition:opacity 160ms ease,text-shadow 160ms ease,color 160ms ease;
+  /* clip-path moves with the knob, so a label a theme cuts at the knob is uncovered as the knob travels. */
+  transition:opacity 160ms ease,text-shadow 160ms ease,color 160ms ease,clip-path 180ms cubic-bezier(0.22,0.75,0.28,1);
 }
 :where(:scope) [data-nse-part="title"]:where([data-nse-state="on"]):where([data-nse-control="switch"] *),
 :where(:scope):is([data-nse-part="title"]:where([data-nse-state="on"]):where([data-nse-control="switch"] *)) {
@@ -237,6 +249,10 @@
 :where(:scope) [data-nse-control="switch"]:where([data-nse-part="background"])[data-nse-tracking="true"] [data-nse-part="knob"]:where([data-nse-control="switch"] *)::after,
 :where(:scope):is([data-nse-control="switch"]:where([data-nse-part="background"])[data-nse-tracking="true"]) [data-nse-part="knob"]:where([data-nse-control="switch"] *)::after {
   transition: none;
+}
+:where(:scope) [data-nse-control="switch"]:where([data-nse-part="background"])[data-nse-tracking="true"] [data-nse-part="title"]:where([data-nse-control="switch"] *),
+:where(:scope):is([data-nse-control="switch"]:where([data-nse-part="background"])[data-nse-tracking="true"]) [data-nse-part="title"]:where([data-nse-control="switch"] *) {
+  transition:text-shadow 160ms ease,color 160ms ease;
 }
 :where(:scope) [data-nse-control="switch"]:where([data-nse-part="background"]):disabled,
 :where(:scope):is([data-nse-control="switch"]:where([data-nse-part="background"]):disabled) {
@@ -1925,9 +1941,9 @@
   position:relative;
   isolation:isolate;
   font-family:inherit;
-  font-size:18px;
+  font-size: calc(var(--nse-control-height, 52px) * 0.25 + 5px);
   font-weight:700;
-  line-height:var(--nse-atmo-control-h);
+  line-height:var(--nse-control-height, var(--nse-atmo-control-h));
   cursor:pointer;
   user-select:none;
 }
@@ -1982,7 +1998,7 @@
 :scope:is([data-nse-part="actions"]:where([data-nse-part="background"]>*)) [data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-part="actions"]>*):where([data-nse-part="backdrop"] *):is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"])):where(:not([data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *))),
 :scope[data-nse-part="actions"]:where([data-nse-part="background"]>*) [data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-part="actions"]>*):where([data-nse-part="backdrop"] *):is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"])):where(:not([data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *))) {
   grid-auto-columns: minmax(0, 1fr);
-  font-size: 18px;
+  font-size: calc(var(--nse-control-height, 52px) * 0.25 + 5px);
   font-weight: 700;
   line-height: 1.12;
 }
@@ -2982,7 +2998,7 @@ meter:scope[data-nse-control="level-indicator"]::-moz-meter-bar {
 :scope:is([data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]):is([data-nse-height],[data-nse-control-size="small"])) [data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *),
 :scope[data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]):is([data-nse-height],[data-nse-control-size="small"]) [data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *) {
   grid-template-columns: minmax(0, 1fr) calc(var(--nse-control-height, 24px) * 0.38);
-  font-size: max(11px, calc(var(--nse-control-height, 24px) * 0.5));
+  font-size: clamp(11px, calc(var(--nse-control-height, 24px) * 0.375), 13px);
 }
 :scope [data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]):is([data-nse-height],[data-nse-control-size="small"]) [data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *)::before,
 :scope:is([data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]):is([data-nse-height],[data-nse-control-size="small"])) [data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *)::before,
@@ -3002,7 +3018,7 @@ meter:scope[data-nse-control="level-indicator"]::-moz-meter-bar {
 :scope [data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]):is([data-nse-height],[data-nse-control-size="small"]) [data-nse-part="label"]:where([data-nse-control="pop-up-button"] *):where([data-nse-part="background"]>*):where(:not([data-nse-date-picker-style="textField"] *)):where(:not([data-nse-part="sliders-mode"] *)):where(:not([data-nse-control="rule-editor"] *)):where(:not([data-nse-control="predicate-editor"] *)),
 :scope:is([data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]):is([data-nse-height],[data-nse-control-size="small"])) [data-nse-part="label"]:where([data-nse-control="pop-up-button"] *):where([data-nse-part="background"]>*):where(:not([data-nse-date-picker-style="textField"] *)):where(:not([data-nse-part="sliders-mode"] *)):where(:not([data-nse-control="rule-editor"] *)):where(:not([data-nse-control="predicate-editor"] *)),
 :scope[data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]):is([data-nse-height],[data-nse-control-size="small"]) [data-nse-part="label"]:where([data-nse-control="pop-up-button"] *):where([data-nse-part="background"]>*):where(:not([data-nse-date-picker-style="textField"] *)):where(:not([data-nse-part="sliders-mode"] *)):where(:not([data-nse-control="rule-editor"] *)):where(:not([data-nse-control="predicate-editor"] *)) {
-  font-size: max(11px, calc(var(--nse-control-height, 24px) * 0.5));
+  font-size: clamp(11px, calc(var(--nse-control-height, 24px) * 0.375), 13px);
   font-weight: 700;
 }
 :scope [data-nse-control="search-field"]:where([data-nse-part="content"]):is([data-nse-height],[data-nse-control-size="small"]) [data-nse-part="bezel"]:where([data-nse-control="search-field"] *),
@@ -3016,7 +3032,7 @@ meter:scope[data-nse-control="level-indicator"]::-moz-meter-bar {
 :scope [data-nse-control="search-field"]:where([data-nse-part="content"]):is([data-nse-height],[data-nse-control-size="small"]) [data-nse-part="bezel"]:where([data-nse-control="search-field"] *) :where([data-nse-part="field"])[data-nse-part="field"],
 :scope:is([data-nse-control="search-field"]:where([data-nse-part="content"]):is([data-nse-height],[data-nse-control-size="small"])) [data-nse-part="bezel"]:where([data-nse-control="search-field"] *) [data-nse-part="field"],
 :scope[data-nse-control="search-field"]:where([data-nse-part="content"]):is([data-nse-height],[data-nse-control-size="small"]) [data-nse-part="bezel"]:where([data-nse-control="search-field"] *) :where([data-nse-part="field"])[data-nse-part="field"] {
-  font-size:max(11px,calc(var(--nse-control-height,26px)*0.5));
+  font-size:clamp(11px,calc(var(--nse-control-height,26px)*0.375),14px);
 }
 :scope :is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"]))[data-nse-control-size]:where([data-nse-button-type]):where(:not([data-nse-control-size="regular"])):where(:not([data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *),[data-nse-control="button"]:where([data-nse-bezel-style="texturedRounded"]):where([data-nse-image-position]))),
 :scope:is(:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"]))[data-nse-control-size]:where([data-nse-button-type]):where(:not([data-nse-control-size="regular"])):where(:not([data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *),[data-nse-control="button"]:where([data-nse-bezel-style="texturedRounded"]):where([data-nse-image-position])))),

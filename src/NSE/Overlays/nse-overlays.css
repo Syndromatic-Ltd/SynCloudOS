@@ -279,8 +279,9 @@
 /* A menu or list whose row was chosen fades out as it closes (desktop; see menuSelectionFlash). */
 .nse-overlay-popup[data-state="closing"],
 :where(:scope):is(.nse-overlay-popup[data-state="closing"]) { pointer-events: none; }
-.nse-overlay-popup[data-state="closing"][data-nse-menu-chosen],
-:where(:scope):is(.nse-overlay-popup[data-state="closing"][data-nse-menu-chosen]) { animation: nse-menu-chosen-fade 0.2s ease-in forwards; }
+/* Dismissed menus fade the same way; the application menu retracts with its own animation instead. */
+.nse-overlay-popup[data-state="closing"]:is([data-nse-menu-chosen],[data-nse-style="menu"],[data-nse-style="context-menu"],[data-nse-style="submenu"]),
+:where(:scope):is(.nse-overlay-popup[data-state="closing"]:is([data-nse-menu-chosen],[data-nse-style="menu"],[data-nse-style="context-menu"],[data-nse-style="submenu"])) { animation: nse-menu-chosen-fade 0.2s ease-in forwards; }
 @keyframes nse-menu-chosen-fade { to { opacity: 0; } }
 
 /* NSEPopover's frame is one continuous outline, including the anchor arrow.

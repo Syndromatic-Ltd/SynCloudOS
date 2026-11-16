@@ -107,6 +107,8 @@
 :scope:is([data-nse-part="cancel"]:where([data-nse-control="search-field"]>[data-nse-part="bezel"]>*)[data-nse-part="cancel"]),
 :scope[data-nse-part="cancel"]:where([data-nse-control="search-field"]>[data-nse-part="bezel"]>*)[data-nse-part="cancel"] {
   background-image:url(data:image/svg+xml,<svg\ xmlns=\"http://www.w3.org/2000/svg\"\ viewBox=\"0\ 0\ 43\ 42\"><defs><linearGradient\ id=\"s\"\ x1=\"0\"\ y1=\"0\"\ x2=\"0\"\ y2=\"1\"><stop\ offset=\"0\"\ stop-color=\"%23ffffff\"\ stop-opacity=\"0.55\"/><stop\ offset=\"0.5\"\ stop-color=\"%23ffffff\"\ stop-opacity=\"0.08\"/><stop\ offset=\"1\"\ stop-color=\"%23ffffff\"\ stop-opacity=\"0.18\"/></linearGradient></defs><circle\ cx=\"21.5\"\ cy=\"21\"\ r=\"20\"\ fill=\"url\(%23s\)\"\ stroke=\"rgba\(0,0,0,0.35\)\"\ stroke-width=\"1.5\"/><path\ d=\"M14.5\ 14\ L28.5\ 28\ M28.5\ 14\ L14.5\ 28\"\ stroke=\"rgba\(255,255,255,0.9\)\"\ stroke-width=\"3.6\"\ stroke-linecap=\"round\"/></svg>);
+  /* Atmo paints the cross, so the framework's fallback glyph stays unseen. */
+  color:transparent;
 }
 
 :scope [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*),
@@ -121,7 +123,7 @@
 :scope [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*),
 :scope:is([data-nse-part="bezel"]:where([data-nse-control="search-field"]>*)),
 :scope[data-nse-part="bezel"]:where([data-nse-control="search-field"]>*) {
-  border-width:0 25px;
+  border-width:0 calc(var(--nse-control-height, 50px) / 2);
   border-image:var(--nse-atmo-svg-si-only-up)0 25 0 25 fill stretch;
   padding:0 8px;
   background:none;
@@ -131,7 +133,7 @@
 :scope [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*) [data-nse-part="field"],
 :scope:is([data-nse-part="bezel"]:where([data-nse-control="search-field"]>*)) [data-nse-part="field"],
 :scope[data-nse-part="bezel"]:where([data-nse-control="search-field"]>*) [data-nse-part="field"] {
-  height:50px;
+  height:var(--nse-control-height, 50px);
   padding:0 3px;
   color:#d6d9dc;
   caret-color:#eef2f5;
@@ -145,19 +147,52 @@
   opacity:1;
 }
 
-:scope [data-nse-control="search-field"]:focus-within [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*),
-:scope:is([data-nse-control="search-field"]:focus-within) [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*),
-:scope[data-nse-control="search-field"]:focus-within [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*) {
-  border-width:0 25px;
-  border-image:var(--nse-atmo-svg-si-only-focus)0 25 0 25 fill stretch;
-  background:none;
+/* Focus fades in: the lit pill art on ::after over the resting one, and the ring on ::before.
+   Both reach out over the cap borders; the ring sits 8% in to hug the drawn pill edge. */
+:scope [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*),
+:scope:is([data-nse-part="bezel"]:where([data-nse-control="search-field"]>*)),
+:scope[data-nse-part="bezel"]:where([data-nse-control="search-field"]>*) {
+  position:relative;
+  isolation:isolate;
 }
 
-:scope [data-nse-control="search-field"]:not([data-nse-enabled="false"]):focus-within [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*),
-:scope:is([data-nse-control="search-field"]:not([data-nse-enabled="false"]):focus-within) [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*),
-:scope[data-nse-control="search-field"]:not([data-nse-enabled="false"]):focus-within [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*) {
+:scope [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*)::before,
+:scope:is([data-nse-part="bezel"]:where([data-nse-control="search-field"]>*))::before,
+:scope[data-nse-part="bezel"]:where([data-nse-control="search-field"]>*)::before,
+:scope [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*)::after,
+:scope:is([data-nse-part="bezel"]:where([data-nse-control="search-field"]>*))::after,
+:scope[data-nse-part="bezel"]:where([data-nse-control="search-field"]>*)::after {
+  content:"";
+  position:absolute;
+  pointer-events:none;
+  opacity:0;
+}
+
+:scope [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*)::before,
+:scope:is([data-nse-part="bezel"]:where([data-nse-control="search-field"]>*))::before,
+:scope[data-nse-part="bezel"]:where([data-nse-control="search-field"]>*)::before {
+  inset:calc(var(--nse-control-height, 50px) * 0.08) calc(var(--nse-control-height, 50px) * -0.42);
   border-radius:999px;
   box-shadow:var(--nse-atmo-focus-ring);
+}
+
+:scope [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*)::after,
+:scope:is([data-nse-part="bezel"]:where([data-nse-control="search-field"]>*))::after,
+:scope[data-nse-part="bezel"]:where([data-nse-control="search-field"]>*)::after {
+  z-index:-1;
+  inset:0 calc(var(--nse-control-height, 50px) / -2);
+  border:0 solid transparent;
+  border-width:0 calc(var(--nse-control-height, 50px) / 2);
+  border-image:var(--nse-atmo-svg-si-only-focus)0 25 0 25 fill stretch;
+}
+
+:scope [data-nse-control="search-field"]:not([data-nse-enabled="false"]):focus-within [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*)::before,
+:scope:is([data-nse-control="search-field"]:not([data-nse-enabled="false"]):focus-within) [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*)::before,
+:scope[data-nse-control="search-field"]:not([data-nse-enabled="false"]):focus-within [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*)::before,
+:scope [data-nse-control="search-field"]:not([data-nse-enabled="false"]):focus-within [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*)::after,
+:scope:is([data-nse-control="search-field"]:not([data-nse-enabled="false"]):focus-within) [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*)::after,
+:scope[data-nse-control="search-field"]:not([data-nse-enabled="false"]):focus-within [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*)::after {
+  opacity:1;
 }
 
 :scope [data-nse-control="ruler-view"] [data-nse-part="title"]:where([data-nse-control="slider"]>*),
@@ -175,7 +210,7 @@
   gap:4px 6px;
   inline-size:100%;
   min-inline-size:0;
-  min-block-size:50px;
+  min-block-size:var(--nse-control-height, 50px);
   padding:8px 16px;
   color:var(--nse-atmo-field-ink,#111820);
 }

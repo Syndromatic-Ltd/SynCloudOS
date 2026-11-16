@@ -21,30 +21,36 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* Turned metal: two pairs of bright cones, and a sheen whose four cones cross them as the device tilts. */
+/* Turned metal: two soft streaks in the metal and two in the sheen, added together.
+   Aligned they read as two bright streaks; as the thumb turns they part into four dim ones and meet again. */
 .nse-metal-thumb,
-:where(:scope):is(.nse-metal-thumb) { position:absolute; display:block; overflow:hidden; border-radius:50%; pointer-events:none; isolation:isolate; background:#c4c4c4; }
-.nse-metal-thumb,
-:where(:scope):is(.nse-metal-thumb)::before { content:""; position:absolute; inset:0; background:conic-gradient(from 0deg at 50% 50%,
-    #9c9c9c 0deg, #8f8f8f 16deg, #a4a4a4 38deg, #d6d6d6 52deg, #f4f4f4 60deg, #d8d8d8 68deg, #a6a6a6 82deg,
-    #8e8e8e 104deg, #959595 126deg, #bdbdbd 142deg, #e4e4e4 150deg, #bbbbbb 158deg, #979797 172deg,
-    #8f8f8f 196deg, #a3a3a3 218deg, #d5d5d5 232deg, #f2f2f2 240deg, #d6d6d6 248deg, #a5a5a5 262deg,
-    #8d8d8d 284deg, #949494 306deg, #bcbcbc 322deg, #e2e2e2 330deg, #bababa 338deg, #989898 352deg, #9c9c9c 360deg); transform:rotate(var(--nse-metal-angle,0rad)); }
+:where(:scope):is(.nse-metal-thumb) {
+  --nse-metal-thumb-base:conic-gradient(from 0deg at 50% 50%,
+    #929292 0deg, #868686 16deg, #9e9e9e 32deg, #cdcdcd 48deg, #ebebeb 60deg, #cdcdcd 72deg, #9e9e9e 88deg,
+    #868686 106deg, #8d8d8d 135deg, #979797 150deg, #8d8d8d 165deg, #868686 194deg,
+    #9e9e9e 212deg, #cdcdcd 228deg, #ebebeb 240deg, #cdcdcd 252deg, #9e9e9e 268deg,
+    #868686 286deg, #8d8d8d 315deg, #979797 330deg, #8d8d8d 345deg, #929292 360deg);
+  --nse-metal-thumb-sheen:conic-gradient(from 0deg at 50% 50%,
+    rgba(255,255,255,0) 0deg, rgba(255,255,255,0) 32deg, rgba(255,255,255,.22) 48deg, rgba(255,255,255,.62) 60deg, rgba(255,255,255,.22) 72deg, rgba(255,255,255,0) 88deg,
+    rgba(255,255,255,0) 212deg, rgba(255,255,255,.22) 228deg, rgba(255,255,255,.62) 240deg, rgba(255,255,255,.22) 252deg, rgba(255,255,255,0) 268deg, rgba(255,255,255,0) 360deg);
+  /* The sheen turns against the metal, so the pairs realign roughly every 130 degrees of turn. */
+  --nse-metal-thumb-sheen-rate:-0.38;
+  position:absolute; inset:0; display:block; overflow:hidden; border-radius:50%; pointer-events:none; isolation:isolate; background:#a6a6a6;
+}
+.nse-metal-thumb::before,
+:where(:scope):is(.nse-metal-thumb)::before { content:""; position:absolute; inset:0; background:var(--nse-metal-thumb-base); transform:rotate(var(--nse-metal-angle,0rad)); }
 .nse-metal-thumb-sheen,
-:where(:scope):is(.nse-metal-thumb-sheen) { position:absolute; inset:0; background:conic-gradient(from 0deg at 50% 50%,
-    rgba(255,255,255,0) 0deg, rgba(255,255,255,0) 44deg, rgba(255,255,255,.55) 60deg, rgba(255,255,255,0) 76deg,
-    rgba(255,255,255,0) 136deg, rgba(255,255,255,.4) 150deg, rgba(255,255,255,0) 164deg,
-    rgba(255,255,255,0) 224deg, rgba(255,255,255,.55) 240deg, rgba(255,255,255,0) 256deg,
-    rgba(255,255,255,0) 316deg, rgba(255,255,255,.4) 330deg, rgba(255,255,255,0) 344deg, rgba(255,255,255,0) 360deg); transform:rotate(calc(var(--nse-metal-angle,0rad) * -1.6)); }
+:where(:scope):is(.nse-metal-thumb-sheen) { position:absolute; inset:0; background:var(--nse-metal-thumb-sheen); mix-blend-mode:screen; transform:rotate(calc(var(--nse-metal-angle,0rad) * var(--nse-metal-thumb-sheen-rate))); }
 /* The plate art cropped square about its turning centre, so the rings sit on the thumb's centre at any size. */
 .nse-metal-thumb-texture,
-:where(:scope):is(.nse-metal-thumb-texture) { position:absolute; inset:0; background:url("/assets/nse/atmo/shell/login-window/generated/thumb-texture.webp") 50% 50% / 100% 100% no-repeat; mix-blend-mode:multiply; opacity:.8; }
+:where(:scope):is(.nse-metal-thumb-texture) { position:absolute; inset:0; background:url("/assets/nse/atmo/shell/login-window/generated/thumb-texture.webp") 50% 50% / 100% 100% no-repeat; mix-blend-mode:multiply; opacity:.55; }
 .nse-metal-thumb-rim,
 :where(:scope):is(.nse-metal-thumb-rim) { position:absolute; inset:0; border-radius:inherit; box-shadow:inset 0 0.7px 0 rgba(255,255,255,.9), inset 0 -0.8px 1px rgba(0,0,0,.65), inset 0 0 0 0.6px rgba(0,0,0,.35); }
 .nse-control-slider[data-thumb-material="metal"] .nse-control-slider-thumb-visual,
 :where(:scope):is(.nse-control-slider[data-thumb-material="metal"]) .nse-control-slider-thumb-visual { background-image:none; }
+/* Proportions of the 49px thumb art, so small sliders stay centred; it casts the switch knob's shadow. */
 .nse-control-slider-thumb-visual>.nse-metal-thumb,
-:where(:scope):is(.nse-control-slider-thumb-visual)>.nse-metal-thumb { left:11.05px; top:11.25px; width:26.9px; height:26.9px; box-shadow:0 1px 2px rgba(0,0,0,.45); }
+:where(:scope):is(.nse-control-slider-thumb-visual)>.nse-metal-thumb { left:22.55%; top:22.96%; width:54.9%; height:54.9%; filter:var(--nse-atmo-toggle-thumb-shadow,drop-shadow(0 1px 2px rgba(0,0,0,.45))); }
 .nse-control-toggle[data-thumb-material="metal"] .nse-control-toggle-thumb::before,
 :where(:scope):is(.nse-control-toggle[data-thumb-material="metal"]) .nse-control-toggle-thumb::before,
 .nse-control-toggle[data-thumb-material="metal"] .nse-control-toggle-thumb::after,

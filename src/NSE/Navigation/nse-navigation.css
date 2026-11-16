@@ -128,13 +128,14 @@
 
 .nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"],
 :where(:scope):is(.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"]) {
-  --nse-tab-chrome-native-height: 72px;
-  --nse-tab-chrome-cap-diameter: 72px;
-  --nse-tab-chrome-cap-radius: 36px;
+  /* The tab bar reads the idiom's tab bar height, as every bar reads its own metric. */
+  --nse-tab-chrome-native-height: var(--nse-bar-height-tab);
+  --nse-tab-chrome-cap-diameter: var(--nse-bar-height-tab);
+  --nse-tab-chrome-cap-radius: calc(var(--nse-bar-height-tab) / 2);
   --nse-tab-bar-height: var(--nse-tab-chrome-native-height);
 }
 
-/* NSETabBar's own chrome variant owns a 72px capsule and vertical content
+/* NSETabBar's own chrome variant owns a bar-height capsule and vertical content
    stack. This selector deliberately excludes ordinary grouped tool buttons:
    their canonical 50px `gt` output remains independent. */
 .nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"]>.nse-tab-bar-tab.nse-control-button,
@@ -145,7 +146,7 @@
   display: flex;
   flex: 1 1 0;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   height: var(--nse-tab-chrome-native-height);
   justify-content: center;
   min-block-size: var(--nse-tab-chrome-native-height);
@@ -272,9 +273,9 @@
 
 .nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] .nse-tab-bar-icon,
 :where(:scope):is(.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"]) .nse-tab-bar-icon {
-  block-size: 24px;
-  flex: 0 0 24px;
-  inline-size: 24px;
+  block-size: 22px;
+  flex: 0 0 22px;
+  inline-size: 22px;
 }
 
 /* The glyph layer is inert unless an appearance paints the icon as a ringed
@@ -354,8 +355,6 @@
 
 .nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] .nse-tab-bar-label,
 :where(:scope):is(.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"]) .nse-tab-bar-label {
-  font-size: 0.75rem;
-  line-height: 0.875rem;
   max-inline-size: 100%;
 }
 .nse-tab-bar-badge,
@@ -592,7 +591,7 @@
   opacity: 0.45;
 }
 
-/* A rail changes only tab orientation. Targets keep the tall tab's 72px
+/* A rail changes only tab orientation. Targets keep the tall tab's bar
    height and independent end caps; content is beside it, never underneath. */
 .nse-tab-bar-safe-area[data-orientation="vertical"],
 :where(:scope):is(.nse-tab-bar-safe-area[data-orientation="vertical"]) {

@@ -125,11 +125,21 @@ function usePresentedThicknesses(controller: NSESplitViewController, snapshot: N
   return thicknesses;
 }
 
+/** The window's outermost split view tracks the title bar (NSTrackingSeparatorToolbarItem), even under a container root. */
+function isOutermostSplit(controller: NSESplitViewController, root: unknown): boolean {
+  if (controller === root) return true;
+  for (let parent = controller.parent; parent; parent = parent.parent) {
+    if (nseSplitViewLayout in parent) return false;
+    if (parent === root) return true;
+  }
+  return false;
+}
+
 /** @internal The view an `NSESplitViewController` renders. */
 export function SplitViewControllerView({ controller }: { readonly controller: NSESplitViewController }) {
   const snapshot = useSyncExternalStore(controller.subscribe, controller.getSnapshot, controller.getSnapshot);
   const titleSlot = useContext(WindowTitleSlotContext);
-  const ownsTitleSlot = titleSlot?.root === controller && controller.splitViewItems[0]?.behavior === "sidebar";
+  const ownsTitleSlot = titleSlot != null && isOutermostSplit(controller, titleSlot.root) && controller.splitViewItems[0]?.behavior === "sidebar";
   const titleSlotView = ownsTitleSlot ? <div ref={titleSlot.setSlot} className="nse-window-title-slot" /> : null;
   const layout = controller[nseSplitViewLayout];
   const items = controller.splitViewItems;

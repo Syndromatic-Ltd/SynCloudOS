@@ -482,7 +482,7 @@
 
 :where(:scope) [data-nse-part="title"]:where([data-nse-state="off"]):where([data-nse-control="switch"] *),
 :where(:scope):is([data-nse-part="title"]:where([data-nse-state="off"]):where([data-nse-control="switch"] *)) {
-  text-align:right;
+  text-align:center;
 }
 
 :where(:scope) [data-nse-part="cell"]:where([data-nse-button-type="radio"]),
@@ -1116,12 +1116,16 @@
 
 [data-nse-part="surface"]:where(:not([data-nse-control="tooltip"])):where([data-nse-part="surface"]):is([data-nse-style]:where(:is([data-nse-style="menu"],[data-nse-style="application-menu"])):where([data-nse-part="surface"]),[data-nse-style="submenu"]:where([data-nse-part="surface"]),[data-nse-style="context-menu"]:where([data-nse-part="surface"])):not([data-nse-style="application-menu"]:where([data-nse-part="surface"])) [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):not([data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))) {
   min-inline-size: 0;
-  /* 65px of frame border minus the 32px the rows bleed back over it. */
-  max-block-size: calc(var(--nse-overlay-available-block-size, 100vh) - 33px);
-  margin: -16px -20px;
+  /* The scroller fills the panel's inner face (its 1px border inside -27px -21px -24px, radius 21px),
+     so rows, highlights and the more bands clip to the panel's curve. 65px of frame minus 49px of bleed.
+     The frame's 10px and 7px insets are the end rows' own padding, so their highlights run to the curved edge. */
+  box-sizing: border-box;
+  max-block-size: calc(var(--nse-overlay-available-block-size, 100vh) - 16px);
+  margin: -26px -20px -23px;
   padding: 0;
+  scroll-padding-block: 40px;
   scrollbar-width: none;
-  border-radius: 0;
+  border-radius: 20px;
   background: transparent;
   color: inherit;
 }
@@ -1136,6 +1140,20 @@
   background: transparent;
   color: inherit;
   text-align: start;
+}
+
+[data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where([data-nse-part="background"]):not([data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-control="menu"] > *):nth-child(1 of [data-nse-part="cell"]) {
+  min-block-size: 52px;
+  padding-block-start: 10px;
+}
+
+[data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where([data-nse-part="background"]):not([data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-control="menu"] > *):nth-last-child(1 of [data-nse-part="cell"]) {
+  min-block-size: 49px;
+  padding-block-end: 7px;
+}
+
+[data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where([data-nse-part="background"]):not([data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-control="menu"] > *):nth-child(1 of [data-nse-part="cell"]):nth-last-child(1 of [data-nse-part="cell"]) {
+  min-block-size: 59px;
 }
 [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where([data-nse-part="background"]):not([data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))) [data-nse-part="icon-column"]:where([data-nse-control="menu-item"] *):not(:empty) { margin-inline-end: 8px; }
 
@@ -2527,6 +2545,19 @@
 :where(:scope):is([data-nse-part="toolbar"]::after) { content: ""; height: 27px; background: linear-gradient(to top, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0)); }
 :where(:scope) [data-nse-part="toolbar"][data-nse-colour-scheme-resolved="dark"]::after,
 :where(:scope):is([data-nse-part="toolbar"][data-nse-colour-scheme-resolved="dark"]::after) { background: linear-gradient(to top, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0)); }
+/* A unified toolbar shares the top bar's row, so it sits on the bar's glass or metal rather than its own strip. */
+:where(:scope) [data-nse-part="toolbar"]:where(.nse-app-topbar *),
+:where(:scope):is([data-nse-part="toolbar"]:where(.nse-app-topbar *)),
+:where(:scope) [data-nse-part="toolbar"][data-nse-colour-scheme-resolved]:where(.nse-app-topbar *),
+:where(:scope):is([data-nse-part="toolbar"][data-nse-colour-scheme-resolved]:where(.nse-app-topbar *)) {
+  min-height: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  box-shadow: none;
+}
+:where(:scope) [data-nse-part="toolbar"][data-nse-colour-scheme-resolved]:where(.nse-app-topbar *)::after,
+:where(:scope):is([data-nse-part="toolbar"][data-nse-colour-scheme-resolved]:where(.nse-app-topbar *)::after) { background: none; }
 /* Bottom titlebar accessories continue the strip under the toolbar, which hands them its foot rule. */
 :where(:scope) [data-nse-part="titlebar-accessories"],
 :where(:scope):is([data-nse-part="titlebar-accessories"]) {
