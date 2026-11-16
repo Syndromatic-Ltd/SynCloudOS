@@ -106,6 +106,7 @@ export type { TFXTextGeometryCapabilities, TFXTextLayoutResult } from "../../FX/
 export { useNSEMenuPort } from "./SynWareNSEMenuPort";
 export { ResponderScope, type ResponderScopeProps } from "../../SynCloudOSReact/ResponderScope";
 export { useQuickSwitchTrigger } from "../../SynCloudOSReact/QuickSwitchTrigger";
+export { useApplicationMenuTrigger, type ApplicationMenuTriggerPort } from "../../SynCloudOSReact/ApplicationMenuTrigger";
 export type { QuickSwitchTriggerPort as SynWareQuickSwitchTriggerPort } from "../../SynCloudOSReact/QuickSwitchTrigger";
 export { SynWareManifestValidationError } from "./createSynWare";
 export { defineSynWareRoutes } from "./defineSynWareRoutes";

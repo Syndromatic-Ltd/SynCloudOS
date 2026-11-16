@@ -41,7 +41,8 @@ import { choreographyTimings } from "../FX/AnimationFX/choreographyTimings";
 
 const backdropFade = (from: number, to: number): PresentationSpec =>
   Object.freeze({ duration: 0.22, timing: "ease-out", tracks: Object.freeze([Object.freeze({ keyPath: "opacity" as const, values: Object.freeze([from, to]) })]) });
-const multiSwitchBackdropMotion = Object.freeze({ enter: backdropFade(0, 1), exit: backdropFade(1, 0) });
+// Opaque from the first frame: the outgoing app was covering the desktop, so a fade-in would expose it.
+const multiSwitchBackdropMotion = Object.freeze({ exit: backdropFade(1, 0) });
 
 /** Dims the stage behind a MultiSwitch, fading through AnimationFX. */
 function MultiSwitchBackdrop() {
@@ -136,7 +137,8 @@ export function ApplicationStageLayer({
           record.role === "standard" && record.documentId === null && record.state === "open");
         if (main && main.record.fullScreen !== "on" && main.record.fullScreen !== "exiting") return null;
         return {
-          id: main?.id ?? `application-stage:${app.bundleIdentifier}`,
+          // One key per app: the main window record can appear mid-switch, and a new key would remount the app.
+          id: `application-stage:${app.bundleIdentifier}`,
           windowId: main?.id,
           appId: app.bundleIdentifier,
           title: app.window.title,

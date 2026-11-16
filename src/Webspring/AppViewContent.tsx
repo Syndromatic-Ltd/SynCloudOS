@@ -23,6 +23,7 @@ import { useNSEViewSafeArea } from "../NSE/hostComposition";
 import type { CSSProperties, ReactNode } from "react";
 import {
   SmoothSurface,
+  nseAppCornerRadius,
   nseSmoothSurfaceDefaultPhysicality,
   type SmoothSurfaceRequest
 } from "../NSE/SmoothSurface";
@@ -34,7 +35,7 @@ function appFrameSmoothSurfaceToNSE(
   if (smoothSurface === "off" || smoothSurface === false) return false;
 
   const base = {
-    radius: 31,
+    radius: nseAppCornerRadius,
     curve: "squircle" as const,
     smoothing: 0.6,
     overflow: "hidden" as const,

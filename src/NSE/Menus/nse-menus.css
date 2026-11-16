@@ -183,6 +183,49 @@
 .nse-control-picker-caption-sizer,
 :where(:scope):is(.nse-control-picker-caption-sizer) { display: block; block-size: 0; overflow: hidden; visibility: hidden; }
 
+
+/* "More" bands: sticky at a scrolling menu's top and foot, each shown while there is more to scroll that way.
+   They take no room until an appearance sizes them with --nse-menu-more-size and paints them. */
+.nse-menu::before,
+:where(:scope):is(.nse-menu)::before,
+.nse-menu::after,
+:where(:scope):is(.nse-menu)::after {
+  content: "";
+  position: sticky;
+  z-index: 2;
+  display: block;
+  block-size: var(--nse-menu-more-size, 0px);
+  pointer-events: none;
+  /* Hidden unless the menu's scroll shows them: a menu that fits has an inactive timeline and keeps this. */
+  opacity: 0;
+}
+.nse-menu::before,
+:where(:scope):is(.nse-menu)::before {
+  inset-block-start: 0;
+  margin-block-end: calc(-1 * var(--nse-menu-more-size, 0px));
+}
+.nse-menu::after,
+:where(:scope):is(.nse-menu)::after {
+  inset-block-end: 0;
+  margin-block-start: calc(-1 * var(--nse-menu-more-size, 0px));
+}
+@supports (animation-timeline: scroll()) {
+  .nse-menu::before,
+  :where(:scope):is(.nse-menu)::before {
+    animation: nse-menu-more-above linear both;
+    animation-timeline: scroll(nearest block);
+    animation-range: 0px var(--nse-menu-more-size, 0px);
+  }
+  .nse-menu::after,
+  :where(:scope):is(.nse-menu)::after {
+    animation: nse-menu-more-below linear both;
+    animation-timeline: scroll(nearest block);
+    animation-range: calc(100% - var(--nse-menu-more-size, 0px)) 100%;
+  }
+}
+@keyframes nse-menu-more-above { from { opacity: 0; } to { opacity: 1; } }
+@keyframes nse-menu-more-below { from { opacity: 1; } to { opacity: 0; } }
+
 }
 
 }

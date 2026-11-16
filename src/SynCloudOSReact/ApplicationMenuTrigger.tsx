@@ -18,7 +18,20 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useSyncExternalStore } from "react";
+import { useContext, useSyncExternalStore } from "react";
+import { WindowApplicationMenuContext } from "../NSE/Toolbars/ApplicationMenuToolbarButton";
+
+export interface ApplicationMenuTriggerPort {
+  readonly label: string;
+  readonly open: boolean;
+  setAnchor(element: HTMLElement | null): void;
+  toggle(): void;
+}
+
+/** The window's application menu, for an app that draws its own trigger in its own chrome. */
+export function useApplicationMenuTrigger(): ApplicationMenuTriggerPort | null {
+  return useContext(WindowApplicationMenuContext);
+}
 
 /** Open state and anchor for one window application menu. */
 export interface ApplicationMenuSnapshot {

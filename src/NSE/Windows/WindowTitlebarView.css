@@ -1,7 +1,6 @@
 @layer nse.atmo {
 @scope ([data-nse-theme]) to ([data-nse-theme]) {
-.nse-window-titlebar-view.nse-window__titlebar,
-.nse-window-titlebar-view.nse-app-topbar {
+.nse-window-titlebar-view.nse-window__titlebar {
   position: relative;
   inset: auto;
   display: flex;
@@ -27,45 +26,34 @@
   min-width: 0;
   min-height: var(--nse-window-titlebar-height, 31px);
 }
-.nse-window-titlebar-view[data-titlebar-material="cumulus"] > .nse-window-titlebar-view__row {
-  min-height: var(--nse-topbar-height, var(--nse-topbar-height-cumulus, 62px));
+/* Cumulus and Metal: Atmo's top bar in normal flow, with the menu bar above it and accessory rows below. */
+.nse-window-titlebar-view:is([data-titlebar-material="cumulus"],[data-titlebar-material="metal"]) {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  flex: none;
+  width: 100%;
+  min-width: 0;
+  padding-left: var(--nse-titlebar-native-left, 0px);
+  padding-right: var(--nse-titlebar-native-right, 0px);
 }
-.nse-window-titlebar-view[data-titlebar-material="cumulus"][data-titlebar-presentation="attached"] {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: auto auto auto auto;
-}
-.nse-window-titlebar-view[data-titlebar-material="cumulus"][data-titlebar-presentation="attached"] > .nse-window-titlebar-view__menu { grid-area: 1 / 1; }
-.nse-window-titlebar-view[data-titlebar-material="cumulus"][data-titlebar-presentation="attached"] > .nse-window-titlebar-view__row { grid-area: 2 / 1; }
-.nse-window-titlebar-view[data-titlebar-material="cumulus"][data-titlebar-presentation="attached"] > .nse-window-titlebar-view__toolbar-row { grid-area: 3 / 1; }
-.nse-window-titlebar-view[data-titlebar-material="cumulus"][data-titlebar-presentation="attached"] > .nse-window-titlebar-view__bottom { grid-area: 4 / 1; }
-.nse-window-titlebar-view[data-titlebar-material="cumulus"][data-titlebar-presentation="attached"] > .nse-app-topbar-base {
-  grid-area: 2 / 1 / 3 / 2;
-  top: -1px;
-  bottom: -1px;
-  height: auto;
-}
-.nse-window-titlebar-view[data-titlebar-material="cumulus"][data-titlebar-presentation="attached"]::before {
-  grid-area: 2 / 1 / 3 / 2;
-  top: 0;
-  bottom: 0;
-  height: auto;
-}
-.nse-window-titlebar-view[data-titlebar-material="metal"] > .nse-window-titlebar-view__row {
-  min-height: var(--nse-topbar-height, var(--nse-topbar-height-metal, 66px));
-}
+.nse-window-titlebar-view > .nse-app-topbar { position: relative; inset: auto; flex: none; }
+.nse-window-titlebar-view__controls { gap: 8px; }
+/* In the bar, toolbar items sit in the trailing cluster on the bar's own glass or metal. */
+.nse-app-topbar [data-window-titlebar-row] .nse-window-titlebar-view__toolbar { flex: 0 1 auto; min-width: 0; }
+.nse-app-topbar [data-window-titlebar-row] .nse-window-titlebar-view__toolbar > * { flex: 0 1 auto; }
+.nse-app-topbar [data-window-titlebar-row] [data-nse-control="toolbar"] { min-height: 0; padding: 0; gap: 8px; background: none; border: 0; box-shadow: none; }
+.nse-app-topbar [data-window-titlebar-row] [data-nse-control="toolbar"] > [data-nse-chrome-primitive] { display: none; }
+/* The bar's buttons carry their own art and size, so the item fits its view (its inline width is for plain toolbars). */
+.nse-app-topbar [data-window-titlebar-row] .nse-toolbar-custom { width: auto !important; min-width: 0 !important; }
+.nse-app-topbar .nse-toolbar-custom > .nse-chrome-primitive { display: none; }
+/* Flexible spaces have nothing to push in a trailing cluster; a toolbar's own row lays out as a plain toolbar. */
+.nse-app-topbar [data-window-titlebar-row] .nse-toolbar-space { flex: 0 0 0; width: 0; min-width: 0; }
 .nse-window-titlebar-view[data-titlebar-layout="unifiedCompact"] > .nse-window-titlebar-view__row {
   min-height: var(--nse-window-titlebar-height, 31px);
   gap: 4px;
 }
-.nse-window-titlebar-view__row > .nse-window-titlebar-view__metal-rail,
-.nse-window-titlebar-view__row > .nse-window-titlebar-view__metal-body {
-  position: absolute;
-  inset-block: 0;
-  pointer-events: none;
-}
-.nse-window-titlebar-view__metal-rail { inset-inline-start: 0; inline-size: var(--nse-window-titlebar-sidebar-width); }
-.nse-window-titlebar-view__metal-body { inset-inline: var(--nse-window-titlebar-sidebar-width) 0; }
 .nse-window-titlebar-view { --nse-titlebar-native-inline-start: var(--nse-titlebar-native-left, 0px); }
 .nse-window-titlebar-view:dir(rtl) { --nse-titlebar-native-inline-start: var(--nse-titlebar-native-right, 0px); }
 .nse-window-titlebar-view__row > [data-window-sidebar-tracking-separator] { display: none; }
@@ -134,8 +122,8 @@
 .nse-window-titlebar-view[data-titlebar-layout="unifiedCompact"] .nse-toolbar { --nse-toolbar-height: 46px; }
 .nse-window-titlebar-view[data-titlebar-transparent="true"],
 .nse-window-titlebar-view[data-titlebar-transparent="true"] > .nse-window-titlebar-view__row { background: transparent; box-shadow: none; border-color: transparent; }
-.nse-window-titlebar-view[data-titlebar-transparent="true"] > .nse-app-topbar-base,
-.nse-window-titlebar-view[data-titlebar-transparent="true"]::before,
+.nse-window-titlebar-view[data-titlebar-transparent="true"] .nse-app-topbar-base,
+.nse-window-titlebar-view[data-titlebar-transparent="true"] .nse-app-topbar::before,
 .nse-window-titlebar-view[data-titlebar-transparent="true"] .nse-app-topbar-metal-grain { display: none; }
 .nse-window-titlebar-view[data-titlebar-presentation="floating"] {
   width: calc(100% - 32px);
@@ -145,7 +133,7 @@
   border-radius: var(--nse-atmo-window-titlebar-radius, 14px);
   color: var(--nse-window-title-foreground, currentColor);
 }
-.nse-window-titlebar-view[data-titlebar-presentation="floating"]::before { content: none; }
+.nse-window-titlebar-view[data-titlebar-presentation="floating"] .nse-app-topbar::before { content: none; }
 .nse-window-titlebar-view__floating-surface {
   position: absolute;
   inset: 0;
@@ -154,7 +142,7 @@
   background: var(--nse-window-title-background, #e5e8eb);
   pointer-events: none;
 }
-.nse-window-titlebar-view[data-titlebar-transparent="true"] > .nse-window-titlebar-view__floating-surface { background: transparent; border-color: transparent; }
+.nse-window-titlebar-view[data-titlebar-transparent="true"] .nse-window-titlebar-view__floating-surface { background: transparent; border-color: transparent; }
 }
 }
 
@@ -167,7 +155,7 @@
 .nse-window-titlebar-view[data-window-frame-view] > .nse-window-titlebar-view__row {
   min-height: var(--nse-frame-titlebar-height, var(--nse-window-titlebar-height, 31px));
 }
-.nse-window-titlebar-view[data-window-frame-view] > .nse-app-topbar-base { display: none; }
+.nse-window-titlebar-view[data-window-frame-view] .nse-app-topbar-base { display: none; }
 .nse-window-titlebar-view__menu .nse-menu-bar {
   width: 100%;
   background: var(--nse-window-title-background);

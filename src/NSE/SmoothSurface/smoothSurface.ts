@@ -74,8 +74,11 @@ export const nseSmoothSurfaceDefaultOptions = {
   autoEffects: true
 } as const satisfies Omit<SmoothSurfaceResolvedOptions, "corners">;
 
+/** An app's corner matches the Cumulus capsule end: half the 46px glass in the 50px bar. */
+export const nseAppCornerRadius = 23;
+
 export const nseAppSmoothSurfaceDefaultOptions = {
-  radius: 31,
+  radius: nseAppCornerRadius,
   curve: "squircle",
   smoothing: 0.6,
   exponent: 4,

@@ -20,7 +20,7 @@
 
 import type { ResolvedKeyBinding } from "../../SynCloudOS/SynCloudOS";
 import { nseFlashMenuSelection } from "./menuSelectionFlash";
-import { Children, isValidElement, useCallback, useContext, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore, type HTMLAttributes, type KeyboardEvent, type ReactNode } from "react";
+import { Children, isValidElement, useCallback, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type HTMLAttributes, type KeyboardEvent, type ReactNode } from "react";
 import type { CommandDispatchAcceptance, CommandPresentation } from "../../SynCloudOS/SynCloudOS";
 import { AppearanceNineSlice } from "../Appearance/NSEAppearanceNineSlice";
 import { useNSEAppearanceProjection } from "../Appearance";
@@ -184,7 +184,8 @@ function CommandMenuSurface({
 
   useEffect(() => {
     if (!open) {
-      controller.dismiss("programmatic");
+      // A popup animating out re-renders this view closed; its menu is already dismissed.
+      if (controller.snapshot.open) controller.dismiss("programmatic");
       return undefined;
     }
     // React StrictMode deliberately replays effects. The controller belongs to
@@ -258,10 +259,7 @@ function CommandMenuSurface({
   }, [activeId, open, presentationReady, snapshot.generation, snapshot.open]);
 
   const flashing = useRef(false);
-  // Set once a chosen row has flashed, until the menu opens again.
-  const chosen = useRef(false);
   const shownSnapshot = useRef(snapshot);
-  if (open && snapshot.open && shownSnapshot.current.generation !== snapshot.generation) chosen.current = false;
   const activate = async (entry: MenuPresentedEntry, delayed = false) => {
     if (entry.kind === "submenu") {
       if (!entry.enabled) return;
@@ -295,7 +293,6 @@ function CommandMenuSurface({
       flashing.current = true;
       try { await flash; } finally { flashing.current = false; }
       if (!ownsBranch(path)) return;
-      chosen.current = true;
     }
     await controller.dispatch(current.id);
   };
@@ -408,10 +405,16 @@ function CommandMenuSurface({
     }
   };
 
-  // A menu whose row was chosen keeps drawing what it showed while its popup fades out.
+  // A closing menu keeps drawing what it showed while its popup animates out; the popup unmounts it after.
   const showing = open && snapshot.open;
   if (showing) shownSnapshot.current = snapshot;
-  const view = showing ? snapshot : chosen.current ? shownSnapshot.current : null;
+  // A closing menu gives up focus at once, so its owner can restore focus when the popup leaves.
+  const menuRef = useRef<HTMLDivElement | null>(null);
+  useLayoutEffect(() => {
+    const active = menuRef.current?.ownerDocument.activeElement;
+    if (!showing && active instanceof HTMLElement && menuRef.current?.contains(active)) active.blur();
+  }, [showing]);
+  const view = showing ? snapshot : shownSnapshot.current.open ? shownSnapshot.current : null;
   if (!view) return null;
   return (
     <div
@@ -420,7 +423,9 @@ function CommandMenuSurface({
       role="menu"
       aria-labelledby={labelledBy}
       aria-busy={view.validating || undefined}
+      ref={menuRef}
       inert={!showing || undefined}
+      aria-hidden={!showing || undefined}
       data-nse-menu-id={model.id}
       data-nse-menu-generation={view.generation}
       {...appearanceProjection}
@@ -445,7 +450,7 @@ function CommandMenuSurface({
           ) : (
             <>
               <span className="nse-menu-back-indicator" data-direction={direction} data-nse-part="back-indicator" aria-hidden="true" />
-              Back
+              <span data-nse-part="title" className="nse-menu-item-label">Back</span>
             </>
           )}
         </button>
@@ -479,7 +484,8 @@ function CommandMenuSurface({
             tabIndex={activeId === entry.id ? 0 : -1}
             title={!entry.enabled ? entry.disabledReason : undefined}
             onFocus={() => setActiveId(entry.id)}
-            onPointerEnter={() => { setHoveredId(entry.id); if (entry.kind === "submenu") activate(entry, true); }}
+            // Hover moves the one highlight here but never opens a submenu: submenus replace the menu, so they open on a click or key.
+            onPointerEnter={(event) => { setHoveredId(entry.id); if (entry.enabled) event.currentTarget.focus({ preventScroll: true }); }}
             onPointerLeave={() => { setHoveredId(current => current === entry.id ? null : current); controller.cancelPendingSubmenu(); }}
             onClick={() => activate(entry)}
           >

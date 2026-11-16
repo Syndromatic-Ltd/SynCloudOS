@@ -33,6 +33,17 @@ Framework baseline is 1bfc47e9 in the Webspring framework worktree. Site baselin
 - Phase 1 status-bar placement and bright dark-scheme border paint are visible in the [paired status captures](phase-1/paired/).
 - Window-controls-overlay verification remains open. Chrome accepted a temporary-profile PWA installation, but the test could not obtain a live native titlebar rectangle.
 
+## Developer MCP chrome rules (owner decisions)
+
+These are for the developer MCP's app checks. None are built yet.
+
+- **Error:** an app has neither `mainMenu` nor an application-menu trigger (`NSEToolbarItem.applicationMenu` or an app-drawn `useApplicationMenuTrigger` button), unless it declares an exception with a reason.
+- **Error:** a window shows two title bars or toolbars. Example: a titled window, which gets the system bar, that also draws its own bar. An app that draws its own chrome must drop `titled` from its `styleMask`.
+- **Error:** more than one QuickSwitch toggle title is visible in a window.
+- **Warning:** more than one Return to Webspring button, or more than one application-menu (User Info or settings) button, in a window.
+- **Error:** an app hand-draws a control NSE already has. Example: Publisher drew its own rotation and shadow-angle dial, a decorative `span` with an `aria-hidden` knob, instead of `NSESlider` with `sliderType: "circular"`. The finding names the existing control and its API, so an agent that assumes something is missing gets the real element instead of inventing one.
+- **Lookup:** `lookup_sdk` answers AppKit names and plain descriptions with the NSE API. "Circular slider", "angle dial", "knob" and `NSSlider.SliderType.circular` all return `NSESlider sliderType="circular"` with its Control Gallery example ("Wrapping angle dial"). An agent asks before concluding a control does not exist.
+
 ## Engineering follow-up
 
 - Browser surfaces now bind and unbind with generation checks. The same mounted window and its auxiliaries follow the acknowledged destination. Child activation selects the eligible modal descendant and deactivation clears its key state while preserving the main window.

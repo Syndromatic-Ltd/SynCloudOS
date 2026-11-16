@@ -24,7 +24,7 @@ import { isNSEHTMLElement } from "../../NSE/Focus/domRealm";
 import { contentInlineSize } from "./contentInlineSize";
 import { useNSEWindowChromeObstruction } from "../../NSE/NSE";
 
-import { Fragment, createContext, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
+import { Fragment, createContext, useCallback, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import type { NSEAnyWindowController } from "../../NSE/applicationHostInterop";
 import { useObserve, ActionResponderContext } from "../../NSE/applicationHostInterop";
@@ -61,7 +61,9 @@ export function useNSEWindowTitlebarDocument(controller: NSEAnyWindowController,
   const titlebarAppearsTransparent = window?.titlebarAppearsTransparent;
   const toolbar = useObserve(window?.toolbar);
   const hasToolbar = toolbar?.isVisible ?? false;
+  const toolbarDisplayMode = toolbar?.displayMode;
   const frameViewClass = window?.frameViewClass;
+  const titled = window?.styleMask.includes("titled") ?? true;
   const texturedBackground = window?.styleMask.includes("texturedBackground");
   const fullSizeContentView = window?.styleMask.includes("fullSizeContentView");
   const backgroundColor = window?.backgroundColor;
@@ -78,9 +80,9 @@ export function useNSEWindowTitlebarDocument(controller: NSEAnyWindowController,
   const sidebarWidth = measuredSidebarWidth > 0 ? measuredSidebarWidth : undefined;
   useLayoutEffect(() => {
     if (!host || !claims) return undefined;
-    host.setDocument(Object.freeze({ title, subtitle, documentEdited, toolbarStyle, titleVisibility, titlebarPresentation, titlebarAppearsTransparent, hasToolbar, frameViewClass, texturedBackground, sidebarWidth, fullSizeContentView, backgroundColor, isOpaque, cornerRadius }));
+    host.setDocument(Object.freeze({ titled, title, subtitle, documentEdited, toolbarStyle, titleVisibility, titlebarPresentation, titlebarAppearsTransparent, hasToolbar, toolbarDisplayMode, frameViewClass, texturedBackground, sidebarWidth, fullSizeContentView, backgroundColor, isOpaque, cornerRadius }));
     return undefined;
-  }, [backgroundColor, claims, cornerRadius, documentEdited, frameViewClass, fullSizeContentView, hasToolbar, host, isOpaque, sidebarWidth, subtitle, texturedBackground, title, titlebarAppearsTransparent, titlebarPresentation, titleVisibility, toolbarStyle]);
+  }, [backgroundColor, claims, cornerRadius, titled, documentEdited, frameViewClass, fullSizeContentView, hasToolbar, toolbarDisplayMode, host, isOpaque, sidebarWidth, subtitle, texturedBackground, title, titlebarAppearsTransparent, titlebarPresentation, titleVisibility, toolbarStyle]);
   useLayoutEffect(() => {
     if (!host || !claims) return undefined;
     return () => { host.setDocument(null); };
@@ -124,6 +126,8 @@ export function WindowTitlebarAccessories({ accessories, renderController, host,
   }
   return <AccessoryRow>{views(null)}</AccessoryRow>;
 }
+
+const applicationMenuIds = Object.freeze(["applicationMenu"]);
 
 /** The row of bottom accessories, on the window's chrome under the toolbar. */
 function AccessoryRow({ children }: { readonly children: ReactNode }) {
@@ -179,7 +183,9 @@ export function WindowToolbar({ controller, toolbar }: { readonly controller: NS
   const mode = useAccessoryColourScheme();
   const element = useRef<HTMLDivElement | null>(null);
   const layout = useContext(WindowLayoutContext);
-  const inTitlebar = Boolean(useContext(WindowTitlebarHostContext)?.toolbar);
+  const titlebarHost = useContext(WindowTitlebarHostContext);
+  const inTitlebar = Boolean(titlebarHost?.toolbar);
+  const applicationMenuSlot = titlebarHost?.applicationMenu ?? null;
   useNSEWindowChromeElement(element, "top", false, toolbar.isVisible && !inTitlebar);
   const [width, setWidth] = useState(0);
   const [attached, setAttached] = useState(false);
@@ -229,6 +235,11 @@ export function WindowToolbar({ controller, toolbar }: { readonly controller: NS
     };
   }, [layout, toolbar.isVisible]);
   const engine = attached ? toolbar[nseToolbarEngine] : null;
+  const engineSnapshot = useSyncExternalStore(
+    useCallback((listener: () => void) => engine?.subscribe(listener) ?? (() => {}), [engine]),
+    () => engine?.snapshot ?? null, () => engine?.snapshot ?? null);
+  // The title row keeps the application menu when the toolbar has a row of its own.
+  const applicationMenu = applicationMenuSlot ? engineSnapshot?.items.find(item => item.id === "applicationMenu" && item.kind === "custom") : undefined;
   useLayoutEffect(() => {
     const node = tabItems.current;
     if (!node) { setTabItemsWidth(0); return undefined; }
@@ -253,6 +264,7 @@ export function WindowToolbar({ controller, toolbar }: { readonly controller: NS
             composition="configured"
             controller={engine}
             width={Math.max(0, width - tabItemsWidth)}
+            drawnElsewhere={applicationMenu ? applicationMenuIds : undefined}
             interaction={{ overflowOverlayId: `${overlayId}:overflow`, parentResponderId: responderId }}
           />
         ) : null}
@@ -260,6 +272,7 @@ export function WindowToolbar({ controller, toolbar }: { readonly controller: NS
           {tabViews.map((view, index) => <Fragment key={index}>{view}</Fragment>)}
         </div> : null}
       </div>
+      {applicationMenu && applicationMenu.kind === "custom" && applicationMenuSlot ? createPortal(applicationMenu.render(), applicationMenuSlot) : null}
       {engine && toolbar.customizationPaletteIsRunning ? (
         <ToolbarConfigurationSheet
           id={`${overlayId}:customize`}

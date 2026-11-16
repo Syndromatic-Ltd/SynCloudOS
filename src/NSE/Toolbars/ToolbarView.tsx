@@ -83,6 +83,8 @@ type ToolbarConfiguredProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | 
   readonly width: number;
   readonly interaction?: ToolbarInteraction;
   readonly direction?: "ltr" | "rtl";
+  /** Item identifiers the window draws in another place, which this row leaves out. */
+  readonly drawnElsewhere?: readonly string[];
   readonly children?: never;
   readonly position?: never;
   readonly grouped?: never;
@@ -106,6 +108,7 @@ function ConfiguredToolbar({
   width,
   interaction: requestedInteraction,
   direction = "ltr",
+  drawnElsewhere,
   className,
   onKeyDown,
   ...htmlAttributes
@@ -130,11 +133,13 @@ function ConfiguredToolbar({
     initialRefreshController.current = controller;
     initialRefreshStarted.current = false;
   }
-  const layout = useMemo(() => allocateToolbarItems(snapshot.items, width, {
+  const items = useMemo(() => drawnElsewhere?.length ? snapshot.items.filter(item => !drawnElsewhere.includes(item.id)) : snapshot.items,
+    [drawnElsewhere, snapshot.items]);
+  const layout = useMemo(() => allocateToolbarItems(items, width, {
     displayMode: snapshot.displayMode,
     sizeMode: snapshot.sizeMode,
     direction,
-  }), [direction, snapshot.displayMode, snapshot.items, snapshot.sizeMode, width]);
+  }), [direction, items, snapshot.displayMode, snapshot.sizeMode, width]);
   // Do not establish a Tab stop from the disabled pre-validation projection.
   // Once command authority has published a generation, the first usable command (or the
   // overflow branch) becomes the initial roving item.

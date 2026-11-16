@@ -129,6 +129,7 @@ export { useRuntimeNSEMenuPort as useNSEMenuPort } from "../../SynCloudOSReact";
 /** Public app-authoring boundary for locally focused control responders. */
 export { ResponderScope, type ResponderScopeProps } from "../../SynCloudOSReact";
 export { useQuickSwitchTrigger } from "../../SynCloudOSReact";
+export { useApplicationMenuTrigger, type ApplicationMenuTriggerPort } from "../../SynCloudOSReact/ApplicationMenuTrigger";
 export type { QuickSwitchTriggerPort as SynWareQuickSwitchTriggerPort } from "../../SynCloudOSReact";
 export { useCommandRegistration } from "../../SynCloudOSReact";
 /** Public app-authoring services retain the canonical runtime panel contracts. */

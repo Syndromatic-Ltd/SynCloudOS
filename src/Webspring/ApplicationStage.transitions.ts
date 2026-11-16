@@ -71,6 +71,8 @@ const bezier = (x1: number, y1: number, x2: number, y2: number): AFXAnimationTim
   Object.freeze({ kind: "cubic-bezier", x1, y1, x2, y2 });
 const multiSwitchEase = bezier(0.55, 0.06, 0.18, 1);
 const multiSwitchSettleEase = bezier(0.33, 0.01, 0.22, 1);
+// The outgoing plane trails the incoming one, so the incoming app slides over it.
+const multiSwitchTrailEase = bezier(0.6, 0.02, 0.5, 1);
 // Framer's default tween for a value without a transition, and its default
 // ease for a tween given only a duration.
 const framerDefaultEase = bezier(0.25, 0.1, 0.35, 1);
@@ -93,13 +95,13 @@ const onPresentation = (presentation: PresentationSpec) =>
 const onMount = (presentation: PresentationSpec) =>
   (previous: string | null) => previous === null ? presentation : null;
 
-// The outgoing MultiSwitch plane recedes, darkens and leans away; the
-// incoming plane settles forward from the pose the outgoing one reaches.
-const outgoingKeyTimes = [0, 0.45, 1];
+// The outgoing MultiSwitch plane recedes, darkens and leans well inward; the
+// incoming plane settles forward from a mirrored lean. Sinking early keeps the incoming plane in front.
+const outgoingKeyTimes = [0, 0.4, 1];
 const outgoingPoses: readonly TransformComponents[] = [
-  { scale: 0.98, z: -24, rotateY: 2 },
-  { scale: 0.86, z: -180, rotateY: 14 },
-  { scale: 0.86, z: -260, rotateY: 22 },
+  { scale: 0.96, z: -40, rotateY: 4 },
+  { scale: 0.8, z: -380, rotateY: 30 },
+  { scale: 0.78, z: -480, rotateY: 40 },
 ];
 const outgoingFilters: readonly FilterComponents[] = [{ brightness: 1 }, { brightness: 0.6 }, { brightness: 0.4 }];
 const outgoingOpacity = [1, 1, 0.94];
@@ -114,12 +116,12 @@ const outgoingSurfaceStyle: CSSProperties = Object.freeze({
   transform: nseTransformStyle(outgoingPoses.at(-1)!),
 });
 const incomingSurface = spec(multiSwitchDuration, framerTween, [transformTrack([
-  { scale: 0.86, z: -260, rotateY: -22 },
-  { scale: 0.86, z: -180, rotateY: -14 },
+  { scale: 0.84, z: -300, rotateY: -34 },
+  { scale: 0.86, z: -160, rotateY: -18 },
   {},
-], { keyTimes: [0, 0.55, 1], timingFunctions: [framerTween, multiSwitchSettleEase] })]);
-const outgoingRootPose: TransformComponents = { x: -118 };
-const outgoingRoot = spec(multiSwitchDuration, multiSwitchEase, [transformTrack([{}, outgoingRootPose], { unit: "vw" })]);
+], { keyTimes: [0, 0.5, 1], timingFunctions: [framerTween, multiSwitchSettleEase] })]);
+const outgoingRootPose: TransformComponents = { x: -72 };
+const outgoingRoot = spec(multiSwitchDuration, multiSwitchTrailEase, [transformTrack([{}, outgoingRootPose], { unit: "vw" })]);
 const incomingRoot = spec(multiSwitchDuration, multiSwitchEase, [transformTrack([{ x: 118 }, {}], { unit: "vw" })]);
 
 const modelOpacity = (style: CSSProperties) => typeof style.opacity === "number" ? style.opacity : 1;

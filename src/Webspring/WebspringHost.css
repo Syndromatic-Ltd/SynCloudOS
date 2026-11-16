@@ -1055,7 +1055,7 @@
    plane is still full-bleed for the first frames, so nothing flashes. */
 .webspring-apps-container[data-multiswitching="true"] {
   overflow: hidden;
-  perspective: 1300px;
+  perspective: 1000px;
   perspective-origin: 50% 46%;
 }
 

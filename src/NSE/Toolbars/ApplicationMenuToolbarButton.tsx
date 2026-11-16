@@ -18,25 +18,23 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext, createContext, type CSSProperties } from "react";
+import { useContext, createContext } from "react";
+import { TitlebarGlyphButton } from "../Windows/TitlebarGlyphButton";
 import { nseTopBarGlyphs } from "../Windows/Chrome/topBarAssets";
 
 export type ApplicationMenuGlyph = "gear" | "person";
 
+/** @internal The window's application menu, shared by the toolbar item and any trigger the app draws. */
 export const WindowApplicationMenuContext = createContext<{
+  readonly label: string;
   readonly open: boolean;
   activate(anchor: HTMLElement): void;
+  setAnchor(element: HTMLElement | null): void;
+  toggle(): void;
 } | null>(null);
 
 export function ApplicationMenuToolbarButton({ glyph }: { readonly glyph: ApplicationMenuGlyph }) {
   const menu = useContext(WindowApplicationMenuContext);
-  const mask = glyph === "gear" ? nseTopBarGlyphs.settings : nseTopBarGlyphs.userInfo;
-  return <button type="button" aria-label="Application Menu" aria-haspopup="menu" aria-expanded={menu?.open ?? false}
-    disabled={!menu} data-window-no-drag="" data-nse-control="toolbar-item" data-nse-part="button"
-    className="nse-app-topbar-button" onClick={event => menu?.activate(event.currentTarget)}>
-    <span className="nse-app-topbar-button-well" aria-hidden="true" />
-    <span className="nse-app-topbar-button-icon" style={{ "--nse-topbar-glyph": `url(${JSON.stringify(mask)})` } as CSSProperties} aria-hidden="true">
-      <span className="nse-app-topbar-glyph-shape" />
-    </span>
-  </button>;
+  return <TitlebarGlyphButton label="Application Menu" glyph={glyph === "gear" ? nseTopBarGlyphs.settings : nseTopBarGlyphs.userInfo}
+    position="right" opensMenu selected={menu?.open ?? false} disabled={!menu} onClick={event => menu?.activate(event.currentTarget)} />;
 }

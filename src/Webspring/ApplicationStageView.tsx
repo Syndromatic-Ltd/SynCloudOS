@@ -40,6 +40,8 @@ import type { SynCloudOSAppInfo } from "../SynCloudOS/SynCloudOS";
 import { AppViewChrome, type AppViewPresentation } from "./AppViewChrome";
 import { AppViewContent } from "./AppViewContent";
 import { WindowTitlebarView } from "../NSE/Windows/WindowTitlebarView";
+import { TitlebarGlyphButton } from "../NSE/Windows/TitlebarGlyphButton";
+import { nseAppCornerRadius } from "../NSE/SmoothSurface";
 import type { WindowTitlebarSlots } from "../NSE/Windows/windowTitlebarContext";
 import { nseTopBarGlyphs } from "../NSE/Windows/Chrome/topBarAssets";
 import { WindowPresentationSlot, useWindowPresentationContent } from "./WindowPresentationContent";
@@ -119,7 +121,9 @@ export function ApplicationStageView({
   }, []);
   const resolvedMode = useResolvedMode();
   const [titlebarDocument, setTitlebarDocument] = useState<WindowTitlebarDocument | null>(null);
-  const usesStandardTopBar = standalone || frame.presentationMotion !== "content" || Boolean(titlebarDocument?.hasToolbar);
+  // An untitled window draws all of its own chrome, as a borderless NSWindow does.
+  const usesStandardTopBar = titlebarDocument?.titled !== false
+    && (standalone || frame.presentationMotion !== "content" || Boolean(titlebarDocument?.hasToolbar));
   const siteBranding = useHostSiteBranding();
   const navigationChromeController = useMemo(() => new ApplicationNavigationChromeController({ owner: nseUnowned }), [stage.id]);
   const navigationChromeSnapshot = useSyncExternalStore(
@@ -171,33 +175,30 @@ export function ApplicationStageView({
   const navigationBack = activeNavigationChrome?.back ?? null;
   const material = titlebarDocument?.texturedBackground ? "metal" : "cumulus";
   const currentTitle = titlebarDocument?.title || activeNavigationChrome?.title || standardBarTitle;
-  const returnControl = standalone ? null : <button
-    type="button" aria-label={returnToWebspringLabel} title={returnToWebspringLabel}
-    className="nse-app-topbar-button" data-position="leading"
-    onClick={() => { void runtime.commands.dispatch("workspace.returnToWebspring", undefined, { source: "toolbar" }); }}>
-    <span className="nse-app-topbar-button-well" aria-hidden="true" />
-    <span className="nse-app-topbar-button-icon" style={{ "--nse-topbar-glyph": `url(${JSON.stringify(siteBranding?.homeIconUrl ?? nseTopBarGlyphs.webspring)})` } as React.CSSProperties} aria-hidden="true">
-      <span className="nse-app-topbar-glyph-shape" />
+  const returnControl = standalone ? null : <TitlebarGlyphButton label={returnToWebspringLabel}
+    glyph={siteBranding?.homeIconUrl ?? nseTopBarGlyphs.webspring}
+    onClick={() => { void runtime.commands.dispatch("workspace.returnToWebspring", undefined, { source: "toolbar" }); }} />;
+  const quickSwitchTitle = (label: ReactNode) => quickSwitchAction ? <button className="nse-app-topbar-title-button" data-nse-part="button"
+    type="button" aria-label={quickSwitchAction.label} aria-expanded={quickSwitchAction.selected} data-selected={quickSwitchAction.selected ? "true" : "false"} onClick={quickSwitchAction.onClick}>
+    <span className="nse-app-topbar-title-text">{label}</span>
+    <span data-nse-part="arrow" className="nse-app-topbar-title-arrow" aria-hidden="true">
+      <span className="nse-app-topbar-title-arrow-glyph nse-app-topbar-title-arrow-right" />
+      <span className="nse-app-topbar-title-arrow-glyph nse-app-topbar-title-arrow-down" />
     </span>
-  </button>;
+  </button> : label;
+  // A Metal window's sidebar gets the rail: the app's name and QuickSwitch over the sidebar, the page title beside it.
+  const sidebarRail = material === "metal" && titlebarDocument?.sidebarWidth !== undefined && !navigationBack
+    ? { width: titlebarDocument.sidebarWidth, content: quickSwitchTitle(appName) } : undefined;
   const standardTopBar = showsTitlebar ? <WindowTitlebarView
     document={{ ...(titlebarDocument ?? { subtitle: "", documentEdited: false }), title: currentTitle }}
     isKeyWindow={stage.isFocused} material={material} mode={resolvedMode}
     onSlotsChange={setSlots}
-    controls={<>{returnControl}{stage.windowId && !standalone ? <button type="button" aria-label="Exit Full Screen"
-      className="nse-app-topbar-button" data-position="leading" data-window-control="fullScreen"
-      onClick={() => runtime.windows.toggleFullScreen(stage.windowId!)}>↙</button> : null}</>}
+    controls={returnControl}
+    sidebar={sidebarRail}
     leading={navigationBack ? <NavigationChromeSlot className="webspring-application-navigation-back-slot" enter={stageMotion.navigationBack}>
       <ApplicationNavigationBackButton label={navigationBack.label} onActivate={navigationBack.onActivate} />
     </NavigationChromeSlot> : undefined}
-    titleAction={quickSwitchAction && !navigationBack ? <button className="nse-app-topbar-title-button"
-      type="button" aria-label={quickSwitchAction.label} aria-expanded={quickSwitchAction.selected} onClick={quickSwitchAction.onClick}>
-      <span className="nse-app-topbar-title-text">{currentTitle}</span>
-      <span data-nse-part="arrow" className="nse-app-topbar-title-arrow" aria-hidden="true">
-        <span className="nse-app-topbar-title-arrow-glyph nse-app-topbar-title-arrow-right" />
-        <span className="nse-app-topbar-title-arrow-glyph nse-app-topbar-title-arrow-down" />
-      </span>
-    </button> : undefined}
+    titleAction={quickSwitchAction && !navigationBack && !sidebarRail ? quickSwitchTitle(currentTitle) : undefined}
   /> : null;
   const isMultiSwitching = Boolean(multiSwitchRole);
   const completePresentation = useCallback(() => {
@@ -273,7 +274,7 @@ export function ApplicationStageView({
         <FocusPortProvider port={nseFocusPort}>
           <QuickSwitchTriggerProvider port={quickSwitchTrigger}>
           <AppViewContent.Surface
-            smoothSurface={titlebarDocument?.cornerRadius ?? 31}
+            smoothSurface={titlebarDocument?.cornerRadius ?? nseAppCornerRadius}
             background={titlebarDocument?.isOpaque === false ? "none" : "system"}
             backgroundColor={titlebarDocument?.backgroundColor}
             fullSizeContentView={titlebarDocument?.fullSizeContentView}

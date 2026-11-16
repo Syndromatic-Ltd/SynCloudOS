@@ -25,6 +25,7 @@ import type { OverlayAnchorPoint } from "../Overlays/computeOverlayPosition";
 import type { NSEMenu } from "./NSEMenu";
 import type { MenuOverlayOptions } from "./menuTypes";
 import { MenuOverlayPresentationScope } from "./menuPresentationContext";
+import { nseMenuChosenFadeMs } from "./menuSelectionFlash";
 
 export interface MenuOverlayProps {
   readonly overlay: MenuOverlayOptions;
@@ -139,7 +140,7 @@ export function MenuOverlay({ overlay, controller, open, anchor, anchorPoint, la
       labelledBy={labelledBy}
       className={className}
       {...(appearance === "application-menu" ? { "data-nse-style": "application-menu" } : {})}
-      exitDuration={exitDuration}
+      exitDuration={exitDuration ?? nseMenuChosenFadeMs}
       restoreFocus={restoreFocus}
       onOpenChange={handleOpenChange}
     >

@@ -101,7 +101,7 @@ export function WindowApplicationMenu({ app, destination, children }: PropsWithC
     const opening = !store.getSnapshot().open;
     store.setOpen(opening);
   }, [store]);
-  const value = useMemo(() => ({ open: state.open, activate }), [activate, state.open]);
+  const value = useMemo(() => ({ label: `${name} Menu`, open: state.open, activate, setAnchor: store.setAnchor, toggle: store.toggle }), [activate, name, state.open, store]);
   return <WindowApplicationMenuContext.Provider value={value}>
     {children}
     {responder ? <ApplicationMenuOverlayHost menuStore={store} model={model} controller={menu}

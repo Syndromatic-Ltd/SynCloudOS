@@ -28,7 +28,7 @@ export interface ClassApplicationHost {
   /** Opens the application's first window and mounts what it renders. */
   openMainWindow(): Promise<string>;
   /** Mounts a window host that renders every window the runtime opens for the application. */
-  mountWindows(options?: { readonly strict?: boolean }): { unmount(): void };
+  mountWindows(options?: { readonly strict?: boolean; readonly wrap?: (windows: ReactNode) => ReactNode }): { unmount(): void };
   /** Unmounts every window host mounted so far; the windows stay open in the runtime. */
   unmountWindows(): void;
   dispose(): Promise<void>;
@@ -98,7 +98,8 @@ export function createClassApplicationHost(AppClass: NSEApplicationClass | Compo
     mountWindows(options = {}) {
       let result!: RenderResult;
       act(() => {
-        result = render(tree(options.strict ? <StrictMode><WindowHost /></StrictMode> : <WindowHost />));
+        const windows = options.strict ? <StrictMode><WindowHost /></StrictMode> : <WindowHost />;
+        result = render(tree(options.wrap ? options.wrap(windows) : windows));
       });
       const handle = { unmount: () => { act(() => { result.unmount(); }); } };
       mounted.push(handle);

@@ -94,20 +94,20 @@ describe("stage presentation", () => {
     expect(outgoing.surface.style).toEqual({
       opacity: 0.94,
       filter: "brightness(0.4)",
-      transform: "translate3d(0px, 0px, -260px) scale(0.86) rotateY(22deg)",
+      transform: "translate3d(0px, 0px, -480px) scale(0.78) rotateY(40deg)",
     });
     expect(endpoints(resolved(outgoing.surface.enter, "presented"))).toEqual({
       opacity: [1, 0.94],
       filter: ["none", "brightness(0.4)"],
-      transform: ["translate3d(0px, 0px, -24px) scale(0.98) rotateY(2deg)", "translate3d(0px, 0px, -260px) scale(0.86) rotateY(22deg)"],
+      transform: ["translate3d(0px, 0px, -40px) scale(0.96) rotateY(4deg)", "translate3d(0px, 0px, -480px) scale(0.78) rotateY(40deg)"],
     });
-    expect(outgoing.root.style).toEqual({ transform: "translate(-118vw, 0vw) scale(1)" });
+    expect(outgoing.root.style).toEqual({ transform: "translate(-72vw, 0vw) scale(1)" });
     expect(endpoints(outgoing.surface.exit)).toEqual({ opacity: [0.94, 0] });
     const incoming = resolveApplicationStageMotion({ reducedMotion: false, role: "incoming", staged: false, launching: false });
     expect(incoming.surface.style).toEqual({});
     expect(endpoints(resolved(incoming.root.enter, null))).toEqual({ transform: ["translate(118vw, 0vw) scale(1)", "none"] });
     expect(endpoints(resolved(incoming.surface.enter, null))).toEqual({
-      transform: ["translate3d(0px, 0px, -260px) scale(0.86) rotateY(-22deg)", "none"],
+      transform: ["translate3d(0px, 0px, -300px) scale(0.84) rotateY(-34deg)", "none"],
     });
   });
 
@@ -336,10 +336,10 @@ describe("stage view MultiSwitch", () => {
     // surface recedes, holding its model pose once the presentation ends.
     rendered.rerender(view("outgoing"));
     const surface = rendered.container.querySelector<HTMLElement>(".webspring-app-view-surface")!;
-    expect(surface.style.transform).toBe("translate3d(0px, 0px, -260px) scale(0.86) rotateY(22deg)");
+    expect(surface.style.transform).toBe("translate3d(0px, 0px, -480px) scale(0.78) rotateY(40deg)");
     expect(surface.style.filter).toBe("brightness(0.4)");
     const out = presentations.of(".webspring-app-view-frame").at(-1)!;
-    expect(out.request.animations[0]).toMatchObject({ from: "none", to: "translate(-118vw, 0vw) scale(1)" });
+    expect(out.request.animations[0]).toMatchObject({ from: "none", to: "translate(-72vw, 0vw) scale(1)" });
     await out.finish();
     expect(onRole).toHaveBeenLastCalledWith("switch:1", "outgoing");
     expect(onRole).toHaveBeenCalledTimes(2);
