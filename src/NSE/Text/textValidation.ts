@@ -62,10 +62,11 @@ export function canonicalNSETextData<T>(value: T, typeId = "nse.text", limits: N
         const descriptors = Object.getOwnPropertyDescriptors(objectCandidate);
         const keys = Reflect.ownKeys(objectCandidate);
         if (keys.some((key) => typeof key !== "string")) fail("objects must not contain symbol properties.");
-        result = Object.fromEntries((keys as string[]).sort().map((key) => {
+        // An optional member set to undefined is absent, as the declared types and JSON both treat it.
+        result = Object.fromEntries((keys as string[]).sort().flatMap((key) => {
           const descriptor = descriptors[key] ?? fail("object descriptor is missing.");
           if (!("value" in descriptor) || !descriptor.enumerable) fail("values must use enumerable data properties, not accessors.");
-          return [key, visit(descriptor.value, depth + 1)];
+          return descriptor.value === undefined ? [] : [[key, visit(descriptor.value, depth + 1)]];
         }));
       }
       seen.delete(objectCandidate);

@@ -665,10 +665,25 @@
 :where(:scope):is(.chronosphere-navigation) {
   right:clamp(110px, 12vw, 240px); bottom:90px; display:flex; flex-direction:column; gap:0;
 }
+/* Chronosphere's own raised arrows, standing on the shelf's ground plane. */
 .chronosphere-time-arrow,
-:where(:scope):is(.chronosphere-time-arrow) { width:88px; height:54px; pointer-events:auto; }
+:where(:scope):is(.chronosphere-time-arrow) {
+  appearance:none; border:0; width:88px; height:54px; padding:0; background:transparent; cursor:pointer;
+  pointer-events:auto; filter:drop-shadow(0 9px 4px rgba(0,0,0,.7));
+  transition:filter 120ms, opacity 120ms;
+}
+.chronosphere-time-arrow svg,
+:where(:scope):is(.chronosphere-time-arrow) svg { width:100%; height:100%; overflow:visible; }
 .chronosphere-time-arrow-present,
-:where(:scope):is(.chronosphere-time-arrow-present) { margin-top:7px; margin-left:34px; }
+:where(:scope):is(.chronosphere-time-arrow-present) { margin-top:-7px; margin-left:34px; }
+.chronosphere-time-arrow:hover:not(:disabled),
+:where(:scope):is(.chronosphere-time-arrow:hover:not(:disabled)) { filter:brightness(1.4) drop-shadow(0 6px 5px #000); }
+.chronosphere-time-arrow:active:not(:disabled),
+:where(:scope):is(.chronosphere-time-arrow:active:not(:disabled)) { filter:brightness(.8); }
+.chronosphere-time-arrow:disabled,
+:where(:scope):is(.chronosphere-time-arrow:disabled) { opacity:.28; cursor:default; }
+.chronosphere-time-arrow:focus-visible,
+:where(:scope):is(.chronosphere-time-arrow:focus-visible) { outline:2px solid #f5ffff; outline-offset:5px; border-radius:5px; }
 /* Glass, lettering and control segments share one projected surface. */
 .chronosphere-floor,
 :where(:scope):is(.chronosphere-floor) {
