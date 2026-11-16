@@ -34,7 +34,7 @@ import { NSETreeController } from "../../src/NSE/Controllers/NSETreeController";
 import { nseUnowned } from "../../src/NSE/Controllers/ownership";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 import baseRef from "./BASE?raw";
-import { labSections } from "./sections";
+import { elementFamilies, labSections } from "./sections";
 import "../../src/NSE/public/styles.css";
 import "../../src/SynCloudOS/styles/runtime.css";
 import "./lab.css";
@@ -81,6 +81,7 @@ interface NavNode { readonly id: string; readonly label: string; readonly childr
 const navGroups: readonly NavNode[] = [
   { id: "group-theme", label: "Theme fixes", children: ["switches", "knob", "outline", "menus"].map(id => ({ id, label: labSections.find(section => section.id === id)!.title, children: [] })) },
   { id: "group-metrics", label: "Metrics", children: ["sizing", "bars"].map(id => ({ id, label: labSections.find(section => section.id === id)!.title, children: [] })) },
+  { id: "group-elements", label: "Every element", children: elementFamilies.map(family => ({ id: family.id, label: family.title, children: [] })) },
   { id: "group-reference", label: "Reference", children: [{ id: "catalogue", label: "Catalogue", children: [] }] },
 ];
 const navGroupIds = new Set(navGroups.map(group => group.id));
@@ -94,8 +95,9 @@ function Sidebar({ section, onSelect }: { section: string; onSelect: (id: string
     return tree;
   });
   useEffect(() => () => controller.dispose(), [controller]);
+  useEffect(() => { controller.select([section]); }, [controller, section]);
   return <NSEOutlineView aria-label="Lab sections" controller={controller} idForItem={item => item.id} childrenForItem={item => item.children} labelForItem={item => item.label}
-    selectionHighlightStyle="sourceList" delegate={{ isGroupItem: id => navGroupIds.has(id) }}
+    selectionHighlightStyle="sourceList" viewportBlockSize="fill" delegate={{ isGroupItem: id => navGroupIds.has(id) }}
     onSelectionChange={event => { const id = [...event.snapshot.selectedIds][0]; if (id && !navGroupIds.has(id)) onSelect(id); }} />;
 }
 
@@ -133,7 +135,8 @@ function Lab() {
 
   useEffect(() => {
     const onMessage = (event: MessageEvent) => {
-      if (event.origin !== location.origin || event.data?.type !== "atmo-lab:ready") return;
+      if (event.origin !== location.origin) return;
+      if (event.data?.type !== "atmo-lab:ready") return;
       if (Array.isArray(event.data.catalogue)) setCatalogue(event.data.catalogue);
       sendAngle(degrees);
     };
@@ -184,11 +187,12 @@ function Lab() {
   );
 
   return <div className="lab">
+    {/* As in an app, the title sits in the bar row and the source list runs the full column beneath it. */}
+    <MetalSurface mode={state.scheme} className="lab-head"><h1>Atmo Lab</h1><p>Baseline {base}</p></MetalSurface>
     <MetalSurface mode={state.scheme} className="lab-nav">
-      <header><h1>Atmo Lab</h1><p>Baseline {base}</p></header>
       <Sidebar section={state.section} onSelect={section => update({ section })} />
     </MetalSurface>
-    <div className="lab-main">
+    <div className="lab-bar">
       <ToolbarView composition="children" position="top">
         <Choice label="Appearance" value={state.scheme} onChange={scheme => update({ scheme })} options={[["light", "Light"], ["dark", "Dark"]]} />
         <Choice label="Backdrop" value={state.backdrop} onChange={backdrop => update({ backdrop })} options={[["metal", "Metal"], ["window", "Window"]]} />
@@ -196,6 +200,8 @@ function Lab() {
         <Choice label="Width" value={state.width} onChange={width => update({ width })} options={[["fill", "Fill"], ["tablet", "Tablet"], ["phone", "Phone"]]} />
         <NSEButton title="Reload" bezelStyle="texturedRounded" controlSize="small" onClick={() => setReloadKey(key => key + 1)} />
       </ToolbarView>
+    </div>
+    <div className="lab-main">
       <div className="lab-brief">
         <p>{sectionInfo?.brief}</p>
         <label className="lab-labelled">Measure <NSESwitch aria-label="Measure" onLabel="On" offLabel="Off" state={state.measure ? "on" : "off"} onStateChange={value => update({ measure: value === "on" })} /></label>

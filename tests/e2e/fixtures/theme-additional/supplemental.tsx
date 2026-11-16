@@ -97,7 +97,7 @@ export const supplementalThemeCatalogue: readonly { id: string; ready?: string; 
 { id: "configured-toolbar-small", render: () => <Toolbar width={500} customising={false} sizeMode="small" /> },
   { id: "menu-bar-open", activate: '[role="menubar"] [role="menuitem"]', render: () => <SpecimenMenuBar /> },
   { id: "application-menu-open", ready: '[data-nse-application-menu]', render: () => <SpecimenApplicationMenu open /> },
-  { id: "application-menu-submenu", ready: '[data-nse-application-menu]', hover: '[data-nse-application-menu] [aria-haspopup]', render: () => <SpecimenApplicationMenu open id="specimen-app-submenu" /> },
+  { id: "application-menu-submenu", ready: '[data-nse-application-menu]', activate: '[data-nse-application-menu] [aria-haspopup]', activeReady: '[data-nse-part="back-indicator"]', render: () => <SpecimenApplicationMenu open id="specimen-app-submenu" /> },
   { id: "context-menu", context: '[data-specimen-context]', render: () => <SpecimenContextMenu /> },
   ...(["metal", "cumulus"] as const).map(material => ({ id: `host-titlebar-${material}`, render: () => <><WindowTitlebarView document={{ title: "Documents", subtitle: "", documentEdited: false }} isKeyWindow material={material} /><p>Body</p></> })),
   { id: "media-grid", render: () => <MediaCollectionPresenter items={["Beach", "Forest"].map((name, index) => ({ id: `m${index}`, providerId: "local", name, kind: "image", mimeType: "image/png", thumbnailUrl: "/assets/webspring/Panel.png" }))} selectedIds={new Set(["5:local2:m1"])} selection="multiple" direction="ltr" onSelectionChange={() => undefined} onActivate={() => undefined} /> },

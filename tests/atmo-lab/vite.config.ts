@@ -32,14 +32,18 @@ const labRoot = resolve(import.meta.dirname);
 const baseRef = (process.env.ATMO_LAB_BASE ?? readFileSync(resolve(labRoot, "BASE"), "utf8")).trim();
 const baselineRoot = resolve(root, ".artifacts/atmo-lab", `baseline-${baseRef}`);
 const mirroredLab = resolve(baselineRoot, "tests/atmo-lab");
-const snapshotPaths = ["src", "tests/fixtures", "tests/e2e/fixtures/theme-baseline", "tsconfig.json", "tsconfig.app.json", "tsconfig.node.json"];
+// Prelude is the site's UI face; the lab reads it from the site checkout, never copying it into this repo.
+const preludeRoot = resolve(process.env.ATMO_LAB_PRELUDE ?? resolve(root, "../../webspring-folders/site/src/Webspring/Contents/Resources/Fonts/Prelude"));
+const snapshotPaths = ["src", "public", "tests/fixtures", "tests/e2e/fixtures/theme-baseline", "tsconfig.json", "tsconfig.app.json", "tsconfig.node.json"];
 
 // The baseline is a read-only export of BASE, so committing our work never moves it.
 function ensureBaseline() {
-  if (existsSync(resolve(baselineRoot, "tsconfig.app.json"))) return;
+  // Art the source names by path lives in public, so an export from before it was included takes just that.
+  const missing = existsSync(resolve(baselineRoot, "tsconfig.app.json")) ? snapshotPaths.filter(path => !existsSync(resolve(baselineRoot, path))) : snapshotPaths;
+  if (!missing.length) return;
   mkdirSync(baselineRoot, { recursive: true });
   const archive = resolve(baselineRoot, "baseline.tar");
-  execFileSync("git", ["-c", "core.longpaths=true", "archive", "--format=tar", "-o", archive, baseRef, ...snapshotPaths], { cwd: root, stdio: "inherit" });
+  execFileSync("git", ["-c", "core.longpaths=true", "archive", "--format=tar", "-o", archive, baseRef, ...missing], { cwd: root, stdio: "inherit" });
   // Relative paths: GNU tar on Windows reads "C:" as a remote host.
   execFileSync("tar", ["-xf", "baseline.tar"], { cwd: baselineRoot, stdio: "inherit" });
   rmSync(archive);
@@ -93,6 +97,14 @@ const atmoLab: Plugin = {
       const pathname = request.url?.split("?")[0];
       if (pathname === "/" || pathname === "/index.html") request.url = "/tests/atmo-lab/index.html";
       next();
+    });
+    server.middlewares.use("/atmo-lab-fonts", (request, response, next) => {
+      const name = decodeURIComponent(request.url?.split("?")[0]?.slice(1) ?? "");
+      const file = resolve(preludeRoot, name);
+      if (!/^PreludeWGL-[A-Za-z]+\.woff2$/.test(name) || !existsSync(file)) return next();
+      response.setHeader("Content-Type", "font/woff2");
+      response.setHeader("Cache-Control", "max-age=3600");
+      response.end(readFileSync(file));
     });
   },
 };

@@ -1,6 +1,7 @@
+@import "./fonts.css";
 /* Atmo Lab frame: layout only. Every control is drawn by the side's own framework. */
 html, body { margin: 0; min-height: 100%; }
-body { font-family: var(--nse-font-system, -apple-system, "Segoe UI", sans-serif); font-size: 14px; }
+body { font-family: "Syndromatic UI", system-ui, sans-serif; font-size: 14px; }
 html[data-appearance="dark"] body { background: #202227; }
 html[data-appearance="light"] body { background: #cdcfd2; }
 
@@ -37,6 +38,13 @@ html[data-appearance="dark"] .lab-row + .lab-row { border-top-color: rgb(0 0 0 /
 }
 .lab-outline { height: 420px; overflow: auto; }
 .lab-menu-stage { min-height: 520px; }
-.lab-bar { position: relative; width: 100%; }
+.lab-bar { position: relative; width: 100%; min-height: var(--nse-topbar-height-cumulus, 50px); }
 .lab-catalogue { width: 800px; max-width: 100%; min-height: 300px; }
 .lab-missing { opacity: 0.7; }
+.lab-embed { display: block; width: 100%; max-width: 1000px; border: 0; border-radius: 6px; box-shadow: 0 0 0 1px rgb(0 0 0 / 22%); background: transparent; }
+.lab-frame[data-embed] { padding: 0; }
+.lab-frame[data-embed] .lab-catalogue { width: 100%; }
+.lab-tooltip-anchor { display: inline-block; padding: 4px 8px; margin-bottom: 48px; border: 1px dashed currentColor; border-radius: 4px; font-size: 12px; }
+.lab-surface-sample { width: 220px; height: 120px; display: grid; place-items: center; }
+.lab-chrono-arrow { display: block; width: 88px; height: 54px; filter: drop-shadow(0 9px 4px rgb(0 0 0 / 70%)); }
+.lab-chrono-arrow svg { width: 100%; height: 100%; overflow: visible; }
