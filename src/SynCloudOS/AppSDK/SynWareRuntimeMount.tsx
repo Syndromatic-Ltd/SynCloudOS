@@ -115,7 +115,11 @@ function MountedAppPresentationBoundary({
   const appAnimations = appClient.animations;
   const animationState = useMemo(() => createRuntimeAnimationState(kernelRuntime, runtime.signal, () => {
     const state = kernelRuntime.lifecycle.getState(runtime.app.bundleIdentifier);
-    return state === "suspended" || state === "closed";
+    if (state === "suspended" || state === "closed") return true;
+    // Both sides of a MultiSwitch hold their display links until it settles, so the switch owns the frame.
+    const multiSwitch = kernelRuntime.store.getSnapshot().application.multiSwitch;
+    return multiSwitch.status === "switching"
+      && (multiSwitch.fromAppId === runtime.app.bundleIdentifier || multiSwitch.toAppId === runtime.app.bundleIdentifier);
   }), [kernelRuntime, runtime]);
   const reducedMotion = useSyncExternalStore(animationState.subscribe, animationState.getReducedMotion, animationState.getReducedMotion);
   const appFrames = useMemo<AFXFrameScheduler | null>(() => {

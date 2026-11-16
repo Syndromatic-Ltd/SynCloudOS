@@ -21,7 +21,7 @@
 import type { AFXRendererParticleBatch } from '../../FX/AnimationFX/AFXRenderer';
 import type { GFXImage } from '../../FX/GraphicsFX/GFXImage';
 
-const vertex = `#version 300 es
+export const particleVertexSource = `#version 300 es
 in vec3 a_position;
 in vec2 a_shape;
 in vec4 a_colour;
@@ -51,7 +51,7 @@ void main() {
   v_offset = u_offset * vec4(a_colour.rgb,1.);
   v_opacity = u_opacity*a_colour.a;
 }`;
-const fragment = `#version 300 es
+export const particleFragmentSource = `#version 300 es
 precision mediump float;
 uniform sampler2D u_image;
 uniform sampler2D u_mask;
@@ -78,26 +78,13 @@ export class BrowserAFXParticlePipeline {
   readonly #vao: WebGLVertexArrayObject;
   readonly #uniforms: Record<string, WebGLUniformLocation | null> = {};
   #storage = new Float32Array(0);
-  constructor(gl: WebGL2RenderingContext) {
+  /** Takes ownership of a linked program built from the particle sources. */
+  constructor(gl: WebGL2RenderingContext, program: WebGLProgram) {
     this.#gl = gl;
-    const compile = (type: number, source: string) => {
-      const shader = gl.createShader(type);
-      if (!shader) throw new Error('Particle shader allocation failed.');
-      gl.shaderSource(shader, source); gl.compileShader(shader);
-      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        const reason = gl.getShaderInfoLog(shader); gl.deleteShader(shader); throw new Error(`Particle shader: ${reason}`);
-      }
-      return shader;
-    };
-    const shaders: WebGLShader[] = [];
-    let program: WebGLProgram | null = null, buffer: WebGLBuffer | null = null, vao: WebGLVertexArrayObject | null = null;
+    let buffer: WebGLBuffer | null = null, vao: WebGLVertexArrayObject | null = null;
     try {
-      shaders.push(compile(gl.VERTEX_SHADER, vertex));
-      shaders.push(compile(gl.FRAGMENT_SHADER, fragment));
-      program = gl.createProgram(); buffer = gl.createBuffer(); vao = gl.createVertexArray();
-      if (!program || !buffer || !vao) throw new Error('Particle pipeline allocation failed.');
-      shaders.forEach(s => gl.attachShader(program!, s)); gl.linkProgram(program);
-      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw new Error(`Particle program: ${gl.getProgramInfoLog(program)}`);
+      buffer = gl.createBuffer(); vao = gl.createVertexArray();
+      if (!buffer || !vao) throw new Error('Particle pipeline allocation failed.');
       gl.bindVertexArray(vao); gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
       for (const [name, count, offset] of [['a_position',3,0],['a_shape',2,3],['a_colour',4,5]] as const) {
         const location = gl.getAttribLocation(program, name);
@@ -109,9 +96,9 @@ export class BrowserAFXParticlePipeline {
         this.#uniforms[name] = gl.getUniformLocation(program, `u_${name}`);
       this.#program = program; this.#buffer = buffer; this.#vao = vao;
     } catch (error) {
-      if (program) gl.deleteProgram(program); if (buffer) gl.deleteBuffer(buffer); if (vao) gl.deleteVertexArray(vao);
+      gl.deleteProgram(program); if (buffer) gl.deleteBuffer(buffer); if (vao) gl.deleteVertexArray(vao);
       throw error;
-    } finally { shaders.forEach(s => gl.deleteShader(s)); gl.bindVertexArray(null); }
+    } finally { gl.bindVertexArray(null); }
   }
   render(batch: AFXRendererParticleBatch, width: number, height: number, texture: (image: GFXImage) => WebGLTexture): void {
     const gl = this.#gl, u = this.#uniforms;
