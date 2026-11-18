@@ -44,6 +44,7 @@ export const paintProperties = Object.freeze([
   "border-image-width",
   "box-shadow",
   "outline-color",
+  "--nse-decorative-border-style",
   ...maskProperties,
   ...maskProperties.map(property => `-webkit-${property}`),
   "-webkit-mask-attachment",

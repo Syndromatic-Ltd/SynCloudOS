@@ -18,9 +18,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { defineConfig } from "vite";
+import { defineConfig, normalizePath, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import { synCloudOS } from "../../scripts/synware/vite-plugin.mjs";
+import { discoverThemeBundles } from "../../scripts/synware/theme-bundles.mjs";
+import { themeModuleSource, themeStylesheet } from "../../scripts/synware/theme-loading.mjs";
 const themeFixtureRoot = resolve(import.meta.dirname, "fixtures/theme-nesting");
 const themeFixturePlugin = synCloudOS({ webspringEntry: false, themesDirectory: "Themes" });
 const configureThemes = themeFixturePlugin.configResolved;
@@ -28,6 +30,31 @@ themeFixturePlugin.configResolved = function(config) { return configureThemes.ca
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { synWareSdkEntries, synWareSdkGeneratedStyles, synWarePackageName } from "../../scripts/synware/sdk-entries.mjs";
+
+function paintReplacementTheme(): Plugin {
+  const moduleId = "virtual:theme-paint-replacement/themes";
+  const stylePrefix = "virtual:theme-paint-replacement/style/";
+  const directory = resolve(import.meta.dirname, "fixtures/theme-paint-replacement/Themes");
+  const toImport = (path: string) => "/@fs/" + normalizePath(path);
+  return {
+    name: "theme-paint-replacement",
+    resolveId(id) {
+      if (id === moduleId || id.startsWith(stylePrefix)) return "\0" + id;
+    },
+    load(id) {
+      if (id !== "\0" + moduleId && !id.startsWith("\0" + stylePrefix)) return;
+      const bundles = discoverThemeBundles(directory);
+      if (id === "\0" + moduleId) {
+        const selected = new Set(bundles.map(bundle => bundle.theme.bundleIdentifier));
+        return themeModuleSource(bundles, selected, toImport, stylePrefix);
+      }
+      const identifier = id.slice(stylePrefix.length + 1, -4);
+      const bundle = bundles.find(candidate => candidate.theme.bundleIdentifier === identifier);
+      if (!bundle) throw new Error("Unknown replacement fixture theme: " + identifier);
+      return themeStylesheet(bundle, toImport);
+    },
+  };
+}
 
 // Native framework fixtures have no dependency on the website bootstrap or worker.
 export default defineConfig({
@@ -42,7 +69,7 @@ export default defineConfig({
       replacement: resolve(import.meta.dirname, "../../.artifacts/synapp-sdk/packages/syncloudos", entry),
     })),
   ] },
-  plugins: [react(), themeFixturePlugin, {
+  plugins: [react(), themeFixturePlugin, paintReplacementTheme(), {
     name: "framework-fixture-pages",
     configureServer(server) {
       const pdfReaderWorker = readFileSync(resolve(import.meta.dirname, "../../node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs"));

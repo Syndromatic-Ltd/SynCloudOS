@@ -389,7 +389,9 @@
 :scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) :is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"],[data-nse-part="increment"],[data-nse-part="decrement"])::before,
 :scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) :is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"],[data-nse-part="increment"],[data-nse-part="decrement"])::before,
 :scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) :is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"],[data-nse-part="increment"],[data-nse-part="decrement"])::before {
-  border:solid;
+  /* This border paints an absolute pseudo-element and reserves no layout space. */
+  --nse-decorative-border-style:solid;
+  border:var(--nse-decorative-border-style,none);
   border-width:2px 1px;
   border-color:rgba(0,0,0,0.34) #a2a2a2 rgba(0,0,0,0.49) #efefef;
   box-shadow:0 1px 0 rgba(255,255,255,0.5);
@@ -398,7 +400,8 @@
 :scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) :is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"],[data-nse-part="increment"],[data-nse-part="decrement"])::after,
 :scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) :is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"],[data-nse-part="increment"],[data-nse-part="decrement"])::after,
 :scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) :is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"],[data-nse-part="increment"],[data-nse-part="decrement"])::after {
-  border:2px solid;
+  --nse-decorative-border-style:solid;
+  border:2px var(--nse-decorative-border-style,none);
   border-color:var(--nse-atmo-rg-ring-t) var(--nse-atmo-rg-ring-seam) var(--nse-atmo-rg-ring-b);
   background:var(--nse-atmo-rg-up) padding-box;
 }

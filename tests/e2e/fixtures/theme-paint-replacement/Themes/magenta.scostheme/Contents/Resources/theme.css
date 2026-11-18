@@ -1,0 +1,49 @@
+[data-nse-control="window"] > [data-nse-part="bezel"],
+[data-nse-control="app-view-chrome"][data-nse-part="background"],
+[data-nse-control="toolbar"][data-nse-position="inline"][data-nse-part="background"],
+[data-nse-control="toolbar-item"][data-nse-part="item"],
+[data-nse-control="tab-view"] [data-nse-part="cell"][data-nse-selected],
+[data-nse-control="segmented-control"] [data-nse-part="bezel"][data-nse-selected],
+[data-nse-control="split-view"] > [data-nse-part="divider"],
+[data-nse-control="menu"][data-nse-part="background"][data-nse-role="command-menu"],
+[data-nse-control="menu-item"][data-nse-part="cell"][data-nse-highlighted][data-nse-focused],
+[data-nse-control="popover"][data-nse-part="surface"],
+[data-nse-control="button"][data-nse-bezel-style="rounded"] > [data-nse-part="bezel"],
+[data-nse-control="pop-up-button"] [data-nse-part="bezel"],
+[data-nse-control="box"][data-nse-part="bezel"],
+[data-nse-control="box"] > [data-nse-part="title"],
+[data-nse-control="search-field"] [data-nse-part="field"] {
+  background: #ff00ff;
+}
+
+[data-nse-control="window"] > [data-nse-part="bezel"] > [data-nse-part],
+[data-nse-control="app-view-chrome"][data-nse-part="background"] > [data-nse-part],
+[data-nse-control="toolbar"][data-nse-position="inline"][data-nse-part="background"] > [data-nse-part],
+[data-nse-control="toolbar-item"][data-nse-part="item"] [data-nse-part],
+[data-nse-control="tab-view"] [data-nse-part="cell"][data-nse-selected] [data-nse-part],
+[data-nse-control="segmented-control"] [data-nse-part="bezel"][data-nse-selected] [data-nse-part],
+[data-nse-control="split-view"] > [data-nse-part="divider"] [data-nse-part],
+[data-nse-control="menu"][data-nse-part="background"][data-nse-role="command-menu"] > [data-nse-part="decoration"],
+[data-nse-control="menu-item"][data-nse-part="cell"][data-nse-highlighted][data-nse-focused] [data-nse-part],
+[data-nse-control="popover"][data-nse-part="surface"] [data-nse-part],
+[data-nse-control="button"][data-nse-bezel-style="rounded"]:not([data-nse-control="pop-up-button"] *) > [data-nse-part="title"],
+[data-nse-control="box"][data-nse-part="bezel"] > [data-nse-part="content"] {
+  opacity: 0;
+}
+
+/* This drawing fills the entire tab cell rather than following Atmo's rounded contour. */
+[data-nse-control="tab-view"] [data-nse-part="cell"][data-nse-selected] {
+  border-radius: 0;
+}
+
+[data-nse-control="box"] > [data-nse-part="title"] {
+  color: transparent;
+}
+
+@media (forced-colors: active) {
+  [data-nse-control="search-field"] [data-nse-part="field"],
+  [data-nse-control="pop-up-button"][data-nse-type="native"] > [data-nse-part="bezel"] {
+    forced-color-adjust: none;
+    border-color: #ff00ff;
+  }
+}
