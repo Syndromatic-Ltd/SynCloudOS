@@ -27,7 +27,7 @@ const projects = config.test?.projects as unknown as Project[];
 it("runs the CPU-bound suites first, alone and on few workers, so their deadlines hold", () => {
   const [heavy, unit] = projects.map(project => project.test);
   expect(heavy).toMatchObject({ name: "heavy", include: heavyTests, sequence: { groupOrder: 0 } });
-  expect(heavy.maxWorkers).toBeLessThanOrEqual(4);
+  expect(heavy.maxWorkers).toBeLessThanOrEqual(8);
   expect(unit).toMatchObject({ name: "unit", sequence: { groupOrder: 1 } });
   expect(unit.exclude).toEqual(expect.arrayContaining(heavyTests));
 });

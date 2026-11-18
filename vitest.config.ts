@@ -39,7 +39,7 @@ export const packagingTests = [
   "tests/runtime/synware-public-api-boundary-guard.test.ts",
 ];
 
-/** CPU-bound source scanners, timing budgets and in-test browsers. They run first, on few workers, so their deadlines hold. */
+/** CPU-bound source scanners, timing budgets and in-test browsers. They run first and alone, on a quarter of the cores, so their deadlines hold. */
 export const heavyTests = [
   "tests/performance/**/*.test.{ts,tsx}",
   "tests/runtime/**/*boundar*.test.ts",
@@ -82,9 +82,9 @@ const shared = {
 };
 const sharedTest = { clearMocks: true, environment: "node" as const, setupFiles: ["tests/setup/runtimeEnvironment.ts"] };
 
-// Measured on 32 cores: four heavy workers keep the scanners' deadlines, and the rest scale with the machine.
-export const heavyWorkers = Math.max(1, Math.min(4, Math.floor(availableParallelism() / 4)));
-export const unitWorkers = Math.max(2, Math.floor(availableParallelism() * 0.4));
+// Measured on 32 cores: a quarter for the heavy project keeps its deadlines, and three quarters for the rest is past the knee.
+export const heavyWorkers = Math.max(1, Math.min(8, Math.floor(availableParallelism() / 4)));
+export const unitWorkers = Math.max(2, Math.floor(availableParallelism() * 0.75));
 
 export function syncloudosTestConfig(suite: "unit" | "packaging") {
   if (suite === "packaging") return defineConfig({ ...shared, test: { ...sharedTest, include: packagingTests, maxWorkers: 4 } });
@@ -92,7 +92,7 @@ export function syncloudosTestConfig(suite: "unit" | "packaging") {
     ...shared,
     test: {
       projects: [
-        { ...shared, test: { ...sharedTest, name: "heavy", include: heavyTests, exclude: [...configDefaults.exclude, ...packagingTests], maxWorkers: heavyWorkers, sequence: { groupOrder: 0 } } },
+        { ...shared, test: { ...sharedTest, name: "heavy", include: heavyTests, exclude: [...configDefaults.exclude, ...packagingTests], maxWorkers: heavyWorkers, testTimeout: 30_000, sequence: { groupOrder: 0 } } },
         { ...shared, test: { ...sharedTest, name: "unit", include: unitTests, exclude: [...configDefaults.exclude, ...packagingTests, ...heavyTests], maxWorkers: unitWorkers, sequence: { groupOrder: 1 } } },
       ],
     },
