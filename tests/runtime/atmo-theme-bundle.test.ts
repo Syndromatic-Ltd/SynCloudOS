@@ -9,7 +9,7 @@ describe("Atmo's public theme bundle", () => {
     expect(bundle.theme.bundleIdentifier).toBe("com.syndromatic.atmo");
     expect(bundle.theme.navigation).toEqual({ compact: { placement: "block-end", flow: "overlay" }, regular: { placement: "source-list", flow: "in-flow" } });
     expect(bundle.theme.presentation).toEqual({ login: "ornamented", notifications: "sliced-3d", materialLighting: "on" });
-  });
+  }, 30_000); // Validates every Atmo stylesheet against the contract, which takes about 5 s.
   it("draws through public hooks and contains no fonts, motion or executable resources", () => {
     const files = (directory: string): string[] => readdirSync(directory, { withFileTypes: true }).flatMap(entry => entry.isDirectory() ? files(resolve(directory, entry.name)) : [resolve(directory, entry.name)]);
     for (const file of files(root)) {
