@@ -28,10 +28,11 @@ jobs:
       - run: npm run boundaries:architecture
       - run: node scripts/fx/boundary-audit.mjs
       - run: npm run sdk:build
-      - run: npm test -- --exclude tests/runtime/synapp-sdk-package.test.ts --exclude tests/runtime/managed-typography-packed-consumer.test.ts --exclude tests/runtime/chronosphere/chronosphere-packed-consumer.test.ts --exclude 'tests/runtime/fx/packed-*.test.ts' --maxWorkers=1
-      - run: npm test -- tests/runtime/synapp-sdk-package.test.ts --maxWorkers=1
+      - run: npm test
+      - run: npm run test:packaging -- --exclude tests/runtime/synapp-sdk-package.test.ts --exclude tests/runtime/managed-typography-packed-consumer.test.ts --exclude tests/runtime/chronosphere/chronosphere-packed-consumer.test.ts
+      - run: npm run test:packaging -- tests/runtime/synapp-sdk-package.test.ts --maxWorkers=1
       - run: npm run sdk:build
-      - run: npm test -- tests/runtime/managed-typography-packed-consumer.test.ts tests/runtime/chronosphere/chronosphere-packed-consumer.test.ts --maxWorkers=1
+      - run: npm run test:packaging -- tests/runtime/managed-typography-packed-consumer.test.ts tests/runtime/chronosphere/chronosphere-packed-consumer.test.ts --maxWorkers=1
       - run: node --test tests/packaging/*.test.mjs
       - run: npm run product:names
       - run: npm run fx:installed

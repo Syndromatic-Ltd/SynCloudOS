@@ -19,8 +19,19 @@
  */
 
 import { expect, it } from "vitest";
-import config from "../../vitest.config";
+import config, { heavyTests, packagingTests } from "../../vitest.config";
 
-it("caps Vitest workers to keep scanner and jsdom suites within their deadlines", () => {
-  expect(config.test?.maxWorkers).toBe(2);
+type Project = { test: { name: string; include: string[]; exclude: string[]; maxWorkers: number; sequence: { groupOrder: number } } };
+const projects = config.test?.projects as unknown as Project[];
+
+it("runs the CPU-bound suites first, alone and on few workers, so their deadlines hold", () => {
+  const [heavy, unit] = projects.map(project => project.test);
+  expect(heavy).toMatchObject({ name: "heavy", include: heavyTests, sequence: { groupOrder: 0 } });
+  expect(heavy.maxWorkers).toBeLessThanOrEqual(4);
+  expect(unit).toMatchObject({ name: "unit", sequence: { groupOrder: 1 } });
+  expect(unit.exclude).toEqual(expect.arrayContaining(heavyTests));
+});
+
+it("leaves packed-SDK consumers to the packaging run", () => {
+  for (const project of projects) expect(project.test.exclude).toEqual(expect.arrayContaining(packagingTests));
 });
