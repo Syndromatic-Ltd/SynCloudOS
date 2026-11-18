@@ -419,7 +419,7 @@ function CommandMenuSurface({
   return (
     <div
       className={`nse-menu${applicationAppearance ? " nse-application-menu-list" : ""}`}
-      data-nse-control="menu" data-nse-part="background"
+      data-nse-control="menu" data-nse-part="background" data-nse-role="command-menu"
       role="menu"
       aria-labelledby={labelledBy}
       aria-busy={view.validating || undefined}
@@ -478,7 +478,6 @@ function CommandMenuSurface({
             aria-disabled={!entry.enabled ? true : undefined}
             disabled={!entry.enabled}
             data-nse-menu-state={entry.kind === "command" ? entry.checked : undefined}
-            data-nse-menu-disabled={!entry.enabled ? "true" : undefined}
             data-nse-menu-command={entry.kind === "command" ? entry.commandId : undefined}
             aria-keyshortcuts={entry.kind === "command" ? ariaKeyShortcuts(entry.presentation?.keyBinding) : undefined}
             tabIndex={activeId === entry.id ? 0 : -1}

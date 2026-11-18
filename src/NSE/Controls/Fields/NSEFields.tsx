@@ -175,7 +175,6 @@ function LabelTextField({ isEditable: _isEditable, font = "body", textColour = "
       data-nse-part="title"
       className={classes("nse-control-label-field", className)}
       data-font={font}
-      data-text-colour={textColour === "secondaryLabelColour" ? "secondary" : undefined}
       data-monospaced-digits={monospacedDigits ? "true" : undefined}
       data-line-break-mode={lineBreakMode === "byCharWrapping" ? "char" : undefined}
       data-background-style={backgroundStyle === "normal" ? undefined : backgroundStyle}

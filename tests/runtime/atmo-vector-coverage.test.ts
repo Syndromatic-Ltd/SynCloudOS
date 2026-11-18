@@ -192,11 +192,15 @@ describe("Atmo vector coverage", () => {
     ]) expect(rule).toContain(declaration);
   });
   it("keeps blur and deep elevation on the inert shared layer with accessibility fallbacks", () => {
-    const navigationCss = readFileSync(path.join(process.cwd(), "src/NSE/Navigation/nse-navigation.css"), "utf8");
+    const navigationPaint = readFileSync(path.join(process.cwd(), "src/Themes/Atmo.scostheme/Contents/Resources/atmo.controls.css"), "utf8");
+    const target = '[data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"] > [data-nse-part="viewport"] > *)::before';
+    const paintFor = (query: string) => navigationPaint.split(`@media (${query}) {`).slice(1)
+      .map(block => block.slice(0, block.indexOf("\n}"))).find(block => block.includes(target));
 
-    expect(navigationCss).toMatch(/@media \(prefers-reduced-transparency: reduce\)[\s\S]*?\.nse-tab-bar::before[\s\S]*?-webkit-backdrop-filter:\s*none[\s\S]*?backdrop-filter:\s*none/u);
-    expect(navigationCss).toMatch(/@media \(forced-colors: active\)[\s\S]*?\.nse-tab-bar::before[\s\S]*?box-shadow:\s*none/u);
-    expect(navigationCss).toMatch(/@media \(forced-colors: active\)[\s\S]*?\.nse-tab-bar::before[\s\S]*?backdrop-filter:\s*none/u);
+    expect(paintFor("prefers-reduced-transparency: reduce")).toContain("-webkit-backdrop-filter: none !important");
+    expect(paintFor("prefers-reduced-transparency: reduce")).toContain("backdrop-filter: none !important");
+    expect(paintFor("forced-colors: active")).toContain("box-shadow: none !important");
+    expect(paintFor("forced-colors: active")).toContain("backdrop-filter: none !important");
 
   });
 

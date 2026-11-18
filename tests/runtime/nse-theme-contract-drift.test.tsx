@@ -7,7 +7,8 @@ import { resolve } from "node:path";
 import { themeBaselineCatalogue } from "../e2e/fixtures/theme-baseline/catalogue";
 import { supplementalThemeCatalogue } from "../e2e/fixtures/theme-additional/supplemental";
 import { additionalThemeCatalogue } from "../e2e/fixtures/theme-additional/catalogue";
-import { StandaloneControlHost } from "../../src/NSE/Overlays";
+import { ListboxPopup, NSEPopover, NSEPopup, StandaloneControlHost } from "../../src/NSE/Overlays";
+import { NSEStackItem, NSEStackView } from "../../src/NSE/Layout";
 import { NSEAppearanceProvider } from "../../src/NSE/Appearance/NSEAppearanceProvider";
 import { atmoTheme } from "../../src/NSE/Appearance/atmo";
 import { createStaticPresentationPort, createStaticPresentationTraits } from "../fixtures/presentationTraits";
@@ -45,6 +46,8 @@ import { NSEColourPanelController } from "../../src/NSE/Colour/ColourPanel/NSECo
 import { NSEColourPanel } from "../../src/NSE/Colour/ColourPanel/NSEColourPanel";
 import { GFXColour } from "../../src/FX/GraphicsFX/GFXColour";
 import { nseUnowned } from "../../src/NSE/Controllers/ownership";
+import { TabBar, TabBarOverflowList } from "../../src/NSE/Navigation/TabBar";
+import { TabBarController } from "../../src/NSE/Navigation/TabBarController";
 
 const repository = resolve(import.meta.dirname, "../..");
 const presentation = createStaticPresentationPort({ width: 1000, height: 800, reducedMotion: true });
@@ -130,6 +133,101 @@ for (const surface of supplementalThemeCatalogue) it(`renders supplemental ${sur
     collect();
   }
   await flashOpenMenus();
+});
+it("renders the retained navigation overflow page", async () => {
+  const id = "theme-contract-overflow";
+  const controller = new TabBarController<React.ReactNode>({
+    id,
+    owner: nseUnowned,
+    destinations: ["Documents", "Pictures", "Music", "Movies", "Downloads", "Settings"].map(label => ({
+      id: label.toLowerCase(),
+      label,
+      icon: { kind: "template" as const, name: label.toLowerCase() },
+      createContent: () => <p>{label}</p>,
+    })),
+  });
+  try {
+    const view = render(
+      <Host>
+        <TabBar controller={controller} idScope={id} aria-label="Workspace" />
+        <TabBarOverflowList controller={controller} idScope={id} aria-label="Workspace" />
+      </Host>,
+    );
+    const more = view.getByRole("tab", { name: "More destinations" });
+    more.focus();
+    fireEvent.keyDown(more, { key: "ArrowDown" });
+    const region = await view.findByRole("region", { name: "More destinations" });
+    expect(region.closest('[data-nse-control="tab-view"][data-nse-part="overflow"][data-nse-style="navigation"]')).not.toBeNull();
+    collect();
+  } finally {
+    cleanup();
+    controller.dispose();
+  }
+});
+it("renders the stack overflow's disabled fallback action", () => {
+  const view = render(
+    <Host>
+      <NSEStackView availableSize={100} overflowLabel="More actions">
+        <NSEStackItem id="save" preferredSize={64} visibilityPriority={100}>Save</NSEStackItem>
+        <NSEStackItem id="export" preferredSize={64} visibilityPriority={0} aria-disabled overflowLabel="Export" onOverflowActivate={() => undefined}>Export</NSEStackItem>
+      </NSEStackView>
+    </Host>,
+  );
+  const trigger = view.getByRole("button", { name: "More actions" });
+  expect(trigger.getAttribute("data-nse-part")).toBe("button");
+  fireEvent.click(trigger);
+  const menu = view.getByRole("dialog", { name: "More actions overflow" });
+  expect(menu.getAttribute("data-nse-part")).toBe("menu");
+  expect(menu.querySelector('[data-nse-part="item"][data-nse-enabled="false"]')?.textContent).toBe("Export");
+  collect();
+});
+it("renders the listbox fade edges as the viewport scrolls", async () => {
+  render(<Host><ListboxPopup id="theme-contract-listbox" defaultOpen options={[{ id: "one", label: "First" }, { id: "two", label: "Second", separatorBefore: true }]} /></Host>);
+  const viewport = await waitFor(() => {
+    const element = document.querySelector<HTMLElement>('#theme-contract-listbox [data-nse-part="viewport"]');
+    expect(element).not.toBeNull();
+    return element!;
+  });
+  Object.defineProperties(viewport, {
+    clientHeight: { configurable: true, value: 100 },
+    scrollHeight: { configurable: true, value: 400 },
+  });
+  for (const [position, edge] of [[0, "maxY"], [100, "both"], [300, "minY"]] as const) {
+    viewport.scrollTop = position;
+    fireEvent.scroll(viewport);
+    expect(viewport.getAttribute("data-nse-edge")).toBe(edge);
+    collect();
+  }
+});
+it("renders both framed popover transparency states", async () => {
+  function FramedPopover({ drawsBackground }: { drawsBackground: boolean }) {
+    const [anchor, setAnchor] = React.useState<HTMLButtonElement | null>(null);
+    return <>
+      <button ref={setAnchor} type="button">Options</button>
+      <NSEPopover id="theme-contract-popover" open surface="overlay" anchor={anchor} parentWindowControllerId={null} drawsBackground={drawsBackground}>
+        <p>Popover content</p>
+      </NSEPopover>
+    </>;
+  }
+  const view = render(<Host><FramedPopover drawsBackground /></Host>);
+  const selector = '[data-nse-control="popover"][data-nse-part="surface"]';
+  await waitFor(() => expect(document.querySelector(selector)?.getAttribute("data-nse-transparent")).toBe("false"));
+  collect();
+  view.rerender(<Host><FramedPopover drawsBackground={false} /></Host>);
+  await waitFor(() => expect(document.querySelector(selector)?.getAttribute("data-nse-transparent")).toBe("true"));
+  collect();
+});
+it("renders a local modal overlay backdrop beside its surface", async () => {
+  render(<Host><NSEPopup id="theme-contract-overlay" defaultOpen modal title="Overlay"><p>Overlay content</p></NSEPopup></Host>);
+  const backdrop = await waitFor(() => {
+    const element = document.getElementById("theme-contract-overlay")?.previousElementSibling;
+    expect(element).not.toBeNull();
+    return element!;
+  });
+  expect(backdrop.getAttribute("data-nse-part")).toBe("backdrop");
+  expect(backdrop.getAttribute("data-nse-role")).toBe("overlay");
+  expect(backdrop.hasAttribute("hidden")).toBe(false);
+  collect();
 });
 it("renders the toolbar row and rail of a Metal titlebar", () => {
   const view = render(

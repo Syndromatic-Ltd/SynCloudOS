@@ -1,5 +1,11 @@
 
-@layer nse.atmo {
+@layer nse.structure {
+@property --nse-overlay-presentation-alpha {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+
 @scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
@@ -58,7 +64,6 @@
 
 .nse-utility-panel[data-state="closing"],
 :where(:scope):is(.nse-utility-panel[data-state="closing"]) {
-  opacity: 0;
   pointer-events: none;
 }
 
@@ -84,7 +89,6 @@
  * surface without inherited visibility surviving the content-ready commit. */
 [data-nse-role="overlay"][data-nse-part="surface"][data-nse-content-pending="true"],
 :where(:scope):is([data-nse-role="overlay"][data-nse-part="surface"][data-nse-content-pending="true"]) {
-  opacity: 0;
   pointer-events: none;
 }
 
@@ -96,8 +100,6 @@
   min-inline-size: min(16rem, calc(100vi - 16px));
   padding: 12px;
   border-radius: 12px;
-  background: Canvas;
-  color: CanvasText;
   outline: none;
   /* Floating UI constrains this surface to the available visual-viewport
      block size. Keep overflow inside the owned surface so a tall panel never
@@ -111,10 +113,8 @@
 :where(:scope):is(.nse-overlay-popup.nse-overlay-popup--content) {
   display: block;
   min-inline-size: 0;
-  max-inline-size: none;
   padding: 0;
   border-radius: 0;
-  background: transparent;
   overflow: visible;
 }
 
@@ -132,7 +132,6 @@
 :where(:scope):is(.nse-overlay-popup-backdrop) {
   position: fixed;
   inset: 0;
-  background: color-mix(in srgb, CanvasText 18%, transparent);
 }
 
 .nse-overlay-popup-host,
@@ -172,35 +171,11 @@
   max-block-size: min(360px, 60vi);
   overflow: auto;
   scrollbar-width: none;
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent 0,
-    #000 var(--nse-listbox-fade-top, 0px),
-    #000 calc(100% - var(--nse-listbox-fade-bottom, 0px)),
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0,
-    #000 var(--nse-listbox-fade-top, 0px),
-    #000 calc(100% - var(--nse-listbox-fade-bottom, 0px)),
-    transparent 100%
-  );
 }
 
 .nse-overlay-listbox-scroll::-webkit-scrollbar,
 :where(:scope):is(.nse-overlay-listbox-scroll)::-webkit-scrollbar {
   display: none;
-}
-
-.nse-overlay-listbox[data-fade-top="true"] .nse-overlay-listbox-scroll,
-:where(:scope):is(.nse-overlay-listbox[data-fade-top="true"]) .nse-overlay-listbox-scroll {
-  --nse-listbox-fade-top: 18px;
-}
-
-.nse-overlay-listbox[data-fade-bottom="true"] .nse-overlay-listbox-scroll,
-:where(:scope):is(.nse-overlay-listbox[data-fade-bottom="true"]) .nse-overlay-listbox-scroll {
-  --nse-listbox-fade-bottom: 18px;
 }
 
 .nse-overlay-listbox-scroll-content,
@@ -215,15 +190,14 @@
   inline-size: 100%;
   border: 0;
   background: transparent;
-  color: inherit;
   padding: 8px 10px;
+  font: inherit;
   text-align: start;
 }
 
-.nse-overlay-listbox-option:is([data-highlighted="true"],[data-nse-menu-flash="on"]):not([data-nse-menu-flash="off"]),
-:where(:scope):is(.nse-overlay-listbox-option:is([data-highlighted="true"],[data-nse-menu-flash="on"]):not([data-nse-menu-flash="off"])) {
+.nse-overlay-listbox-option:is([data-nse-highlighted],[data-nse-menu-flash="on"]):not([data-nse-menu-flash="off"]),
+:where(:scope):is(.nse-overlay-listbox-option:is([data-nse-highlighted],[data-nse-menu-flash="on"]):not([data-nse-menu-flash="off"])) {
   outline: none;
-  background: color-mix(in srgb, Highlight 18%, transparent);
 }
 
 /* A rule between groups of rows (1px plus 4px either side: the 9px the listbox allows). */
@@ -231,7 +205,6 @@
 :where(:scope):is(.nse-overlay-listbox-separator) {
   block-size: 1px;
   margin: 4px 0;
-  background: color-mix(in srgb, currentColor 22%, transparent);
 }
 
 /* Commands under the values ("Show Fonts…") read as commands, not choices. */
@@ -267,29 +240,24 @@
 /* Dismissed menus fade the same way; the application menu retracts with its own animation instead. */
 .nse-overlay-popup[data-state="closing"]:is([data-nse-menu-chosen],[data-nse-style="menu"],[data-nse-style="context-menu"],[data-nse-style="submenu"]),
 :where(:scope):is(.nse-overlay-popup[data-state="closing"]:is([data-nse-menu-chosen],[data-nse-style="menu"],[data-nse-style="context-menu"],[data-nse-style="submenu"])) { animation: nse-menu-chosen-fade 0.2s ease-in forwards; }
-@keyframes nse-menu-chosen-fade { to { opacity: 0; } }
+@keyframes nse-menu-chosen-fade { to { --nse-overlay-presentation-alpha: 0; } }
 
 /* NSEPopover's frame is one continuous outline, including the anchor arrow.
    Only the content scrolls/clips; the arrow and its shared shadow stay outside. */
-.nse-overlay-popup.nse-popover[data-nse-part="surface"][data-nse-popover-draws-background],
-:where(:scope):is(.nse-overlay-popup.nse-popover[data-nse-part="surface"][data-nse-popover-draws-background]) {
+.nse-overlay-popup.nse-popover[data-nse-part="surface"][data-nse-transparent],
+:where(:scope):is(.nse-overlay-popup.nse-popover[data-nse-part="surface"][data-nse-transparent]) {
   display: flex;
   flex-direction: column;
   isolation: isolate;
   gap: 0;
   padding: 0;
   border: 0;
-  border-image: none;
   border-radius: 10px;
-  background: transparent;
   overflow: visible;
   min-inline-size: min(16rem, var(--nse-overlay-available-inline-size, calc(100vi - 24px)));
-  filter: var(--nse-popover-shadow, drop-shadow(0 2px 4px #0003) drop-shadow(0 12px 24px #0003));
   transform-origin: center bottom;
 }
 
-.nse-overlay-popup.nse-popover[data-nse-part="surface"][data-nse-popover-draws-background]::before,
-:where(:scope):is(.nse-overlay-popup.nse-popover[data-nse-part="surface"][data-nse-popover-draws-background])::before { content: none; }
 .nse-popover:not([data-nse-positioned="true"]),
 :where(:scope):is(.nse-popover:not([data-nse-positioned="true"])) { visibility: hidden; }
 .nse-popover-frame,
@@ -304,17 +272,9 @@
 }
 .nse-popover-frame [data-nse-part="popover-outline"],
 :where(:scope):is(.nse-popover-frame) [data-nse-part="popover-outline"] {
-  fill: var(--nse-popover-fill, Canvas);
-  stroke: var(--nse-popover-border-colour, #0005);
   stroke-width: 1;
   stroke-linejoin: round;
 }
-.nse-popover-frame [data-nse-part="popover-arrow-fill"],
-:where(:scope):is(.nse-popover-frame) [data-nse-part="popover-arrow-fill"] { fill: none; }
-.nse-popover[data-nse-popover-draws-background="false"] [data-nse-part="popover-outline"],
-:where(:scope):is(.nse-popover[data-nse-popover-draws-background="false"]) [data-nse-part="popover-outline"] { fill: none; }
-.nse-popover[data-nse-popover-draws-background="false"] [data-nse-part="popover-arrow-fill"],
-:where(:scope):is(.nse-popover[data-nse-popover-draws-background="false"]) [data-nse-part="popover-arrow-fill"] { fill: var(--nse-popover-arrow-fill, Canvas); }
 .nse-popover-arrow,
 :where(:scope):is(.nse-popover-arrow) { position: absolute; width: 20px; height: 20px; pointer-events: none; }
 
@@ -329,8 +289,8 @@
   overflow: auto;
   border-radius: inherit;
 }
-.nse-overlay-popup.nse-popover[data-nse-popover-draws-background="false"]>.nse-overlay-popup-content,
-:where(:scope):is(.nse-overlay-popup.nse-popover[data-nse-popover-draws-background="false"])>.nse-overlay-popup-content { padding: 0; }
+.nse-overlay-popup.nse-popover[data-nse-transparent="true"]>.nse-overlay-popup-content,
+:where(:scope):is(.nse-overlay-popup.nse-popover[data-nse-transparent="true"])>.nse-overlay-popup-content { padding: 0; }
 .nse-popover[data-nse-positioned="true"][data-state="open"],
 :where(:scope):is(.nse-popover[data-nse-positioned="true"][data-state="open"]) {
   animation: nse-popover-scale-in 320ms var(--nse-popover-spring, ease-out) both, nse-popover-fade-in 120ms ease-out both;
@@ -342,9 +302,9 @@
 .nse-popover[data-nse-reduced-motion="true"][data-state="closing"],
 :where(:scope):is(.nse-popover[data-nse-reduced-motion="true"][data-state="closing"]) { animation: nse-popover-fade-out 100ms linear both; }
 @keyframes nse-popover-scale-in { from { transform: scale(0.85); } to { transform: scale(1); } }
-@keyframes nse-popover-fade-in { from { opacity: 0; } to { opacity: 1; } }
-@keyframes nse-popover-out { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.94); } }
-@keyframes nse-popover-fade-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes nse-popover-fade-in { from { --nse-overlay-presentation-alpha: 0; } to { --nse-overlay-presentation-alpha: 1; } }
+@keyframes nse-popover-out { from { --nse-overlay-presentation-alpha: 1; transform: scale(1); } to { --nse-overlay-presentation-alpha: 0; transform: scale(0.94); } }
+@keyframes nse-popover-fade-out { from { --nse-overlay-presentation-alpha: 1; } to { --nse-overlay-presentation-alpha: 0; } }
 @media (prefers-reduced-motion: reduce) {
   .nse-popover[data-nse-positioned="true"][data-state="open"],
 :where(:scope):is(.nse-popover[data-nse-positioned="true"][data-state="open"]) { animation: nse-popover-fade-in 100ms linear both; }
@@ -369,6 +329,13 @@
   max-inline-size: min(32rem, calc(100vi - 16px));
 }
 
+.nse-overlay-popup.nse-overlay-popup--application-menu,
+:where(:scope):is(.nse-overlay-popup.nse-overlay-popup--application-menu),
+.nse-overlay-popup.nse-overlay-popup--content,
+:where(:scope):is(.nse-overlay-popup.nse-overlay-popup--content) {
+  max-inline-size: none;
+}
+
 .nse-overlay-popup[data-nse-overlay-kind="action-sheet"],
 :where(:scope):is(.nse-overlay-popup[data-nse-overlay-kind="action-sheet"]) {
   position: fixed;
@@ -377,8 +344,8 @@
   max-inline-size: none;
 }
 
-.nse-overlay-popup.nse-popover[data-nse-part="surface"][data-nse-popover-draws-background],
-:where(:scope):is(.nse-overlay-popup.nse-popover[data-nse-part="surface"][data-nse-popover-draws-background]) {
+.nse-overlay-popup.nse-popover[data-nse-part="surface"][data-nse-transparent],
+:where(:scope):is(.nse-overlay-popup.nse-popover[data-nse-part="surface"][data-nse-transparent]) {
   max-inline-size: min(32rem, var(--nse-overlay-available-inline-size, calc(100vi - 24px)));
   max-block-size: var(--nse-overlay-available-block-size, calc(100vb - 24px));
 }

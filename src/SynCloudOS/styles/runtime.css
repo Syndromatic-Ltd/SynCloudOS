@@ -1,4 +1,3 @@
-@layer nse.atmo {
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -19,6 +18,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+@layer nse.structure {
+  @scope ([data-nse-theme]) to ([data-nse-theme]) {
+    /* Let menu titles and listbox commands refine the inherited font. */
+    button:where([data-nse-control="menu-item"]:is([data-nse-part="title"], [data-nse-part="cell"][data-kind="action"])) { font: inherit; }
+  }
+}
+
+@layer nse.atmo {
 :root {
   font-family: var(--font-ui, system-ui, sans-serif);
   color: #f8fbff;
@@ -53,7 +60,9 @@ body,
 }
 
 @scope ([data-nse-theme]) to ([data-nse-theme]) {
-button, input, textarea { font: inherit; }
+button:not(:where([data-nse-control="menu-item"]:is([data-nse-part="title"], [data-nse-part="cell"][data-kind="action"]))),
+input,
+textarea { font: inherit; }
 }
 
 button {

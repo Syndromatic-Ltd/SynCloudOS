@@ -131,8 +131,8 @@
 
 /* Grouped child controls are one continuous segmented surface. Appearances own
    the segment paint, while NSE owns the invariant that segments stay joined. */
-.nse-control-toolbar[data-grouped="true"],
-:where(:scope):is(.nse-control-toolbar[data-grouped="true"]) {
+.nse-control-toolbar[data-grouped="true"]:where(:not([data-nse-control="tab-view"][data-nse-style="navigation"]>[data-nse-part="viewport"]>[data-nse-part="header"])),
+:where(:scope):is(.nse-control-toolbar[data-grouped="true"]):where(:not([data-nse-control="tab-view"][data-nse-style="navigation"]>[data-nse-part="viewport"]>[data-nse-part="header"])) {
   gap: 0;
 }
 

@@ -1,5 +1,5 @@
 
-@layer nse.atmo {
+@layer nse.structure {
 @scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
@@ -167,8 +167,6 @@
 :where(:scope):is(:where(.nse-control-label-field[data-font="headline"])) { font-size: var(--nse-text-headline-size); font-weight: var(--nse-text-headline-weight); }
 :where(.nse-control-label-field[data-font="label"]),
 :where(:scope):is(:where(.nse-control-label-field[data-font="label"])) { font-size: var(--nse-text-label-size); font-weight: var(--nse-text-label-weight); }
-:where(.nse-control-label-field[data-text-colour="secondary"]),
-:where(:scope):is(:where(.nse-control-label-field[data-text-colour="secondary"])) { color: color-mix(in srgb, currentColor var(--nse-text-secondary-opacity), transparent); }
 :where(.nse-control-label-field[data-monospaced-digits="true"]),
 :where(:scope):is(:where(.nse-control-label-field[data-monospaced-digits="true"])) { font-variant-numeric: tabular-nums; }
 :where(.nse-control-label-field[data-line-break-mode="char"]),
@@ -255,38 +253,9 @@
   gap: var(--nse-spacing-inline);
 }
 
-:where(.nse-form-help),
-:where(:scope):is(:where(.nse-form-help)) {
-  margin: calc(var(--nse-spacing-tight) - var(--nse-content-spacing, 0px)) 0 0;
-  max-inline-size: var(--nse-readable-width);
-  font-size: var(--nse-text-footnote-size);
-  line-height: 1.4;
-  color: color-mix(in srgb, currentColor var(--nse-text-secondary-opacity), transparent);
-}
-
-:where(.nse-form-row[data-nse-inline="true"])>:where(.nse-form-control)>:where(.nse-form-help),
-:where(:scope):is(:where(.nse-form-row[data-nse-inline="true"]))>:where(.nse-form-control)>:where(.nse-form-help) {
-  flex-basis: 100%;
-}
-
 :where(.nse-form-row[data-nse-full-width="true"])>:where(.nse-form-control),
 :where(:scope):is(:where(.nse-form-row[data-nse-full-width="true"]))>:where(.nse-form-control) {
   grid-column: 1 / -1;
-}
-
-:where(.nse-form-separator),
-:where(:scope):is(:where(.nse-form-separator)) {
-  grid-column: 1 / -1;
-  block-size: 1px;
-  /* The UA's auto inline margins shrink an hr to nothing in a grid. */
-  margin-block: calc(var(--nse-spacing-related) - var(--nse-form-row-spacing));
-  margin-inline: 0;
-  inline-size: 100%;
-  border: 0;
-  /* An engraved rule: a dark hairline over a light lip reads as a groove on
-     any surface, where one faint line vanishes on grey. */
-  background: color-mix(in srgb, currentColor 24%, transparent);
-  box-shadow: 0 1px 0 color-mix(in srgb, white 55%, transparent);
 }
 
 @container nse-form (max-width: 420px) {

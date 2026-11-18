@@ -3,6 +3,254 @@
  * Load after atmo-structure.css. Third-party artwork origins are recorded
  * in the repository notices; no raster theme is required at runtime. */
 
+/* Layout controls. */
+/* Text labels and stack overflow paint. */
+:where([data-nse-control="text-field"][data-nse-part="title"][data-nse-editable="false"][data-nse-text-colour="secondaryLabelColour"]),
+:where(:scope):where([data-nse-control="text-field"][data-nse-part="title"][data-nse-editable="false"][data-nse-text-colour="secondaryLabelColour"]) {
+  color: color-mix(in srgb, currentColor var(--nse-text-secondary-opacity), transparent);
+}
+
+:where([data-nse-control="stack-view"]) :where([data-nse-part="overflow"]) > [data-nse-part="button"],
+:where(:scope):where([data-nse-control="stack-view"]) :where([data-nse-part="overflow"]) > [data-nse-part="button"] {
+  border-color: currentColor;
+  color: inherit;
+}
+
+:where([data-nse-control="stack-view"]) :where([data-nse-part="overflow"]) > [data-nse-part="menu"],
+:where(:scope):where([data-nse-control="stack-view"]) :where([data-nse-part="overflow"]) > [data-nse-part="menu"] {
+  background: Canvas;
+  border-color: currentColor;
+}
+
+:where([data-nse-control="stack-view"]) :where([data-nse-part="overflow"]) > :where([data-nse-part="menu"]) > [data-nse-part="item"],
+:where(:scope):where([data-nse-control="stack-view"]) :where([data-nse-part="overflow"]) > :where([data-nse-part="menu"]) > [data-nse-part="item"] { color: inherit; }
+
+:where([data-nse-control="stack-view"]) :where([data-nse-part="overflow"]) > :where([data-nse-part="menu"]) > [data-nse-part="item"][data-nse-enabled="false"],
+:where(:scope):where([data-nse-control="stack-view"]) :where([data-nse-part="overflow"]) > :where([data-nse-part="menu"]) > [data-nse-part="item"][data-nse-enabled="false"] { opacity: 0.6; }
+
+/* Command menus share the menu parts with listbox popups. */
+[data-nse-control="menu"]:where([data-nse-part="background"][data-nse-role="command-menu"]),
+:where(:scope):is([data-nse-control="menu"]:where([data-nse-part="background"][data-nse-role="command-menu"])) {
+  background: Canvas;
+  color: CanvasText;
+}
+
+[data-nse-part="bezel"]:where([data-nse-role="application-menu"][data-nse-style="application-menu"]) > :where([data-nse-part="body"]) > [data-nse-control="menu"]:where([data-nse-part="background"][data-nse-role="command-menu"]),
+:where(:scope):is([data-nse-part="bezel"]:where([data-nse-role="application-menu"][data-nse-style="application-menu"])) > :where([data-nse-part="body"]) > [data-nse-control="menu"]:where([data-nse-part="background"][data-nse-role="command-menu"]) {
+  background: transparent;
+  color: inherit;
+}
+
+[data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-control="menu"][data-nse-role="command-menu"] > *) {
+  background: transparent;
+  color: inherit;
+}
+
+[data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-control="menu"][data-nse-role="command-menu"] > *):is(:focus-visible, :hover, [data-nse-menu-flash="on"]):not([data-nse-menu-flash="off"]) {
+  outline: none;
+  background: Highlight;
+  color: HighlightText;
+}
+
+[data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-control="menu"][data-nse-role="command-menu"] > *)[data-nse-enabled="false"] {
+  opacity: 0.55;
+}
+
+[data-nse-part="shortcut-column"]:where([data-nse-control="menu-item"][data-nse-part="cell"] *) {
+  color: color-mix(in srgb, currentColor 68%, transparent);
+}
+
+[data-nse-part="separator"]:where([data-nse-control="menu"][data-nse-role="command-menu"] > *) {
+  background: color-mix(in srgb, currentColor 18%, transparent);
+}
+
+[data-nse-part="item"]:where([data-nse-control="menu-bar"] > *) > :where([data-nse-control="menu-item"][data-nse-part="title"]),
+:where(:scope):is([data-nse-part="item"]:where([data-nse-control="menu-bar"] > *)) > :where([data-nse-control="menu-item"][data-nse-part="title"]) {
+  color: inherit;
+  background: transparent;
+}
+
+[data-nse-part="item"]:where([data-nse-control="menu-bar"] > *) > :where([data-nse-control="menu-item"][data-nse-part="title"]):is([data-nse-highlighted], :hover),
+:where(:scope):is([data-nse-part="item"]:where([data-nse-control="menu-bar"] > *)) > :where([data-nse-control="menu-item"][data-nse-part="title"]):is([data-nse-highlighted], :hover) {
+  background: color-mix(in srgb, Highlight 18%, transparent);
+}
+
+@media (forced-colors: active) {
+  [data-nse-control="menu"]:where([data-nse-part="background"][data-nse-role="command-menu"]),
+  :where(:scope):is([data-nse-control="menu"]:where([data-nse-part="background"][data-nse-role="command-menu"])) {
+    border-color: CanvasText;
+  }
+
+  [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-control="menu"][data-nse-role="command-menu"] > *):focus-visible {
+    outline: 2px solid Highlight;
+  }
+}
+
+/* An inactive scroll timeline leaves both cues hidden. */
+[data-nse-control="menu"]:where([data-nse-part="background"][data-nse-role="command-menu"])::before,
+:where(:scope):is([data-nse-control="menu"]:where([data-nse-part="background"][data-nse-role="command-menu"]))::before,
+[data-nse-control="menu"]:where([data-nse-part="background"][data-nse-role="command-menu"])::after,
+:where(:scope):is([data-nse-control="menu"]:where([data-nse-part="background"][data-nse-role="command-menu"]))::after {
+  opacity: var(--nse-menu-more-opacity, 0);
+}
+
+/* Navigation tabs. */
+:where([data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"] > [data-nse-part="viewport"] > *)) > [data-nse-part="cell"]:where([data-nse-role="tab"]) {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  color: inherit;
+}
+
+:where(:where([data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"] > [data-nse-part="viewport"] > *)) > [data-nse-part="cell"]:where([data-nse-role="tab"]) > [data-nse-part="content"]) > [data-nse-part="image"][data-nse-type="vector"],
+:where([data-nse-control="tab-view"][data-nse-part="overflow"]:where([data-nse-style="navigation"]) [data-nse-part="cell-content"]:where([data-nse-control="table-cell-view"][data-nse-style="list"]) > [data-nse-part="leading"]) > [data-nse-part="image"][data-nse-type="vector"] {
+  background: currentColor;
+  -webkit-mask: var(--nse-tab-icon-source) center / contain no-repeat;
+  mask: var(--nse-tab-icon-source) center / contain no-repeat;
+}
+
+:where(:where([data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"] > [data-nse-part="viewport"] > *)) > [data-nse-part="cell"]:where([data-nse-role="tab"]) > [data-nse-part="content"]) > [data-nse-part="image"][data-nse-type="template"],
+:where([data-nse-control="tab-view"][data-nse-part="overflow"]:where([data-nse-style="navigation"]) [data-nse-part="cell-content"]:where([data-nse-control="table-cell-view"][data-nse-style="list"]) > [data-nse-part="leading"]) > [data-nse-part="image"][data-nse-type="template"] {
+  border-color: currentColor;
+  opacity: 0.72;
+}
+
+:where([data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"] > [data-nse-part="viewport"] > *)) > [data-nse-part="cell"]:where([data-nse-role="tab"])[data-nse-hovered]:where(:not([data-nse-enabled="false"], [data-nse-selected], [data-nse-highlighted], [data-nse-focused])) > :where([data-nse-part="content"]) > [data-nse-part="image"][data-nse-type="vector"] {
+  filter: brightness(1.1);
+}
+
+:where([data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"] > [data-nse-part="viewport"] > *)) > [data-nse-part="cell"]:where([data-nse-role="tab"])[data-nse-selected]:where(:not([data-nse-enabled="false"])) > :where([data-nse-part="content"]) > [data-nse-part="image"][data-nse-type="vector"] {
+  filter: brightness(1.28);
+}
+
+:where([data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"] > [data-nse-part="viewport"] > *)) > [data-nse-part="cell"]:where([data-nse-role="tab"])[data-nse-enabled="false"] > :where([data-nse-part="content"]) > [data-nse-part="image"] {
+  opacity: 0.42;
+}
+
+[data-nse-control="tab-view"][data-nse-part="overflow"]:where([data-nse-style="navigation"]),
+:where(:scope):is([data-nse-control="tab-view"][data-nse-part="overflow"]:where([data-nse-style="navigation"])) {
+  background: transparent;
+}
+
+:where([data-nse-control="tab-view"][data-nse-part="overflow"]:where([data-nse-style="navigation"])) [data-nse-part="cell-content"]:where([data-nse-control="table-cell-view"][data-nse-style="list"]):focus-visible {
+  outline: 2px solid currentColor;
+}
+
+@media (forced-colors: active) {
+  [data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"] > [data-nse-part="viewport"] > *)::before,
+  :where(:scope):is([data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"] > [data-nse-part="viewport"] > *))::before {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    box-shadow: none !important;
+  }
+
+  :where([data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"] > [data-nse-part="viewport"] > *)) > [data-nse-part="cell"]:where([data-nse-role="tab"]):focus-visible {
+    outline: 2px solid Highlight;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  [data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"] > [data-nse-part="viewport"] > *)::before,
+  :where(:scope):is([data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"] > [data-nse-part="viewport"] > *))::before {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+}
+
+[data-nse-part="cell"]:where([data-nse-control="button"]):where([data-nse-control="tab-view"][data-nse-part="header"][data-nse-style="icons"] *) {
+  background: none;
+  color: inherit;
+}
+
+[data-nse-part="cell"]:where([data-nse-control="button"]):where([data-nse-control="tab-view"][data-nse-part="header"][data-nse-style="icons"] *):disabled {
+  opacity: 0.45;
+}
+
+/* Overlay surfaces. */
+/* Popup surfaces and the local modal backdrop. */
+[data-nse-role="overlay"]:where([data-nse-part="surface"][data-nse-style]),
+:where(:scope):is([data-nse-role="overlay"]:where([data-nse-part="surface"][data-nse-style])) {
+  background: Canvas;
+  color: CanvasText;
+}
+
+[data-nse-role="overlay"]:where([data-nse-part="surface"]):is([data-nse-style="application-menu"],[data-nse-style="content"]),
+:where(:scope):is([data-nse-role="overlay"]:where([data-nse-part="surface"]):is([data-nse-style="application-menu"],[data-nse-style="content"])) {
+  background: transparent;
+}
+
+[data-nse-part="backdrop"]:where([data-nse-role="overlay"]),
+:where(:scope):is([data-nse-part="backdrop"]:where([data-nse-role="overlay"])) {
+  background: color-mix(in srgb, CanvasText 18%, transparent);
+}
+
+/* Listbox fade edges and fallback row paint. */
+:where([data-nse-style="listbox"][data-nse-part="surface"]) [data-nse-part="viewport"]:where([data-nse-control="menu"] > *),
+:where(:scope):where([data-nse-style="listbox"][data-nse-part="surface"]) [data-nse-part="viewport"]:where([data-nse-control="menu"] > *) {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--nse-listbox-fade-top, 0px),
+    #000 calc(100% - var(--nse-listbox-fade-bottom, 0px)),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--nse-listbox-fade-top, 0px),
+    #000 calc(100% - var(--nse-listbox-fade-bottom, 0px)),
+    transparent 100%
+  );
+}
+
+:where([data-nse-style="listbox"][data-nse-part="surface"]) [data-nse-part="viewport"]:where([data-nse-control="menu"] > *):is([data-nse-edge="minY"],[data-nse-edge="both"]),
+:where(:scope):where([data-nse-style="listbox"][data-nse-part="surface"]) [data-nse-part="viewport"]:where([data-nse-control="menu"] > *):is([data-nse-edge="minY"],[data-nse-edge="both"]) {
+  --nse-listbox-fade-top: 18px;
+}
+
+:where([data-nse-style="listbox"][data-nse-part="surface"]) [data-nse-part="viewport"]:where([data-nse-control="menu"] > *):is([data-nse-edge="maxY"],[data-nse-edge="both"]),
+:where(:scope):where([data-nse-style="listbox"][data-nse-part="surface"]) [data-nse-part="viewport"]:where([data-nse-control="menu"] > *):is([data-nse-edge="maxY"],[data-nse-edge="both"]) {
+  --nse-listbox-fade-bottom: 18px;
+}
+
+:where([data-nse-style="listbox"][data-nse-part="surface"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="viewport"] > [data-nse-part="content"] > *),
+:where(:scope):where([data-nse-style="listbox"][data-nse-part="surface"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="viewport"] > [data-nse-part="content"] > *) {
+  color: inherit;
+}
+
+:where([data-nse-style="listbox"][data-nse-part="surface"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="viewport"] > [data-nse-part="content"] > *):is([data-nse-highlighted],[data-nse-menu-flash="on"]):not([data-nse-menu-flash="off"]),
+:where(:scope):where([data-nse-style="listbox"][data-nse-part="surface"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="viewport"] > [data-nse-part="content"] > *):is([data-nse-highlighted],[data-nse-menu-flash="on"]):not([data-nse-menu-flash="off"]) {
+  background: color-mix(in srgb, Highlight 18%, transparent);
+}
+
+:where([data-nse-style="listbox"][data-nse-part="surface"]) [data-nse-part="separator"]:where([data-nse-part="viewport"] > [data-nse-part="content"] > *),
+:where(:scope):where([data-nse-style="listbox"][data-nse-part="surface"]) [data-nse-part="separator"]:where([data-nse-part="viewport"] > [data-nse-part="content"] > *) {
+  background: color-mix(in srgb, currentColor 22%, transparent);
+}
+
+/* A framed popover owns its plate and shadow. */
+[data-nse-role="overlay"][data-nse-part="surface"][data-nse-transparent]:is([data-nse-control="popover"],[data-nse-control="sheet"]),
+:where(:scope):is([data-nse-role="overlay"][data-nse-part="surface"][data-nse-transparent]:is([data-nse-control="popover"],[data-nse-control="sheet"])) {
+  border-image: none;
+  background: transparent;
+  filter: var(--nse-popover-shadow, drop-shadow(0 2px 4px #0003) drop-shadow(0 12px 24px #0003));
+}
+
+[data-nse-part="popover-frame"] > [data-nse-part="popover-outline"],
+:where(:scope):is([data-nse-part="popover-frame"]) > [data-nse-part="popover-outline"] {
+  fill: var(--nse-popover-fill, Canvas);
+  stroke: var(--nse-popover-border-colour, #0005);
+}
+
+[data-nse-part="popover-frame"] > [data-nse-part="popover-arrow-fill"],
+:where(:scope):is([data-nse-part="popover-frame"]) > [data-nse-part="popover-arrow-fill"] { fill: none; }
+
+[data-nse-part="surface"][data-nse-transparent="true"]:where([data-nse-role="overlay"]) :where([data-nse-part="popover-frame"]) > [data-nse-part="popover-outline"],
+:where(:scope):is([data-nse-part="surface"][data-nse-transparent="true"]:where([data-nse-role="overlay"])) :where([data-nse-part="popover-frame"]) > [data-nse-part="popover-outline"] { fill: none; }
+
+[data-nse-part="surface"][data-nse-transparent="true"]:where([data-nse-role="overlay"]) :where([data-nse-part="popover-frame"]) > [data-nse-part="popover-arrow-fill"],
+:where(:scope):is([data-nse-part="surface"][data-nse-transparent="true"]:where([data-nse-role="overlay"])) :where([data-nse-part="popover-frame"]) > [data-nse-part="popover-arrow-fill"] { fill: var(--nse-popover-arrow-fill, Canvas); }
+
 :scope {
   --nse-atmo-content-ink: #25303c;
   --nse-atmo-title-ink: #293645;
@@ -415,13 +663,17 @@
 :scope [data-nse-control="tab-view"]>:is([data-nse-control="toolbar"]:where([data-nse-part="background"]):where([data-nse-position]),[data-nse-control="tab-view"]:where([data-nse-part="header"]):where([data-nse-style="capsule"]),[data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"]>[data-nse-part="viewport"]>*),[data-nse-control="segmented-control"]:where([data-nse-part="content"]):where([data-nse-position="inline"])):is([data-nse-part="header"],[data-nse-style="grouped"])>[data-nse-part="tab-item"]:nth-child(n)>:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"])):where(:not([data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *))),
 :scope:is([data-nse-control="tab-view"])>:is([data-nse-control="toolbar"]:where([data-nse-part="background"]):where([data-nse-position]),[data-nse-control="tab-view"]:where([data-nse-part="header"]):where([data-nse-style="capsule"]),[data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"]>[data-nse-part="viewport"]>*),[data-nse-control="segmented-control"]:where([data-nse-part="content"]):where([data-nse-position="inline"])):is([data-nse-part="header"],[data-nse-style="grouped"])>[data-nse-part="tab-item"]:nth-child(n)>:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"])):where(:not([data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *))),
 :scope[data-nse-control="tab-view"]>:is([data-nse-control="toolbar"]:where([data-nse-part="background"]):where([data-nse-position]),[data-nse-control="tab-view"]:where([data-nse-part="header"]):where([data-nse-style="capsule"]),[data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"]>[data-nse-part="viewport"]>*),[data-nse-control="segmented-control"]:where([data-nse-part="content"]):where([data-nse-position="inline"])):is([data-nse-part="header"],[data-nse-style="grouped"])>[data-nse-part="tab-item"]:nth-child(n)>:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"])):where(:not([data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *))) {
-  height: var(--nse-atmo-bar-h);
-  min-height: var(--nse-atmo-bar-h);
   --nse-control-minimum-block-size: var(--nse-atmo-bar-h);
   border: 0;
   border-image: none;
   padding: 0 16px 0 15px; /* middle cell content insets (measured live) */
   color: #555;
+}
+:scope [data-nse-control="tab-view"]>:is([data-nse-control="toolbar"]:where([data-nse-part="background"]):where([data-nse-position]),[data-nse-control="tab-view"]:where([data-nse-part="header"]):where([data-nse-style="capsule"]),[data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"]>[data-nse-part="viewport"]>*),[data-nse-control="segmented-control"]:where([data-nse-part="content"]):where([data-nse-position="inline"])):is([data-nse-part="header"],[data-nse-style="grouped"])>[data-nse-part="tab-item"]:nth-child(n)>:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"])):where(:not([data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *))):where(:not([data-nse-control="tab-view"][data-nse-style="navigation"]>[data-nse-part="viewport"]>[data-nse-part="header"][data-nse-control-size="large"]>[data-nse-part="cell"][data-nse-role="tab"])),
+:scope:is([data-nse-control="tab-view"])>:is([data-nse-control="toolbar"]:where([data-nse-part="background"]):where([data-nse-position]),[data-nse-control="tab-view"]:where([data-nse-part="header"]):where([data-nse-style="capsule"]),[data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"]>[data-nse-part="viewport"]>*),[data-nse-control="segmented-control"]:where([data-nse-part="content"]):where([data-nse-position="inline"])):is([data-nse-part="header"],[data-nse-style="grouped"])>[data-nse-part="tab-item"]:nth-child(n)>:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"])):where(:not([data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *))):where(:not([data-nse-control="tab-view"][data-nse-style="navigation"]>[data-nse-part="viewport"]>[data-nse-part="header"][data-nse-control-size="large"]>[data-nse-part="cell"][data-nse-role="tab"])),
+:scope[data-nse-control="tab-view"]>:is([data-nse-control="toolbar"]:where([data-nse-part="background"]):where([data-nse-position]),[data-nse-control="tab-view"]:where([data-nse-part="header"]):where([data-nse-style="capsule"]),[data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"]>[data-nse-part="viewport"]>*),[data-nse-control="segmented-control"]:where([data-nse-part="content"]):where([data-nse-position="inline"])):is([data-nse-part="header"],[data-nse-style="grouped"])>[data-nse-part="tab-item"]:nth-child(n)>:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"])):where(:not([data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *))):where(:not([data-nse-control="tab-view"][data-nse-style="navigation"]>[data-nse-part="viewport"]>[data-nse-part="header"][data-nse-control-size="large"]>[data-nse-part="cell"][data-nse-role="tab"])) {
+  height: var(--nse-atmo-bar-h);
+  min-height: var(--nse-atmo-bar-h);
 }
 :scope [data-nse-control="tab-view"]>:is([data-nse-control="toolbar"]:where([data-nse-part="background"]):where([data-nse-position]),[data-nse-control="tab-view"]:where([data-nse-part="header"]):where([data-nse-style="capsule"]),[data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"]>[data-nse-part="viewport"]>*),[data-nse-control="segmented-control"]:where([data-nse-part="content"]):where([data-nse-position="inline"])):is([data-nse-part="header"],[data-nse-style="grouped"])>[data-nse-part="tab-item"]:first-child>:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"])):where(:not([data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *))),
 :scope:is([data-nse-control="tab-view"])>:is([data-nse-control="toolbar"]:where([data-nse-part="background"]):where([data-nse-position]),[data-nse-control="tab-view"]:where([data-nse-part="header"]):where([data-nse-style="capsule"]),[data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"]>[data-nse-part="viewport"]>*),[data-nse-control="segmented-control"]:where([data-nse-part="content"]):where([data-nse-position="inline"])):is([data-nse-part="header"],[data-nse-style="grouped"])>[data-nse-part="tab-item"]:first-child>:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"])):where(:not([data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *))),
@@ -1402,9 +1654,16 @@
 :where(:scope) :is([data-nse-control="toolbar"]:where([data-nse-part="background"]):where([data-nse-position]),[data-nse-control="tab-view"]:where([data-nse-part="header"]):where([data-nse-style="capsule"]),[data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"]>[data-nse-part="viewport"]>*),[data-nse-control="segmented-control"]:where([data-nse-part="content"]):where([data-nse-position="inline"])):is([data-nse-part="header"],[data-nse-style="grouped"])>:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"])),
 :where(:scope):is(:is([data-nse-control="toolbar"]:where([data-nse-part="background"]):where([data-nse-position]),[data-nse-control="tab-view"]:where([data-nse-part="header"]):where([data-nse-style="capsule"]),[data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"]>[data-nse-part="viewport"]>*),[data-nse-control="segmented-control"]:where([data-nse-part="content"]):where([data-nse-position="inline"])):is([data-nse-part="header"],[data-nse-style="grouped"]))>:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"])),
 :where(:scope):is([data-nse-control="toolbar"]:where([data-nse-part="background"]):where([data-nse-position]),[data-nse-control="tab-view"]:where([data-nse-part="header"]):where([data-nse-style="capsule"]),[data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"]>[data-nse-part="viewport"]>*),[data-nse-control="segmented-control"]:where([data-nse-part="content"]):where([data-nse-position="inline"])):is([data-nse-part="header"],[data-nse-style="grouped"])>:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"])) {
+  --nse-control-minimum-block-size:var(--nse-atmo-bar-h);
+}
+:where(:scope) :is([data-nse-control="toolbar"]:where([data-nse-part="background"]):where([data-nse-position]),[data-nse-control="tab-view"]:where([data-nse-part="header"]):where([data-nse-style="capsule"]),[data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"]>[data-nse-part="viewport"]>*),[data-nse-control="segmented-control"]:where([data-nse-part="content"]):where([data-nse-position="inline"])):not(:is([data-nse-part="header"],[data-nse-style="grouped"]))>:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"])):where(:not([data-nse-control="tab-view"][data-nse-style="navigation"]>[data-nse-part="viewport"]>[data-nse-part="header"][data-nse-control-size="large"]>[data-nse-part="cell"][data-nse-role="tab"])),
+:where(:scope):is(:is([data-nse-control="toolbar"]:where([data-nse-part="background"]):where([data-nse-position]),[data-nse-control="tab-view"]:where([data-nse-part="header"]):where([data-nse-style="capsule"]),[data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"]>[data-nse-part="viewport"]>*),[data-nse-control="segmented-control"]:where([data-nse-part="content"]):where([data-nse-position="inline"])):not(:is([data-nse-part="header"],[data-nse-style="grouped"])))>:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"])):where(:not([data-nse-control="tab-view"][data-nse-style="navigation"]>[data-nse-part="viewport"]>[data-nse-part="header"][data-nse-control-size="large"]>[data-nse-part="cell"][data-nse-role="tab"])),
+:where(:scope):is([data-nse-control="toolbar"]:where([data-nse-part="background"]):where([data-nse-position]),[data-nse-control="tab-view"]:where([data-nse-part="header"]):where([data-nse-style="capsule"]),[data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"]>[data-nse-part="viewport"]>*),[data-nse-control="segmented-control"]:where([data-nse-part="content"]):where([data-nse-position="inline"])):not(:is([data-nse-part="header"],[data-nse-style="grouped"]))>:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"])):where(:not([data-nse-control="tab-view"][data-nse-style="navigation"]>[data-nse-part="viewport"]>[data-nse-part="header"][data-nse-control-size="large"]>[data-nse-part="cell"][data-nse-role="tab"])),
+:where(:scope) :is([data-nse-control="toolbar"]:where([data-nse-part="background"]):where([data-nse-position]),[data-nse-control="tab-view"]:where([data-nse-part="header"]):where([data-nse-style="capsule"]),[data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"]>[data-nse-part="viewport"]>*),[data-nse-control="segmented-control"]:where([data-nse-part="content"]):where([data-nse-position="inline"])):is([data-nse-part="header"],[data-nse-style="grouped"])>:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"])):where(:not([data-nse-control="tab-view"][data-nse-style="navigation"]>[data-nse-part="viewport"]>[data-nse-part="header"][data-nse-control-size="large"]>[data-nse-part="cell"][data-nse-role="tab"])),
+:where(:scope):is(:is([data-nse-control="toolbar"]:where([data-nse-part="background"]):where([data-nse-position]),[data-nse-control="tab-view"]:where([data-nse-part="header"]):where([data-nse-style="capsule"]),[data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"]>[data-nse-part="viewport"]>*),[data-nse-control="segmented-control"]:where([data-nse-part="content"]):where([data-nse-position="inline"])):is([data-nse-part="header"],[data-nse-style="grouped"]))>:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"])):where(:not([data-nse-control="tab-view"][data-nse-style="navigation"]>[data-nse-part="viewport"]>[data-nse-part="header"][data-nse-control-size="large"]>[data-nse-part="cell"][data-nse-role="tab"])),
+:where(:scope):is([data-nse-control="toolbar"]:where([data-nse-part="background"]):where([data-nse-position]),[data-nse-control="tab-view"]:where([data-nse-part="header"]):where([data-nse-style="capsule"]),[data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"]>[data-nse-part="viewport"]>*),[data-nse-control="segmented-control"]:where([data-nse-part="content"]):where([data-nse-position="inline"])):is([data-nse-part="header"],[data-nse-style="grouped"])>:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"])):where(:not([data-nse-control="tab-view"][data-nse-style="navigation"]>[data-nse-part="viewport"]>[data-nse-part="header"][data-nse-control-size="large"]>[data-nse-part="cell"][data-nse-role="tab"])) {
   height:var(--nse-atmo-bar-h);
   min-height:var(--nse-atmo-bar-h);
-  --nse-control-minimum-block-size:var(--nse-atmo-bar-h);
 }
 :scope :is([data-nse-control="toolbar"]:where([data-nse-part="background"]):where([data-nse-position]),[data-nse-control="tab-view"]:where([data-nse-part="header"]):where([data-nse-style="capsule"]),[data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"]>[data-nse-part="viewport"]>*),[data-nse-control="segmented-control"]:where([data-nse-part="content"]):where([data-nse-position="inline"])):not(:is([data-nse-part="header"],[data-nse-style="grouped"]))>:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"]))::before,
 :scope:is(:is([data-nse-control="toolbar"]:where([data-nse-part="background"]):where([data-nse-position]),[data-nse-control="tab-view"]:where([data-nse-part="header"]):where([data-nse-style="capsule"]),[data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"]>[data-nse-part="viewport"]>*),[data-nse-control="segmented-control"]:where([data-nse-part="content"]):where([data-nse-position="inline"])):not(:is([data-nse-part="header"],[data-nse-style="grouped"])))>:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"]))::before,
@@ -2662,7 +2921,7 @@
   border-image: none;
 }
 
-[data-nse-part="surface"]:where(:not([data-nse-control="tooltip"]))[data-nse-part="surface"]:is([data-nse-style="popover"]:where([data-nse-part="surface"]),[data-nse-style="action-sheet"]:where([data-nse-part="surface"]))::before {
+[data-nse-part="surface"]:where(:not([data-nse-control="tooltip"]))[data-nse-part="surface"]:is([data-nse-style="popover"]:where([data-nse-part="surface"]),[data-nse-style="action-sheet"]:where([data-nse-part="surface"])):where(:not([data-nse-transparent]))::before {
   content: "";
   border-radius: 8px;
   border: 1px solid;

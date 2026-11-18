@@ -79,7 +79,7 @@ describe("popover frame and presentation", () => {
   it("keeps an arrow and frame while the content paints its plate", async () => {
     render(<Harness><Fixture drawsBackground={false} /></Harness>);
     const surface = await screen.findByRole("dialog", { name: "Options" });
-    expect(surface.getAttribute("data-nse-popover-draws-background")).toBe("false");
+    expect(surface.getAttribute("data-nse-transparent")).toBe("true");
     expect(surface.querySelector('[data-nse-part="arrow"]')).not.toBeNull();
     expect(surface.querySelector('[data-nse-part="popover-frame"]')).not.toBeNull();
     await waitFor(() => expect(surface.style.getPropertyValue("--nse-popover-arrow-fill")).toBe("#efe2c6"));
@@ -98,7 +98,7 @@ describe("popover frame and presentation", () => {
   it("drops anchored coordinates on compact adaptation without remounting the editor", async () => {
     const view = render(<Harness><Fixture /></Harness>);
     const surface = await screen.findByRole("dialog", { name: "Options" });
-    expect(surface.dataset.nsePopoverDrawsBackground).toBe("true");
+    expect(surface.dataset.nseTransparent).toBe("false");
     const draft = screen.getByRole("textbox", { name: "Draft" });
     await waitFor(() => expect(surface.style.left).not.toBe(""));
     view.rerender(<Harness compact><Fixture /></Harness>);

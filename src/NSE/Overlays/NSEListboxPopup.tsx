@@ -347,7 +347,6 @@ export function ListboxPopup<T = unknown>({
         type="button"
         role="option"
         aria-selected={option.kind !== "action" && option.id === selectedId}
-        data-highlighted={index === activeIndex && !option.disabled ? "true" : undefined}
         data-kind={option.kind === "action" ? "action" : undefined}
         aria-posinset={index + 1}
         aria-setsize={options.length}
@@ -368,6 +367,7 @@ export function ListboxPopup<T = unknown>({
   });
 
   const contentStyle: CSSProperties | undefined = shouldVirtualize ? { position: "relative", minBlockSize: `${options.length * rowHeight}px` } : undefined;
+  const fadeEdge = fadeTop && fadeBottom ? "both" : fadeTop ? "minY" : fadeBottom ? "maxY" : undefined;
   return (
     <NSEPopup
       id={resolvedId}
@@ -399,11 +399,9 @@ export function ListboxPopup<T = unknown>({
         data-popup-align={popupAlign}
         data-size={controlSize === "small" ? "small" : undefined}
         data-nse-control-size={controlSize}
-        data-fade-top={fadeTop ? "true" : "false"}
-        data-fade-bottom={fadeBottom ? "true" : "false"}
         onKeyDown={handleKeyDown}
       >
-        <div ref={scrollRef} data-nse-part="viewport" className="nse-overlay-listbox-scroll" onScroll={updateScrollState}>
+        <div ref={scrollRef} data-nse-part="viewport" data-nse-edge={fadeEdge} className="nse-overlay-listbox-scroll" onScroll={updateScrollState}>
           <div ref={attachContent} data-nse-part="content" className="nse-overlay-listbox-scroll-content" style={contentStyle}>
             {optionRows}
           </div>

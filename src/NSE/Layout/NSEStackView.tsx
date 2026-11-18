@@ -618,6 +618,7 @@ function ArrangedStackView({
       {overflowPolicy === "menu" && overflowEntries.length > 0 ? (
         <span
           className="nse-stack-view-overflow"
+          data-nse-part="overflow"
           data-stack-overflow-size={formatSize(layout.overflowTriggerSize)}
           style={overflowStyle(orientation, distribution, layout.overflowTriggerSize, layout.overflowTriggerSpacing, layout.overflowTriggerPosition)}
         >
@@ -625,6 +626,7 @@ function ArrangedStackView({
             ref={overflowTriggerRef}
             type="button"
             className="nse-stack-view-overflow-trigger"
+            data-nse-part="button"
             aria-label={overflowLabel}
             aria-haspopup="dialog"
             aria-expanded={overflowOpen}
@@ -654,6 +656,7 @@ function ArrangedStackView({
             aria-hidden={!overflowOpen}
             hidden={!overflowOpen}
             className="nse-stack-view-overflow-menu"
+            data-nse-part="menu"
             data-stack-overflow-presentation="true"
           >
             {overflowEntries.map((entry) => {
@@ -666,6 +669,8 @@ function ArrangedStackView({
                     disabled={itemAriaDisabled}
                     aria-disabled={itemAriaDisabled ? true : undefined}
                     className="nse-stack-view-overflow-item"
+                    data-nse-part="item"
+                    data-nse-enabled={itemAriaDisabled ? "false" : undefined}
                     data-stack-overflow-action="true"
                     data-stack-overflow-source-index={entry.sourceIndex}
                     onClick={() => entry.onOverflowActivate?.()}

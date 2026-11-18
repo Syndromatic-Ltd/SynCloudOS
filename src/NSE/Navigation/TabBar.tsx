@@ -106,41 +106,6 @@ function tabIconStyle(icon: NSENavigationIcon): TabIconStyle | undefined {
   return { "--nse-tab-icon-source": source } as TabIconStyle;
 }
 
-function tabVisualState(
-  state: NSENavigationPresentationState,
-  selected: boolean,
-  pressed: boolean,
-) {
-  return selected && pressed ? "selected-pressed" : state;
-}
-
-type TabChromeState = "up" | "down" | "sel" | "seldown" | "dis";
-
-function tabChromeState(
-  state: NSENavigationPresentationState,
-  selected: boolean,
-  pressed: boolean,
-): TabChromeState {
-  if (state === "disabled") return "dis";
-  if (selected && pressed) return "seldown";
-  if (selected) return "sel";
-  if (pressed) return "down";
-  return "up";
-}
-
-function tabChromeMetadata(
-  segment: TabChromeSegment,
-  state: TabChromeState,
-) {
-  return {
-    "data-nse-tab-chrome-family": "grouped-toolbutton",
-    "data-nse-tab-chrome-variant": "tall",
-    "data-nse-tab-chrome-segment": segment,
-    "data-nse-tab-chrome-state": state,
-    "data-nse-tab-chrome-active": "true",
-  };
-}
-
 /**
  * The tall-chrome icon material, as the Atmo UserInfo glyph paints it: the
  * ring and glyph are 75% translucent, with a soft white rim just inside every
@@ -356,10 +321,6 @@ export function TabBar({
           data-position={usesTallTabChrome ? "inline" : undefined}
           data-grouped={usesTallTabChrome ? "true" : undefined}
           data-nse-tab-layout={orientation === "vertical" ? "side-rail" : "floating-bottom"}
-          data-nse-tab-chrome-family={usesTallTabChrome ? "grouped-toolbutton" : undefined}
-          data-nse-tab-chrome-variant={usesTallTabChrome ? "tall" : undefined}
-          data-nse-tab-chrome-size={usesTallTabChrome ? "tall" : undefined}
-          data-nse-tab-chrome-active={usesTallTabChrome ? "true" : "false"}
           data-nse-tab-visible-item-count={controls.length}
           data-nse-tab-overflow-count={overflowDestinations.length}
           data-nse-tab-overflow-open={overflowOpen ? "true" : "false"}
@@ -375,7 +336,6 @@ export function TabBar({
           const icon = projectNSENavigationIcon(destination.icon, state);
           const iconStyle = tabIconStyle(destination.icon);
           const segment = tabChromeSegment(index, orientation === "vertical" ? 1 : controls.length);
-          const chromeState = tabChromeState(state, selected, pressed);
           return (
             <LabelHelp key={destination.id} label={destination.accessibleLabel ?? destination.label}><button
               className={classes("nse-tab-bar-tab", usesTallTabChrome && "nse-control-button")}
@@ -398,8 +358,6 @@ export function TabBar({
               data-pressed={pressed ? "true" : "false"}
               data-nse-tab-destination={destination.id}
               data-nse-tab-presentation-state={state}
-              data-nse-tab-visual-state={tabVisualState(state, selected, pressed)}
-              {...tabChromeMetadata(segment, chromeState)}
 
               onFocus={() => {
                 setFocusedTabId(destination.id);
@@ -424,7 +382,6 @@ export function TabBar({
                 <span
                   data-nse-part="bezel" className="nse-tab-bar-chrome-surface"
                   aria-hidden="true"
-                  data-nse-tab-chrome-surface="true"
                 />
               ) : null}
               <span data-nse-part="content" className="nse-tab-bar-content" data-nse-tab-content="true">
@@ -433,7 +390,6 @@ export function TabBar({
                   aria-hidden="true"
                   data-icon-kind={icon.kind}
                   data-nse-tab-icon-source={icon.source}
-                  data-nse-tab-icon-ready={icon.kind === "vector" ? "true" : "false"}
                   data-nse-tab-icon-state={icon.state}
                   style={iconStyle}
 
@@ -467,11 +423,6 @@ export function TabBar({
             data-selected={moreSelected ? "true" : "false"}
             data-pressed={morePressed ? "true" : "false"}
             data-nse-tab-presentation-state={moreState}
-            data-nse-tab-visual-state={tabVisualState(moreState, moreSelected, morePressed)}
-            {...tabChromeMetadata(
-              tabChromeSegment(controls.length - 1, orientation === "vertical" ? 1 : controls.length),
-              tabChromeState(moreState, moreSelected, morePressed),
-            )}
 
             onFocus={() => {
               setFocusedTabId(TabBarMoreDestinationId);
@@ -496,7 +447,6 @@ export function TabBar({
               <span
                 data-nse-part="bezel" className="nse-tab-bar-chrome-surface"
                 aria-hidden="true"
-                data-nse-tab-chrome-surface="true"
               />
             ) : null}
             <span data-nse-part="content" className="nse-tab-bar-content" data-nse-tab-content="true">
@@ -505,7 +455,6 @@ export function TabBar({
                 aria-hidden="true"
                 data-icon-kind={moreIcon.kind}
                 data-nse-tab-icon-source={moreIcon.source}
-                data-nse-tab-icon-ready="true"
                 data-nse-tab-icon-state={moreIcon.state}
                 style={moreIconStyle}
 
@@ -661,6 +610,7 @@ export function TabBarOverflowList({
   const overflowPage = overflowOpen && moreHierarchyActive ? (
     <section
       className={classes("nse-tab-bar-overflow-page", !ownsPanel && className)}
+      data-nse-control="tab-view" data-nse-part="overflow" data-nse-style="navigation"
       data-nse-tab-overflow-page="true"
       data-nse-tab-overflow-source-controller={controller.id}
     >
@@ -708,7 +658,6 @@ export function TabBarOverflowList({
                       aria-hidden="true"
                       data-icon-kind={icon.kind}
                       data-nse-tab-icon-source={icon.source}
-                      data-nse-tab-icon-ready={icon.kind === "vector" ? "true" : "false"}
                       data-nse-tab-icon-state={icon.state}
                       style={iconStyle}
                     />

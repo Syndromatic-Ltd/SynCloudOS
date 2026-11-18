@@ -48,7 +48,7 @@ Contract version 1: 72 controls, 48 colours.
   - `data-nse-role`: `disclosure`
   - `data-nse-shadow`: `true`
   - `data-nse-shadow-suppressed`: `true`
-  - `data-nse-style`: `alpha`, `arrow`, `floating`, `grey`, `inspector`, `plain`, `sidebar`, `soft`, `surface`
+  - `data-nse-style`: `alpha`, `arrow`, `floating`, `grey`, `grouped`, `inspector`, `plain`, `sidebar`, `soft`, `surface`
   - `data-nse-title-position`: `aboveBottom`, `aboveTop`, `atBottom`, `atTop`, `belowBottom`, `belowTop`, `noTitle`
   - `data-nse-transparent`: `false`, `true`
   - `data-nse-view-layer`: ``
@@ -210,10 +210,11 @@ Contract version 1: 72 controls, 48 colours.
 - Variants:
   - `data-nse-chrome`: `standard`
   - `data-nse-control-size`: `regular`, `small`
+  - `data-nse-edge`: `both`, `maxY`, `minY`
   - `data-nse-menu-chosen`: ``
   - `data-nse-placement`: `block-end-inline-start`, `bottom-start`, `viewport-block-start-inline-end`
   - `data-nse-presentation`: `anchored`, `viewport-block-start-inline-end`
-  - `data-nse-role`: `application-menu`, `overlay`
+  - `data-nse-role`: `application-menu`, `command-menu`, `overlay`
   - `data-nse-style`: `application-menu`, `context-menu`, `listbox`, `menu`
 
 ### `menu-bar`
@@ -295,6 +296,7 @@ Contract version 1: 72 controls, 48 colours.
   - `data-nse-presentation`: `anchored`
   - `data-nse-role`: `overlay`
   - `data-nse-style`: `popover`
+  - `data-nse-transparent`: `false`, `true`
 
 ### `predicate-editor`
 
@@ -428,8 +430,8 @@ Contract version 1: 72 controls, 48 colours.
 
 ### `stack-view`
 
-- Parts: `content`
-- States: none
+- Parts: `button`, `content`, `item`, `menu`, `overflow`
+- States: `enabled=false`
 - Variants:
   - `data-nse-alignment`: `centre`
   - `data-nse-orientation`: `horizontal`
@@ -460,7 +462,7 @@ Contract version 1: 72 controls, 48 colours.
 
 ### `tab-view`
 
-- Parts: `background`, `bezel`, `cell`, `content`, `crayon`, `crayon-art`, `crayon-box`, `crayon-box-front`, `crayons-mode`, `grey-presets`, `header`, `image`, `image-marker`, `image-mode`, `image-palette`, `indicator`, `palettes-mode`, `sliders-mode`, `swatch`, `tab-item`, `title`, `viewport`, `wheel-mode`
+- Parts: `background`, `bezel`, `cell`, `content`, `crayon`, `crayon-art`, `crayon-box`, `crayon-box-front`, `crayons-mode`, `grey-presets`, `header`, `image`, `image-marker`, `image-mode`, `image-palette`, `indicator`, `overflow`, `palettes-mode`, `sliders-mode`, `swatch`, `tab-item`, `title`, `viewport`, `wheel-mode`
 - States: `selected`
 - Variants:
   - `data-nse-control-size`: `large`
@@ -474,12 +476,14 @@ Contract version 1: 72 controls, 48 colours.
 
 ### `table-cell-view`
 
-- Parts: `accessory`, `badge`, `cell`, `cell-content`, `disclosure`, `leading`, `primary-text`, `row`, `secondary-text`, `text-content`, `trailing`
+- Parts: `accessory`, `badge`, `cell`, `cell-content`, `disclosure`, `image`, `leading`, `primary-text`, `row`, `secondary-text`, `text-content`, `trailing`
 - States: `selected`
 - Variants:
   - `data-nse-expanded`: `false`
   - `data-nse-highlight-style`: `none`, `regular`
+  - `data-nse-position`: `first`, `last`
   - `data-nse-style`: `list`
+  - `data-nse-type`: `template`
 
 ### `table-view`
 

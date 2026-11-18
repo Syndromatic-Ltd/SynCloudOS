@@ -1,12 +1,9 @@
 :scope :is([data-nse-button-type]:where(:not([data-nse-button-type="switch"],[data-nse-button-type="radio"],[data-nse-bezel-style="disclosure"])),[data-nse-role="tab"]:where([data-nse-control-size="large"]),[data-nse-control="button"]:where([data-nse-part="cell"][data-nse-bezel-style="rounded"])):where(:not([data-nse-control="button"]:where([data-nse-control="pop-up-button"][data-nse-pulls-down="false"] *))),
 :scope:is(:is([data-nse-button-type]:where(:not([data-nse-button-type="switch"],[data-nse-button-type="radio"],[data-nse-bezel-style="disclosure"])),[data-nse-role="tab"]:where([data-nse-control-size="large"]),[data-nse-control="button"]:where([data-nse-part="cell"][data-nse-bezel-style="rounded"])):where(:not([data-nse-control="button"]:where([data-nse-control="pop-up-button"][data-nse-pulls-down="false"] *)))),
 :scope:is([data-nse-button-type]:where(:not([data-nse-button-type="switch"],[data-nse-button-type="radio"],[data-nse-bezel-style="disclosure"])),[data-nse-role="tab"]:where([data-nse-control-size="large"]),[data-nse-control="button"]:where([data-nse-part="cell"][data-nse-bezel-style="rounded"])):where(:not([data-nse-control="button"]:where([data-nse-control="pop-up-button"][data-nse-pulls-down="false"] *))) {
-  min-width:calc(var(--nse-control-height, var(--nse-atmo-control-h)) * 1.46);
   --nse-control-minimum-inline-size:calc(var(--nse-control-height, var(--nse-atmo-control-h)) * 1.46);
   max-width:100%;
   margin:0;
-  height:var(--nse-control-height, var(--nse-atmo-control-h));
-  min-height:var(--nse-control-height, var(--nse-atmo-control-h));
   --nse-control-minimum-block-size:var(--nse-control-height, var(--nse-atmo-control-h));
   padding:0 calc(var(--nse-control-height, var(--nse-atmo-control-h)) * 0.52);
   border:0;
@@ -33,6 +30,13 @@
   --nse-atmo-btn-down-b:rgba(68,68,68,0.87);
   --nse-atmo-btn-down-b2:rgba(64,64,64,0.87);
   --nse-atmo-btn-down-side:rgba(59,59,59,0.87);
+}
+:scope :is([data-nse-button-type]:where(:not([data-nse-button-type="switch"],[data-nse-button-type="radio"],[data-nse-bezel-style="disclosure"])),[data-nse-role="tab"]:where([data-nse-control-size="large"]),[data-nse-control="button"]:where([data-nse-part="cell"][data-nse-bezel-style="rounded"])):where(:not([data-nse-control="button"]:where([data-nse-control="pop-up-button"][data-nse-pulls-down="false"] *))):where(:not([data-nse-control="tab-view"][data-nse-style="navigation"]>[data-nse-part="viewport"]>[data-nse-part="header"][data-nse-control-size="large"]>[data-nse-part="cell"][data-nse-role="tab"])),
+:scope:is(:is([data-nse-button-type]:where(:not([data-nse-button-type="switch"],[data-nse-button-type="radio"],[data-nse-bezel-style="disclosure"])),[data-nse-role="tab"]:where([data-nse-control-size="large"]),[data-nse-control="button"]:where([data-nse-part="cell"][data-nse-bezel-style="rounded"])):where(:not([data-nse-control="button"]:where([data-nse-control="pop-up-button"][data-nse-pulls-down="false"] *)))):where(:not([data-nse-control="tab-view"][data-nse-style="navigation"]>[data-nse-part="viewport"]>[data-nse-part="header"][data-nse-control-size="large"]>[data-nse-part="cell"][data-nse-role="tab"])),
+:scope:is([data-nse-button-type]:where(:not([data-nse-button-type="switch"],[data-nse-button-type="radio"],[data-nse-bezel-style="disclosure"])),[data-nse-role="tab"]:where([data-nse-control-size="large"]),[data-nse-control="button"]:where([data-nse-part="cell"][data-nse-bezel-style="rounded"])):where(:not([data-nse-control="button"]:where([data-nse-control="pop-up-button"][data-nse-pulls-down="false"] *))):where(:not([data-nse-control="tab-view"][data-nse-style="navigation"]>[data-nse-part="viewport"]>[data-nse-part="header"][data-nse-control-size="large"]>[data-nse-part="cell"][data-nse-role="tab"])) {
+  min-width:calc(var(--nse-control-height, var(--nse-atmo-control-h)) * 1.46);
+  height:var(--nse-control-height, var(--nse-atmo-control-h));
+  min-height:var(--nse-control-height, var(--nse-atmo-control-h));
 }
 
 :scope :is([data-nse-button-type]:where(:not([data-nse-button-type="switch"],[data-nse-button-type="radio"],[data-nse-bezel-style="disclosure"])),[data-nse-role="tab"]:where([data-nse-control-size="large"]),[data-nse-control="button"]:where([data-nse-part="cell"][data-nse-bezel-style="rounded"])):where(:not([data-nse-control="button"]:where([data-nse-control="pop-up-button"][data-nse-pulls-down="false"] *))):focus-visible::before,

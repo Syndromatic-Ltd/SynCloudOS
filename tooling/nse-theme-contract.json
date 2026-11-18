@@ -104,6 +104,7 @@
           "arrow",
           "floating",
           "grey",
+          "grouped",
           "inspector",
           "plain",
           "sidebar",
@@ -639,6 +640,11 @@
           "regular",
           "small"
         ],
+        "edge": [
+          "both",
+          "maxY",
+          "minY"
+        ],
         "menu-chosen": [
           ""
         ],
@@ -653,6 +659,7 @@
         ],
         "role": [
           "application-menu",
+          "command-menu",
           "overlay"
         ],
         "style": [
@@ -877,6 +884,10 @@
         ],
         "style": [
           "popover"
+        ],
+        "transparent": [
+          "false",
+          "true"
         ]
       }
     },
@@ -1224,9 +1235,15 @@
     },
     "stack-view": {
       "parts": [
-        "content"
+        "button",
+        "content",
+        "item",
+        "menu",
+        "overflow"
       ],
-      "states": [],
+      "states": [
+        "enabled=false"
+      ],
       "variants": {
         "alignment": [
           "centre"
@@ -1322,6 +1339,7 @@
         "image-mode",
         "image-palette",
         "indicator",
+        "overflow",
         "palettes-mode",
         "sliders-mode",
         "swatch",
@@ -1378,6 +1396,7 @@
         "cell",
         "cell-content",
         "disclosure",
+        "image",
         "leading",
         "primary-text",
         "row",
@@ -1396,8 +1415,15 @@
           "none",
           "regular"
         ],
+        "position": [
+          "first",
+          "last"
+        ],
         "style": [
           "list"
+        ],
+        "type": [
+          "template"
         ]
       }
     },

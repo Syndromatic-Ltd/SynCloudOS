@@ -1,5 +1,5 @@
 
-@layer nse.atmo {
+@layer nse.structure {
 @scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
@@ -125,10 +125,9 @@
 :where(:scope):is(.nse-stack-view-overflow-trigger) {
   align-items: center;
   background: transparent;
-  border: 1px solid currentColor;
+  border: 1px solid;
   box-sizing: border-box;
   border-radius: 4px;
-  color: inherit;
   cursor: pointer;
   display: inline-flex;
   inline-size: 100%;
@@ -146,14 +145,13 @@
 :where(:scope):is(.nse-stack-view-overflow-item:focus-visible),
 .nse-stack-view-overflow-action :focus-visible,
 :where(:scope):is(.nse-stack-view-overflow-action) :focus-visible {
-  outline: 2px solid currentColor;
+  outline: 2px solid;
   outline-offset: 2px;
 }
 
 .nse-stack-view-overflow-menu,
 :where(:scope):is(.nse-stack-view-overflow-menu) {
-  background: Canvas;
-  border: 1px solid currentColor;
+  border: 1px solid;
   display: grid;
   gap: 2px;
   inset-block-start: calc(100% + 4px);
@@ -168,7 +166,6 @@
 :where(:scope):is(.nse-stack-view-overflow-item) {
   background: transparent;
   border: 0;
-  color: inherit;
   cursor: pointer;
   padding: 4px 8px;
   text-align: start;
@@ -185,7 +182,6 @@
 .nse-stack-view-overflow-item[aria-disabled="true"],
 :where(:scope):is(.nse-stack-view-overflow-item[aria-disabled="true"]) {
   cursor: default;
-  opacity: 0.6;
 }
 
 @media (forced-colors: active) {

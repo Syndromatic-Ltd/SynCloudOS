@@ -64,7 +64,7 @@ export function PopoverWindowSurface({ surface, windowControllerId, anchored, ch
     className={`nse-overlay-popup nse-popover nse-overlay-popup--${anchored ? "popover" : "action-sheet"}`}
     data-nse-control="popover" data-nse-role="overlay" data-nse-part="surface" data-nse-style={anchored ? "popover" : "action-sheet"}
     data-nse-window-popover=""
-    data-nse-popover-draws-background={String(request.drawsBackground ?? true)}
+    data-nse-transparent={String(request.drawsBackground === false)}
     data-nse-reduced-motion={String(reducedMotion)}
     data-nse-overlay-kind={anchored ? "popover" : "action-sheet"}
     data-nse-presentation={anchored ? "anchored" : "sheet"}
@@ -73,7 +73,13 @@ export function PopoverWindowSurface({ surface, windowControllerId, anchored, ch
     aria-modal={!anchored || undefined}
     aria-label={request.labelledBy ? undefined : request.title}
     aria-labelledby={request.labelledBy} aria-describedby={request.describedBy}
-    style={{ width: "100%", height: "100%", minWidth: 0, "--nse-popover-spring": nsePopoverSpringEasing } as CSSProperties}
+    style={{
+      width: "100%",
+      height: "100%",
+      minWidth: 0,
+      opacity: "var(--nse-overlay-presentation-alpha)",
+      "--nse-popover-spring": nsePopoverSpringEasing,
+    } as CSSProperties}
     onKeyDown={event => {
       if (event.key !== "Escape" || event.defaultPrevented || event.nativeEvent.isComposing || request.behavior === "applicationDefined") return;
       event.preventDefault(); event.stopPropagation();

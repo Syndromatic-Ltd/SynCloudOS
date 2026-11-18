@@ -171,7 +171,7 @@ describe("window-hosted transient surface bridge", () => {
       const surface = await screen.findByRole("dialog", { name: "Paper" });
       expect(surface.closest("[data-window-host]")?.getAttribute("data-window-host")).toBe(id);
       expect(surface.querySelector('[data-nse-part="popover-frame"]')).not.toBeNull();
-      expect(surface.dataset.nsePopoverDrawsBackground).toBe("false");
+      expect(surface.dataset.nseTransparent).toBe("true");
       await waitFor(() => expect(surface.dataset.placement).toBe("left"));
       expect(surface.style.getPropertyValue("--nse-popover-arrow-fill")).toBe("#efe2c6");
       expect(runtime.windows.select(id).record.bounds).toMatchObject({ x: 268, y: 248 });

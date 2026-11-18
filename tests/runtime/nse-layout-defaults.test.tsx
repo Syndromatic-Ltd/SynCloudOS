@@ -141,7 +141,7 @@ describe("NSE default layout", () => {
     // Mirror classes sit beside the control's own class; they are private to the theme engine.
     expect([...text.classList].filter(token => !token.startsWith("nse:"))).toEqual(["nse-control-label-field"]);
     expect(text.getAttribute("data-font")).toBe("footnote");
-    expect(text.getAttribute("data-text-colour")).toBe("secondary");
+    expect(text.getAttribute("data-nse-text-colour")).toBe("secondaryLabelColour");
     expect(text.getAttribute("data-monospaced-digits")).toBe("true");
     expect(text.getAttribute("data-line-break-mode")).toBe("char");
     expect(document.querySelector("input")).toBeNull();

@@ -256,6 +256,13 @@ export function NSEPopup({
     );
   }
 
+  const presentationState = closing || !state.open ? "closing" : "open";
+  const surfaceStyle = (htmlAttributes as { readonly "data-nse-style"?: string })["data-nse-style"]
+    ?? (chrome === "standard" ? kind : chrome);
+  const fadesAsMenu = presentationState === "closing"
+    && (chosen || surfaceStyle === "menu" || surfaceStyle === "context-menu" || surfaceStyle === "submenu");
+  const motionOpacity = contentPending ? 0 : hasPopoverFrame || fadesAsMenu ? "var(--nse-overlay-presentation-alpha)" : undefined;
+
   const surface = createElement(
     "div",
     {
@@ -264,15 +271,19 @@ export function NSEPopup({
       ...htmlAttributes,
       ...appearanceProjection,
       "data-nse-theme": undefined,
-      style: { ...appearanceProjection.style, ...htmlAttributes.style },
+      style: {
+        ...appearanceProjection.style,
+        ...htmlAttributes.style,
+        ...(hasPopoverFrame ? { "--nse-popover-spring": nsePopoverSpringEasing } : {}),
+        ...(motionOpacity === undefined ? {} : { opacity: motionOpacity }),
+      },
       ref: surfaceRef,
       id: resolvedId,
-      "data-state": closing || !state.open ? "closing" : "open",
+      "data-state": presentationState,
       inert: !state.open || contentPending ? true : undefined,
       ...(hasPopoverFrame ? {
-        "data-nse-popover-draws-background": String(drawsBackground),
+        "data-nse-transparent": String(!drawsBackground),
         "data-nse-reduced-motion": String(reducedMotion),
-        style: { ...appearanceProjection.style, ...htmlAttributes.style, "--nse-popover-spring": nsePopoverSpringEasing },
       } : {}),
       className: surfaceClassName,
       role: surfaceRole,
@@ -300,6 +311,7 @@ export function NSEPopup({
         className: "nse-overlay-popup-backdrop",
         hidden: !isModal,
         "data-nse-part": "backdrop",
+        "data-nse-role": "overlay",
         "aria-hidden": true,
       }),
       surface,

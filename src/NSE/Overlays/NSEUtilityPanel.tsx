@@ -305,6 +305,7 @@ function StandaloneUtilityPanel({ id, title, anchor, fitting, closing, onExited,
         height: size.height,
         // Measured and placed before it is shown.
         visibility: frame ? undefined : "hidden",
+        opacity: closing ? 0 : undefined,
       }}
     >
       <PanelView record={record} presentation={presentation} blocked={false} dirty={false} dispatchCommand={dispatchCommand} moveHandleProps={moveHandleProps}>

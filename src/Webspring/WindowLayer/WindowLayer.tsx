@@ -56,7 +56,7 @@ function PopoverModalBackdrop({ zIndex }: { readonly zIndex: number }) {
   const appearance = useNSEAppearanceProjection();
   return <div {...appearance} style={{ display: "contents" }}>
     <div className="nse-overlay-popup-modal-host">
-      <div className="nse-overlay-popup-backdrop" data-window-modal-backdrop="" data-nse-part="backdrop" aria-hidden
+      <div className="nse-overlay-popup-backdrop" data-window-modal-backdrop="" data-nse-part="backdrop" data-nse-role="overlay" aria-hidden
         style={{ zIndex, pointerEvents: "auto" }} onPointerDown={event => event.stopPropagation()} />
     </div>
   </div>;
