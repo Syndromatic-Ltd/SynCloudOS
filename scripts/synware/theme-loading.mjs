@@ -3,6 +3,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import * as cssTree from "css-tree";
 import ts from "typescript";
+import { paintProperties } from "./paint-properties.mjs";
 import { optimiseSelectors } from "./selector-performance.mjs";
 const stateHooks = ["highlighted", "hovered", "focused", "selected"];
 function gates(selector) {
@@ -13,8 +14,56 @@ function gates(selector) {
   if (!selector.includes("data-nse-state")) result += ':not([data-nse-state="on"]):not([data-nse-state="mixed"])';
   return result;
 }
-/** A partial drawing is state-specific: missing states retain the base layer's complete drawing. */
-export function scopeThemeCSS(source, bundleIdentifier) {
+const drawingHooks = new Set(["data-nse-control", "data-nse-part"]);
+const legacyPseudoElements = new Set(["before", "after", "first-line", "first-letter"]);
+const clearDeclarations = paintProperties.map(property => property + ":initial").join(";");
+
+function drawsElement(selector) {
+  const subject = selector.children.toArray();
+  const compound = subject.slice(subject.findLastIndex(child => child.type === "Combinator") + 1);
+  if (compound.some(child => child.type === "PseudoElementSelector" ||
+    child.type === "PseudoClassSelector" && legacyPseudoElements.has(child.name.toLowerCase()))) return false;
+  return compound.some(child => {
+    if (child.type === "AttributeSelector") return drawingHooks.has(cssTree.generate(child.name));
+    if (child.type !== "PseudoClassSelector" || !["is", "where"].includes(child.name.toLowerCase())) return false;
+    const argumentsList = child.children?.first;
+    return argumentsList?.type === "SelectorList" && argumentsList.children.toArray().every(drawsElement);
+  });
+}
+
+function clearingRules(children) {
+  const selectors = new Set();
+  const groups = [];
+  for (const child of children) {
+    if (child.type === "Rule" && child.prelude.type === "SelectorList") {
+      for (const selector of child.prelude.children) {
+        if (!drawsElement(selector)) continue;
+        const text = cssTree.generate(selector);
+        selectors.add(text);
+        selectors.add(text + "::before");
+        selectors.add(text + "::after");
+      }
+    }
+    if (child.type === "Atrule" && child.block) {
+      const clear = clearingRules(child.block.children);
+      if (clear) {
+        const prelude = child.prelude ? " " + cssTree.generate(child.prelude) : "";
+        groups.push("@" + child.name + prelude + "{" + clear + "}");
+      }
+    }
+  }
+  if (selectors.size) groups.unshift([...selectors].join(",") + "{" + clearDeclarations + "}");
+  return groups.join("\n");
+}
+
+/**
+ * A partial drawing is state-specific: missing states retain the base layer's complete drawing.
+ * @param {string} source
+ * @param {string} bundleIdentifier
+ * @param {{ layer?: "nse.theme" | "nse.app-theme", boundary?: "data-nse-theme" | "data-nse-app-theme" }} [options]
+ */
+export function scopeThemeCSS(source, bundleIdentifier, options = {}) {
+  const { layer = "nse.theme", boundary = "data-nse-theme" } = options;
   const ast = cssTree.parse(source, { parseCustomProperty: true });
   const seen = new WeakSet();
   cssTree.walk(ast, { visit: "Rule", enter(node, item, list) {
@@ -41,8 +90,11 @@ export function scopeThemeCSS(source, bundleIdentifier) {
     list.replace(item, next.children);
     return cssTree.walk.skip;
   } });
-  // The style engine files the twins above under nothing; optimiseSelectors re-files them.
-  return optimiseSelectors(`@layer nse.theme { @scope ([data-nse-theme="${bundleIdentifier}"]) to ([data-nse-theme]:not([data-nse-theme="${bundleIdentifier}"])) {\n${cssTree.generate(ast)}\n} }\n`);
+  const clear = clearingRules(ast.children);
+  const clearLayer = clear ? "@layer clear {\n" + clear + "\n}\n" : "";
+  const root = "[" + boundary + "=" + JSON.stringify(bundleIdentifier) + "]";
+  // The style engine files the twins above under nothing. optimiseSelectors re-files them.
+  return optimiseSelectors(`@layer ${layer} { @scope (${root}) to ([${boundary}]:not(${root})) {\n${clearLayer}${cssTree.generate(ast)}\n} }\n`);
 }
 /** Resolve local imports before wrapping: @import is not valid inside a scope. */
 export function themeStylesheet(bundle, fileImport) {
