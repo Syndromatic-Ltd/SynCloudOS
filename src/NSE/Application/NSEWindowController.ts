@@ -74,7 +74,7 @@ export interface NSEWindow {
   titleVisibility: NSEWindowTitleVisibility;
   titlebarPresentation: NSEWindowTitlebarPresentation;
   frameViewClass: NSEWindowFrameViewClass | null;
-  backgroundColor: string | null;
+  backgroundColour: string | null;
   isOpaque: boolean;
   cornerRadius: number | null;
   titlebarAppearsTransparent: boolean;
@@ -322,7 +322,7 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
   #titleVisibility: NSEWindowTitleVisibility;
   #titlebarPresentation: NSEWindowTitlebarPresentation = "attached";
   #frameViewClass: NSEWindowFrameViewClass | null;
-  #backgroundColor: string | null = null;
+  #backgroundColour: string | null = null;
   #isOpaque = true;
   #cornerRadius: number | null = null;
   #titlebarAppearsTransparent: boolean;
@@ -400,11 +400,11 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
         controller.#frameViewClass = value;
         controller.notifyObservers();
       },
-      get backgroundColor() { return controller.#backgroundColor; },
-      set backgroundColor(value: string | null) {
-        if (value !== null && typeof value !== "string") throw new TypeError("A window background is a CSS color or null.");
-        if (value === controller.#backgroundColor) return;
-        controller.#backgroundColor = value;
+      get backgroundColour() { return controller.#backgroundColour; },
+      set backgroundColour(value: string | null) {
+        if (value !== null && typeof value !== "string") throw new TypeError("A window background is a CSS colour or null.");
+        if (value === controller.#backgroundColour) return;
+        controller.#backgroundColour = value;
         controller.notifyObservers();
       },
       get isOpaque() { return controller.#isOpaque; },

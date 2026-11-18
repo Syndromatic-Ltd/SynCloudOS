@@ -21,7 +21,7 @@ export interface WindowTitlebarDocument {
   readonly texturedBackground?: boolean;
   readonly sidebarWidth?: number;
   readonly fullSizeContentView?: boolean;
-  readonly backgroundColor?: string | null;
+  readonly backgroundColour?: string | null;
   readonly isOpaque?: boolean;
   readonly cornerRadius?: number | null;
   readonly titlebarPresentation?: "attached" | "floating";

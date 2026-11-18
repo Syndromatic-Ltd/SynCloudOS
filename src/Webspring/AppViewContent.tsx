@@ -64,7 +64,7 @@ function Surface({
   background,
   header,
   containsHeader = false,
-  backgroundColor,
+  backgroundColour,
   fullSizeContentView = false,
   children
 }: {
@@ -74,7 +74,7 @@ function Surface({
   /** The rounded surface clips the titlebar and its content together. */
   header?: ReactNode;
   containsHeader?: boolean;
-  backgroundColor?: string | null;
+  backgroundColour?: string | null;
   fullSizeContentView?: boolean;
   children: ReactNode;
 }) {
@@ -90,7 +90,7 @@ function Surface({
     "data-full-size-content": fullSizeContentView ? "" : undefined,
     style: {
       ...safeArea.properties,
-      ...(backgroundColor ? { backgroundColor } : {}),
+      ...(backgroundColour ? { backgroundColor: backgroundColour } : {}),
       "--nse-content-inset-top": fullSizeContentView
         ? "var(--nse-content-layout-inset-top, 0px)"
         : containsHeader ? "0px" : "var(--nse-safe-area-inset-top, 0px)",

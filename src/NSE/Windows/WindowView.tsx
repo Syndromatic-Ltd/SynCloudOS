@@ -157,7 +157,7 @@ export function WindowView({
         data-nse-part="bezel" className={["nse-window__surface", smoothSurfaceProps.className].filter(Boolean).join(" ")}
         data-full-size-content={titlebarDocument?.fullSizeContentView ? "" : undefined}
         style={{ ...smoothSurfaceProps.style,
-          ...(titlebarDocument?.backgroundColor ? { backgroundColor: titlebarDocument.backgroundColor } : titlebarDocument?.isOpaque === false ? { backgroundColor: "transparent" } : {}),
+          ...(titlebarDocument?.backgroundColour ? { backgroundColor: titlebarDocument.backgroundColour } : titlebarDocument?.isOpaque === false ? { backgroundColor: "transparent" } : {}),
           ...(titlebarDocument?.cornerRadius != null ? { borderRadius: titlebarDocument.cornerRadius } : {}) }}
         data-window-surface=""
       >

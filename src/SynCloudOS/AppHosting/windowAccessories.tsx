@@ -66,7 +66,7 @@ export function useNSEWindowTitlebarDocument(controller: NSEAnyWindowController,
   const titled = window?.styleMask.includes("titled") ?? true;
   const texturedBackground = window?.styleMask.includes("texturedBackground");
   const fullSizeContentView = window?.styleMask.includes("fullSizeContentView");
-  const backgroundColor = window?.backgroundColor;
+  const backgroundColour = window?.backgroundColour;
   const isOpaque = window?.isOpaque;
   const cornerRadius = window?.cornerRadius;
   const claims = Boolean(window);
@@ -80,9 +80,9 @@ export function useNSEWindowTitlebarDocument(controller: NSEAnyWindowController,
   const sidebarWidth = measuredSidebarWidth > 0 ? measuredSidebarWidth : undefined;
   useLayoutEffect(() => {
     if (!host || !claims) return undefined;
-    host.setDocument(Object.freeze({ titled, title, subtitle, documentEdited, toolbarStyle, titleVisibility, titlebarPresentation, titlebarAppearsTransparent, hasToolbar, toolbarDisplayMode, frameViewClass, texturedBackground, sidebarWidth, fullSizeContentView, backgroundColor, isOpaque, cornerRadius }));
+    host.setDocument(Object.freeze({ titled, title, subtitle, documentEdited, toolbarStyle, titleVisibility, titlebarPresentation, titlebarAppearsTransparent, hasToolbar, toolbarDisplayMode, frameViewClass, texturedBackground, sidebarWidth, fullSizeContentView, backgroundColour, isOpaque, cornerRadius }));
     return undefined;
-  }, [backgroundColor, claims, cornerRadius, titled, documentEdited, frameViewClass, fullSizeContentView, hasToolbar, toolbarDisplayMode, host, isOpaque, sidebarWidth, subtitle, texturedBackground, title, titlebarAppearsTransparent, titlebarPresentation, titleVisibility, toolbarStyle]);
+  }, [backgroundColour, claims, cornerRadius, titled, documentEdited, frameViewClass, fullSizeContentView, hasToolbar, toolbarDisplayMode, host, isOpaque, sidebarWidth, subtitle, texturedBackground, title, titlebarAppearsTransparent, titlebarPresentation, titleVisibility, toolbarStyle]);
   useLayoutEffect(() => {
     if (!host || !claims) return undefined;
     return () => { host.setDocument(null); };

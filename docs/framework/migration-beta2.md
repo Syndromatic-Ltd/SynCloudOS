@@ -159,7 +159,7 @@ Hosts that genuinely build rendering surfaces use `createAFXLayer(surface, sched
 | `content`, `contentSources`, `registerContentSource` and `LowerContentShelfView` | `defineWidget` and `WebspringWidgetShelf` |
 | An always-present loading shelf | No widgets means no shelf; each widget declares empty behaviour and has bounded loading/error/retry states |
 | `frame.layout: "simple"` or `"defacto"` | Removed; content is full-bleed in the app frame |
-| A hard-coded cotton app body | `NSEWindow.backgroundColor` and `NSEWindow.isOpaque` |
+| A hard-coded cotton app body | `NSEWindow.backgroundColour` and `NSEWindow.isOpaque` |
 | Hard-coded return artwork | `branding.homeIcon`, or the generic house glyph |
 | A generic "Preferences" system entry | "System Preferences…", distinct from an app's own preferences |
 | Private preference-pane registration | `definePreferencePane` and discovered `.prefPane` folders |

@@ -207,13 +207,13 @@ window.isFullScreen;                                 // derived from styleMask c
 
 Names are AppKit's where AppKit has one (`styleMask` values `titled | closable | miniaturizable | resizable |
 fullSizeContentView | texturedBackground | fullScreen`, `collectionBehavior`, `titleVisibility`,
-`titlebarAppearsTransparent`, `standardWindowButton(_:)`, `backgroundColor`). The existing `WindowStyle` spelling
+`titlebarAppearsTransparent`, `standardWindowButton(_:)`, `backgroundColour`). The existing `WindowStyle` spelling
 `minimisable` is the system's internal record value; the public mask uses AppKit's `miniaturizable` and the
 facade maps it. **Builder:** do not rename `WindowRecord.style` values in this plan.
 
 - **Metal vs Cumulus** (`frame.material`) becomes `styleMask` `texturedBackground` (NSWindow.StyleMask
   .texturedBackground, the original AppKit metal window).
-- **Body background** (`frame.background`) becomes `NSEWindow.backgroundColor` (`"system"` default, `null`
+- **Body background** (`frame.background`) becomes `NSEWindow.backgroundColour` (`"system"` default, `null`
   for unpainted, or a surface), with `isOpaque` as AppKit has it.
 - **Corner shape** (`frame.smoothSurface`, `windowDefaults.smoothSurface`) becomes one window property; keep the
   existing `SmoothSurface` value type.
@@ -492,7 +492,7 @@ The Electron adapter and installed window-controls-overlay measurement have thei
 ### Phase 2: the window model (Codex)
 
 - `NSEWindow`: `styleMask`, `collectionBehavior`, `titleVisibility`, `titlebarAppearsTransparent`,
-  `backgroundColor`/`isOpaque`, corner shape, `standardWindowButton(_:)`, `toggleFullScreen()`, `isFullScreen`,
+  `backgroundColour`/`isOpaque`, corner shape, `standardWindowButton(_:)`, `toggleFullScreen()`, `isFullScreen`,
   `performClose()`, `miniaturize()`. All observable; all mutable after creation.
 - `WindowManager`: `setStyle(id, style)`, `toggleFullScreen(id)` with the transition states above,
   `kind: "full-screen"` presentation, restoration format bump and migration (`WindowRestoration.ts`).
