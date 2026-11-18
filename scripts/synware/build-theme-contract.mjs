@@ -31,7 +31,8 @@ export function createNSEThemeContract(rendered, vocabulary, colours) {
     navigation: { compact: { placement: ["block-start", "block-end"], flow: ["in-flow", "overlay"] }, regular: { placement: ["source-list", "block-start"], flow: ["in-flow", "overlay"] } },
     presentation: { login: ["plain", "ornamented"], notifications: ["plain", "sliced-3d"], materialLighting: ["off", "on"] },
     appThemeControls: ["window", "app-view-chrome", "toolbar", "toolbar-item", "tab-view", "segmented-control", "split-view", "menu", "menu-item", "popover"],
-    limits: { minimumHitTarget: { regular: 24, large: 24 }, visibleFocusIndicator: true, reducedMotion: true, semanticProperties: ["display", "visibility", "content"], forbiddenProperties: ["animation", "transition", "font", "font-family", "font-size", "font-weight", "line-height", "letter-spacing"] },
+    typography: { properties: ["font", "font-*", "line-height", "letter-spacing", "word-spacing", "text-transform"], fontFormats: ["woff2"] },
+    limits: { minimumHitTarget: { regular: 24, large: 24 }, visibleFocusIndicator: true, reducedMotion: true, semanticProperties: ["display", "visibility", "content"], forbiddenProperties: ["animation", "transition"] },
     renamedFrom: { "toolbar.root": "toolbar.background", "circular-slider": "slider[slider-type=circular]", "slider-field": "slider[slider-type=linear]", "ruler": "ruler-view", "scroll-view-frame": "scroll-view", "toolbar-configuration-sheet": "toolbar-customisation-palette", "calendar": "date-picker[date-picker-elements=yearMonthDay]", "time-picker": "date-picker[date-picker-elements=hourMinute]", "date-time-picker": "date-picker[date-picker-elements=yearMonthDay hourMinute]", "date-range-picker": "date-picker[date-picker-mode=range]", "route-picker": "route-picker-view", "file-panel": "save-panel" },
   };
 }
@@ -82,7 +83,10 @@ export function renderNSEThemeContractMarkdown(contract) {
   lines.push("", "## Navigation and presentation", "");
   for (const [size, entry] of Object.entries(contract.navigation)) lines.push("- " + tick("navigation." + size) + ": placement " + list(entry.placement) + "; flow " + list(entry.flow));
   for (const [name, values] of Object.entries(contract.presentation)) lines.push("- " + tick("presentation." + name) + ": " + list(values));
-  lines.push("", "## App theme controls", "", list(contract.appThemeControls), "", "## Limits", "");
+  lines.push("", "## Typography", "",
+    "Themes can set " + list(contract.typography.properties) + ". Drawing a part resets its underlying paint and typography for that state.",
+    "", "Use `@font-face` with " + list(contract.typography.fontFormats) + " files under `Resources/` and a package-local `url()`.", "",
+    "## App theme controls", "", list(contract.appThemeControls), "", "## Limits", "");
   for (const [name, value] of Object.entries(contract.limits)) {
     const text = Array.isArray(value) ? list(value) : value && typeof value === "object" ? Object.entries(value).map(([key, item]) => key + " " + item).join(", ") : String(value);
     lines.push("- " + tick(name) + ": " + text);

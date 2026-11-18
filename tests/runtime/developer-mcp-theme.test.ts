@@ -50,9 +50,9 @@ describe("developer MCP .scostheme bundles", () => {
     expect(validation.warnings).toHaveLength(partCount);
     expect(validation.warnings).toContainEqual(expect.objectContaining({ rule: "theme.undrawn-part", part: "button.bezel" }));
   });
-  it("counts a part as drawn once a rule with declarations names it", async () => {
+  it("counts typography on a part as a drawing", async () => {
     await scaffold();
-    writeFileSync(css(), readFileSync(css(), "utf8").replace('[data-nse-control="button"] [data-nse-part="bezel"] {}', '[data-nse-control="button"] [data-nse-part="bezel"] { background: #20242c; }'));
+    writeFileSync(css(), readFileSync(css(), "utf8").replace('[data-nse-control="button"] [data-nse-part="bezel"] {}', '[data-nse-control="button"] [data-nse-part="bezel"] { font-size: 13px; }'));
     const validation = await validateTheme({ projectRoot: project, path: "src/Themes/Dusk.scostheme" });
     expect(validation.ok).toBe(true);
     expect(validation.coverage.drawn).toBe(1);
@@ -64,7 +64,6 @@ describe("developer MCP .scostheme bundles", () => {
     const cases: Array<[string, string]> = [
       [".nse-button { color: #fff; }", "idiom.theme-private-class"],
       ['[data-nse-control="button"][data-nse-focused] { outline: none; }', "idiom.theme-limit"],
-      ['[data-nse-control="button"] [data-nse-part="title"] { font-size: 30px; }', "theme.typography"],
       ['[data-nse-control="button"][data-nse-made-up] { color: #fff; }', "theme.css-selector"],
     ];
     for (const [rule, expected] of cases) {

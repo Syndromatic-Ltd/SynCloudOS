@@ -1,8 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, truncateSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { basename, join, resolve } from "node:path";
 import { readThemeBundle, discoverThemeBundles, assertThemeFileNames } from "../../scripts/synware/theme-bundles.mjs";
+import { themeStylesheet } from "../../scripts/synware/theme-loading.mjs";
 const valid = resolve(import.meta.dirname, "../fixtures/themes/Valid.scostheme");
 let directory: string, bundle: string;
 beforeEach(() => { directory = mkdtempSync(join(tmpdir(), "scos-bundle-")); bundle = join(directory, "Paper.scostheme"); cpSync(valid, bundle, { recursive: true }); });
@@ -27,6 +28,48 @@ describe("static .scostheme bundles", () => {
     write("Resources/atmo-structure.controls.css", '[data-nse-control="button"] { transition: opacity 180ms; }');
     expect(() => readThemeBundle(bundle)).toThrow(/atmo-structure.controls.css.*motion/u);
   });
+  it("accepts typography on contract parts", () => {
+    write("Resources/theme.css", '[data-nse-control="button"] [data-nse-part="title"] { font: 600 14px/1.3 system-ui; font-variant-numeric: tabular-nums; line-height: 1.5; letter-spacing: .04em; word-spacing: .1em; text-transform: uppercase; }');
+    expect(readThemeBundle(bundle).stylesheets).toHaveLength(1);
+  });
+
+  it("loads package-local WOFF2 fonts from an imported stylesheet", () => {
+    write("Resources/fonts/paper.woff2", "wOF2");
+    write("Resources/fonts/faces.css", '@font-face { font-family: "Paper Test"; src: url("./paper.woff2?v=1") format("woff2"); font-weight: 500; font-display: swap; }');
+    write("Resources/theme.css", '@import "./fonts/faces.css"; [data-nse-control="button"] { font-family: "Paper Test"; }');
+    const theme = readThemeBundle(bundle);
+    expect(theme.files).toContain(join(bundle, "Contents/Resources/fonts/paper.woff2"));
+    const css = themeStylesheet(theme, (file: string) => "/theme-assets/" + basename(file));
+    expect(css).toContain("@font-face");
+    expect(css).toContain("url(/theme-assets/paper.woff2?v=1)");
+    expect(css).toContain('font-family:"Paper Test"');
+  });
+
+  it.each([
+    'local("Installed Font")',
+    'url(https://example.invalid/font.woff2)',
+    'url(../../../external.woff2)',
+    'url(data:font/woff2;base64,d09GMg==)',
+    'url(./missing.woff2)',
+    'url(./art.png)',
+    'var(--font-file)',
+  ])("rejects an invalid font src of %s", value => {
+    writeFileSync(join(directory, "external.woff2"), "wOF2");
+    write("Resources/art.png", "not a font");
+    write("Resources/theme.css", `@font-face { font-family: "Paper Test"; src: ${value}; }`);
+    expect(() => readThemeBundle(bundle)).toThrow(/theme.css.*(?:font|package-local|escapes)/iu);
+  });
+
+  it.each(["ttf", "otf", "woff"])("rejects a %s resource", extension => {
+    write(`Resources/paper.${extension}`, "");
+    expect(() => readThemeBundle(bundle)).toThrow(/static-resources/u);
+  });
+
+  it("still rejects @keyframes in authored themes", () => {
+    write("Resources/theme.css", '@keyframes move { from { opacity: 0; } to { opacity: 1; } }');
+    expect(() => readThemeBundle(bundle)).toThrow(/css-at-rule.*keyframes/u);
+  });
+
   const cases: [string, RegExp][] = [
     ["unknown keys", /Theme.json.*unknown|unknown.*Theme.json/i],
     ["identity duplication", /Theme.json.*unknown|unknown.*Theme.json/i],
@@ -35,7 +78,6 @@ describe("static .scostheme bundles", () => {
     ["bad placement", /Theme.json.*placement|placement.*Theme.json/i],
     ["executable file", /run.js.*static|static.*run.js/i],
     ["TypeScript resource", /run.ts.*static|static.*run.ts/i],
-    ["font resource", /font.woff2.*static|static.*font.woff2/i],
     ["executable Info", /Info.ts.*static|Info.ts.*execut/i],
     ["path traversal", /theme.css.*local|theme.css.*escap|escap.*theme.css/i],
     ["missing image", /Theme.json.*missing|missing.*Theme.json/i],
@@ -47,7 +89,6 @@ describe("static .scostheme bundles", () => {
     ["app selectors", /theme.css.*selector|selector.*theme.css/i],
     ["unknown hooks", /theme.css.*control|control.*theme.css/i],
     ["motion", /theme.css.*motion|motion.*theme.css/i],
-    ["typography", /theme.css.*typography|typography.*theme.css/i],
     ["focus removal", /theme.css.*focus|focus.*theme.css/i],
     ["semantic hiding", /theme.css.*semantic|semantic.*theme.css/i],
     ["oversized slice", /theme.css.*slice|slice.*theme.css/i],

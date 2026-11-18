@@ -16,7 +16,12 @@ function gates(selector) {
 }
 const drawingHooks = new Set(["data-nse-control", "data-nse-part"]);
 const legacyPseudoElements = new Set(["before", "after", "first-line", "first-letter"]);
-const clearDeclarations = paintProperties.map(property => property + ":initial").join(";");
+const typographyProperties = [
+  "font", "font-variant", "font-variant-emoji", "font-kerning", "font-size-adjust", "font-optical-sizing",
+  "font-feature-settings", "font-variation-settings", "font-language-override", "font-palette", "font-synthesis",
+  "line-height", "letter-spacing", "word-spacing", "text-transform",
+];
+const clearDeclarations = [...paintProperties, ...typographyProperties].map(property => property + ":initial").join(";");
 
 function drawsElement(selector) {
   const subject = selector.children.toArray();
@@ -134,7 +139,13 @@ export function themeStylesheet(bundle, fileImport) {
       const imported = cssTree.parse(stylesheet(resolve(dirname(file), path)), { parseCustomProperty: true });
       list.replace(item, imported.children); return cssTree.walk.skip;
     } });
-    const resource = value => /^(?:data:|#|\/|[a-z]+:)/iu.test(value) ? value : fileImport(resolve(dirname(file), decodeURIComponent(value)));
+    const resource = value => {
+      if (/^(?:data:|#|\/|[a-z]+:)/iu.test(value)) return value;
+      const boundary = value.search(/[?#]/u);
+      const path = boundary === -1 ? value : value.slice(0, boundary);
+      const suffix = boundary === -1 ? "" : value.slice(boundary);
+      return fileImport(resolve(dirname(file), decodeURIComponent(path))) + suffix;
+    };
     cssTree.walk(ast, node => {
       if (node.type === "Url") node.value = resource(node.value);
       if (node.type === "Function" && ["image-set", "-webkit-image-set"].includes(node.name)) for (const child of node.children) if (child.type === "String") child.value = resource(child.value);

@@ -2376,6 +2376,19 @@
     "menu-item",
     "popover"
   ],
+  "typography": {
+    "properties": [
+      "font",
+      "font-*",
+      "line-height",
+      "letter-spacing",
+      "word-spacing",
+      "text-transform"
+    ],
+    "fontFormats": [
+      "woff2"
+    ]
+  },
   "limits": {
     "minimumHitTarget": {
       "regular": 24,
@@ -2390,13 +2403,7 @@
     ],
     "forbiddenProperties": [
       "animation",
-      "transition",
-      "font",
-      "font-family",
-      "font-size",
-      "font-weight",
-      "line-height",
-      "letter-spacing"
+      "transition"
     ]
   },
   "renamedFrom": {

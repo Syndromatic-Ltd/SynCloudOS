@@ -5,6 +5,7 @@
   background: #f6dde2;
   color: #3b1020;
   box-shadow: inset 0 0 0 1px #b36179, 0 3px 9px #350b2526;
+  font: inherit;
 }
 
 [data-nse-control="menu"][data-nse-part="background"][data-nse-role="command-menu"] > [data-nse-part="decoration"] {
@@ -18,6 +19,18 @@
 [data-nse-control="menu-item"][data-nse-part="cell"]:is([data-nse-highlighted], [data-nse-focused]) {
   background: #a32245;
   color: #fff;
+  font: inherit;
+}
+
+[data-nse-control="tab-view"] [data-nse-part="cell"][data-nse-selected],
+[data-nse-control="segmented-control"] [data-nse-part="bezel"][data-nse-selected] {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 50px;
+}
+
+[data-nse-control="tab-view"] [data-nse-part="cell"][data-nse-selected] {
+  text-transform: uppercase;
 }
 
 :scope[data-nse-colour-scheme-resolved="dark"] [data-nse-control="window"][data-nse-part="background"] > [data-nse-part="bezel"],
@@ -43,6 +56,7 @@
 [data-nse-control="toolbar"][data-nse-part="background"] > [data-nse-part="background"][data-nse-style="surface"] {
   background: #c8102e;
   color: #fff;
+  font: inherit;
 }
 
 :scope[data-nse-colour-scheme-resolved="dark"] [data-nse-control="window"][data-nse-part="background"] > [data-nse-part="bezel"] > [data-nse-part="header"],
@@ -55,4 +69,11 @@
 [data-nse-control="toolbar-item"][data-nse-part="item"] > [data-nse-part="title"] {
   color: #fff;
   text-shadow: none;
+  font: inherit;
+}
+
+[data-nse-control="window"][data-nse-part="background"] > [data-nse-part="bezel"] > [data-nse-part="header"] [data-nse-part="title"] {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
 }

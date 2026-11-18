@@ -1,6 +1,6 @@
 # Themes
 
-A theme decides how NSE controls and SynCloudOS chrome look: their fills, borders, shadows, artwork and colours. It doesn't decide what a control is, how big it is, how it lays out, how it moves or what typeface it uses. Those belong to the framework, so every theme behaves the same and only looks different.
+A theme supplies the fills, borders, shadows, artwork, colours and typography of NSE controls and SynCloudOS chrome. The framework owns control semantics, interaction and motion.
 
 Atmo is the built-in theme. It is itself a theme bundle, `Atmo.scostheme`, drawn through the same contract as any theme you write.
 
@@ -11,11 +11,11 @@ A system theme is a `.scostheme` bundle of static files with an identity, a defi
 - paint every control part the [theme contract](theme-contract.md) publishes, in every state and variant it lists;
 - set the 48 semantic colours, in light and dark, and optionally for high contrast;
 - supply named images, such as `NSGoBackTemplate`, and workspace artwork;
+- style control text and supply package-local WOFF2 fonts;
 - choose navigation placement and the login, notification and material-lighting presentations.
 
 It can't:
 
-- change typography (`font`, `line-height`, `letter-spacing`, `word-spacing`, `text-transform`);
 - add motion (`animation`, `transition`), because motion is framework-owned and follows the system's reduced-motion setting;
 - hide or reveal semantics (`display`, `visibility`, `content` on a contract part);
 - remove a focused control's focus indicator without drawing another;
@@ -35,6 +35,8 @@ src/Themes/
         buttons.css
         button-rounded.png
         button-rounded@2x.png
+        fonts/
+          DuskText.woff2
       Licences/
 ```
 
@@ -46,7 +48,7 @@ The Vite plugin discovers system themes in `src/Themes`. Set `themesDirectory` i
 export default { bundleIdentifier: "com.example.dusk", displayName: "Dusk", version: "1.0.0", themeContractVersion: 1 };
 ```
 
-`Resources/theme.css` is the entry stylesheet. It can `@import` other stylesheets in the bundle, which load in import order. `url()` references resolve relative to the stylesheet and must stay inside the bundle; `data:` URLs are allowed. Put the licences for any artwork you ship in `Licences/`.
+`Resources/theme.css` is the entry stylesheet. It can `@import` other stylesheets in the bundle, which load in import order. `url()` references resolve relative to the stylesheet and must stay inside the bundle. Inline image data URLs are allowed. Put artwork and font licences in `Licences/`.
 
 ## Theme.json
 
@@ -129,9 +131,26 @@ SVG works the same way, as a file or a `data:` URL, and stays sharp at every den
 
 ## What Atmo provides underneath
 
-Atmo is always loaded in the `nse.atmo` layer beneath installed themes. When a theme draws an element in a particular state, the build clears the underlying paint on that element and its `::before` and `::after`. Other parts and states keep their underlying drawing. `validate_theme` reports coverage for a whole system theme.
+Atmo is always loaded in the `nse.atmo` layer beneath installed themes. When a theme draws an element in a particular state, the build clears the underlying paint and typography on that element and its `::before` and `::after`. Other parts and states keep their underlying drawing. `validate_theme` reports coverage for a whole system theme.
 
-Control structure (size, layout, typography, motion) lives in `nse.structure` and Atmo's layer and applies under every theme. A theme repaints a control; it never re-lays it out.
+## Typography
+
+Set `font`, its longhands, `line-height`, `letter-spacing`, `word-spacing` and `text-transform` on the parts you draw. Use `font: inherit` when the part should use its parent's typeface and size.
+
+Declare custom fonts with `@font-face`. Each `src` must resolve to a WOFF2 file under the bundle's `Resources/` directory. Use a family name specific to the theme because the browser registers font families for the document.
+
+```css
+@font-face {
+  font-family: "Dusk Text";
+  src: url("./fonts/DuskText.woff2") format("woff2");
+  font-display: swap;
+}
+
+[data-nse-control="button"] [data-nse-part="title"] {
+  font-family: "Dusk Text", system-ui, sans-serif;
+  letter-spacing: 0.02em;
+}
+```
 
 ## Using a theme
 

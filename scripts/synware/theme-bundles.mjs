@@ -1,4 +1,4 @@
-/** Host-trusted, static .scostheme bundles. Ported from PR #1 without fonts or motion. */
+/** Host-trusted, static .scostheme bundles. */
 import { existsSync, lstatSync, readdirSync, readFileSync, realpathSync } from "node:fs";
 import { dirname, extname, isAbsolute, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -11,7 +11,7 @@ import { parseManifest } from "./manifest-source.mjs";
 const builtInAtmoControls = fileURLToPath(new URL("../../src/Themes/Atmo.scostheme/Contents/Resources/atmo-structure.controls.css", import.meta.url));
 const builtInControlStates = new Set(["data-suspended", "data-variant", "data-state", "data-motion"]);
 const identifier = /^[a-z][a-z0-9-]*(?:\.[a-z][a-z0-9-]*)+$/u;
-const resourceExtensions = new Set([".css", ".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg", ".avif", ".txt", ".md", ".json", ".strings"]);
+const resourceExtensions = new Set([".css", ".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg", ".avif", ".woff2", ".txt", ".md", ".json", ".strings"]);
 const inside = (root, path) => { const rel = relative(root, path); return !isAbsolute(rel) && rel !== ".." && !rel.startsWith("../") && !rel.startsWith("..\\"); };
 function walk(root) {
   const files=[]; let bytes=0;
@@ -124,6 +124,32 @@ export function assertThemeFileNames(names) {
 const freeze = value => { if (value && typeof value === "object") { for (const child of Object.values(value)) freeze(child); Object.freeze(value); } return value; };
 const fail = (file, rule, message) => { throw new TypeError(`${file}: ${rule}: ${message}`); };
 const record = (value, allowed, file) => { try { keys(value, allowed, file); } catch (error) { fail(file, "unknown-key", error.message); } };
+
+function validateFontFace(rule, root, file) {
+  const descriptors = rule.block?.children.toArray();
+  if (rule.prelude || !descriptors || descriptors.some(node => node.type !== "Declaration")) {
+    fail(file, "css-font-face", "Declare font descriptors inside @font-face.");
+  }
+  const resources = resolve(root, "Contents/Resources");
+  const sources = descriptors.filter(node => cssTree.ident.decode(node.property).toLowerCase() === "src");
+  if (!sources.length) fail(file, "css-font-face", "@font-face requires a package-local WOFF2 src.");
+  for (const source of sources) {
+    let count = 0;
+    try {
+      validateCssValue(cssTree.generate(source.value), url => {
+        const target = localPath(root, file, url);
+        if (!target || extname(target).toLowerCase() !== ".woff2" || !inside(resources, realpathSync(target))) {
+          throw new TypeError("@font-face src must name a WOFF2 file under Resources.");
+        }
+        count++;
+      }, file, true);
+    } catch (error) {
+      fail(file, "css-font-face", error.message);
+    }
+    if (!count) fail(file, "css-font-face", "@font-face requires a package-local WOFF2 src.");
+  }
+}
+
 export function imageDimensions(file) {
   const bytes = readFileSync(file), extension = extname(file).toLowerCase();
   if (extension === ".svg") {
@@ -287,7 +313,9 @@ export function validateThemeCSS(source, { file, root, contract, kind = "system"
           const match = /^(["'])([^"']+)\1\s*$/u.exec(cssTree.generate(node.prelude));
           if (!match) fail(file, "css-import", "Use a quoted local stylesheet import.");
           const target = localPath(root, file, match[2]); if (!target || extname(target).toLowerCase() !== ".css") fail(file, "css-import", "Import a local CSS file."); onImport(target);
-        } else if (!["media", "supports", "container", "layer"].includes(name)) fail(file, "css-at-rule", `@${name} is not theme data; fonts and motion are framework-owned.`);
+        } else if (name === "font-face") {
+          validateFontFace(node, root, file);
+        } else if (!["media", "supports", "container", "layer"].includes(name)) fail(file, "css-at-rule", `@${name} is not allowed in theme stylesheets.`);
       }
       if (node.type === "Selector") {
         const selector = cssTree.generate(node);
@@ -333,7 +361,6 @@ export function validateThemeCSS(source, { file, root, contract, kind = "system"
       if (node.type === "Declaration") {
         const property = cssTree.ident.decode(node.property).toLowerCase();
         if (!builtInControls && /^(?:animation|transition)(?:-|$)/u.test(property)) fail(file, "motion", "Themes cannot define motion.");
-        if (!builtInControls && /^(?:font(?:-|$)|line-height$|letter-spacing$|word-spacing$|text-transform$)/u.test(property)) fail(file, "typography", "Themes cannot define typography.");
         if (["behavior", "-moz-binding"].includes(property)) fail(file, "css-code", "Executable CSS is forbidden.");
         validateCssValue(valueText(node), url => localPath(root, file, url), file);
       }
@@ -353,7 +380,7 @@ export function readThemeBundle(bundlePath, options = {}) {
     }
     if (["Info.ts", "Theme.json"].includes(name)) continue;
     if (name.startsWith("Licences/") && (/\.(?:txt|md)$/iu.test(name) || /\/(?:LICENSE|LICENCE|NOTICE|COPYING)$/u.test(name))) continue;
-    if (!name.startsWith("Resources/") || !resourceExtensions.has(extname(file).toLowerCase())) fail(file, "static-resources", "Themes contain static data and resources only; no code, fonts or motion.");
+    if (!name.startsWith("Resources/") || !resourceExtensions.has(extname(file).toLowerCase())) fail(file, "static-resources", "Themes contain static resources only. WOFF2 is the supported font format.");
   }
   const infoPath = resolve(contents, "Info.ts"), definitionPath = resolve(contents, "Theme.json");
   let info;

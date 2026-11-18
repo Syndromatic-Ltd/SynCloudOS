@@ -713,6 +713,12 @@ Themes can read these properties when an instance supplies a colour.
 - `presentation.notifications`: `plain`, `sliced-3d`
 - `presentation.materialLighting`: `off`, `on`
 
+## Typography
+
+Themes can set `font`, `font-*`, `line-height`, `letter-spacing`, `word-spacing`, `text-transform`. Drawing a part resets its underlying paint and typography for that state.
+
+Use `@font-face` with `woff2` files under `Resources/` and a package-local `url()`.
+
 ## App theme controls
 
 `window`, `app-view-chrome`, `toolbar`, `toolbar-item`, `tab-view`, `segmented-control`, `split-view`, `menu`, `menu-item`, `popover`
@@ -723,7 +729,7 @@ Themes can read these properties when an instance supplies a colour.
 - `visibleFocusIndicator`: true
 - `reducedMotion`: true
 - `semanticProperties`: `display`, `visibility`, `content`
-- `forbiddenProperties`: `animation`, `transition`, `font`, `font-family`, `font-size`, `font-weight`, `line-height`, `letter-spacing`
+- `forbiddenProperties`: `animation`, `transition`
 
 ## Renamed identities
 

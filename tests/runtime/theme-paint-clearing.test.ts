@@ -29,7 +29,10 @@ describe("theme paint clearing", () => {
     if (clearRule?.type !== "Rule") throw new Error("Missing clear rule");
     const selector = cssTree.generate(drawing.prelude);
     expect(cssTree.generate(clearRule.prelude)).toBe([selector, selector + "::before", selector + "::after"].join(","));
-    expect(cssTree.generate(clearRule.block)).toBe("{" + paintProperties.map(property => property + ":initial").join(";") + "}");
+    const resets = clearRule.block.children.toArray().filter(declaration => declaration.type === "Declaration");
+    const names = resets.map(declaration => declaration.property);
+    expect(names).toEqual(expect.arrayContaining([...paintProperties, "font", "line-height", "letter-spacing", "word-spacing", "text-transform"]));
+    expect(resets.every(declaration => cssTree.generate(declaration.value) === "initial")).toBe(true);
   });
 
   it("carries the same state gates as the theme drawing", () => {
