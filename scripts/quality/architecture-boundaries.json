@@ -523,7 +523,7 @@
           "src/SynCloudOSReact/QuickSwitchTrigger.tsx"
         ],
         "nse": [
-          "src/NSE/NSE.ts",
+          "src/NSE/NSE.ts", "src/NSE/sdkPackageEntry.ts",
           "src/NSE/Animation/index.ts",
           "src/NSE/public/content.ts",
           "src/NSE/public/text-layout.ts",
@@ -759,7 +759,7 @@
           "src/SynCloudOS/Identity/bundleIdentifier.d.mts"
         ],
         "app-sdk-host": [
-          "src/SynCloudOS/AppHosting/runtimeEntry.ts"
+          "src/SynCloudOS/AppHosting/runtimeEntry.ts", "src/SynCloudOS/AppSDK/mountedEnvironmentClientRegistry.ts"
         ]
       }
     },

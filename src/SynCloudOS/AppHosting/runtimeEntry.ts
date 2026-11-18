@@ -5,4 +5,3 @@ export { applicationSessionFor } from "./applicationSession";
 export { ViewControllerView } from "./applicationHosting";
 
 export { installedApplicationMenuSections } from "./installedApplicationMenus";
-export { getMountedAppEnvironmentClients } from "../AppSDK/mountedEnvironmentClientRegistry";

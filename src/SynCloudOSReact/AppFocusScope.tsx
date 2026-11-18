@@ -26,7 +26,7 @@ import type { SynWareRuntime } from "./appRuntimeTypes";
 import { isWithinNSEFocusOrigin, isNSEDOMNode, isNSEDOMElement, isNSEHTMLElement, PresentingDocumentContext } from "../NSE/hostComposition";
 import { useResponderHierarchy } from "./responderHierarchy";
 import { AttachedSheetLayerContext, FocusScopeIdContext } from "./focusScopeContext";
-import { getMountedAppEnvironmentClients } from "../SynCloudOS/AppHosting/runtimeEntry";
+import { getMountedAppEnvironmentClients } from "../SynCloudOS/AppSDK/mountedEnvironmentClientRegistry";
 
 export interface AppFocusScopeOptions {
   readonly scopeId: string;
