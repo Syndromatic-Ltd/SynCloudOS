@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { markSystemWindowSurface } from "../Overlays/systemWindowSurface";
 import React from "react";
 import type { FilePanelReference, FilePanelResult, FilePanelService, OpenPanelRequest } from "../../SynCloudOS/nseRuntimeContracts";
 import { matchesOpenPanelContentType, openPanelAcceptTypes, type FilePanelDirectory } from "../../SynCloudOS/nseRuntimeContracts";
@@ -162,10 +163,10 @@ export class NSEOpenPanel implements Sheet {
     const frame = host.frame();
     const width = compact ? frame.width : Math.min(820, frame.width - 32);
     const height = compact ? frame.height : Math.min(560, frame.height - 48);
-    shown = host.bridge.present({ id, role: window ? "sheet" : "modal", title: this.prompt || "Open", parentWindowControllerId: window?.id ?? null,
+    shown = host.bridge.present(markSystemWindowSurface({ id, role: window ? "sheet" : "modal", title: this.prompt || "Open", parentWindowControllerId: window?.id ?? null,
       parentResponderId: host.responderId, anchor, bounds: { x: frame.x + (frame.width - width) / 2, y: frame.y + (window ? 0 : (frame.height - height) / 2), width, height },
       onDidClose: () => { if (!closing) complete({ kind: "cancelled" }); },
-    }, <OpenPanelContent session={session} />);
+    }), <OpenPanelContent session={session} />);
     void shown.catch(cause => complete({ kind: "error", message: "The Open panel could not be presented.", cause }));
     return pending;
   }

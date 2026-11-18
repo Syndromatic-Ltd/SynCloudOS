@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { SystemSurfaceAppearance } from "../../Appearance/NSEAppearanceProvider";
 import { useEffect, useId, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
 import { useNSEOverlayProvider } from "../../Overlays";
 import { UtilityPanel } from "../../Overlays/NSEUtilityPanel";
@@ -211,11 +212,11 @@ export function NSEColourPanel({ controller: supplied, "aria-label": label = "Co
       setEyeDropperState(result.kind === "denied" || result.kind === "unavailable" || result.kind === "error" ? result.kind : "idle");
     }
   };
-  return (
-    // An inspector: it stays open while the user works elsewhere, and its
-    // close control keeps the colour shown, as NSColorPanel does.
+  // An inspector: it stays open while the user works elsewhere, and its
+  // close control keeps the colour shown, as NSColorPanel does.
+  return <SystemSurfaceAppearance>
     <UtilityPanel id={`colour-panel-${instanceId}`} open={presents && snapshot.open} title={title} anchor={anchor} contentInset="none" onClose={() => { if (controller.getSnapshot().open) controller.close("commit"); }}>
-    <section data-nse-control="colour-panel" data-nse-part="background" data-state={hexError ? "invalid" : contentState === "ready" ? snapshot.status : contentState}  aria-label={label} aria-busy={contentState === "loading" || undefined}>
+    <section data-nse-control="colour-panel" data-nse-part="background" data-nse-system-surface="" data-state={hexError ? "invalid" : contentState === "ready" ? snapshot.status : contentState}  aria-label={label} aria-busy={contentState === "loading" || undefined}>
       {contentState !== "ready" ? <p role={contentState === "loading" || contentState === "empty" || contentState === "disabled" || contentState === "read-only" ? "status" : "alert"} data-nse-part="content-message">{contentMessages[contentState]}</p> : null}
       <fieldset disabled={disabled}>
         <NSETabView
@@ -256,5 +257,5 @@ export function NSEColourPanel({ controller: supplied, "aria-label": label = "Co
       </fieldset>
     </section>
     </UtilityPanel>
-  );
+  </SystemSurfaceAppearance>;
 }

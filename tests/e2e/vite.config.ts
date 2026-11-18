@@ -31,26 +31,29 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { synWareSdkEntries, synWareSdkGeneratedStyles, synWarePackageName } from "../../scripts/synware/sdk-entries.mjs";
 
-function paintReplacementTheme(): Plugin {
-  const moduleId = "virtual:theme-paint-replacement/themes";
-  const stylePrefix = "virtual:theme-paint-replacement/style/";
-  const directory = resolve(import.meta.dirname, "fixtures/theme-paint-replacement/Themes");
+function fixtureThemes(fixture: string, appThemes?: string): Plugin {
+  const moduleId = "virtual:" + fixture + "/themes";
+  const stylePrefix = "virtual:" + fixture + "/style/";
+  const directory = resolve(import.meta.dirname, "fixtures", fixture);
   const toImport = (path: string) => "/@fs/" + normalizePath(path);
   return {
-    name: "theme-paint-replacement",
+    name: fixture,
     resolveId(id) {
       if (id === moduleId || id.startsWith(stylePrefix)) return "\0" + id;
     },
     load(id) {
       if (id !== "\0" + moduleId && !id.startsWith("\0" + stylePrefix)) return;
-      const bundles = discoverThemeBundles(directory);
+      const bundles = [
+        ...discoverThemeBundles(resolve(directory, "Themes")),
+        ...(appThemes ? discoverThemeBundles(resolve(directory, appThemes), { kind: "app" }) : []),
+      ];
       if (id === "\0" + moduleId) {
         const selected = new Set(bundles.map(bundle => bundle.theme.bundleIdentifier));
         return themeModuleSource(bundles, selected, toImport, stylePrefix);
       }
       const identifier = id.slice(stylePrefix.length + 1, -4);
       const bundle = bundles.find(candidate => candidate.theme.bundleIdentifier === identifier);
-      if (!bundle) throw new Error("Unknown replacement fixture theme: " + identifier);
+      if (!bundle) throw new Error("Unknown " + fixture + " theme: " + identifier);
       return themeStylesheet(bundle, toImport);
     },
   };
@@ -69,7 +72,7 @@ export default defineConfig({
       replacement: resolve(import.meta.dirname, "../../.artifacts/synapp-sdk/packages/syncloudos", entry),
     })),
   ] },
-  plugins: [react(), themeFixturePlugin, paintReplacementTheme(), {
+  plugins: [react(), themeFixturePlugin, fixtureThemes("theme-paint-replacement"), fixtureThemes("theme-app-scope", "AppThemes"), {
     name: "framework-fixture-pages",
     configureServer(server) {
       const pdfReaderWorker = readFileSync(resolve(import.meta.dirname, "../../node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs"));

@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { SystemSurfaceAppearance } from "../NSE/Appearance/NSEAppearanceProvider";
 import { useNSEAppearance } from "../NSE/Appearance";
 import { nseStateHooks } from "../NSE/hostComposition";
 import { useNSEThemeInteraction } from "../NSE/hostComposition";
@@ -966,8 +967,9 @@ export function NotificationCentrePresenter({
     if (plan.shouldCloseCentre) closeCentre();
   }
 
-  return (
+  return <SystemSurfaceAppearance>
     <aside
+      data-nse-system-surface=""
       className="syncloudos-notification-layer"
       aria-label={t("notifications.layerAriaLabel", "SynCloudOS Notification Centre")}
       data-reduced-motion={presenter.reducedMotion ? "true" : "false"}
@@ -1007,5 +1009,5 @@ export function NotificationCentrePresenter({
         ) : null}
       </Presence>
     </aside>
-  );
+  </SystemSurfaceAppearance>;
 }

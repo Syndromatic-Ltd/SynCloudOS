@@ -44,8 +44,8 @@ export function OpenPanelSheetSurface({ request, compact, onClose, children }: {
 }) {
   const appearance = useNSEAppearance();
   return <FocusScope options={{ scopeId: request.id, kind: "modal", modal: true, trapFocus: true, asChild: true }}>
-    <div className="nse-open-sheet-backdrop nse-window-sheet-backdrop" data-compact={compact || undefined} onKeyDown={event => { if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); onClose(); } }}>
-      <section role="dialog" aria-modal="true" aria-label={request.title} data-nse-colour-scheme-resolved={appearance.resolvedColourScheme} className="nse-open-sheet nse-sheet" data-nse-control="open-panel" data-nse-part="sheet" data-compact={compact || undefined}
+    <div className="nse-open-sheet-backdrop nse-window-sheet-backdrop" data-nse-system-surface="" data-compact={compact || undefined} onKeyDown={event => { if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); onClose(); } }}>
+      <section role="dialog" aria-modal="true" aria-label={request.title} data-nse-colour-scheme-resolved={appearance.resolvedColourScheme} className="nse-open-sheet nse-sheet" data-nse-control="open-panel" data-nse-part="sheet" data-nse-system-surface="" data-compact={compact || undefined}
         style={{ width: compact ? "100%" : `min(${request.bounds.width}px, calc(100% - 32px))`, height: `min(${request.bounds.height}px, 100%)` }}>{children}</section>
     </div>
   </FocusScope>;

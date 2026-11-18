@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { SystemSurfaceAppearance } from "../../NSE/Appearance/NSEAppearanceProvider";
+import { isSystemWindowSurface } from "../../NSE/Overlays/systemWindowSurface";
 import { WindowPresentationSlot, useWindowPresentationContent } from "../WindowPresentationContent";
 import { isNSEDOMElement, WindowLayoutContext, WindowLayoutModel } from "../../NSE/hostComposition";
 
@@ -118,6 +120,7 @@ export function WindowHost({
   useSyncExternalStore(renderers.subscribe, () => renderers.revision, () => renderers.revision);
   const contentRendererAvailable = contentState.status === "loaded" && renderers.has(contentState.mountKey);
   const surface = contentState.status === "loaded" ? renderers.surface(contentState.mountKey) : null;
+  const systemSurface = isSystemWindowSurface(surface?.request);
   const popoverSurface = surface && (record.role === "popover" || record.role === "sheet" && surface.request.drawsBackground !== undefined) ? surface : null;
   const wasPopoverSurface = useRef(false);
   if (popoverSurface) wasPopoverSurface.current = true;
@@ -213,6 +216,7 @@ export function WindowHost({
   const lastFrameRef = useRef<{
     readonly style: React.CSSProperties;
     readonly contents: React.ReactNode;
+    readonly systemSurface: boolean;
     readonly popoverScope?: { readonly parentResponderId: string; readonly parentScopeId?: string };
   } | null>(null);
   const hostRendered = record.state === "open" &&
@@ -272,14 +276,17 @@ export function WindowHost({
   ) {
     const lastFrame = lastFrameRef.current;
     if (!exiting || !lastFrame) return null;
+    const AppearanceBoundary = lastFrame.systemSurface ? SystemSurfaceAppearance : React.Fragment;
     // The same provider as the open frame keeps the tree's shape, so the exit
     // keeps the mounted contents rather than remounting them empty.
     return (
+      <AppearanceBoundary>
       <WindowLayoutContext.Provider value={layout}>
       <div
         ref={hostRef}
         className="webspring-window-host"
         data-window-host={record.id}
+        data-nse-system-surface={lastFrame.systemSurface ? "" : undefined}
         data-window-exiting=""
         aria-hidden
         inert
@@ -294,6 +301,7 @@ export function WindowHost({
         >{lastFrame.contents}</FocusScope> : lastFrame.contents}
       </div>
       </WindowLayoutContext.Provider>
+      </AppearanceBoundary>
     );
   }
 
@@ -387,10 +395,12 @@ export function WindowHost({
     zIndex: record.zIndex,
   };
   // A modal's focus scope is not kept: an exiting sheet traps nothing.
-  lastFrameRef.current = { style: hostStyle, contents: windowContents,
+  lastFrameRef.current = { style: hostStyle, contents: windowContents, systemSurface,
     ...(ownsPopoverFocus ? { popoverScope: { parentScopeId, parentResponderId: popoverSurface?.request.parentResponderId ?? parentResponderId } } : {}),
   };
+  const AppearanceBoundary = systemSurface ? SystemSurfaceAppearance : React.Fragment;
   return (
+    <AppearanceBoundary>
     <WindowLayoutContext.Provider value={layout}>
     {/* Exit fade only (no enter animation): a closing window dissolves instead
      * of cutting, so Quit-with-windows reads as one continuous exit rather
@@ -399,6 +409,7 @@ export function WindowHost({
       ref={hostRef}
       className="webspring-window-host"
       data-window-host={record.id}
+      data-nse-system-surface={systemSurface ? "" : undefined}
       aria-hidden={blocked ? true : undefined}
       onPointerDownCapture={(event) => {
         const target = event.target;
@@ -425,5 +436,6 @@ export function WindowHost({
       ) : windowContents}
     </div>
     </WindowLayoutContext.Provider>
+    </AppearanceBoundary>
   );
 }

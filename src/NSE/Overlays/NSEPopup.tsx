@@ -39,7 +39,7 @@ import type { OverlayAnchorPoint } from "./computeOverlayPosition";
 import { useNSEOverlay } from "./useNSEOverlay";
 import { useNSEOverlayProvider } from "./OverlayProvider";
 import { ActionResponderContext } from "../Controls/Core/useNSEControlAction";
-import { useNSEAppearanceProjection } from "../Appearance";
+import { useNSEAppearanceProjection, useIsSystemSurfaceAppearance } from "../Appearance/NSEAppearanceProvider";
 import type {
   LogicalPlacement,
   OverlayDismissReason,
@@ -164,6 +164,7 @@ export function NSEPopup({
   ...htmlAttributes
 }: NSEPopupProps) {
   const appearanceProjection = useNSEAppearanceProjection();
+  const systemSurface = useIsSystemSurfaceAppearance();
   const generatedId = useId().replace(/:/g, "");
   const resolvedId = id ?? `nse-popup:${generatedId}`;
   const titleId = `nse-popup-title:${generatedId}`;
@@ -306,7 +307,12 @@ export function NSEPopup({
   // changes modality. Reparenting the surface would remount an unsaved editor.
   const portalContents = createElement(
       "div",
-      { className: isModal ? "nse-overlay-popup-modal-host" : "nse-overlay-popup-host", ...appearanceProjection, "data-nse-role": isModal ? "modal" : undefined },
+      {
+        className: isModal ? "nse-overlay-popup-modal-host" : "nse-overlay-popup-host",
+        ...appearanceProjection,
+        "data-nse-system-surface": systemSurface ? "" : undefined,
+        "data-nse-role": isModal ? "modal" : undefined,
+      },
       createElement("div", {
         className: "nse-overlay-popup-backdrop",
         hidden: !isModal,

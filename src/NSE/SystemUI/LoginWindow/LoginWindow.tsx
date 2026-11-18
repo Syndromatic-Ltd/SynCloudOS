@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { SystemSurfaceAppearance } from "../../Appearance/NSEAppearanceProvider";
 import { useNSEAppearance } from "../../Appearance/NSEAppearanceProvider";
 import { useEffect, useRef, type KeyboardEvent } from "react";
 import "./loginPlate.css";
@@ -82,8 +83,8 @@ export function LoginWindow({ title = "Sign in", branding, methods = [], authent
     if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus({ preventScroll: true }); }
     else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus({ preventScroll: true }); }
   }
-  return (
-    <div data-nse-control="login-window" data-nse-part="background" ref={rootRef} className={`nse-login-window nse-login-window--${variant} is-login-step-synId ${activeError ? "has-login-error" : ""} ${className}`} data-sheen={ornamented ? "enter" : undefined} data-nse-login-presentation={ornamented ? "ornamented" : "plain"} role="dialog" aria-modal="true" aria-labelledby="nse-login-window-title" aria-describedby={activeError ? "nse-login-window-error" : undefined} onKeyDown={trapFocus}>
+  return <SystemSurfaceAppearance>
+    <div data-nse-control="login-window" data-nse-part="background" data-nse-system-surface="" ref={rootRef} className={`nse-login-window nse-login-window--${variant} is-login-step-synId ${activeError ? "has-login-error" : ""} ${className}`} data-sheen={ornamented ? "enter" : undefined} data-nse-login-presentation={ornamented ? "ornamented" : "plain"} role="dialog" aria-modal="true" aria-labelledby="nse-login-window-title" aria-describedby={activeError ? "nse-login-window-error" : undefined} onKeyDown={trapFocus}>
       {ornamented ? <span data-nse-part="attachment" className="nse-login-window-top-tack" aria-hidden="true"><img data-nse-part="image" src={loginWindowAssets.tackTransparent} alt="" draggable={false} /><img data-nse-part="image" src={loginWindowAssets.tackWhite} alt="" draggable={false} /></span> : null}
       <div ref={swingRef} data-nse-part="effects" className="nse-login-window-swing-stage">
         {ornamented ? <div data-nse-part="suspension" className="nse-login-window-hang" aria-hidden="true"><div data-nse-part="content" className="nse-login-window-hang-flipper"><img data-nse-part="shadow" className="nse-login-window-rope-shadow" src={loginWindowAssets.ropeShadow} alt="" draggable={false} /><img data-nse-part="leading" className="nse-login-window-rope nse-login-window-rope-left" src={loginWindowAssets.ropeLeft} alt="" draggable={false} /><img data-nse-part="trailing" className="nse-login-window-rope nse-login-window-rope-right" src={loginWindowAssets.ropeRight} alt="" draggable={false} /></div></div> : null}
@@ -105,5 +106,5 @@ export function LoginWindow({ title = "Sign in", branding, methods = [], authent
         </div></div></div>
       </div>
     </div>
-  );
+  </SystemSurfaceAppearance>;
 }

@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { SystemSurfaceAppearance } from "../NSE/Appearance/NSEAppearanceProvider";
 import { useId, useRef, useState, type ReactNode } from "react";
 import { Presence, useNSEAnimationEnvironment, useNSEPresentation } from "../NSE/Animation";
 import { resolveSystemAlertDetailsMotion } from "./SystemAlert.transitions";
@@ -162,8 +163,8 @@ export function SystemAlert({
   const messageId = useId();
   const icon = getSystemAlertIcon(error, useHostSiteBranding(), appearance, applicationIcon);
 
-  return (
-    <AlertSurface className="syncloudos-system-alert" appearance={appearance} labelledBy={titleId} describedBy={messageId}>
+  return <SystemSurfaceAppearance>
+    <AlertSurface data-nse-system-surface="" className="syncloudos-system-alert" appearance={appearance} labelledBy={titleId} describedBy={messageId}>
       <div data-nse-part="content" className="nse-system-alert-content">
         <div data-nse-part="decoration" className={`syncloudos-alert-artwork${icon.src ? "" : " is-caution-only"}`} data-alert-icon={icon.kind} aria-hidden="true">
           {icon.src ? <img data-nse-part="image" className="syncloudos-alert-logo" data-alert-logo={icon.src === synCloudOSLogo ? "syncloudos" : ""} src={icon.src} alt="" /> : null}
@@ -202,5 +203,5 @@ export function SystemAlert({
         {!isSessionMismatch && actions.includes("dismiss") ? <ActionButton appearance={actionAppearance} onClick={onDismiss}>{isNotResponding ? "Continue" : "Close"}</ActionButton> : null}
       </div>
     </AlertSurface>
-  );
+  </SystemSurfaceAppearance>;
 }

@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { SystemSurfaceAppearance, useIsSystemSurfaceAppearance } from "../Appearance/NSEAppearanceProvider";
+import { markSystemWindowSurface } from "./systemWindowSurface";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type HTMLAttributes, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { PanelView } from "../Windows/PanelView";
@@ -124,6 +126,7 @@ function clampFrame(frame: Frame, size: WindowFittingSize, view: Window | null):
  */
 export function UtilityPanel({ id, open, title, anchor, parentWindowControllerId = null, children, contentInset = "standard", onClose, onDismissRefused }: UtilityPanelProps) {
   const bridge = useOptionalNSEWindowSurfaceBridge();
+  const systemSurface = useIsSystemSurfaceAppearance();
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
   const handleDidClose = useNSEWindowSurfaceLifecycle({
@@ -146,10 +149,11 @@ export function UtilityPanel({ id, open, title, anchor, parentWindowControllerId
       ? registerNSEInspectorOrigin(body.closest("[data-window-host], .nse-utility-panel") ?? body, anchor)
       : null;
   }, [anchor, open]);
-  const presentedContent = useNSEPresentedContent(<WindowFittingContent onFittingSize={onFittingSize}><div ref={bindOrigin} className="nse-utility-panel-body" data-content-inset={contentInset}>{children}</div></WindowFittingContent>);
+  const panelBody = <WindowFittingContent onFittingSize={onFittingSize}><div ref={bindOrigin} className="nse-utility-panel-body" data-content-inset={contentInset}>{children}</div></WindowFittingContent>;
+  const presentedContent = useNSEPresentedContent(systemSurface ? <SystemSurfaceAppearance>{panelBody}</SystemSurfaceAppearance> : panelBody);
   const request = useMemo(() => {
     const size = panelSize(fitting, viewOf(anchor));
-    return {
+    const request = {
       id,
       role: "panel" as const,
       title,
@@ -159,9 +163,10 @@ export function UtilityPanel({ id, open, title, anchor, parentWindowControllerId
       sizing: "content" as const,
       onDidClose: handleDidClose,
     };
+    return systemSurface ? markSystemWindowSurface(request) : request;
     // The position places the window when it opens; once open, the host keeps
     // wherever the user has moved it and follows only the size.
-  }, [anchor, fitting, handleDidClose, id, parentWindowControllerId, title]);
+  }, [anchor, fitting, handleDidClose, id, parentWindowControllerId, systemSurface, title]);
   useEffect(() => {
     if (!open || !bridge) return;
     bridge.present(request, presentedContent).catch((error: unknown) => reportNSEWindowSurfaceError(bridge, error, id, "present"));
@@ -187,6 +192,7 @@ function StandaloneUtilityPanel({ id, title, anchor, fitting, closing, onExited,
 }) {
   const { portalHost, runtime } = useNSEOverlayProvider();
   const appearanceProjection = useNSEAppearanceProjection();
+  const systemSurface = useIsSystemSurfaceAppearance();
   const [frame, setFrame] = useState<Frame | null>(null);
   const drag = useRef<{ readonly pointerId: number; readonly originX: number; readonly originY: number; readonly frame: Frame } | null>(null);
   const surfaceRef = useRef<HTMLDivElement | null>(null);
@@ -291,6 +297,7 @@ function StandaloneUtilityPanel({ id, title, anchor, fitting, closing, onExited,
       ref={surfaceRef}
       className="nse-utility-panel"
       data-nse-utility-panel={id}
+      data-nse-system-surface={systemSurface ? "" : undefined}
       data-state={closing ? "closing" : "open"}
       inert={closing || undefined}
       {...appearanceProjection}

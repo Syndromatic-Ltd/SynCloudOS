@@ -1,0 +1,10 @@
+[data-nse-control="tab-view"] [data-nse-part="cell"][data-nse-selected],
+[data-nse-control="tab-view"][data-nse-part="background"],
+[data-nse-control="menu"][data-nse-part="background"][data-nse-role="command-menu"],
+[data-nse-control="popover"][data-nse-part="surface"] {
+  background: #cc2233;
+}
+
+:scope[data-nse-colour-scheme-resolved="dark"] [data-nse-control="tab-view"] [data-nse-part="cell"][data-nse-selected] {
+  background: #8d2032;
+}

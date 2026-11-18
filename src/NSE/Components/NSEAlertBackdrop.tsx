@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useIsSystemSurfaceAppearance } from "../Appearance/NSEAppearanceProvider";
 import { useContext, useEffect, useImperativeHandle, useRef, type CSSProperties, type KeyboardEvent, type ReactNode, type Ref } from "react";
 import "./components.css";
 import { useNSEAnimationEnvironment, useNSEPresentation } from "../Animation";
@@ -58,6 +59,7 @@ export function AlertBackdrop({
   "data-syncloudos-focus-scope": focusScope,
 }: AlertBackdropProps) {
   const appearanceProjection = useNSEAppearanceProjection();
+  const systemSurface = useIsSystemSurfaceAppearance();
   const provider = useOptionalOverlayProvider();
   const presentingDocument = useContext(PresentingDocumentContext) ?? (typeof document === "undefined" ? null : document);
   const { region, hostViewport } = useNSEOverlayRegion({ source: presentation ?? provider?.runtime.environment.presentation ?? null, open: true, purpose: "alert", document: presentingDocument });
@@ -122,7 +124,7 @@ export function AlertBackdrop({
   return (
     <div
       ref={backdropRef}
-      data-nse-control="system-alert" data-nse-part="backdrop" className={["nse-control-alert-backdrop", className].filter(Boolean).join(" ")}
+      data-nse-control="system-alert" data-nse-part="backdrop" data-nse-system-surface={systemSurface ? "" : undefined} className={["nse-control-alert-backdrop", className].filter(Boolean).join(" ")}
       // An alert begun as a sheet (beginSheetModal) is attached to its window,
       // and its theme draws it so: the backdrop is the theme's scope root, so
       // the presentation is stated here rather than read from the window.

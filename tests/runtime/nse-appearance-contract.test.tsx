@@ -29,6 +29,7 @@ import React, { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { NSEAppearanceProvider, useNSEAppearance, type NSEAppearanceServicePort } from "../../src/NSE/Appearance";
+import { NSEAppearance } from "../../src/NSE/Appearance/NSEAppearance";
 import { AboutDialog } from "../../src/NSE/Components/NSESystemDialogs";
 import { PreferencesToast } from "../../src/NSE/Components/NSEPreferencesToast";
 import { RadioGroup, NSETextField } from "../../src/NSE/Controls/Fields/NSEFields";
@@ -38,6 +39,7 @@ import { OverlayProvider, NSEPopup as NSECanonicalPopup } from "../../src/NSE/Ov
 import type { OverlayRuntimePort } from "../../src/NSE/Overlays/overlayTypes";
 import { atmoTheme } from "../../src/NSE/Appearance/atmo";
 import { Tooltip } from "../../src/NSE/Tooltips";
+import { NSEView } from "../../src/NSE/Views/NSEView";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 
 const customAppearance = createTestTheme("com.example.custom-test", "Custom test");
@@ -135,6 +137,31 @@ function CanonicalPortalSpecimens() {
 }
 
 describe("NSE appearance composition", () => {
+
+  it("options-only constructor inherits the name", () => {
+    const chrome = Object.freeze({ kind: "app" as const, bundleIdentifier: "com.example.chrome", displayName: "Chrome", version: "1.0.0" });
+    const appearance = new NSEAppearance({ theme: chrome });
+    expect(appearance.name).toBeUndefined();
+
+    const draw = (scheme: "light" | "dark") => (
+      <NSEAppearanceProvider theme={customAppearance} colourScheme={scheme} contrast="high" transparency="reduced">
+        <NSEView appearance={appearance}>
+          <Probe id="app-chrome" />
+        </NSEView>
+      </NSEAppearanceProvider>
+    );
+    const { rerender } = render(draw("dark"));
+    const boundary = screen.getByTestId("app-chrome").closest("[data-nse-app-theme]");
+    expect(boundary?.getAttribute("data-nse-app-theme")).toBe(chrome.bundleIdentifier);
+    expect(boundary?.getAttribute("data-nse-theme")).toBe(customAppearance.bundleIdentifier);
+    expect(boundary?.getAttribute("data-nse-colour-scheme-resolved")).toBe("dark");
+    expect(boundary?.getAttribute("data-nse-contrast")).toBe("high");
+    expect(boundary?.getAttribute("data-nse-transparency")).toBe("reduced");
+    expect(boundary?.getAttribute("style")).toBeNull();
+
+    rerender(draw("light"));
+    expect(boundary?.getAttribute("data-nse-colour-scheme-resolved")).toBe("light");
+  });
 
   it("selects explicit canonical appearance definitions without legacy aliases", () => {
     expect(atmoTheme.bundleIdentifier).toBe("com.syndromatic.atmo");

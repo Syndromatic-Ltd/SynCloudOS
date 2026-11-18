@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { SystemSurfaceAppearance } from "../Appearance/NSEAppearanceProvider";
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import { GFXColour } from "../../FX/GraphicsFX/GFXColour";
 import { useNSEColourPanelContextCarrier, useOptionalNSEColourPanelController, useOptionalNSEColourPanelResponderId } from "../Colour/ColourPanel/NSEColourPanelProvider";
@@ -540,11 +541,11 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
 
   // An inspector (NSFontPanel): it floats beside the document and stays open
   // while the user keeps typing; its close control ends the session.
-  return <UtilityPanel id={`font-panel-${instanceId}`} open={effectiveOpen} title={title} anchor={anchor} parentWindowControllerId={parentWindowControllerId} contentInset="none" onClose={() => {
+  return <SystemSurfaceAppearance><UtilityPanel id={`font-panel-${instanceId}`} open={effectiveOpen} title={title} anchor={anchor} parentWindowControllerId={parentWindowControllerId} contentInset="none" onClose={() => {
     endSession(fontPanelAbort("Font panel session was closed."));
     onOpenChange(false);
   }} onDismissRefused={() => onOpenChange(true)}>
-    {carryColourPanel(<section data-nse-control="font-panel" data-nse-part="background" data-state={readOnly ? "read-only" : !preset ? "unavailable" : status === "idle" || status === "executed" ? "ready" : status} data-nse-flow={direction} dir={direction} aria-label={label}>
+    {carryColourPanel(<section data-nse-control="font-panel" data-nse-part="background" data-nse-system-surface="" data-state={readOnly ? "read-only" : !preset ? "unavailable" : status === "idle" || status === "executed" ? "ready" : status} data-nse-flow={direction} dir={direction} aria-label={label}>
       {showsPreview ? <div data-nse-part="preview" style={shownDocumentColour ? { "--nse-font-panel-document": shownDocumentColour.toCSS() } as CSSProperties : undefined}>
         <output data-nse-part="preview-sample" aria-label={`Preview: ${description}`} style={previewStyle}>{familyName}</output>
         <p data-nse-part="preview-description" aria-hidden="true">{description}</p>
@@ -675,5 +676,5 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
       <p role="status" data-nse-part="notice">{!preset ? "No fonts available." : notice}</p>
       {status !== "idle" && status !== "executed" ? <p role="alert" data-nse-part="error">Typography command {status}.</p> : null}
     </section>)}
-  </UtilityPanel>;
+  </UtilityPanel></SystemSurfaceAppearance>;
 }

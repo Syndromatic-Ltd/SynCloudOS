@@ -1,4 +1,5 @@
 /* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
+import { SystemSurfaceAppearance } from "../../NSE/Appearance/NSEAppearanceProvider";
 import React, { createContext, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type PropsWithChildren, type ReactNode } from "react";
 import { SynCloudOSRuntimeContext } from "../../SynCloudOSReact";
 import { useNSEAnimationEnvironment } from "../../NSE/Animation";
@@ -78,9 +79,9 @@ function OpenPanelSheet({ request, onClose, children }: PropsWithChildren<{ requ
   const { reducedMotion } = useNSEAnimationEnvironment();
   const compact = useContext(Context)?.compact() === true;
   useLayoutEffect(() => sheetHost?.attach(), [sheetHost]);
-  if (compact) return <NSEPopup id={request.id} open parentResponderId={request.parentResponderId} anchor={request.anchor}
+  if (compact) return <SystemSurfaceAppearance><NSEPopup id={request.id} open parentResponderId={request.parentResponderId} anchor={request.anchor}
     presentation={{ mode: "sheet" }} overlayKind="action-sheet" chrome="menu" modal aria-label={request.title} className="nse-open-compact-sheet"
-    onOpenChange={open => { if (!open) onClose(); }}>{children}</NSEPopup>;
-  const content = <OpenPanelSheetSurface request={request} compact={compact} onClose={onClose}>{children}</OpenPanelSheetSurface>;
+    data-nse-system-surface="" onOpenChange={open => { if (!open) onClose(); }}>{children}</NSEPopup></SystemSurfaceAppearance>;
+  const content = <SystemSurfaceAppearance><OpenPanelSheetSurface request={request} compact={compact} onClose={onClose}>{children}</OpenPanelSheetSurface></SystemSurfaceAppearance>;
   return sheetHost?.layer ? createPortal(<WindowSheetFrame reducedMotion={reducedMotion}>{content}</WindowSheetFrame>, sheetHost.layer) : content;
 }

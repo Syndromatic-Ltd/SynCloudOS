@@ -1,0 +1,5 @@
+[data-nse-control="button"] > [data-nse-part="bezel"],
+[data-nse-control="save-panel"][data-nse-part="surface"],
+[data-nse-control="tab-view"][data-nse-part="background"] {
+  background: #2e5267;
+}

@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { SystemSurfaceAppearance } from "../Appearance/NSEAppearanceProvider";
+import { markSystemWindowSurface } from "../Overlays/systemWindowSurface";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { NSEPopup, reportNSEWindowSurfaceError, useNSEWindowSurfaceLifecycle, useOptionalNSEWindowSurfaceBridge, type OverlayDismissReason, type WindowSurfaceBridge } from "../Overlays";
 import { useNSEPresentedContent } from "../Overlays/useNSEPresentedContent";
@@ -113,7 +115,7 @@ export function FilePanelView({
   }, [onOpenChange]);
 
   const content = (
-    <section className="nse-file-panel-content" data-nse-part="content" data-nse-control="save-panel" data-state={status}>
+    <section className="nse-file-panel-content" data-nse-part="content" data-nse-control="save-panel" data-nse-system-surface="" data-state={status}>
       {message ? <p className="nse-file-panel-status" role="status" data-state={status}>{message}</p> : null}
       {children}
     </section>
@@ -124,7 +126,7 @@ export function FilePanelView({
   const onFittingSize = useCallback((next: WindowFittingSize) => {
     setFitting((current) => current && current.width === next.width && current.height === next.height ? current : next);
   }, []);
-  const canonicalRequest = useMemo(() => ({
+  const canonicalRequest = useMemo(() => markSystemWindowSurface({
     id,
     role: compact ? "sheet" as const : "panel" as const,
     title,
@@ -134,7 +136,9 @@ export function FilePanelView({
     sizing: "content" as const,
     onDidClose: handleDidClose,
   }), [anchor, compact, fitting?.height, fitting?.width, handleDidClose, id, parentWindowControllerId, title]);
-  const presentedContent = useNSEPresentedContent(<WindowFittingContent onFittingSize={onFittingSize}>{content}</WindowFittingContent>);
+  const presentedContent = useNSEPresentedContent(
+    <SystemSurfaceAppearance><WindowFittingContent onFittingSize={onFittingSize}>{content}</WindowFittingContent></SystemSurfaceAppearance>,
+  );
   useEffect(() => {
     if (!open || !canonicalBridge) return;
     canonicalBridge.present(canonicalRequest, presentedContent).catch((error: unknown) => {
@@ -142,7 +146,7 @@ export function FilePanelView({
     });
   }, [canonicalBridge, canonicalRequest, id, open, presentedContent]);
   if (canonicalBridge) return null;
-  return (
+  return <SystemSurfaceAppearance>
     <NSEPopup
       id={id}
       open={open}
@@ -157,11 +161,12 @@ export function FilePanelView({
       className="nse-file-panel"
       data-nse-control="save-panel"
       data-nse-part="surface"
+      data-nse-system-surface=""
       data-state={status}
 
       onOpenChange={dismiss}
     >
       {content}
     </NSEPopup>
-  );
+  </SystemSurfaceAppearance>;
 }

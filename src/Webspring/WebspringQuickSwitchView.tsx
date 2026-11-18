@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { SystemSurfaceAppearance } from "../NSE/Appearance/NSEAppearanceProvider";
 import { nseControlHooks } from "../NSE/NSE";
 import { useNSEThemeInteraction } from "../NSE/hostComposition";
 import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
@@ -248,14 +249,14 @@ export function WebspringQuickSwitchView({
     void runtime.commands.dispatch("workspace.openApp", { appId: app.bundleIdentifier }, { responderId: "workspace", source: "menu" });
   }
 
-  return (
+  return <SystemSurfaceAppearance>
     <Presence>
       {open ? (
         <FocusScope scopeId={`quickswitch:${quickSwitchId}`} kind="popover" parentResponderId="webspring">
         <QuickSwitchSurface
           surfaceRef={rootRef}
           motion={reducedMotion ? quickSwitchMotion.reduced : quickSwitchMotion.standard}
-          data-nse-control="quick-switch" data-nse-part="background" className="webspring-quickswitch"
+          data-nse-control="quick-switch" data-nse-part="background" data-nse-system-surface="" className="webspring-quickswitch"
           role="dialog"
           aria-label={locale.t("quickswitch.ariaLabel", "QuickSwitch")}
           aria-modal="false"
@@ -337,7 +338,7 @@ export function WebspringQuickSwitchView({
         </FocusScope>
       ) : null}
     </Presence>
-  );
+  </SystemSurfaceAppearance>;
 }
 
 function QuickSwitchItem({ selected, ...attributes }: ComponentProps<"button"> & { selected: boolean }) {

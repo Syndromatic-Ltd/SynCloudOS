@@ -37,8 +37,8 @@
    mode. Light follows the aluminium metal family and dark the blue-hued one. These are theme-neutral
    defaults: a theme (Atmo among them) redefines them, so content drawn with them follows the theme.
    Text tokens keep at least 4.5:1 against --nse-colour-window-background; the accent at least 3:1. */
-:where([data-nse-colour-scheme-resolved="light"]),
-:where(:scope):is(:where([data-nse-colour-scheme-resolved="light"])) {
+:where([data-nse-colour-scheme-resolved="light"]:not([data-nse-app-theme])),
+:where(:scope):is(:where([data-nse-colour-scheme-resolved="light"]:not([data-nse-app-theme]))) {
   --nse-colour-label: #2a2f36;
   --nse-colour-secondary-label: #555d66;
   --nse-colour-tertiary-label: rgba(44, 56, 70, 0.54);
@@ -88,8 +88,8 @@
   --nse-colour-system-brown: #996633;
   --nse-colour-system-grey: #808080;
 }
-:where([data-nse-colour-scheme-resolved="dark"]),
-:where(:scope):is(:where([data-nse-colour-scheme-resolved="dark"])) {
+:where([data-nse-colour-scheme-resolved="dark"]:not([data-nse-app-theme])),
+:where(:scope):is(:where([data-nse-colour-scheme-resolved="dark"]:not([data-nse-app-theme]))) {
   --nse-colour-label: #dde3ea;
   --nse-colour-secondary-label: #a7afba;
   --nse-colour-tertiary-label: rgba(200, 210, 222, 0.45);
