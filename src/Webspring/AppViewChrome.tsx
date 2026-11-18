@@ -20,6 +20,7 @@
 
 import { WindowLayoutContext, WindowLayoutModel, useNSEContentLayoutProperties } from "../NSE/hostComposition";
 import { useNSEDeferredDisposal } from "../NSE/hostComposition";
+import { useInPlaceAppearanceProjection } from "../NSE/Appearance/NSEAppearanceProvider";
 
 import { useCallback, useLayoutEffect, useMemo, useEffect, useRef, type CSSProperties, type FocusEventHandler, type ReactNode, type Ref } from "react";
 import { useNSEPresenceExiting, useNSEPresentation } from "../NSE/Animation";
@@ -49,6 +50,7 @@ type RootProps = {
   staged?: boolean;
   /** The focused application stage: once presented it becomes the key window. */
   keyWindow?: boolean;
+  hasAppearanceOverride?: boolean;
   rootRef?: Ref<HTMLDivElement>;
   children: ReactNode;
   presentation?: AppViewPresentation;
@@ -66,6 +68,7 @@ function Root({
   multiSwitchRole,
   staged = false,
   keyWindow = false,
+  hasAppearanceOverride = false,
   rootRef,
   children,
   presentation,
@@ -73,6 +76,8 @@ function Root({
   style,
   ...hostProps
 }: RootProps) {
+  const projection = useInPlaceAppearanceProjection();
+  const appearanceProjection = hasAppearanceOverride ? projection : undefined;
   const frameRef = useRef<HTMLDivElement | null>(null);
   const layout = useMemo(() => new WindowLayoutModel(), []);
   useNSEDeferredDisposal(layout);
@@ -109,6 +114,7 @@ function Root({
   return (
     <WindowLayoutContext.Provider value={layout}>
     <div
+      {...appearanceProjection}
       {...hostProps}
       ref={setFrame}
       tabIndex={-1}
@@ -120,7 +126,7 @@ function Root({
       data-launch-staged={staged ? "true" : undefined}
       aria-hidden={inactive ? true : undefined}
       inert={inactive ? true : undefined}
-      style={{ ...style, ...presentation?.motion.style, zIndex, ...(inactive ? { pointerEvents: "none" as const } : {}) }}
+      style={{ ...appearanceProjection?.style, ...style, ...presentation?.motion.style, zIndex, ...(inactive ? { pointerEvents: "none" as const } : {}) }}
     >
       {children}
     </div>

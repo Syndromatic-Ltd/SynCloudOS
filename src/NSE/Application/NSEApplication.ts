@@ -27,6 +27,7 @@ import { nseDisposeFor, type OwnedObject, type NSEOwner } from "../Controllers/o
 import { NSEObject } from "../Objects/NSEObject";
 import { publishObservableChange } from "../Objects/observable";
 import type { NSEMenu } from "../Menus/NSEMenu";
+import type { NSEAppearance } from "../Appearance/NSEAppearance";
 import { ObjectLifetime } from "./objectLifetime";
 import { ownNSEFactory, type Disposable, type SynchronousDisposable } from "./ownedFactory";
 import type { NSEAnyWindowController, NSEWindowController, NSEWindowControllerClass } from "./NSEWindowController";
@@ -147,6 +148,19 @@ export class NSEApplication extends NSEObject implements NSEOwner, OwnedObject {
   }
 
   #mainMenu: NSEMenu | null = null;
+
+  /** NSApplication.appearance: the default appearance of the application's windows and presented surfaces. */
+  get appearance(): NSEAppearance | null {
+    return this.#appearance;
+  }
+
+  set appearance(value: NSEAppearance | null) {
+    if (value === this.#appearance) return;
+    this.#appearance = value;
+    publishObservableChange(this);
+  }
+
+  #appearance: NSEAppearance | null = null;
 
   constructor() {
     super();

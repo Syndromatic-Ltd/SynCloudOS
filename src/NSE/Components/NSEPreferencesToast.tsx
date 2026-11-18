@@ -36,6 +36,7 @@ import { NSEImage } from "../Controls/Images/NSEImageResource";
 import { ControlImage } from "../Controls/Images/NSEControlImage";
 import { NSEButton } from "../Controls/Buttons/NSEButton";
 import { projectNSEAppearance, useNSEAppearance } from "../Appearance";
+import { useIsSystemSurfaceAppearance } from "../Appearance/NSEAppearanceProvider";
 
 /**
  * Preferences, as a panel that glides up from the lower screen and settles in
@@ -173,6 +174,7 @@ function PreferencesTitlebar({ title, titleView, leading }: { title: ReactNode; 
 
 export function PreferencesToast({ open, focusScopeId, title, panes, initialPane, backLabel, appearance, resolvedMode, runtimeOwner, onClose }: PreferencesToastProps) {
   const inheritedAppearance = useNSEAppearance();
+  const systemSurface = useIsSystemSurfaceAppearance();
   const requestedAppearance = appearance ?? inheritedAppearance.requestedColourScheme;
   const projectedMode = resolvedMode ?? inheritedAppearance.resolvedColourScheme;
   const appearanceProjection = projectNSEAppearance({
@@ -266,6 +268,7 @@ export function PreferencesToast({ open, focusScopeId, title, panes, initialPane
           <div
             className="nse-prefs-backdrop"
             {...appearanceProjection}
+            data-nse-system-surface={systemSurface ? "" : undefined}
             data-nse-control="panel" data-nse-part="surface" data-nse-style="preferences"
             data-appearance={requestedAppearance}
             data-mode={projectedMode}

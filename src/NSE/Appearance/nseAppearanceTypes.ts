@@ -50,7 +50,9 @@ export type NSEResolvedAppearance = NSEAppearanceSelection;
 
 export interface EffectiveAppearance extends NSEResolvedAppearance {
   readonly appTheme?: NSEAppTheme | undefined;
-  readonly systemAppearance?: NSEResolvedAppearance | undefined;
+  readonly ambientAppearance?: NSEResolvedAppearance | undefined;
+  readonly relocatesAppearance?: true | undefined;
+  readonly semanticAppearance?: NSEResolvedAppearance | undefined;
   readonly isSystemSurface?: true;
 }
 

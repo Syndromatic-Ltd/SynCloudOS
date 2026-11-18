@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useNSEAppearance } from "../Appearance/NSEAppearanceProvider";
+import { useInPlaceAppearanceProjection, useNSEAppearance, ViewAppearanceBoundary } from "../Appearance/NSEAppearanceProvider";
 import { useNSEContentLayoutProperties } from "../Layout/windowObstructions";
 
 import React, { type KeyboardEventHandler, type ReactNode } from "react";
@@ -61,7 +61,22 @@ const windowSmoothSurfaceRequest = (value: WindowSmoothSurfaceConfiguration | nu
   return value;
 };
 
-export function WindowView({
+export function WindowView(props: WindowFrameProps) {
+  const [titlebarDocument, setTitlebarDocument] = React.useState<WindowTitlebarDocument | null>(null);
+  const [slots, setSlots] = React.useState<WindowTitlebarSlots | null>(null);
+  const titlebarHost = React.useMemo(() => ({ leadingAccessories: null, trailingAccessories: null,
+    ...slots, setDocument: setTitlebarDocument, setSlots }), [slots]);
+
+  return (
+    <ViewAppearanceBoundary appearance={titlebarDocument?.appearance ?? null} projectBoundary={false}>
+      <WindowTitlebarHostContext.Provider value={titlebarHost}>
+        <WindowFrame {...props} titlebarDocument={titlebarDocument} />
+      </WindowTitlebarHostContext.Provider>
+    </ViewAppearanceBoundary>
+  );
+}
+
+function WindowFrame({
   record,
   presentation,
   zoomed = false,
@@ -79,18 +94,17 @@ export function WindowView({
   arrowAlignment,
   onKeyDown,
   children,
-}: WindowFrameProps) {
+  titlebarDocument,
+}: WindowFrameProps & { readonly titlebarDocument: WindowTitlebarDocument | null }) {
   // Hooks precede the closed/hidden early return. The clip-path hook writes
   // real squircle geometry onto the surface element; the className/style
   // props carry the radius paint underneath. Shadow and resize handles are
   // siblings of the surface, so clipping never touches them; content scrolls
   // inside the clipped surface exactly like mounted app views.
   const appearance = useNSEAppearance();
+  const projection = useInPlaceAppearanceProjection();
+  const appearanceProjection = titlebarDocument?.appearance ? projection : undefined;
   const contentLayoutProperties = useNSEContentLayoutProperties();
-  const [titlebarDocument, setTitlebarDocument] = React.useState<WindowTitlebarDocument | null>(null);
-  const [slots, setSlots] = React.useState<WindowTitlebarSlots | null>(null);
-  const titlebarHost = React.useMemo(() => ({ leadingAccessories: null, trailingAccessories: null,
-    ...slots, setDocument: setTitlebarDocument, setSlots }), [slots]);
   const [surfaceNode, setSurfaceNode] = React.useState<HTMLDivElement | null>(null);
   const smoothSurfaceRequest = windowSmoothSurfaceRequest(record.smoothSurface ?? null);
   useSmoothSurface(surfaceNode, smoothSurfaceRequest);
@@ -104,8 +118,8 @@ export function WindowView({
 
   const smoothSurfaceProps = getOptionalSmoothSurfaceProps(smoothSurfaceRequest);
   return (
-    <WindowTitlebarHostContext.Provider value={titlebarHost}>
     <section
+      {...appearanceProjection}
       data-nse-control="window" data-nse-part="background" data-nse-role={record.role} data-nse-type={record.role === "borderless" ? "frameless" : "system"} data-nse-edge={arrowEdge} data-nse-alignment={arrowAlignment} data-nse-chrome={record.role === "hud" ? "hud" : appearance.chrome} data-nse-key-window={record.isKey ? undefined : "false"} data-nse-toolbar-style={titlebarDocument?.toolbarStyle ?? "automatic"}
       className={["nse-window-view", className].filter(Boolean).join(" ")}
       role={resolvedSemanticRole}
@@ -138,6 +152,7 @@ export function WindowView({
       data-window-arrow-edge={arrowEdge}
       data-window-arrow-alignment={arrowAlignment}
       style={{
+        ...appearanceProjection?.style,
         left: 0,
         top: 0,
         width: "100%",
@@ -166,6 +181,5 @@ export function WindowView({
       </div>
       {resizeHandles}
     </section>
-    </WindowTitlebarHostContext.Provider>
   );
 }

@@ -38,6 +38,7 @@ import { ApplicationNavigationBackButton } from "./ApplicationNavigationBackButt
 import { activateResponderHierarchy, clearOwnedResponderAnchor, QuickSwitchTriggerProvider, ResponderScope, useHostSiteBranding, useResolvedMode, useRuntimeNSEControlPort, useRuntimeNSEFocusPort, useRuntimeNSEOverlayPort, useRuntimeSelector, useKernelSynCloudOS } from "../SynCloudOSReact";
 import type { SynCloudOSAppInfo } from "../SynCloudOS/SynCloudOS";
 import { AppViewChrome, type AppViewPresentation } from "./AppViewChrome";
+import { ViewAppearanceBoundary } from "../NSE/Appearance/NSEAppearanceProvider";
 import { AppViewContent } from "./AppViewContent";
 import { WindowTitlebarView } from "../NSE/Windows/WindowTitlebarView";
 import { TitlebarGlyphButton } from "../NSE/Windows/TitlebarGlyphButton";
@@ -119,8 +120,10 @@ export function ApplicationStageView({
     overlayPlaneRef.current = element;
     setOverlayDestination(element);
   }, []);
-  const resolvedMode = useResolvedMode();
+  const systemMode = useResolvedMode();
   const [titlebarDocument, setTitlebarDocument] = useState<WindowTitlebarDocument | null>(null);
+  const appearance = titlebarDocument?.appearance ?? null;
+  const resolvedMode = appearance?.name ? appearance.name === "darkAqua" ? "dark" : "light" : systemMode;
   // An untitled window draws all of its own chrome, as a borderless NSWindow does.
   const usesStandardTopBar = titlebarDocument?.titled !== false
     && (standalone || frame.presentationMotion !== "content" || Boolean(titlebarDocument?.hasToolbar));
@@ -263,6 +266,7 @@ export function ApplicationStageView({
       multiSwitchRole={multiSwitchRole}
       staged={staged}
       keyWindow={stage.isFocused}
+      hasAppearanceOverride={appearance !== null}
       rootRef={presentationRootRef}
       presentation={rootPresentation}
     >
@@ -308,7 +312,7 @@ export function ApplicationStageView({
       </AppViewChrome.Surface>
     </AppViewChrome.Root>
   );
-  return (
+  return <ViewAppearanceBoundary appearance={appearance} projectBoundary={false}>
     <OverlayProvider runtimePort={nseOverlayPort} defaultParentResponderId={applicationResponderId} portalContainer={overlayDestination}>
     <TooltipProvider>
     <WindowSurfaceBridgeProvider bridge={stageWindowSurfaceBridge}>
@@ -328,5 +332,5 @@ export function ApplicationStageView({
     </div>
     </TooltipProvider>
     </OverlayProvider>
-  );
+  </ViewAppearanceBoundary>;
 }

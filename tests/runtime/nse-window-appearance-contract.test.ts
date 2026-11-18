@@ -21,7 +21,10 @@
 
 import { createElement, useContext } from "react";
 import { act, render } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import { NSEAppearance } from "../../src/NSE/Appearance/NSEAppearance";
+import { NSEApplication, type NSEApplicationContext } from "../../src/NSE/Application/NSEApplication";
+import { instantiateInOwnerScope, nseDisposeFor, OwnershipScope } from "../../src/NSE/Controllers/ownership";
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
 import { NSE_WINDOW_GEOMETRY } from "../../src/NSE/Windows";
 import { StandardWindowView } from "../../src/NSE/Windows/StandardWindowView";
@@ -35,9 +38,47 @@ function WindowDocument({ controller }: { controller: NSEWindowController }) {
   return null;
 }
 
+function renderWindowDocument(controller: NSEWindowController, id: string) {
+  const record = {
+    ...standardWindow(id),
+    id,
+    runtimeId: "test",
+    state: "open",
+    isKey: true,
+    isMain: true,
+    zIndex: 1,
+  } as WindowRecord;
+  return render(createElement(StandardWindowView, {
+    record,
+    dirty: false,
+    blocked: false,
+    dispatchCommand: async () => ({ handled: true }),
+    presentation: {
+      kind: "desktop-window",
+      visible: true,
+      bounds: record.bounds,
+      safeAreaInsets: { blockStart: 0, inlineEnd: 0, blockEnd: 0, inlineStart: 0 },
+      movable: false,
+      resizable: false,
+      titleBarVisible: true,
+    },
+  }, createElement(WindowDocument, { controller })));
+}
+
+function applicationForTest() {
+  const context: NSEApplicationContext = {
+    appId: "com.example.appearance",
+    windows: () => [],
+    async openWindow() { throw new Error("This fixture constructs only its own window."); },
+  };
+  return instantiateInOwnerScope(new OwnershipScope("NSEApplication", context.appId), () => new NSEApplication(), context);
+}
+
+function appAppearance(id: string) {
+  return new NSEAppearance({ theme: { kind: "app", bundleIdentifier: id, displayName: id, version: "1.0.0" } });
+}
+
 describe("NSE window appearance contract", () => {
-
-
   it("publishes measured CSS-pixel geometry without device-pixel scaling", () => {
     expect(NSE_WINDOW_GEOMETRY).toEqual({
       titleBarHeight: 31,
@@ -55,33 +96,74 @@ describe("NSE window appearance contract", () => {
     expect(Object.isFrozen(NSE_WINDOW_GEOMETRY)).toBe(true);
   });
 
+  it("observes application appearance changes and restores the null default", () => {
+    const application = applicationForTest();
+    const observer = vi.fn();
+    const stop = application.subscribe(observer);
+    const appearance = appAppearance("com.example.chrome");
+
+    try {
+      expect(application.appearance).toBeNull();
+      application.appearance = appearance;
+      expect(application.appearance).toBe(appearance);
+      application.appearance = appearance;
+      expect(observer).toHaveBeenCalledOnce();
+
+      application.appearance = null;
+      expect(application.appearance).toBeNull();
+      expect(observer).toHaveBeenCalledTimes(2);
+    } finally {
+      stop();
+      application[nseDisposeFor]("application-closed");
+    }
+  });
+
+  it("projects application appearance on the window root and observes window overrides", () => {
+    const application = applicationForTest();
+    const controller = instantiateInOwnerScope(
+      new OwnershipScope("NSEWindowController", "appearance-projection"),
+      () => new NSEWindowController(),
+      { app: application },
+    );
+    const inherited = appAppearance("com.example.chrome");
+    const override = appAppearance("com.example.window-chrome");
+    const view = renderWindowDocument(controller, "appearance-projection");
+    const observer = vi.fn();
+    const stop = controller.subscribe(observer);
+    const appThemeId = () => view.container.querySelector('[data-nse-control="window"][data-nse-part="background"]')
+      ?.getAttribute("data-nse-app-theme");
+
+    try {
+      expect(appThemeId()).toBeNull();
+      act(() => { application.appearance = inherited; });
+      expect(appThemeId()).toBe("com.example.chrome");
+      expect(controller.window.appearance).toBeNull();
+
+      act(() => { controller.window.appearance = override; });
+      expect(controller.window.appearance).toBe(override);
+      expect(appThemeId()).toBe("com.example.window-chrome");
+      act(() => { controller.window.appearance = override; });
+      expect(observer).toHaveBeenCalledOnce();
+
+      act(() => { controller.window.appearance = null; });
+      expect(controller.window.appearance).toBeNull();
+      expect(appThemeId()).toBe("com.example.chrome");
+      expect(observer).toHaveBeenCalledTimes(2);
+
+      act(() => { application.appearance = null; });
+      expect(appThemeId()).toBeNull();
+    } finally {
+      stop();
+      view.unmount();
+      controller.dispose();
+      application[nseDisposeFor]("application-closed");
+    }
+  });
+
   it("window background is backgroundColour only", () => {
     const controller = new NSEWindowController();
     const { window } = controller;
-    const record = {
-      ...standardWindow("appearance-window"),
-      id: "appearance-window",
-      runtimeId: "test",
-      state: "open",
-      isKey: true,
-      isMain: true,
-      zIndex: 1,
-    } as WindowRecord;
-    const view = render(createElement(StandardWindowView, {
-      record,
-      dirty: false,
-      blocked: false,
-      dispatchCommand: async () => ({ handled: true }),
-      presentation: {
-        kind: "desktop-window",
-        visible: true,
-        bounds: record.bounds,
-        safeAreaInsets: { blockStart: 0, inlineEnd: 0, blockEnd: 0, inlineStart: 0 },
-        movable: false,
-        resizable: false,
-        titleBarVisible: true,
-      },
-    }, createElement(WindowDocument, { controller })));
+    const view = renderWindowDocument(controller, "appearance-window");
 
     try {
       expect(window.backgroundColour).toBeNull();

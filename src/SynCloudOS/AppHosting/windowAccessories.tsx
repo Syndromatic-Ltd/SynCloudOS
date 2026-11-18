@@ -26,7 +26,9 @@ import { useNSEWindowChromeObstruction } from "../../NSE/NSE";
 
 import { Fragment, createContext, useCallback, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import type { NSEAnyWindowController } from "../../NSE/applicationHostInterop";
+import { nseWindowInternals, type NSEAnyWindowController } from "../../NSE/applicationHostInterop";
+import type { NSEAppearance } from "../../NSE/Appearance/NSEAppearance";
+import { useRelocatedAppearance } from "../../NSE/Appearance/NSEAppearanceProvider";
 import { useObserve, ActionResponderContext } from "../../NSE/applicationHostInterop";
 import { nseAttachToolbar, nseEndToolbarCustomization, nseToolbarEngine, nseToolbarTabViews } from "../../NSE/applicationHostInterop";
 import type { NSEToolbar } from "../../NSE/NSE";
@@ -49,9 +51,11 @@ import { WindowTitlebarHostContext, type WindowTitlebarHost } from "../../NSE/ap
 import { nseWindowPresentedTitle } from "../../NSE/applicationHostInterop";
 
 /** Publishes the window's title, subtitle and edited state to the stage's title bar. */
-export function useNSEWindowTitlebarDocument(controller: NSEAnyWindowController, host: WindowTitlebarHost | null, presentedSidebarWidth?: number): void {
+export function useNSEWindowTitlebarDocument(controller: NSEAnyWindowController, host: WindowTitlebarHost | null, presentedSidebarWidth?: number): NSEAppearance | null {
   useObserve(controller);
   const window = controller.isDisposed ? null : controller.window;
+  const application = useObserve(window ? controller[nseWindowInternals].application : null);
+  const appearance = window?.appearance ?? application?.appearance ?? null;
   const title = window ? nseWindowPresentedTitle(window) : "";
   const toolbarStyle = window?.toolbarStyle ?? "automatic";
   const subtitle = window?.subtitle ?? "";
@@ -80,13 +84,14 @@ export function useNSEWindowTitlebarDocument(controller: NSEAnyWindowController,
   const sidebarWidth = measuredSidebarWidth > 0 ? measuredSidebarWidth : undefined;
   useLayoutEffect(() => {
     if (!host || !claims) return undefined;
-    host.setDocument(Object.freeze({ titled, title, subtitle, documentEdited, toolbarStyle, titleVisibility, titlebarPresentation, titlebarAppearsTransparent, hasToolbar, toolbarDisplayMode, frameViewClass, texturedBackground, sidebarWidth, fullSizeContentView, backgroundColour, isOpaque, cornerRadius }));
+    host.setDocument(Object.freeze({ titled, title, subtitle, documentEdited, toolbarStyle, titleVisibility, titlebarPresentation, titlebarAppearsTransparent, hasToolbar, toolbarDisplayMode, frameViewClass, texturedBackground, sidebarWidth, fullSizeContentView, backgroundColour, appearance, isOpaque, cornerRadius }));
     return undefined;
-  }, [backgroundColour, claims, cornerRadius, titled, documentEdited, frameViewClass, fullSizeContentView, hasToolbar, toolbarDisplayMode, host, isOpaque, sidebarWidth, subtitle, texturedBackground, title, titlebarAppearsTransparent, titlebarPresentation, titleVisibility, toolbarStyle]);
+  }, [appearance, backgroundColour, claims, cornerRadius, titled, documentEdited, frameViewClass, fullSizeContentView, hasToolbar, toolbarDisplayMode, host, isOpaque, sidebarWidth, subtitle, texturedBackground, title, titlebarAppearsTransparent, titlebarPresentation, titleVisibility, toolbarStyle]);
   useLayoutEffect(() => {
     if (!host || !claims) return undefined;
     return () => { host.setDocument(null); };
   }, [claims, host]);
+  return appearance;
 }
 
 interface AccessoryProps {
@@ -163,7 +168,8 @@ export function WindowContentBorder({ thickness }: { readonly thickness: number 
 /** Light or dark, as the application's appearance resolves, for the window's own chrome. */
 function useAccessoryColourScheme(): "light" | "dark" {
   const appearance = useSynWareContext()?.appearance;
-  return useSyncExternalStore(appearance?.subscribe ?? noSubscription, () => (appearance?.resolved() === "dark" ? "dark" : "light"), () => "light");
+  const systemMode = useSyncExternalStore<"light" | "dark">(appearance?.subscribe ?? noSubscription, () => (appearance?.resolved() === "dark" ? "dark" : "light"), () => "light");
+  return useRelocatedAppearance()?.resolvedColourScheme ?? systemMode;
 }
 
 /**

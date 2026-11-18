@@ -63,6 +63,7 @@ import type { SynWareContextValue } from "../AppSDK/appContextTypes";
 import { bindActionResponder, hasActions } from "../AppSDK/actions";
 import { trackLiveApplicationObject } from "./applicationHotReload";
 import { WindowContentBorder, WindowSheetFrame, WindowSheetHostContext, WindowTitlebarAccessories, nseContentBorderSize, WindowTitlebarHostContext, useNSEWindowSheetHost, WindowToolbar, useNSEWindowTitlebarDocument } from "./windowAccessories";
+import { ViewAppearanceBoundary, useInPlaceAppearanceProjection } from "../../NSE/Appearance/NSEAppearanceProvider";
 import { MountedWindowContext } from "../../NSE/Application/NSEWindowContext";
 import { WindowApplicationMenu } from "./windowApplicationMenu";
 import { applicationSessionFor } from "./applicationSession";
@@ -479,7 +480,8 @@ export function WindowControllerView({ controller }: WindowControllerViewProps) 
   // Both standalone windows and stage hosts project the same window-owned chrome.
   const stageTitlebar = titlebarHost;
   const accessoryHost = titlebarHost;
-  useNSEWindowTitlebarDocument(controller, loaded ? stageTitlebar : null, sidebarWidth);
+  const appearance = useNSEWindowTitlebarDocument(controller, loaded ? stageTitlebar : null, sidebarWidth);
+  const localAppearance = titlebarHost ? null : appearance;
   const standardControls = titlebarHost?.standardControls ?? null;
   useLayoutEffect(() => {
     const internals = controller[nseWindowInternals];
@@ -550,13 +552,14 @@ export function WindowControllerView({ controller }: WindowControllerViewProps) 
   // Keep the content host permanent: showing chrome must not remount an editor or its draft.
   const hasBottomAccessory = bottomBorder > 0 && bottomBarAccessory != null;
   return (
+    <ViewAppearanceBoundary appearance={localAppearance} projectBoundary={false}>
     <MountedWindowContext.Provider value={controller}>
     <WindowTitleSlotContext.Provider value={titleSlotHost}>
     <ActionScopeProvider appId={appRuntime.app.bundleIdentifier}>
       <ControllerResponder target={controller} kind="controller">
         <WindowApplicationMenu app={controller.app} destination={titlebarHost?.menuBar}>
         {accessories.length ? <WindowTitlebarAccessories accessories={accessories} renderController={renderAccessory} host={accessoryHost} placement="titlebar" /> : null}
-          <div className="nse-window-chrome-frame">
+          <WindowControllerFrame projectAppearance={localAppearance !== null}>
             {toolbar ? titlebarHost?.toolbar
               ? createPortal(<WindowToolbar controller={controller} toolbar={toolbar} />, titlebarHost.toolbar)
               : !titlebarHost ? <WindowToolbar controller={controller} toolbar={toolbar} /> : null
@@ -569,11 +572,17 @@ export function WindowControllerView({ controller }: WindowControllerViewProps) 
               {bottomBorder > 0 ? <WindowContentBorder thickness={bottomBorder} /> : null}
               {sheetLayer}
             </div>
-          </div>
+          </WindowControllerFrame>
         </WindowApplicationMenu>
       </ControllerResponder>
     </ActionScopeProvider>
     </WindowTitleSlotContext.Provider>
     </MountedWindowContext.Provider>
+    </ViewAppearanceBoundary>
   );
+}
+
+function WindowControllerFrame({ projectAppearance, children }: { readonly projectAppearance: boolean; readonly children: ReactNode }) {
+  const projection = useInPlaceAppearanceProjection();
+  return <div className="nse-window-chrome-frame" {...(projectAppearance ? projection : undefined)}>{children}</div>;
 }

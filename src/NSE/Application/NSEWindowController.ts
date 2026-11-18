@@ -28,6 +28,7 @@ import {
   type NSEOwner,
 } from "../Controllers/ownership";
 import { NSEObject } from "../Objects/NSEObject";
+import type { NSEAppearance } from "../Appearance/NSEAppearance";
 import { LayoutGuideStore, type NSELayoutGuide } from "../Layout/NSELayoutGuide";
 import type { NSEScrollRect } from "../Scroll/scrollTypes";
 import { validateNSEWindowFrameView, type NSEWindowFrameViewClass } from "./NSEWindowFrameView";
@@ -75,6 +76,8 @@ export interface NSEWindow {
   titlebarPresentation: NSEWindowTitlebarPresentation;
   frameViewClass: NSEWindowFrameViewClass | null;
   backgroundColour: string | null;
+  /** NSWindow.appearance: null inherits the application's appearance. */
+  appearance: NSEAppearance | null;
   isOpaque: boolean;
   cornerRadius: number | null;
   titlebarAppearsTransparent: boolean;
@@ -255,6 +258,8 @@ export interface NSEWindowControllerContext {
 
 /** The framework's view of a window controller. Not part of the public API. */
 export interface NSEWindowControllerInternals {
+  /** The framework's recorded owner, when this controller was created by an application. */
+  readonly application: NSEApplication | undefined;
   /** Whether `windowDidLoad` has run. */
   readonly isLoaded: boolean;
   /** Binds the mounted window; the first call runs `windowDidLoad`. Returns the unbind function. */
@@ -323,6 +328,7 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
   #titlebarPresentation: NSEWindowTitlebarPresentation = "attached";
   #frameViewClass: NSEWindowFrameViewClass | null;
   #backgroundColour: string | null = null;
+  #appearance: NSEAppearance | null = null;
   #isOpaque = true;
   #cornerRadius: number | null = null;
   #titlebarAppearsTransparent: boolean;
@@ -405,6 +411,12 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
         if (value !== null && typeof value !== "string") throw new TypeError("A window background is a CSS colour or null.");
         if (value === controller.#backgroundColour) return;
         controller.#backgroundColour = value;
+        controller.notifyObservers();
+      },
+      get appearance() { return controller.#appearance; },
+      set appearance(value: NSEAppearance | null) {
+        if (value === controller.#appearance) return;
+        controller.#appearance = value;
         controller.notifyObservers();
       },
       get isOpaque() { return controller.#isOpaque; },
@@ -552,6 +564,7 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
       return requireMount("beginSheetModal").presentAlert(request, AbortSignal.any([controller.ownerSignal, signal]));
     });
     this.#internals = {
+      application: (this.#lifetime.context as NSEWindowControllerContext | undefined)?.app,
       get isLoaded() { return controller.#loaded; },
       attach: (mount) => controller.#attach(mount),
       setKey: (isKey) => controller.#setKey(isKey),

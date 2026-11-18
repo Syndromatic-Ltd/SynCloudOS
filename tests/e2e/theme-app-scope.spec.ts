@@ -86,3 +86,79 @@ test("nameless appearance follows the scheme", async ({ page }) => {
   await background(tab, darkRed);
   expect(await boundary(tab, "data-nse-colour-scheme-resolved")).toBe("dark");
 });
+
+const blue = "rgb(34, 85, 204)";
+const windowTheme = "com.example.blue-chrome";
+
+async function openApplicationWindows(page: Page) {
+  await page.goto(fixture + "?host=application");
+  const stage = page.locator('[data-nse-control="app-view-chrome"]').filter({ has: page.locator("#main-document") });
+  await stage.getByRole("button", { name: "Open secondary window" }).click();
+  const secondary = page.locator('[data-window-id][data-nse-control="window"]').filter({ has: page.locator("#secondary-document") });
+  await expect(secondary).toBeVisible();
+  return {
+    stage,
+    secondary,
+    mainTab: stage.getByRole("tab", { selected: true }),
+    secondaryTab: secondary.getByRole("tab", { selected: true }),
+  };
+}
+
+test("application appearance reaches every app window", async ({ page }) => {
+  const { stage, secondary, mainTab, secondaryTab } = await openApplicationWindows(page);
+  await secondary.getByRole("button", { name: "Set application appearance" }).click();
+  await background(mainTab, red);
+  await background(secondaryTab, red);
+  expect(await boundary(stage, "data-nse-app-theme")).toBe(appTheme);
+  expect(await boundary(secondary, "data-nse-app-theme")).toBe(appTheme);
+
+  await secondary.getByRole("button", { name: "Open draft sheet" }).click();
+  const sheet = page.getByRole("alertdialog", { name: "Keep draft?" });
+  await expect(sheet).toBeVisible();
+  expect(await boundary(sheet, "data-nse-app-theme")).toBe(appTheme);
+  expect(await boundary(sheet, "data-nse-system-surface")).toBeNull();
+});
+
+test("window appearance overrides the application's", async ({ page }) => {
+  const { secondary, mainTab, secondaryTab } = await openApplicationWindows(page);
+  await secondary.getByRole("button", { name: "Set application appearance" }).click();
+  await background(secondaryTab, red);
+  await secondary.getByRole("button", { name: "Open document notes" }).click();
+  const notes = page.locator('#application-appearance-popover[data-nse-control="popover"][data-nse-part="surface"]');
+  await background(notes, red);
+
+  await notes.getByRole("button", { name: "Change window appearance" }).click();
+  await background(secondaryTab, blue);
+  await background(mainTab, red);
+  await background(notes, blue);
+  expect(await boundary(notes, "data-nse-app-theme")).toBe(windowTheme);
+});
+
+test("setting null restores the system look", async ({ page }) => {
+  const { stage, secondary, secondaryTab } = await openApplicationWindows(page);
+  await secondary.getByRole("button", { name: "Set application appearance" }).click();
+  await secondary.getByRole("button", { name: "Set window appearance" }).click();
+  await background(secondaryTab, blue);
+  await secondary.getByRole("button", { name: "Clear window appearance" }).click();
+  await background(secondaryTab, red);
+
+  await secondary.getByRole("button", { name: "Clear application appearance" }).click();
+  await background(stage.locator(tabBackground), dusk);
+  await background(secondary.locator(tabBackground), dusk);
+  expect(await boundary(stage, "data-nse-app-theme")).toBeNull();
+  expect(await boundary(secondary, "data-nse-app-theme")).toBeNull();
+});
+
+test("System Preferences is untouched", async ({ page }) => {
+  const { secondary, secondaryTab } = await openApplicationWindows(page);
+  await secondary.getByRole("button", { name: "Set application appearance" }).click();
+  await background(secondaryTab, red);
+
+  await secondary.getByRole("button", { name: "Open System Preferences" }).click();
+  const preferences = page.getByRole("dialog", { name: "System Preferences" });
+  await expect(preferences).toBeVisible();
+  expect(await boundary(preferences, "data-nse-system-surface")).toBe("");
+  await expect(preferences.locator("[data-nse-app-theme]")).toHaveCount(0);
+  expect(await boundary(preferences, "data-nse-app-theme")).toBeNull();
+  expect(await boundary(secondary, "data-nse-app-theme")).toBe(appTheme);
+});

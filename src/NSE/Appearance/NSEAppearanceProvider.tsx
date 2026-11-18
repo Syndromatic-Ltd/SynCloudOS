@@ -129,12 +129,14 @@ export function NSEAppearanceProvider({
 
 /** Resolve a view or window appearance against the surrounding system appearance. */
 export function ViewAppearanceBoundary({ appearance, children, projectBoundary = true }: PropsWithChildren<{
-  readonly appearance: NSEAppearance;
+  readonly appearance: NSEAppearance | null;
   readonly projectBoundary?: boolean;
 }>) {
   const inherited = useContext(NSEAppearanceContext);
-  const { theme: selected, name, chrome, contrast, transparency } = appearance;
+  const { theme: selected, name, chrome, contrast, transparency } = appearance ?? {};
+  const hasAppearance = appearance !== null;
   const value = useMemo<EffectiveAppearance>(() => {
+    if (!hasAppearance) return inherited;
     const appTheme = selected && "kind" in selected ? selected : undefined;
     const systemTheme = selected && !("kind" in selected) ? freezeNSETheme(selected) : undefined;
     const scheme = name === undefined ? undefined : name === "darkAqua" ? "dark" : "light";
@@ -142,16 +144,19 @@ export function ViewAppearanceBoundary({ appearance, children, projectBoundary =
       ...inherited,
       theme: systemTheme ?? inherited.theme,
       appTheme: inherited.isSystemSurface ? undefined : appTheme ?? inherited.appTheme,
-      systemAppearance: systemTheme ? undefined
-        : appTheme && !inherited.isSystemSurface ? inherited.systemAppearance ?? inherited : inherited.systemAppearance,
+      ambientAppearance: inherited.isSystemSurface ? undefined : inherited.ambientAppearance ?? inherited,
+      relocatesAppearance: inherited.isSystemSurface ? undefined : !projectBoundary || inherited.relocatesAppearance ? true : undefined,
+      semanticAppearance: systemTheme ? undefined
+        : appTheme && !inherited.isSystemSurface ? inherited.semanticAppearance ?? inherited : inherited.semanticAppearance,
       chrome: chrome ?? inherited.chrome,
       requestedColourScheme: scheme ?? inherited.requestedColourScheme,
       resolvedColourScheme: scheme ?? inherited.resolvedColourScheme,
       contrast: contrast ?? inherited.contrast,
       transparency: transparency ?? inherited.transparency,
     });
-  }, [selected, name, chrome, contrast, transparency, inherited]);
-  return <AppearanceBoundary value={value} projectBoundary={projectBoundary}>{children}</AppearanceBoundary>;
+  }, [hasAppearance, selected, name, chrome, contrast, transparency, inherited, projectBoundary]);
+  if (!projectBoundary) return <NSEAppearanceContext.Provider value={value}>{children}</NSEAppearanceContext.Provider>;
+  return <AppearanceBoundary value={value} projectBoundary>{children}</AppearanceBoundary>;
 }
 
 /** System UI keeps the surrounding system appearance when its children move to a portal. */
@@ -160,9 +165,11 @@ export function SystemSurfaceAppearance({ children }: PropsWithChildren) {
   const value = useMemo<EffectiveAppearance>(() => {
     if (inherited.isSystemSurface) return inherited;
     return Object.freeze({
-      ...(inherited.systemAppearance ?? inherited),
+      ...(inherited.ambientAppearance ?? inherited),
       appTheme: undefined,
-      systemAppearance: undefined,
+      ambientAppearance: undefined,
+      relocatesAppearance: undefined,
+      semanticAppearance: undefined,
       isSystemSurface: true,
     });
   }, [inherited]);
@@ -173,9 +180,14 @@ export function useIsSystemSurfaceAppearance(): boolean {
   return useContext(NSEAppearanceContext).isSystemSurface === true;
 }
 
-export function useAppDrawingAppearance(): EffectiveAppearance | undefined {
+export function useRelocatedAppearance(): EffectiveAppearance | undefined {
   const appearance = useContext(NSEAppearanceContext);
-  return appearance.appTheme ? appearance : undefined;
+  return appearance.appTheme || appearance.relocatesAppearance ? appearance : undefined;
+}
+
+export function useInPlaceAppearanceProjection() {
+  const appearance = useContext(NSEAppearanceContext);
+  return useMemo(() => appearance.ambientAppearance ? projectNSEAppearance(appearance) : undefined, [appearance]);
 }
 
 /** Restore a presenting view's appearance in a separately mounted surface. */

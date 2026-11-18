@@ -23,7 +23,7 @@ import type { EffectiveAppearance, NSEAppearanceDataAttributes } from "./nseAppe
 
 /** Projects the appearance environment onto views and relocated portal boundaries. */
 export function projectNSEAppearance(appearance: EffectiveAppearance, relocated = false): NSEAppearanceDataAttributes {
-  const colourAppearance = appearance.systemAppearance ?? appearance;
+  const colourAppearance = appearance.semanticAppearance ?? appearance;
   return Object.freeze({
     "data-nse-theme": appearance.theme.bundleIdentifier,
     ...(appearance.appTheme && { "data-nse-app-theme": appearance.appTheme.bundleIdentifier }),

@@ -1,0 +1,4 @@
+[data-nse-control="tab-view"] [data-nse-part="cell"][data-nse-selected],
+[data-nse-control="popover"][data-nse-part="surface"] {
+  background: #2255cc;
+}

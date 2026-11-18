@@ -29,6 +29,7 @@ import {
   QuickSwitchTriggerProvider, ResponderHierarchyContext,
   useKernelSynCloudOS, useQuickSwitchTrigger, useRuntimeNSEOverlayPort,
 } from "../SynCloudOSReact";
+import { RelocatedAppearance, useRelocatedAppearance } from "../NSE/Appearance/NSEAppearanceProvider";
 import { SynWareEntryRenderer } from "./SynWareEntryRenderer";
 import { useWebspringLocale } from "./webspringLocale";
 import { AppPresentationErrorFallback, SynCloudOSWatchdog, type SynCloudOSAppInfo, type WindowController } from "../SynCloudOS/SynCloudOS";
@@ -37,6 +38,7 @@ interface Slot {
   readonly node: HTMLDivElement;
   readonly priority: number;
   readonly titlebar: React.ContextType<typeof WindowTitlebarHostContext>;
+  readonly appearance: ReturnType<typeof useRelocatedAppearance>;
   readonly layout: React.ContextType<typeof WindowLayoutContext>;
   readonly quickSwitch: ReturnType<typeof useQuickSwitchTrigger>;
   readonly navigation?: ApplicationNavigationChromeController;
@@ -60,12 +62,13 @@ export function WindowPresentationSlot({
   const register = useContext(SlotRegistration);
   const node = useRef<HTMLDivElement>(null);
   const titlebar = useContext(WindowTitlebarHostContext);
+  const appearance = useRelocatedAppearance();
   const layout = useContext(WindowLayoutContext);
   const quickSwitch = useQuickSwitchTrigger();
   useLayoutEffect(() => {
     if (!node.current) return;
-    return register?.(windowId, { node: node.current, priority, titlebar, layout, quickSwitch, navigation, standardChrome, bridge, overlay });
-  }, [bridge, layout, navigation, overlay, priority, quickSwitch, register, standardChrome, titlebar, windowId]);
+    return register?.(windowId, { node: node.current, priority, titlebar, appearance, layout, quickSwitch, navigation, standardChrome, bridge, overlay });
+  }, [appearance, bridge, layout, navigation, overlay, priority, quickSwitch, register, standardChrome, titlebar, windowId]);
   return <div ref={node} data-window-presentation-slot={windowId} style={{ display: "contents" }} />;
 }
 
@@ -175,7 +178,7 @@ function PresentedApplicationWindow({ controller, app, slot, document }: {
           <QuickSwitchTriggerProvider port={presentation.quickSwitch}>
             <WindowSurfaceBridgeProvider bridge={presentation.bridge ?? null}>
             <ApplicationNavigationChromeProvider controller={navigation ?? null} standardChromeAvailable={presentation.standardChrome ?? false}>
-              {content}
+              <RelocatedAppearance appearance={presentation.appearance}>{content}</RelocatedAppearance>
             </ApplicationNavigationChromeProvider>
             </WindowSurfaceBridgeProvider>
           </QuickSwitchTriggerProvider>

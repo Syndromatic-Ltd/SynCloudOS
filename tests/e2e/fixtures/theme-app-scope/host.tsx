@@ -118,4 +118,10 @@ function Host() {
   );
 }
 
-createRoot(document.getElementById("root")!).render(<Host />);
+const root = document.getElementById("root")!;
+if (parameters.get("host") === "application") {
+  const { mountApplication } = await import("./application");
+  await mountApplication(root, dusk, redChrome, themes["com.example.blue-chrome"]);
+} else {
+  createRoot(root).render(<Host />);
+}

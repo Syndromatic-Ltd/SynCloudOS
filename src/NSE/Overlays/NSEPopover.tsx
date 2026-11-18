@@ -19,7 +19,7 @@
  */
 
 import { useCallback, useContext, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
-import { useAppDrawingAppearance } from "../Appearance/NSEAppearanceProvider";
+import { useRelocatedAppearance } from "../Appearance/NSEAppearanceProvider";
 import { ActionResponderContext } from "../Controls/Core/useNSEControlAction";
 import { NSEPopup, type PopupPresentation } from "./NSEPopup";
 import { useNSEOverlayProvider } from "./OverlayProvider";
@@ -131,7 +131,7 @@ export function NSEPopover({
   const resolvedPresentation = useMemo(() => ({ ...automaticPresentation,
     placement: preferredEdge ? nsePopoverEdgePlacement[preferredEdge] : automaticPresentation.placement,
   }), [automaticPresentation, preferredEdge]);
-  const appearance = useAppDrawingAppearance();
+  const appearance = useRelocatedAppearance();
   const hostedBridge = useOptionalNSEWindowSurfaceBridge();
   const nearestResponder = useContext(ActionResponderContext);
   const { defaultParentResponderId } = useNSEOverlayProvider();

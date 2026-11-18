@@ -1,6 +1,7 @@
 /* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
 
 import { createContext, type ReactNode } from "react";
+import type { NSEAppearance } from "../Appearance/NSEAppearance";
 import type { NSEWindowToolbarStyle } from "../Application/NSEWindowController";
 import type { NSEViewController } from "../Application/NSEViewController";
 
@@ -22,6 +23,7 @@ export interface WindowTitlebarDocument {
   readonly sidebarWidth?: number;
   readonly fullSizeContentView?: boolean;
   readonly backgroundColour?: string | null;
+  readonly appearance?: NSEAppearance | null;
   readonly isOpaque?: boolean;
   readonly cornerRadius?: number | null;
   readonly titlebarPresentation?: "attached" | "floating";
