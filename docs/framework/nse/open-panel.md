@@ -1,6 +1,6 @@
 # Open panels, folders and application storage
 
-`NSEOpenPanel` is an object, after `NSOpenPanel`. AppKit defines the architecture; Atmo draws its source list, search capsule, collection and grey plate. The owner approved a desktop sheet and compact Sources drill-in on 2026-11-07.
+`NSEOpenPanel` is an object, after `NSOpenPanel`. AppKit defines the architecture; Atmo draws its source list, search capsule, collection and grey plate, presenting a sheet on desktop and a compact Sources drill-in on narrow viewports.
 
 ```ts
 const panel = new NSEOpenPanel();
@@ -30,13 +30,13 @@ The web platform does not reveal durable OS file URLs. `NSEOpenPanelURL` is cons
 
 ## Sources
 
-**Folders** lists actual directory handles granted with **Add Folder…**. The browser platform port persists them by structured clone in IndexedDB, scoped to the application bundle. These are the web analogue of security-scoped bookmarks, rather than a grant of permanent permission: opening a panel calls `queryPermission`; ungranted or revoked bookmarks remain visible with a lock. Choosing a locked row calls `requestPermission` directly from that user action. Neither restoring a bookmark nor background enumeration prompts for permission. Browsing uses `values()`, retains path history, sorts folders first and searches the current directory.
+Folders lists actual directory handles granted with Add Folder…. The browser platform port persists them by structured clone in IndexedDB, scoped to the application bundle. These are the web analogue of security-scoped bookmarks, rather than a grant of permanent permission: opening a panel calls `queryPermission`; ungranted or revoked bookmarks remain visible with a lock. Choosing a locked row calls `requestPermission` directly from that user action. Neither restoring a bookmark nor background enumeration prompts for permission. Browsing uses `values()`, retains path history, sorts folders first and searches the current directory.
 
-**Media** lists `panel.mediaSources`, using the providers formerly supplied to the separate media panel. There is one panel and one result contract. Each provider supplies `id`, `label` and `query(query, signal)`, and may supply `release(items)` and `requiresUserActivation`. A provider query returns `{ items, nextCursor }`; each item carries `id`, `providerId`, `kind` (`image`, `video`, `audio`), `name`, `mimeType` and optional `source`, `thumbnailUrl` or `fileReference`. Ordinary sources are searchable and paginated. Activation-only sources are queried by an explicit source action, never by a mount effect.
+Media lists `panel.mediaSources`, using the providers formerly supplied to the separate media panel. There is one panel and one result contract. Each provider supplies `id`, `label` and `query(query, signal)`, and may supply `release(items)` and `requiresUserActivation`. A provider query returns `{ items, nextCursor }`; each item carries `id`, `providerId`, `kind` (`image`, `video`, `audio`), `name`, `mimeType` and optional `source`, `thumbnailUrl` or `fileReference`. Ordinary sources are searchable and paginated. Activation-only sources are queried by an explicit source action, never by a mount effect.
 
-**App Storage** opens the current bundle's origin-private application-support directory. It is labelled Application Support; an application can create its own Scratch Disk or Media subdirectory there.
+App Storage opens the current bundle's origin-private application-support directory. It is labelled Application Support; an application can create its own Scratch Disk or Media subdirectory there.
 
-**System Chooser…** invokes the existing browser file chooser directly from its button. Cancelling that chooser returns to the drawn panel. Unsupported or insecure drawn-panel environments take the system path at `begin` time. With no current activation that path returns a typed denial immediately; it never waits for a later click.
+System Chooser… invokes the existing browser file chooser directly from its button. Cancelling that chooser returns to the drawn panel. Unsupported or insecure drawn-panel environments take the system path at `begin` time. With no current activation that path returns a typed denial immediately; it never waits for a later click.
 
 ## Explicit system-only presentation
 

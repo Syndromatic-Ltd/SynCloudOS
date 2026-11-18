@@ -58,12 +58,12 @@ export function ExportSettings() {
 
 ## Conventions
 
-- **Native elements underneath.** Buttons are `<button>`, fields are `<input>`, and each control accepts the attributes of its element. Form submission, autofill and assistive technology work as they do on any page.
-- **Values and phases.** Controls that produce values call `onValueChange(value, phase)`. The phase distinguishes a `"preview"` during a drag from the `"commit"` that follows, so you can update a live readout without recording an undo step for every pixel.
-- **Control sizes.** Many controls take `controlSize` of `"regular"`, `"small"` or `"mini"`.
-- **Labels are required.** Controls without visible text require an `aria-label`, and the types enforce it.
-- **Reduced motion and forced colours.** Every control honours the user's settings without extra code.
-- **Commands.** Fields and segmented controls accept a command binding, so a control dispatches the same commands as menus and key bindings.
+- Native elements underneath: buttons are `<button>`, fields are `<input>`, and each control accepts the attributes of its element, so form submission, autofill and assistive technology work as they do on any page.
+- Values and phases: controls that produce values call `onValueChange(value, phase)`, where `phase` distinguishes a `"preview"` during a drag from the `"commit"` that follows so you can update a live readout without recording an undo step for every pixel.
+- Control sizes: many controls take `controlSize` of `"regular"`, `"small"` or `"mini"`.
+- Labels are required: controls without visible text require an `aria-label`, and the types enforce it.
+- Reduced motion and forced colours: every control honours the user's settings without extra code.
+- Actions and commands: buttons, segmented controls, pop-up buttons, path controls and menu items accept an `action` binding, so a control dispatches the same commands as menus and key bindings.
 
 ## Reference pages
 
@@ -149,17 +149,16 @@ Data views render collections owned by a controller. They are virtualised, so a 
 | --- | --- |
 | `NSEMenu` | A menu object (`NSMenu`) of command, submenu, separator and view items, validated along the responder chain when it opens. A pull-down `NSEPopUpButton` shows one, a view shows one as its `NSEView.menu`, and the application's `mainMenu` is one. |
 | `NSEMenuBar` | Draws the application's `mainMenu` across the window. |
-
-On a desktop (a fine pointer that hovers), choosing an item in any menu or pop-up list flashes it (highlighted, unhighlighted, highlighted again) before the command runs, then the menu fades out, as a Mac menu does. Dismissing a menu without a choice closes it at once, and touch presentations do neither. A pop-up button's list is at least as wide as the button, and without a `width` the button is sized to its widest item (`sizeToFit`). Pressing an open pop-up button closes its list.
 | `NSEView` | A view with a contextual `menu` and a `toolTip` (`NSView.menu`, `NSView.toolTip`). |
 | `NSEPopup` | An anchored or modal popup plate. |
 | `NSEToolbar` | A window's toolbar (`window.toolbar`): validated items, overflow, display and size modes, the customisation palette and autosaved configuration. |
+
+On a desktop (a fine pointer that hovers), choosing an item in any menu or pop-up list flashes it (highlighted, unhighlighted, highlighted again) before the command runs, then the menu fades out, as a Mac menu does. Dismissing a menu without a choice closes it at once, and touch presentations do neither. A pop-up button's list is at least as wide as the button, and without a `width` the button is sized to its widest item (`sizeToFit`). Pressing an open pop-up button closes its list.
 
 ## Panels and overlays
 
 | Component | Purpose |
 | --- | --- |
-| `NSEAlert` | An alert object (`NSAlert`) presented as a sheet on a window. See [Alerts and sheets](windows.md#alerts-and-sheets). |
 | `NSEAlert`, `presentAsSheet` | An alert is an `NSEAlert` object presented on a window; a custom dialog is a view controller presented as a sheet. See [Alerts and sheets](windows.md#alerts-and-sheets). Host system UI outside any window uses `NSEConfirmDialog` from `nse/system-ui`. |
 | `presentAsModalWindow` | `NSEViewController.presentAsModalWindow(controller)` presents a view controller as a centred application-modal window. See [Modal windows](windows.md#modal-windows). |
 | `presentAsPopover` | `NSEViewController.presentAsPopover(controller, { of, preferredEdge, behavior })` presents a view controller in a popover. See [Popovers](windows.md#popovers). |
@@ -184,10 +183,8 @@ Some controls come with a controller that holds their state and restoration data
 | Controller | Drives |
 | --- | --- |
 | `NSEPageController` | Drill-in history, horizontal strips or page curls, with child controllers for arranged objects and single-page or two-page curl layouts. See [Page controller](controllers.md#page-controller). |
-| `NSESplitViewController.compactItem` | The selected split item in a compact layout (NSE extension). |
-| `NSETabViewController`, `NSETabViewItem` | A container showing one child at a time behind a tab control (`NSTabViewController`): `tabViewItems` (each an `NSETabViewItem` with the child `viewController`, `label`, `image` and `toolTip`), `selectedTabViewItemIndex`, and `tabStyle` (`segmentedControlOnTop`, `segmentedControlOnBottom`, which Atmo draws as its bottom tab bar, or `unspecified`). Override `shouldSelect`, `willSelect` and `didSelect`. Place it with `<tabs.view />`. |
-| `NSETabViewController` | Tab view items, selected index, restoration and fixed or adaptive tab placement. |
-| `NSESplitViewController`, `NSESplitViewItem` | A split view of child view controllers: thicknesses, holding priorities and collapse. |
+| `NSESplitViewController`, `NSESplitViewItem` | A split view of child view controllers: thicknesses, holding priorities and collapse. `NSESplitViewController.compactItem` selects the item in a compact layout (NSE extension). |
+| `NSETabViewController`, `NSETabViewItem` | A container showing one child at a time behind a tab control (`NSTabViewController`): `tabViewItems` (each an `NSETabViewItem` with the child `viewController`, `label`, `image` and `toolTip`), `selectedTabViewItemIndex`, restoration, and `tabStyle` (`segmentedControlOnTop`, `segmentedControlOnBottom`, `toolbar`, `unspecified`, or `sidebarAdaptable`). Override `shouldSelect`, `willSelect` and `didSelect`. Place it with `<tabs.view />`. |
 | `NSETitlebarAccessoryViewController` | A view controller drawn in the window's title bar (`window.addTitlebarAccessoryViewController`). |
 
 The [controllers guide](controllers.md) covers the array, tree and preferences controllers.

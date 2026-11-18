@@ -8,15 +8,15 @@ An ImageFX image is a description, not a bitmap. `IFXImage.fromPixels()` wraps e
 
 The framework has these parts, and each has its own section below.
 
-- **Images and extents.** `IFXImage` nodes with a finite or infinite `extent`, and the operations that crop, transform, composite and clamp them.
-- **Filters.** About 200 named filters in 15 categories, applied with `IFXFilter` and discovered through `IFXFilterRegistry`. See the [filter catalogue](image/filters.md).
-- **Rendering.** `IFXContext`, `IFXRenderPipeline`, destinations, tile plans and tasks turn a graph into pixels with budgets and cancellation.
-- **Resources.** `IFXImageResource` loads and exports images through the session.
-- **Image view.** `IFXImageView`, after ImageKit's `IKImageView`, shows a resource to zoom, pan and crop.
-- **Text images.** `createIFXTextImage` and `createIFXAttributedTextImage` turn [TextFX](text.md) text into graph nodes.
-- **Analysis and RAW.** Feature detection, barcode descriptors, model assets and a portable DNG decoder. See [analysis and RAW](image/analysis-and-raw.md).
-- **Kernels, processors and graph transport.** Custom per-pixel programs and the codec that moves a graph between threads. See [kernels and graph transport](image/kernels-and-graphs.md).
-- **Retained image shaders.** `IFXShader` carries immutable GPU generator and filter recipes presented by AnimationFX layers. See [image shaders in retained layers](image/shaders.md).
+- Images and extents: `IFXImage` nodes with a finite or infinite `extent`, and the operations that crop, transform, composite and clamp them.
+- Filters: about 200 named filters in 15 categories, applied with `IFXFilter` and discovered through `IFXFilterRegistry`. See the [filter catalogue](image/filters.md).
+- Rendering: `IFXContext`, `IFXRenderPipeline`, destinations, tile plans and tasks turn a graph into pixels with budgets and cancellation.
+- Resources: `IFXImageResource` loads and exports images through the session.
+- Image view: `IFXImageView`, after ImageKit's `IKImageView`, shows a resource to zoom, pan and crop.
+- Text images: `createIFXTextImage` and `createIFXAttributedTextImage` turn [TextFX](text.md) text into graph nodes.
+- Analysis and RAW: feature detection, barcode descriptors, model assets and a portable DNG decoder. See [analysis and RAW](image/analysis-and-raw.md).
+- Kernels, processors and graph transport: custom per-pixel programs and the codec that moves a graph between threads. See [kernels and graph transport](image/kernels-and-graphs.md).
+- Retained image shaders: `IFXShader` carries immutable GPU generator and filter recipes presented by AnimationFX layers. See [image shaders in retained layers](image/shaders.md).
 
 ```ts
 import { IFXImage } from "@syndromatic/syncloudos/fx/image";

@@ -69,7 +69,7 @@ export const routes = notesRoutes;
 export default NotesView;
 ```
 
-An application class instead declares `static routes = notesRoutes`. **Do not also export named `routes` from that module.** Class and named-module declarations of the same lifecycle field are rejected, rather than merged.
+An application class instead declares `static routes = notesRoutes`. Do not also export named `routes` from that module, because class and named-module declarations of the same lifecycle field are rejected rather than merged.
 
 `mountSynCloudOS` consumes `virtual:syncloudos/project` when no explicit composition is supplied. Remove duplicate hand-written app, preference, widget and integration registries. The generated `shellResources` contains the shell's resource URLs and localised strings:
 
@@ -119,7 +119,7 @@ Controller views already observe their own controller. If action validation depe
 
 Controllers created in class field initialisers or constructors inherit ownership. Controllers created later, including after `await`, need an explicit `owner: this`. Dispose subscriptions in the corresponding disappearance/disposal lifecycle; do not reintroduce React bridges or hand-dispose a controller that the class already owns. Text editing's content authority is now `textOwner`; `owner` means lifetime ownership.
 
-Child view-controller frames no longer impose `width: 100%; height: 100%`. The parent owns layout. Pass `className` to `<child.view />` to style its existing managed outlet—for example, a flex-growing canvas beside fixed-width sidebars. Keep that real frame for layer bounds and lifecycle; remove internal-attribute selectors and `display: contents` workarounds. See [Applications](applications.md) for complete layout examples.
+Child view-controller frames no longer impose `width: 100%; height: 100%`, because the parent owns layout. Pass `className` to `<child.view />` to style its existing managed outlet, for example a flex-growing canvas beside fixed-width sidebars. Keep that real frame for layer bounds and lifecycle, and remove internal-attribute selectors and `display: contents` workarounds. See [Applications](applications.md) for complete layout examples.
 
 ### Actions retain command security
 
@@ -172,7 +172,7 @@ Integrations declare their actual application owners. Owner matching is case-ins
 
 Appearance definitions, slots and recipes are replaced by `.scostheme` theme bundles drawn through a public contract ([Themes](themes.md), [contract reference](theme-contract.md)). None of the removed names has an alias.
 
-**Theme selection**
+### Theme selection
 
 | Removed | Use instead |
 | --- | --- |
@@ -187,13 +187,21 @@ Appearance definitions, slots and recipes are replaced by `.scostheme` theme bun
 
 The `@syndromatic/syncloudos/nse/themes/atmo` entry now exports only `atmoTheme`, and its `styles.css` loads control structure and the whole Atmo bundle.
 
-**Colours.** The `--nse-app-*` properties become semantic colours: `--nse-app-background` → `--nse-colour-window-background`, `--nse-app-foreground` → `--nse-colour-label`, `--nse-app-foreground-secondary` → `--nse-colour-secondary-label`, `--nse-app-surface` → `--nse-colour-control-background`, `--nse-app-surface-border` → `--nse-colour-grid`, `--nse-app-separator` → `--nse-colour-separator`, `--nse-app-accent` → `--nse-colour-control-accent`, `--nse-app-accent-foreground` → `--nse-colour-selected-control-text`, `--nse-app-selection` → `--nse-colour-selected-content-background` and `--nse-app-critical` → `--nse-colour-system-red`. The British spellings replace `textColor`, `labelColor`, `secondaryLabelColor` and `emphasized`: use `textColour`, `labelColour`, `secondaryLabelColour` and `emphasised`. The separator's `gray` variant is `grey`.
+### Colours
 
-**Layout.** `NSEScrollInsets` becomes `NSEEdgeInsets` (with `NSEEdgeInsetsZero` and `NSEEdgeInsetsMake`), and `NSEScrollView`'s `scrollInsets` prop becomes `contentInsets` and `scrollerInsets`, with `automaticallyAdjustsContentInsets` on by default. See [layout guides and safe areas](windows.md#layout-guides-and-safe-areas).
+The `--nse-app-*` properties become semantic colours: `--nse-app-background` → `--nse-colour-window-background`, `--nse-app-foreground` → `--nse-colour-label`, `--nse-app-foreground-secondary` → `--nse-colour-secondary-label`, `--nse-app-surface` → `--nse-colour-control-background`, `--nse-app-surface-border` → `--nse-colour-grid`, `--nse-app-separator` → `--nse-colour-separator`, `--nse-app-accent` → `--nse-colour-control-accent`, `--nse-app-accent-foreground` → `--nse-colour-selected-control-text`, `--nse-app-selection` → `--nse-colour-selected-content-background` and `--nse-app-critical` → `--nse-colour-system-red`. The British spellings replace `textColor`, `labelColor`, `secondaryLabelColor` and `emphasized`: use `textColour`, `labelColour`, `secondaryLabelColour` and `emphasised`. The separator's `gray` variant is `grey`.
 
-**Control identities.** Theme and application CSS that selected the old identities uses their replacements: `calendar`, `time-picker`, `date-time-picker` and `date-range-picker` are `date-picker` with its `date-picker-elements` and `date-picker-mode` variants; `circular-slider` and `slider-field` are `slider` with `slider-type`; `ruler` is `ruler-view`; `route-picker` is `route-picker-view`; `file-panel` is `save-panel`; `scroll-view-frame` is `scroll-view`; `toolbar-configuration-sheet` is `toolbar-customisation-palette`; and the toolbar's `root` part is `background`.
+### Layout
 
-**Drawing controls.** Only a theme draws NSE controls. Application CSS that selects private `.nse-*` classes, or contract hooks such as `[data-nse-control]` and `[data-nse-part]`, is reported by the Developer MCP as `idiom.control-internals`. Draw your own content with the semantic colours, and leave NSE controls to the theme.
+`NSEScrollInsets` becomes `NSEEdgeInsets` (with `NSEEdgeInsetsZero` and `NSEEdgeInsetsMake`), and `NSEScrollView`'s `scrollInsets` prop becomes `contentInsets` and `scrollerInsets`, with `automaticallyAdjustsContentInsets` on by default. See [layout guides and safe areas](windows.md#layout-guides-and-safe-areas).
+
+### Control identities
+
+Theme and application CSS that selected the old identities uses their replacements: `calendar`, `time-picker`, `date-time-picker` and `date-range-picker` are `date-picker` with its `date-picker-elements` and `date-picker-mode` variants; `circular-slider` and `slider-field` are `slider` with `slider-type`; `ruler` is `ruler-view`; `route-picker` is `route-picker-view`; `file-panel` is `save-panel`; `scroll-view-frame` is `scroll-view`; `toolbar-configuration-sheet` is `toolbar-customisation-palette`; and the toolbar's `root` part is `background`.
+
+### Drawing controls
+
+Only a theme draws NSE controls. Application CSS that selects private `.nse-*` classes, or contract hooks such as `[data-nse-control]` and `[data-nse-part]`, is reported by the Developer MCP as `idiom.control-internals`. Draw your own content with the semantic colours, and leave NSE controls to the theme.
 
 ## 8. Verify the installed consumer, not only the source tree
 

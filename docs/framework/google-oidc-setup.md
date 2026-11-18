@@ -16,7 +16,7 @@ The handler requests the scopes `openid email profile` and authenticates to Goog
 
 1. In a dedicated Google Cloud project, configure the OAuth consent screen in testing mode.
 2. Add two test users: one address that your allowlist will accept, and one that it will reject. Both must be test users so that either can reach the consent step. The server allowlist is what admits or refuses them afterwards.
-3. Create an OAuth client of type **Web application**.
+3. Create an OAuth client of type Web application.
 4. Add `${PUBLIC_ORIGIN}/auth/callback` as an authorised redirect URI.
 5. Note the client ID and keep the client secret private.
 

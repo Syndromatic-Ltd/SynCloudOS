@@ -93,13 +93,13 @@ const participant = bindSynWareNSETextEditingSession({ documents, documentId, se
 | --- | --- |
 | `parseAttributedContent`, `attributedContent`, `paragraph`, `textRun`, `attachmentRun` | Validate/build bounded semantic content. |
 | `attributedContentText`, `attributedContentLayoutText` | Accessible/plain text or UTF-16 layout text with U+FFFC attachments. |
-| `exportAttributedContent`, `importAttributedContent` | Bounded attributed clipboard serialization. |
+| `exportAttributedContent`, `importAttributedContent` | Bounded attributed clipboard serialisation. |
 
 Ranges use UTF-16 offsets; surrogate interiors are rejected. User deletion/movement uses grapheme boundaries. Content validation rejects executable properties, malformed links and oversized structures before admission. The v1 grammar is an interchange format; it does not replace an application's native document model.
 
 ### Custom surfaces and output
 
-`NSETextInputClient` and `NSETextInputHost` cooperate with an application-owned custom surface. A single stable accessible input host owns marked input, reading order and native events. Supply revisioned geometry with explicit coordinate transforms for candidate/caret positions. Pending geometry stays pending or explicitly provisional. Active composition refuses explicit lifecycle settlement until it finishes or is canceled; autosave captures committed canonical content.
+`NSETextInputClient` and `NSETextInputHost` cooperate with an application-owned custom surface. A single stable accessible input host owns marked input, reading order and native events. Supply revisioned geometry with explicit coordinate transforms for candidate/caret positions. Pending geometry stays pending or explicitly provisional. Active composition refuses explicit lifecycle settlement until it finishes or is cancelled; autosave captures committed canonical content.
 
 `createSynWareDocumentOutputPreparation` settles editing, captures one immutable model/revision and retains engine-declared dependencies. The application supplies page geometry and drawing callbacks. Output does not paginate, define native Pages structures, or mark native content saved. Print receipts distinguish preparation and dialog request from physical completion. See [custom document engines](custom-document-engines.md) and [geometry](text-geometry.md).
 
@@ -109,7 +109,7 @@ Ranges use UTF-16 offsets; surrogate interiors are rejected. User deletion/movem
 
 Font choices belong to the host. A manager has no built-in family catalogue: supply family metadata when constructing it, or offer fonts registered in its font library. The framework packages no site font files, and its chrome inherits the host's typography. Portable font descriptors retain requested intent; font acquisition and resolution use the caller's resources.
 
-[Managed fonts](managed-fonts.md) capture resources, stable named faces and semantic UI roles in one declaration. Mounted apps access that manager with `useFonts()`; ordinary resolvers receive it explicitly. Imported-library snapshot changes refresh reader callbacks, while unknown or not-yet-installed selections retain fallback behavior. Catalogue metadata alone does not provide ready glyph data.
+[Managed fonts](managed-fonts.md) capture resources, stable named faces and semantic UI roles in one declaration. Mounted apps access that manager with `useFonts()`; ordinary resolvers receive it explicitly. Imported-library snapshot changes refresh reader callbacks, while unknown or not-yet-installed selections retain fallback behaviour. Catalogue metadata alone does not provide ready glyph data.
 
 `NSELayoutManager` retains browser logical measurement and scoped invalidation. Shaped geometry uses explicit TextFX projections and supplied containers/exclusions. Their capability declarations distinguish logical DOM measurement from shaped glyph/caret geometry; they do not imply DOM/PDF pixel equality.
 

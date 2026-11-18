@@ -208,7 +208,7 @@ application keeps running, `removed-from-parent` for a view controller removed w
 `removeFromParent()` or replaced as a window's `contentViewController`, and `explicit` when you call
 `dispose()`. Read it from `disposalReason`, or from the argument of `onDispose(listener)`.
 
-Creating a controller later—in a method, callback or after an `await`—has no ambient owner while a
+Creating a controller later (in a method, callback or after an `await`) has no ambient owner while a
 class-based application is running (the check covers the whole page, not just the owning app). Pass
 `owner: this` to tie it to the current application, window controller or view controller. Use
 `ownerSignal` when an abort signal defines its lifetime, or `owner: nseUnowned` (from
@@ -329,12 +329,7 @@ return <NoteList onSelectionChange={id => {
 }} />;
 ```
 
-Segmented controls, popup/picker controls and cover-flow activation also accept `action` and
-`actionPayload`, with the same validation as push buttons. They do not call action methods directly.
-Without `actionPayload`, segmented controls and cover flow send the activated item's ID, pickers
-send the chosen option's value, and a popup-button trigger sends its menu model's ID. Candidate
-choices are validated individually. An explicitly supplied payload, including `undefined`, overrides
-these defaults; use `actionPayload={undefined}` for a no-argument action.
+`NSEButton`, `NSESegmentedControl`, `NSEPopUpButton`, `NSEPathControl` and `NSEMenu` items also accept `action` and `actionPayload`, with the same validation as push buttons, so they do not call action methods directly. Without `actionPayload`, segmented controls send the activated segment's ID, path controls send the clicked item, and a pop-up button trigger sends its menu model's ID or item value. Candidate choices are validated individually, and an explicitly supplied payload (including `undefined`) overrides these defaults. Cover Flow (`NSECollectionView` with `createCoverFlowCollectionLayout`) uses `onSelectionChange` and `onActivate`.
 
 Prefer a primitive ID when that is all the action needs. For richer, known data, build each level:
 
@@ -404,9 +399,9 @@ An application that uses a different Vite setup calls the same helpers from `scr
 
 In the dev server, an application module that default-exports an `NSEApplication` is a hot-reload boundary: editing it never restarts the host. The plugin compares each class in the module with its previous version, by a signature of what a method swap cannot repair: field declarations and their initialisers (instance and static, with decorators), the constructor, the `extends` clause and class decorators. Methods are not part of the signature.
 
-- **Methods changed, fields the same.** Live instances of the changed classes (the application, its window controllers and view controllers) are given the new class's prototype. Methods, actions and validation update immediately, state is kept, and observers are told. Views re-render through React Fast Refresh.
-- **A field added, removed or given another initialiser.** That application, and only that application, relaunches with a "Reloaded Notes" notice. The framework does not try to migrate field values. The rest of the OS keeps running.
-- **Private members (`#field`, `#method`) or a static block.** A private member's brand belongs to the class that declared it, so these classes sign their whole source: any edit relaunches the application.
-- **Shell or framework changes.** Today's whole-host restart is the fallback.
+- Methods changed, fields the same: live instances of the changed classes (the application, its window controllers and view controllers) are given the new class's prototype. Methods, actions and validation update immediately, state is kept, and observers are told. Views re-render through React Fast Refresh.
+- A field added, removed or given another initialiser: that application, and only that application, relaunches with a "Reloaded Notes" notice. The framework does not try to migrate field values, and the rest of the OS keeps running.
+- Private members (`#field`, `#method`) or a static block: a private member's brand belongs to the class that declared it, so these classes sign their whole source and any edit relaunches the application.
+- Shell or framework changes: today's whole-host restart is the fallback.
 
 A module whose default export is a function component, or whose update also touches a module that is not an application, takes the dev server's ordinary update path.

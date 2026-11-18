@@ -2,7 +2,7 @@
 
 AuthenticationServices exposes platform passkeys through `ASAuthorizationController`, following Apple's providers, registration/assertion requests and delegate. It is a separate import from system authentication. Importing the module does not inspect the browser, start authentication, install listeners or prompt. A site with `authentication: "disabled"` and an app that does not import this entry carries no passkey code.
 
-Passkeys prove possession of a credential to a relying-party **server**. Neither a browser credential nor an `ASAuthorization` is a verified identity or a system session. Applications may use the API for their own service without enabling system sign-in. Alternatively a site can explicitly compose a passkey method with its existing OIDC/local `AuthenticationService`.
+Passkeys prove possession of a credential to a relying-party server. Neither a browser credential nor an `ASAuthorization` is a verified identity or a system session. Applications may use the API for their own service without enabling system sign-in, or a site can explicitly compose a passkey method with its existing OIDC/local `AuthenticationService`.
 
 ## Application sign-in
 
@@ -94,7 +94,7 @@ The site supplies two server-backed operations:
 1. `beginAssertion({ returnPath, signal })` obtains a fresh server challenge and returns the provider's assertion request for the configured relying party.
 2. `verifyAssertion(credential, { returnPath, signal })` sends `credential.toJSON()` to the server. The server verifies it, establishes its normal HttpOnly session cookie and returns success.
 
-After verification the composition calls the existing service's `refresh()`. Sign-in completes only if that server refresh returns `authenticated` with a profile. A successful browser assertion or a successful verification callback alone cannot establish runtime authority. The wrapper exposes the **same** `sessionAdapter` object as its base service. It then navigates to the validated local return path (a host may inject `navigate`). Supply the returned service through `authentication: { policy: "optional" | "required", service }`.
+After verification the composition calls the existing service's `refresh()`. Sign-in completes only if that server refresh returns `authenticated` with a profile. A successful browser assertion or a successful verification callback alone cannot establish runtime authority. The wrapper exposes the same `sessionAdapter` object as its base service, then navigates to the validated local return path (a host may inject `navigate`). Supply the returned service through `authentication: { policy: "optional" | "required", service }`.
 
 The composition owns and disposes its base service by default; set `disposesService: false` only when another host owns that lifetime. Cancellation/disposal/superseding sign-in aborts the pending ceremony and prevents a late client result from refreshing identity or navigating. Network cancellation cannot retract a mutation already accepted by a server: server session creation, revocation and competing requests must follow the server's own transaction rules.
 

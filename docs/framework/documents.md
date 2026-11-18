@@ -115,7 +115,7 @@ Configured recovery stores capture committed content at recovery checkpoints. Ac
 
 ## Versions and conflicts
 
-`listDocumentVersions(id)` returns the saved history, and `restoreDocumentVersion(id, version)` adopts that version's content. Native dirtiness compares serialized content identity with the saved identity: adopting the current saved content is clean; different older content remains dirty. The revision continues to advance for both cases.
+`listDocumentVersions(id)` returns the saved history, and `restoreDocumentVersion(id, version)` adopts that version's content. Native dirtiness compares serialised content identity with the saved identity: adopting the current saved content is clean, while different older content remains dirty and the revision continues to advance in both cases.
 
 Two writers can change the same document. A save that finds a newer remote version puts the document in the `"conflicted"` state, and the snapshot's `conflict` holds the base, the local model and the remote record. Resolve it with `resolveDocumentConflict`:
 
@@ -145,9 +145,9 @@ history: {
 },
 ```
 
-`captureContent` returns a JSON value or deterministic fingerprint of authored content. Values compare by canonical JSON identity. `restoreContent` merges historical authored content into the current model, retaining current synchronization metadata. Both callbacks are synchronous and pure and receive immutable inputs. Replay validates the resulting model and requires its authored projection to match the historical one before publishing or restoring selection.
+`captureContent` returns a JSON value or deterministic fingerprint of authored content. Values compare by canonical JSON identity. `restoreContent` merges historical authored content into the current model, retaining current synchronisation metadata. Both callbacks are synchronous and pure and receive immutable inputs. Replay validates the resulting model and requires its authored projection to match the historical one before publishing or restoring selection.
 
-With this policy, a `recordUndo: false` adoption preserves existing Undo and Redo only when authored content is unchanged; it still closes typing coalescing. Replacing authored content clears obsolete history. Without the policy, non-history model adoption retains the existing behavior of clearing history. Keep this domain policy on the document type instead of maintaining a separate application undo stack.
+With this policy, a `recordUndo: false` adoption preserves existing Undo and Redo only when authored content is unchanged; it still closes typing coalescing. Replacing authored content clears obsolete history. Without the policy, non-history model adoption retains the existing behaviour of clearing history. Keep this domain policy on the document type instead of maintaining a separate application undo stack.
 
 ## Document resources
 
@@ -182,11 +182,11 @@ For text fields within a native model, [the text owner adapter](text-and-editing
 
 ## Editing participants and lifecycle barriers
 
-Register an editing participant for a field or private engine that can hold uncommitted changes. Its `settle(context)` either commits valid data through the context's admitted transaction, returns a refusal that preserves its draft, or reports revocation. The context expires after the barrier; retaining it does not authorize a later asynchronous edit. Dispose registration when its session or view ends.
+Register an editing participant for a field or private engine that can hold uncommitted changes. Its `settle(context)` either commits valid data through the context's admitted transaction, returns a refusal that preserves its draft, or reports revocation. The context expires after the barrier; retaining it does not authorise a later asynchronous edit. Dispose registration when its session or view ends.
 
 Explicit Save, Save As, Revert, Export, Print and Close settle participants before capturing content or deciding whether changes need review. An active IME composition refuses settlement and remains available to the user. A participant that committed successfully before another participant refused keeps its legitimate commit. Explicit discard has a separate callback. Autosave and recovery capture already committed content without forcing native composition to finish.
 
-`closeDocument(id, { reason, signal })` forwards both options through the scoped client. Canceling close preserves the document and drafts. Close preparation retains the existing conditional storage and rollback semantics; field settlement occurs before that mutation-protected preparation.
+`closeDocument(id, { reason, signal })` forwards both options through the scoped client. Cancelling close preserves the document and drafts. Close preparation retains the existing conditional storage and rollback semantics; field settlement occurs before that mutation-protected preparation.
 
 ## Application document workflows
 

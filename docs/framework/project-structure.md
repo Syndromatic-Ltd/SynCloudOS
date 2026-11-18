@@ -46,12 +46,12 @@ export default {
   displayName: "Diagnostics",
   version: "1.0.0",
   webspring: { visible: true },
-  permissions: ["diagnostics.view"],
+  entitlements: ["diagnostics.view"],
   availability: "development",
 } satisfies SynWareInfo;
 ```
 
-Development-only applications are excluded from production builds. In-project apps are first-party and receive their requested permissions. External bundles keep the existing trusted-source allowlist path.
+Development-only applications are excluded from production builds. In-project apps are first-party and receive their declared entitlements, while external bundles keep the trusted-source allowlist path.
 
 ## Application modules
 
@@ -119,7 +119,7 @@ node scripts/synware/validate-synware.mjs src/SynWare/Notes.app
 
 Application scaffolds write `Info.ts` with `bundleIdentifier`, `displayName`, `version: "1.0.0"` and `webspring.visible`. `--organisation` defaults to `com.example`; the lowercased folder name is appended (`JournalPublisher.app` → `com.example.journalpublisher`) and the display name splits words (`Journal Publisher`). The Developer MCP offers the same kinds through `scaffold({ kind, name, organisation?, bundleIdentifier?, owners? })`. `inspect_project` reports resolved manifests, and `validate` applies the installed schema and default-export checks before optional TypeScript validation. Static tooling does not execute project configuration or application code; computed Vite paths require explicit overrides.
 
-For an existing app, replace `id` and `runtime.bundleId` with `bundleIdentifier`, `title` with `displayName`, and `SynWareManifestOverrides` with `SynWareInfo`; write the app version explicitly. Saved app data and old launcher layouts are reset, not migrated. See the [identity migration table](synware-manifest.md#migration-from-the-previous-identity-fields).
+For an existing app, replace `id` and `runtime.bundleId` with `bundleIdentifier`, `title` with `displayName`, and `SynWareManifestOverrides` with `SynWareInfo`; write the app version explicitly. Saved app data and old launcher layouts are reset rather than migrated. See the [identity migration table](synware-manifest.md#migration-from-the-previous-identity-fields).
 
 The unpublished `1.0.0-beta.2` candidate requires this clean cutover. Remove the previous identity
 fields and application-specific React service bridges rather than keeping aliases or fallback
@@ -138,11 +138,7 @@ Move reduced-motion work to `traitCollectionDidChange(previous)` and read
 Move geometry-dependent controller work to `viewWillLayout`/`viewDidLayout`.
 Child view-controller frames no longer impose a percentage height or width; the parent owns layout.
 
-Move command shortcuts and menu categories to `@action` options. Bind segmented controls, pickers,
-popups and cover flow with `action`/`actionPayload`, or use `useAction(name, payload)` for custom
-links; do not call action methods from views. Pass `owner: this` when constructing controllers
-outside constructors. Text editing's content authority is `textOwner`; `owner` now means the same
-lifetime owner as in other NSE controllers.
+Move command shortcuts and menu categories to `@action` options. Bind buttons, segmented controls, popup buttons, path controls and menu items with `action`/`actionPayload`, or use `useAction(name, payload)` for custom links; do not call action methods directly from views. Pass `owner: this` when constructing controllers outside constructors. Text editing's content authority is `textOwner`, while `owner` means the same lifetime owner as in other NSE controllers.
 
 For detachable windows pass `documentId`, `restorationKey`, `mobilePolicy` and
 `preferredBounds` to `openWindow`. Declare stable names in `static windowControllers` for cold

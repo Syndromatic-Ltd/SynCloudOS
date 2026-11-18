@@ -2,7 +2,7 @@
 
 Chronosphere is the version browser. Any SynWare presents its history through it: the browser takes over the screen above the application, shows the subject's versions in the view the application chose, and returns when the person is done. Applications supply their own content and decide whether a past version can be restored.
 
-Chronosphere owns everything around the archive: capturing the present, the wait bezel while it prepares, the overlay, focus and the return to the application. A **view** draws the archive itself. The framework ships two views, and an application can write its own, in the same way Webspring is composed of views.
+Chronosphere owns everything around the archive: capturing the present, the wait bezel while it prepares, the overlay, focus and the return to the application. A view draws the archive itself; the framework ships two views, and an application can write its own in the same way Webspring is composed of views.
 
 NSE owns the archive presentation and its narrow image, animation, scheduling and media-query contracts. The permanent AppSDK `/chronosphere` entry supplies those capabilities from the presenting app's mount; NSE does not depend on app context. Document services retain persistence and restoration authority through the application's restore action. Raw NSE presentation modules are internal framework composition points, while applications use the public entry below.
 

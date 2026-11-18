@@ -14,7 +14,7 @@ The pipeline has five stages, and each has a class.
 
 Everything is immutable. Fonts, attributed strings, paragraph styles, lines and frames never change after creation, so you can cache them freely and share them between components.
 
-TextFX uses no ambient system fonts. You supply every font as bytes, making the shaping inputs explicit. Browser rasterization and native input behavior still require their own validation.
+TextFX uses no ambient system fonts. You supply every font as bytes, making the shaping inputs explicit. Browser rasterisation and native input behaviour still require their own validation.
 
 ## Cooperating with NSE text and custom engines
 

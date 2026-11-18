@@ -1,6 +1,6 @@
 # Class authoring, bindings and managed work
 
-Use classes for application/window/region ownership and ordinary React components for layout and local hook state. The root import supplies the authoring contracts; controls and all thirteen FX frameworks retain their existing subpaths. TypeScript 6.0.3 uses standard TC39 decorators without `experimentalDecorators` or `emitDecoratorMetadata`.
+Use classes for application/window/region ownership and ordinary React components for layout and local hook state. The root import supplies the authoring contracts; controls and all twenty-two FX frameworks retain their existing subpaths. TypeScript 6.0.3 uses standard TC39 decorators without `experimentalDecorators` or `emitDecoratorMetadata`.
 
 ## Inline and separate views
 
@@ -52,7 +52,7 @@ Import `NSEWindowController` from the root for that pattern. No-argument root co
 
 For `NSEComboBox`, `binding<string>` owns editable text and excludes `inputValue` and `onInputValueChange`. `value` and `onValueChange` remain the separate typed domain-selection channel. Selecting a represented object uses the data source's label for the bound text. Freeform text, form submission and IME composition retain their existing semantics; binding a string does not convert the represented object into a string.
 
-Other value families preserve their existing native forms, focus, accessible invalid messages, composition boundaries, preview/commit/cancel behavior and controller models. A search should be debounced once: use the field's existing query mechanism or the task debounce, not both.
+Other value families preserve their existing native forms, focus, accessible invalid messages, composition boundaries, preview/commit/cancel behaviour and controller models. A search should be debounced once: use the field's existing query mechanism or the task debounce, not both.
 
 ## Actions and undo
 
@@ -80,7 +80,7 @@ Bindings to grouped preferences can import `PreferenceValidationError` and `Pref
 
 `AFXTransaction.perform({ duration, delay, timing, disableActions }, changes)` closes a synchronous layer transaction in `finally`. It inherits outer options, batches actual applicable layer actions and does not roll back application model writes. Async callbacks are invalid. Existing begin/commit/flush, explicit animation handles and all other FX framework imports remain available.
 
-Managed frame callbacks use monotonic seconds and stop when the view is inactive. Resuming begins with delta zero. Select reduced-motion behavior explicitly (`static` or `continue`), retain the scene's real content/media timebases and handle unsupported renderers through the app's unavailable UI. Source and jsdom tests do not prove physical-GPU or visual acceptance.
+Managed frame callbacks use monotonic seconds and stop when the view is inactive. Resuming begins with delta zero. Select reduced-motion behaviour explicitly (`static` or `continue`), retain the scene's real content/media timebases and handle unsupported renderers through the app's unavailable UI. Source and jsdom tests do not prove physical-GPU or visual acceptance.
 
 ### Display links for your own GPU engine
 
@@ -160,7 +160,7 @@ const figure = context.displayList;
 
 ## Scaffolds and validation
 
-`synware:create Search.app` generates the separate-view pattern by default, with `Contents/Views/SearchView.tsx`; `--authoring inline` keeps the view in `index.tsx`. Add `--content-application-menu` to declare `applicationMenu.trigger: "content"` and render the menu trigger as an `NSEButton`. `--authoring function` is an explicit opt-in for a function-component app, and it is what the hook-based `--fx` recipe scaffolds use when no authoring is given. Class views can compose those components; combining class scaffold mode with `--fx` is diagnosed before writing files. The Developer MCP `scaffold` tool uses the same templates.
+`npm run synware:create -- src/SynWare/Search.app` generates the separate-view pattern by default, with `Contents/Views/SearchView.tsx`; `--authoring inline` keeps the view in `index.tsx`. Add `--application-menu-toolbar` to create an `NSEWindowController` with `NSEToolbarItem.applicationMenu("gear")`. `--authoring function` is an explicit opt-in for a function-component app, and it is what the hook-based `--fx` recipe scaffolds use when no authoring is given. Class views can compose those components; combining class scaffold mode with `--fx` is diagnosed before writing files. The Developer MCP `scaffold` tool uses the same templates.
 
 The [authoring contract](authoring-contract.md) lists which API to use for each job, and the Developer MCP `validate` tool reports `idiom.*` warnings where an application departs from it.
 

@@ -1,6 +1,6 @@
 # Document assets
 
-Applications serialize stable references in their native model and acquire temporary descriptors when presenting images. A stable `DocumentAssetReference` contains authorization/document scope, semantic asset ID, SHA-256 hash, MIME type, byte length and optional intrinsic metrics. It contains no object URL, live lease, runtime generation or store. Equal bytes can share storage within an authorization scope while retaining distinct semantic identities.
+Applications serialise stable references in their native model and acquire temporary descriptors when presenting images. A stable `DocumentAssetReference` contains authorisation and document scope, semantic asset ID, SHA-256 hash, MIME type, byte length and optional intrinsic metrics. It contains no object URL, live lease, runtime generation or store. Equal bytes can share storage within an authorisation scope while retaining distinct semantic identities.
 
 ## Host configuration
 
@@ -20,7 +20,7 @@ const assetBacking = {
 };
 ```
 
-Reference enumeration belongs to the application's native type/codec policy. The framework does not walk arbitrary native models or impose a page/object grammar. Scope mappings must preserve the same authorized native document identity across runtime recreation; a temporary runtime ID is unsuitable. Assert native durability only when the configured native provider actually provides it.
+Reference enumeration belongs to the application's native type/codec policy. The framework does not walk arbitrary native models or impose a page/object grammar. Scope mappings must preserve the same authorised native document identity across runtime recreation; a temporary runtime ID is unsuitable. Assert native durability only when the configured native provider actually provides it.
 
 A supplied store is host owned. A factory creates one runtime-owned store; runtime teardown releases live roots/leases before disposing it. Durable saved-version and recovery roots survive the live runtime. Without backing, existing asset-free document workflows remain valid and persistent asset operations report unsupported capability.
 
@@ -70,7 +70,7 @@ Native Save verifies the captured reference set before provider publication. An 
 
 Saved-version roots use verified provider identity. Repeated idempotent writes must not create a growing set of roots for one version. Release a version root only after provider listings, current-record state and a direct historical read establish that the version was evicted. Deleting a current record does not imply historical versions were deleted. Providers own pruning policy.
 
-Recovery stores a committed native model with its manifest and exact retention root. Replacing or removing recovery releases the previous record's own root. Restore, remote adoption and version reads validate required dependencies before canonical adoption. Duplicate/Save As need application-native reference remapping into the destination's authorized scope; sharing immutable bytes is permitted only when that authority allows it. Moving providers can return unsupported transfer rather than copy a source live lease.
+Recovery stores a committed native model with its manifest and exact retention root. Replacing or removing recovery releases the previous record's own root. Restore, remote adoption and version reads validate required dependencies before canonical adoption. Duplicate/Save As need application-native reference remapping into the destination's authorised scope; sharing immutable bytes is permitted only when that authority allows it. Moving providers can return unsupported transfer rather than copy a source live lease.
 
 ## Output and diagnostics
 

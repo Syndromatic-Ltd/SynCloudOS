@@ -298,7 +298,7 @@ export function Keyboard() {
 }
 ```
 
-The manifest for this component declares the permission:
+The manifest for this component declares the entitlement:
 
 ```ts
 export default {
@@ -307,7 +307,7 @@ export default {
   version: "1.0.0",
   displayName: "Keys",
   routes: [{ path: "/keys", primary: true }],
-  permissions: ["midi.access"],
+  entitlements: ["midi.access"],
 } as const;
 ```
 

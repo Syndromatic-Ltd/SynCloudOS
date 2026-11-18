@@ -21,7 +21,7 @@ Controls marked "Yes" open a floating list, so they need an *overlay host*. A mo
 
 ## Shared behaviour
 
-**Values and phases.** A value control reports its changes with a *phase*:
+Values and phases: a value control reports its changes with a phase:
 
 | Phase | When |
 | --- | --- |
@@ -31,15 +31,15 @@ Controls marked "Yes" open a floating list, so they need an *overlay host*. A mo
 
 Use `"preview"` for a live readout, and `"commit"` for anything that should be saved or recorded as an undo step.
 
-**Controlled and uncontrolled.** Give `value` and the control shows exactly that, and calls back when the user edits. Give only `defaultValue` and the control keeps its own state. A native form reset returns an uncontrolled control to its default.
+Controlled and uncontrolled: give `value` and the control shows that value and calls back when the user edits; give only `defaultValue` and the control keeps its own state. A native form reset returns an uncontrolled control to its default.
 
-**Validation.** `validation` is `{ kind: "valid" }` or `{ kind: "invalid", code, message }`, and it is yours to compute. An invalid result sets `aria-invalid`, links the message to the field through `aria-describedby` and shows it as an alert. Command availability is separate. See below.
+Validation: `validation` is `{ kind: "valid" }` or `{ kind: "invalid", code, message }`, and it is yours to compute. An invalid result sets `aria-invalid`, links the message to the field through `aria-describedby` and shows it as an alert. Command availability is separate (see below).
 
-**Commands.** Fields and search accept a `command` binding, `{ id, payload }` with an optional `responderId` for diagnostics. The control validates the command through the responder chain, disables itself while the command is unavailable, and dispatches it before it commits the value. When the command does not execute, the value does not commit. Bindings resolve through the host's command system and never through a registry of the control's own. See [Commands, responders and undo](../commands-responders-undo.md).
+Commands: fields and search accept a `command` binding, `{ id, payload }` with an optional `responderId` for diagnostics. The control validates the command through the responder chain, disables itself while the command is unavailable, and dispatches it before it commits the value. When the command does not execute, the value does not commit. Bindings resolve through the host's command system and never through a registry of the control's own. See [Commands, responders and undo](../commands-responders-undo.md).
 
-**Control size.** `controlSize` is `"regular"` (the default), `"small"` or `"mini"`. The theme sizes the frame, the text and the affixes together.
+Control size: `controlSize` is `"regular"` (the default), `"small"` or `"mini"`. The theme sizes the frame, the text and the affixes together.
 
-**Labels.** A control with no visible text needs an `aria-label`. The types require it where a label cannot be inferred.
+Labels: a control with no visible text needs an `aria-label`. The types require it where a label cannot be inferred.
 
 ## NSETextField
 
@@ -64,9 +64,9 @@ Use `"preview"` for a live readout, and `"commit"` for anything that should be s
 
 Every other `<input>` attribute passes through, except `prefix`, which the frame uses.
 
-**Editing model.** Typing calls `onValueChange(text, "preview")`. Enter, or leaving the field, commits. Escape restores the last committed text, calls `onValueChange(value, "cancel")` and skips the commit that leaving the field would have made. Escape claims the key only when there was something to revert, so a clean field still lets it close the panel that contains it. Composition input, such as an input method for Japanese, reports nothing until the composition ends.
+Editing model: typing calls `onValueChange(text, "preview")`, Enter or leaving the field commits, and Escape restores the last committed text, calls `onValueChange(value, "cancel")`, and skips the commit that leaving the field would have made. Escape claims the key only when there was something to revert, so a clean field still lets it close the panel that contains it. Composition input, such as an input method for Japanese, reports nothing until the composition ends.
 
-**Formatters.** A `formatter` makes the field edit values of type `T` rather than strings. It is any object with four methods:
+Formatters: a `formatter` makes the field edit values of type `T` rather than strings. It is any object with four methods:
 
 | Method | Purpose |
 | --- | --- |
@@ -136,7 +136,7 @@ A search box for incremental and submitted searches, with an affordance that cle
 
 Enter submits and Escape clears the text, or closes the recents menu when the field is already empty. Recent searches appear when the empty field takes focus, and need an overlay host. Choosing one fills the field and submits it. While an input method is composing, the field neither queries nor submits.
 
-**Keeping recent searches.** Without `recentSearches`, the field keeps its own list for as long as it is shown. AppKit keeps the list between launches with `recentsAutosaveName`; in NSE, bind `recentSearches` to a `@preference` property and store the list `onRecentSearchesChange` passes you. Searches are trimmed, and an empty search or one longer than 256 characters is not remembered.
+Keeping recent searches: without `recentSearches`, the field keeps its own list for as long as it is shown. AppKit keeps the list between launches with `recentsAutosaveName`; in NSE, bind `recentSearches` to a `@preference` property and store the list `onRecentSearchesChange` passes you. Searches are trimmed, and an empty search or one longer than 256 characters is not remembered.
 
 ## NSEComboBox
 
@@ -205,15 +205,15 @@ import { NSEBox, NSEButton, NSESearchField, NSESegmentedControl, NSETextField } 
 
 // A formatter is any object with these four methods.
 const percent = {
-  format: (value: number) => `${Math.round(value * 100)}%`,
-  editingText: (value: number) => String(Math.round(value * 100)),
-  parse: (text: string) => {
+  string: (value: number) => `${Math.round(value * 100)}%`,
+  editingString: (value: number) => String(Math.round(value * 100)),
+  getObjectValue: (text: string) => {
     const number = Number(text.replace("%", "").trim());
     return Number.isFinite(number)
       ? { ok: true as const, value: number / 100 }
       : { ok: false as const, error: { code: "not-a-number", message: "Enter a number.", input: text } };
   },
-  validatePartial: (text: string) => ({ valid: /^\d{0,3}%?$/.test(text) }),
+  isPartialStringValid: (text: string) => ({ valid: /^\d{0,3}%?$/.test(text) }),
 };
 
 export function ExportOptions() {

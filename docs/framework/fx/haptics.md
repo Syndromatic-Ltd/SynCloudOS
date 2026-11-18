@@ -17,7 +17,7 @@ import { HFXHapticPattern } from "@syndromatic/syncloudos/fx/haptics";
 | Prefix | `HFX` |
 | Entry | `@syndromatic/syncloudos/fx/haptics` |
 | Hook | `useHaptics`, from `@syndromatic/syncloudos/sdk` |
-| Permission | `haptics.play` in the manifest `permissions` list |
+| Permission | `haptics.play` in the manifest `entitlements` list |
 | Analogue | Core Haptics (`CHHapticEngine`, `CHHapticPattern`, `CHHapticAdvancedPatternPlayer`, AHAP) |
 
 ## What the entry exports
@@ -58,12 +58,10 @@ export function SaveButton() {
 }
 ```
 
-Declare the permission in the manifest, or the hook throws when the component mounts.
+Declare the entitlement in the manifest, or the hook throws when the component mounts.
 
-```json
-{
-  "permissions": ["haptics.play"]
-}
+```ts
+entitlements: ["haptics.play"]
 ```
 
 ### `HFXFeedbackPresetName`
@@ -685,7 +683,7 @@ Where haptic hardware is missing, NSE controls that request feedback fall back t
 
 ### Permissions and denial
 
-Declare `haptics.play` in the manifest `permissions` list. The permission is checked when a session is created, which happens after the component mounts. Without it, `createEngine` throws a `DOMException` with name `SecurityError` and the message "SynWare capability haptics.play must be declared." Because `useHaptics()` creates its session in a layout effect, the exception surfaces as a render error at mount, so declare the permission before you ship a component that uses the hook. If the application is closing, session creation rethrows the owner's abort reason instead.
+Declare `haptics.play` in the manifest `entitlements` list. The permission is checked when a session is created, which happens after the component mounts. Without it, `createEngine` throws a `DOMException` with name `SecurityError` and the message "SynWare capability haptics.play must be declared." Because `useHaptics()` creates its session in a layout effect, the exception surfaces as a render error at mount, so declare the entitlement before you ship a component that uses the hook. If the application is closing, session creation rethrows the owner's abort reason instead.
 
 The hook never prompts the user. The user's vibration and button sound switches, and the browser's audio policy, remain in force for every session. A pattern never turns on feedback that the user has turned off.
 

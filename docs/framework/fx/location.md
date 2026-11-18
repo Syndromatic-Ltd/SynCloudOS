@@ -205,7 +205,7 @@ export function headingToRadians(degrees: number | null | undefined): number | n
 type LFXAccuracy = "balanced" | "high";
 ```
 
-The accuracy preference of a request. `"balanced"` is the default everywhere. `"high"` asks the host for the most precise source it has, which usually costs more battery and time to first fix. It is a preference: the host may return a coarse fix, and `high` does not unlock any facility listed in [Native-only capabilities](#native-only-capabilities). Any other string is rejected with a `TypeError` by `watch`.
+The accuracy preference of a request. `"balanced"` is the default everywhere. `"high"` asks the host for the most precise source it has, which usually costs more battery and time to first fix. It is a preference: the host may return a coarse fix, and `high` does not enable any facility listed in [Native-only capabilities](#native-only-capabilities). Any other string is rejected with a `TypeError` by `watch`.
 
 ### `LFXAuthorizationStatus`
 
@@ -422,16 +422,14 @@ The hook returns a stable, frozen manager facade for the component. It creates t
 - Before the component mounts, `current()` and `watch()` throw `Error("The component location owner is not mounted.")`, and `getAuthorizationStatus()` resolves `"unavailable"`. After unmount the same applies. Call the manager from effects and event handlers, not during render.
 - The facade does not change between renders, so it is safe in dependency arrays.
 - Mounting never requests a fix.
-- Creating the underlying manager requires `location.read`. When the manifest does not declare it, or host policy refuses it, creation throws a `SecurityError` `DOMException` from the mount effect. Declare the permission before you use the hook.
+- Creating the underlying manager requires `location.read`. When the manifest does not declare it, or host policy refuses it, creation throws a `SecurityError` `DOMException` from the mount effect. Declare the entitlement before you use the hook.
 - One application can hold at most eight managers at a time. A ninth creation throws a `QuotaExceededError` `DOMException`. A component that uses the hook holds one.
 
-```json
-{
-  "permissions": ["location.read", "location.request"]
-}
+```ts
+entitlements: ["location.read", "location.request"]
 ```
 
-See the [SynWare manifest](../synware-manifest.md) for where `permissions` sits in the manifest.
+See the [SynWare manifest](../synware-manifest.md) for where `entitlements` sits in the manifest.
 
 ### `LFXLocationClient`
 

@@ -59,7 +59,7 @@ export default class Hello extends NSEApplication {
 }
 ```
 
-The controls take Atmo's appearance in light and dark without any stylesheet of your own; the host entry imports the NSE styles once (see below). `create-synware Hello.app` and the Developer MCP `scaffold` tool generate this shape, and the [authoring contract](authoring-contract.md) lists which API to use for each job: controls, documents, managed tasks, display links for WebGL engines and `NSEView.draw` for plots. A function component is still accepted as an application for very small apps, but it gives up the controller's bindings, actions, undo and managed lifetimes. See [Class authoring](cocoa-authoring.md).
+The controls take Atmo's appearance in light and dark without any stylesheet of your own, because the host entry imports the NSE styles once (see below). `npm run synware:create -- src/SynWare/Hello.app` in a framework checkout and the Developer MCP `scaffold` tool both generate this shape, and the [authoring contract](authoring-contract.md) lists which API to use for each job: controls, documents, managed tasks, display links for WebGL engines, and `NSEView.draw` for plots. A function component is still accepted for very small apps, though it gives up the controller's bindings, actions, undo and managed lifetimes. See [Class authoring](cocoa-authoring.md).
 
 Create the required `Contents/Info.ts` beside the entry point. Identity and version are explicit, as in an Info.plist; `schemaVersion` defaults to `1`:
 
@@ -99,7 +99,7 @@ const host = await mountSynCloudOS({
 import.meta.hot?.dispose(() => host.dispose("hot reload"));
 ```
 
-This mounts the application's real session without Webspring or a top bar. The default `application.frame: "fullscreen"` fills the page; `"declared"` honours its manifest presentation. This is not the browser's native Fullscreen API. Secondary applications must use `windowedView`, `systemSheet` or `backgroundService`, not `appView`. The site root opens the primary application's entry route; declared nested routes remain available.
+This mounts the application's real session without Webspring or a top bar. The default `application.frame: "fullscreen"` fills the host element rather than calling the browser's native Fullscreen API, while `"declared"` honours its manifest presentation. Secondary applications must use `windowedView`, `systemSheet` or `backgroundService`, rather than `appView`. The site root opens the primary application's entry route while declared nested routes remain available.
 
 An application can opt into an application menu with `NSEApplication.mainMenu`, `NSEToolbarItem.applicationMenu("gear")`, or both. The [authentication guide](authentication.md) explains the account actions.
 
@@ -149,7 +149,7 @@ Externally supplied bundles retain the existing trusted-source allowlist boundar
 
 ### Updating an existing application
 
-Replace manifest `id` and `runtime.bundleId` with the single `bundleIdentifier`; replace manifest `title` with `displayName` and `SynWareManifestOverrides` with `SynWareInfo`. Add an explicit app `version`, and update public app metadata and `application: { bundleIdentifier }` selectors. Window titles and unrelated entity IDs are unchanged. Old saved app data and Webspring layouts are reset, not migrated; no aliases are kept. The [migration table](synware-manifest.md#migration-from-the-previous-identity-fields) lists every identity change.
+Replace manifest `id` and `runtime.bundleId` with the single `bundleIdentifier`; replace manifest `title` with `displayName` and `SynWareManifestOverrides` with `SynWareInfo`. Add an explicit app `version`, and update public app metadata and `application: { bundleIdentifier }` selectors. Window titles and unrelated entity IDs stay unchanged. Old saved app data and Webspring layouts are reset rather than migrated, and no aliases are kept. The [migration table](synware-manifest.md#migration-from-the-previous-identity-fields) lists every identity change.
 
 
 ## Check and measure

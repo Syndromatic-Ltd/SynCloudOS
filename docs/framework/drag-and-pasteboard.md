@@ -1,6 +1,6 @@
 # Drag and pasteboard
 
-Copy, cut, paste and drag and drop share one idea from Cocoa: a **pasteboard** holds typed representations of some content, and any application that understands a representation can take it. SynCloudOS provides named pasteboards and a drag session that moves content between responders, windows and applications.
+Copy, cut, paste and drag and drop share one idea from Cocoa: a pasteboard holds typed representations of some content, and any application that understands a representation can take it. SynCloudOS provides named pasteboards and a drag session that moves content between responders, windows and applications.
 
 Both clients belong to the session, so an application only ever transfers content through its own mounted endpoints.
 
@@ -58,7 +58,7 @@ if (image?.value instanceof NSEData) {
 
 ## Drag sessions
 
-`useDrag()` returns the drag client. A drag moves between **endpoints**, each identified by an application, a window and a responder. `endpoint()` creates one for the current responder.
+`useDrag()` returns the drag client. A drag moves between endpoints, each identified by an application, a window and a responder. `endpoint()` creates one for the current responder.
 
 ```tsx
 import { useDrag } from "@syndromatic/syncloudos/sdk";

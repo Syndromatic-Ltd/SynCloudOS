@@ -87,4 +87,4 @@ Declare the permissions an application needs in its manifest `entitlements` list
 
 ## Scaffolding an example
 
-In a checkout of the framework repository, `npm run synware:create -- <directory> <app-id> --fx animation,audio` scaffolds a bundle with a working call into each framework you name. See the [SDK tooling notes](../synware-sdk.md#tooling).
+In a checkout of the framework repository, `npm run synware:create -- src/SynWare/Example.app --fx animation,audio` scaffolds a bundle with a working call into each framework you name. See the [SDK tooling notes](../synware-sdk.md#tooling).

@@ -81,7 +81,7 @@ toolbar.isVisible = !compact;                         // a hidden toolbar keeps 
 toolbar.validateVisibleItems();                       // after state its validators read changes outside an action
 ```
 
-The window owns the toolbar's command and preference authority, so you do not build a preferences controller or pass a menu runtime. JournalPublisher (`PublisherWindowController.tsx`) and the control gallery's Toolbars section use it.
+The window owns the toolbar's command and preference authority, so you do not build a preferences controller or pass a menu runtime.
 
 ## The title bar: title, subtitle and accessories
 
@@ -99,7 +99,7 @@ class FileAccessory extends NSETitlebarAccessoryViewController {
 this.window.addTitlebarAccessoryViewController(new FileAccessory(this));
 ```
 
-A textured `NSESegmentedControl` segment can carry a command menu (`menu: NSEMenu`, NSSegmentedControl.setMenu(_:forSegment:)): pressing it shows the menu below the segment, which stays highlighted while the menu is open. Publisher's File accessory is a small one-segment control of this kind.
+A textured `NSESegmentedControl` segment can carry a command menu (`menu: NSEMenu`, NSSegmentedControl.setMenu(_:forSegment:)): pressing it shows the menu below the segment, which stays highlighted while the menu is open.
 
 ## The status line: a window's bottom content border
 
@@ -116,7 +116,7 @@ this.window.setContentBorderThickness(56, "minY");   // 0 removes it
 </div>
 ```
 
-Atmo draws a tall border (44 points or more) as its metal footer and a shorter one as its compact strip. Journal Publisher (56) and FieldLab (28) use it. Only the bottom edge is drawn.
+Atmo draws a tall border (44 points or more) as its metal footer and a shorter one (such as 28 points) as its compact strip. Only the bottom edge is drawn.
 
 ## A narrow inspector
 
@@ -135,7 +135,7 @@ An inspector of 240 to 320 pixels is narrower than a form is designed for. Use t
 </NSEBox>
 ```
 
-Give the inspector its width from the split or pane that contains it, and let its controls fill it. Don't make room by shrinking text or changing the theme's control art. JournalPublisher's `PublisherInspector.tsx` follows this pattern.
+Give the inspector its width from the split or pane that contains it, and let its controls fill it. Don't make room by shrinking text or changing the theme's control art.
 
 ## Keeping pane content alive across layouts
 

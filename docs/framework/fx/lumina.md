@@ -35,7 +35,7 @@ import { LUFXQuery, LUFXSearchableItem } from "@syndromatic/syncloudos/fx/lumina
 
 ## A first index
 
-An application declares the permissions it needs, acquires an index, writes items into it and queries it. This component indexes one note and searches for it.
+An application declares the entitlements it needs, acquires an index, writes items into it and queries it. This component indexes one note and searches for it.
 
 ```tsx
 import { useState } from "react";
@@ -83,7 +83,7 @@ export function IndexAndSearch() {
 }
 ```
 
-The manifest for this component lists both permissions:
+The manifest for this component lists both entitlements:
 
 ```ts
 export default {
@@ -92,7 +92,7 @@ export default {
   version: "1.0.0",
   displayName: "Notes",
   routes: [{ path: "/notes", primary: true }],
-  permissions: ["lumina.index", "lumina.query"],
+  entitlements: ["lumina.index", "lumina.query"],
 } as const;
 ```
 

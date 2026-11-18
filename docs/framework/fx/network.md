@@ -18,7 +18,7 @@ Constructors also accept a required `NWFXInterfaceType`, or an array of prohibit
 
 Both monitor construction and every native/queued delivery enforce the launch entitlement and current app authority. Revocation immediately cancels native subscriptions and advances an access generation; restoring access cannot deliver an older queued path or revive an older instance. App abort and selected-session registry removal are terminal. Up to eight active native observations per mount are admitted. Importing or constructing never starts browser observation. Host ports are private and are not available on SCOS, SynWareContextValue, browser contribution environments or exported testing environments. Native adapters are associated privately with their environment identity; no networkPaths field exposes the adapter or snapshot type.
 
-| Apple member | Browser behavior |
+| Apple member | Browser behaviour |
 |---|---|
 | `NWPath.status` | `navigator.onLine` supplies a coarse satisfied/unsatisfied hint. It does not prove Internet or endpoint reachability. No active probes run. |
 | `NWPath.unsatisfiedReason` | Throws ENOTSUP when the host cannot observe the reason. An excluded observed interface produces unsatisfied/notAvailable. |

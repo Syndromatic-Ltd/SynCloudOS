@@ -51,7 +51,7 @@ Identifiers retain their declared case in manifests and public displays. Registr
 | `SCOS.open("notes")` | `SCOS.open("com.example.notes")` or `SCOS.open("/notes")` |
 | Old app persistence keys and Webspring layout v4 | Reset app storage under the new identity; Webspring layout v5 (`webspring.layout.v5`) |
 
-This is a clean cutover: saved data is reset, not migrated. There are no old-ID aliases or compatibility shims. Window, document, command, folder, pane and widget IDs and window/command titles are unchanged.
+This is a clean cutover: saved data is reset rather than migrated, and there are no old-ID aliases or compatibility shims. Window, document, command, folder, pane and widget IDs and window/command titles are unchanged.
 
 ## Routes and presentations
 
@@ -112,7 +112,7 @@ The [test host](testing-synware.md) uses fixture subject grants and denial-first
 | Field | Notes |
 | --- | --- |
 | Localised files | Every `Resources/Localised/<locale>.locale/*.strings` file is discovered. `localeResources` is no longer a manifest field. |
-| `appearances` | Declares the appearances the application supports: `{ id, variant }` where `variant` is `"atmo"` or `"neutral"`. |
+| `appearances` | Declares the appearances the application supports: `{ id, variant }` where `variant` is `"system"` or `"neutral"`. |
 
 ## Lifecycle and background work
 

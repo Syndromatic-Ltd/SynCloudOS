@@ -94,7 +94,7 @@ See [Applications](applications.md) for the complete class tree and ownership ru
 | `SCOS.commands.createPayload("key", value, ...)` / `.createPayloadArray(value, ...)` | Construct immutable command records and arrays from primitives and nested values built by the same mounted scope. Use explicit known fields; arbitrary raw nested objects are rejected. |
 | `NSEApplication.windowControllers` | Static name-to-class declaration for cold restoration, such as `{ detachedNote: DetachedNoteWindow }`; recreated controllers receive their original `openingOptions`. |
 | `@action(options)` | `NSEActionOptions<Payload>.title` accepts a string, localised title record or the ordinary typed command title resolver; payload-dependent titles preserve validator overrides. `menuCategory`, `keyBindings` and `allowReservedBrowserShortcut` keep ordinary command semantics. |
-| `useAction(name, payload?)` | `{ perform(payload?: unknown): Promise<CommandDispatchResult \| null>, enabled, state }`; no argument uses the bound payload, while an event-time argument gets fresh validation through responders and `validateX`. NSE segmented, popup/picker and cover-flow controls accept `action`/`actionPayload`. |
+| `useAction(name, payload?)` | `{ perform(payload?: unknown): Promise<CommandDispatchResult \| null>, enabled, state }`; no argument uses the bound payload, while an event-time argument gets fresh validation through responders and `validateX`. `NSEButton`, `NSESegmentedControl`, `NSEPopUpButton`, `NSEPathControl` and `NSEMenu` items accept `action`/`actionPayload`. |
 | `createSynWareTestHost({ application, manifest, services? })` | Launches a class app; `host.application.windows` exposes controllers. `services: [[token, client]]` registers real typed app clients. `host.persistence` is the app's preference store. |
 | `createSynWareTestHost({ applicationDocuments })` | `SynWareTestApplicationDocumentsConfiguration` supplies production `initialTypes`, `initialAdapters`, `recoveryStore` and `assetBacking`, plus explicitly trusted seed kinds and a pre-launch installer. `SynWareTestDocumentInstallContext` exposes only scoped `documents`, `seed`, `environment` and `signal`; manifest admission still applies. See [trusted document provision](testing-synware.md#trusted-document-provision). |
 | `createSynWareTestHost({ diagnostics: provider })` | Host-only `AppTrustedDiagnosticsClient` provision, still requiring `diagnostics.view`; use `host.diagnostics.replace(provider)` or `.revoke()` to change authority and abort old work. |
@@ -224,7 +224,7 @@ Hooks give each client a React shape, subscribing to changes and releasing resou
 | Environment | `useMediaQuery`, `useMediaQueries`, `useConnectivity`, `useAppearance`, `useSettingsAvailability` |
 | Outward actions | `useNotifications`, `useShare`, `useExternalActions`, `usePasteboard`, `useDrag` |
 | Text and colour | `useStrings`, `useTextLayout`, `useColourPanel` |
-| FX | `useAnimations`, `useImages`, `useAudio`, `useHaptics`, `useMotion`, `useMedia`, `useVideo`, `useMIDI`, `useLocation`, `useLumina` |
+| FX | `useAnimations`, `useImages`, `useTextLayout`, `useAudio`, `useHaptics`, `useMotion`, `useMedia`, `useVideo`, `useVideoPresentation`, `useMIDI`, `useBluetooth`, `useNFC`, `useSpeech`, `useSpeechSynthesizer`, `useContacts`, `usePayment`, `useXR`, `useLocation`, `useNetwork`, `useLumina` |
 | Web content | `useWebContent` |
 | Host services | `useService` |
 
@@ -272,7 +272,7 @@ function ExportButton({ id }: { id: string }) {
 }
 ```
 
-`denial.code` is `"unavailable"` when the host offers no such service and `"denied"` when the host's policy refuses your application. Declare the services your application depends on in the manifest `services` list, and request the matching `permissions`. Code that prefers an exception can call `app.services.require(token)`, which throws `SynWareServiceAcquisitionError` with the same denial attached.
+`denial.code` is `"unavailable"` when the host offers no such service and `"denied"` when the host's policy refuses your application. Declare the services your application depends on in the manifest `services` list, and request the matching `entitlements`. Code that prefers an exception can call `app.services.require(token)`, which throws `SynWareServiceAcquisitionError` with the same denial attached.
 
 ## Routes
 
@@ -356,7 +356,7 @@ A checkout of the framework repository includes three commands for working with 
 
 | Command | What it does |
 | --- | --- |
-| `npm run synware:create -- <directory> <app-id>` | Scaffolds a bundle with a manifest, a root component and a locale file. Add `--fx animation,graphics` (or any of the thirteen FX names) to include a working example for each framework. |
+| `npm run synware:create -- <target>` | Scaffolds a `.app`, `.prefPane`, `.widget` or `.integration.ts` target. For `.app` bundles, add `--organisation com.example`, `--authoring separate\|inline\|function`, or `--fx animation,graphics` (supporting the thirteen FX recipes: `animation`, `graphics`, `image`, `text`, `audio`, `haptics`, `motion`, `media`, `video`, `midi`, `location`, `lumina`, `compression`). |
 | `npm run synware:validate -- [directory]` | Checks a bundle's manifest against the schema and its imports against the public entries. Without an argument it validates every bundle in the repository. |
 | `npm run sdk:build` | Builds the distributable SDK package, one entry for each subpath listed in the [overview](overview.md#the-package). |
 

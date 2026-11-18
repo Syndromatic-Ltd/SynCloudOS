@@ -22,11 +22,11 @@ The shorthand strings `"optional"` and `"required"` construct no authentication 
 - The object form with `createHttpAuthentication` needs a server that answers the same-origin `/auth/methods`, `/auth/session`, `/auth/start` and `/auth/logout` endpoints: use the [server handler](#server-handler) and an OIDC provider.
 - With `"disabled"`, nobody can sign in, so the host opens the primary application publicly; it needs no `runtime.policy.public`. A primary that declares `runtime.policy.requiresLogin` fails to mount, since nobody could ever open it.
 - With `"optional"` (string or object), the primary bundle declares `runtime.policy.public` in its manifest, because it launches before anyone signs in.
-- With `"required"`, the sign-in window is presented before the primary application launches. The `application: { id }` host accepts the same `authentication` values as the Webspring shell; see [Getting started](getting-started.md#mount-one-application).
+- With `"required"`, the sign-in window is presented before the primary application launches. The `application: { bundleIdentifier }` host accepts the same `authentication` values as the Webspring shell; see [Getting started](getting-started.md#mount-one-application).
 
 A single-application host uses the same application menu as Webspring. Apps expose it through their main menu bar, an application-menu toolbar item, or both. When the host enables authentication, the menu presents Sign In or Log Out for the current session. See [Mount one application in Getting started](getting-started.md#mount-one-application).
 
-Optional sign-in offers **Cancel**, including when no authentication service is configured. Cancelling returns to the presentation that requested sign-in: the Board remains on the Board, while a single-application host resumes its existing application session, route and content. It does not create or authorise a session. Required sign-in has no Cancel action.
+Optional sign-in offers Cancel, including when no authentication service is configured. Cancelling returns to the presentation that requested sign-in: the Board remains on the Board, while a single-application host resumes its existing application session, route and content. It does not create or authorise a session. Required sign-in has no Cancel action.
 
 The service reports one of `disabled`, `checking`, `anonymous`, `authenticating`, `authenticated`, `expired` and `error`. Disposing the host disposes the service you supplied.
 
@@ -144,7 +144,7 @@ export default {
 };
 ```
 
-The handler performs OIDC discovery and the authorization code flow with PKCE. It binds state and nonce to the browser, validates the ID token's signature and claims, applies your admission policy, stores hashed sessions and supports revocation. The browser receives only the public profile and the expiry time.
+The handler performs OIDC discovery and the authorisation code flow with PKCE. It binds state and nonce to the browser, validates the ID token's signature and claims, applies your admission policy, stores hashed sessions and supports revocation, while the browser receives only the public profile and the expiry time.
 
 ### Protect your own routes
 

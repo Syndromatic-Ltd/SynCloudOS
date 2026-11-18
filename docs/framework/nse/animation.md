@@ -1,6 +1,6 @@
 # Animation objects
 
-`NSEAnimationContext` follows `NSAnimationContext`: `duration` is in seconds, `timingFunction` contains cubic Bézier control points, and `allowsImplicitAnimation` controls implicit layer actions. `runAnimationGroup(changes, completionHandler?)` scopes synchronous changes, inherits enclosing values, restores the enclosing context even after an exception, and completes when the group's view and layer animations settle. Atmo supplies additional curves through `atmoMotion`.
+`NSEAnimationContext` follows `NSAnimationContext`: `duration` is in seconds, `timingFunction` contains cubic Bézier control points, and `allowsImplicitAnimation` controls implicit layer actions. `runAnimationGroup(changes, completionHandler?)` scopes synchronous changes, inherits enclosing values, restores the enclosing context even after an exception, and completes when the group's view and layer animations settle. Motion defaults and curves are owned by the framework and theme rather than a public `atmoMotion` export.
 
 ```ts
 NSEAnimationContext.runAnimationGroup(context => {

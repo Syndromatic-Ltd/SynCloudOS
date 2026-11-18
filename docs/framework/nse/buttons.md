@@ -48,9 +48,9 @@ import { NSEButton, NSESwitch } from "@syndromatic/syncloudos/nse";
 | `haptic` | `HFXFeedbackRequest` | by art | | The click feedback. Pass `false` for none. |
 | `type` | `"button" \| "submit" \| "reset"` | `"button"` | | The native button type. An NSE button never submits a form unless you say `type="submit"`. |
 
-**Press state.** A button is pressed while the primary pointer button is held inside it, or while Space or Enter is held. Moving the pointer out shows it released, moving back in shows it pressed again, and letting go outside cancels the click. The native click still fires once, so forms and `onClick` behave as usual.
+Press state: a button is pressed while the primary pointer button is held inside it, or while Space or Enter is held. Moving the pointer out shows it released, moving back in shows it pressed again, and letting go outside cancels the click. The native click still fires once, so forms and `onClick` behave as usual.
 
-**Haptics.** A click asks the session's haptic engine for a tick, named from HapticsFX: `"success"`, `"warning"`, `"error"`, `"light"`, `"medium"`, `"heavy"`, `"soft"`, `"rigid"`, `"selection"`, `"nudge"` or `"buzz"`. The default follows how the theme draws the button: `success` for the default button, `error` for a destructive one, `rigid` for the dark and textured art, `medium` otherwise. Without a haptic engine, or with haptics turned off, the request does nothing. See [HapticsFX](../fx/haptics.md).
+Haptics: a click asks the session's haptic engine for a tick, named from HapticsFX: `"success"`, `"warning"`, `"error"`, `"light"`, `"medium"`, `"heavy"`, `"soft"`, `"rigid"`, `"selection"`, `"nudge"` or `"buzz"`. The default follows how the theme draws the button: `success` for the default button, `error` for a destructive one, `rigid` for the dark and textured art, `medium` otherwise. Without a haptic engine, or with haptics turned off, the request does nothing. See [HapticsFX](../fx/haptics.md).
 
 ### Disclosure sections
 

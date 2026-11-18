@@ -4,13 +4,15 @@
 
 ## Prerequisites
 
-The examples run under Vitest with a DOM. Install the test tools as dev dependencies; the SDK doesn't bring them:
+The examples run under Vitest 5.1 with a DOM. Install the test tools as dev dependencies because the SDK does not bundle them:
 
 ```sh
 npm install --save-dev vitest jsdom @testing-library/react
 ```
 
 Mark DOM tests with `// @vitest-environment jsdom` (or set `environment: "jsdom"` in the Vitest config) and pass that environment's `document` to the host.
+
+In a framework checkout, `npm test` runs the unit suite on Vitest 5.1 in about 3 minutes in two sequential groups: CPU-heavy source scanners, counterpart checks and timing budgets first, followed by everything else. Tests that install the packed SDK archive into a temporary consumer run separately with `npm run test:packaging` after `npm run sdk:build`.
 
 ## A first test
 
@@ -59,7 +61,7 @@ Pass the `document` your test environment provides, such as the one from jsdom o
 | `appContext` | The low-level mounted context behind the facade returned by `useSCOS()`. |
 | `adapters` | Fakes for storage, clipboard, drag, windows, location, MIDI, video and the other host capabilities. |
 
-`createSynWareTestHost` accepts `app`, `document`, `container`, `now`, `permissions`, `locale`, `timeZone`, `branding`, `strictMode`, `applicationDocuments` and `surface` (`"stage"` or `"window"`). Set `strictMode: true` to render under React StrictMode and catch effects that fail to clean up. Supply native `DocumentType` codecs through `applicationDocuments.initialTypes`; an application's manifest declares the types it may use but does not install their codecs.
+`createSynWareTestHost` accepts `app` (or `application` and `manifest`), `document`, `container`, `now`, `entitlements`, `locale`, `timeZone`, `branding`, `strictMode`, `services`, `diagnostics`, `applicationDocuments`, `loadGate` and `surface` (`"stage"` or `"window"`). Set `strictMode: true` to render under React StrictMode and catch effects that fail to clean up. Supply native `DocumentType` codecs through `applicationDocuments.initialTypes` because an application's manifest declares the types it may use without installing their codecs.
 
 For a class application pass `{ application: NotesApp, manifest }` instead of `app`. After
 `await host.render()`, `host.application` is the live `NSEApplication` and `.windows` contains its
@@ -130,7 +132,7 @@ export async function renderSeededNotes(document: Document) {
       displayName: "Notes",
       version: "1.0.0",
       documentTypes: [{ id: noteDocumentType.id, displayName: noteDocumentType.displayName }],
-      permissions: ["documentStore.drafts.read", "documentStore.draft.write"],
+      entitlements: ["documentStore.drafts.read", "documentStore.draft.write"],
     },
     applicationDocuments,
     document,
@@ -240,7 +242,7 @@ const host = createSynWareTestHost({
     bundleIdentifier: "com.example.diagnostics",
     displayName: "Diagnostics",
     version: "1.0.0",
-    permissions: ["diagnostics.view"],
+    entitlements: ["diagnostics.view"],
   },
   document,
   diagnostics: {

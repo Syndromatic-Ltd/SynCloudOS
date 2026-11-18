@@ -52,7 +52,7 @@ The first disposal wins, including when an owner signal aborts before a later ex
 
 An error alert has two layers. What everyone sees is plain language: a title and one sentence, such as "SynCloudOS stopped unexpectedly." with "An unexpected error has prevented SynCloudOS from working properly." for the root watchdog, or "Notes stopped unexpectedly." with "An unexpected error has prevented this application from working properly." for an application. Titles name an application by its display name. Codes, class names and thrown messages never appear in this layer.
 
-Everything developer-facing is inside the single **Technical details** disclosure. It opens with the error's identity:
+Everything developer-facing is inside the single Technical details disclosure. It opens with the error's identity:
 
 ```text
 Exception: SynCloudOSLifecycleError
@@ -61,12 +61,12 @@ Message: Cannot set AFXLayer.hidden after disposal.
 Caught by: SynCloudOS.RootWatchdog
 ```
 
-- **Exception** is the thrown value's class name, such as `SynCloudOSLifecycleError` or `TypeError`. A thrown non-`Error` value reads `Non-Error value (string)` or similar.
-- **Code** is the error's one authoritative code (see below).
-- **Message** is the thrown error's own message.
-- **Caught by** names the boundary that caught the error. Where it originated is the stack further down.
+- Exception: the thrown value's class name, such as `SynCloudOSLifecycleError` or `TypeError`. A thrown non-`Error` value reads `Non-Error value (string)` or similar.
+- Code: the error's one authoritative code (see below).
+- Message: the thrown error's own message.
+- Caught by: the boundary that caught the error. Where it originated is the stack further down.
 
-A condition the framework reports itself, such as a connection error or an unknown route, has no Exception or Message line, and says **Reported by** instead of Caught by.
+A condition the framework reports itself, such as a connection error or an unknown route, has no Exception or Message line, and says Reported by instead of Caught by.
 
 The rest of the technical details follows, and only what is known: the condition's detail line, the lifecycle resource identity and disposal reason, the problem, the source location, the application, window and route, severity and recoverability, the catalogue hint and docs, and the stack. The thrown error's cause, the development-only disposal stack and the React component stack come last. Unknown fields are omitted rather than printed as `none`, and no text appears twice. The copyable report (`toTechnicalReport`, also in the Inspector's error report) is the title, the message, the technical details and the capture time.
 

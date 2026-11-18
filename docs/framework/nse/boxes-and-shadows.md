@@ -16,7 +16,7 @@ import { NSEBox, NSEShadow, NSEView } from "@syndromatic/syncloudos/nse";
 
 ## Atmo's property mapping
 
-The framework sets `data-box-kind`, `data-border-style`, `data-nse-shadow`, `data-transparent`, `data-custom-fill`, `data-custom-border` and `data-corner-curve`. It does not choose an Atmo variant in JavaScript. CSS lives in `Themes/Atmo/Resources/atmo.css`.
+The framework sets `data-box-kind`, `data-border-style`, `data-nse-shadow`, `data-transparent`, `data-custom-fill`, `data-custom-border` and `data-corner-curve`. It does not choose an Atmo variant in JavaScript; the Atmo rules live in `src/Themes/Atmo.scostheme/Contents/Resources/atmo.boxes.css` and `atmo-structure.boxes.css`.
 
 | Properties | Atmo look |
 | --- | --- |

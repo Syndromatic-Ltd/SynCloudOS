@@ -28,9 +28,9 @@ session.pause();
 session.run(configuration, XRFXSessionRunOptions.resetTracking | XRFXSessionRunOptions.removeExistingAnchors);
 ```
 
-`useXR()` returns an actual component-owned `XRFXSession`. It survives React StrictMode effect replay and stops on genuine unmount. Set its delegate and queue, then call `run` from an explicit user action. Each privileged call checks the manifest, host authorization, application consent and the selected session lifetime. Revocation or application termination ends the old instance permanently, including queued delegate work and pending requests; regrant permits a new instance. Native permission refusal overrides saved consent.
+`useXR()` returns an actual component-owned `XRFXSession`. It survives React StrictMode effect replay and stops on genuine unmount. Set its delegate and queue, then call `run` from an explicit user action. Each privileged call checks the manifest, host authorisation, application consent and the selected session lifetime. Revocation or application termination ends the old instance permanently, including queued delegate work and pending requests; regrant permits a new instance. Native permission refusal overrides saved consent.
 
-| Apple member | XRFX member | Behavior |
+| Apple member | XRFX member | Behaviour |
 | --- | --- | --- |
 | `ARSession.delegate`, `delegateQueue` | `XRFXSession.delegate`, `delegateQueue` | Sender-first `XRFXSessionDelegate`; actual `DFXQueue` work. `null` uses the selected application's main queue. |
 | `ARSession.currentFrame`, `configuration` | Same members | Current immutable snapshot and copied concrete configuration, initially `null`. |
@@ -58,6 +58,6 @@ A repeated identical active configuration preserves its session. Changing config
 
 Raycast results are copied in their native frame and their hit-test source is cancelled before completion. Plane-specific targets or alignments fail with `unsupportedConfiguration`; no `XRFXPlaneAnchor` is exported because this adapter has no admitted plane-detection observation path. VR has no ARKit counterpart and is excluded. Face/body tracking, scene reconstruction, world maps, collaboration, persistent anchors and native hardware acceptance are outside this family pass.
 
-A spontaneous native session end releases its mounted slot, clears current run/frame state and invalidates queued or in-flight work. Restart with explicit `resetTracking`; no invented public end delegate is exposed. Native sessions, render layers, anchors and hit-test sources that arrive after cancellation are released without ending a replacement session. Ownership is checked again when a native session or layer crosses an asynchronous handoff. Browser denial is recorded before conversion at setup, frame, anchor, raycast and finalization boundaries. Native devices still require compatible hardware, HTTPS, permissions policy and user activation.
+A spontaneous native session end releases its mounted slot, clears current run/frame state and invalidates queued or in-flight work. Restart with explicit `resetTracking`; no invented public end delegate is exposed. Native sessions, render layers, anchors and hit-test sources that arrive after cancellation are released without ending a replacement session. Ownership is checked again when a native session or layer crosses an asynchronous handoff. Browser denial is recorded before conversion at setup, frame, anchor, raycast and finalisation boundaries. Native devices still require compatible hardware, HTTPS, permissions policy and user activation.
 
 The removed client/factory, capability/status, mode/reference-space and browser-options APIs have no aliases. Application code uses the classes above or `useXR()`.

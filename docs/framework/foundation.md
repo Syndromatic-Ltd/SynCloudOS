@@ -93,7 +93,7 @@ const text = dates.string(new Date("2026-11-07T12:30:00Z"));
 const date = dates.date(text);
 ```
 
-Intl formats any supported calendar in style mode. Parsing and explicit patterns currently support the Gregorian calendar and positive-era years; other calendars/eras reject explicitly. Localized style parsing uses Intl parts and verifies the formatted result, including month/weekday names, digits, day periods and time-zone labels. Missing date fields default to 1 January 2001, missing time fields to midnight, and two-digit style years to 2000–2099. Impossible dates and daylight-saving gaps return `null`. Ambiguous repeated wall times use the formatter's deterministic zone resolution; there is no locale-independent `Date.parse` fallback. Style output without seconds cannot recover seconds; formatting does not preserve milliseconds. These limits describe this API's supported conversion surface, rather than the full ICU pattern language.
+Intl formats any supported calendar in style mode. Parsing and explicit patterns currently support the Gregorian calendar and positive-era years; other calendars/eras reject explicitly. Localised style parsing uses Intl parts and verifies the formatted result, including month/weekday names, digits, day periods and time-zone labels. Missing date fields default to 1 January 2001, missing time fields to midnight, and two-digit style years to 2000–2099. Impossible dates and daylight-saving gaps return `null`. Ambiguous repeated wall times use the formatter's deterministic zone resolution; there is no locale-independent `Date.parse` fallback. Style output without seconds cannot recover seconds; formatting does not preserve milliseconds. These limits describe this API's supported conversion surface, rather than the full ICU pattern language.
 
 ### Decimal numbers
 
@@ -105,7 +105,7 @@ const amount = NSEDecimalNumber.fromString("0.1").adding(NSEDecimalNumber.fromSt
 const eighth = NSEDecimalNumber.one.dividing(NSEDecimalNumber.fromString("8"), cents); // 0.12
 ```
 
-Rounding modes are `plain` (nearest, ties away from zero), `bankers` (nearest, ties to even), `down` (toward negative infinity) and `up` (toward positive infinity). A handler's optional `scale` is decimal places, with an omitted scale retaining the bounded precision. `raiseOnExactness`, `raiseOnOverflow`, `raiseOnUnderflow` and `raiseOnDivideByZero` control arithmetic errors. Defaults tolerate inexactness and raise the other three errors. A suppressed unrepresentable result becomes `notANumber`; suppressed inexactness returns the rounded result. `defaultBehavior` is replaceable. Custom `NSEDecimalNumberBehaviors.exceptionDuringOperation` can supply a replacement for a raised arithmetic error. Serialization returns decimal text, preserving the value without a binary-number bridge.
+Rounding modes are `plain` (nearest, ties away from zero), `bankers` (nearest, ties to even), `down` (toward negative infinity) and `up` (toward positive infinity). A handler's optional `scale` is decimal places, with an omitted scale retaining the bounded precision. `raiseOnExactness`, `raiseOnOverflow`, `raiseOnUnderflow` and `raiseOnDivideByZero` control arithmetic errors. Defaults tolerate inexactness and raise the other three errors. A suppressed unrepresentable result becomes `notANumber`; suppressed inexactness returns the rounded result. `defaultBehavior` is replaceable. Custom `NSEDecimalNumberBehaviors.exceptionDuringOperation` can supply a replacement for a raised arithmetic error. Serialisation returns decimal text, preserving the value without a binary-number bridge.
 
 ### Undo
 
@@ -148,7 +148,7 @@ For persistent application settings, inject the mounted application’s preferen
 
 ## Scope
 
-Foundation owns the value types and the undo history engine. The system layer owns mounted authority and service adapters. The internal date, decimal and transformer predecessors have been removed. `ChangeSet` and `SelectionModel` remain private controller implementation models: neither has a Foundation class counterpart, and neither is published under an invented Cocoa name. Public byte contracts are described below.
+Foundation owns the value types and the undo history engine, while the system layer owns mounted authority and service adapters. The internal date, decimal and transformer predecessors have been removed. `ChangeSet` and `SelectionModel` remain private controller implementation models: neither has a Foundation class counterpart, and neither is published under an invented Cocoa name.
 
 ## Public byte contracts
 

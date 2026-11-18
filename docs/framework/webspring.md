@@ -2,7 +2,7 @@
 
 Webspring is the shell of a SynCloudOS site. It presents the launcher, hosts the application stage, provides the app switcher and notifications, and runs the sign-in gate. You describe the shell with one manifest and one definition, and the browser host does the rest.
 
-The launcher that ships with the framework is the **Board**, a paged grid of application icons inspired by iOS Springboard. Icons hold to reorder, launch with a zoom into the application stage and return with the reverse motion. The Board adapts from a phone to a desktop display.
+The launcher that ships with the framework is the Board, a paged grid of application icons inspired by iOS Springboard. Icons hold to reorder, launch with a zoom into the application stage and return with the reverse motion, adapting from a phone to a desktop display.
 
 ## Define a shell
 
@@ -264,7 +264,7 @@ export default defineWebspring({
 - `load(signal)` returns the data, of any shape. The framework owns the promise. The signal aborts when the Board unmounts, when the person retries or the widget refreshes, and when the load times out.
 - `view` is a React component that receives `{ data, refresh }` once the load has succeeded. A view that throws shows the error state; the rest of the Board is untouched.
 - `whenEmpty` is `"hide"` (the widget disappears, and so does the shelf if every widget is hidden) or `{ message }` (the message shows in its place). Empty means an empty array, `null` or `undefined`; `isEmpty(data)` replaces that rule.
-- The framework draws the other states. While loading it shows a placeholder. A rejected load shows an error with **Retry**. A load that has not settled after `timeout` milliseconds (10 000 by default) is aborted and shows a timeout error with **Retry**, so a widget can never stay on "Loading…".
+- The framework draws the other states: while loading it shows a placeholder, a rejected load shows an error with Retry, and a load that has not settled after `timeout` milliseconds (10 000 by default) is aborted and shows a timeout error with Retry, so a widget can never stay on "Loading…".
 - `title` is a string, or `{ key, fallback }` looked up in the app's strings. `icon` is a resource path, resolved through the shell's resources.
 
 The endpoint behind `load` decides what is public. Filter drafts, future dated items and deleted records there.
@@ -288,13 +288,13 @@ The Vite plugin discovers `src/SynWare/*.app`, `src/Preferences/*.prefPane`, `sr
 
 ## Authentication
 
-Pass `"disabled"` for a public site. For server backed sign-in, pass `{ policy: "optional" | "required", service, loginComponent? }`. Optional mode keeps public content available and adds a Sign In control. Required mode holds protected shell content until the server confirms the session. Disabled mode makes no authentication requests and never offers Log Out. An app intended for anonymous launching declares `runtime.configurationProfiles.public: true`. See [Authentication](authentication.md).
+Pass `"disabled"` for a public site. For server backed sign-in, pass `{ policy: "optional" | "required", service, loginComponent? }`. Optional mode keeps public content available and adds a Sign In control. Required mode holds protected shell content until the server confirms the session. Disabled mode makes no authentication requests and never offers Log Out. An app intended for anonymous launching declares `runtime.policy.public: true`. See [Authentication](authentication.md).
 
 When a gate is configured, the host presents the sign-in window after the icons settle, dims the launcher behind it and keeps the launcher inert until the window has left. Visits without a gate, and visits that are already authenticated, enter without interruption. A tab-local marker in session storage preserves only the held presentation across provider redirects. It stores no identity and grants no access.
 
 ## System Preferences
 
-System Preferences is a list of panes. The framework ships six, each one a module of its own: **Account** (only when sign-in is on), **Appearance**, **Audio & Haptics** (`sounds`), **Motion**, **Notifications** and **Language**. Add your own with `definePreferencePane`, and list them in the shell definition.
+System Preferences is a list of panes. The framework ships ten, each one a module of its own: Account (only when sign-in is on), Appearance, Audio & Haptics (`sounds`), Motion, Notifications, Privacy & Security (`privacy-security`), Language, Updates, Storage and Capabilities. Add your own with `definePreferencePane`, and list them in the shell definition.
 
 ```tsx
 import { defineWebspring, definePreferencePane, type PreferencePaneViewProps } from "@syndromatic/syncloudos/webspring";
@@ -308,7 +308,7 @@ const billing = definePreferencePane({
   id: "billing",
   title: { key: "billing.title", fallback: "Billing" },
   icon: billingIcon,
-  order: 600,
+  order: 700,
   view: BillingPane,
 });
 
@@ -321,9 +321,9 @@ export default defineWebspring({
 
 - `view` is a React component. It receives `settings` (the person's current settings), `appearance` (`"light"`, `"dark"` or `"auto"`) and `locale` (the active locale and the supported ones). It re-renders when any of them changes.
 - `title` is a string, or `{ key, fallback }` looked up in the system dictionary. `icon` is your artwork, a URL (import the SVG), shown beside the title in the list.
-- Panes list in ascending `order`, ties broken by `id`. The built-ins sit at 50 (Account), 100 (Appearance), 200, 300, 400 and 500 (Language).
+- Panes list in ascending `order`, ties broken by `id`. The built-ins sit at 50 (`account`), 100 (`appearance`), 200 (`sounds`), 300 (`motion`), 400 (`notifications`), 450 (`privacy-security`), 500 (`language`), 600 (`updates`), 650 (`storage`) and 660 (`capabilities`).
 - Optional `summary` (the line under the title, usually the current value) and `accessory` (a control on the list row, such as a master switch) are React components that receive the same props.
-- `hide` removes built-in panes by `id`: `appearance`, `sounds`, `motion`, `notifications`, `language`, `account`. A developer pane with a built-in's `id` replaces that built-in instead. `hide` never removes a developer pane.
+- `hide` removes built-in panes by `id`: `account`, `appearance`, `sounds`, `motion`, `notifications`, `privacy-security`, `language`, `updates`, `storage`, `capabilities`. A developer pane with a built-in's `id` replaces that built-in instead, and `hide` never removes a developer pane.
 - A pane that throws shows "This preference pane could not be loaded." in its place, and System Preferences stays open. A summary that throws shows "Unavailable"; a throwing accessory is dropped.
 
 Themes restyle the window through custom properties alone (`--nse-prefs-panel-background`, `--nse-prefs-selection-background` and the rest, listed at the top of `nsePreferencesToast.css`); the sidebar list layout is the same in every theme. Use the `nse-prefs-section`, `nse-prefs-note` and `nse-prefs-empty` classes and the NSE controls inside a pane so it follows the theme.
