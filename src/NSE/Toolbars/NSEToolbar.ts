@@ -19,6 +19,7 @@
  */
 
 import { NSEObject } from "../Objects/NSEObject";
+import { nseCSSValue } from "../Graphics/NSEShadow";
 import { NSEUserDefaultsController } from "../Controllers/NSEUserDefaultsController";
 import { NSEUserDefaults } from "../../Foundation/NSEUserDefaults";
 import type { NSEOwner } from "../Controllers/ownership";
@@ -153,6 +154,11 @@ export class NSEToolbar<const Items extends readonly NSEToolbarItemInput[] = rea
     }
     for (const id of options.defaultItemIdentifiers) {
       if (!allowed.includes(id)) throw new TypeError(`Toolbar "${options.identifier}" shows "${id}" by default but does not allow it.`);
+    }
+    for (const item of options.items) {
+      if (item.kind === "command" && item.backgroundTintColour !== undefined) {
+        nseCSSValue(item.backgroundTintColour, "color", "NSEToolbarItem backgroundTintColour");
+      }
     }
     this.identifier = options.identifier;
     this.allowsUserCustomization = options.allowsUserCustomization ?? false;

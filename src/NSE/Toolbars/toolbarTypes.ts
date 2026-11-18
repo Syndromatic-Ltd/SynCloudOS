@@ -64,6 +64,8 @@ export type NSEToolbarItem =
        * false draws only its icon, with the label beneath it, as Pages' toolbar does.
        */
       readonly bordered?: boolean;
+      /** NSToolbarItem.backgroundTintColor. Applies to bordered items. */
+      readonly backgroundTintColour?: string;
       /** Stable host-provided geometry; no DOM measurement is acquired. */
       readonly minimumWidth?: number;
       readonly idealWidth?: number;
@@ -151,6 +153,7 @@ export type ToolbarPresentedItem =
       readonly disabledReason?: string;
       readonly presentation: CommandPresentation | null;
       readonly bordered: boolean;
+      readonly backgroundTintColour?: string;
       readonly minimumWidth?: number;
       readonly idealWidth?: number;
     }

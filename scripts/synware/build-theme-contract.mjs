@@ -19,6 +19,14 @@ export function createNSEThemeContract(rendered, vocabulary, colours) {
       variants: Object.fromEntries([...entry.variants].sort(([a], [b]) => a.localeCompare(b, "en")).map(([name, values]) => [name, sorted(values)])),
     }])),
     colours: [...colours],
+    customProperties: {
+      "--nse-bezel-colour": ["button", "pop-up-button"],
+      "--nse-content-tint-colour": ["button", "pop-up-button"],
+      "--nse-background-tint-colour": ["toolbar-item"],
+      "--nse-selected-segment-bezel-colour": ["segmented-control"],
+      "--nse-box-fill": ["box"],
+      "--nse-box-border-colour": ["box"],
+    },
     appearance: { "colour-scheme-resolved": ["light", "dark"], contrast: ["normal", "high", "forced"], transparency: ["normal", "reduced"] },
     navigation: { compact: { placement: ["block-start", "block-end"], flow: ["in-flow", "overlay"] }, regular: { placement: ["source-list", "block-start"], flow: ["in-flow", "overlay"] } },
     presentation: { login: ["plain", "ornamented"], notifications: ["plain", "sliced-3d"], materialLighting: ["off", "on"] },
@@ -66,7 +74,9 @@ export function renderNSEThemeContractMarkdown(contract) {
     lines.push("");
   }
   lines.push("## Colours", "", "Each name is a key of " + tick("colours.light") + " and " + tick("colours.dark") + " in " + tick("Theme.json") + ".", "", list(contract.colours), "");
-  lines.push("## Appearance attributes", "");
+  lines.push("## Control custom properties", "", "Themes can read these properties when an instance supplies a colour.", "");
+  for (const [property, controls] of Object.entries(contract.customProperties)) lines.push("- " + tick(property) + " applies to " + list(controls));
+  lines.push("", "## Appearance attributes", "");
   for (const [name, values] of Object.entries(contract.appearance)) lines.push("- " + tick("data-nse-" + name) + ": " + list(values));
   lines.push("", "## Navigation and presentation", "");
   for (const [size, entry] of Object.entries(contract.navigation)) lines.push("- " + tick("navigation." + size) + ": placement " + list(entry.placement) + "; flow " + list(entry.flow));

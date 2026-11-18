@@ -41,11 +41,18 @@ function TooltipSpecimen() {
   const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null);
   return <><button ref={setAnchor}>Anchor</button><Tooltip id="contract-tooltip" open anchor={anchor} content="Help" /></>;
 }
-function Toolbar({ width, customising, borderless = false, labelled = false, sizeMode = "regular" }: { width: number; customising: boolean; borderless?: boolean; labelled?: boolean; sizeMode?: "regular" | "small" }) {
+export function Toolbar({ width, customising, borderless = false, labelled = false, sizeMode = "regular", checked = "off" }: {
+  width: number;
+  customising: boolean;
+  borderless?: boolean;
+  labelled?: boolean;
+  sizeMode?: "regular" | "small";
+  checked?: "on" | "off";
+}) {
   const [controller] = useState(() => {
     const values = new Map<string, unknown>();
     const preferences = new NSEUserDefaultsController<ToolbarPreferences>({ namespace: "contract-toolbar", schema: { version: 1, defaults: { itemIds: ["save", "custom", "space", "flex", "separator"], displayMode: "icon-and-label", sizeMode }, fields: { itemIds: { validate: (v: unknown): v is readonly string[] => Array.isArray(v) }, displayMode: { validate: (v: unknown): v is ToolbarPreferences["displayMode"] => typeof v === "string" }, sizeMode: { validate: (v: unknown): v is ToolbarPreferences["sizeMode"] => typeof v === "string" } }, migrations: [] }, defaults: defaultsFrom({ read: key => values.get(key) ?? null, write: (key, value) => { values.set(key, value); }, remove: key => { values.delete(key); } }) });
-    const runtime: ToolbarRuntimePort = { signal: new AbortController().signal, commands: { getPresentationGeneration: () => ({ registryGeneration: 0, responderGeneration: 0 }), validateMany: async requests => new Map(requests.map(request => [request.key, { commandId: request.commandId, responderId: "contract", title: "Save", enabled: true, denied: false, hidden: false, state: "off" as const, stale: false }])), prepareDispatch: async () => ({ status: "cancelled", reason: "specimen" }), dispatch: async commandId => ({ status: "cancelled", commandId, operationId: "contract", reason: "specimen" }) } };
+    const runtime: ToolbarRuntimePort = { signal: new AbortController().signal, commands: { getPresentationGeneration: () => ({ registryGeneration: 0, responderGeneration: 0 }), validateMany: async requests => new Map(requests.map(request => [request.key, { commandId: request.commandId, responderId: "contract", title: "Save", enabled: true, denied: false, hidden: false, state: checked, stale: false }])), prepareDispatch: async () => ({ status: "cancelled", reason: "specimen" }), dispatch: async commandId => ({ status: "cancelled", commandId, operationId: "contract", reason: "specimen" }) } };
     return new NSEToolbarController({ configuration: { identifier: "contract-toolbar", owner: { kind: "window", windowControllerId: "contract" }, allowedItemIds: ["save", "custom", "space", "flex", "separator"], defaultItemIds: ["save", "custom", "space", "flex", "separator"], displayMode: "icon-and-label", sizeMode }, items: [{ kind: "command", id: "save", label: "Save", paletteLabel: "Save document", commandId: "save", icon: <span>S</span>, minimumWidth: 40, idealWidth: 54, ...(borderless ? { bordered: false } : {}) }, { kind: "custom", id: "custom", label: "Custom", minimumWidth: 40, idealWidth: 62, render: () => <span>Custom</span>, ...(labelled ? { showsLabel: true } : {}) }, { kind: "space", id: "space", width: 8 }, { kind: "flexible-space", id: "flex", minimumWidth: 12 }, { kind: "separator", id: "separator" }], preferences, runtime });
   });
   useEffect(() => () => controller.dispose(), [controller]);

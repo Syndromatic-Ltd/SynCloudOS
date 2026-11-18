@@ -48,6 +48,7 @@ Contract version 1: 73 controls, 48 colours.
 - Parts: `actions`, `background`, `bezel`, `border`, `content`, `header`, `label`, `separator`, `subtitle`, `title`
 - States: none
 - Variants:
+  - `data-nse-border-colour`: `true`
   - `data-nse-border-type`: `bezelBorder`, `grooveBorder`
   - `data-nse-box-type`: `custom`, `primary`, `secondary`, `separator`
   - `data-nse-custom-border`: `true`
@@ -78,7 +79,9 @@ Contract version 1: 73 controls, 48 colours.
   - `data-nse-bezel-style`: `disclosure`, `rounded`, `texturedRounded`
   - `data-nse-button-type`: `momentaryPushIn`, `pushOnPushOff`, `switch`, `toggle`
   - `data-nse-chrome`: `hud`
+  - `data-nse-content-tint`: `true`
   - `data-nse-control-size`: `large`, `regular`, `small`
+  - `data-nse-custom-bezel`: `true`
   - `data-nse-expanded`: `false`, `true`
   - `data-nse-has-destructive-action`: `true`
   - `data-nse-image-position`: `imageLeading`, `imageOnly`, `imageTrailing`, `noImage`
@@ -336,7 +339,9 @@ Contract version 1: 73 controls, 48 colours.
 - States: `enabled=false`, `focused`, `highlighted`, `hovered`
 - Variants:
   - `data-nse-bezel-style`: `rounded`
+  - `data-nse-content-tint`: `true`
   - `data-nse-control-size`: `regular`, `small`
+  - `data-nse-custom-bezel`: `true`
   - `data-nse-height`: `24`
   - `data-nse-pulls-down`: `false`, `true`
   - `data-nse-type`: `native`
@@ -449,6 +454,7 @@ Contract version 1: 73 controls, 48 colours.
 - Variants:
   - `data-nse-button-type`: `radio`
   - `data-nse-control-size`: `regular`, `small`
+  - `data-nse-custom-bezel`: `true`
   - `data-nse-distribution`: `fill-equally`
   - `data-nse-expanded`: `false`, `true`
   - `data-nse-height`: `40`
@@ -611,8 +617,9 @@ Contract version 1: 73 controls, 48 colours.
 ### `toolbar-item`
 
 - Parts: `background`, `border`, `content`, `custom`, `highlight`, `image`, `item`, `overflow`, `overflow-glyph`, `separator`, `shadow`, `title`
-- States: `enabled=false`, `selected`, `state=off`
+- States: `enabled=false`, `selected`, `state=off`, `state=on`
 - Variants:
+  - `data-nse-background-tint`: `true`
   - `data-nse-style`: `bevel`, `borderless`, `cap`, `gloss`, `inner-shadow`, `labelled`, `splice`, `surface`
   - `data-nse-toolbar-bordered`: `false`
 
@@ -680,6 +687,17 @@ Contract version 1: 73 controls, 48 colours.
 Each name is a key of `colours.light` and `colours.dark` in `Theme.json`.
 
 `labelColour`, `secondaryLabelColour`, `tertiaryLabelColour`, `quaternaryLabelColour`, `textColour`, `placeholderTextColour`, `selectedTextColour`, `textBackgroundColour`, `selectedTextBackgroundColour`, `unemphasisedSelectedTextColour`, `unemphasisedSelectedTextBackgroundColour`, `keyboardFocusIndicatorColour`, `linkColour`, `separatorColour`, `gridColour`, `headerTextColour`, `findHighlightColour`, `highlightColour`, `shadowColour`, `selectedContentBackgroundColour`, `unemphasisedSelectedContentBackgroundColour`, `alternatingContentBackground1`, `alternatingContentBackground2`, `selectedMenuItemTextColour`, `controlAccentColour`, `controlColour`, `controlBackgroundColour`, `controlTextColour`, `disabledControlTextColour`, `selectedControlColour`, `selectedControlTextColour`, `alternateSelectedControlTextColour`, `windowBackgroundColour`, `windowFrameTextColour`, `underPageBackgroundColour`, `systemRed`, `systemOrange`, `systemYellow`, `systemGreen`, `systemMint`, `systemTeal`, `systemCyan`, `systemBlue`, `systemIndigo`, `systemPurple`, `systemPink`, `systemBrown`, `systemGrey`
+
+## Control custom properties
+
+Themes can read these properties when an instance supplies a colour.
+
+- `--nse-bezel-colour` applies to `button`, `pop-up-button`
+- `--nse-content-tint-colour` applies to `button`, `pop-up-button`
+- `--nse-background-tint-colour` applies to `toolbar-item`
+- `--nse-selected-segment-bezel-colour` applies to `segmented-control`
+- `--nse-box-fill` applies to `box`
+- `--nse-box-border-colour` applies to `box`
 
 ## Appearance attributes
 

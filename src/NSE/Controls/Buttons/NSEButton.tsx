@@ -26,6 +26,7 @@ import {
   useLayoutEffect,
   useRef,
   type ButtonHTMLAttributes,
+  type CSSProperties,
   type ForwardedRef,
   type ReactElement,
   type ReactNode,
@@ -37,6 +38,7 @@ import { nseControlHooks, nseMinimumControlProperties } from "../../Theme/contra
 import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction";
 import type { NSEImage } from "../Images/NSEImageResource";
 import type { HFXFeedbackPresetName, HFXFeedbackRequest } from "../../Feedback";
+import { nseCSSValue } from "../../Graphics/NSEShadow";
 import type { NSEBinding } from "../../Bindings/bindingTypes";
 import type { ControlActionProps, NSEControlValidation } from "../Core/controlTypes";
 import { useNSEControlFormReset, useNSEControlValue } from "../Core";
@@ -85,6 +87,10 @@ export interface NSEButtonProps<Payload = unknown>
   readonly title?: ReactNode;
   readonly buttonType?: NSEButtonType;
   readonly bezelStyle?: NSEBezelStyle;
+  /** One CSS colour for the bezel. */
+  readonly bezelColour?: string;
+  /** One CSS colour for the title and template image. */
+  readonly contentTintColour?: string;
   /** The button's image: an NSEImage, image URL or drawn element. Template images inherit the content colour. */
   readonly image?: ReactNode | NSEImage;
   /** Defaults to `imageLeading` when the button has an image, otherwise `noImage`. */
@@ -165,11 +171,27 @@ function accessibleTitle(title: ReactNode): string | undefined {
   return typeof title === "string" || typeof title === "number" ? String(title) : undefined;
 }
 
+function buttonColourOverrides(bezelColour: string | undefined, contentTintColour: string | undefined, style?: CSSProperties) {
+  const bezel = bezelColour === undefined ? undefined : nseCSSValue(bezelColour, "color", "NSEButton bezelColour");
+  const tint = contentTintColour === undefined ? undefined : nseCSSValue(contentTintColour, "color", "NSEButton contentTintColour");
+  return {
+    "data-nse-custom-bezel": bezel === undefined ? undefined : "true",
+    "data-nse-content-tint": tint === undefined ? undefined : "true",
+    style: bezel === undefined && tint === undefined ? style : {
+      ...style,
+      ...(bezel === undefined ? {} : { "--nse-bezel-colour": bezel }),
+      ...(tint === undefined ? {} : { "--nse-content-tint-colour": tint }),
+    } as CSSProperties,
+  };
+}
+
 const PushButtonCell = forwardRef<HTMLButtonElement, NSEButtonProps>(function PushButtonCell(
   {
     title,
     buttonType = "momentaryPushIn",
     bezelStyle = "rounded",
+    bezelColour,
+    contentTintColour,
     image,
     imagePosition,
     state,
@@ -225,6 +247,7 @@ const PushButtonCell = forwardRef<HTMLButtonElement, NSEButtonProps>(function Pu
   const shownImage = position === "noImage" || image == null ? null : <ControlImage image={image} />;
   const label = accessibleTitle(title);
   const disclosure = bezelStyle === "disclosure";
+  const { style, ...colourHooks } = buttonColourOverrides(bezelColour, contentTintColour, props.style);
 
   return (
     <button
@@ -260,7 +283,8 @@ const PushButtonCell = forwardRef<HTMLButtonElement, NSEButtonProps>(function Pu
         triggerNSEControlHapticForEvent(resolveNSEControlHaptic(haptic, TONE_HAPTICS[tone]), event, !disabled);
       }}
       {...props}
-      style={nseMinimumControlProperties(props.style)}
+      style={nseMinimumControlProperties(style)}
+      {...colourHooks}
       {...theme.events}
       {...nseControlHooks({ control: (props as { "data-nse-control"?: NSEThemeControlName })["data-nse-control"] ?? "button", state: presentation?.state ?? state ?? "off", highlighted: isHighlighted || press.active, selected: drawnPressed, tracking: press.active, enabled: !disabled, hovered: theme.hovered, focused: theme.focused, variants: { "bezel-style": bezelStyle, "control-size": controlSize ?? "regular", "button-type": buttonType, "image-position": position, ...(appearance ? { "appearance-name": appearance } : {}), ...(keyEquivalent ? { "key-equivalent": keyEquivalent, ...(keyEquivalent === "\r" ? { role: "default" } : {}) } : {}), ...(hasDestructiveAction ? { "has-destructive-action": "true" } : {}) } })}
       data-nse-part={(props as Record<string, unknown>)["data-nse-part"] as string ?? "background"}
@@ -291,6 +315,8 @@ function SwitchButtonCell(
     image: _image,
     imagePosition: _imagePosition,
     bezelStyle: _bezelStyle,
+    bezelColour,
+    contentTintColour,
     buttonType: _buttonType,
     state,
     defaultState,
@@ -360,6 +386,7 @@ function SwitchButtonCell(
       <label
         {...theme.events}
         {...nseControlHooks({ control: restAttributes["data-nse-control"] as NSEThemeControlName ?? "button", state: fromCheckState(current.value), highlighted: isHighlighted || theme.highlighted, enabled: isEnabled, hovered: theme.hovered, focused: theme.focused, variants: { "button-type": "switch", "control-size": controlSize ?? "regular", "bezel-style": _bezelStyle ?? "rounded" } })}
+        {...buttonColourOverrides(bezelColour, contentTintColour)}
         data-nse-part={restAttributes["data-nse-part"] as string ?? "background"}
         className={classes("nse-control-checkbox", disabled && "is-disabled", className)}
         htmlFor={inputId}

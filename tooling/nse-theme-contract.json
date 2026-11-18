@@ -106,6 +106,9 @@
       ],
       "states": [],
       "variants": {
+        "border-colour": [
+          "true"
+        ],
         "border-type": [
           "bezelBorder",
           "grooveBorder"
@@ -246,10 +249,16 @@
         "chrome": [
           "hud"
         ],
+        "content-tint": [
+          "true"
+        ],
         "control-size": [
           "large",
           "regular",
           "small"
+        ],
+        "custom-bezel": [
+          "true"
         ],
         "expanded": [
           "false",
@@ -1143,9 +1152,15 @@
         "bezel-style": [
           "rounded"
         ],
+        "content-tint": [
+          "true"
+        ],
         "control-size": [
           "regular",
           "small"
+        ],
+        "custom-bezel": [
+          "true"
         ],
         "height": [
           "24"
@@ -1444,6 +1459,9 @@
         "control-size": [
           "regular",
           "small"
+        ],
+        "custom-bezel": [
+          "true"
         ],
         "distribution": [
           "fill-equally"
@@ -1978,9 +1996,13 @@
       "states": [
         "enabled=false",
         "selected",
-        "state=off"
+        "state=off",
+        "state=on"
       ],
       "variants": {
+        "background-tint": [
+          "true"
+        ],
         "style": [
           "bevel",
           "borderless",
@@ -2269,6 +2291,28 @@
     "systemBrown",
     "systemGrey"
   ],
+  "customProperties": {
+    "--nse-bezel-colour": [
+      "button",
+      "pop-up-button"
+    ],
+    "--nse-content-tint-colour": [
+      "button",
+      "pop-up-button"
+    ],
+    "--nse-background-tint-colour": [
+      "toolbar-item"
+    ],
+    "--nse-selected-segment-bezel-colour": [
+      "segmented-control"
+    ],
+    "--nse-box-fill": [
+      "box"
+    ],
+    "--nse-box-border-colour": [
+      "box"
+    ]
+  },
   "appearance": {
     "colour-scheme-resolved": [
       "light",

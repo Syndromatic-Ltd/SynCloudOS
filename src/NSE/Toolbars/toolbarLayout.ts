@@ -160,6 +160,7 @@ function toPresented(item: ToolbarPresentedItem | NSEToolbarItem, index: number)
     payload: item.payload,
     label: item.label,
     bordered: item.bordered !== false,
+    backgroundTintColour: item.backgroundTintColour,
     paletteLabel: item.paletteLabel,
     icon: item.icon,
     enabled: true,

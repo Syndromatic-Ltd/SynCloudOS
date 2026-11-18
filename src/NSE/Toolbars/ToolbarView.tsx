@@ -33,7 +33,7 @@ import {
 } from "react";
 import type { SmoothSurfaceRequest } from "../SmoothSurface";
 import { getSmoothSurfaceThemeHooks } from "../SmoothSurface/smoothSurface";
-import { classes, getControlSmoothSurfaceProps } from "../Controls/Core/nseControlsShared";
+import { classes, getControlSmoothSurfaceProps, type CSSVarStyle } from "../Controls/Core/nseControlsShared";
 import {
   ChromeBevel,
   ChromeCap,
@@ -263,6 +263,12 @@ function ConfiguredToolbar({
             </span>
           );
         }
+        const tint = item.bordered ? item.backgroundTintColour : undefined;
+        // The allocation is the whole slot, including its inline margins.
+        const itemStyle: CSSVarStyle = {
+          inlineSize: `calc(${entry.allocatedWidth}px - 2 * var(--nse-toolbar-item-inline-margin, 0px))`,
+          ...(tint === undefined ? {} : { "--nse-background-tint-colour": tint }),
+        };
         const itemAppearanceState: ChromeVisualState = !item.enabled
           ? "disabled"
           : item.checked === "on" || item.checked === "mixed"
@@ -284,9 +290,7 @@ function ConfiguredToolbar({
             }}
             type="button"
             className="nse-toolbar-item"
-            // The allocation is the item's whole slot: its inline margins come out of it, so a
-            // row of items fills exactly the width the layout gave it.
-            style={{ inlineSize: `calc(${entry.allocatedWidth}px - 2 * var(--nse-toolbar-item-inline-margin, 0px))` }}
+            style={itemStyle}
             data-nse-control="toolbar-item"
             data-nse-state={item.checked} data-nse-enabled={item.enabled ? undefined : "false"} data-nse-selected={item.checked !== "off" ? "" : undefined}
             data-nse-highlighted={pressedItemId === entry.instanceId ? "" : undefined} data-nse-hovered={hoveredItemId === entry.instanceId ? "" : undefined} data-nse-focused={focusedItemId === entry.instanceId ? "" : undefined}
@@ -295,6 +299,7 @@ function ConfiguredToolbar({
             data-nse-toolbar-state={item.checked}
             data-nse-toolbar-bordered={item.bordered ? undefined : "false"} data-nse-style={item.bordered ? undefined : "borderless"}
             data-nse-part="item"
+            data-nse-background-tint={tint === undefined ? undefined : "true"}
             data-state={!item.enabled ? "disabled" : item.checked === "on" || item.checked === "mixed" ? "selected" : "normal"}
 
             aria-label={item.label}

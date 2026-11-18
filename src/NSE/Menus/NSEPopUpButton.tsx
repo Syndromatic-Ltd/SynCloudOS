@@ -20,11 +20,12 @@
 
 import { useNSEThemeInteraction } from "../Theme/contract/useThemeInteraction";
 import { nseControlHooks } from "../Theme/contract/hooks";
-import { useCallback, useContext, useEffect, useId, useMemo, useRef, useState, type HTMLAttributes, type ReactNode } from "react";
+import { useCallback, useContext, useEffect, useId, useMemo, useRef, useState, type CSSProperties, type HTMLAttributes, type ReactNode } from "react";
 import { useOptionalOverlayProvider } from "../Overlays";
 import { ListboxPopup, type ListboxOption } from "../Overlays/NSEListboxPopup";
 import type { PopupPresentation } from "../Overlays/NSEPopup";
 import { NSEButton, type NSEButtonProps } from "../Controls/Buttons/NSEButton";
+import { nseCSSValue } from "../Graphics/NSEShadow";
 import { classes, sizedControlStyle, useControllableState, useNSEControlFeedback } from "../Controls/Core/nseControlsShared";
 import { ActionResponderContext, useNSEActionBinding } from "../Controls/Core/useNSEControlAction";
 import type { NSEActionReference } from "../Controls/Core/actionReference";
@@ -77,6 +78,10 @@ export interface NSEPopUpButtonProps<Payload = unknown> extends Omit<HTMLAttribu
   readonly appearance?: NSEButtonProps["appearance"];
   /** NSButton.bezelStyle of a pull-down button: `texturedRounded` is the toolbar capsule. */
   readonly bezelStyle?: NSEButtonProps["bezelStyle"];
+  /** One CSS colour for the bezel. */
+  readonly bezelColour?: string;
+  /** One CSS colour for the displayed value or title and template image. */
+  readonly contentTintColour?: string;
   /** NSView.toolTip. */
   readonly toolTip?: string;
   /** "small" is the size inspectors and panels use (24px). */
@@ -147,6 +152,8 @@ function PopUpButtonControl(props: NSEPopUpButtonProps) {
     isEnabled = true,
     appearance,
     bezelStyle,
+    bezelColour,
+    contentTintColour,
     toolTip,
     controlSize = "regular",
     height,
@@ -256,9 +263,21 @@ function PopUpButtonControl(props: NSEPopUpButtonProps) {
     return <ItemActionBinding key={row.rowId} id={row.rowId} action={action} payload={hasActionPayload ? actionPayload : row.item.value} onState={receiveItemCommand} />;
   });
 
+  const bezel = bezelColour === undefined ? undefined : nseCSSValue(bezelColour, "color", "NSEPopUpButton bezelColour");
+  const tint = contentTintColour === undefined ? undefined : nseCSSValue(contentTintColour, "color", "NSEPopUpButton contentTintColour");
+  const colourHooks = {
+    "data-nse-custom-bezel": bezel === undefined ? undefined : "true",
+    "data-nse-content-tint": tint === undefined ? undefined : "true",
+  };
+  const drawingStyle = bezel === undefined && tint === undefined ? style : {
+    ...style,
+    ...(bezel === undefined ? {} : { "--nse-bezel-colour": bezel }),
+    ...(tint === undefined ? {} : { "--nse-content-tint-colour": tint }),
+  } as CSSProperties;
+
   if (!hosted) {
     return (
-      <label {...drawing} data-nse-part="background" id={id} className={classes("nse-choice-control", className)} data-nse-choice="native" data-nse-type="native" style={sizedControlStyle(style, height, width)} {...(htmlAttributes as HTMLAttributes<HTMLLabelElement>)} {...theme.events}>
+      <label {...drawing} data-nse-part="background" id={id} className={classes("nse-choice-control", className)} data-nse-choice="native" data-nse-type="native" style={sizedControlStyle(drawingStyle, height, width)} {...(htmlAttributes as HTMLAttributes<HTMLLabelElement>)} {...colourHooks} {...theme.events}>
         {bindings}
         {label ? (labelHidden ? <span className="nse-control-visually-hidden">{label}</span> : label) : null}
         <select
@@ -288,8 +307,9 @@ function PopUpButtonControl(props: NSEPopUpButtonProps) {
       data-pulls-down={pullsDown ? "true" : undefined}
       data-size={height !== undefined ? "custom" : controlSize === "small" ? "small" : undefined}
       data-nse-height={height === undefined ? undefined : String(height)}
-      style={sizedControlStyle(style, height, width)}
+      style={sizedControlStyle(drawingStyle, height, width)}
       {...htmlAttributes}
+      {...colourHooks}
       {...theme.events}
     >
       {bindings}
@@ -316,6 +336,8 @@ function PopUpButtonControl(props: NSEPopUpButtonProps) {
         </>}
         appearance={appearance}
         bezelStyle={pullsDown ? bezelStyle : undefined}
+        bezelColour={bezel}
+        contentTintColour={tint}
         toolTip={toolTip}
         isHighlighted={pullsDown ? open : itemCommands.get(selectedValue)?.presentation?.state === "on"}
         isEnabled={!(disabled || !actionAvailable)}

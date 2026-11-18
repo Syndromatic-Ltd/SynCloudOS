@@ -1076,6 +1076,7 @@ export function NSEBox({
       data-custom-fill={resolvedFill === undefined ? undefined : "true"}
       data-nse-custom-fill={resolvedFill === undefined ? undefined : "true"}
       data-custom-border={resolvedBorder !== undefined || resolvedWidth !== undefined || cornerRadius !== undefined || cornerCurve !== undefined ? "true" : undefined}
+      data-nse-border-colour={resolvedBorder === undefined ? undefined : "true"}
       data-nse-custom-border={resolvedBorder !== undefined || resolvedWidth !== undefined || cornerRadius !== undefined || cornerCurve !== undefined ? "true" : undefined}
 
       data-nse-layout-margins={resolvedMargins ? undefined : "standard"}

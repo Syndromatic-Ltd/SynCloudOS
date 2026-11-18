@@ -12,8 +12,8 @@ const capture = { animations: "disabled", caret: "hide", scale: "css" } as const
 
 test.use({ colorScheme: "light", reducedMotion: "reduce", viewport: { width: 1010, height: 750 } });
 
-async function openSpecimen(page: Page, specimen: string, theme = "magenta") {
-  await page.goto(root + "?" + new URLSearchParams({ specimen, theme }));
+async function openSpecimen(page: Page, specimen: string, theme = "magenta", options: Record<string, string> = {}) {
+  await page.goto(root + "?" + new URLSearchParams({ specimen, theme, ...options }));
   await expect(page.locator("#" + specimen)).toBeVisible();
   await page.evaluate(() => document.fonts.ready);
   if (specimen === "menu") {
@@ -125,7 +125,7 @@ test("repainting the pop-up bezel keeps the arrow and value visible", async ({ p
 test("forced colours beat a theme's drawing", async ({ page }) => {
   await page.emulateMedia({ forcedColors: "active" });
   for (const [specimen, name] of [["search-field", "field"], ["pop-up-button-native", "bezel"]]) {
-    await openSpecimen(page, specimen);
+    await openSpecimen(page, specimen, "magenta", { colour: "1" });
     const system = await page.evaluate(() => {
       const swatch = document.createElement("span");
       swatch.style.cssText = "forced-color-adjust: none; background-color: Canvas; color: CanvasText";
@@ -141,4 +141,118 @@ test("forced colours beat a theme's drawing", async ({ page }) => {
     await expect(drawing).toHaveCSS("background-color", system.background);
     await expect(drawing).toHaveCSS("border-top-width", "1px");
   }
+});
+
+function hsl(r: number, g: number, b: number) {
+  const [red, green, blue] = [r / 255, g / 255, b / 255];
+  const max = Math.max(red, green, blue), min = Math.min(red, green, blue);
+  const chroma = max - min, lightness = (max + min) / 2;
+  if (!chroma) return { hue: 0, lightness, saturation: 0 };
+  const sector = max === red ? (green - blue) / chroma : max === green ? 2 + (blue - red) / chroma : 4 + (red - green) / chroma;
+  return { hue: (sector * 60 + 360) % 360, lightness, saturation: chroma / (1 - Math.abs(2 * lightness - 1)) };
+}
+
+async function dominantPaint(drawing: Locator) {
+  const labels = [part("title"), part("image"), part("segment-image")].join(", ");
+  const png = await drawing.screenshot({ ...capture, style: labels + " { opacity: 0 !important; }" });
+  const { data, info } = await sharp(png).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+  const colours = new Map<number, number>();
+  for (let y = Math.ceil(info.height * 0.2); y < info.height * 0.8; y++) {
+    for (let x = Math.ceil(info.width * 0.2); x < info.width * 0.8; x++) {
+      const offset = (y * info.width + x) * info.channels;
+      const rgb = (data[offset]! << 16) | (data[offset + 1]! << 8) | data[offset + 2]!;
+      colours.set(rgb, (colours.get(rgb) ?? 0) + 1);
+    }
+  }
+  const rgb = [...colours.entries()].sort((left, right) => right[1] - left[1])[0]?.[0];
+  if (rgb === undefined) throw new Error("Missing pixels inside the drawing");
+  return hsl(rgb >> 16, (rgb >> 8) & 255, rgb & 255);
+}
+
+for (const specimen of ["button", "pop-up-button", "toolbar-item"]) {
+  const property = specimen === "toolbar-item" ? "backgroundTintColour" : "bezelColour";
+  test(property + " paints the bezel in every state — " + specimen, async ({ page }) => {
+    const selector = specimen === "toolbar-item" ? control("toolbar-item") + part("item") : part("bezel");
+    const bezel = page.locator("#" + specimen + " " + selector);
+    await openSpecimen(page, specimen, "magenta", { colour: "1" });
+    const button = page.locator("#" + specimen).getByRole("button").first();
+    await expect(button).toBeEnabled();
+    const resting = await dominantPaint(bezel);
+    const { hue } = hsl(0xc8, 0x10, 0x2e);
+    const hueDistance = Math.abs(resting.hue - hue);
+    expect(Math.min(hueDistance, 360 - hueDistance)).toBeLessThanOrEqual(10);
+    expect(resting.saturation).toBeGreaterThan(0.3);
+
+    await button.hover();
+    await page.mouse.down();
+    await expect(button).toHaveAttribute("data-nse-highlighted", "");
+    expect((await dominantPaint(bezel)).lightness).toBeLessThan(resting.lightness);
+    await page.mouse.up();
+
+    await openSpecimen(page, specimen, "magenta", { colour: "1", disabled: "1" });
+    await expect(button).toHaveAttribute("data-nse-enabled", "false");
+    expect((await dominantPaint(bezel)).saturation).toBeLessThan(resting.saturation);
+  });
+}
+
+test("contentTintColour colours the title and template image", async ({ page }) => {
+  await openSpecimen(page, "button", "magenta", { colour: "1", template: "1" });
+  const root = page.locator("#button");
+  await expect(root.locator(part("title"))).toHaveCSS("color", "rgb(200, 16, 46)");
+  await expect(root.locator("[data-nse-image-template]")).toHaveCSS("background-color", "rgb(200, 16, 46)");
+  await openSpecimen(page, "pop-up-button", "magenta", { colour: "1", template: "1" });
+  await expect(page.locator("#pop-up-button " + part("content") + " > " + part("title"))).toHaveCSS("color", "rgb(200, 16, 46)");
+});
+
+async function interiorPixels(drawing: Locator) {
+  const bounds = await drawing.boundingBox();
+  if (!bounds) throw new Error("Missing part bounds");
+  // A fractional edge can include a pixel from the neighbouring segment.
+  const x = Math.ceil(bounds.x), y = Math.ceil(bounds.y);
+  const clip = { x, y, width: Math.floor(bounds.x + bounds.width) - x, height: Math.floor(bounds.y + bounds.height) - y };
+  return sharp(await drawing.page().screenshot({ ...capture, clip })).ensureAlpha().raw().toBuffer();
+}
+
+const segmentCases: readonly { name: string; options: Record<string, string>; drawingPart: string }[] = [
+  { name: "rounded", options: {}, drawingPart: "bezel" },
+  { name: "textured text", options: { textured: "1" }, drawingPart: "cell" },
+  { name: "textured image", options: { textured: "1", segmentImage: "1" }, drawingPart: "bezel" },
+];
+for (const { name, options, drawingPart } of segmentCases) {
+  test("selectedSegmentBezelColour paints only the selected segment — " + name, async ({ page }) => {
+    await openSpecimen(page, "segments", "none", options);
+    const bezels = page.locator("#segments " + part(drawingPart));
+    const restBefore = await interiorPixels(bezels.nth(1));
+    await openSpecimen(page, "segments", "none", { ...options, colour: "1" });
+    expect((await interiorPixels(bezels.nth(1))).equals(restBefore)).toBe(true);
+    const chosen = await dominantPaint(bezels.first());
+    expect(chosen.hue).toBeGreaterThan(335);
+    expect(chosen.saturation).toBeGreaterThan(0.3);
+  });
+}
+
+test("box fillColour covers the bezel and legend", async ({ page }, info) => {
+  await openSpecimen(page, "box", "none", { colour: "1" });
+  const drawing = "#box " + control("box");
+  const hide = drawing + " > " + part("title") + " { color: transparent !important; text-shadow: none !important; }";
+  await expectMagenta(page.locator(drawing + part("bezel")), info, hide + drawing + " > " + part("content") + " { opacity: 0 !important; }");
+  await expectMagenta(page.locator(drawing + " > " + part("title")), info, hide);
+});
+
+test("box borderColour replaces the bezel border artwork", async ({ page }) => {
+  await openSpecimen(page, "box", "magenta", { border: "1" });
+  const box = page.locator("#box " + control("box") + part("bezel"));
+  await expect(box).toHaveCSS("border-image-source", "none");
+  await expect(box).toHaveCSS("box-shadow", "rgb(200, 16, 46) 0px 0px 0px 1px inset");
+});
+
+test("backgroundTintColour is ignored on a borderless toolbar item", async ({ page }) => {
+  const item = page.locator("#toolbar-item " + control("toolbar-item") + part("item"));
+  const state = { borderless: "1" };
+  await openSpecimen(page, "toolbar-item", "none", state);
+  await expect(item).toBeEnabled();
+  const before = await item.screenshot(capture);
+  await openSpecimen(page, "toolbar-item", "none", { ...state, colour: "1" });
+  await expect(item).toBeEnabled();
+  expect((await item.screenshot(capture)).equals(before)).toBe(true);
 });

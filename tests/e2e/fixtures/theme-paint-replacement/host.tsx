@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client";
 import type { NSETheme } from "../../../../src/NSE/Theme/NSETheme";
 import { atmoTheme } from "../../../../src/NSE/Appearance/atmo";
 import { NSEAppearanceProvider, useNSEAppearance } from "../../../../src/NSE/Appearance/NSEAppearanceProvider";
+import { NSEImage } from "../../../../src/NSE/Controls/Images/NSEImageResource";
 import { NSEButton } from "../../../../src/NSE/Controls/Buttons/NSEButton";
 import { NSEBox } from "../../../../src/NSE/Controls/Fields/NSEFields";
 import { NSESearchField } from "../../../../src/NSE/Controls/Fields/NSESearchField";
@@ -35,6 +36,10 @@ import { themes } from "virtual:theme-paint-replacement/themes";
 const noop = () => undefined;
 const parameters = new URLSearchParams(location.search);
 const selected = parameters.get("specimen");
+const customColour = parameters.has("colour") ? "#c8102e" : undefined;
+const disabled = parameters.has("disabled");
+const highlighted = parameters.has("highlighted");
+const template = parameters.has("template") ? NSEImage.named(NSEImage.goBackTemplateName) : undefined;
 const fixtureThemes: Readonly<Record<string, NSETheme>> = themes;
 const theme = parameters.get("theme") === "none" ? atmoTheme : fixtureThemes["com.example.magenta"];
 if (!theme) throw new Error("The replacement fixture requires com.example.magenta.");
@@ -127,7 +132,7 @@ function ConfiguredToolbar() {
         getPresentationGeneration: () => ({ registryGeneration: 0, responderGeneration: 0 }),
         validateMany: async requests => new Map(requests.map(request => [request.key, {
           commandId: request.commandId, responderId: "paint-replacement", title: "Save",
-          enabled: true, denied: false, hidden: false, state: "off", stale: false,
+          enabled: !disabled, denied: false, hidden: false, state: "off", stale: false,
         }])),
         prepareDispatch: async () => ({ status: "cancelled", reason: "specimen" }),
         dispatch: async commandId => ({ status: "cancelled", commandId, operationId: "paint-replacement", reason: "specimen" }),
@@ -143,7 +148,7 @@ function ConfiguredToolbar() {
         displayMode: "icon-and-label",
         sizeMode: "regular",
       },
-      items: [{ kind: "command", id: "save", label: "Save", paletteLabel: "Save", commandId: "save", icon: <span>S</span>, minimumWidth: 210, idealWidth: 240 }],
+      items: [{ kind: "command", id: "save", label: "Save", paletteLabel: "Save", commandId: "save", icon: <span>S</span>, backgroundTintColour: customColour, bordered: !parameters.has("borderless"), minimumWidth: 210, idealWidth: 240 }],
       preferences,
       runtime,
     });
@@ -183,6 +188,7 @@ function Popover() {
 }
 
 const popup = () => <NSEPopUpButton accessibleLabel="Order" label="Order" labelHidden width={300}
+  isEnabled={!disabled} bezelColour={customColour} contentTintColour={template ? customColour : undefined}
   defaultValue="name" items={[{ title: "Name", value: "name" }, { title: "Date", value: "date" }]} />;
 
 const specimens = {
@@ -192,8 +198,8 @@ const specimens = {
   toolbar: () => <ToolbarView composition="children" position="inline" style={{ width: 600 }}><NSEButton title="Open" /></ToolbarView>,
   "toolbar-item": () => <ConfiguredToolbar />,
   tabs: () => <Tabs />,
-  segments: () => <NSESegmentedControl aria-label="Display mode" segmentStyle="rounded"
-    items={["Icons", "List", "Columns"].map(label => ({ id: label.toLowerCase(), label, width: 192 }))}
+  segments: () => <NSESegmentedControl aria-label="Display mode" segmentStyle={parameters.has("textured") ? "texturedRounded" : "rounded"} selectedSegmentBezelColour={customColour}
+    items={["Icons", "List", "Columns"].map(label => ({ id: label.toLowerCase(), label, width: 192, image: parameters.has("segmentImage") ? <span>{label}</span> : undefined }))}
     selection={{ mode: "select-one", selectedIds: new Set(["icons"]), allowsEmpty: false }} onSelectionChange={noop} />,
   "split-view": () => <NSESplitView sidebar={<p>Sources</p>} defaultSidebarWidth={200} style={{ width: 640, height: 300 }}><p>Contents</p></NSESplitView>,
   menu: () => <MenuView label="Actions" items={[
@@ -203,10 +209,13 @@ const specimens = {
     { value: "reveal", label: "Reveal its containing folder" },
   ]} />,
   popover: () => <Popover />,
-  button: () => <NSEButton bezelStyle="rounded" title="Continue" style={{ inlineSize: 700 }} />,
+  button: () => <NSEButton bezelStyle="rounded" title="Continue" style={{ inlineSize: 700 }}
+    bezelColour={customColour} contentTintColour={template ? customColour : undefined} image={template}
+    isHighlighted={highlighted} isEnabled={!disabled} />,
   "pop-up-button": popup,
   "pop-up-button-native": popup,
-  box: () => <NSEBox title="Document export and display options" titlePosition="atTop" style={{ width: 620, minHeight: 240 }}><p>Options</p></NSEBox>,
+  box: () => <NSEBox title="Document export and display options" titlePosition="atTop" fillColour={parameters.has("colour") ? "#ff00ff" : undefined}
+    borderColour={parameters.has("border") ? "#c8102e" : undefined} style={{ width: 620, minHeight: 240 }}><p>Options</p></NSEBox>,
   "search-field": () => <NSESearchField aria-label="Search" width={880} height={36} showsSearchIcon defaultValue="Documents" />,
 } satisfies Record<string, () => ReactNode>;
 

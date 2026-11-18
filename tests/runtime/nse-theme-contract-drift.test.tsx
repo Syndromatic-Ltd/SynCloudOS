@@ -5,7 +5,7 @@ import { afterAll, afterEach, beforeEach, onTestFailed, expect, it } from "vites
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { themeBaselineCatalogue } from "../e2e/fixtures/theme-baseline/catalogue";
-import { supplementalThemeCatalogue } from "../e2e/fixtures/theme-additional/supplemental";
+import { supplementalThemeCatalogue, Toolbar as ConfiguredToolbarSpecimen } from "../e2e/fixtures/theme-additional/supplemental";
 import { additionalThemeCatalogue } from "../e2e/fixtures/theme-additional/catalogue";
 import { ListboxPopup, NSEPopover, NSEPopup, StandaloneControlHost } from "../../src/NSE/Overlays";
 import { NSEStackItem, NSEStackView } from "../../src/NSE/Layout";
@@ -96,6 +96,9 @@ import { ChronosphereEnvironmentProvider, type ChronosphereEnvironment } from ".
 import { createChronosphereAppSubject } from "../../src/NSE/Chronosphere/chronosphereSubject";
 import { defaultChronosphereLabels } from "../../src/NSE/Chronosphere/chronosphereViewTypes";
 import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
+import { NSESegmentedControl } from "../../src/NSE/Controls/Values/NSESegmentedControl";
+import { NSEBox } from "../../src/NSE/Controls/Fields/NSEFields";
+import { NSEPopUpButton } from "../../src/NSE/Menus/NSEPopUpButton";
 import { PageCurlLeaf } from "../../src/NSE/Page/PageCurlLeaf";
 
 const repository = resolve(import.meta.dirname, "../..");
@@ -405,7 +408,11 @@ it("renders a hosted application window", async () => {
       this.accessory = new Accessory();
     }
     override windowDidLoad() {
-      this.window.toolbar = new NSEToolbar({ identifier: "main", items: [{ id: "share", kind: "button", label: "Share" }], defaultItemIdentifiers: ["share"] });
+      this.window.toolbar = new NSEToolbar({
+        identifier: "main",
+        items: [{ id: "share", kind: "command", commandId: "share", label: "Share", paletteLabel: "Share", icon: "S", backgroundTintColour: "#c8102e" }],
+        defaultItemIdentifiers: ["share"],
+      });
       this.window.addTitlebarAccessoryViewController(this.accessory);
       this.window.setContentBorderThickness(24, "minY");
     }
@@ -1113,6 +1120,20 @@ it("renders the projected book strips, folded paper and tear hooks", () => {
   expect(view.container.querySelector('[data-nse-presentation="book"] [data-nse-part="face"][data-nse-role="page-strip"]')).toBeTruthy();
   expect(view.container.querySelector('[data-nse-part="face"][data-nse-style="fold"]')).toBeTruthy();
   expect(view.container.querySelector('[data-nse-part="attachment"][data-nse-role="page-tear"]')).toBeTruthy();
+  collect();
+});
+
+it("renders the instance colour hooks", async () => {
+  const view = render(<Host>
+    <NSEButton title="Action" bezelColour="#c8102e" contentTintColour="#222" />
+    <NSEPopUpButton accessibleLabel="Choice" items={[]} bezelColour="#c8102e" contentTintColour="#222" />
+    <NSESegmentedControl aria-label="Mode" items={[{ id: "one", label: "One" }]} selectedSegmentBezelColour="#c8102e"
+      selection={{ mode: "select-one", selectedIds: new Set(["one"]), allowsEmpty: false }} />
+    <NSEBox title="Details" borderColour="#c8102e" />
+    <ConfiguredToolbarSpecimen width={500} customising={false} checked="on" />
+  </Host>);
+  expect(view.container.querySelectorAll('[data-nse-custom-bezel="true"]').length).toBeGreaterThanOrEqual(3);
+  await waitFor(() => expect(view.container.querySelector('[data-nse-control="toolbar-item"][data-nse-selected]')).toBeTruthy());
   collect();
 });
 

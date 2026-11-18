@@ -21,6 +21,7 @@
 import type { CommandDispatchResult, CommandPresentation } from "../../SynCloudOS/SynCloudOS";
 import { commandValidationRequestKey, SynCloudOSLifecycleRecord, synCloudOSLifecycleSignalReason } from "../../SynCloudOS/nseRuntimeContracts";
 import { ControllerLifetime } from "../Controllers/controllerLifetime";
+import { nseCSSValue } from "../Graphics/NSEShadow";
 import { nseActionReferenceName, type NSEActionPayloadCheck } from "../Controls/Core/actionReference";
 import { subscribeNSEActionChanges } from "../Controls/Core/actionChanges";
 import type {
@@ -156,6 +157,7 @@ function presentationFor(
       disabledReason: presentation?.disabledReason,
       presentation: presentation ?? null,
       bordered: item.bordered !== false,
+      backgroundTintColour: item.backgroundTintColour,
       minimumWidth: item.minimumWidth,
       idealWidth: item.idealWidth,
     };
@@ -210,10 +212,15 @@ export class NSEToolbarController<const Items extends readonly NSEToolbarItemInp
   }) {
     const { configuration, preferences, runtime } = options;
     const items = options.items.map((item): NSEToolbarItem => {
-      if (item.kind !== "command" || !("action" in item)) return item;
-      if (Reflect.get(item, "commandId") !== undefined) throw new TypeError(`NSE toolbar item "${item.id}" cannot declare both action and commandId.`);
-      if (!runtime.resolveAction) throw new TypeError(`NSE toolbar item "${item.id}" requires an application to resolve its action.`);
-      const { action, ...rest } = item;
+      if (item.kind !== "command") return item;
+      const backgroundTintColour = item.backgroundTintColour;
+      const configured = backgroundTintColour === undefined ? item : {
+        ...item, backgroundTintColour: nseCSSValue(backgroundTintColour, "color", "NSEToolbarItem backgroundTintColour"),
+      };
+      if (!("action" in configured)) return configured;
+      if (Reflect.get(configured, "commandId") !== undefined) throw new TypeError(`NSE toolbar item "${configured.id}" cannot declare both action and commandId.`);
+      if (!runtime.resolveAction) throw new TypeError(`NSE toolbar item "${configured.id}" requires an application to resolve its action.`);
+      const { action, ...rest } = configured;
       return { ...rest, commandId: runtime.resolveAction(typeof action === "string" ? action : nseActionReferenceName(action)) };
     });
     if (!configuration.identifier.trim()) throw new TypeError("NSE toolbar identifiers must not be empty.");

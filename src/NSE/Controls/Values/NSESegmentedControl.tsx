@@ -30,7 +30,8 @@ import { useNSEActionBinding } from "../Core/useNSEControlAction";
 import { useNSEControlFeedback } from "../Core/nseControlsShared";
 import type { HFXFeedbackRequest } from "../../../FX/HapticsFX/HFXHapticEvent";
 import type { NSESegmentedControlProps, NSESegmentedItem, NSESegmentedSelection } from "./valueControlTypes";
-import { TexturedSegmentCells, useSegmentActions } from "./NSESegmentStyles";
+import { nseCSSValue } from "../../Graphics/NSEShadow";
+import { selectedSegmentBezelStyle, TexturedSegmentCells, useSegmentActions } from "./NSESegmentStyles";
 
 interface SegmentButtonProps {
   readonly item: NSESegmentedItem;
@@ -97,8 +98,12 @@ export function NSESegmentedControl<Payload = unknown>(props: NSEBoundValueProps
 }
 
 function SegmentedControlControl(props: NSESegmentedControlProps) {
-  if (props.segmentStyle === "texturedRounded") return <TexturedSegmentCells {...props} />;
-  return <RoundedSegments {...props} />;
+  const { selectedSegmentBezelColour } = props;
+  const resolved = selectedSegmentBezelColour === undefined
+    ? props
+    : { ...props, selectedSegmentBezelColour: nseCSSValue(selectedSegmentBezelColour, "color", "NSESegmentedControl selectedSegmentBezelColour") };
+  if (props.segmentStyle === "texturedRounded") return <TexturedSegmentCells {...resolved} />;
+  return <RoundedSegments {...resolved} />;
 }
 
 function RoundedSegments(props: NSESegmentedControlProps) {
@@ -150,7 +155,7 @@ function RoundedSegments(props: NSESegmentedControlProps) {
   };
   const activeMenu = menuId ? items.find((item) => item.id === menuId) : null;
 
-  return <div role="group" aria-label={props["aria-label"]} className={props.className} data-nse-part="content" {...theme.events} {...nseControlHooks({ control: "segmented-control", enabled: props.isEnabled !== false, highlighted: theme.highlighted, hovered: theme.hovered, focused: theme.focused, variants: { "segment-style": props.segmentStyle ?? "rounded", "control-size": props.controlSize ?? "regular" } })} data-nse-height={props.height === undefined ? undefined : String(props.height)} data-state={(props.isEnabled === false) ? "disabled" : props.readOnly ? "read-only" : overflow.length ? "overflow" : "ready"}  data-segment-style={props.segmentStyle ?? "rounded"} data-distribution={props.distribution === "fill-equally" ? "fill-equally" : undefined} data-nse-distribution={props.distribution === "fill-equally" ? "fill-equally" : undefined} data-size={props.height !== undefined ? "custom" : props.controlSize === "small" ? "small" : undefined} style={props.height !== undefined ? { ["--nse-control-height" as string]: `${props.height}px` } : undefined}>
+  return <div role="group" aria-label={props["aria-label"]} className={props.className} data-nse-part="content" data-nse-custom-bezel={props.selectedSegmentBezelColour === undefined ? undefined : "true"} {...theme.events} {...nseControlHooks({ control: "segmented-control", enabled: props.isEnabled !== false, highlighted: theme.highlighted, hovered: theme.hovered, focused: theme.focused, variants: { "segment-style": props.segmentStyle ?? "rounded", "control-size": props.controlSize ?? "regular" } })} data-nse-height={props.height === undefined ? undefined : String(props.height)} data-state={(props.isEnabled === false) ? "disabled" : props.readOnly ? "read-only" : overflow.length ? "overflow" : "ready"}  data-segment-style={props.segmentStyle ?? "rounded"} data-distribution={props.distribution === "fill-equally" ? "fill-equally" : undefined} data-nse-distribution={props.distribution === "fill-equally" ? "fill-equally" : undefined} data-size={props.height !== undefined ? "custom" : props.controlSize === "small" ? "small" : undefined} style={selectedSegmentBezelStyle(props)}>
     {visible.map((item) => <span key={item.id} data-nse-part="segment">
       <SegmentButton item={item} selected={props.selection.selectedIds.has(item.id)} tabIndex={item.id === selected ? 0 : -1} disabled={Boolean((props.isEnabled === false))} readOnly={Boolean(props.readOnly)} refs={refs} haptic={props.haptic} onActivate={() => select(item.id)} onKeyDown={(event) => { if (event.key === "ArrowRight" || event.key === "ArrowDown") { event.preventDefault(); move(item.id, 1); } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") { event.preventDefault(); move(item.id, -1); } }} />
       {(Array.isArray(item.menu) && item.menu.length) ? <button ref={(node) => { if (node) menuRefs.current.set(item.id, node); else menuRefs.current.delete(item.id); }} type="button" aria-label={`More options for ${typeof item.label === "string" ? item.label : item.id}`} data-nse-part="disclosure" data-nse-expanded={String(menuId === item.id)} aria-expanded={menuId === item.id} disabled={(props.isEnabled === false) || props.readOnly || (item.isEnabled === false)} onClick={() => setMenuId((current) => current === item.id ? null : item.id)}>▾</button> : null}
