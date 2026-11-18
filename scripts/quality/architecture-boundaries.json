@@ -945,7 +945,6 @@
           "src/NSE/Animation/index.ts",
           "src/NSE/hostComposition.ts",
           "src/NSE/public/controls.ts",
-          "src/NSE/AuroreEngine/index.ts",
           "src/NSE/Containers/index.ts",
           "src/NSE/Content/index.ts",
           "src/NSE/Editor/index.ts",
@@ -1121,7 +1120,6 @@
           "src/NSE/public/appearance.ts",
           "src/NSE/public/scroll.ts",
           "src/NSE/public/page.ts",
-          "src/NSE/public/aurore.ts",
           "src/NSE/public/layout.ts",
           "src/NSE/public/system-ui.ts",
           "src/NSE/public/styles.css"
