@@ -92,6 +92,17 @@ for (const { specimen, name, selector, captureStyle } of cases) {
   });
 }
 
+test("paint-only themes keep the typography inherited by a drawn part", async ({ page }) => {
+  await openSpecimen(page, "box");
+  const box = "#box " + control("box");
+  await page.addStyleTag({ content: box + " { font: 19px/27px monospace; }" });
+  const title = page.locator(box + " > " + part("title"));
+  await expect(title).toHaveCSS("background-color", magenta);
+  await expect(title).toHaveCSS("font-family", "monospace");
+  await expect(title).toHaveCSS("font-size", "19px");
+  await expect(title).toHaveCSS("line-height", "27px");
+});
+
 test("undrawn states keep base paint", async ({ page }) => {
   for (const [specimen, name] of [["tabs", "cell"], ["segments", "bezel"]]) {
     const selector = "#" + specimen + " " + part(name) + ":not(" + selected + ")";

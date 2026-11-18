@@ -21,7 +21,10 @@ const typographyProperties = [
   "font-feature-settings", "font-variation-settings", "font-language-override", "font-palette", "font-synthesis",
   "line-height", "letter-spacing", "word-spacing", "text-transform",
 ];
-const clearDeclarations = [...paintProperties, ...typographyProperties].map(property => property + ":initial").join(";");
+const clearDeclarations = [
+  ...paintProperties.map(property => property + ":initial"),
+  ...typographyProperties.map(property => property + ":unset"),
+].join(";");
 
 function drawsElement(selector) {
   const subject = selector.children.toArray();

@@ -715,7 +715,7 @@ Themes can read these properties when an instance supplies a colour.
 
 ## Typography
 
-Themes can set `font`, `font-*`, `line-height`, `letter-spacing`, `word-spacing`, `text-transform`. Drawing a part resets its underlying paint and typography for that state.
+Themes can set `font`, `font-*`, `line-height`, `letter-spacing`, `word-spacing`, `text-transform`. Drawing a part resets its underlying paint and typography for that state. Omitted inherited typography properties take their values from the parent.
 
 Use `@font-face` with `woff2` files under `Resources/` and a package-local `url()`.
 

@@ -84,7 +84,7 @@ export function renderNSEThemeContractMarkdown(contract) {
   for (const [size, entry] of Object.entries(contract.navigation)) lines.push("- " + tick("navigation." + size) + ": placement " + list(entry.placement) + "; flow " + list(entry.flow));
   for (const [name, values] of Object.entries(contract.presentation)) lines.push("- " + tick("presentation." + name) + ": " + list(values));
   lines.push("", "## Typography", "",
-    "Themes can set " + list(contract.typography.properties) + ". Drawing a part resets its underlying paint and typography for that state.",
+    "Themes can set " + list(contract.typography.properties) + ". Drawing a part resets its underlying paint and typography for that state. Omitted inherited typography properties take their values from the parent.",
     "", "Use `@font-face` with " + list(contract.typography.fontFormats) + " files under `Resources/` and a package-local `url()`.", "",
     "## App theme controls", "", list(contract.appThemeControls), "", "## Limits", "");
   for (const [name, value] of Object.entries(contract.limits)) {

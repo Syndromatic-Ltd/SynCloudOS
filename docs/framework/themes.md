@@ -135,7 +135,7 @@ Atmo is always loaded in the `nse.atmo` layer beneath installed themes. When a t
 
 ## Typography
 
-Set `font`, its longhands, `line-height`, `letter-spacing`, `word-spacing` and `text-transform` on the parts you draw. Use `font: inherit` when the part should use its parent's typeface and size.
+Set `font`, its longhands, `line-height`, `letter-spacing`, `word-spacing` and `text-transform` on the parts you draw. When a drawing omits an inherited typography property, the part takes that property from its parent.
 
 Declare custom fonts with `@font-face`. Each `src` must resolve to a WOFF2 file under the bundle's `Resources/` directory. Use a family name specific to the theme because the browser registers font families for the document.
 

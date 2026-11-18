@@ -30,9 +30,11 @@ describe("theme paint clearing", () => {
     const selector = cssTree.generate(drawing.prelude);
     expect(cssTree.generate(clearRule.prelude)).toBe([selector, selector + "::before", selector + "::after"].join(","));
     const resets = clearRule.block.children.toArray().filter(declaration => declaration.type === "Declaration");
-    const names = resets.map(declaration => declaration.property);
-    expect(names).toEqual(expect.arrayContaining([...paintProperties, "font", "line-height", "letter-spacing", "word-spacing", "text-transform"]));
-    expect(resets.every(declaration => cssTree.generate(declaration.value) === "initial")).toBe(true);
+    const values = Object.fromEntries(resets.map(declaration => [declaration.property, cssTree.generate(declaration.value)]));
+    for (const property of paintProperties) expect(values[property], property).toBe("initial");
+    for (const property of ["font", "line-height", "letter-spacing", "word-spacing", "text-transform"]) {
+      expect(values[property], property).toBe("unset");
+    }
   });
 
   it("carries the same state gates as the theme drawing", () => {
