@@ -9,6 +9,6 @@ npm run atmo:lab
 Then open http://127.0.0.1:5391/.
 
 - The baseline export lives in `.artifacts/atmo-lab/baseline-<BASE>/`. Delete it to re-export.
-- Specimen sources here are mirrored into the export on change, so both sides render identical pages.
+- Shared specimens are mirrored into the export on change. The Partial app theme section uses only the working tree because the frozen revision predates app themes.
 - The lab's own chrome is NSE from the working tree, so it is a live specimen too.
 - Change `BASE` (or set `ATMO_LAB_BASE`) to compare against another commit.

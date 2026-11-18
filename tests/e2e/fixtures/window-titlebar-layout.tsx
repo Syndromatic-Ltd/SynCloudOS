@@ -1,6 +1,7 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { NSEAppearanceProvider } from "../../../src/NSE/Appearance/NSEAppearanceProvider";
+import { NSEAppearance } from "../../../src/NSE/Appearance/NSEAppearance";
+import { NSEAppearanceProvider, ViewAppearanceBoundary } from "../../../src/NSE/Appearance/NSEAppearanceProvider";
 import { atmoTheme } from "../../../src/NSE/Appearance/atmo";
 import { StandaloneControlHost } from "../../../src/NSE/Overlays";
 import { NSEMenu } from "../../../src/NSE/Menus/NSEMenu";
@@ -8,6 +9,7 @@ import { NSEMenuBar } from "../../../src/NSE/Menus/NSEMenuBar";
 import { nseMenuModel } from "../../../src/NSE/Menus/menuTypes";
 import { MenuRuntimeProvider } from "../../../src/NSE/Menus/menuRuntimeContext";
 import { WindowTitlebarView } from "../../../src/NSE/Windows/WindowTitlebarView";
+import type { WindowTitlebarDocument, WindowTitlebarHost } from "../../../src/NSE/Windows/windowTitlebarContext";
 import { NSEToolbarController } from "../../../src/NSE/Toolbars/NSEToolbarController";
 import { NSEToolbarItem } from "../../../src/NSE/Toolbars/NSEToolbar";
 import { NSEWindowFrameView } from "../../../src/NSE/Application/NSEWindowFrameView";
@@ -15,10 +17,13 @@ import { ToolbarView } from "../../../src/NSE/Toolbars/ToolbarView";
 import { NSEUserDefaultsController } from "../../../src/NSE/Controllers";
 import { nseUnowned } from "../../../src/NSE/Controllers/ownership";
 import type { ToolbarPreferences, ToolbarRuntimePort } from "../../../src/NSE/Toolbars/toolbarTypes";
-import type { NSEWindowToolbarStyle } from "../../../src/NSE/Application/NSEWindowController";
+import { NSEWindowController, type NSEWindowToolbarStyle } from "../../../src/NSE/Application/NSEWindowController";
+import { useNSEWindowTitlebarDocument } from "../../../src/SynCloudOS/AppHosting/windowAccessories";
 import { defaultsFrom } from "../../fixtures/userDefaults";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
 import "../../../src/NSE/public/styles.css";
+// @ts-expect-error The fixture Vite plugin provides this virtual module.
+import { themes } from "virtual:window-titlebar-layout/themes";
 
 const params = new URLSearchParams(location.search);
 const toolbarStyle = (params.get("style") ?? "unified") as NSEWindowToolbarStyle;
@@ -28,13 +33,7 @@ document.documentElement.dataset.appearance = scheme;
 document.documentElement.style.colorScheme = scheme;
 document.documentElement.style.background = scheme === "dark" ? "#20252c" : "#e7ebef";
 const actions: string[] = [];
-class ColouredFrame extends NSEWindowFrameView {
-  static appearance = async () => ({ default: ':scope [data-nse-part="title"] { color: rgb(21, 101, 183); }' });
-}
-class FailedFrame extends NSEWindowFrameView {
-  static appearance = async () => { throw new Error("Frame stylesheet fixture failed to load"); };
-}
-const frameAppearance = params.get("frame") === "before" ? NSEWindowFrameView : ColouredFrame;
+const titlebarAppearance = new NSEAppearance({ theme: themes["com.example.titlebar-blue"] });
 Object.assign(window, { titlebarLayoutRequests: actions });
 const menuRuntime: ToolbarRuntimePort = { signal: new AbortController().signal, commands: {
   getPresentationGeneration: () => ({ registryGeneration: 1, responderGeneration: 1 }),
@@ -97,30 +96,53 @@ function MeasuredToolbar() {
   }, []);
   return <div ref={node} style={{ minWidth: 0, flex: "1 1 auto" }}>{width > 0 ? <ToolbarView composition="configured" controller={controller} width={width} interaction={{ parentResponderId: "layout" }} /> : null}</div>;
 }
+
 function Fixture() {
   const frame = useRef<HTMLDivElement>(null);
   const [nativeRect, setNativeRect] = useState<DOMRect | null>(null);
   const [drags, setDrags] = useState(0);
-  const [frameViewClass, setFrameViewClass] = useState<typeof NSEWindowFrameView | undefined>(() => params.has("frame") ? frameAppearance : undefined);
+  const [controller] = useState(() => {
+    const value = new NSEWindowController({ styleMask: ["titled"] });
+    value.window.title = "A long document title";
+    value.window.subtitle = "Unsaved draft";
+    value.window.isDocumentEdited = true;
+    value.window.toolbarStyle = toolbarStyle;
+    value.window.titlebarPresentation = params.has("floating") ? "floating" : "attached";
+    if (params.has("frame")) {
+      value.window.frameViewClass = NSEWindowFrameView;
+      value.window.appearance = params.get("frame") === "before" ? null : titlebarAppearance;
+    }
+    return value;
+  });
+  const [titlebarDocument, setTitlebarDocument] = useState<WindowTitlebarDocument | null>(null);
+  const titlebarHost = useMemo<WindowTitlebarHost>(() => ({
+    setDocument: setTitlebarDocument,
+    leadingAccessories: null,
+    trailingAccessories: null,
+  }), []);
   const [sidebarWidth, setSidebarWidth] = useState<number | undefined>(params.has("tracking") ? 200 : undefined);
+  useNSEWindowTitlebarDocument(controller, titlebarHost, sidebarWidth);
+  useEffect(() => () => controller.dispose(), [controller]);
   useLayoutEffect(() => {
     if (!params.has("native")) return;
     const rect = frame.current!.getBoundingClientRect();
     setNativeRect(new DOMRect(params.get("native") === "right" ? rect.right - 120 : rect.left, rect.top, 120, 70));
   }, []);
   return <div ref={frame} data-layout-fixture="" style={{ width: Number(params.get("width") ?? 900), margin: 20 }}>
-    <WindowTitlebarView document={{ title: "A long document title", subtitle: "Unsaved draft", documentEdited: true, toolbarStyle, hasToolbar: true, frameViewClass, sidebarWidth, titlebarPresentation: params.has("floating") ? "floating" : "attached" }}
-      isKeyWindow mode={scheme} material={params.has("cumulus") ? "cumulus" : "metal"} controls={nativeRect ? null : <button style={{ width: 50, height: 26 }}>Close</button>}
-      leading={<button style={{ width: 60, height: 26 }}>Leading</button>}
-      trailing={<select aria-label="Trailing accessory" style={{ width: 90, height: 26 }}><option>Trailing</option></select>}
-      toolbar={<MeasuredToolbar />} nativeControlExclusion={nativeRect}
-      menuBar={params.has("menu") ? <FixtureMenuBar /> : undefined}
-      bottomAccessories={<div style={{ height: 23 }}>Bottom accessory</div>}
-      moveHandleProps={{ onPointerDown: () => setDrags(value => value + 1) }} />
+    {titlebarDocument && <ViewAppearanceBoundary appearance={titlebarDocument.appearance ?? null} projectBoundary={params.has("frame")}>
+      <WindowTitlebarView document={titlebarDocument}
+        isKeyWindow mode={scheme} material={params.has("cumulus") ? "cumulus" : "metal"} controls={nativeRect ? null : <button style={{ width: 50, height: 26 }}>Close</button>}
+        leading={<button style={{ width: 60, height: 26 }}>Leading</button>}
+        trailing={<select aria-label="Trailing accessory" style={{ width: 90, height: 26 }}><option>Trailing</option></select>}
+        toolbar={<MeasuredToolbar />} nativeControlExclusion={nativeRect}
+        menuBar={params.has("menu") ? <FixtureMenuBar /> : undefined}
+        bottomAccessories={<div style={{ height: 23 }}>Bottom accessory</div>}
+        moveHandleProps={{ onPointerDown: () => setDrags(value => value + 1) }} />
+    </ViewAppearanceBoundary>}
     <output data-drag-count="">{drags}</output>
     {params.has("frame") ? <>
       <WindowTitlebarView document={{ title: "Another window", subtitle: "", documentEdited: false }} isKeyWindow />
-      <button onClick={() => setFrameViewClass(() => FailedFrame)}>Fail stylesheet</button>
+      <button onClick={() => { controller.window.appearance = null; }}>Clear window appearance</button>
     </> : null}
     {params.has("tracking") ? <>
       <button onClick={() => setSidebarWidth(260)}>Resize sidebar</button>

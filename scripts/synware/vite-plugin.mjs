@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { discoverThemeBundles, validateThemeCSS } from "./theme-bundles.mjs";
+import { discoverThemeBundles } from "./theme-bundles.mjs";
 import { builtInThemeCSS } from "./built-in-theme-css.mjs";
 import { selectorPerformance } from "./selector-performance.mjs";
 import { resolveHookMirrorJSX } from "./hook-mirror-jsx.mjs";
@@ -922,33 +922,6 @@ export function synCloudOS(options) {
   const findOwningBundle = (current, filePath) =>
     current.bundles.find(bundle => isPathInside(dirname(dirname(bundle.entryPath)), filePath));
 
-  let frameThemeContract;
-  function assertFrameStylesheet(path, root) {
-    const file = realpathSync.native(path);
-    if (!assertNoSymlink(path, "a window frame stylesheet").isFile() || !isPathInside(root, file)) {
-      throw new TypeError(`${path}: window frame stylesheet must be a file within its bundle.`);
-    }
-    return file;
-  }
-  function validateWindowFrameCSS(source, file, root, watch) {
-    frameThemeContract ??= JSON.parse(readFileSync(new URL("../../tooling/nse-theme-contract.json", import.meta.url), "utf8"));
-    const validated = new Set();
-    const visiting = new Set();
-    const visit = (css, path) => {
-      if (visiting.has(path)) throw new TypeError(`${path}: cyclic window frame stylesheet import.`);
-      if (validated.has(path)) return;
-      visiting.add(path);
-      validateThemeCSS(css, { file: path, root, contract: frameThemeContract, onImport: target => {
-        const local = assertFrameStylesheet(target, root);
-        watch(local);
-        visit(readFileSync(local, "utf8"), local);
-      } });
-      visiting.delete(path);
-      validated.add(path);
-    };
-    visit(source, file);
-  }
-
   const collectBundleSourceFiles = (directory, out = []) => {
     for (const entry of readdirSync(directory, { withFileTypes: true })) {
       if (entry.name === "node_modules" || entry.name === "dist" || entry.name === "__tests__") continue;
@@ -1124,17 +1097,6 @@ export function synCloudOS(options) {
     },
     api: toolchain.api,
     async transform(code, id) {
-      const [framePath, frameQuery] = id.split("?", 2);
-      if (framePath.endsWith(".frame.css")) {
-        if (!new URLSearchParams(frameQuery).has("inline")) {
-          throw new TypeError(`${framePath}: window frame stylesheets must use ?inline.`);
-        }
-        const bundle = findOwningBundle(discovery ?? refresh(), framePath);
-        const root = realpathSync.native(bundle ? dirname(dirname(bundle.entryPath)) : resolvedConfig.root);
-        const file = assertFrameStylesheet(framePath, root);
-        validateWindowFrameCSS(code, file, root, path => this.addWatchFile(path));
-        return null;
-      }
       const hotResult = await toolchain.transform.call(this, code, id);
       const hotCode = (typeof hotResult === "string" ? hotResult : hotResult?.code) ?? code;
       const cleanId = id.split("?")[0];

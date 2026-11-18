@@ -79,7 +79,7 @@ function Choice<T extends string>({ label, value, options, onChange }: { label: 
 // Sections grouped the way a source list would group them.
 interface NavNode { readonly id: string; readonly label: string; readonly children: readonly NavNode[] }
 const navGroups: readonly NavNode[] = [
-  { id: "group-theme", label: "Theme fixes", children: ["switches", "knob", "outline", "menus"].map(id => ({ id, label: labSections.find(section => section.id === id)!.title, children: [] })) },
+  { id: "group-theme", label: "Theme fixes", children: ["switches", "knob", "outline", "menus", "partial-app-theme"].map(id => ({ id, label: labSections.find(section => section.id === id)!.title, children: [] })) },
   { id: "group-metrics", label: "Metrics", children: ["sizing", "bars"].map(id => ({ id, label: labSections.find(section => section.id === id)!.title, children: [] })) },
   { id: "group-elements", label: "Every element", children: elementFamilies.map(family => ({ id: family.id, label: family.title, children: [] })) },
   { id: "group-reference", label: "Reference", children: [{ id: "catalogue", label: "Catalogue", children: [] }] },

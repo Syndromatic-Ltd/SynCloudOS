@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Component, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { Component, lazy, Suspense, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
 import { NSESwitch, NSETextField } from "../../src/NSE/Controls/Fields/NSEFields";
 import { NSESearchField } from "../../src/NSE/Controls/Fields/NSESearchField";
@@ -43,7 +43,7 @@ const measuring = parameters.get("measure") === "1";
 const scheme = parameters.get("scheme") === "dark" ? "dark" : "light";
 
 /** One labelled specimen; with measuring on it reads back the rendered control's size. */
-function Spec({ label, children, wide = false }: { label: string; children: ReactNode; wide?: boolean }) {
+export function Spec({ label, children, wide = false }: { label: string; children: ReactNode; wide?: boolean }) {
   const slot = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState<string | null>(null);
   useLayoutEffect(() => {
@@ -378,6 +378,9 @@ function More() {
   </>;
 }
 
+const partialThemeModule = import.meta.glob<{ default: React.ComponentType }>("./working-tree/PartialAppTheme.tsx")["./working-tree/PartialAppTheme.tsx"];
+const PartialAppTheme = partialThemeModule ? lazy(partialThemeModule) : null;
+
 export function renderSection(id: string): ReactNode {
   const family = elementFamilies.find(candidate => candidate.id === id);
   if (id === "more") return <More />;
@@ -389,6 +392,9 @@ export function renderSection(id: string): ReactNode {
     case "outline": return <Outline />;
     case "menus": return <Menus />;
     case "bars": return <Bars />;
+    case "partial-app-theme": return PartialAppTheme
+      ? <Suspense fallback={null}><PartialAppTheme /></Suspense>
+      : <p className="lab-missing">App themes are unavailable in this frozen revision.</p>;
     case "catalogue": return <Catalogue />;
     default: return <p className="lab-missing">Unknown section “{id}”.</p>;
   }

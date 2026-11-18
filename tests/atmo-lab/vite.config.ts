@@ -18,17 +18,20 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { defineConfig, type Plugin } from "vite";
+import { defineConfig, normalizePath, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import { execFileSync } from "node:child_process";
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync } from "node:fs";
-import { relative, resolve } from "node:path";
+import { relative, resolve, sep } from "node:path";
 import { synCloudOS } from "../../scripts/synware/vite-plugin.mjs";
+import { discoverThemeBundles } from "../../scripts/synware/theme-bundles.mjs";
+import { themeModuleSource, themeStylesheet } from "../../scripts/synware/theme-loading.mjs";
 import { synWarePackageName, synWareSdkEntries } from "../../scripts/synware/sdk-entries.mjs";
 
 // Atmo Lab: the frozen theme on the left, the working tree on the right, in one server.
 const root = resolve(import.meta.dirname, "../..");
 const labRoot = resolve(import.meta.dirname);
+const workingTreeSpecimens = resolve(labRoot, "working-tree");
 const baseRef = (process.env.ATMO_LAB_BASE ?? readFileSync(resolve(labRoot, "BASE"), "utf8")).trim();
 const baselineRoot = resolve(root, ".artifacts/atmo-lab", `baseline-${baseRef}`);
 const mirroredLab = resolve(baselineRoot, "tests/atmo-lab");
@@ -50,7 +53,8 @@ function ensureBaseline() {
 }
 
 // Specimens are mirrored into the snapshot so both sides render the same pages against their own source.
-const mirrorable = (file: string) => /\.(tsx?|css|html)$/.test(file) && !file.endsWith("vite.config.ts");
+const mirrorable = (file: string) => !file.startsWith(workingTreeSpecimens + sep)
+  && /\.(tsx?|css|html)$/.test(file) && !file.endsWith("vite.config.ts");
 function mirrorFile(file: string) {
   const target = resolve(mirroredLab, relative(labRoot, file));
   mkdirSync(resolve(target, ".."), { recursive: true });
@@ -59,6 +63,7 @@ function mirrorFile(file: string) {
 function mirrorAll(directory = labRoot) {
   for (const name of readdirSync(directory)) {
     const path = resolve(directory, name);
+    if (path === workingTreeSpecimens) continue;
     if (statSync(path).isDirectory()) mirrorAll(path);
     else if (mirrorable(path)) mirrorFile(path);
   }
@@ -115,9 +120,32 @@ const themes = synCloudOS({ webspringEntry: false, themesDirectory: "Themes" });
 const configureThemes = themes.configResolved;
 themes.configResolved = function (config: unknown) { return configureThemes.call(this, { ...(config as object), root: themeFixtureRoot }); };
 
+const appThemeModule = "virtual:atmo-lab/app-themes";
+const appThemeStylePrefix = "virtual:atmo-lab/app-theme-style/";
+const toFileImport = (path: string) => "/@fs/" + normalizePath(path);
+const appThemes: Plugin = {
+  name: "atmo-lab-app-themes",
+  resolveId(id) {
+    if (id === appThemeModule || id.startsWith(appThemeStylePrefix)) return "\0" + id;
+  },
+  load(id) {
+    if (id !== "\0" + appThemeModule && !id.startsWith("\0" + appThemeStylePrefix)) return;
+    const bundles = discoverThemeBundles(resolve(workingTreeSpecimens, "AppThemes"), { kind: "app" });
+    for (const bundle of bundles) for (const file of bundle.files) this.addWatchFile(file);
+    if (id === "\0" + appThemeModule) {
+      const selected = new Set(bundles.map(bundle => bundle.theme.bundleIdentifier));
+      return themeModuleSource(bundles, selected, toFileImport, appThemeStylePrefix);
+    }
+    const identifier = id.slice(appThemeStylePrefix.length + 1, -4);
+    const bundle = bundles.find(candidate => candidate.theme.bundleIdentifier === identifier);
+    if (!bundle) throw new Error("Unknown Atmo Lab app theme: " + identifier);
+    return themeStylesheet(bundle, toFileImport);
+  },
+};
+
 export default defineConfig({
   root,
-  plugins: [react(), themes, atmoLab],
+  plugins: [react(), themes, appThemes, atmoLab],
   optimizeDeps: { entries: ["tests/atmo-lab/index.html", "tests/atmo-lab/frame.html"] },
   server: { host: "127.0.0.1", port: 5391, strictPort: true, fs: { allow: [root] } },
 });

@@ -1,6 +1,6 @@
 /* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
-import { useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type HTMLAttributes, type ReactNode, type RefObject } from "react";
-import { nseWindowFrameStyle, type NSEWindowFrameViewClass } from "../Application/NSEWindowFrameView";
+import { useContext, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type HTMLAttributes, type ReactNode, type RefObject } from "react";
+import { nseWindowFrameStyle } from "../Application/NSEWindowFrameView";
 import { useNSEWindowChromeElement } from "../Layout/windowObstructions";
 import { WindowTitlebarHostContext, type WindowTitlebarDocument, type WindowTitlebarSlots } from "./windowTitlebarContext";
 import "./Chrome/nse-chrome.css";
@@ -36,21 +36,6 @@ function interactiveTarget(target: EventTarget | null, header: HTMLElement): boo
   const element = node?.nodeType === 1 ? node as Element : node?.parentElement;
   const interactive = element?.closest(interactiveSelector);
   return Boolean(interactive && interactive !== header && header.contains(interactive));
-}
-
-function useWindowFrameAppearance(Frame: NSEWindowFrameViewClass | null | undefined) {
-  const id = useId();
-  const [loaded, setLoaded] = useState<{ frame: NSEWindowFrameViewClass; css: string } | null>(null);
-  useEffect(() => {
-    if (!Frame?.appearance) return;
-    let active = true;
-    void Promise.resolve().then(() => Frame.appearance?.()).then(module => {
-      if (active && typeof module?.default === "string") setLoaded({ frame: Frame, css: module.default });
-    }, () => undefined);
-    return () => { active = false; };
-  }, [Frame]);
-  if (!loaded || loaded.frame !== Frame) return null;
-  return { id, css: `@layer nse.theme { @scope ([data-window-frame-appearance=${JSON.stringify(id)}]) to ([data-window-titlebar]) { ${loaded.css} } }` };
 }
 
 /** @internal Shared composition; the window's existing toolbar renderer owns overflow and commands. */
@@ -137,7 +122,6 @@ export function WindowTitlebarView({ document, isKeyWindow, titleId, material = 
     className="nse-window-titlebar-view__toolbar">{toolbar}</div>;
   const sidebarWidth = sidebar?.width ?? document.sidebarWidth;
   const metalRail = material === "metal" && sidebarWidth !== undefined;
-  const frameAppearance = useWindowFrameAppearance(document.frameViewClass);
   const headerStyle = { "--nse-window-titlebar-sidebar-width": sidebarWidth === undefined ? undefined : `${sidebarWidth}px`, ...nseWindowFrameStyle(document.frameViewClass), ...moveStyle, ...style, "--nse-titlebar-native-left": `${exclusion.left}px`, "--nse-titlebar-native-right": `${exclusion.right}px` } as CSSProperties;
   const titlebarHooks = {
     "data-nse-role": "titlebar",
@@ -189,10 +173,9 @@ export function WindowTitlebarView({ document, isKeyWindow, titleId, material = 
       data-titlebar-presentation={presentation} data-window-frame-view={document.frameViewClass ? "" : undefined}
       data-titlebar-transparent={document.titlebarAppearsTransparent ? "true" : undefined} data-has-toolbar={hasToolbar ? "true" : "false"}
       data-window-titlebar="" data-window-active={isKeyWindow ? "true" : "false"} data-nse-key-window={isKeyWindow ? undefined : "false"}
-      data-window-frame-appearance={frameAppearance?.id} data-mode={mode}
+      data-mode={mode}
       onPointerDown={event => { if (!interactiveTarget(event.target, event.currentTarget)) onPointerDown?.(event); }}
       onDoubleClick={event => { if (!interactiveTarget(event.target, event.currentTarget)) onDoubleClick?.(event); }}>
-      {frameAppearance ? <style>{frameAppearance.css}</style> : null}
       <div ref={setMenu} data-nse-part="menu" data-window-menu-slot="" className="nse-window-titlebar-view__menu" data-window-no-drag="">{menuBar}</div>
       <WindowTitlebarMaterialContext.Provider value={material}>{bar}</WindowTitlebarMaterialContext.Provider>
       {hasToolbar && separateToolbar && !stackedToolbar ? <div className="nse-window-titlebar-view__toolbar-row" data-window-titlebar-toolbar-row="">
@@ -209,11 +192,9 @@ export function WindowTitlebarView({ document, isKeyWindow, titleId, material = 
     data-titlebar-transparent={document.titlebarAppearsTransparent ? "true" : undefined} data-has-toolbar={hasToolbar ? "true" : "false"}
     data-window-titlebar="" data-window-hud-titlebar={variant === "hud" ? "" : undefined} data-window-panel-titlebar={variant === "panel" ? "" : undefined}
     data-window-active={isKeyWindow ? "true" : "false"} data-nse-key-window={isKeyWindow ? undefined : "false"}
-    data-window-frame-appearance={frameAppearance?.id}
     data-mode={mode} data-nse-colour-scheme-resolved={mode}
     onPointerDown={event => { if (!interactiveTarget(event.target, event.currentTarget)) onPointerDown?.(event); }}
     onDoubleClick={event => { if (!interactiveTarget(event.target, event.currentTarget)) onDoubleClick?.(event); }}>
-    {frameAppearance ? <style>{frameAppearance.css}</style> : null}
     <div ref={setMenu} data-nse-part="menu" data-window-menu-slot="" className="nse-window-titlebar-view__menu" data-window-no-drag="">{menuBar}</div>
     <div data-nse-part="content" className="nse-window-titlebar-view__row" data-window-titlebar-row="">
       {sidebarWidth !== undefined && hasToolbar ? <span aria-hidden="true" data-window-sidebar-tracking-separator="" data-nse-part="separator" /> : null}

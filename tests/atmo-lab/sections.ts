@@ -52,6 +52,7 @@ export const labSections: readonly LabSection[] = [
   { id: "outline", title: "Outline groups", brief: "The group line runs from the label to an arrow pinned near the trailing edge, whatever the label length." },
   { id: "menus", title: "Menus", brief: "Section dividers, submenu arrows and the scroll indicator." },
   { id: "bars", title: "Top bars", brief: "Top bars, toolbars and grouped buttons." },
+  { id: "partial-app-theme", title: "Partial app theme", brief: "Red app chrome alongside stock controls and a button with its own bezel colour." },
   ...elementFamilies.map(family => ({ id: family.id, title: family.title, brief: family.brief })),
   { id: "catalogue", title: "Catalogue", brief: "Any of the frozen baseline catalogue's surfaces, by name." },
 ];

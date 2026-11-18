@@ -72,7 +72,7 @@ export default defineConfig({
       replacement: resolve(import.meta.dirname, "../../.artifacts/synapp-sdk/packages/syncloudos", entry),
     })),
   ] },
-  plugins: [react(), themeFixturePlugin, fixtureThemes("theme-paint-replacement"), fixtureThemes("theme-app-scope", "AppThemes"), {
+  plugins: [react(), themeFixturePlugin, fixtureThemes("theme-paint-replacement"), fixtureThemes("theme-app-scope", "AppThemes"), fixtureThemes("window-titlebar-layout", "AppThemes"), {
     name: "framework-fixture-pages",
     configureServer(server) {
       const pdfReaderWorker = readFileSync(resolve(import.meta.dirname, "../../node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs"));

@@ -300,8 +300,8 @@
 
 :is([data-nse-part="header"],[data-nse-part="surface"]):where([data-nse-role="titlebar"])[data-nse-type="custom"],
 :where(:scope):is(:is([data-nse-part="header"],[data-nse-part="surface"]):where([data-nse-role="titlebar"])[data-nse-type="custom"]) {
-  background: var(--nse-frame-background, var(--nse-window-title-background));
-  border-block-end: 1px solid var(--nse-frame-separator, var(--nse-window-divider));
+  background: var(--nse-window-title-background);
+  border-block-end: 1px solid var(--nse-window-divider);
 }
 
 [data-nse-part="menu"]:where([data-nse-role="titlebar"]>*) [data-nse-control="menu-bar"],

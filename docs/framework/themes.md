@@ -6,7 +6,7 @@ Atmo is the built-in theme. It is itself a theme bundle, `Atmo.scostheme`, drawn
 
 ## What a theme is
 
-A theme is a `.scostheme` bundle of static files: an identity, a definition and stylesheets. It contains no code that runs. It can:
+A system theme is a `.scostheme` bundle of static files with an identity, a definition and stylesheets. It contains no code that runs. It can:
 
 - paint every control part the [theme contract](theme-contract.md) publishes, in every state and variant it lists;
 - set the 48 semantic colours, in light and dark, and optionally for high contrast;
@@ -38,7 +38,7 @@ src/Themes/
       Licences/
 ```
 
-The Vite plugin discovers every bundle in `src/Themes`. Set `themesDirectory` in `synCloudOS({ … })` to look elsewhere, or `false` to disable discovery.
+The Vite plugin discovers system themes in `src/Themes`. Set `themesDirectory` in `synCloudOS({ … })` to look elsewhere, or `false` to disable system theme discovery.
 
 `Info.ts` is the theme's identity. It is read statically, never executed:
 
@@ -129,7 +129,7 @@ SVG works the same way, as a file or a `data:` URL, and stays sharp at every den
 
 ## What Atmo provides underneath
 
-Atmo is always loaded, in the `nse.atmo` layer beneath every theme. Any part your theme doesn't draw keeps Atmo's drawing, so a theme can start small, with colours and a few controls, and grow. `validate_theme` lists the parts you haven't drawn yet.
+Atmo is always loaded in the `nse.atmo` layer beneath installed themes. When a theme draws an element in a particular state, the build clears the underlying paint on that element and its `::before` and `::after`. Other parts and states keep their underlying drawing. `validate_theme` reports coverage for a whole system theme.
 
 Control structure (size, layout, typography, motion) lives in `nse.structure` and Atmo's layer and applies under every theme. A theme repaints a control; it never re-lays it out.
 
@@ -141,16 +141,63 @@ Name it in the host:
 import { mountSynCloudOS } from "@syndromatic/syncloudos/browser";
 import { themes } from "virtual:syncloudos/themes";
 
-const host = await mountSynCloudOS({ element, application: { bundleIdentifier: "com.example.hello" }, theme: themes["com.example.dusk"] });
+const dusk = themes["com.example.dusk"];
+if ("kind" in dusk) throw new TypeError("The host requires a system theme.");
+const host = await mountSynCloudOS({ element, application: { bundleIdentifier: "com.example.hello" }, theme: dusk });
 ```
 
-`themes` holds every discovered bundle's `NSETheme`, keyed by bundle identifier. A theme's stylesheets are built only if the host names it or your code references it through `themes`. Without `theme`, the host uses Atmo.
+`themes` holds each discovered `NSETheme` or `NSEAppTheme`, keyed by bundle identifier. A theme's stylesheets are built only if the host names it or your code references it through `themes`. Without `theme`, the host uses Atmo.
 
 A standalone React page sets it on its root view: `<NSEView appearance={new NSEAppearance("aqua", { theme: themes["com.example.dusk"] })}>`.
 
 ## Nesting
 
-Every theme boundary carries `data-nse-theme="<bundleIdentifier>"`. A provider inside another provider starts a new boundary. The inner theme's rules apply inside it, the outer theme's stop at it, and the inner boundary resets every semantic colour so nothing is inherited from outside.
+A system theme boundary carries `data-nse-theme="<bundleIdentifier>"`. A provider inside another provider starts a new boundary. The inner theme's rules apply inside it, the outer theme's stop at it, and the inner boundary resets every semantic colour so nothing is inherited from outside.
+
+## App themes
+
+An app can ship a partial theme for its own window and navigation chrome. Put the bundle in the app's resources.
+
+```text
+Run.app/
+  Contents/Resources/
+    RunChrome.scostheme/
+      Contents/
+        Info.ts
+        Resources/
+          theme.css
+```
+
+Use the usual `Info.ts` identity and `themeContractVersion`. The Vite plugin discovers the bundle with the app. An app theme contains stylesheets and their local artwork. The enclosing system theme supplies semantic colours, navigation, presentation and named images, so omit `Theme.json`.
+
+An app theme can draw `window`, `app-view-chrome`, `toolbar`, `toolbar-item`, `tab-view`, `segmented-control`, `split-view`, `menu`, `menu-item` and `popover`. Anchor each selector to an allowed control and use its published parts, states and variants. The app bundle validator accepts partial coverage. See [App theme controls](theme-contract.md#app-theme-controls).
+
+```css
+[data-nse-control="tab-view"] [data-nse-part="cell"][data-nse-selected] {
+  background: #c8102e;
+  color: white;
+}
+```
+
+Set an appearance at the application, window or view level. The nearest setting takes precedence.
+
+- `app.appearance` applies to windows, sheets, popovers and menus the application presents.
+- `window.appearance` overrides the application for one window.
+- `NSEView.appearance` applies to a view and its descendants.
+
+```tsx
+import { NSEAppearance } from "@syndromatic/syncloudos/nse/appearance";
+import { themes } from "virtual:syncloudos/themes";
+
+const chrome = new NSEAppearance({ theme: themes["com.example.run.chrome"] });
+app.appearance = chrome;
+window.appearance = chrome;
+// A view can also set <NSEView appearance={chrome}>…</NSEView>.
+```
+
+Assign `null` to an application or window appearance to restore inheritance. An appearance that only sets an app theme follows the surrounding light or dark scheme, contrast and transparency.
+
+The `data-nse-app-theme` boundary keeps the system theme and its semantic colours in effect. App drawing applies in `nse.app-theme`, above the system theme's drawing, and replaces the paint for each part and state it draws. Instance properties such as `bezelColour` take precedence. App drawing stops at a different app theme boundary and at `data-nse-system-surface`, which marks surfaces such as System Preferences, the open and save panels, and the Colour and Font panels.
 
 ## Scaffolding and validating
 

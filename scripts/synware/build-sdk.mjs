@@ -397,7 +397,6 @@ async function main() {
     .replace("../../src/SynCloudOS/AppSDK/fx/runtime.ts", "./fx-attribution-runtime.js")
     .replace("../../src/SynCloudOS/AppSDK/manifest/synappManifestValidator.generated.mjs", "./manifest-validator.mjs")
     .replace("../../src/SynCloudOS/Identity/bundleIdentifier.mjs", "./bundleIdentifier.mjs")
-    .replace('new URL("../../tooling/nse-theme-contract.json", import.meta.url)', 'new URL("./tooling/nse-theme-contract.json", import.meta.url)')
     .replace("./dispatch/closureConversion.mjs", "./dispatch-closure-conversion.mjs")
     .replace("../../src/FX/DispatchFX/internal/workerSafeEntries.json", "./dispatch-worker-safe-entries.json"));
   writeFileSync(resolve(directory, "dispatch-closure-conversion.mjs"), readFileSync(resolve(repositoryRoot, "scripts/synware/dispatch/closureConversion.mjs"), "utf8")

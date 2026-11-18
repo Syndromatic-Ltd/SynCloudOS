@@ -1,14 +1,14 @@
 import { expect, test } from "playwright/test";
 
 const fixture = "/tests/e2e/fixtures/window-titlebar-layout.html";
-test("frame-view paint stays in its window and falls back after a failed load", async ({ page }) => {
+test("window appearance paints only its titlebar and clearing it restores Atmo", async ({ page }) => {
   await page.goto(`${fixture}?frame`);
   const title = page.locator("[data-window-title]").filter({ hasText: "A long document title" });
   const sibling = page.locator("[data-window-title]").filter({ hasText: "Another window" });
   await expect(title).toHaveCSS("color", "rgb(21, 101, 183)");
   await expect(sibling).not.toHaveCSS("color", "rgb(21, 101, 183)");
-  await page.getByRole("button", { name: "Fail stylesheet" }).click();
-  await expect(title).not.toHaveCSS("color", "rgb(21, 101, 183)");
+  await page.getByRole("button", { name: "Clear window appearance" }).click();
+  await expect(title).toHaveCSS("color", "rgb(43, 51, 60)");
   await expect(page.getByRole("button", { name: "Close" })).toBeVisible();
 });
 

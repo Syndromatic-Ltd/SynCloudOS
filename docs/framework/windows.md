@@ -133,7 +133,7 @@ The Developer MCP reports `idiom.layout-guide` for a raw `env(safe-area-inset-*)
 
 The system draws each title bar. Set `window.titleVisibility`, `window.titlebarAppearsTransparent`, or the `fullSizeContentView` style bit to change how chrome is placed against content. The layout guide and `window.contentLayoutRect` describe the content area available below the measured chrome.
 
-`window.titlebarPresentation = "floating"` detaches Cumulus chrome across all toolbar styles. The default is `"attached"`. Windows with `texturedBackground` use Metal and keep their bars attached. A subclass of `NSEWindowFrameView` can supply titlebar metrics and theme tokens. It can also load a stylesheet with `static override appearance = () => import("./Resources/Journal.frame.css?inline")`. SynWare validates the stylesheet and its local imports against the NSE theme contract. Use `:scope` for the title bar itself and semantic `data-nse-part` selectors for its parts. Each window scopes the stylesheet to its own title bar and uses the frame's metrics and tokens if the stylesheet fails to load.
+`window.titlebarPresentation = "floating"` detaches Cumulus chrome across all toolbar styles. The default is `"attached"`. Windows with `texturedBackground` use Metal and keep their bars attached. A subclass of `NSEWindowFrameView` can set the title bar's height with `static override titlebarHeight = 28`. Paint the frame through an app theme assigned to `window.appearance`. A window inherits its application's appearance when its own appearance is `null`. See [App themes](themes.md#app-themes).
 
 ## Key, main and focus
 

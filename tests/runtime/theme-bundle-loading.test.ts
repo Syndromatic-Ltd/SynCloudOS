@@ -38,24 +38,20 @@ describe("theme loading", () => {
     expect(css).toContain("--paper-marker"); expect(css).not.toContain("--unused-marker"); expect(css).toContain("nse.atmo");
   }, 30_000);
   it("disables discovery when themesDirectory is false", async () => { const root = project(); const plugin = synCloudOS({ webspringEntry: false, themesDirectory: false }); await plugin.configResolved({ root, command: "serve" }); const code = plugin.load("\0virtual:syncloudos/themes"); expect(code).not.toContain("com.example.paper"); });
-  it("validates window frame CSS and its local imports before producing an inline stylesheet", async () => {
-    const root = project();
-    writeFileSync(join(root, "src/main.ts"), 'import css from "./Journal.frame.css?inline"; console.log(css);');
-    writeFileSync(join(root, "src/Journal.frame.css"), '@import "./frame-plate.css"; [data-nse-part="header"] { background: var(--nse-window-title-background); }');
-    const plate = join(root, "src/frame-plate.css");
-    writeFileSync(plate, '[data-nse-part="title"] { color: var(--nse-window-title-foreground); }');
-    const bundle = () => build({ configFile: false, root, logLevel: "silent", plugins: [synCloudOS({ webspringEntry: false, themesDirectory: false })], build: { write: false, minify: false, rollupOptions: { input: join(root, "src/main.ts") } } });
-    const result = await bundle();
-    const outputs = (Array.isArray(result) ? result : [result]).flatMap(result => "output" in result ? result.output : []);
-    expect(outputs.find(output => output.type === "chunk")?.code).toContain("--nse-window-title-foreground");
-    writeFileSync(plate, '[data-nse-part="title"] { display: none; }');
-    await expect(bundle()).rejects.toThrow(/semantic-limit/);
-  }, 30_000);
-  it("rejects globally injected frame CSS", async () => {
+  it("a .frame.css import is an ordinary stylesheet", async () => {
     const root = project();
     writeFileSync(join(root, "src/main.ts"), 'import "./Journal.frame.css";');
-    writeFileSync(join(root, "src/Journal.frame.css"), '[data-nse-part="header"] { background: white; }');
-    await expect(build({ configFile: false, root, logLevel: "silent", plugins: [synCloudOS({ webspringEntry: false, themesDirectory: false })], build: { write: false, rollupOptions: { input: join(root, "src/main.ts") } } }))
-      .rejects.toThrow(/window frame stylesheets must use \?inline/i);
-  }, 30_000);
+    writeFileSync(join(root, "src/Journal.frame.css"), '.journal-frame { color: red; }');
+    const result = await build({
+      configFile: false,
+      root,
+      logLevel: "silent",
+      plugins: [synCloudOS({ webspringEntry: false, themesDirectory: false })],
+      build: { write: false, minify: false, rollupOptions: { input: join(root, "src/main.ts") } },
+    });
+    const outputs = (Array.isArray(result) ? result : [result]).flatMap(result => "output" in result ? result.output : []);
+    const css = outputs.filter(output => output.type === "asset" && output.fileName.endsWith(".css")).map(output => String(output.source)).join("\n");
+    expect(css).toContain(".journal-frame");
+    expect(css).toContain("color: red");
+  });
 });
