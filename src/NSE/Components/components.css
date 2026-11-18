@@ -384,16 +384,11 @@
 .nse-control-alert-backdrop,
 :where(:scope):is(.nse-control-alert-backdrop),
 :where(:scope).nse-control-alert-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 10000;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
-  place-items: center;
   box-sizing: border-box;
   overflow: hidden;
-  padding: max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-top, 0px)) max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-right, 0px)) max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-bottom, 0px)) max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-left, 0px));
   background: rgba(0, 0, 0, 0.42);
   -webkit-backdrop-filter: blur(5px) saturate(0.85);
   backdrop-filter: blur(5px) saturate(0.85);
@@ -418,13 +413,10 @@
   max-height: calc(100vh - 22px);
   max-inline-size: 100%;
   max-block-size: 100%;
-  min-height: 250px;
   padding: 28px;
-  overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.34);
   border-radius: 16px;
   color: #f5f8ff;
-  text-align: center;
   text-shadow: 0 -1px 0 rgba(0,0,0,0.78), 0 1px 1px rgba(255,255,255,0.12);
   background: linear-gradient(180deg, rgba(62, 78, 99, 0.98), rgba(16, 24, 36, 0.98));
   box-shadow: 0 28px 42px rgba(0,0,0,0.64), inset 0 1px 0 rgba(255,255,255,0.16);
@@ -449,9 +441,7 @@
 :where(:scope):is(.nse-system-alert-content),
 :where(:scope).nse-system-alert-content {
   display: grid;
-  grid-template-columns: 116px minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
-  gap: 8px;
   align-items: start;
   text-align: left;
   min-width: 0;
@@ -616,10 +606,8 @@
   grid-template-columns: repeat(auto-fit, minmax(min(184px, 100%), 1fr));
   justify-content: stretch;
   gap: 10px;
-  width: 100%;
   max-width: 100%;
   flex: 0 0 auto;
-  margin: 18px -2px 0;
 }
 
 .nse-alert-actions .nse-system-alert-action-button.nse-control-button,
@@ -657,14 +645,11 @@
 :where(:scope):is(.nse-alert-actions),
 :where(:scope).nse-alert-actions {
     grid-template-columns: minmax(0, 1fr);
-    margin-right: 0;
-    margin-left: 0;
   }
 
   .nse-system-alert-content,
 :where(:scope):is(.nse-system-alert-content),
 :where(:scope).nse-system-alert-content {
-    grid-template-columns: 1fr;
     justify-items: center;
     text-align: center;
     margin: 0;
@@ -731,8 +716,6 @@
   .nse-system-alert-content,
 :where(:scope):is(.nse-system-alert-content),
 :where(:scope).nse-system-alert-content {
-    grid-template-columns: 84px minmax(0, 1fr);
-    gap: 8px;
     margin: 0;
   }
 
@@ -793,16 +776,6 @@
   }
 }
 
-/* The backdrop still covers both halves. Its content box is the selected
-   region; no wrapper/reparenting or second focus trap is introduced. */
-.nse-control-alert-backdrop[data-nse-overlay-region="true"],
-:where(:scope):is(.nse-control-alert-backdrop[data-nse-overlay-region="true"]),
-:where(:scope).nse-control-alert-backdrop[data-nse-overlay-region="true"] {
-  padding-top: calc(var(--nse-overlay-region-top) + max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-top, 0px)));
-  padding-right: calc(var(--nse-overlay-region-right) + max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-right, 0px)));
-  padding-bottom: calc(var(--nse-overlay-region-bottom) + max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-bottom, 0px)));
-  padding-left: calc(var(--nse-overlay-region-left) + max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-left, 0px)));
-}
 .nse-control-alert-backdrop[data-nse-overlay-region="true"]>.nse-control-alert,
 :where(:scope):is(.nse-control-alert-backdrop[data-nse-overlay-region="true"])>.nse-control-alert {
   min-block-size: 0;
@@ -823,4 +796,75 @@
 
 }
 
+}
+
+@layer nse.structure {
+@scope ([data-nse-theme]) to ([data-nse-theme]) {
+.nse-control-alert-backdrop,
+:where(:scope):is(.nse-control-alert-backdrop),
+:where(:scope).nse-control-alert-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  place-items: center;
+  padding: max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-top, 0px)) max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-right, 0px)) max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-bottom, 0px)) max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-left, 0px));
+}
+
+.nse-control-alert,
+:where(:scope):is(.nse-control-alert),
+:where(:scope).nse-control-alert {
+  min-height: 250px;
+  overflow: hidden;
+  text-align: center;
+}
+
+.nse-system-alert-content,
+:where(:scope):is(.nse-system-alert-content),
+:where(:scope).nse-system-alert-content {
+  grid-template-columns: 116px minmax(0, 1fr);
+  gap: 8px;
+}
+
+.nse-alert-actions,
+:where(:scope):is(.nse-alert-actions),
+:where(:scope).nse-alert-actions {
+  width: 100%;
+  margin: 18px -2px 0;
+}
+
+/* The backdrop still covers both halves. Its content box is the selected
+   region; no wrapper/reparenting or second focus trap is introduced. */
+.nse-control-alert-backdrop[data-nse-overlay-region="true"],
+:where(:scope):is(.nse-control-alert-backdrop[data-nse-overlay-region="true"]),
+:where(:scope).nse-control-alert-backdrop[data-nse-overlay-region="true"] {
+  padding-top: calc(var(--nse-overlay-region-top) + max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-top, 0px)));
+  padding-right: calc(var(--nse-overlay-region-right) + max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-right, 0px)));
+  padding-bottom: calc(var(--nse-overlay-region-bottom) + max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-bottom, 0px)));
+  padding-left: calc(var(--nse-overlay-region-left) + max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-left, 0px)));
+}
+
+@media (max-width: 680px) {
+  .nse-alert-actions,
+:where(:scope):is(.nse-alert-actions),
+:where(:scope).nse-alert-actions {
+    margin-right: 0;
+    margin-left: 0;
+  }
+
+  .nse-system-alert-content,
+:where(:scope):is(.nse-system-alert-content),
+:where(:scope).nse-system-alert-content {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-height: 560px) {
+  .nse-system-alert-content,
+:where(:scope):is(.nse-system-alert-content),
+:where(:scope).nse-system-alert-content {
+    grid-template-columns: 84px minmax(0, 1fr);
+    gap: 8px;
+  }
+}
+}
 }

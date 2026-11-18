@@ -19,10 +19,11 @@ Contract version 1: 72 controls, 48 colours.
 
 ### `app-view-chrome`
 
-- Parts: `background`, `content-border`, `content-view`
+- Parts: `background`, `border`, `content-border`, `content-view`, `decoration`
 - States: `key-window=false`
 - Variants:
-  - `data-nse-content-border`: `small`
+  - `data-nse-content-border`: `large`, `small`
+  - `data-nse-edge`: `minY`
 
 ### `badge`
 
@@ -68,12 +69,13 @@ Contract version 1: 72 controls, 48 colours.
   - `data-nse-appearance-name`: `aqua`, `darkAqua`
   - `data-nse-bezel-style`: `disclosure`, `rounded`, `texturedRounded`
   - `data-nse-button-type`: `momentaryPushIn`, `pushOnPushOff`, `switch`, `toggle`
+  - `data-nse-chrome`: `hud`
   - `data-nse-control-size`: `large`, `regular`, `small`
   - `data-nse-expanded`: `false`, `true`
   - `data-nse-has-destructive-action`: `true`
   - `data-nse-image-position`: `imageLeading`, `imageOnly`, `imageTrailing`, `noImage`
   - `data-nse-key-equivalent`: ``, ``
-  - `data-nse-role`: `close`, `current`, `default`, `ground`, `ink`, `minimise`, `zoom`
+  - `data-nse-role`: `back`, `close`, `current`, `default`, `ground`, `ink`, `minimise`, `zoom`
   - `data-nse-style`: `edited`
 
 ### `clip-view`
@@ -418,7 +420,7 @@ Contract version 1: 72 controls, 48 colours.
 
 ### `split-view`
 
-- Parts: `background`, `content`, `divider`, `handle`, `sidebar`
+- Parts: `background`, `content`, `divider`, `handle`, `sidebar`, `split-divider`, `split-pane`, `split-pane-slot`
 - States: none
 - Variants:
   - `data-nse-position`: `leading`
@@ -448,12 +450,13 @@ Contract version 1: 72 controls, 48 colours.
 
 ### `system-alert`
 
-- Parts: `actions`, `backdrop`, `background`, `content`, `label`, `title`
+- Parts: `actions`, `backdrop`, `background`, `badge`, `content`, `decoration`, `label`, `title`
 - States: none
 - Variants:
   - `data-nse-appearance-name`: `aqua`
   - `data-nse-chrome`: `standard`
   - `data-nse-presentation`: `sheet`
+  - `data-nse-type`: `content-view`
 
 ### `tab-view`
 
@@ -583,17 +586,20 @@ Contract version 1: 72 controls, 48 colours.
 
 ### `window`
 
-- Parts: `accessory`, `background`, `bezel`, `content`, `content-border`, `content-view`, `handle`, `header`, `leading`, `menu`, `shadow`, `sheet`, `subtitle`, `title`, `titlebar-accessories`, `toolbar`, `trailing`, `window-fitting-content`
-- States: `key-window=false`
+- Parts: `accessory`, `backdrop`, `background`, `bezel`, `body`, `border`, `button`, `cell`, `content`, `content-border`, `content-view`, `decoration`, `fill`, `floating-titlebar`, `handle`, `header`, `image`, `indicator`, `leading`, `menu`, `shadow`, `sheet`, `sidebar`, `subtitle`, `surface`, `title`, `titlebar-accessories`, `toolbar`, `toolbar-row`, `trailing`, `window-fitting-content`
+- States: `key-window=false`, `selected`
 - Variants:
   - `data-nse-alignment`: `center`, `end`, `start`
   - `data-nse-chrome`: `hud`, `metal`, `standard`
-  - `data-nse-content-border`: `small`
-  - `data-nse-edge`: `block-end`, `block-end-inline-end`, `block-end-inline-start`, `block-start`, `block-start-inline-end`, `block-start-inline-start`, `inline-end`, `inline-start`
-  - `data-nse-role`: `borderless`, `hud`, `modal`, `panel`, `popover`, `sheet`, `standard`
-  - `data-nse-style`: `hud`, `panel`, `standard`
+  - `data-nse-content-border`: `large`, `small`
+  - `data-nse-edge`: `block-end`, `block-end-inline-end`, `block-end-inline-start`, `block-start`, `block-start-inline-end`, `block-start-inline-start`, `inline-end`, `inline-start`, `minY`
+  - `data-nse-material`: `cumulus`, `metal`
+  - `data-nse-presentation`: `attached`, `floating`
+  - `data-nse-role`: `borderless`, `hud`, `modal`, `panel`, `popover`, `sheet`, `standard`, `titlebar`, `transfer`
+  - `data-nse-style`: `hud`, `panel`, `standard`, `titlebar`
   - `data-nse-toolbar-style`: `automatic`, `expanded`, `preference`, `unified`, `unifiedCompact`
-  - `data-nse-type`: `frameless`, `system`
+  - `data-nse-transparent`: `true`
+  - `data-nse-type`: `custom`, `frameless`, `system`
 
 ## Colours
 

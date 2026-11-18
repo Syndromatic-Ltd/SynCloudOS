@@ -308,7 +308,7 @@ it("gives a full-size content view the whole sheet: no system title heading, sti
   await act(async () => { fireEvent.click(await screen.findByRole("button", { name: "New…" })); });
 
   const sheet = await screen.findByRole("dialog", { name: "New Collection" });
-  expect(sheet.hasAttribute("data-nse-full-size-content-view")).toBe(true);
+  expect(sheet.getAttribute("data-nse-type")).toBe("content-view");
   expect(sheet.querySelector(".nse-sheet-title")).toBeNull();
   expect(sheet.contains(screen.getByTestId("paper"))).toBe(true);
   expect((sheet.closest(".nse-window-sheet-layer") as HTMLElement).dataset.sheetAttached).toBe("true");

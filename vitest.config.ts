@@ -53,9 +53,11 @@ export const heavyTests = [
   "tests/runtime/fx/dispatch-pool-worker.test.ts",
   "tests/runtime/atmo-theme-bundle.test.ts",
   "tests/runtime/error-catalogue.test.ts",
+  "tests/runtime/framework-theme-neutrality.test.ts",
   "tests/runtime/heritage-inspector-source.test.ts",
   "tests/runtime/idiom-errors.test.ts",
   "tests/runtime/nse-page-tear.test.ts",
+  "tests/runtime/nse-view-draw-browser.test.ts",
   "tests/runtime/selector-performance.test.ts",
   "tests/runtime/theme-bundles.test.ts",
 ];

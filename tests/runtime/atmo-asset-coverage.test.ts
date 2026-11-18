@@ -34,7 +34,7 @@ describe("explicit theme resource ownership", () => {
     const root = path.resolve("src/Themes", `${theme}.scostheme`, "Contents", "Resources");
     const files = cssFiles(root);
     expect(files.length).toBeGreaterThan(0);
-    let references = 0;
+    const rasterResources = new Set<string>();
     for (const file of files) {
       const css = readFileSync(file, "utf8")
         .replace(/\/\*[\s\S]*?\*\//g, "")
@@ -46,20 +46,26 @@ describe("explicit theme resource ownership", () => {
       const imports = [...css.matchAll(/@import\s+["']([^"']+)["']/g)].map((match) => match[1]);
       for (const url of [...urls, ...imports]) {
         if (url.startsWith("data:") || url.startsWith("#")) continue;
-        references++;
         expect(url, file).not.toMatch(/^(?:\/|https?:)/);
         const resolved = path.resolve(path.dirname(file), url.split(/[?#]/)[0]);
         expect(path.relative(root, resolved), `${file}: ${url}`).not.toMatch(/^\.\.(?:[\\/]|$)/);
         expect(existsSync(resolved), `${file}: ${url}`).toBe(true);
-        // Canonical Atmo is raster-free: the SystemAlert nine-slices, its last
-        // exception, are traced into CSS (their PNGs stay as manifest-only assets).
-        if (theme === "Atmo") expect(url, `${file}: canonical Atmo consumes no raster resources`).not.toMatch(/\.(?:png|jpe?g|gif|webp)(?:$|[?#])/i);
+        if (/\.(?:png|jpe?g|gif|webp)(?:$|[?#])/i.test(url)) {
+          rasterResources.add(path.relative(root, resolved).replaceAll(path.sep, "/"));
+        }
       }
     }
-    if (theme !== "Atmo") expect(references).toBeGreaterThan(0);
+    expect(rasterResources).toEqual(new Set([
+      "chrome/metal/dark/header-endcap-left.png",
+      "chrome/metal/dark/header-endcap-right.png",
+      "chrome/metal/dark/header-middle.png",
+      "chrome/metal/light/header-endcap-left.png",
+      "chrome/metal/light/header-endcap-right.png",
+      "chrome/metal/light/header-middle.png",
+    ]));
   });
 
-  it("keeps canonical Atmo self-contained and raster-free", () => {
+  it("keeps the Atmo bundle independent of retired appearance assets", () => {
     for (const file of ["src/NSE/Appearance/atmo.ts", "src/NSE/Appearance/atmoTheme.ts", ...cssFiles("src/Themes/Atmo.scostheme/Contents/Resources")]) {
       const source = readFileSync(file, "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
       expect(source, file).not.toMatch(/AtmoHeritage|AtmoOnyx|AppearanceAssets|\/assets\/nse\/atmo\/|--av-|data-atmo-render/);

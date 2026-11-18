@@ -23,12 +23,10 @@
 import React from "react";
 import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
+import { atmoPaintCSS } from "../fixtures/atmoStylesheets";
 import { PanelView, HUDWindowView, SheetView, PopoverWindowView, ModalWindowView } from "../../src/NSE/NSE";
 import { standardWindow } from "../fixtures/windowTestDependencies";
 import type { WindowRecord, WindowPresentation } from "../../src/SynCloudOS/Windows";
-
-const windowCSS = readFileSync("src/NSE/Windows/nse-windows.css", "utf8");
 
 function roleRecord(role: WindowRecord["role"]): { record: WindowRecord; presentation: WindowPresentation } {
   const request = standardWindow(`role-${role}`, { title: `${role} specimen`, role });
@@ -79,23 +77,22 @@ describe("non-standard window role paint", () => {
       try {
         const root = document.querySelector(`[data-window-id="role-${role}"]`);
         expect(root, `${role} renders its window root`).not.toBeNull();
-        // Concrete theme identity belongs to the surrounding appearance
-        // provider; window roles expose only semantic chrome state.
+        expect(root?.getAttribute("data-nse-control")).toBe("window");
+        expect(root?.getAttribute("data-nse-role")).toBe(role);
         if (bar) expect(root?.querySelector(bar), `${role} renders its titlebar`).not.toBeNull();
         expect(root?.textContent).toContain(`${role} content`);
       } finally {
         unmount();
       }
     }
-    // Theme-neutral fallback paint remains on semantic window hooks.
-    for (const selector of [
-      ".nse-window__titlebar,",
-      ".nse-window-view--hud,",
-      ".nse-window__hud-titlebar,",
-      ".nse-window-view--sheet,",
-      ".nse-window-view--popover,",
+    const paint = atmoPaintCSS();
+    for (const hook of [
+      '[data-nse-control="window"]',
+      '[data-nse-role="titlebar"]',
+      '[data-nse-role="hud"]',
+      '[data-nse-role="popover"]',
     ]) {
-      expect(windowCSS.includes(selector), `stylesheet keeps ${selector}`).toBe(true);
+      expect(paint.includes(hook), `Atmo paints through ${hook}`).toBe(true);
     }
   });
 });

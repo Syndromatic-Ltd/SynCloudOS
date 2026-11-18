@@ -204,7 +204,7 @@ function LabBar({ variant }: { variant: "atmoCumulus" | "atmoMetal" }) {
   if (legacyTopBar?.TopBar) { const TopBar = legacyTopBar.TopBar; return <TopBar title={title} variant={variant} scheme={scheme} leadingItems={[{ kind: "webspring", label: "Home" }]} trailingItems={[{ kind: "settings", label: "Settings" }]} />; }
   const View = titlebarView!.WindowTitlebarView!;
   return <View document={{ title, subtitle: "", documentEdited: false }} isKeyWindow material={variant === "atmoMetal" ? "metal" : "cumulus"} mode={scheme}
-    controls={<button type="button" aria-label="Home" className="nse-app-topbar-button" data-position="leading"><span className="nse-app-topbar-button-well" aria-hidden="true" /></button>} />;
+    controls={<button type="button" aria-label="Home" className="nse-app-topbar-button" data-position="leading" data-nse-part="cell" data-nse-style="titlebar" data-nse-material="cumulus"><span className="nse-app-topbar-button-well" data-nse-part="bezel" aria-hidden="true" /></button>} />;
 }
 
 function Bars() {

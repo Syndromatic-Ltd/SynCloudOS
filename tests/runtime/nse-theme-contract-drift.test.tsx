@@ -10,7 +10,7 @@ import { additionalThemeCatalogue } from "../e2e/fixtures/theme-additional/catal
 import { StandaloneControlHost } from "../../src/NSE/Overlays";
 import { NSEAppearanceProvider } from "../../src/NSE/Appearance/NSEAppearanceProvider";
 import { atmoTheme } from "../../src/NSE/Appearance/atmo";
-import { createStaticPresentationPort } from "../fixtures/presentationTraits";
+import { createStaticPresentationPort, createStaticPresentationTraits } from "../fixtures/presentationTraits";
 import { nseThemeControls, nseThemeParts, nseThemeStates, nseThemeVariants } from "../../src/NSE/Theme/contract/vocabulary";
 import { nseThemeColourNames } from "../../src/NSE/Theme/contract/colours";
 import { createNSEThemeContract } from "../../scripts/synware/build-theme-contract.mjs";
@@ -19,6 +19,24 @@ import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
 import { NSETitlebarAccessoryViewController } from "../../src/NSE/Application/NSETitlebarAccessoryViewController";
 import { NSEToolbar } from "../../src/NSE/Toolbars/NSEToolbar";
+import { WindowTitlebarView } from "../../src/NSE/Windows/WindowTitlebarView";
+import { WindowView } from "../../src/NSE/Windows/WindowView";
+import { TitlebarGlyphButton } from "../../src/NSE/Windows/TitlebarGlyphButton";
+import { nseTopBarGlyphs } from "../../src/NSE/Windows/Chrome/topBarAssets";
+import { ApplicationNavigationBackButton } from "../../src/Webspring/ApplicationNavigationBackButton";
+import { AppViewChrome } from "../../src/Webspring/AppViewChrome";
+import { WindowContentBorder } from "../../src/SynCloudOS/AppHosting/windowAccessories";
+import { WindowPresentationContent } from "../../src/Webspring/WindowPresentationContent";
+import { WindowLayer, createApplicationWindowContentRendererRegistry } from "../../src/Webspring/WindowLayer";
+import { HostSiteBrandingProvider, SynCloudOSProvider } from "../../src/SynCloudOSReact";
+import { createBrowserWindowHost } from "../../src/SynCloudOS/PlatformAdapters/BrowserWindowHost";
+import { NSEWindowFrameView } from "../../src/NSE/Application/NSEWindowFrameView";
+import { NSESplitViewController, NSESplitViewItem } from "../../src/NSE/DataViews/Split";
+import { ViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
+import type { WindowPresentation, WindowRecord } from "../../src/SynCloudOS/SynCloudOS";
+import { TestContentViewController, updateTraits } from "../fixtures/tabViewController";
+import { modalWindow, standardWindow } from "../fixtures/windowTestDependencies";
+import { createWindowLayerFixture } from "../fixtures/windowLayerFixture";
 import { createClassApplicationHost } from "./fixtures/classApplicationHost";
 import { nseFlashMenuSelection } from "../../src/NSE/Menus/menuSelectionFlash";
 import { createSynCloudOS } from "../../src/SynCloudOS/Runtime/createSynCloudOS";
@@ -113,6 +131,104 @@ for (const surface of supplementalThemeCatalogue) it(`renders supplemental ${sur
   }
   await flashOpenMenus();
 });
+it("renders the toolbar row and rail of a Metal titlebar", () => {
+  const view = render(
+    <Host>
+      <WindowTitlebarView
+        document={{ title: "Documents", subtitle: "", documentEdited: false, toolbarStyle: "unified", toolbarDisplayMode: "iconAndLabel" }}
+        isKeyWindow
+        material="metal"
+        toolbar={<button>Open</button>}
+        sidebar={{ width: 180, content: <span>Folders</span> }}
+        leading={<ApplicationNavigationBackButton label="Back" onActivate={() => undefined} />}
+        trailing={<TitlebarGlyphButton label="Menu" glyph={nseTopBarGlyphs.settings} selected opensMenu />}
+      />
+    </Host>,
+  );
+  const header = view.container.querySelector('[data-nse-control="window"][data-nse-part="header"]');
+  expect(header?.querySelector('[data-nse-part="toolbar-row"]')?.textContent).toBe("Open");
+  expect(header?.querySelector('[data-nse-part="sidebar"]')?.textContent).toBe("Folders");
+  expect(header?.querySelector('[data-nse-control="button"][data-nse-role="back"]')).not.toBeNull();
+  expect(header?.querySelector('[data-nse-part="cell"][data-nse-style="titlebar"][data-nse-selected]')).not.toBeNull();
+  collect();
+});
+it("renders the large content border on embedded application chrome", () => {
+  const view = render(
+    <Host>
+      <AppViewChrome.Root zIndex={1}>
+        <WindowContentBorder thickness={44} />
+      </AppViewChrome.Root>
+    </Host>,
+  );
+  expect(view.container.querySelector('[data-nse-control="app-view-chrome"] [data-nse-part="content-border"][data-nse-content-border="large"]')).not.toBeNull();
+  collect();
+});
+it("renders the floating Cumulus titlebar and its custom frame", () => {
+  class Frame extends NSEWindowFrameView {
+    static override titlebarHeight = 44;
+  }
+  const record = {
+    ...standardWindow("theme-contract-floating", { title: "Documents" }),
+    id: "theme-contract-floating",
+    runtimeId: "runtime:theme-contract" as WindowRecord["runtimeId"],
+    state: "open",
+    isKey: true,
+    isMain: true,
+    zIndex: 1,
+  } satisfies WindowRecord;
+  const windowPresentation: WindowPresentation = {
+    kind: "desktop-window",
+    visible: true,
+    bounds: record.bounds,
+    safeAreaInsets: { blockStart: 0, inlineEnd: 0, blockEnd: 0, inlineStart: 0 },
+    movable: true,
+    resizable: true,
+    titleBarVisible: true,
+  };
+  const view = render(
+    <Host>
+      <WindowView
+        record={record}
+        presentation={windowPresentation}
+        blocked={false}
+        dirty={false}
+        dispatchCommand={async () => undefined}
+        titleBar={<WindowTitlebarView
+          document={{ title: record.title, subtitle: "", documentEdited: false, titlebarPresentation: "floating", titlebarAppearsTransparent: true, frameViewClass: Frame }}
+          isKeyWindow
+          material="cumulus"
+          titleId={record.id + "-title"}
+        />}
+      >
+        <p>Documents</p>
+      </WindowView>
+    </Host>,
+  );
+  const titlebar = view.container.querySelector('[data-nse-part="surface"][data-nse-role="titlebar"]');
+  expect(titlebar?.getAttribute("data-nse-presentation")).toBe("floating");
+  expect(titlebar?.getAttribute("data-nse-transparent")).toBe("true");
+  expect(titlebar?.getAttribute("data-nse-type")).toBe("custom");
+  expect(titlebar?.querySelector('[data-nse-part="floating-titlebar"]')).not.toBeNull();
+  collect();
+});
+it("renders both dividers of a three-pane split view", () => {
+  const controller = new NSESplitViewController({
+    id: "theme-contract-split",
+    splitViewItems: ["Sources", "Documents", "Inspector"].map(title => new NSESplitViewItem({
+      identifier: title.toLowerCase(),
+      viewController: new TestContentViewController(title, () => <p>{title}</p>),
+    })),
+  });
+  try {
+    const view = render(<Host><ViewControllerView controller={controller} /></Host>);
+    updateTraits(controller, createStaticPresentationTraits({ width: 1000, height: 800, reducedMotion: true }));
+    expect(view.container.querySelectorAll('[data-nse-part="split-divider"]')).toHaveLength(2);
+    collect();
+  } finally {
+    cleanup();
+    controller.dispose();
+  }
+});
 // A hosted application window draws its toolbar and titlebar accessories in the window chrome.
 it("renders a hosted application window", async () => {
   class Accessory extends NSETitlebarAccessoryViewController {
@@ -122,14 +238,23 @@ it("renders a hosted application window", async () => {
     override title = "Rename";
     static override view = function SheetView() { return <p>Sheet</p>; };
   }
+  class FullSizeSheet extends Sheet {
+    override sheetHasFullSizeContentView = true;
+  }
   let content!: Content;
+  let mainWindow!: MainWindow;
   class Content extends NSEViewController {
     constructor() { super(); content = this; }
     static override view = function ContentView() { return <p>Body</p>; };
   }
   class MainWindow extends NSEWindowController {
     readonly accessory: Accessory;
-    constructor() { super(); this.contentViewController = new Content(); this.accessory = new Accessory(); }
+    constructor() {
+      super();
+      mainWindow = this;
+      this.contentViewController = new Content();
+      this.accessory = new Accessory();
+    }
     override windowDidLoad() {
       this.window.toolbar = new NSEToolbar({ identifier: "main", items: [{ id: "share", kind: "button", label: "Share" }], defaultItemIdentifiers: ["share"] });
       this.window.addTitlebarAccessoryViewController(this.accessory);
@@ -144,7 +269,8 @@ it("renders a hosted application window", async () => {
     await act(async () => { await host.openMainWindow(); });
     await waitFor(() => expect(document.querySelector('[data-nse-part="titlebar-accessories"]')).not.toBeNull());
     // A sheet attaches under the toolbar, in the window's sheet frame.
-    await act(async () => { content.presentAsSheet(Sheet); });
+    let sheet!: Sheet;
+    await act(async () => { sheet = content.presentAsSheet(Sheet); });
     await waitFor(() => expect(document.querySelector('[data-nse-part="sheet"]')).not.toBeNull());
     // Production draws a hosted window's content inside its NSEWindowView; the class host renders the content alone.
     // Move the host's container into a window section so its chrome parts are recorded under the window, as they draw.
@@ -155,11 +281,67 @@ it("renders a hosted application window", async () => {
     container.before(windowView);
     windowView.append(container);
     collect();
+    await act(async () => {
+      content.dismiss(sheet);
+      content.presentAsSheet(FullSizeSheet);
+      mainWindow.window.setContentBorderThickness(44, "minY");
+    });
+    await waitFor(() => {
+      expect(container.querySelector('[data-nse-control="system-alert"][data-nse-type="content-view"]')).not.toBeNull();
+      expect(container.querySelector('[data-nse-part="content-border"][data-nse-content-border="large"]')).not.toBeNull();
+    });
+    collect();
     windowView.before(container);
     windowView.remove();
   } finally {
     cleanup();
     await host.dispose();
+  }
+});
+it("renders the window transfer control with a browser window host", async () => {
+  const browserHost = createBrowserWindowHost(window, () => null);
+  const host = createClassApplicationHost(() => <p>Document</p>, "com.example.theme-contract-transfer", browserHost);
+  const renderers = createApplicationWindowContentRendererRegistry(host.runtime, { [host.appId]: host.runtime.apps.getApp(host.appId)! });
+  try {
+    await host.launch();
+    await host.openMainWindow();
+    const view = render(
+      <Host>
+        <SynCloudOSProvider runtime={host.runtime}>
+          <HostSiteBrandingProvider value={{ name: "Theme contract", logoAlt: "", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null }}>
+            <WindowPresentationContent>
+              <WindowLayer contentRegistry={renderers} />
+            </WindowPresentationContent>
+          </HostSiteBrandingProvider>
+        </SynCloudOSProvider>
+      </Host>,
+    );
+    await view.findByText("Document");
+    expect(view.container.querySelector('[data-nse-part="button"][data-nse-role="transfer"]')).not.toBeNull();
+    collect();
+  } finally {
+    cleanup();
+    renderers.dispose();
+    await host.dispose();
+  }
+});
+it("renders a backdrop for a system-wide modal window", async () => {
+  const fixture = await createWindowLayerFixture();
+  try {
+    const modal = fixture.manager.create(modalWindow("theme-contract-modal", null, { applicationId: null, applicationSessionId: null }));
+    await fixture.manager.open(modal.id);
+    const view = render(
+      <Host>
+        <SynCloudOSProvider runtime={fixture.runtime}>
+          <WindowLayer contentRegistry={fixture.contentRegistry} />
+        </SynCloudOSProvider>
+      </Host>,
+    );
+    expect(view.container.querySelector('[data-nse-control="window"][data-nse-part="backdrop"][data-nse-role="modal"]')).not.toBeNull();
+    collect();
+  } finally {
+    cleanup();
+    await fixture.cleanup();
   }
 });
 it("renders colour panel states", async () => {

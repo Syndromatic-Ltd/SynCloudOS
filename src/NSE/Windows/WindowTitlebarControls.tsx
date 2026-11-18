@@ -69,7 +69,7 @@ function WindowControl({
       type="button"
       className={`nse-window__control nse-window__control--${hud && kind === "close" ? "hud-close" : kind === "fullScreen" ? "zoom" : kind}`}
       aria-label={label}
-      data-nse-control="button" data-nse-part="cell" data-nse-highlighted={highlighted ? "" : undefined} data-nse-role={kind} data-nse-style={kind === "close" && dirty ? "edited" : undefined}
+      data-nse-control="button" data-nse-part="cell" data-nse-highlighted={highlighted ? "" : undefined} data-nse-role={kind} data-nse-chrome={hud ? "hud" : undefined} data-nse-style={kind === "close" && dirty ? "edited" : undefined}
       data-window-control={kind}
       data-window-control-state={state}
 

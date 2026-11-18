@@ -165,9 +165,9 @@ export function SystemAlert({
   return (
     <AlertSurface className="syncloudos-system-alert" appearance={appearance} labelledBy={titleId} describedBy={messageId}>
       <div className="nse-system-alert-content">
-        <div className={`syncloudos-alert-artwork${icon.src ? "" : " is-caution-only"}`} data-alert-icon={icon.kind} aria-hidden="true">
+        <div data-nse-part="decoration" className={`syncloudos-alert-artwork${icon.src ? "" : " is-caution-only"}`} data-alert-icon={icon.kind} aria-hidden="true">
           {icon.src ? <img data-nse-part="image" className="syncloudos-alert-logo" data-alert-logo={icon.src === synCloudOSLogo ? "syncloudos" : ""} src={icon.src} alt="" /> : null}
-          <img className="syncloudos-alert-caution" data-alert-caution src={cautionIcon} alt="" />
+          <img className="syncloudos-alert-caution" data-nse-part="badge" src={cautionIcon} alt="" />
         </div>
         <div data-nse-part="content" className="nse-system-alert-copy">
           <h2 data-nse-part="title" id={titleId}>{error.title}</h2>

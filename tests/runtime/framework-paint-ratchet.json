@@ -39,12 +39,7 @@
   "src/NSE/SystemUI/LoginWindow/LoginWindow.css": 50,
   "src/NSE/TextEditing/text-view.css": 4,
   "src/NSE/Toolbars/nse-toolbars.css": 3,
-  "src/NSE/Windows/Chrome/nse-chrome.css": 140,
-  "src/NSE/Windows/WindowTitlebarView.css": 12,
-  "src/NSE/Windows/nse-windows.css": 28,
-  "src/SynCloudOS/AppHosting/window-chrome.css": 6,
   "src/SynCloudOS/styles/runtime.css": 5,
-  "src/SynCloudOSReact/system-alert.css": 3,
   "src/Webspring/Contents/Views/WebspringBoardView/WebspringBoardView.css": 40,
   "src/Webspring/Preferences/Capabilities.prefPane/capabilities.css": 4,
   "src/Webspring/Preferences/Sounds.prefPane/audioHapticsPane.css": 2,
@@ -56,6 +51,5 @@
   "src/Webspring/WebspringIconArtwork.css": 2,
   "src/Webspring/WebspringPresentation.css": 4,
   "src/Webspring/WebspringWidgetShelf.css": 16,
-  "src/Webspring/WindowLayer/window-layer.css": 3,
   "src/Webspring/privacySecurityPane.css": 3
 }

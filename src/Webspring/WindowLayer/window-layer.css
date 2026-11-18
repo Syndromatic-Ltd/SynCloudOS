@@ -18,51 +18,51 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-.webspring-window-layer {
-  position: fixed;
-  inset: 0;
-  overflow: clip;
-  pointer-events: none;
-  z-index: 80;
-}
+@layer nse.structure {
+  .webspring-window-layer {
+    position: fixed;
+    inset: 0;
+    overflow: clip;
+    pointer-events: none;
+    z-index: 80;
+  }
 
-.webspring-window-host {
-  pointer-events: auto;
-}
+  .webspring-window-host {
+    pointer-events: auto;
+  }
 
-.nse-window__transfer-control {
-  margin-inline: 6px;
-  min-inline-size: 28px;
-  min-block-size: 24px;
-  border: 0;
-  border-radius: 4px;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-}
+  .nse-window__transfer-control {
+    margin-inline: 6px;
+    min-inline-size: 28px;
+    min-block-size: 24px;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    font: inherit;
+  }
 
-.webspring-window-host > [data-syncloudos-focus-scope] {
-  height: 100%;
-  min-height: 0;
-}
+  .webspring-window-host > [data-syncloudos-focus-scope] {
+    height: 100%;
+    min-height: 0;
+  }
 
-.webspring-window-modal-backdrop {
-  position: absolute;
-  inset: 0;
-  pointer-events: auto;
-  background: rgb(0 0 0 / 18%);
-}
+  .webspring-window-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    pointer-events: auto;
+  }
 
-.webspring-window-host > [data-nse-control="window"]:where([data-nse-part="background"]) {
-  position: relative;
-  inset: 0;
-}
+  .webspring-window-host > [data-nse-control="window"]:where([data-nse-part="background"]) {
+    position: relative;
+    inset: 0;
+  }
 
-/* The window host owns viewport placement. A compact popover keeps its plate
-   and sheet geometry inside that host, rather than the overlay's fixed inset. */
-.webspring-window-host .nse-popover[data-nse-window-popover] {
-  position: relative;
-  inset: auto;
-  max-inline-size: none;
-  max-block-size: none;
+  /* The window host owns viewport placement. A compact popover keeps its plate
+     and sheet geometry inside that host, rather than the overlay's fixed inset. */
+  .webspring-window-host .nse-overlay-popup.nse-popover[data-nse-part="surface"][data-nse-window-popover] {
+    position: relative;
+    inset: auto;
+    max-inline-size: none;
+    max-block-size: none;
+  }
 }

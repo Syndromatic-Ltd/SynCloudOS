@@ -89,7 +89,7 @@ describe("browser recovery branding plumbing", () => {
     vi.spyOn(console, "error").mockImplementation(() => undefined);
     const { element, runtime } = await mount();
     expect(element.querySelector<HTMLImageElement>("[data-alert-logo]")?.getAttribute("src")).toContain("SynCloudOSLogo.png");
-    expect(element.querySelector<HTMLImageElement>("[data-alert-caution]")?.getAttribute("src")).toContain("AlertCautionIcon.png");
+    expect(element.querySelector<HTMLImageElement>('[data-nse-part="badge"]')?.getAttribute("src")).toContain("AlertCautionIcon.png");
     act(() => runtime.appearance.set("light"));
     expect(element.querySelector('[role="alertdialog"]')?.classList.contains("is-light")).toBe(true);
     expect(runtime.store.getSnapshot().errors.at(-1)?.source).toBe("SynCloudOS.RootWatchdog");

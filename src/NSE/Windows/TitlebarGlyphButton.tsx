@@ -36,17 +36,17 @@ export function TitlebarGlyphButton({ label, glyph, position = "left", selected 
   const shared = {
     ref: place, type: "button" as const, title: label, "aria-label": label, disabled,
     "aria-haspopup": opensMenu ? "menu" as const : undefined, "aria-expanded": opensMenu ? selected : undefined,
-    "data-position": position, "data-selected": selected ? "true" : "false", "data-window-no-drag": "",
+    "data-position": position, "data-nse-part": "cell", "data-nse-style": "titlebar", "data-nse-selected": selected ? "" : undefined, "data-window-no-drag": "",
     onClick: (event: MouseEvent<HTMLButtonElement>) => { onClick?.(event); void feedback?.trigger("rigid"); },
   };
   if (material === "metal") {
-    return <button {...shared} className="nse-app-topbar-metal-pill">
-      <span className="nse-app-topbar-metal-pill-shell" aria-hidden="true" />
-      <span className="nse-app-topbar-metal-pill-glyph" style={glyphStyle} aria-hidden="true"><span className="nse-app-topbar-glyph-shape" /></span>
+    return <button {...shared} className="nse-app-topbar-metal-pill" data-nse-material="metal">
+      <span className="nse-app-topbar-metal-pill-shell" data-nse-part="bezel" aria-hidden="true" />
+      <span className="nse-app-topbar-metal-pill-glyph" data-nse-part="image" style={glyphStyle} aria-hidden="true"><span className="nse-app-topbar-glyph-shape" data-nse-part="indicator" /></span>
     </button>;
   }
-  return <button {...shared} className="nse-app-topbar-button">
-    <span className="nse-app-topbar-button-well" aria-hidden="true"><span className="nse-app-topbar-button-well-selected" /></span>
-    <span className="nse-app-topbar-button-icon" style={glyphStyle} aria-hidden="true"><span className="nse-app-topbar-glyph-shape" /></span>
+  return <button {...shared} className="nse-app-topbar-button" data-nse-material="cumulus">
+    <span className="nse-app-topbar-button-well" data-nse-part="bezel" aria-hidden="true"><span className="nse-app-topbar-button-well-selected" data-nse-part="fill" /></span>
+    <span className="nse-app-topbar-button-icon" data-nse-part="image" style={glyphStyle} aria-hidden="true"><span className="nse-app-topbar-glyph-shape" data-nse-part="indicator" /></span>
   </button>;
 }

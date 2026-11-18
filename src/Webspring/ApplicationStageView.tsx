@@ -178,12 +178,12 @@ export function ApplicationStageView({
   const returnControl = standalone ? null : <TitlebarGlyphButton label={returnToWebspringLabel}
     glyph={siteBranding?.homeIconUrl ?? nseTopBarGlyphs.webspring}
     onClick={() => { void runtime.commands.dispatch("workspace.returnToWebspring", undefined, { source: "toolbar" }); }} />;
-  const quickSwitchTitle = (label: ReactNode) => quickSwitchAction ? <button className="nse-app-topbar-title-button" data-nse-part="button"
-    type="button" aria-label={quickSwitchAction.label} aria-expanded={quickSwitchAction.selected} data-selected={quickSwitchAction.selected ? "true" : "false"} onClick={quickSwitchAction.onClick}>
+  const quickSwitchTitle = (label: ReactNode) => quickSwitchAction ? <button className="nse-app-topbar-title-button" data-nse-part="button" data-nse-style="titlebar"
+    type="button" aria-label={quickSwitchAction.label} aria-expanded={quickSwitchAction.selected} data-nse-selected={quickSwitchAction.selected ? "" : undefined} onClick={quickSwitchAction.onClick}>
     <span className="nse-app-topbar-title-text">{label}</span>
     <span data-nse-part="arrow" className="nse-app-topbar-title-arrow" aria-hidden="true">
-      <span className="nse-app-topbar-title-arrow-glyph nse-app-topbar-title-arrow-right" />
-      <span className="nse-app-topbar-title-arrow-glyph nse-app-topbar-title-arrow-down" />
+      <span className="nse-app-topbar-title-arrow-glyph nse-app-topbar-title-arrow-right" data-nse-part="image" data-nse-orientation="horizontal" />
+      <span className="nse-app-topbar-title-arrow-glyph nse-app-topbar-title-arrow-down" data-nse-part="image" data-nse-orientation="vertical" />
     </span>
   </button> : label;
   // A Metal window's sidebar gets the rail: the app's name and QuickSwitch over the sidebar, the page title beside it.

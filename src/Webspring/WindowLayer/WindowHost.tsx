@@ -354,7 +354,7 @@ export function WindowHost({
       dispatchCommand={(commandId, payload) => commands.dispatch(commandId, payload, { source: "toolbar" })}
       presentationControl={sharedPresentation && record.role === "standard" && record.content.rendererId === "application" &&
         manager.host.capabilities.separateSurfaces && presentation.kind === "desktop-window" &&
-        !record.parentWindowControllerId ? <button type="button" className="nse-window__transfer-control"
+        !record.parentWindowControllerId ? <button type="button" className="nse-window__transfer-control" data-nse-part="button" data-nse-role="transfer"
           aria-label={detached ? "Reattach to Webspring" : "Detach Window"} data-window-transfer="" data-window-no-drag=""
           onClick={() => { if (detached) void manager.reattach(record.id); else void manager.detach(record.id); }}>
           {detached ? "↙" : "↗"}

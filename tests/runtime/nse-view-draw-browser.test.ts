@@ -13,6 +13,7 @@ beforeAll(async () => {
     ...decoratorEsbuildOptions,
     // Root-relative asset URLs are the host's to serve, as they stay in the SDK's built CSS.
     external: ["/assets/*"],
+    loader: { ".png": "dataurl" },
     stdin: { resolveDir: process.cwd(), loader: "tsx", contents: `
       import React, { useState } from "react";
       import { createRoot } from "react-dom/client";

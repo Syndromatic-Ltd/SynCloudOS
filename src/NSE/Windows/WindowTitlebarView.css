@@ -1,4 +1,4 @@
-@layer nse.atmo {
+@layer nse.structure {
 @scope ([data-nse-theme]) to ([data-nse-theme]) {
 .nse-window-titlebar-view.nse-window__titlebar {
   position: relative;
@@ -43,7 +43,7 @@
 /* In the bar, toolbar items sit in the trailing cluster on the bar's own glass or metal. */
 .nse-app-topbar [data-window-titlebar-row] .nse-window-titlebar-view__toolbar { flex: 0 1 auto; min-width: 0; }
 .nse-app-topbar [data-window-titlebar-row] .nse-window-titlebar-view__toolbar > * { flex: 0 1 auto; }
-.nse-app-topbar [data-window-titlebar-row] [data-nse-control="toolbar"] { min-height: 0; padding: 0; gap: 8px; background: none; border: 0; box-shadow: none; }
+.nse-app-topbar [data-window-titlebar-row] [data-nse-control="toolbar"] { min-height: 0; padding: 0; gap: 8px; }
 .nse-app-topbar [data-window-titlebar-row] [data-nse-control="toolbar"] > [data-nse-chrome-primitive] { display: none; }
 /* The bar's buttons carry their own art and size, so the item fits its view (its inline width is for plain toolbars). */
 .nse-app-topbar [data-window-titlebar-row] .nse-toolbar-custom { width: auto !important; min-width: 0 !important; }
@@ -64,7 +64,6 @@
   inset-block: 6px;
   inset-inline-start: calc(var(--nse-window-titlebar-sidebar-width) - var(--nse-floating-titlebar-inline-offset, 0px) - var(--nse-titlebar-native-inline-start));
   inline-size: 1px;
-  background: var(--nse-window-divider, currentColor);
   pointer-events: none;
 }
 .nse-window-titlebar-view__controls,
@@ -120,8 +119,6 @@
 .nse-window-titlebar-view[data-titlebar-layout="preference"] > .nse-window-titlebar-view__toolbar-row > .nse-window-titlebar-view__toolbar { flex: 0 1 auto; justify-content: center; width: 100%; }
 .nse-window-titlebar-view[data-titlebar-layout="preference"] .nse-toolbar { justify-content: center; }
 .nse-window-titlebar-view[data-titlebar-layout="unifiedCompact"] .nse-toolbar { --nse-toolbar-height: 46px; }
-.nse-window-titlebar-view[data-titlebar-transparent="true"],
-.nse-window-titlebar-view[data-titlebar-transparent="true"] > .nse-window-titlebar-view__row { background: transparent; box-shadow: none; border-color: transparent; }
 .nse-window-titlebar-view[data-titlebar-transparent="true"] .nse-app-topbar-base,
 .nse-window-titlebar-view[data-titlebar-transparent="true"] .nse-app-topbar::before,
 .nse-window-titlebar-view[data-titlebar-transparent="true"] .nse-app-topbar-metal-grain { display: none; }
@@ -131,36 +128,21 @@
   align-self: center;
   margin: 12px auto;
   border-radius: var(--nse-atmo-window-titlebar-radius, 14px);
-  color: var(--nse-window-title-foreground, currentColor);
 }
 .nse-window-titlebar-view[data-titlebar-presentation="floating"] .nse-app-topbar::before { content: none; }
 .nse-window-titlebar-view__floating-surface {
   position: absolute;
   inset: 0;
-  border: 1px solid var(--nse-window-divider, rgb(31 41 55 / 30%));
+  border: 1px solid;
   border-radius: inherit;
-  background: var(--nse-window-title-background, #e5e8eb);
   pointer-events: none;
 }
-.nse-window-titlebar-view[data-titlebar-transparent="true"] .nse-window-titlebar-view__floating-surface { background: transparent; border-color: transparent; }
-}
-}
 
-@layer nse.atmo {
-@scope ([data-nse-theme]) to ([data-nse-theme]) {
-.nse-window-titlebar-view[data-window-frame-view] {
-  background: var(--nse-frame-background, var(--nse-window-title-background));
-  border-block-end: 1px solid var(--nse-frame-separator, var(--nse-window-divider));
-}
 .nse-window-titlebar-view[data-window-frame-view] > .nse-window-titlebar-view__row {
   min-height: var(--nse-frame-titlebar-height, var(--nse-window-titlebar-height, 31px));
 }
 .nse-window-titlebar-view[data-window-frame-view] .nse-app-topbar-base { display: none; }
-.nse-window-titlebar-view__menu .nse-menu-bar {
-  width: 100%;
-  background: var(--nse-window-title-background);
-  border-block-end: 1px solid var(--nse-window-divider);
-}
+.nse-window-titlebar-view__menu .nse-menu-bar { width: 100%; }
 .nse-window-view:has(> .nse-window__surface > [data-window-titlebar]) .nse-window__surface[data-full-size-content] > [data-window-titlebar] {
   position: absolute;
   inset: 0 0 auto;

@@ -139,8 +139,13 @@ export function WindowTitlebarView({ document, isKeyWindow, titleId, material = 
   const metalRail = material === "metal" && sidebarWidth !== undefined;
   const frameAppearance = useWindowFrameAppearance(document.frameViewClass);
   const headerStyle = { "--nse-window-titlebar-sidebar-width": sidebarWidth === undefined ? undefined : `${sidebarWidth}px`, ...nseWindowFrameStyle(document.frameViewClass), ...moveStyle, ...style, "--nse-titlebar-native-left": `${exclusion.left}px`, "--nse-titlebar-native-right": `${exclusion.right}px` } as CSSProperties;
+  const titlebarHooks = {
+    "data-nse-role": "titlebar",
+    "data-nse-presentation": presentation,
+    "data-nse-transparent": document.titlebarAppearsTransparent ? "true" : undefined,
+    "data-nse-type": document.frameViewClass ? "custom" : undefined,
+  } as const;
   if (material !== "standard") {
-    // Cumulus and Metal draw Atmo's top bar: the same parts and classes its art is written against.
     const metal = material === "metal";
     const title = <>{titleAction ?? document.title}{document.subtitle ? <span data-nse-part="subtitle" className="nse-window-titlebar-subtitle">{document.subtitle}</span> : null}</>;
     const controlsSlot = controls ? <div ref={setStandardControls} className="nse-window-titlebar-view__controls" data-window-no-drag="" data-syncloudos-focus-chrome="">{controls}</div> : null;
@@ -154,30 +159,30 @@ export function WindowTitlebarView({ document, isKeyWindow, titleId, material = 
           className="nse-app-topbar nse-app-topbar-metal" data-variant="atmoMetal" data-mode={mode} data-nse-colour-scheme-resolved={mode}
           data-has-rail={metalRail ? "true" : "false"} data-toolbar-row={stackedToolbar ? "true" : undefined}
           style={metalRail ? { "--nse-topbar-rail": `${sidebarWidth}px` } as CSSProperties : undefined}>
-          {stackedToolbar ? <span className="nse-app-topbar-metal-grain" aria-hidden="true" /> : null}
+          {stackedToolbar ? <span data-nse-part="decoration" className="nse-app-topbar-metal-grain" aria-hidden="true" /> : null}
           {metalRail ? <div data-nse-part="sidebar" className="nse-app-topbar-metal-rail">
-            <span className="nse-app-topbar-metal-grain" aria-hidden="true" />
-            <div className="nse-app-topbar-metal-rail-content" data-window-no-drag="">{sidebar?.content}</div>
+            <span data-nse-part="decoration" className="nse-app-topbar-metal-grain" aria-hidden="true" />
+            <div data-nse-part="content" className="nse-app-topbar-metal-rail-content" data-window-no-drag="">{sidebar?.content}</div>
           </div> : null}
           <div data-nse-part="body" className="nse-app-topbar-metal-main" data-window-titlebar-row="">
-            <span className="nse-app-topbar-metal-grain" aria-hidden="true" />
+            <span data-nse-part="decoration" className="nse-app-topbar-metal-grain" aria-hidden="true" />
             <div data-nse-part="leading" className="nse-app-topbar-metal-cluster nse-app-topbar-metal-leading">{controlsSlot}{leadingSlot}</div>
-            <h1 id={titleId} data-window-title="" data-document-edited={document.documentEdited ? "true" : undefined} className="nse-app-topbar-metal-title" hidden={titleHidden}>{title}</h1>
+            <h1 id={titleId} data-nse-part="title" data-window-title="" data-document-edited={document.documentEdited ? "true" : undefined} className="nse-app-topbar-metal-title" hidden={titleHidden}>{title}</h1>
             <div data-nse-part="trailing" className="nse-app-topbar-metal-cluster nse-app-topbar-metal-trailing">{inlineToolbar}{trailingSlot}{applicationMenuSlot}</div>
           </div>
           {stackedToolbar ? <div data-nse-part="toolbar-row" className="nse-app-topbar-metal-toolbar-row" data-window-titlebar-toolbar-row="">{toolbarSlot}</div> : null}
         </header>
-      : <header data-nse-control="window" data-nse-part="header" data-nse-chrome="standard" data-window-titlebar-bar=""
+      : <header data-nse-control="window" data-nse-part="header" data-nse-chrome="standard" data-nse-material="cumulus" data-window-titlebar-bar=""
           className="nse-app-topbar" data-variant="atmoCumulus" data-mode={mode} data-nse-colour-scheme-resolved={mode}>
           {presentation === "floating" ? <div data-nse-part="floating-titlebar" className="nse-window-titlebar-view__floating-surface" aria-hidden="true" />
-            : <div className="nse-app-topbar-base" aria-hidden="true"><span className="nse-app-topbar-base-glass" /></div>}
+            : <div data-nse-part="background" className="nse-app-topbar-base" aria-hidden="true"><span data-nse-part="bezel" className="nse-app-topbar-base-glass" /></div>}
           <div data-nse-part="content" className="nse-app-topbar-content" data-window-titlebar-row="">
             <div data-nse-part="leading" className="nse-app-topbar-slot nse-app-topbar-slot-left">{controlsSlot}{leadingSlot}</div>
             <h1 id={titleId} data-nse-part="title" data-window-title="" data-document-edited={document.documentEdited ? "true" : undefined} className="nse-app-topbar-title" hidden={titleHidden}>{title}</h1>
             <div data-nse-part="trailing" className="nse-app-topbar-slot nse-app-topbar-slot-right">{inlineToolbar}{trailingSlot}{applicationMenuSlot}</div>
           </div>
         </header>;
-    return <div {...handleProps} ref={header as unknown as RefObject<HTMLDivElement>}
+    return <div {...handleProps} {...titlebarHooks} ref={header as unknown as RefObject<HTMLDivElement>} data-nse-part="surface"
       className={["nse-window-titlebar-view", moveClassName, className].filter(Boolean).join(" ")}
       style={headerStyle} data-nse-toolbar-style={toolbarStyle}
       data-toolbar-style={toolbarStyle} data-titlebar-layout={resolvedStyle} data-titlebar-material={material}
@@ -195,7 +200,7 @@ export function WindowTitlebarView({ document, isKeyWindow, titleId, material = 
       <div ref={setBottom} data-nse-part="titlebar-accessories" className="nse-window-titlebar-view__bottom" data-window-no-drag="">{bottomAccessories}</div>
     </div>;
   }
-  return <header {...handleProps} ref={header}
+  return <header {...handleProps} {...titlebarHooks} ref={header}
     className={["nse-window-titlebar-view", `nse-window__titlebar nse-window__titlebar--${variant}`, variant === "hud" ? "nse-window__hud-titlebar" : "", moveClassName, className].filter(Boolean).join(" ")}
     style={headerStyle} data-nse-control={ownedByWindow ? undefined : "window"} data-nse-part="header" data-nse-style={variant}
     data-nse-chrome="standard" data-nse-toolbar-style={toolbarStyle}

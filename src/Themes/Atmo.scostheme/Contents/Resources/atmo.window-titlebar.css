@@ -125,3 +125,187 @@
   /* After the shorthand, which resets it — same trap as the light plate. */
   background-origin: border-box;
 }
+
+/* Window surfaces and standard titlebars. */
+
+[data-nse-part="bezel"]:where([data-nse-control="window"][data-nse-part="background"]>*),
+:where(:scope):is([data-nse-part="bezel"]:where([data-nse-control="window"][data-nse-part="background"]>*)) {
+  color: inherit;
+  background: inherit;
+  border-color: inherit;
+}
+
+[data-nse-control="window"]:where([data-nse-part="background"]):not([data-nse-type="frameless"]),
+:where(:scope):is([data-nse-control="window"]:where([data-nse-part="background"]):not([data-nse-type="frameless"])) {
+  color: var(--nse-window-foreground, #17202a);
+  background: var(--nse-window-background, #f4f5f6);
+  border-color: var(--nse-window-border, rgb(31 41 55 / 42%));
+  box-shadow: none;
+}
+
+[data-nse-control="window"]:where([data-nse-part="background"]):not([data-nse-type="frameless"]) > [data-nse-part="bezel"],
+:where(:scope):is([data-nse-control="window"]:where([data-nse-part="background"]):not([data-nse-type="frameless"])) > [data-nse-part="bezel"] {
+  box-shadow: var(--nse-window-shadow, 0 14px 42px rgb(15 23 42 / 26%));
+}
+
+[data-nse-control="window"]:where([data-nse-part="background"])[data-nse-type="frameless"],
+:where(:scope):is([data-nse-control="window"]:where([data-nse-part="background"])[data-nse-type="frameless"]),
+[data-nse-control="window"]:where([data-nse-part="background"])[data-nse-type="frameless"] > [data-nse-part="bezel"],
+:where(:scope):is([data-nse-control="window"]:where([data-nse-part="background"])[data-nse-type="frameless"]) > [data-nse-part="bezel"] {
+  background: none;
+  box-shadow: none;
+}
+
+[data-nse-control="window"]:where([data-nse-part="background"]):where([data-nse-role="sheet"]),
+:where(:scope):is([data-nse-control="window"]:where([data-nse-part="background"]):where([data-nse-role="sheet"])) {
+  --nse-window-shadow: var(--nse-window-sheet-shadow, 0 18px 48px rgb(15 23 42 / 32%));
+}
+
+[data-nse-control="window"]:where([data-nse-part="background"]):where([data-nse-role="popover"]),
+:where(:scope):is([data-nse-control="window"]:where([data-nse-part="background"]):where([data-nse-role="popover"])) {
+  --nse-window-shadow: var(--nse-window-popover-shadow, 0 10px 32px rgb(15 23 42 / 28%));
+}
+
+[data-nse-part="header"]:where([data-nse-role="titlebar"]),
+:where(:scope):is([data-nse-part="header"]:where([data-nse-role="titlebar"])) {
+  color: var(--nse-window-title-foreground, currentColor);
+  background: var(--nse-window-title-background, #e5e8eb);
+  border-block-end-color: var(--nse-window-divider, rgb(31 41 55 / 30%));
+}
+
+[data-nse-control="button"]:where([data-nse-part="cell"]:is([data-nse-role="close"],[data-nse-role="minimise"],[data-nse-role="zoom"],[data-nse-role="fullScreen"]):where([data-nse-part="accessory"]>*)),
+:where(:scope):is([data-nse-control="button"]:where([data-nse-part="cell"]:is([data-nse-role="close"],[data-nse-role="minimise"],[data-nse-role="zoom"],[data-nse-role="fullScreen"]):where([data-nse-part="accessory"]>*))) {
+  color: inherit;
+}
+
+[data-nse-control="button"]:where([data-nse-part="cell"]:is([data-nse-role="close"],[data-nse-role="minimise"],[data-nse-role="zoom"],[data-nse-role="fullScreen"]):where([data-nse-part="accessory"]>*)):focus-visible,
+:where(:scope):is([data-nse-control="button"]:where([data-nse-part="cell"]:is([data-nse-role="close"],[data-nse-role="minimise"],[data-nse-role="zoom"],[data-nse-role="fullScreen"]):where([data-nse-part="accessory"]>*))):focus-visible {
+  outline-color: var(--nse-window-focus-ring, Highlight);
+}
+
+[data-nse-part="bezel"]:where([data-nse-control="button"]:where([data-nse-part="cell"]:is([data-nse-role="close"],[data-nse-role="minimise"],[data-nse-role="zoom"],[data-nse-role="fullScreen"]):where([data-nse-part="accessory"]>*))>*),
+:where(:scope):is([data-nse-part="bezel"]:where([data-nse-control="button"]:where([data-nse-part="cell"]:is([data-nse-role="close"],[data-nse-role="minimise"],[data-nse-role="zoom"],[data-nse-role="fullScreen"]):where([data-nse-part="accessory"]>*))>*)) {
+  border-color: currentColor;
+  background: var(--nse-window-control-background, #c5cbd1);
+}
+
+[data-nse-control="button"]:where([data-nse-part="cell"]:is([data-nse-role="close"],[data-nse-role="minimise"],[data-nse-role="zoom"],[data-nse-role="fullScreen"]):where([data-nse-part="accessory"]>*))[data-nse-role="close"] > [data-nse-part="bezel"],
+:where(:scope):is([data-nse-control="button"]:where([data-nse-part="cell"]:is([data-nse-role="close"],[data-nse-role="minimise"],[data-nse-role="zoom"],[data-nse-role="fullScreen"]):where([data-nse-part="accessory"]>*))[data-nse-role="close"]) > [data-nse-part="bezel"] {
+  background: var(--nse-window-close-background, #d46a63);
+}
+
+[data-nse-control="button"]:where([data-nse-part="cell"]:is([data-nse-role="close"],[data-nse-role="minimise"],[data-nse-role="zoom"],[data-nse-role="fullScreen"]):where([data-nse-part="accessory"]>*))[data-nse-role="minimise"] > [data-nse-part="bezel"],
+:where(:scope):is([data-nse-control="button"]:where([data-nse-part="cell"]:is([data-nse-role="close"],[data-nse-role="minimise"],[data-nse-role="zoom"],[data-nse-role="fullScreen"]):where([data-nse-part="accessory"]>*))[data-nse-role="minimise"]) > [data-nse-part="bezel"] {
+  background: var(--nse-window-minimise-background, #d8ad4d);
+}
+
+[data-nse-control="button"]:where([data-nse-part="cell"]:is([data-nse-role="close"],[data-nse-role="minimise"],[data-nse-role="zoom"],[data-nse-role="fullScreen"]):where([data-nse-part="accessory"]>*)):is([data-nse-role="zoom"],[data-nse-role="fullScreen"]) > [data-nse-part="bezel"],
+:where(:scope):is([data-nse-control="button"]:where([data-nse-part="cell"]:is([data-nse-role="close"],[data-nse-role="minimise"],[data-nse-role="zoom"],[data-nse-role="fullScreen"]):where([data-nse-part="accessory"]>*)):is([data-nse-role="zoom"],[data-nse-role="fullScreen"])) > [data-nse-part="bezel"] {
+  background: var(--nse-window-zoom-background, #6aa873);
+}
+
+[data-nse-control="button"]:where([data-nse-part="cell"]:is([data-nse-role="close"],[data-nse-role="minimise"],[data-nse-role="zoom"],[data-nse-role="fullScreen"]):where([data-nse-part="accessory"]>*)):is(:hover,:active) > [data-nse-part="bezel"],
+:where(:scope):is([data-nse-control="button"]:where([data-nse-part="cell"]:is([data-nse-role="close"],[data-nse-role="minimise"],[data-nse-role="zoom"],[data-nse-role="fullScreen"]):where([data-nse-part="accessory"]>*)):is(:hover,:active)) > [data-nse-part="bezel"] {
+  filter: brightness(0.86);
+}
+
+:where([data-nse-control="window"][data-nse-part="background"])[data-nse-role="hud"],
+:where(:scope):is(:where([data-nse-control="window"][data-nse-part="background"])[data-nse-role="hud"]) {
+  color: var(--nse-window-hud-foreground, #f8fafc);
+  background: var(--nse-window-hud-background, #28313b);
+  border-color: var(--nse-window-hud-border, #111820);
+}
+
+[data-nse-part="header"]:where([data-nse-role="titlebar"]):where([data-nse-style="hud"]),
+:where(:scope):is([data-nse-part="header"]:where([data-nse-role="titlebar"]):where([data-nse-style="hud"])) {
+  background: var(--nse-window-hud-title-background, #343f4b);
+  border-block-end-color: var(--nse-window-hud-divider, #111820);
+}
+
+[data-nse-control="button"]:where([data-nse-part="cell"]:is([data-nse-role="close"],[data-nse-role="minimise"],[data-nse-role="zoom"],[data-nse-role="fullScreen"]):where([data-nse-part="accessory"]>*))[data-nse-chrome="hud"] > [data-nse-part="bezel"],
+:where(:scope):is([data-nse-control="button"]:where([data-nse-part="cell"]:is([data-nse-role="close"],[data-nse-role="minimise"],[data-nse-role="zoom"],[data-nse-role="fullScreen"]):where([data-nse-part="accessory"]>*))[data-nse-chrome="hud"]) > [data-nse-part="bezel"] {
+  background: var(--nse-window-hud-close-background, #cbd5df);
+}
+
+[data-nse-control="window"]:where([data-nse-part="background"]):where([data-nse-role="popover"])::before,
+:where(:scope):is([data-nse-control="window"]:where([data-nse-part="background"]):where([data-nse-role="popover"]))::before {
+  background: inherit;
+  border-color: currentColor;
+}
+
+[data-nse-control="window"]:where([data-nse-part="background"]):where([data-nse-role="borderless"]),
+:where(:scope):is([data-nse-control="window"]:where([data-nse-part="background"]):where([data-nse-role="borderless"])) {
+  --nse-window-shadow: none;
+  color: inherit;
+  background: transparent;
+  box-shadow: none;
+}
+
+@media (forced-colors: active) {
+  [data-nse-control="window"]:where([data-nse-part="background"]),
+  :where(:scope):is([data-nse-control="window"]:where([data-nse-part="background"])),
+  [data-nse-part="header"]:where([data-nse-role="titlebar"]),
+  :where(:scope):is([data-nse-part="header"]:where([data-nse-role="titlebar"])),
+  [data-nse-part="bezel"]:where([data-nse-control="button"]:where([data-nse-part="cell"]:is([data-nse-role="close"],[data-nse-role="minimise"],[data-nse-role="zoom"],[data-nse-role="fullScreen"]):where([data-nse-part="accessory"]>*))>*),
+  :where(:scope):is([data-nse-part="bezel"]:where([data-nse-control="button"]:where([data-nse-part="cell"]:is([data-nse-role="close"],[data-nse-role="minimise"],[data-nse-role="zoom"],[data-nse-role="fullScreen"]):where([data-nse-part="accessory"]>*))>*)) {
+    border-color: CanvasText;
+    forced-color-adjust: auto;
+  }
+
+  [data-nse-control="button"]:where([data-nse-part="cell"]:is([data-nse-role="close"],[data-nse-role="minimise"],[data-nse-role="zoom"],[data-nse-role="fullScreen"]):where([data-nse-part="accessory"]>*)):focus-visible,
+  :where(:scope):is([data-nse-control="button"]:where([data-nse-part="cell"]:is([data-nse-role="close"],[data-nse-role="minimise"],[data-nse-role="zoom"],[data-nse-role="fullScreen"]):where([data-nse-part="accessory"]>*))):focus-visible {
+    outline-color: Highlight;
+  }
+}
+
+/* Floating, transparent and custom titlebar paint. */
+
+[data-nse-control="window"]:where([data-nse-part="header"]:is([data-nse-chrome="metal"],[data-nse-material="cumulus"])) > :is([data-nse-part="body"],[data-nse-part="content"]) [data-nse-control="toolbar"],
+:where(:scope):is([data-nse-control="window"]:where([data-nse-part="header"]:is([data-nse-chrome="metal"],[data-nse-material="cumulus"]))) > :is([data-nse-part="body"],[data-nse-part="content"]) [data-nse-control="toolbar"] {
+  background: none;
+  border: 0;
+  box-shadow: none;
+}
+
+[data-nse-part="header"]:where([data-nse-role="titlebar"]) > [data-nse-part="content"] > [data-nse-part="separator"],
+:where(:scope):is([data-nse-part="header"]:where([data-nse-role="titlebar"])) > [data-nse-part="content"] > [data-nse-part="separator"] {
+  background: var(--nse-window-divider, currentColor);
+}
+
+:is([data-nse-part="header"],[data-nse-part="surface"]):where([data-nse-role="titlebar"])[data-nse-transparent="true"],
+:where(:scope):is(:is([data-nse-part="header"],[data-nse-part="surface"]):where([data-nse-role="titlebar"])[data-nse-transparent="true"]),
+[data-nse-part="header"]:where([data-nse-role="titlebar"])[data-nse-transparent="true"] > [data-nse-part="content"],
+:where(:scope):is([data-nse-part="header"]:where([data-nse-role="titlebar"])[data-nse-transparent="true"]) > [data-nse-part="content"] {
+  background: transparent;
+  box-shadow: none;
+  border-color: transparent;
+}
+
+:is([data-nse-part="header"],[data-nse-part="surface"]):where([data-nse-role="titlebar"])[data-nse-presentation="floating"],
+:where(:scope):is(:is([data-nse-part="header"],[data-nse-part="surface"]):where([data-nse-role="titlebar"])[data-nse-presentation="floating"]) {
+  color: var(--nse-window-title-foreground, currentColor);
+}
+
+[data-nse-control="window"]:where([data-nse-part="header"]:is([data-nse-chrome="metal"],[data-nse-material="cumulus"])) > [data-nse-part="floating-titlebar"],
+:where(:scope):is([data-nse-control="window"]:where([data-nse-part="header"]:is([data-nse-chrome="metal"],[data-nse-material="cumulus"]))) > [data-nse-part="floating-titlebar"] {
+  border-color: var(--nse-window-divider, rgb(31 41 55 / 30%));
+  background: var(--nse-window-title-background, #e5e8eb);
+}
+
+:is([data-nse-part="header"],[data-nse-part="surface"]):where([data-nse-role="titlebar"])[data-nse-transparent="true"] [data-nse-part="floating-titlebar"],
+:where(:scope):is(:is([data-nse-part="header"],[data-nse-part="surface"]):where([data-nse-role="titlebar"])[data-nse-transparent="true"]) [data-nse-part="floating-titlebar"] {
+  background: transparent;
+  border-color: transparent;
+}
+
+:is([data-nse-part="header"],[data-nse-part="surface"]):where([data-nse-role="titlebar"])[data-nse-type="custom"],
+:where(:scope):is(:is([data-nse-part="header"],[data-nse-part="surface"]):where([data-nse-role="titlebar"])[data-nse-type="custom"]) {
+  background: var(--nse-frame-background, var(--nse-window-title-background));
+  border-block-end: 1px solid var(--nse-frame-separator, var(--nse-window-divider));
+}
+
+[data-nse-part="menu"]:where([data-nse-role="titlebar"]>*) [data-nse-control="menu-bar"],
+:where(:scope):is([data-nse-part="menu"]:where([data-nse-role="titlebar"]>*)) [data-nse-control="menu-bar"] {
+  background: var(--nse-window-title-background);
+  border-block-end: 1px solid var(--nse-window-divider);
+}

@@ -2427,11 +2427,6 @@
    the full bar height as their hit target, and a centred title clear of the
    beads. Coarse pointers keep the 44px touch target.
    ========================================================================= */
-:where(:scope) [data-nse-control="window"]:where([data-nse-part="background"]),
-:where(:scope):is([data-nse-control="window"]:where([data-nse-part="background"])) {
-  --nse-window-control-paint-size: 14px;
-}
-
 :where(:scope) [data-nse-control="window"]:where([data-nse-part="background"]) [data-nse-style="panel"]:where([data-nse-part="header"]),
 :where(:scope):is([data-nse-control="window"]:where([data-nse-part="background"])) [data-nse-style="panel"]:where([data-nse-part="header"]) {
   --nse-window-titlebar-height: 24px;
@@ -2472,11 +2467,6 @@
 :where(:scope):is([data-nse-control="window"]:where([data-nse-part="background"])) [data-nse-part="header"]:where([data-nse-control="window"] *):where([data-nse-chrome="hud"] *) [data-nse-control="button"]:where([data-nse-part="cell"]):where([data-nse-chrome="hud"] *) {
   width: 26px;
   height: 26px;
-}
-
-:where(:scope) [data-nse-control="window"]:where([data-nse-part="background"]) [data-nse-part="title"]:where([data-nse-control="window"] *):where([data-nse-chrome="hud"] *),
-:where(:scope):is([data-nse-control="window"]:where([data-nse-part="background"])) [data-nse-part="title"]:where([data-nse-control="window"] *):where([data-nse-chrome="hud"] *) {
-  padding: 0 36px;
 }
 
 @media (pointer: coarse) {

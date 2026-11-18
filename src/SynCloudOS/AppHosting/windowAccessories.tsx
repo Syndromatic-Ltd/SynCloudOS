@@ -153,10 +153,10 @@ export function WindowContentBorder({ thickness }: { readonly thickness: number 
   const style = { "--nse-window-content-border-thickness": `${thickness}px` } as CSSProperties;
   const size = nseContentBorderSize(thickness);
   return <>
-    <div className="nse-window-content-border" data-nse-part="content-border" data-edge="minY" data-size={size} data-mode={mode} data-nse-colour-scheme-resolved={mode} style={style} aria-hidden="true">
-      <span className="nse-window-content-border-grain" />
+    <div className="nse-window-content-border" data-nse-part="content-border" data-nse-content-border={size} data-nse-edge="minY" data-nse-colour-scheme-resolved={mode} style={style} aria-hidden="true">
+      <span className="nse-window-content-border-grain" data-nse-part="decoration" />
     </div>
-    <div className="nse-window-content-border-edge" data-edge="minY" data-size={size} data-mode={mode} data-nse-colour-scheme-resolved={mode} style={style} aria-hidden="true" />
+    <div className="nse-window-content-border-edge" data-nse-part="border" data-nse-content-border={size} data-nse-edge="minY" data-nse-colour-scheme-resolved={mode} style={style} aria-hidden="true" />
   </>;
 }
 

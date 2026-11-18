@@ -183,6 +183,7 @@ function WindowSurfaceLayer({ contentRegistry, onDiagnostic, binding }: WindowLa
       {topModalZ !== null && topModal?.record.role === "popover" ? <PopoverModalBackdrop zIndex={Math.max(0, topModalZ - 0.5)} /> : topModalZ !== null && !topModal?.record.applicationId && !topModal?.record.parentWindowControllerId ? (
         <div
           className="webspring-window-modal-backdrop"
+          data-nse-control="window" data-nse-part="backdrop" data-nse-role="modal"
           data-window-modal-backdrop=""
           aria-hidden="true"
           style={{ zIndex: Math.max(0, topModalZ - 0.5) }}

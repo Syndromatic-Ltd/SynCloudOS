@@ -23,15 +23,21 @@
     "app-view-chrome": {
       "parts": [
         "background",
+        "border",
         "content-border",
-        "content-view"
+        "content-view",
+        "decoration"
       ],
       "states": [
         "key-window=false"
       ],
       "variants": {
         "content-border": [
+          "large",
           "small"
+        ],
+        "edge": [
+          "minY"
         ]
       }
     },
@@ -200,6 +206,9 @@
           "switch",
           "toggle"
         ],
+        "chrome": [
+          "hud"
+        ],
         "control-size": [
           "large",
           "regular",
@@ -223,6 +232,7 @@
           "\u001b"
         ],
         "role": [
+          "back",
           "close",
           "current",
           "default",
@@ -1197,7 +1207,10 @@
         "content",
         "divider",
         "handle",
-        "sidebar"
+        "sidebar",
+        "split-divider",
+        "split-pane",
+        "split-pane-slot"
       ],
       "states": [],
       "variants": {
@@ -1269,7 +1282,9 @@
         "actions",
         "backdrop",
         "background",
+        "badge",
         "content",
+        "decoration",
         "label",
         "title"
       ],
@@ -1283,6 +1298,9 @@
         ],
         "presentation": [
           "sheet"
+        ],
+        "type": [
+          "content-view"
         ]
       }
     },
@@ -1662,27 +1680,40 @@
     "window": {
       "parts": [
         "accessory",
+        "backdrop",
         "background",
         "bezel",
         "body",
+        "border",
+        "button",
+        "cell",
         "content",
         "content-border",
         "content-view",
+        "decoration",
+        "fill",
+        "floating-titlebar",
         "handle",
         "header",
+        "image",
+        "indicator",
         "leading",
         "menu",
         "shadow",
         "sheet",
+        "sidebar",
         "subtitle",
+        "surface",
         "title",
         "titlebar-accessories",
         "toolbar",
+        "toolbar-row",
         "trailing",
         "window-fitting-content"
       ],
       "states": [
-        "key-window=false"
+        "key-window=false",
+        "selected"
       ],
       "variants": {
         "alignment": [
@@ -1696,6 +1727,7 @@
           "standard"
         ],
         "content-border": [
+          "large",
           "small"
         ],
         "edge": [
@@ -1706,7 +1738,16 @@
           "block-start-inline-end",
           "block-start-inline-start",
           "inline-end",
-          "inline-start"
+          "inline-start",
+          "minY"
+        ],
+        "material": [
+          "cumulus",
+          "metal"
+        ],
+        "presentation": [
+          "attached",
+          "floating"
         ],
         "role": [
           "borderless",
@@ -1715,12 +1756,15 @@
           "panel",
           "popover",
           "sheet",
-          "standard"
+          "standard",
+          "titlebar",
+          "transfer"
         ],
         "style": [
           "hud",
           "panel",
-          "standard"
+          "standard",
+          "titlebar"
         ],
         "toolbar-style": [
           "automatic",
@@ -1729,7 +1773,11 @@
           "unified",
           "unifiedCompact"
         ],
+        "transparent": [
+          "true"
+        ],
         "type": [
+          "custom",
           "frameless",
           "system"
         ]

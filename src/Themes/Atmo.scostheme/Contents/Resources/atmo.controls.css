@@ -232,7 +232,7 @@
   --nse-atmo-alert-px: calc(var(--nse-atmo-alert-slice) / 160);
   --nse-atmo-alert-body: linear-gradient(#737373 0, #565656 calc(var(--nse-atmo-alert-px) * 10), #565656 29%, #242424 93%, #282828 100%);
   --nse-atmo-alert-rim: rgba(255, 255, 255, 0.07);
-  padding: var(--nse-atmo-alert-slice);
+  padding: var(--nse-alert-surface-padding, var(--nse-atmo-alert-slice));
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -287,7 +287,7 @@
 :scope [data-nse-control="system-alert"][data-nse-presentation="sheet"] [data-nse-part="background"]:where([data-nse-control="system-alert"] *):where(:not([data-nse-control="system-alert"] [data-nse-control] *)),
 :scope:is([data-nse-control="system-alert"][data-nse-presentation="sheet"]) [data-nse-part="background"]:where([data-nse-control="system-alert"] *):where(:not([data-nse-control="system-alert"] [data-nse-control] *)),
 :scope[data-nse-control="system-alert"][data-nse-presentation="sheet"] [data-nse-part="background"]:where([data-nse-control="system-alert"] *):where(:not([data-nse-control="system-alert"] [data-nse-control] *)) {
-  padding-top: calc(var(--nse-atmo-alert-slice) - var(--nse-atmo-alert-px) * 27);
+  padding-top: var(--nse-alert-surface-padding, calc(var(--nse-atmo-alert-slice) - var(--nse-atmo-alert-px) * 27));
 }
 :scope [data-nse-control="system-alert"][data-nse-presentation="sheet"] [data-nse-part="background"]:where([data-nse-control="system-alert"] *):where(:not([data-nse-control="system-alert"] [data-nse-control] *))::before,
 :scope:is([data-nse-control="system-alert"][data-nse-presentation="sheet"]) [data-nse-part="background"]:where([data-nse-control="system-alert"] *):where(:not([data-nse-control="system-alert"] [data-nse-control] *))::before,

@@ -49,7 +49,7 @@ const applicationIcon = "/resolved-app-resources/AppIcon.png";
 const callbacks = { onDismiss() {}, onReturn() {}, onReload() {} };
 const artwork = () => screen.getByRole("alertdialog").querySelector<HTMLElement>("[data-alert-icon]")!;
 const logo = () => artwork().querySelector<HTMLImageElement>("[data-alert-logo]");
-const badge = () => artwork().querySelector<HTMLImageElement>("[data-alert-caution]");
+const badge = () => artwork().querySelector<HTMLImageElement>('[data-nse-part="badge"]');
 
 describe("private host recovery artwork", () => {
   it("uses the current system artwork and its sizing for an app without a declared icon", () => {

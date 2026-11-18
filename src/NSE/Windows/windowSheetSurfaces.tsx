@@ -25,7 +25,7 @@ export function ControllerSheetSurface({ scopeId, attached, title, titleId, widt
   return <FocusScope options={{ scopeId, kind: "modal", modal: true, trapFocus: true, asChild: true }}>
     <AlertBackdrop onSafeDismiss={onCancel} className={attached ? "nse-window-sheet-backdrop" : undefined} motion={attached ? "sheet" : "alert"}>
       <AlertSurface role="dialog" labelledBy={title && !fullSizeContentView ? titleId : undefined} aria-label={title && fullSizeContentView ? title : undefined}
-        data-nse-full-size-content-view={fullSizeContentView ? "" : undefined} className="nse-sheet" motion={attached ? "sheet" : "alert"}
+        data-nse-type={fullSizeContentView ? "content-view" : undefined} className="nse-sheet" motion={attached ? "sheet" : "alert"}
         appearance={attached ? colourScheme : "dark"}
         style={width === undefined ? undefined : { width: `min(${width}px, calc(100% - 32px))` }}>
         {title && !fullSizeContentView ? <h2 id={titleId} className="nse-sheet-title">{title}</h2> : null}

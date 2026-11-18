@@ -23,9 +23,8 @@ import settings from "./Resources/AtmoTopBar/settings.svg?url&no-inline";
 import userInfo from "./Resources/AtmoTopBar/user-info.svg?url&no-inline";
 
 /**
- * The bars and their buttons are painted in CSS (nse-chrome.css); the only assets are the
- * built-in item glyphs. Each is a single solid shape whose alpha is used as a CSS mask, so the
- * theme colours it. An item's own `icon` (any single-shape SVG) takes the same route.
+ * Atmo paints these glyphs as CSS masks in the title bar.
+ * A single-shape SVG supplied by a toolbar item uses the same mask treatment.
  */
 export const nseTopBarGlyphs = Object.freeze({
   webspring: home,

@@ -30,15 +30,15 @@ describe("a window's bottom content border", () => {
   });
   it("draws a band behind the content and an edge above it, sized by the thickness", () => {
     const view = render(<WindowContentBorder thickness={56} />);
-    const band = view.container.querySelector<HTMLElement>(".nse-window-content-border")!;
-    const edge = view.container.querySelector<HTMLElement>(".nse-window-content-border-edge")!;
-    expect(band.dataset.edge).toBe("minY");
-    expect(band.dataset.size).toBe("large");
+    const band = view.container.querySelector<HTMLElement>('[data-nse-part="content-border"]')!;
+    const edge = view.container.querySelector<HTMLElement>('[data-nse-part="border"]')!;
+    expect(band.dataset.nseEdge).toBe("minY");
+    expect(band.dataset.nseContentBorder).toBe("large");
     expect(band.getAttribute("aria-hidden")).toBe("true");
     expect(band.style.getPropertyValue("--nse-window-content-border-thickness")).toBe("56px");
-    expect(edge.dataset.size).toBe("large");
+    expect(edge.dataset.nseContentBorder).toBe("large");
     view.rerender(<WindowContentBorder thickness={24} />);
-    expect(view.container.querySelector<HTMLElement>(".nse-window-content-border")!.dataset.size).toBe("small");
+    expect(view.container.querySelector<HTMLElement>('[data-nse-part="content-border"]')!.dataset.nseContentBorder).toBe("small");
   });
 
   it("draws labels on it raised (NSCell.backgroundStyle)", () => {
