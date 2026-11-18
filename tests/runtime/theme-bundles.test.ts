@@ -22,6 +22,11 @@ describe("static .scostheme bundles", () => {
       }
     }
   });
+  it("keeps Atmo's source-only motion allowance out of theme bundles", () => {
+    write("Info.ts", 'export default { bundleIdentifier: "com.syndromatic.atmo", displayName: "Atmo", version: "1.0.0", themeContractVersion: 1 };');
+    write("Resources/atmo-structure.controls.css", '[data-nse-control="button"] { transition: opacity 180ms; }');
+    expect(() => readThemeBundle(bundle)).toThrow(/atmo-structure.controls.css.*motion/u);
+  });
   const cases: [string, RegExp][] = [
     ["unknown keys", /Theme.json.*unknown|unknown.*Theme.json/i],
     ["identity duplication", /Theme.json.*unknown|unknown.*Theme.json/i],

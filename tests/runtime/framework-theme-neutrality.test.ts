@@ -42,3 +42,22 @@ function frameworkPaintCounts() {
 it("framework CSS draws no paint", () => {
   expect(frameworkPaintCounts()).toEqual({});
 });
+
+it("NSE structure CSS declares no typography or motion", () => {
+  const directory = join(root, "src", "NSE", "Structure");
+  const violations: string[] = [];
+  for (const entry of readdirSync(directory, { recursive: true, withFileTypes: true })) {
+    if (!entry.isFile() || !entry.name.endsWith(".css")) continue;
+    const path = join(entry.parentPath, entry.name);
+    const file = relative(directory, path);
+    cssTree.walk(cssTree.parse(readFileSync(path, "utf8"), { positions: true }), node => {
+      const name = node.type === "Declaration" ? cssTree.ident.decode(node.property).toLowerCase() : "";
+      const property = name.replace(/^-(?:webkit|moz|ms|o)-/u, "");
+      if (/^(?:(?:font|transition|animation)(?:-|$)|(?:line-height|letter-spacing|word-spacing|text-transform)$)/u.test(property)
+        || (node.type === "Atrule" && /^(?:-webkit-)?keyframes$/iu.test(node.name))) {
+        violations.push(`${file}:${node.loc?.start.line} ${name || "@keyframes"}`);
+      }
+    });
+  }
+  expect(violations).toEqual([]);
+});
