@@ -303,7 +303,7 @@ export function runInstalledFx({ mode, manifestPath, base = "/", keep = false })
       for (const scenario of deterministicScenarios) {
         execute(receipt, {
           id: scenario.id,
-          args: [vitest, "run", scenario.test, "--maxWorkers=1", "--no-file-parallelism"],
+          args: [vitest, "run", "--config", resolve(repositoryRoot, "vitest.packaging.config.ts"), scenario.test, "--maxWorkers=1", "--no-file-parallelism"],
           families: scenario.families,
           dimension: "D",
           assertionText: scenario.assertionText,
