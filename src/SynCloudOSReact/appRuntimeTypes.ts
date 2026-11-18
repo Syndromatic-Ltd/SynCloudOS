@@ -145,9 +145,9 @@ export interface SynWareOwnedWindowSnapshot {
   readonly documentAssociationRole: "primary" | "secondary" | "inspector" | null;
   readonly mobilePolicy: "fullscreen" | "sheet" | "popover-to-sheet" | "hidden";
   readonly restorationKey: string | null;
-  readonly style?: readonly import("../SynCloudOS/Windows/windowTypes").WindowStyle[];
-  readonly fullScreen?: import("../SynCloudOS/Windows/windowTypes").WindowFullScreenState;
-  readonly collectionBehavior?: import("../SynCloudOS/Windows/windowTypes").WindowCollectionBehavior;
+  readonly style?: readonly import("../SynCloudOS/SynCloudOS").WindowStyle[];
+  readonly fullScreen?: import("../SynCloudOS/SynCloudOS").WindowFullScreenState;
+  readonly collectionBehavior?: import("../SynCloudOS/SynCloudOS").WindowCollectionBehavior;
   readonly isKey: boolean;
   readonly isMain: boolean;
 }

@@ -73,3 +73,8 @@ export type { NSEAppTheme } from "./Theme/NSEAppTheme";
 export type { ViewDrawingEnvironment } from "./Views/NSEViewDrawingEnvironment";
 
 export { WindowTitlebarControls } from "./Windows/WindowTitlebarControls";
+// The application stage draws the shared window titlebar for windowless apps.
+export { WindowTitlebarView } from "./Windows/WindowTitlebarView";
+export { TitlebarGlyphButton } from "./Windows/TitlebarGlyphButton";
+export type { WindowTitlebarSlots } from "./Windows/windowTitlebarContext";
+export { nseTopBarGlyphs } from "./Windows/Chrome/topBarAssets";

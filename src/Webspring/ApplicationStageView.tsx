@@ -38,13 +38,9 @@ import { ApplicationNavigationBackButton } from "./ApplicationNavigationBackButt
 import { activateResponderHierarchy, clearOwnedResponderAnchor, QuickSwitchTriggerProvider, ResponderScope, useHostSiteBranding, useResolvedMode, useRuntimeNSEControlPort, useRuntimeNSEFocusPort, useRuntimeNSEOverlayPort, useRuntimeSelector, useKernelSynCloudOS } from "../SynCloudOSReact";
 import type { SynCloudOSAppInfo } from "../SynCloudOS/SynCloudOS";
 import { AppViewChrome, type AppViewPresentation } from "./AppViewChrome";
-import { ViewAppearanceBoundary } from "../NSE/hostComposition";
+import { TitlebarGlyphButton, ViewAppearanceBoundary, WindowTitlebarView, nseTopBarGlyphs, type WindowTitlebarSlots } from "../NSE/hostComposition";
 import { AppViewContent } from "./AppViewContent";
-import { WindowTitlebarView } from "../NSE/Windows/WindowTitlebarView";
-import { TitlebarGlyphButton } from "../NSE/Windows/TitlebarGlyphButton";
 import { nseAppCornerRadius } from "../NSE/SmoothSurface";
-import type { WindowTitlebarSlots } from "../NSE/Windows/windowTitlebarContext";
-import { nseTopBarGlyphs } from "../NSE/Windows/Chrome/topBarAssets";
 import { WindowPresentationSlot, useWindowPresentationContent } from "./WindowPresentationContent";
 import { SynWareEntryRenderer } from "./SynWareEntryRenderer";
 import { WindowTitlebarHostContext, type WindowTitlebarDocument, type WindowTitlebarHost } from "../NSE/hostComposition";

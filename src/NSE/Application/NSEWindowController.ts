@@ -20,7 +20,7 @@
 
 import type { SynCloudOSLifecycleDisposalReason } from "../../SynCloudOS/nseRuntimeContracts";
 import type { SynWareOwnedWindowSnapshot, SynWareWindowCloseGuard } from "../../SynCloudOS/nseRuntimeContracts";
-import type { WindowFullScreenNotification } from "../../SynCloudOS/Windows/windowTypes";
+import type { WindowFullScreenNotification } from "../../SynCloudOS/SynCloudOS";
 import {
   nseDisposeFor,
   type NSEControllerOwnershipOptions,

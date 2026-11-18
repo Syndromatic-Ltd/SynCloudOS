@@ -20,20 +20,13 @@
 
 import { createPortal } from "react-dom";
 import { createContext, useCallback, useContext, useId, useMemo, useState, useSyncExternalStore, type PropsWithChildren } from "react";
-import { NSEMenuBar, createApplicationMenuModel, type MenuSection } from "../../NSE/NSE";
-import { createReactOwnedNSEMenu, orderMenuEntries } from "../../NSE/Menus/NSEMenu";
-import { nseMenuModel, type MenuEntryInput } from "../../NSE/Menus/menuTypes";
-import { useMenuLifetime } from "../../NSE/Menus/useMenuLifetime";
-import { WindowApplicationMenuContext } from "../../NSE/Toolbars/ApplicationMenuToolbarButton";
-import { ActionResponderContext, useObserve } from "../../NSE/applicationHostInterop";
-import type { NSEApplication } from "../../NSE/Application";
-import { SynWareRuntimeContext } from "../../SynCloudOSReact";
+import { NSEMenuBar, createApplicationMenuModel, nseMenuModel, orderMenuEntries, type MenuSection } from "../../NSE/NSE";
+import { ActionResponderContext, WindowApplicationMenuContext, createReactOwnedNSEMenu, useMenuLifetime, useObserve, type MenuEntryInput, type NSEApplication } from "../../NSE/applicationHostInterop";
+import { SynWareRuntimeContext, createApplicationMenuStore, useApplicationMenuSnapshot, useRuntimeNSEMenuPort } from "../../SynCloudOSReact";
 import type { SynCloudOSRuntime } from "../Runtime/runtimeInstanceTypes";
-import { useRuntimeNSEMenuPort } from "../../SynCloudOSReact/nseMenuPort";
 import { useSynWareContext } from "../AppSDK/SynWareContext";
 import { installedApplicationMenuSections } from "./installedApplicationMenus";
-import { applicationMenuLabels, ApplicationMenuOverlayHost } from "../../Webspring/applicationMenuPresentation";
-import { createApplicationMenuStore, useApplicationMenuSnapshot } from "../../SynCloudOSReact/ApplicationMenuTrigger";
+import { applicationMenuLabels, ApplicationMenuOverlayHost } from "./applicationMenuPresentation";
 
 export const WindowApplicationMenuHostContext = createContext<SynCloudOSRuntime | null>(null);
 

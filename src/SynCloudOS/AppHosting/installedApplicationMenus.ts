@@ -20,7 +20,7 @@
 
 import type { SynCloudOSRuntime } from "../Runtime/runtimeInstanceTypes";
 import { applicationSessionFor } from "./applicationSession";
-import type { NSEApplication } from "../../NSE/Application";
+import type { NSEApplication } from "../../NSE/applicationHostInterop";
 import type { MenuSection } from "../../NSE/NSE";
 import { shortcutCommandIdentifier } from "../SynCloudOS";
 /** The Dock contribution is also available in the application's Webspring menu. */

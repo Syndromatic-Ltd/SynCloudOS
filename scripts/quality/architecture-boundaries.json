@@ -263,8 +263,7 @@
       "id": "sdk-build-config",
       "include": [
         "scripts/synware/sdk-entries.mjs",
-        "scripts/synware/sdk-entries.d.mts",
-        "scripts/synware/project-selection.d.mts"
+        "scripts/synware/sdk-entries.d.mts"
       ],
       "mayImportLayers": [],
       "mayImportEntrypoints": {}
@@ -398,7 +397,7 @@
         "src/SynCloudOS/AppSDK/appRuntimeFacade.ts",
         "src/SynCloudOS/AppSDK/createSynWareContextValue.ts",
         "src/SynCloudOS/AppSDK/SynWareRuntimeMount.tsx",
-        "src/SynCloudOS/AppSDK/manifest/projectRuntimeManifest.ts",
+        "src/SynCloudOS/AppSDK/projectRuntimeManifest.ts",
         "src/SynCloudOS/AppHosting/**",
         "src/SynCloudOS/AppSDK/mountedBluetoothPort.ts",
         "src/SynCloudOS/AppSDK/mountedNFCPort.ts",
@@ -428,7 +427,7 @@
           "src/SynCloudOS/HostServices/mountedResourceScope.ts"
         ],
         "runtime": [
-          "src/SynCloudOS/SynCloudOS.ts",
+          "src/SynCloudOS/SynCloudOS.ts", "src/SynCloudOS/Windows/windowTypes.ts", "src/SynCloudOS/Resources/frameworkAssets.ts",
           "src/SynCloudOS/BundleLoader/trustedBundleProvenance.ts",
           "src/SynCloudOS/BundleLoader/bundleGenerationFence.ts",
           "src/SynCloudOS/Routing/appSdkRoutePort.ts",
@@ -471,8 +470,6 @@
         "src/SynCloudOS/AppSDK/**",
         "src/SynCloudOS/AppSDK/manifest/index.ts",
         "src/SynCloudOS/AppAuthoring/**",
-        "src/SynCloudOSReact/NSEEditorUndoAdapter.ts",
-        "src/SynCloudOSReact/SynCloudOSNSEEditor.tsx",
         "src/SynCloudOSReact/SynCloudOSNSEFontPanel.tsx"
       ],
       "mayImportLayers": [
@@ -554,7 +551,7 @@
           "src/Webspring/public.ts"
         ],
         "app-sdk-host": [
-          "src/SynCloudOS/AppSDK/manifest/projectRuntimeManifest.ts",
+          "src/SynCloudOS/AppSDK/projectRuntimeManifest.ts",
           "src/SynCloudOS/AppSDK/mountedSettlementPort.ts",
           "src/SynCloudOS/AppHosting/authoring.ts"
         ],
@@ -576,8 +573,7 @@
       "include": [
         "src/SynCloudOS/Developer/**",
         "src/SynCloudOS/Inspector/**",
-        "src/FrameworkTests/**",
-        "src/ConformanceProgramme/**"
+        "src/FrameworkTests/**"
       ],
       "mayImportLayers": [
         "devtools",
@@ -627,7 +623,6 @@
       "include": [
         "src/SynCloudOS/PlatformAdapters/**",
         "src/SynCloudOS/Documents/Adapters/**",
-        "src/SynCloudOS/DocumentStore/IndexedDBDocumentStore.ts",
         "src/SynCloudOS/DocumentStore/PersistenceDocumentStore.ts"
       ],
       "mayImportLayers": [
@@ -649,8 +644,6 @@
           "src/SynCloudOS/DocumentStore/documentStoreTypes.ts",
           "src/SynCloudOS/Documents/DocumentErrors.ts",
           "src/SynCloudOS/Documents/documentTypes.ts",
-          "src/SynCloudOS/Animation/animationTypes.ts",
-          "src/SynCloudOS/Sound/soundTypes.ts",
           "src/SynCloudOS/WebContent/webContentTypes.ts",
           "src/SynCloudOS/Persistence/Persistence.ts",
           "src/SynCloudOS/Pasteboard/pasteboardTypes.ts",
@@ -859,9 +852,7 @@
       "id": "appearance",
       "include": [
         "src/NSE/Appearance/**",
-        "scripts/cappuccino/appearance/**",
-        "src/Themes/**",
-        "src/Appearance/**"
+        "src/Themes/**"
       ],
       "mayImportLayers": [
         "appearance",
@@ -895,7 +886,6 @@
       "mayImportEntrypoints": {
         "runtime": [
           "src/SynCloudOS/SynCloudOS.ts",
-          "src/SynCloudOS/Animation/index.ts",
           "src/SynCloudOS/Models/index.ts",
           "src/SynCloudOS/nseRuntimeContracts.ts"
         ],
@@ -947,8 +937,6 @@
           "src/NSE/public/controls.ts",
           "src/NSE/Containers/index.ts",
           "src/NSE/Content/index.ts",
-          "src/NSE/Editor/index.ts",
-          "src/NSE/Haptics/index.ts",
           "src/NSE/Layout/index.ts",
           "src/NSE/Material/index.ts",
           "src/NSE/Page/index.ts",
@@ -1115,7 +1103,6 @@
         "nse": [
           "src/NSE/sdkPackageEntry.ts",
           "src/NSE/public/controls.ts",
-          "src/NSE/public/editor.ts",
           "src/NSE/public/content.ts",
           "src/NSE/public/appearance.ts",
           "src/NSE/public/scroll.ts",
@@ -1174,8 +1161,7 @@
         ],
         "sdk-build-config": [
           "scripts/synware/sdk-entries.mjs",
-          "scripts/synware/sdk-entries.d.mts",
-          "scripts/synware/project-selection.d.mts"
+          "scripts/synware/sdk-entries.d.mts"
         ],
         "browser-host": [
           "src/SynCloudOSReact/browser.tsx"

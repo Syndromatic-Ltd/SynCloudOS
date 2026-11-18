@@ -75,6 +75,7 @@ export type {
   SynCloudOSPresentationTraits,
   SynCloudOSPresentationTraitsService,
 } from "./ResponsiveModeManager/presentationTypes";
+export { getSynCloudOSHorizontalSizeClass } from "./ResponsiveModeManager/presentationTypes";
 export type {
   RuntimeLayoutViewportSnapshot,
   RuntimeMediaQuery,

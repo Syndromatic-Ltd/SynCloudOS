@@ -19,8 +19,8 @@
  */
 
 import { WindowLayoutContext, useNSEWindowChromeElement } from "../../NSE/applicationHostInterop";
-import { NSESplitViewController } from "../../NSE/DataViews/Split/NSESplitViewController";
-import { isNSEHTMLElement } from "../../NSE/Focus/domRealm";
+import { NSESplitViewController } from "../../NSE/NSE";
+import { isNSEHTMLElement } from "../../NSE/applicationHostInterop";
 import { contentInlineSize } from "./contentInlineSize";
 import { useNSEWindowChromeObstruction } from "../../NSE/NSE";
 
@@ -36,7 +36,7 @@ import { ToolbarView } from "../../NSE/applicationHostInterop";
 import { ToolbarConfigurationSheet } from "../../NSE/applicationHostInterop";
 import type { NSETitlebarAccessoryViewController } from "../../NSE/NSE";
 import { SynWareRuntimeContext } from "../../SynCloudOSReact";
-import { AttachedSheetLayerContext } from "../../SynCloudOSReact/focusScopeContext";
+import { AttachedSheetLayerContext } from "../../SynCloudOSReact";
 import { useSynWareContext } from "../AppSDK/SynWareContext";
 import { controllerServicesFor } from "../AppSDK/controllerServices";
 import "./window-chrome.css";

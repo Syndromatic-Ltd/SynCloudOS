@@ -18,16 +18,15 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ApplicationMenu } from "../NSE/NSE";
-import { useApplicationMenuSnapshot, type ApplicationMenuStore } from "../SynCloudOSReact";
-import type { SynCloudOSTranslationParams } from "../SynCloudOS/LocaleServices";
-import type { WebspringAppMenuLabels } from "./webspringAppMenu";
+import { ApplicationMenu, type ApplicationMenuLabels } from "../../NSE/NSE";
+import { useApplicationMenuSnapshot, type ApplicationMenuStore } from "../../SynCloudOSReact";
+import type { SynCloudOSTranslationParams } from "../SynCloudOS";
 
-/** The Webspring locale's text lookup (`useWebspringLocale().t`). */
+/** A locale text lookup, such as `useWebspringLocale().t`. */
 export type ApplicationMenuText = (key: string, fallback: string, params?: SynCloudOSTranslationParams) => string;
 
 /** The system labels every application menu shares, for the app's localised name. */
-export function applicationMenuLabels(appName: string, t: ApplicationMenuText): WebspringAppMenuLabels {
+export function applicationMenuLabels(appName: string, t: ApplicationMenuText): ApplicationMenuLabels {
   return {
     label: appName,
     // Avoid an "About About" menu item for About.app while preserving the

@@ -23,7 +23,7 @@ import { createPortal } from "react-dom";
 import { Presence } from "../../NSE/Animation";
 import { useNSEAppearanceProjection } from "../../NSE/Appearance";
 import { PresentingDocumentContext } from "../../NSE/hostComposition";
-import type { WindowSurfaceBinding } from "../../SynCloudOS/Windows/WindowHostEnvironment";
+import type { WindowSurfaceBinding } from "../../SynCloudOS/SynCloudOS";
 import { useKernelSynCloudOS } from "../../SynCloudOSReact";
 import { useWindowPresentationContent } from "../WindowPresentationContent";
 import { WindowHost, type WindowLayerDiagnostic } from "./WindowHost";

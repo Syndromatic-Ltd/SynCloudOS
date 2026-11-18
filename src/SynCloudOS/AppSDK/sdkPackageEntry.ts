@@ -239,7 +239,7 @@ export type {
   SynWareOwnedProjectionRequest,
   SynWareOwnedProjectionResult,
 } from "./appDefinitionTypes";
-export { useNSEApplication, useNSEWindow } from "../../NSE/Application/NSEWindowContext";
+export { useNSEApplication, useNSEWindow } from "../../NSE/NSE";
 export { TFXFontDescriptor, type TFXFontDescriptorOptions } from "../../FX/TextFX/TFXFontDescriptor";
 export type { TFXFontReadinessChange, TFXFontRegistration, TFXFontResourceMimeType } from "../../FX/TextFX/textLayoutTypes";
 export type {

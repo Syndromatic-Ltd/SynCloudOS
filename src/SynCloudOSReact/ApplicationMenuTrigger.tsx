@@ -19,7 +19,7 @@
  */
 
 import { useContext, useSyncExternalStore } from "react";
-import { WindowApplicationMenuContext } from "../NSE/Toolbars/ApplicationMenuToolbarButton";
+import { WindowApplicationMenuContext } from "../NSE/applicationHostInterop";
 
 export interface ApplicationMenuTriggerPort {
   readonly label: string;

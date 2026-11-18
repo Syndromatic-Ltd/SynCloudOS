@@ -4,10 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
-import { getSynCloudOSHorizontalSizeClass } from "../../SynCloudOS/ResponsiveModeManager/presentationTypes";
-import type { ScreenSnapshot } from "../../SynCloudOS/Windows/ScreenService";
-import { unavailableViewportFeatures } from "../../SynCloudOS/Windows/viewportFeatures";
-import type { WindowBounds } from "../../SynCloudOS/Windows/windowTypes";
+import { getSynCloudOSHorizontalSizeClass, unavailableViewportFeatures, type ScreenSnapshot, type WindowBounds } from "../../SynCloudOS/SynCloudOS";
 
 const noInsets = { blockStart: 0, blockEnd: 0, inlineStart: 0, inlineEnd: 0 };
 

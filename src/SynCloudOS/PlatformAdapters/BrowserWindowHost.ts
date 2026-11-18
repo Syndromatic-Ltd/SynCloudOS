@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
-import { createStageWindowHost, type WindowHostCapabilities, type WindowHostEnvironment, type WindowHostEvent, type WindowSurfaceBinding } from "../Windows/WindowHostEnvironment";
+import { createStageWindowHost, type WindowHostCapabilities, type WindowHostEnvironment, type WindowHostEvent, type WindowSurfaceBinding } from "../SynCloudOS";
 
 const stylesheet = "style, link[rel~=stylesheet]";
 

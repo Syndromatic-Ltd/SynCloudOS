@@ -28,7 +28,7 @@ import { createMountedShareClient } from "./mountedShareClient";
 import { createMountedFilePanelClient } from "./mountedFilePanelClient";
 import { isHiddenCommandAcceptance, markHiddenCommandAcceptance } from "../nseRuntimeContracts";
 import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
-import { windowResponderFor } from "../Responders/ResponderGraph";
+import { windowResponderFor } from "../SynCloudOS";
 import { createMountedServiceTerminalOperations } from "./mountedServiceTerminalOperations";
 import { registerMountedDocumentWorkflowProvider } from "./mountedDocumentWorkflowProvider";
 import { prepareMountedDocumentAssetEdit } from "./mountedDocumentAssetPreparation";
@@ -4539,10 +4539,10 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
     cleanupOnAbort(() => { unsubscribePrivacyIdentity(); unsubscribePrivacyProfile(); unsubscribeCanonicalPrivacySession(); privacyOwner.abort(); });
     const environmentClients = Object.freeze({
       currentWindow: {
-        setStyle(style: readonly import("../Windows/windowTypes").WindowStyle[]) {
+        setStyle(style: readonly import("../SynCloudOS").WindowStyle[]) {
           if (windowControllerId !== undefined) runtime.windows.setStyle(ownedWindow(windowControllerId).id, style);
         },
-        setCollectionBehavior(behavior: import("../Windows/windowTypes").WindowCollectionBehavior) {
+        setCollectionBehavior(behavior: import("../SynCloudOS").WindowCollectionBehavior) {
           if (windowControllerId !== undefined) runtime.windows.setCollectionBehavior(ownedWindow(windowControllerId).id, behavior);
         },
         toggleFullScreen() {

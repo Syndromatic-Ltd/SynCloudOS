@@ -51,3 +51,9 @@ export { ControllerSheetSurface, WindowAlertContent, OpenPanelSheetSurface } fro
 export { nativePresentations } from "./Application/nativePresentation";
 export { SystemSurfaceAppearance, ViewAppearanceBoundary, useInPlaceAppearanceProjection, useRelocatedAppearance } from "./Appearance/NSEAppearanceProvider";
 export type { NSEAppearance } from "./Appearance/NSEAppearance";
+export { isNSEHTMLElement } from "./Focus/domRealm";
+export { MountedWindowContext } from "./Application/NSEWindowContext";
+export { createReactOwnedNSEMenu } from "./Menus/NSEMenu";
+export type { MenuEntryInput } from "./Menus/menuTypes";
+export { useMenuLifetime } from "./Menus/useMenuLifetime";
+export { WindowApplicationMenuContext } from "./Toolbars/ApplicationMenuToolbarButton";
