@@ -235,11 +235,11 @@
 }
 
 /* A menu or list whose row was chosen fades out as it closes (desktop; see menuSelectionFlash). */
-.nse-overlay-popup[data-state="closing"],
-:where(:scope):is(.nse-overlay-popup[data-state="closing"]) { pointer-events: none; }
+.nse-overlay-popup[data-nse-overlay-state="closing"],
+:where(:scope):is(.nse-overlay-popup[data-nse-overlay-state="closing"]) { pointer-events: none; }
 /* Dismissed menus fade the same way; the application menu retracts with its own animation instead. */
-.nse-overlay-popup[data-state="closing"]:is([data-nse-menu-chosen],[data-nse-style="menu"],[data-nse-style="context-menu"],[data-nse-style="submenu"]),
-:where(:scope):is(.nse-overlay-popup[data-state="closing"]:is([data-nse-menu-chosen],[data-nse-style="menu"],[data-nse-style="context-menu"],[data-nse-style="submenu"])) { animation: nse-menu-chosen-fade 0.2s ease-in forwards; }
+.nse-overlay-popup[data-nse-overlay-state="closing"]:is([data-nse-menu-chosen],[data-nse-style="menu"],[data-nse-style="context-menu"],[data-nse-style="submenu"]),
+:where(:scope):is(.nse-overlay-popup[data-nse-overlay-state="closing"]:is([data-nse-menu-chosen],[data-nse-style="menu"],[data-nse-style="context-menu"],[data-nse-style="submenu"])) { animation: nse-menu-chosen-fade 0.2s ease-in forwards; }
 @keyframes nse-menu-chosen-fade { to { --nse-overlay-presentation-alpha: 0; } }
 
 /* NSEPopover's frame is one continuous outline, including the anchor arrow.
@@ -291,25 +291,25 @@
 }
 .nse-overlay-popup.nse-popover[data-nse-transparent="true"]>.nse-overlay-popup-content,
 :where(:scope):is(.nse-overlay-popup.nse-popover[data-nse-transparent="true"])>.nse-overlay-popup-content { padding: 0; }
-.nse-popover[data-nse-positioned="true"][data-state="open"],
-:where(:scope):is(.nse-popover[data-nse-positioned="true"][data-state="open"]) {
+.nse-popover[data-nse-positioned="true"][data-nse-overlay-state="open"],
+:where(:scope):is(.nse-popover[data-nse-positioned="true"][data-nse-overlay-state="open"]) {
   animation: nse-popover-scale-in 320ms var(--nse-popover-spring, ease-out) both, nse-popover-fade-in 120ms ease-out both;
 }
-.nse-popover[data-state="closing"],
-:where(:scope):is(.nse-popover[data-state="closing"]) { animation: nse-popover-out 150ms ease-in both; }
-.nse-popover[data-nse-reduced-motion="true"][data-state="open"],
-:where(:scope):is(.nse-popover[data-nse-reduced-motion="true"][data-state="open"]) { animation: nse-popover-fade-in 100ms linear both; }
-.nse-popover[data-nse-reduced-motion="true"][data-state="closing"],
-:where(:scope):is(.nse-popover[data-nse-reduced-motion="true"][data-state="closing"]) { animation: nse-popover-fade-out 100ms linear both; }
+.nse-popover[data-nse-overlay-state="closing"],
+:where(:scope):is(.nse-popover[data-nse-overlay-state="closing"]) { animation: nse-popover-out 150ms ease-in both; }
+.nse-popover[data-nse-reduced-motion="true"][data-nse-overlay-state="open"],
+:where(:scope):is(.nse-popover[data-nse-reduced-motion="true"][data-nse-overlay-state="open"]) { animation: nse-popover-fade-in 100ms linear both; }
+.nse-popover[data-nse-reduced-motion="true"][data-nse-overlay-state="closing"],
+:where(:scope):is(.nse-popover[data-nse-reduced-motion="true"][data-nse-overlay-state="closing"]) { animation: nse-popover-fade-out 100ms linear both; }
 @keyframes nse-popover-scale-in { from { transform: scale(0.85); } to { transform: scale(1); } }
 @keyframes nse-popover-fade-in { from { --nse-overlay-presentation-alpha: 0; } to { --nse-overlay-presentation-alpha: 1; } }
 @keyframes nse-popover-out { from { --nse-overlay-presentation-alpha: 1; transform: scale(1); } to { --nse-overlay-presentation-alpha: 0; transform: scale(0.94); } }
 @keyframes nse-popover-fade-out { from { --nse-overlay-presentation-alpha: 1; } to { --nse-overlay-presentation-alpha: 0; } }
 @media (prefers-reduced-motion: reduce) {
-  .nse-popover[data-nse-positioned="true"][data-state="open"],
-:where(:scope):is(.nse-popover[data-nse-positioned="true"][data-state="open"]) { animation: nse-popover-fade-in 100ms linear both; }
-  .nse-popover[data-state="closing"],
-:where(:scope):is(.nse-popover[data-state="closing"]) { animation: nse-popover-fade-out 100ms linear both; }
+  .nse-popover[data-nse-positioned="true"][data-nse-overlay-state="open"],
+:where(:scope):is(.nse-popover[data-nse-positioned="true"][data-nse-overlay-state="open"]) { animation: nse-popover-fade-in 100ms linear both; }
+  .nse-popover[data-nse-overlay-state="closing"],
+:where(:scope):is(.nse-popover[data-nse-overlay-state="closing"]) { animation: nse-popover-fade-out 100ms linear both; }
 }
 
 }

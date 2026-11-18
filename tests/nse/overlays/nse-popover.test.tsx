@@ -90,7 +90,7 @@ describe("popover frame and presentation", () => {
     const surface = await screen.findByRole("dialog", { name: "Options" });
     expect(surface.getAttribute("data-nse-reduced-motion")).toBe("true");
     view.rerender(<Harness reducedMotion><Fixture open={false} /></Harness>);
-    expect(surface.getAttribute("data-state")).toBe("closing");
+    expect(surface.getAttribute("data-nse-overlay-state")).toBe("closing");
     expect(surface.hasAttribute("inert")).toBe(true);
     await waitFor(() => expect(document.getElementById("paper")).toBeNull());
   });
@@ -126,9 +126,9 @@ describe("popover frame and presentation", () => {
     const view = render(<Harness><Fixture /></Harness>);
     await waitFor(() => expect(document.getElementById("paper")?.dataset.nsePositioned).toBe("true"));
     view.rerender(<Harness />);
-    await waitFor(() => expect(document.querySelector('.nse-popover[data-state="closing"][aria-hidden="true"]')).not.toBeNull());
+    await waitFor(() => expect(document.querySelector('.nse-popover[data-nse-overlay-state="closing"][aria-hidden="true"]')).not.toBeNull());
     expect(document.getElementById("paper")).toBeNull();
-    expect(document.querySelector('.nse-popover[data-state="closing"]')?.hasAttribute("inert")).toBe(true);
+    expect(document.querySelector('.nse-popover[data-nse-overlay-state="closing"]')?.hasAttribute("inert")).toBe(true);
     await waitFor(() => expect(document.querySelector(".nse-popover")).toBeNull());
   });
 });

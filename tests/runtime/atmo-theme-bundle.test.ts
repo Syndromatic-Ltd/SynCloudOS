@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
-import { readThemeBundle } from "../../scripts/synware/theme-bundles.mjs";
+import { deriveNSEThemeContract } from "../../scripts/synware/build-theme-contract.mjs";
+import { readThemeBundle, validateThemeCSS } from "../../scripts/synware/theme-bundles.mjs";
 const root = resolve(import.meta.dirname, "../../src/Themes/Atmo.scostheme");
 describe("Atmo's public theme bundle", () => {
   it("is a valid static bundle with Atmo's existing navigation and presentation", () => {
@@ -17,6 +18,13 @@ describe("Atmo's public theme bundle", () => {
       expect(file).not.toMatch(/\.(?:tsx?|jsx?|mjs|cjs|woff2?|ttf|otf)$/u);
       if (!file.endsWith(".css")) continue;
       expect(readFileSync(file, "utf8")).not.toMatch(/\.nse-[a-z]|@font-face/u);
+    }
+  });
+  it("applies the public selector contract even to Atmo's motion stylesheet", () => {
+    const file = resolve(root, "Contents/Resources/atmo-structure.controls.css");
+    const contract = deriveNSEThemeContract(resolve(import.meta.dirname, "../.."));
+    for (const selector of ["legend", "[data-suspended]", "[data-variant]", "[data-state]", "[data-motion]"]) {
+      expect(() => validateThemeCSS(`:scope ${selector} { color: red; }`, { file, root, contract })).toThrow(/css-selector/u);
     }
   });
 });

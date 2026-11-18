@@ -60,7 +60,7 @@ it("flashes the chosen row, then chooses it and fades the list out (desktop)", a
   // The list stays mounted while it fades, marked chosen, then goes.
   const popup = document.querySelector(".nse-overlay-popup--listbox") as HTMLElement;
   expect(popup.hasAttribute("data-nse-menu-chosen")).toBe(true);
-  expect(popup.dataset.state).toBe("closing");
+  expect(popup.dataset.nseOverlayState).toBe("closing");
   await waitFor(() => expect(document.querySelector(".nse-overlay-popup--listbox")).toBeNull());
 });
 

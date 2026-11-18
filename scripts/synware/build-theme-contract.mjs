@@ -73,6 +73,7 @@ export function renderNSEThemeContractMarkdown(contract) {
       lines.push("- Variants:");
       for (const [variant, values] of variants) lines.push("  - " + tick("data-nse-" + variant) + ": " + list(values));
     }
+    if (name === "window" && entry.parts.includes("document")) lines.push("- Mark a document region in custom window content with `data-nse-part=\"document\"` so its titles can be distinguished from window chrome.");
     lines.push("");
   }
   lines.push("## Colours", "", "Each name is a key of " + tick("colours.light") + " and " + tick("colours.dark") + " in " + tick("Theme.json") + ".", "", list(contract.colours), "");

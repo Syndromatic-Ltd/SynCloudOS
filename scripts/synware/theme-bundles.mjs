@@ -6,10 +6,8 @@ import * as cssTree from "css-tree";
 import { SaxesParser } from "saxes";
 import ts from "typescript";
 import { parseManifest } from "./manifest-source.mjs";
-// Atmo's source is compiled into the fallback layer. Other bundles, including
-// bundles with the same identifier, are subject to the authored theme contract.
-const builtInAtmoControls = fileURLToPath(new URL("../../src/Themes/Atmo.scostheme/Contents/Resources/atmo-structure.controls.css", import.meta.url));
-const builtInControlStates = new Set(["data-suspended", "data-variant", "data-state", "data-motion"]);
+// Part 3 removes this exemption when motion tokens land.
+const ATMO_MOTION_EXEMPT_STYLESHEET = fileURLToPath(new URL("../../src/Themes/Atmo.scostheme/Contents/Resources/atmo-structure.controls.css", import.meta.url));
 const identifier = /^[a-z][a-z0-9-]*(?:\.[a-z][a-z0-9-]*)+$/u;
 const resourceExtensions = new Set([".css", ".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg", ".avif", ".woff2", ".txt", ".md", ".json", ".strings"]);
 const inside = (root, path) => { const rel = relative(root, path); return !isAbsolute(rel) && rel !== ".." && !rel.startsWith("../") && !rel.startsWith("..\\"); };
@@ -287,7 +285,7 @@ export function themeRuleSummaries(source) {
 }
 export function validateThemeCSS(source, { file, root, contract, kind = "system", onImport = () => undefined, siblings: bundleSiblings } = {}) {
   const app = kind === "app";
-  const builtInControls = !app && file && resolve(file) === builtInAtmoControls;
+  const allowsMotion = !app && file && resolve(file) === ATMO_MOTION_EXEMPT_STYLESHEET;
   if (app && !Array.isArray(contract.appThemeControls)) fail(file, "css-control", "The theme contract does not define appThemeControls.");
   const appControls = app ? new Set(contract.appThemeControls) : null;
   const ast = cssTree.parse(source, { parseCustomProperty: true, positions: true, onParseError(error) { fail(file, "css-syntax", error.message); } });
@@ -308,7 +306,7 @@ export function validateThemeCSS(source, { file, root, contract, kind = "system"
       if (node.type === "Raw" && node.value.trim()) fail(file, "css-syntax", "Unparsed CSS is not permitted.");
       if (node.type === "Atrule") {
         const name = cssTree.ident.decode(node.name).toLowerCase();
-        if (builtInControls && name === "keyframes") return cssTree.walk.skip;
+        if (allowsMotion && name === "keyframes") return cssTree.walk.skip;
         if (name === "import") {
           const match = /^(["'])([^"']+)\1\s*$/u.exec(cssTree.generate(node.prelude));
           if (!match) fail(file, "css-import", "Use a quoted local stylesheet import.");
@@ -321,13 +319,13 @@ export function validateThemeCSS(source, { file, root, contract, kind = "system"
         const selector = cssTree.generate(node);
         cssTree.walk(node, child => {
           if (["ClassSelector", "IdSelector"].includes(child.type)
-            || child.type === "TypeSelector" && child.name !== "*" && !(builtInControls && child.name === "legend")) {
+            || child.type === "TypeSelector" && child.name !== "*") {
             fail(file, "css-selector", `Use contract hooks only: ${selector}`);
           }
           if (child.type === "PseudoClassSelector" && ["root", "host", "host-context"].includes(app ? cssTree.ident.decode(child.name).toLowerCase() : child.name)) fail(file, "css-selector", `Use contract hooks only: ${selector}`);
           if (child.type !== "AttributeSelector") return;
           const name = cssTree.ident.decode(cssTree.generate(child.name));
-          if (!attributes.has(name) && !(builtInControls && builtInControlStates.has(name))) fail(file, "css-selector", `Unknown contract attribute ${name}.`);
+          if (!attributes.has(name)) fail(file, "css-selector", `Unknown contract attribute ${name}.`);
           const value = child.value?.value ?? child.value?.name;
           if (name === "data-nse-control") {
             const control = app && child.value?.type === "Identifier" ? cssTree.ident.decode(value) : value;
@@ -339,8 +337,7 @@ export function validateThemeCSS(source, { file, root, contract, kind = "system"
             }
             if (control && !contract.controls[control]) fail(file, "css-control", `Unknown control ${control}.`);
           }
-          if (name === "data-nse-part" && value && !(builtInControls && value === "document")
-            && !Object.values(contract.controls).some(control => control.parts.includes(value))) {
+          if (name === "data-nse-part" && value && !Object.values(contract.controls).some(control => control.parts.includes(value))) {
             fail(file, "css-part", `Unknown part ${value}.`);
           }
         });
@@ -360,7 +357,7 @@ export function validateThemeCSS(source, { file, root, contract, kind = "system"
       }
       if (node.type === "Declaration") {
         const property = cssTree.ident.decode(node.property).toLowerCase();
-        if (!builtInControls && /^(?:animation|transition)(?:-|$)/u.test(property)) fail(file, "motion", "Themes cannot define motion.");
+        if (!allowsMotion && /^(?:animation|transition)(?:-|$)/u.test(property)) fail(file, "motion", "Themes cannot define motion.");
         if (["behavior", "-moz-binding"].includes(property)) fail(file, "css-code", "Executable CSS is forbidden.");
         validateCssValue(valueText(node), url => localPath(root, file, url), file);
       }

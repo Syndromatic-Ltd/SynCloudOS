@@ -54,7 +54,7 @@ Contract version 1: 73 controls, 48 colours.
   - `data-nse-custom-border`: `true`
   - `data-nse-custom-fill`: `true`
   - `data-nse-expanded`: `true`
-  - `data-nse-role`: `disclosure`, `note`
+  - `data-nse-role`: `disclosure`, `legend`, `note`
   - `data-nse-shadow`: `true`
   - `data-nse-shadow-suppressed`: `true`
   - `data-nse-style`: `alpha`, `arrow`, `floating`, `grey`, `grouped`, `inspector`, `plain`, `sidebar`, `soft`, `surface`
@@ -248,6 +248,7 @@ Contract version 1: 73 controls, 48 colours.
   - `data-nse-control-size`: `regular`, `small`
   - `data-nse-edge`: `both`, `maxY`, `minY`
   - `data-nse-menu-chosen`: ``
+  - `data-nse-overlay-state`: `closing`, `open`
   - `data-nse-placement`: `block-end-inline-start`, `bottom-start`, `viewport-block-start-inline-end`
   - `data-nse-presentation`: `anchored`, `viewport-block-start-inline-end`
   - `data-nse-role`: `application-menu`, `command-menu`, `overlay`
@@ -352,6 +353,7 @@ Contract version 1: 73 controls, 48 colours.
 - States: none
 - Variants:
   - `data-nse-chrome`: `standard`
+  - `data-nse-overlay-state`: `closing`, `open`
   - `data-nse-placement`: `block-end-inline-start`, `bottom-start`
   - `data-nse-presentation`: `anchored`
   - `data-nse-role`: `overlay`
@@ -372,8 +374,10 @@ Contract version 1: 73 controls, 48 colours.
   - `data-nse-background-style`: `emphasised`, `normal`
   - `data-nse-control-size`: `large`, `regular`, `small`
   - `data-nse-indeterminate`: `false`, `true`
+  - `data-nse-motion`: `animated`, `static`
   - `data-nse-role`: `status`
   - `data-nse-style`: `bar`, `spinning`
+  - `data-nse-suspended`: `false`, `true`
 
 ### `quick-switch`
 
@@ -411,6 +415,7 @@ Contract version 1: 73 controls, 48 colours.
 - States: none
 - Variants:
   - `data-nse-chrome`: `standard`
+  - `data-nse-overlay-state`: `open`
   - `data-nse-placement`: `block-end-inline-start`
   - `data-nse-presentation`: `anchored`, `sheet`
   - `data-nse-role`: `overlay`
@@ -469,6 +474,7 @@ Contract version 1: 73 controls, 48 colours.
 - States: none
 - Variants:
   - `data-nse-chrome`: `standard`
+  - `data-nse-overlay-state`: `open`
   - `data-nse-placement`: `block-end-inline-start`
   - `data-nse-presentation`: `sheet`
   - `data-nse-role`: `overlay`
@@ -609,6 +615,7 @@ Contract version 1: 73 controls, 48 colours.
 - States: none
 - Variants:
   - `data-nse-chrome`: `standard`
+  - `data-nse-overlay-state`: `open`
   - `data-nse-placement`: `block-end-inline-start`
   - `data-nse-presentation`: `sheet`
   - `data-nse-role`: `overlay`
@@ -629,6 +636,7 @@ Contract version 1: 73 controls, 48 colours.
 - States: none
 - Variants:
   - `data-nse-chrome`: `standard`
+  - `data-nse-overlay-state`: `open`
   - `data-nse-placement`: `bottom-start`
   - `data-nse-role`: `overlay`
 
@@ -666,7 +674,7 @@ Contract version 1: 73 controls, 48 colours.
 
 ### `window`
 
-- Parts: `accessory`, `backdrop`, `background`, `bezel`, `body`, `border`, `button`, `cell`, `content`, `content-border`, `content-view`, `decoration`, `fill`, `floating-titlebar`, `handle`, `header`, `image`, `indicator`, `leading`, `menu`, `shadow`, `sheet`, `sidebar`, `subtitle`, `surface`, `title`, `titlebar-accessories`, `toolbar`, `toolbar-row`, `trailing`, `window-fitting-content`
+- Parts: `accessory`, `backdrop`, `background`, `bezel`, `body`, `border`, `button`, `cell`, `content`, `content-border`, `content-view`, `decoration`, `document`, `fill`, `floating-titlebar`, `handle`, `header`, `image`, `indicator`, `leading`, `menu`, `shadow`, `sheet`, `sidebar`, `subtitle`, `surface`, `title`, `titlebar-accessories`, `toolbar`, `toolbar-row`, `trailing`, `window-fitting-content`
 - States: `key-window=false`, `selected`
 - Variants:
   - `data-nse-alignment`: `center`, `end`, `start`
@@ -681,6 +689,7 @@ Contract version 1: 73 controls, 48 colours.
   - `data-nse-toolbar-style`: `automatic`, `expanded`, `preference`, `unified`, `unifiedCompact`
   - `data-nse-transparent`: `true`
   - `data-nse-type`: `custom`, `frameless`, `system`
+- Mark a document region in custom window content with `data-nse-part="document"` so its titles can be distinguished from window chrome.
 
 ## Colours
 

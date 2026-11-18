@@ -2183,9 +2183,9 @@
   inset-inline-start:1px;
   box-sizing:border-box;
 }
-:scope [data-nse-control="progress-indicator"][data-variant="bar"][data-state="indeterminate"][data-motion="static"] [data-nse-part="fill"],
-:scope:is([data-nse-control="progress-indicator"][data-variant="bar"][data-state="indeterminate"][data-motion="static"]) [data-nse-part="fill"],
-:scope[data-nse-control="progress-indicator"][data-variant="bar"][data-state="indeterminate"][data-motion="static"] [data-nse-part="fill"] {
+:scope [data-nse-control="progress-indicator"][data-nse-style="bar"][data-nse-indeterminate="true"][data-nse-motion="static"] [data-nse-part="fill"],
+:scope:is([data-nse-control="progress-indicator"][data-nse-style="bar"][data-nse-indeterminate="true"][data-nse-motion="static"]) [data-nse-part="fill"],
+:scope[data-nse-control="progress-indicator"][data-nse-style="bar"][data-nse-indeterminate="true"][data-nse-motion="static"] [data-nse-part="fill"] {
   inset-inline-start: 33%;
 }
 @media (prefers-reduced-motion: reduce) {
@@ -2642,13 +2642,13 @@ meter:scope[data-nse-control="level-indicator"]::-moz-meter-bar {
 }
 
 @scope ([data-nse-theme]) to ([data-nse-theme]) {
-:where(:scope) [data-nse-part="surface"][data-nse-style="application-menu"][data-state="closing"],
-:where(:scope):is([data-nse-part="surface"][data-nse-style="application-menu"][data-state="closing"]) {
+:where(:scope) [data-nse-part="surface"][data-nse-style="application-menu"][data-nse-overlay-state="closing"],
+:where(:scope):is([data-nse-part="surface"][data-nse-style="application-menu"][data-nse-overlay-state="closing"]) {
   pointer-events: none;
 }
 @media (prefers-reduced-motion: reduce) {
-:where(:scope) [data-nse-part="surface"][data-nse-style="application-menu"][data-state="closing"] [data-nse-part="bezel"][data-nse-role="application-menu"],
-:where(:scope):is([data-nse-part="surface"][data-nse-style="application-menu"][data-state="closing"]) [data-nse-part="bezel"][data-nse-role="application-menu"] {
+:where(:scope) [data-nse-part="surface"][data-nse-style="application-menu"][data-nse-overlay-state="closing"] [data-nse-part="bezel"][data-nse-role="application-menu"],
+:where(:scope):is([data-nse-part="surface"][data-nse-style="application-menu"][data-nse-overlay-state="closing"]) [data-nse-part="bezel"][data-nse-role="application-menu"] {
     --nse-app-menu-presentation-alpha: 0;
   }
 }

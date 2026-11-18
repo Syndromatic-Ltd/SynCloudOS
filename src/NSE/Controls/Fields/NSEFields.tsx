@@ -1085,6 +1085,7 @@ export function NSEBox({
       {title ? (
         <legend
           data-nse-part="title"
+          data-nse-role="legend"
           className={classes(
             "nse-control-group-label",
             "nse-box-title",

@@ -161,8 +161,8 @@
 :where(:scope):is([data-nse-part="image"]:where([data-nse-control="progress-indicator"][data-nse-style="spinning"]:is([data-nse-control-size="small"],[data-nse-control-size="large"]):not([data-nse-indeterminate])>*)) {
   animation: nse-control-spinner 0.9s steps(12) infinite;
 }
-:where(:scope) [data-nse-control="progress-indicator"]:where([data-nse-part="content"][data-nse-style="spinning"])[data-suspended="true"] > [data-nse-part="image"],
-:where(:scope):is([data-nse-control="progress-indicator"]:where([data-nse-part="content"][data-nse-style="spinning"])[data-suspended="true"]) > [data-nse-part="image"] {
+:where(:scope) [data-nse-control="progress-indicator"]:where([data-nse-part="content"][data-nse-style="spinning"])[data-nse-suspended="true"] > [data-nse-part="image"],
+:where(:scope):is([data-nse-control="progress-indicator"]:where([data-nse-part="content"][data-nse-style="spinning"])[data-nse-suspended="true"]) > [data-nse-part="image"] {
   animation-play-state: paused;
 }
 @media (prefers-reduced-motion: reduce) {
@@ -177,8 +177,8 @@
   line-height:1;
   transition:background 0.15s ease;
 }
-:where(:scope) [data-nse-control="box"][data-nse-part="bezel"]>[data-nse-part="title"]:where(legend),
-:where(:scope):is([data-nse-control="box"][data-nse-part="bezel"])>[data-nse-part="title"]:where(legend) {
+:where(:scope) [data-nse-control="box"][data-nse-part="bezel"]>[data-nse-part="title"]:where([data-nse-role="legend"]),
+:where(:scope):is([data-nse-control="box"][data-nse-part="bezel"])>[data-nse-part="title"]:where([data-nse-role="legend"]) {
   line-height:20px;
 }
 @media (forced-colors: active) {
@@ -668,9 +668,9 @@
 :scope[data-nse-control="progress-indicator"][data-nse-style="bar"][data-nse-indeterminate="true"] [data-nse-part="fill"] {
   animation:nse-atmo-progress-sweep 1.4s ease-in-out infinite alternate;
 }
-:scope [data-nse-control="progress-indicator"][data-variant="bar"][data-state="indeterminate"][data-motion="static"] [data-nse-part="fill"],
-:scope:is([data-nse-control="progress-indicator"][data-variant="bar"][data-state="indeterminate"][data-motion="static"]) [data-nse-part="fill"],
-:scope[data-nse-control="progress-indicator"][data-variant="bar"][data-state="indeterminate"][data-motion="static"] [data-nse-part="fill"] {
+:scope [data-nse-control="progress-indicator"][data-nse-style="bar"][data-nse-indeterminate="true"][data-nse-motion="static"] [data-nse-part="fill"],
+:scope:is([data-nse-control="progress-indicator"][data-nse-style="bar"][data-nse-indeterminate="true"][data-nse-motion="static"]) [data-nse-part="fill"],
+:scope[data-nse-control="progress-indicator"][data-nse-style="bar"][data-nse-indeterminate="true"][data-nse-motion="static"] [data-nse-part="fill"] {
   animation: none;
 }
 @keyframes nse-atmo-progress-sweep {
@@ -696,9 +696,9 @@
 :scope[data-nse-control="progress-indicator"]:is([data-nse-style="spinning"]:where([data-nse-indeterminate="true"]),[data-nse-indeterminate="true"]):not([data-nse-style="bar"])>[data-nse-part="track"] {
   animation:nse-atmo-progress-turn 0.9s linear infinite;
 }
-:scope [data-nse-control="progress-indicator"][data-motion="static"]>[data-nse-part="track"],
-:scope:is([data-nse-control="progress-indicator"][data-motion="static"])>[data-nse-part="track"],
-:scope[data-nse-control="progress-indicator"][data-motion="static"]>[data-nse-part="track"] {
+:scope [data-nse-control="progress-indicator"][data-nse-motion="static"]>[data-nse-part="track"],
+:scope:is([data-nse-control="progress-indicator"][data-nse-motion="static"])>[data-nse-part="track"],
+:scope[data-nse-control="progress-indicator"][data-nse-motion="static"]>[data-nse-part="track"] {
   animation: none;
 }
 @keyframes nse-atmo-progress-turn {
@@ -922,12 +922,12 @@
 :scope:is([data-nse-control="window"]:where([data-nse-part="header"]):where([data-nse-toolbar-style])[data-nse-toolbar-style="expanded"]) [data-nse-part="title"]:where([data-nse-control="window"] *):where(:not([data-nse-control="window"] [data-nse-control] *)):where(:not([data-nse-part="header"]>*)):where(:not([data-nse-part="content"]>*)):where(:not([data-nse-part="document"] *)):where(:not([data-nse-part="leading"]>*)),
 :scope[data-nse-control="window"]:where([data-nse-part="header"]):where([data-nse-toolbar-style])[data-nse-toolbar-style="expanded"] [data-nse-part="title"]:where([data-nse-control="window"] *):where(:not([data-nse-control="window"] [data-nse-control] *)):where(:not([data-nse-part="header"]>*)):where(:not([data-nse-part="content"]>*)):where(:not([data-nse-part="document"] *)):where(:not([data-nse-part="leading"]>*)) { font-size: 28px; line-height: 37px; }
 }
-:where(:scope) [data-nse-part="surface"][data-nse-style="application-menu"][data-state="open"] [data-nse-part="bezel"][data-nse-role="application-menu"],
-:where(:scope):is([data-nse-part="surface"][data-nse-style="application-menu"][data-state="open"]) [data-nse-part="bezel"][data-nse-role="application-menu"] {
+:where(:scope) [data-nse-part="surface"][data-nse-style="application-menu"][data-nse-overlay-state="open"] [data-nse-part="bezel"][data-nse-role="application-menu"],
+:where(:scope):is([data-nse-part="surface"][data-nse-style="application-menu"][data-nse-overlay-state="open"]) [data-nse-part="bezel"][data-nse-role="application-menu"] {
   animation: nse-app-menu-drop 0.18s ease-out;
 }
-:where(:scope) [data-nse-part="surface"][data-nse-style="application-menu"][data-state="closing"] [data-nse-part="bezel"][data-nse-role="application-menu"],
-:where(:scope):is([data-nse-part="surface"][data-nse-style="application-menu"][data-state="closing"]) [data-nse-part="bezel"][data-nse-role="application-menu"] {
+:where(:scope) [data-nse-part="surface"][data-nse-style="application-menu"][data-nse-overlay-state="closing"] [data-nse-part="bezel"][data-nse-role="application-menu"],
+:where(:scope):is([data-nse-part="surface"][data-nse-style="application-menu"][data-nse-overlay-state="closing"]) [data-nse-part="bezel"][data-nse-role="application-menu"] {
   animation: nse-app-menu-retract 0.16s ease-in forwards;
 }
 @keyframes nse-app-menu-retract {
@@ -953,13 +953,13 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-:where(:scope) [data-nse-part="surface"][data-nse-style="application-menu"][data-state] [data-nse-part="bezel"][data-nse-role="application-menu"],
-:where(:scope):is([data-nse-part="surface"][data-nse-style="application-menu"][data-state]) [data-nse-part="bezel"][data-nse-role="application-menu"] {
+:where(:scope) [data-nse-part="surface"][data-nse-style="application-menu"][data-nse-overlay-state] [data-nse-part="bezel"][data-nse-role="application-menu"],
+:where(:scope):is([data-nse-part="surface"][data-nse-style="application-menu"][data-nse-overlay-state]) [data-nse-part="bezel"][data-nse-role="application-menu"] {
     animation: none;
   }
 }
-:where(:scope) [data-nse-part="surface"][data-nse-style="application-menu"][data-state="closing"][data-nse-menu-chosen] [data-nse-part="bezel"][data-nse-role="application-menu"],
-:where(:scope):is([data-nse-part="surface"][data-nse-style="application-menu"][data-state="closing"][data-nse-menu-chosen]) [data-nse-part="bezel"][data-nse-role="application-menu"] {
+:where(:scope) [data-nse-part="surface"][data-nse-style="application-menu"][data-nse-overlay-state="closing"][data-nse-menu-chosen] [data-nse-part="bezel"][data-nse-role="application-menu"],
+:where(:scope):is([data-nse-part="surface"][data-nse-style="application-menu"][data-nse-overlay-state="closing"][data-nse-menu-chosen]) [data-nse-part="bezel"][data-nse-role="application-menu"] {
   animation: none;
 }
   @keyframes nse-control-spinner {

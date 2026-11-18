@@ -72,7 +72,7 @@ export function PopoverWindowSurface({ surface, windowControllerId, anchored, ch
     data-nse-reduced-motion={String(reducedMotion)}
     data-nse-overlay-kind={anchored ? "popover" : "action-sheet"}
     data-nse-presentation={anchored ? "anchored" : "sheet"}
-    data-state={exiting ? "closing" : "open"}
+    data-nse-overlay-state={exiting ? "closing" : "open"}
     role="dialog" tabIndex={-1}
     aria-modal={!anchored || undefined}
     aria-label={request.labelledBy ? undefined : request.title}

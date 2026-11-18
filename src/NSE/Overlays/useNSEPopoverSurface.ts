@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef } from "react";
 import { sampleSpring } from "../../FX/AnimationFX/AFXTimingFunction";
+import { setNSEHook } from "../Theme/contract/hookMirrorDOM";
 import { updateNSEPopoverFrame } from "./popoverFrame";
 import { useNSEOverlayProvider } from "./OverlayProvider";
 
@@ -43,7 +44,7 @@ export function useNSEPopoverSurface(surface: HTMLElement | null, arrow: HTMLEle
     let snapshot: HTMLElement | null = null;
     let heldController = false;
     const capture = () => {
-      if (!isOpen.current || surface.dataset.state === "closing") return;
+      if (!isOpen.current || surface.dataset.nseOverlayState === "closing") return;
       const controller = surface.querySelector("[data-nse-view-controller]");
       if (heldController && !controller) return;
       heldController ||= Boolean(controller);
@@ -80,7 +81,7 @@ export function useNSEPopoverSurface(surface: HTMLElement | null, arrow: HTMLEle
         copy.querySelectorAll("[id]").forEach(element => element.removeAttribute("id"));
         copy.setAttribute("inert", "");
         copy.setAttribute("aria-hidden", "true");
-        copy.dataset.state = "closing";
+        setNSEHook(copy, "overlay-state", "closing");
         portal.appendChild(copy);
         let handle: unknown;
         const remove = () => { copy.remove(); runtime.signal.removeEventListener("abort", abort); };

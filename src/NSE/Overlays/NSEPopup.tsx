@@ -280,7 +280,7 @@ export function NSEPopup({
       },
       ref: surfaceRef,
       id: resolvedId,
-      "data-state": presentationState,
+      "data-nse-overlay-state": presentationState,
       inert: !state.open || contentPending ? true : undefined,
       ...(hasPopoverFrame ? {
         "data-nse-transparent": String(!drawsBackground),

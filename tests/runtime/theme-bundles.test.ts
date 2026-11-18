@@ -28,6 +28,16 @@ describe("static .scostheme bundles", () => {
     write("Resources/atmo-structure.controls.css", '[data-nse-control="button"] { transition: opacity 180ms; }');
     expect(() => readThemeBundle(bundle)).toThrow(/atmo-structure.controls.css.*motion/u);
   });
+  it("accepts the former Atmo-only selectors in an authored theme through public hooks", () => {
+    write("Resources/theme.css", `
+      [data-nse-control="box"] > [data-nse-part="title"][data-nse-role="legend"],
+      [data-nse-control="window"] [data-nse-part="document"],
+      [data-nse-control="progress-indicator"][data-nse-suspended="true"] > [data-nse-part="image"],
+      [data-nse-control="progress-indicator"][data-nse-style="bar"][data-nse-indeterminate="true"][data-nse-motion="static"] [data-nse-part="fill"],
+      [data-nse-control="menu"][data-nse-part="surface"][data-nse-overlay-state="closing"] { color: red; }
+    `);
+    expect(readThemeBundle(bundle).stylesheets).toHaveLength(1);
+  });
   it("accepts typography on contract parts", () => {
     write("Resources/theme.css", '[data-nse-control="button"] [data-nse-part="title"] { font: 600 14px/1.3 system-ui; font-variant-numeric: tabular-nums; line-height: 1.5; letter-spacing: .04em; word-spacing: .1em; text-transform: uppercase; }');
     expect(readThemeBundle(bundle).stylesheets).toHaveLength(1);

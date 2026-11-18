@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import React from "react";
 import { act, cleanup, fireEvent, render, waitFor } from "@testing-library/react";
-import { afterAll, afterEach, beforeEach, onTestFailed, expect, it } from "vitest";
+import { afterAll, afterEach, beforeEach, onTestFailed, expect, it, vi } from "vitest";
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { themeBaselineCatalogue } from "../e2e/fixtures/theme-baseline/catalogue";
@@ -66,6 +66,9 @@ import { NSETextView } from "../../src/NSE/TextEditing/NSETextView";
 import { TextEditingSession } from "../../src/NSE/TextEditing/TextEditingSession";
 import { IconWell } from "../../src/NSE/Components/IconWell";
 import { LoadingSpinner } from "../../src/NSE/Components/LoadingSpinner";
+import { NSEProgressIndicator } from "../../src/NSE/Progress/NSEProgressIndicator";
+import { Spinner } from "../../src/NSE/Progress/spinnerSprite";
+import { AnimationEnvironmentProvider } from "../../src/NSE/Animation/NSEAnimationEnvironment";
 import { AboutDialog, NSEConfirmDialog } from "../../src/NSE/Components/NSESystemDialogs";
 import { ContainerPane } from "../../src/NSE/Containers/NSEContainers";
 import { synCloudOSLogoUrl } from "../../src/SynCloudOS/Resources/frameworkAssets";
@@ -302,6 +305,19 @@ it("renders the toolbar row and rail of a Metal titlebar", () => {
   expect(header?.querySelector('[data-nse-part="cell"][data-nse-style="titlebar"][data-nse-selected]')).not.toBeNull();
   collect();
 });
+it.each(["menu", "popover"] as const)("renders the %s overlay phase hooks", async kind => {
+  const fixture = (open: boolean) => <Host><NSEPopup id="theme-contract-overlay-phase" overlayKind={kind} open={open} exitDuration={1000} /></Host>;
+  const view = render(fixture(true));
+  const surface = await waitFor(() => {
+    const element = document.getElementById("theme-contract-overlay-phase");
+    expect(element?.getAttribute("data-nse-overlay-state")).toBe("open");
+    return element!;
+  });
+  collect();
+  view.rerender(fixture(false));
+  expect(surface.getAttribute("data-nse-overlay-state")).toBe("closing");
+  collect();
+});
 it("renders the large content border on embedded application chrome", () => {
   const view = render(
     <Host>
@@ -350,7 +366,7 @@ it("renders the floating Cumulus titlebar and its custom frame", () => {
           titleId={record.id + "-title"}
         />}
       >
-        <p>Documents</p>
+        <article data-nse-part="document"><p>Documents</p></article>
       </WindowView>
     </Host>,
   );
@@ -359,6 +375,7 @@ it("renders the floating Cumulus titlebar and its custom frame", () => {
   expect(titlebar?.getAttribute("data-nse-transparent")).toBe("true");
   expect(titlebar?.getAttribute("data-nse-type")).toBe("custom");
   expect(titlebar?.querySelector('[data-nse-part="floating-titlebar"]')).not.toBeNull();
+  expect(view.container.querySelector('[data-nse-control="window"] [data-nse-part="document"]')).not.toBeNull();
   collect();
 });
 it.each([true, false])("renders both dividers of a three-pane split view (vertical=%s)", (isVertical) => {
@@ -604,6 +621,36 @@ it("renders selected icon, light spinner, pane subtitle and keyboard toolbar", a
   act(() => field.focus());
   await waitFor(() => expect(view.getByRole("toolbar").getAttribute("data-nse-presentation")).toBe("keyboard"));
   collect();
+});
+
+it("renders both motion and visibility states of progress indicators", () => {
+  let notify: (isIntersecting: boolean) => void = () => { throw new Error("The spinner did not observe its visibility."); };
+  vi.stubGlobal("IntersectionObserver", class {
+    constructor(callback: IntersectionObserverCallback) {
+      notify = isIntersecting => callback([{ isIntersecting } as IntersectionObserverEntry], this as unknown as IntersectionObserver);
+    }
+    observe() {}
+    disconnect() {}
+  });
+  try {
+    const view = render(<>
+      <AnimationEnvironmentProvider reducedMotion={true}><NSEProgressIndicator aria-label="Static" /></AnimationEnvironmentProvider>
+      <AnimationEnvironmentProvider reducedMotion={false}><NSEProgressIndicator aria-label="Animated" /></AnimationEnvironmentProvider>
+      <Spinner tone="dark" />
+    </>);
+    expect(view.getByRole("progressbar", { name: "Static" }).getAttribute("data-nse-motion")).toBe("static");
+    expect(view.getByRole("progressbar", { name: "Animated" }).getAttribute("data-nse-motion")).toBe("animated");
+    const spinner = view.getByRole("status");
+    notify(false);
+    expect(spinner.classList.contains("nse:suspended=true")).toBe(true);
+    collect();
+    notify(true);
+    expect(spinner.classList.contains("nse:suspended=false")).toBe(true);
+    collect();
+  } finally {
+    cleanup();
+    vi.unstubAllGlobals();
+  }
 });
 
 it("renders the About and confirmation artwork", async () => {

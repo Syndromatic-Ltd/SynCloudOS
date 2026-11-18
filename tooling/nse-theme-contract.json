@@ -130,6 +130,7 @@
         ],
         "role": [
           "disclosure",
+          "legend",
           "note"
         ],
         "shadow": [
@@ -824,6 +825,10 @@
         "menu-chosen": [
           ""
         ],
+        "overlay-state": [
+          "closing",
+          "open"
+        ],
         "placement": [
           "block-end-inline-start",
           "bottom-start",
@@ -1199,6 +1204,10 @@
         "chrome": [
           "standard"
         ],
+        "overlay-state": [
+          "closing",
+          "open"
+        ],
         "placement": [
           "block-end-inline-start",
           "bottom-start"
@@ -1252,12 +1261,20 @@
           "false",
           "true"
         ],
+        "motion": [
+          "animated",
+          "static"
+        ],
         "role": [
           "status"
         ],
         "style": [
           "bar",
           "spinning"
+        ],
+        "suspended": [
+          "false",
+          "true"
         ]
       }
     },
@@ -1341,6 +1358,9 @@
       "variants": {
         "chrome": [
           "standard"
+        ],
+        "overlay-state": [
+          "open"
         ],
         "placement": [
           "block-end-inline-start"
@@ -1502,6 +1522,9 @@
       "variants": {
         "chrome": [
           "standard"
+        ],
+        "overlay-state": [
+          "open"
         ],
         "placement": [
           "block-end-inline-start"
@@ -1964,6 +1987,9 @@
         "chrome": [
           "standard"
         ],
+        "overlay-state": [
+          "open"
+        ],
         "placement": [
           "block-end-inline-start"
         ],
@@ -2028,6 +2054,9 @@
       "variants": {
         "chrome": [
           "standard"
+        ],
+        "overlay-state": [
+          "open"
         ],
         "placement": [
           "bottom-start"
@@ -2145,6 +2174,7 @@
         "content-border",
         "content-view",
         "decoration",
+        "document",
         "fill",
         "floating-titlebar",
         "handle",
