@@ -73,5 +73,5 @@ describe("NSE SystemUI ownership", () => {
 
     expect(findings).toEqual([]);
     expect(validateGlobalKeyboardListeners({ root })).toEqual([]);
-  }, 15_000);
+  });
 });

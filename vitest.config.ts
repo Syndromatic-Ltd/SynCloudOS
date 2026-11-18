@@ -47,6 +47,10 @@ export const heavyTests = [
   "tests/runtime/**/*-guard.test.ts",
   "tests/runtime/**/*-hygiene.test.ts",
   "tests/runtime/**/*public-types.test.ts",
+  "tests/nse/**/*.browser.test.ts",
+  "tests/runtime/**/*-browser.test.ts",
+  "tests/runtime/document-output-print.test.ts",
+  "tests/runtime/fx/dispatch-pool-worker.test.ts",
   "tests/runtime/atmo-theme-bundle.test.ts",
   "tests/runtime/error-catalogue.test.ts",
   "tests/runtime/heritage-inspector-source.test.ts",
@@ -88,12 +92,14 @@ export const unitWorkers = Math.max(2, Math.floor(availableParallelism() * 0.75)
 
 export function syncloudosTestConfig(suite: "unit" | "packaging") {
   if (suite === "packaging") return defineConfig({ ...shared, test: { ...sharedTest, include: packagingTests, maxWorkers: 4 } });
+  // Projects extend the root, so its plugins and aliases load once. Unit tests get 15s because other agents often share the machine.
   return defineConfig({
     ...shared,
     test: {
+      ...sharedTest,
       projects: [
-        { ...shared, test: { ...sharedTest, name: "heavy", include: heavyTests, exclude: [...configDefaults.exclude, ...packagingTests], maxWorkers: heavyWorkers, testTimeout: 30_000, sequence: { groupOrder: 0 } } },
-        { ...shared, test: { ...sharedTest, name: "unit", include: unitTests, exclude: [...configDefaults.exclude, ...packagingTests, ...heavyTests], maxWorkers: unitWorkers, sequence: { groupOrder: 1 } } },
+        { extends: true, test: { name: "heavy", include: heavyTests, exclude: [...configDefaults.exclude, ...packagingTests], maxWorkers: heavyWorkers, testTimeout: 30_000, sequence: { groupOrder: 0 } } },
+        { extends: true, test: { name: "unit", include: unitTests, exclude: [...configDefaults.exclude, ...packagingTests, ...heavyTests], maxWorkers: unitWorkers, testTimeout: 15_000, sequence: { groupOrder: 1 } } },
       ],
     },
   });

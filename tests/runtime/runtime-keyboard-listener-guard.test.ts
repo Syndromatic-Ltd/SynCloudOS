@@ -50,5 +50,5 @@ describe("global keyboard listener boundary", () => {
   it("rejects every raw global keyboard listener in source", () => {
     const errors = validateGlobalKeyboardListeners({ root: process.cwd() });
     expect(errors).toEqual([]);
-  }, 15_000);
+  });
 });
