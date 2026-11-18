@@ -38,7 +38,7 @@ jobs:
       - run: npm run fx:installed
       - name: Audit a generated consumer with scoped FX operations
         run: |
-          node scripts/synware/create-synware.mjs .artifacts/capability-consumer/src/SynWare/ReleaseCheck.app com.example.releasecheck --fx media,video,midi,location,lumina
+          node scripts/synware/create-synware.mjs .artifacts/capability-consumer/src/SynWare/ReleaseCheck.app --fx media,video,midi,location,lumina
           npm run synware:capabilities -- .artifacts/capability-consumer
   browsers:
     runs-on: ubuntu-latest
