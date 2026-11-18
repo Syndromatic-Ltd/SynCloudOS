@@ -860,8 +860,6 @@
       "include": [
         "src/NSE/Appearance/**",
         "scripts/cappuccino/appearance/**",
-        "src/NSE/Themes/**",
-        "src/NSE/Themes/Atmo/**",
         "src/Themes/**",
         "src/Appearance/**"
       ],

@@ -302,6 +302,7 @@ describe("architecture dependency boundaries", () => {
     for (const fixture of fixtures) {
       expect(errors.some((error) => error.startsWith(`tests/fixtures/architecture-boundaries/${fixture}:`)), fixture).toBe(true);
     }
+    expect(errors.every((error) => error.includes("raw-global-keyboard-listener"))).toBe(true);
     expect(validateGlobalKeyboardListeners({ root: process.cwd(), files: ["tests/fixtures/architecture-boundaries/react-keyboard-allowed.tsx.fixture"] })).toEqual([]);
   });
   it("detects aliased, commented, exported, dynamic, type, and require bypasses", () => {
