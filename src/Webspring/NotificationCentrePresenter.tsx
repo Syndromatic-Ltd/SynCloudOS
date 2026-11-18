@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { SystemSurfaceAppearance } from "../NSE/Appearance/NSEAppearanceProvider";
+import { SystemSurfaceAppearance } from "../NSE/hostComposition";
 import { useNSEAppearance } from "../NSE/Appearance";
 import { nseStateHooks } from "../NSE/hostComposition";
 import { useNSEThemeInteraction } from "../NSE/hostComposition";

@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { SystemSurfaceAppearance } from "../NSE/Appearance/NSEAppearanceProvider";
+import { SystemSurfaceAppearance } from "../NSE/hostComposition";
 import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
 import { Presence } from "../NSE/Animation";
 import { AlertBackdrop } from "../NSE/NSE";

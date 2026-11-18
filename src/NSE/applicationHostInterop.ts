@@ -49,3 +49,5 @@ export { MenuRuntimeProvider } from "./Menus/menuRuntimeContext";
 export { ControllerSheetSurface, WindowAlertContent, OpenPanelSheetSurface } from "./Windows/windowSheetSurfaces";
 
 export { nativePresentations } from "./Application/nativePresentation";
+export { SystemSurfaceAppearance, ViewAppearanceBoundary, useInPlaceAppearanceProjection, useRelocatedAppearance } from "./Appearance/NSEAppearanceProvider";
+export type { NSEAppearance } from "./Appearance/NSEAppearance";

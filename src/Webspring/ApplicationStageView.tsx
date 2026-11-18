@@ -38,7 +38,7 @@ import { ApplicationNavigationBackButton } from "./ApplicationNavigationBackButt
 import { activateResponderHierarchy, clearOwnedResponderAnchor, QuickSwitchTriggerProvider, ResponderScope, useHostSiteBranding, useResolvedMode, useRuntimeNSEControlPort, useRuntimeNSEFocusPort, useRuntimeNSEOverlayPort, useRuntimeSelector, useKernelSynCloudOS } from "../SynCloudOSReact";
 import type { SynCloudOSAppInfo } from "../SynCloudOS/SynCloudOS";
 import { AppViewChrome, type AppViewPresentation } from "./AppViewChrome";
-import { ViewAppearanceBoundary } from "../NSE/Appearance/NSEAppearanceProvider";
+import { ViewAppearanceBoundary } from "../NSE/hostComposition";
 import { AppViewContent } from "./AppViewContent";
 import { WindowTitlebarView } from "../NSE/Windows/WindowTitlebarView";
 import { TitlebarGlyphButton } from "../NSE/Windows/TitlebarGlyphButton";

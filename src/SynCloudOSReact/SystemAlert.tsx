@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { SystemSurfaceAppearance } from "../NSE/Appearance/NSEAppearanceProvider";
+import { SystemSurfaceAppearance } from "../NSE/hostComposition";
 import { useId, useRef, useState, type ReactNode } from "react";
 import { Presence, useNSEAnimationEnvironment, useNSEPresentation } from "../NSE/Animation";
 import { resolveSystemAlertDetailsMotion } from "./SystemAlert.transitions";

@@ -20,8 +20,8 @@
 
 import { useLayoutEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { projectNSEAppearance, useNSEAppearanceProjection } from "../../NSE/Appearance";
-import { RelocatedAppearance } from "../../NSE/Appearance/NSEAppearanceProvider";
-import { popoverAppearance, type PopoverAppearanceMetadata } from "../../NSE/Overlays/popoverAppearanceMetadata";
+import { RelocatedAppearance } from "../../NSE/hostComposition";
+import { popoverAppearance, type PopoverAppearanceMetadata } from "../../NSE/hostComposition";
 import { useNSEAnimationEnvironment } from "../../NSE/Animation";
 import { useNSEPresenceExiting } from "../../NSE/Animation";
 import { PopoverFrame } from "../../NSE/hostComposition";

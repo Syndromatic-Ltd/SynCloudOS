@@ -64,6 +64,12 @@ export { useMenuLifetime } from "./Menus/useMenuLifetime";
 export { nseStateHooks } from "./Theme/contract/hooks";
 export { useNSEThemeInteraction } from "./Theme/contract/useThemeInteraction";
 export type { NSETheme } from "./Theme/NSETheme";
+// System surfaces and relocated windows carry their appearance through these host-only parts.
+export { RelocatedAppearance, SystemSurfaceAppearance, ViewAppearanceBoundary, useInPlaceAppearanceProjection, useNSEAppearance, useRelocatedAppearance } from "./Appearance/NSEAppearanceProvider";
+export { popoverAppearance, type PopoverAppearanceMetadata } from "./Overlays/popoverAppearanceMetadata";
+export { isSystemWindowSurface } from "./Overlays/systemWindowSurface";
+export { setNSEHook } from "./Theme/contract/hookMirrorDOM";
+export type { NSEAppTheme } from "./Theme/NSEAppTheme";
 export type { ViewDrawingEnvironment } from "./Views/NSEViewDrawingEnvironment";
 
 export { WindowTitlebarControls } from "./Windows/WindowTitlebarControls";

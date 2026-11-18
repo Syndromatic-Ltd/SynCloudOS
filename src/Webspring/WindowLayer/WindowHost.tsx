@@ -18,8 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { SystemSurfaceAppearance } from "../../NSE/Appearance/NSEAppearanceProvider";
-import { isSystemWindowSurface } from "../../NSE/Overlays/systemWindowSurface";
+import { SystemSurfaceAppearance } from "../../NSE/hostComposition";
+import { isSystemWindowSurface } from "../../NSE/hostComposition";
 import { WindowPresentationSlot, useWindowPresentationContent } from "../WindowPresentationContent";
 import { isNSEDOMElement, WindowLayoutContext, WindowLayoutModel } from "../../NSE/hostComposition";
 

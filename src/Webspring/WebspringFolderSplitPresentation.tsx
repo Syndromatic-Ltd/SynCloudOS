@@ -21,7 +21,7 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
 import { LayoutView } from "../NSE/Animation";
 import { FocusScope } from "../NSE/NSE";
-import { setNSEHook } from "../NSE/Theme/contract/hookMirrorDOM";
+import { setNSEHook } from "../NSE/hostComposition";
 import { webspringIconSprings } from "./Webspring.transitions";
 import type { WebspringFolderPresentationComponent, WebspringFolderPresentationProps } from "./webspringTypes";
 import { folderSplitPhaseMachine, type FolderSplitPhase } from "./folderSplitPhaseMachine";

@@ -1,5 +1,5 @@
 /* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
-import { SystemSurfaceAppearance } from "../../NSE/Appearance/NSEAppearanceProvider";
+import { SystemSurfaceAppearance } from "../../NSE/applicationHostInterop";
 import React, { createContext, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type PropsWithChildren, type ReactNode } from "react";
 import { SynCloudOSRuntimeContext } from "../../SynCloudOSReact";
 import { useNSEAnimationEnvironment } from "../../NSE/Animation";

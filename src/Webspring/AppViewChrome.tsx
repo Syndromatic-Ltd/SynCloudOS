@@ -20,7 +20,7 @@
 
 import { WindowLayoutContext, WindowLayoutModel, useNSEContentLayoutProperties } from "../NSE/hostComposition";
 import { useNSEDeferredDisposal } from "../NSE/hostComposition";
-import { useInPlaceAppearanceProjection } from "../NSE/Appearance/NSEAppearanceProvider";
+import { useInPlaceAppearanceProjection } from "../NSE/hostComposition";
 
 import { useCallback, useLayoutEffect, useMemo, useEffect, useRef, type CSSProperties, type FocusEventHandler, type ReactNode, type Ref } from "react";
 import { useNSEPresenceExiting, useNSEPresentation } from "../NSE/Animation";

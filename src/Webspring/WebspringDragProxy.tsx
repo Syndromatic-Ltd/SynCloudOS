@@ -20,7 +20,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { useNSEAppearanceProjection } from "../NSE/Appearance/NSEAppearanceProvider";
+import { useNSEAppearanceProjection } from "../NSE/Appearance";
 import { WebspringFolderTile } from "./WebspringFolderTile";
 import type { WebspringApp, WebspringFolderItem } from "./webspringTypes";
 import "./WebspringPresentation.css";

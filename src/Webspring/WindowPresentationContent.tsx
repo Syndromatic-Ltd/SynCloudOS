@@ -29,7 +29,7 @@ import {
   QuickSwitchTriggerProvider, ResponderHierarchyContext,
   useKernelSynCloudOS, useQuickSwitchTrigger, useRuntimeNSEOverlayPort,
 } from "../SynCloudOSReact";
-import { RelocatedAppearance, useRelocatedAppearance } from "../NSE/Appearance/NSEAppearanceProvider";
+import { RelocatedAppearance, useRelocatedAppearance } from "../NSE/hostComposition";
 import { SynWareEntryRenderer } from "./SynWareEntryRenderer";
 import { useWebspringLocale } from "./webspringLocale";
 import { AppPresentationErrorFallback, SynCloudOSWatchdog, type SynCloudOSAppInfo, type WindowController } from "../SynCloudOS/SynCloudOS";

@@ -1,12 +1,12 @@
 /* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
 import { useId, useSyncExternalStore } from "react";
-import { SystemSurfaceAppearance, ViewAppearanceBoundary, useNSEAppearance } from "../NSE/Appearance/NSEAppearanceProvider";
-import { useObserve } from "../NSE/Objects";
+import { SystemSurfaceAppearance, ViewAppearanceBoundary, useNSEAppearance } from "../NSE/hostComposition";
+import { useObserve } from "../NSE/applicationHostInterop";
 import { AlertSurface } from "../NSE/hostComposition";
 import { AlertBackdrop } from "../NSE/hostComposition";
 import { NSEButton } from "../NSE/public/controls";
 import type { SynCloudOSPresentationTraitsService } from "../SynCloudOS/SynCloudOS";
-import { applicationSessionFor } from "../SynCloudOS/AppHosting/applicationSession";
+import { applicationSessionFor } from "../SynCloudOS/AppHosting/runtimeEntry";
 import type { SynCloudOSAlertCenter, SynCloudOSPresentedAlert } from "../SynCloudOS/SystemUI/alertCenter";
 import { FocusScope } from "./FocusScope";
 import { useKernelSynCloudOS } from "./runtimeContext";

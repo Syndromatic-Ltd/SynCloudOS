@@ -63,7 +63,7 @@ import type { SynWareContextValue } from "../AppSDK/appContextTypes";
 import { bindActionResponder, hasActions } from "../AppSDK/actions";
 import { trackLiveApplicationObject } from "./applicationHotReload";
 import { WindowContentBorder, WindowSheetFrame, WindowSheetHostContext, WindowTitlebarAccessories, nseContentBorderSize, WindowTitlebarHostContext, useNSEWindowSheetHost, WindowToolbar, useNSEWindowTitlebarDocument } from "./windowAccessories";
-import { ViewAppearanceBoundary, useInPlaceAppearanceProjection } from "../../NSE/Appearance/NSEAppearanceProvider";
+import { ViewAppearanceBoundary, useInPlaceAppearanceProjection } from "../../NSE/applicationHostInterop";
 import { MountedWindowContext } from "../../NSE/Application/NSEWindowContext";
 import { WindowApplicationMenu } from "./windowApplicationMenu";
 import { applicationSessionFor } from "./applicationSession";
