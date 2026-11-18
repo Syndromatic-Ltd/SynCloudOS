@@ -142,11 +142,20 @@ export function createSdkPackageManifest({ name, exports, files, peerDependencie
   };
 }
 
+const reviewedAtmoTextures = new Set([
+  "login/plate-texture.webp",
+  "materials/linen.webp",
+  "materials/thumb-texture.webp",
+  "workspace/brushed-metal.webp",
+  "workspace/NSETileCotton.jpg",
+].map(file => "themes/Atmo.scostheme/Contents/Resources/" + file));
+
 export function assertReviewedPackageFiles(files) {
   for (const file of files) {
     if (file.includes("\\") || file.split("/").some((part) => part === ".." || part === "." || part === "")) {
       throw new TypeError(`SDK package contains an unsafe file path: ${file}`);
     }
+    if (reviewedAtmoTextures.has(file)) continue;
     if (file.startsWith("types/FrameworkTests/")) throw new TypeError(`SDK package contains a test fixture: ${file}`);
     if (file.endsWith(".js.map")) {
       // Reuse the reviewed JavaScript policy, rather than admitting arbitrary

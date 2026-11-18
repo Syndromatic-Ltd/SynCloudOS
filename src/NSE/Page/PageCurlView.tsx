@@ -132,7 +132,7 @@ export function PageCurlView({ controller }: { readonly controller: NSEPageContr
       inside={face(inside, `${direction}-inside`)}
       back={<>
         <div className="nse-page-controller__reverse">{face(back, `${direction}-back`)}</div>
-        <div className="nse-page__curl-ghost" aria-hidden="true">{face(front, `${direction}-ghost`)}</div>
+        <div className="nse-page__curl-ghost" data-nse-part="face" data-nse-role="page-ghost" aria-hidden="true">{face(front, `${direction}-ghost`)}</div>
       </>}
       dogEar={canTurn}
       dogEarLabel={forward ? "Next page" : "Previous page"}

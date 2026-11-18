@@ -21,6 +21,7 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
 import { LayoutView } from "../NSE/Animation";
 import { FocusScope } from "../NSE/NSE";
+import { setNSEHook } from "../NSE/Theme/contract/hookMirrorDOM";
 import { webspringIconSprings } from "./Webspring.transitions";
 import type { WebspringFolderPresentationComponent, WebspringFolderPresentationProps } from "./webspringTypes";
 import { folderSplitPhaseMachine, type FolderSplitPhase } from "./folderSplitPhaseMachine";
@@ -44,10 +45,10 @@ export interface WebspringFolderSplitOptions {
 }
 
 interface ResolvedSplitOptions {
-  readonly underlay: { readonly image: string | undefined; readonly size: string; readonly colour: string };
+  readonly underlay: NonNullable<WebspringFolderSplitOptions["underlay"]>;
   readonly panelHeight: "content" | number;
   readonly notch: boolean;
-  readonly edgeShadow: number;
+  readonly edgeShadow?: number;
   readonly duration: number;
 }
 
@@ -59,29 +60,19 @@ const SEAM_GAP = 6;
 /** Depth of the light caught along each cut edge, inside the stage. */
 const EDGE_HIGHLIGHT = 1;
 const STAGE_MARGIN = 24;
-/** Marks an icon in a clone as the opened folder's own or as part of the backdrop. */
-const BACKDROP_ATTRIBUTE = "data-webspring-folder-backdrop";
-
-
 function resolveOptions(options: WebspringFolderSplitOptions): ResolvedSplitOptions {
-  const { underlay = {}, panelHeight = "content", notch = true, edgeShadow = 0.55, duration = 0.42 } = options;
+  const { underlay = {}, panelHeight = "content", notch = true, edgeShadow, duration = 0.42 } = options;
   if (panelHeight !== "content" && (typeof panelHeight !== "number" || !Number.isFinite(panelHeight) || panelHeight <= 0)) {
     throw new TypeError("Webspring folder panelHeight must be content or a positive number of pixels.");
   }
-  if (typeof edgeShadow !== "number" || !Number.isFinite(edgeShadow) || edgeShadow < 0 || edgeShadow > 1) {
+  if (edgeShadow !== undefined && (typeof edgeShadow !== "number" || !Number.isFinite(edgeShadow) || edgeShadow < 0 || edgeShadow > 1)) {
     throw new TypeError("Webspring folder edgeShadow must be a number from 0 to 1.");
   }
   if (typeof duration !== "number" || !Number.isFinite(duration) || duration < 0 || duration > 5) {
     throw new TypeError("Webspring folder duration must be a number of seconds from 0 to 5.");
   }
   return Object.freeze({
-    underlay: Object.freeze({
-      // Unset means the framework linen, which the stylesheet supplies so the
-      // package build can relocate it alongside the consumer's bundle.
-      image: underlay.image,
-      size: underlay.size ?? "cover",
-      colour: underlay.colour ?? "#2b3038",
-    }),
+    underlay: Object.freeze({ image: underlay.image, size: underlay.size, colour: underlay.colour }),
     panelHeight,
     notch: Boolean(notch),
     edgeShadow,
@@ -141,7 +132,7 @@ function cloneStage(stage: HTMLElement, folderId: string) {
     }
   }
   for (const icon of clone.querySelectorAll<HTMLElement>("[data-webspring-item-id]")) {
-    icon.setAttribute(BACKDROP_ATTRIBUTE, icon.dataset.webspringItemId === folderId ? "anchor" : "backdrop");
+    setNSEHook(icon, "role", icon.dataset.webspringItemId === folderId ? "anchor" : "backdrop");
   }
   clone.classList.add("webspring-folder-split-clone");
   clone.setAttribute("aria-hidden", "true");
@@ -332,15 +323,15 @@ function FolderSplit({ folder, stage, anchor, reducedMotion, renderApp, onClose,
     ...(options.underlay.image === undefined ? {} : {
       "--webspring-folder-underlay-image": options.underlay.image ? `url("${options.underlay.image}")` : "none",
     }),
-    "--webspring-folder-underlay-size": options.underlay.size,
-    "--webspring-folder-underlay-colour": options.underlay.colour,
+    "--webspring-folder-underlay-size": options.underlay.size === "" ? "auto" : options.underlay.size,
+    "--webspring-folder-underlay-colour": options.underlay.colour === "" ? "transparent" : options.underlay.colour,
   } as CSSProperties;
 
   return <FocusScope options={{ scopeId: `webspring-folder:${scopeId}`, kind: "modal", modal: true, trapFocus: true, restoreFocus: true, asChild: true }}>
     <div
       data-nse-control="folder-presentation" data-nse-part="background" className="webspring-folder-split"
-      data-phase={phase}
-      data-motion={fade ? "fade" : "split"}
+      data-nse-presentation={phase}
+      data-nse-style={fade ? "fade" : "split"}
       style={style}
       onKeyDownCapture={onKeyDown}
     >
@@ -363,7 +354,7 @@ function FolderSplit({ folder, stage, anchor, reducedMotion, renderApp, onClose,
         </div>
       </div>
       <div
-        data-nse-part="background" className="webspring-folder-split-half is-top"
+        data-nse-part="background" data-nse-position="top" className="webspring-folder-split-half is-top"
         style={{
           height: `${seam}px`,
           transform: parted ? `translate3d(0, ${-overflow}px, 0)` : undefined,
@@ -379,7 +370,7 @@ function FolderSplit({ folder, stage, anchor, reducedMotion, renderApp, onClose,
         <div data-nse-part="border" className="webspring-folder-split-edge is-top" style={{ clipPath: topEdgeClip }} />
       </div>
       <div
-        data-nse-part="background" className="webspring-folder-split-half is-bottom"
+        data-nse-part="background" data-nse-position="bottom" className="webspring-folder-split-half is-bottom"
         style={{
           top: `${bottomTop}px`,
           height: `${bottomHeight}px`,

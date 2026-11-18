@@ -82,7 +82,7 @@ for (const scheme of ["light", "dark"] as const) for (let partition = 0; partiti
         })));
         const before = await geometry();
         await page.getByRole("button", { name: "Open folder Tools" }).click();
-        await expect(page.locator('.webspring-folder-split[data-phase="open"]')).toBeVisible();
+        await expect(page.locator('[data-nse-control="folder-presentation"][data-nse-part="background"][data-nse-presentation="open"]')).toBeVisible();
         await testInfo.attach("folder-geometry", { body: JSON.stringify({ dpr: await page.evaluate(() => devicePixelRatio), before, after: await geometry() }, null, 2), contentType: "application/json" });
       }
       if (surface.id === "folder-presentation") await expect(page.locator('[data-nse-control="folder-presentation"]')).toBeVisible();

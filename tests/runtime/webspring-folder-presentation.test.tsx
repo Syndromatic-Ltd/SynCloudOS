@@ -95,7 +95,7 @@ function renderSplit({ reducedMotion = false, onClose = vi.fn(), Split = Present
   return { view, root, onClose };
 }
 
-const opened = (root: HTMLElement) => waitFor(() => expect(root.dataset.phase).toBe("open"));
+const opened = (root: HTMLElement) => waitFor(() => expect(root.dataset.nsePresentation).toBe("open"));
 const cloneOf = (root: HTMLElement, half: "is-top" | "is-bottom") =>
   root.querySelector<HTMLElement>(`.webspring-folder-split-half.${half} .webspring-folder-split-clone`)!;
 
@@ -107,7 +107,7 @@ describe("Webspring folder split presentation", () => {
 
     // The split never sits waiting for anything: it is at rest in the same
     // pass that mounts it, with both halves already filled.
-    expect(root.dataset.phase).toBe("closed");
+    expect(root.dataset.nsePresentation).toBe("closed");
     expect(root.querySelectorAll(".webspring-folder-split-clone")).toHaveLength(3);
     expect(root.dataset.capture).toBeUndefined();
   });
@@ -147,8 +147,8 @@ describe("Webspring folder split presentation", () => {
 
     for (const half of ["is-top", "is-bottom"] as const) {
       const clone = cloneOf(root, half);
-      expect(clone.querySelector('[data-webspring-item-id="folder.tools"]')!.getAttribute("data-webspring-folder-backdrop")).toBe("anchor");
-      expect(clone.querySelector('[data-webspring-item-id="app.alpha"]')!.getAttribute("data-webspring-folder-backdrop")).toBe("backdrop");
+      expect(clone.querySelector('[data-webspring-item-id="folder.tools"]')!.getAttribute("data-nse-role")).toBe("anchor");
+      expect(clone.querySelector('[data-webspring-item-id="app.alpha"]')!.getAttribute("data-nse-role")).toBe("backdrop");
     }
   });
 
@@ -231,7 +231,7 @@ describe("Webspring folder split presentation", () => {
     const { root } = renderSplit({ reducedMotion: true });
     await opened(root);
 
-    expect(root.dataset.motion).toBe("fade");
+    expect(root.dataset.nseStyle).toBe("fade");
     expect(root.querySelectorAll(".webspring-folder-split-clone")).toHaveLength(3);
   });
 
@@ -251,7 +251,7 @@ describe("Webspring folder split presentation", () => {
     const [top, bottom] = root.querySelectorAll<HTMLElement>(".webspring-folder-split-half");
     expect(top.style.height).toBe("186px");
     expect(bottom.style.top).toBe("172px");
-    expect(root.dataset.phase).toBe("open");
+    expect(root.dataset.nsePresentation).toBe("open");
   });
 
   it("closes on Escape, telling the view once the halves have rejoined", async () => {
@@ -260,7 +260,7 @@ describe("Webspring folder split presentation", () => {
 
     vi.useFakeTimers();
     fireEvent.keyDown(screen.getByRole("dialog", { name: "Tools" }), { key: "Escape" });
-    expect(root.dataset.phase).toBe("closing");
+    expect(root.dataset.nsePresentation).toBe("closing");
     const bottom = root.querySelector<HTMLElement>(".webspring-folder-split-half.is-bottom")!;
     expect(bottom.style.top).toBe("172px");
     expect(bottom.style.transform).toBe("");

@@ -158,7 +158,7 @@ function BoardIcon({ app, opening, ...entry }: BoardEntryProps & {
   return <LayoutView className="webspring-board-slot" layoutTransition={dragging ? null : reorderMotion}><button
     type="button"
     {...drawing.events} {...nseControlHooks({ control: "app-icon", enabled: !disabled, highlighted: drawing.highlighted, hovered: drawing.hovered, focused: drawing.focused, selected: editing && dragging, variants: { type: "application" } })} data-nse-part="content"
-    className={`webspring-board-icon ${editing ? "is-editing" : ""} ${dragging ? "is-dragging" : ""} ${disabled ? "is-disabled" : ""}`}
+    className="webspring-board-icon" data-nse-style={editing ? "editing" : undefined} data-nse-state={dragging ? "dragging" : undefined}
     {...interaction.dataProps}
     aria-label={editing ? `Move ${app.displayName}` : `Open ${app.displayName}`}
     aria-pressed={editing ? dragging : undefined}
@@ -176,8 +176,8 @@ function BoardIcon({ app, opening, ...entry }: BoardEntryProps & {
     onClick={() => { if (!disabled && !editing) void actions.openApp(app.bundleIdentifier, app.route); }}
   >
     <BoardIconArtwork index={index} total={model.items.length} state={boardIconState(model, exit)} exit={exit}>
-      <span data-nse-part="bezel" className="webspring-board-icon-well" data-loading={loading ? "true" : undefined} data-drop-target={normalizeBundleIdentifier(model.folders.dropTargetId) === normalizeBundleIdentifier(app.bundleIdentifier) ? "true" : undefined}>
-        {app.iconUrl ? <img src={app.iconUrl} alt="" aria-hidden="true" draggable={false} /> : <span aria-hidden="true">{app.displayName.slice(0, 1)}</span>}
+      <span data-nse-part="bezel" className="webspring-board-icon-well" data-nse-state={loading ? "loading" : undefined} data-nse-highlighted={normalizeBundleIdentifier(model.folders.dropTargetId) === normalizeBundleIdentifier(app.bundleIdentifier) ? "" : undefined}>
+        {app.iconUrl ? <img data-nse-part="image" src={app.iconUrl} alt="" aria-hidden="true" draggable={false} /> : <span aria-hidden="true">{app.displayName.slice(0, 1)}</span>}
         {loading ? <LoadingSpinner label={`Loading ${app.displayName}`} variant="dark" /> : null}
         <Badge count={app.badgeCount} label={app.badgeLabel} />
       </span>
@@ -199,7 +199,7 @@ function BoardFolderIcon({ folder, onOpen, ...entry }: BoardEntryProps & {
   return <LayoutView className="webspring-board-slot" layoutTransition={dragging ? null : reorderMotion}><button
     type="button"
     {...drawing.events} {...nseControlHooks({ control: "app-icon", highlighted: drawing.highlighted, hovered: drawing.hovered, focused: drawing.focused, selected: open || dragging, variants: { type: "folder" } })} data-nse-part="content"
-    className={`webspring-board-icon is-folder ${editing ? "is-editing" : ""} ${dragging ? "is-dragging" : ""}`}
+    className="webspring-board-icon is-folder" data-nse-style={editing ? "editing" : undefined} data-nse-state={dragging ? "dragging" : undefined}
     {...interaction.dataProps}
     aria-label={editing ? `Move folder ${folder.title}` : `Open folder ${folder.title}`}
     aria-pressed={editing ? dragging : undefined}
@@ -591,9 +591,8 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
       }}
       data-nse-control="board" data-nse-part="background" className="webspring-board"
       style={launcherStyle}
-      data-launch-phase={model.launchPhase}
-      data-entrance-phase={model.entrancePhase}
-      data-layout-editing={model.layout.editing ? "true" : "false"}
+      data-nse-presentation={model.launchPhase}
+      data-nse-state={model.entrancePhase}
       data-reduced-motion={model.presentationTraits.reducedMotion ? "true" : "false"}
       onPointerMoveCapture={pointerMove}
       onPointerUpCapture={(event) => pointerEnd(event, true)}
@@ -604,11 +603,11 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
       }}
     >
       <section
-        data-nse-part="content" className="webspring-board-launcher"
+        data-nse-part="content" data-nse-role="launcher" className="webspring-board-launcher"
         aria-label="Webspring"
         onPointerDownCapture={pointerDown}
       >
-        <div data-nse-part="background" className="webspring-board-material" aria-hidden="true" onTransitionEnd={(event: TransitionEvent<HTMLDivElement>) => {
+        <div data-nse-part="background" data-nse-role="launcher" className="webspring-board-material" aria-hidden="true" onTransitionEnd={(event: TransitionEvent<HTMLDivElement>) => {
           if (model.launchPhase === "returning" && event.target === event.currentTarget && event.propertyName === "transform") actions.completeReturnTrack("material");
         }} />
         <header data-nse-part="header" className="webspring-board-brand">
@@ -641,8 +640,8 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
           {board.pages[activePage]?.map((item, index) => renderEntry(item, activePage * board.pageSize + index))}
         </div>
       </section>
-      {board.pages.length > 1 ? <nav data-nse-part="accessory" className="webspring-board-page-controls" aria-label="Application pages">
-        {board.pages.map((_items, index) => <button key={index} type="button" aria-label={`Show application page ${index + 1}`} aria-current={index === activePage ? "page" : undefined} onClick={() => setPage(index)} onPointerEnter={() => { if (model.layout.draggingItemId) setPage(index); }} />)}
+      {board.pages.length > 1 ? <nav data-nse-part="accessory" data-nse-role="page-controls" className="webspring-board-page-controls" aria-label="Application pages">
+        {board.pages.map((_items, index) => <button key={index} type="button" data-nse-part="button" data-nse-selected={index === activePage ? "" : undefined} aria-label={`Show application page ${index + 1}`} aria-current={index === activePage ? "page" : undefined} onClick={() => setPage(index)} onPointerEnter={() => { if (model.layout.draggingItemId) setPage(index); }} />)}
       </nav> : null}
       </section>
       {model.widgets.length > 0 ? <WebspringWidgetShelf entries={model.widgets} surface={model.background.shelf} /> : null}

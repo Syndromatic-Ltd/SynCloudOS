@@ -47,7 +47,7 @@ function LaunchDim({ motion }: { motion: WebspringLaunchDimMotion }) {
   useNSEPresentation(dimRef, motion);
   // As with a Core Animation layer, the element holds its model value and the
   // presentation animates over it; nothing is left applied once it settles.
-  return <div ref={dimRef} className="webspring-launch-dim" aria-hidden="true" style={{ opacity: motion.opacity }} />;
+  return <div ref={dimRef} data-nse-part="backdrop" data-nse-role="launch" className="webspring-launch-dim" aria-hidden="true" style={{ opacity: motion.opacity }} />;
 }
 
 /** Dims the launcher while an application launches, fading out as it leaves. */

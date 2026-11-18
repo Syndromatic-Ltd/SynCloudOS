@@ -30,6 +30,14 @@ it("admits only reviewed FX family artifacts", () => {
   }
 });
 
+it("packages the reviewed Atmo textures inside the theme bundle", () => {
+  const root = "themes/Atmo.scostheme/Contents/Resources/";
+  const textures = ["login/plate-texture.webp", "materials/linen.webp", "materials/thumb-texture.webp",
+    "workspace/brushed-metal.webp", "workspace/NSETileCotton.jpg"];
+  expect(() => assertReviewedPackageFiles(textures.map(file => root + file))).not.toThrow();
+  expect(() => assertReviewedPackageFiles([root + "workspace/unreviewed.webp"])).toThrow(/unreviewed/u);
+});
+
 it("admits separate source maps only beside reviewed JavaScript artifacts", () => {
   expect(() => assertReviewedPackageFiles([
     "sdk.js.map", "fx/graphics.js.map", "fx/video/webm.js.map",

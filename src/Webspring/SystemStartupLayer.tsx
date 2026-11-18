@@ -27,28 +27,31 @@ import { useSystemStartupMotion, type SystemStartupMotionPreset } from "./System
 
 /** One boot-screen part: it rests at its model style and its AnimationFX
  * presentations play over it, entering on mount and exiting with the layer. */
-function StartupPart({ className, motion, style, children }: {
+function StartupPart({ className, part, role, motion, style, children }: {
   className: string;
+  part: "background" | "decoration" | "loading";
+  role: "startup" | "startup-material" | "startup-spotlight" | "startup-spinner";
   motion: SystemStartupMotionPreset;
   style?: CSSProperties;
   children?: ReactNode;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   useNSEPresentation(ref, motion);
-  return <div ref={ref} className={className} style={style}>{children}</div>;
+  return <div ref={ref} data-nse-control={role === "startup" ? "view" : undefined}
+    data-nse-part={part} data-nse-role={role} className={className} style={style}>{children}</div>;
 }
 
-// The material's stylesheet opacity is 0 until it is revealed.
+// The reveal presentation animates to the material's visible model state.
 const revealedMaterial: CSSProperties = { opacity: 1 };
 
 function StartupScreen({ showMaterial }: { showMaterial: boolean }) {
   const { t } = useWebspringLocale();
   const startupMotion = useSystemStartupMotion();
   return (
-    <StartupPart className="syncloudos-startup-layer" motion={startupMotion.bootLayer}>
-      {showMaterial ? <StartupPart className="syncloudos-startup-material" motion={startupMotion.bootMaterialReveal} style={revealedMaterial} /> : null}
-      {showMaterial ? <StartupPart className="syncloudos-startup-spotlight" motion={startupMotion.bootOverlayReveal} /> : null}
-      <StartupPart className="syncloudos-startup-spinner" motion={startupMotion.bootSpinner}>
+    <StartupPart className="syncloudos-startup-layer" part="background" role="startup" motion={startupMotion.bootLayer}>
+      {showMaterial ? <StartupPart className="syncloudos-startup-material" part="background" role="startup-material" motion={startupMotion.bootMaterialReveal} style={revealedMaterial} /> : null}
+      {showMaterial ? <StartupPart className="syncloudos-startup-spotlight" part="decoration" role="startup-spotlight" motion={startupMotion.bootOverlayReveal} /> : null}
+      <StartupPart className="syncloudos-startup-spinner" part="loading" role="startup-spinner" motion={startupMotion.bootSpinner}>
         <LoadingSpinner label={t("startup.starting", "Starting SynCloudOS")} variant="dark" />
       </StartupPart>
     </StartupPart>

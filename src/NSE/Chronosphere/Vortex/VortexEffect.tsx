@@ -184,5 +184,26 @@ export function VortexEffect({ active = true, eager = false, ariaLabel, decorati
     }
   }, [images, layers, frames, recipe, maxDpr, staticMotion, reducedMotion, off]);
 
-  return <div ref={wrapper} className={["vortex-effect", className].filter(Boolean).join(" ")} style={style} data-effect="vortex" data-preset={recipe.id} data-active={active ? "true" : "false"} data-renderer={off ? "off" : status} data-renderer-error={import.meta.env.DEV ? failure : undefined} aria-hidden={decorative ? true : undefined} role={decorative ? undefined : "img"} aria-label={decorative ? undefined : ariaLabel}>{status === "unavailable" ? <div className="vortex-effect__plate" style={{ backgroundImage: `url("${vortexAssets.starNebula}")` }} /> : null}<canvas ref={target} className="vortex-effect__surface" /></div>;
+  return (
+    <div
+      ref={wrapper}
+      className={["vortex-effect", className].filter(Boolean).join(" ")}
+      data-nse-control="visual-effect-view" data-nse-part="background" data-nse-style="vortex"
+      style={style}
+      data-effect="vortex"
+      data-preset={recipe.id}
+      data-active={active ? "true" : "false"}
+      data-renderer={off ? "off" : status}
+      data-renderer-error={import.meta.env.DEV ? failure : undefined}
+      aria-hidden={decorative ? true : undefined}
+      role={decorative ? undefined : "img"}
+      aria-label={decorative ? undefined : ariaLabel}
+    >
+      {status === "unavailable" ? (
+        <div className="vortex-effect__plate" data-nse-part="image" data-nse-role="vortex"
+          style={{ backgroundImage: `url("${vortexAssets.starNebula}")` }} />
+      ) : null}
+      <canvas ref={target} className="vortex-effect__surface" data-nse-part="surface" data-nse-role="vortex" />
+    </div>
+  );
 }

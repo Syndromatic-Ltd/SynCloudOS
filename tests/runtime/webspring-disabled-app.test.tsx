@@ -59,7 +59,7 @@ it.each([
   const button = screen.getByRole("button", { name: "Open Preparing" }) as HTMLButtonElement;
   expect(button.textContent).toContain("Preparing");
   expect(button.disabled).toBe(true);
-  expect(button.classList.contains("is-disabled")).toBe(true);
+  expect(button.getAttribute("data-nse-enabled")).toBe("false");
   expect(button.getAttribute("aria-description")).toBe(reason);
   expect(button.title).toBe(reason);
   fireEvent.click(button);

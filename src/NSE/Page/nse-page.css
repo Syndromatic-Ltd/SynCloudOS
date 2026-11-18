@@ -1,5 +1,5 @@
 
-@layer nse.atmo {
+@layer nse.structure {
 @scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
@@ -29,7 +29,6 @@
   contain: layout paint style;
   min-width: 0;
   min-height: 1px;
-  color: var(--nse-page-colour);
   border-radius: var(--nse-page-radius);
   perspective: var(--nse-page-perspective);
   transform-style: preserve-3d;
@@ -70,9 +69,7 @@
   inset: 0;
   z-index: 0;
   overflow: hidden;
-  opacity: var(--nse-page-inside-opacity);
   pointer-events: none;
-  background: var(--nse-page-inside-background);
   transition:
     opacity var(--nse-page-duration) var(--nse-page-ease),
     filter var(--nse-page-duration) var(--nse-page-ease);
@@ -87,10 +84,7 @@
 :where(:scope):is(.nse-page[data-book-surface="true"]) .nse-page__cast-shadow {
   inset: 0 auto 0 calc(var(--nse-page-book-shadow-x) - 18px);
   width: 36px;
-  opacity: var(--nse-page-book-shadow-opacity);
   transform: none;
-  filter: blur(8px);
-  background: linear-gradient(90deg, transparent, rgba(48, 35, 19, .65), transparent);
 }
 
 .nse-page__cast-shadow,
@@ -99,12 +93,7 @@
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  opacity: var(--nse-page-shadow-opacity);
   transform: var(--nse-page-shadow-transform);
-  filter: blur(18px);
-  background:
-    radial-gradient(ellipse at 60% 55%, var(--nse-page-shadow-colour), transparent 68%),
-    linear-gradient(90deg, transparent, var(--nse-page-shadow-colour), transparent);
   transition:
     opacity var(--nse-page-duration) var(--nse-page-ease),
     transform var(--nse-page-duration) var(--nse-page-ease);
@@ -147,12 +136,7 @@
   min-width: 0;
   min-height: 0;
   overflow: hidden;
-  color: inherit;
   border-radius: var(--nse-page-radius);
-  background: var(--nse-page-background);
-  box-shadow:
-    inset 0 0 0 var(--nse-page-thickness) var(--nse-page-edge-colour),
-    inset 0 1px 0 var(--nse-page-highlight-colour);
   clip-path: var(--nse-page-front-clip-path);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
@@ -167,7 +151,6 @@
   display: none;
   pointer-events: none;
   border-radius: var(--nse-page-radius);
-  background: var(--nse-page-backstop-background, var(--nse-page-background));
   clip-path: var(--nse-page-backstop-clip-path);
   contain: paint;
   backface-visibility: hidden;
@@ -178,16 +161,13 @@
 .nse-page__face--front,
 :where(:scope):is(.nse-page__face--front) {
   z-index: 2;
-  opacity: var(--nse-page-front-opacity);
 }
 
 .nse-page__face--back,
 :where(:scope):is(.nse-page__face--back) {
   z-index: 1;
-  opacity: var(--nse-page-back-opacity);
   transform: var(--nse-page-face-back-transform);
   pointer-events: none;
-  background: var(--nse-page-back-background);
 }
 
 /* Snapshot-backed flexible book leaf. The semantic sheet stays mounted once
@@ -217,7 +197,6 @@
   inset-block: 0;
   left: 0;
   overflow: hidden;
-  background-repeat: no-repeat;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
@@ -226,11 +205,6 @@
 :where(:scope):is(.nse-page__book-strip[data-hinge="right"]) .nse-page__book-strip-face {
   left: auto;
   right: 0;
-}
-
-.nse-page__book-strip-face--back,
-:where(:scope):is(.nse-page__book-strip-face--back) {
-  background-color: var(--nse-page-back-background);
 }
 
 .nse-page[data-book-surface="true"] .nse-page__sheet,
@@ -243,20 +217,17 @@
 .nse-page[data-book-turn="true"] .nse-page__cast-shadow,
 :where(:scope):is(.nse-page[data-book-turn="true"]) .nse-page__cast-shadow {
   width: 22%;
-  filter: blur(10px);
   transform: none;
 }
 
 .nse-page[data-book-turn="true"][data-edge="right"] .nse-page__cast-shadow,
 :where(:scope):is(.nse-page[data-book-turn="true"][data-edge="right"]) .nse-page__cast-shadow {
   inset: 0 100% 0 auto;
-  background: linear-gradient(90deg, transparent 22%, var(--nse-page-shadow-colour));
 }
 
 .nse-page[data-book-turn="true"][data-edge="left"] .nse-page__cast-shadow,
 :where(:scope):is(.nse-page[data-book-turn="true"][data-edge="left"]) .nse-page__cast-shadow {
   inset: 0 auto 0 100%;
-  background: linear-gradient(90deg, var(--nse-page-shadow-colour), transparent 78%);
 }
 
 /*
@@ -361,9 +332,7 @@
   inset: 0;
   z-index: 0;
   overflow: hidden;
-  background-color: #f3f1ec;
   border-radius: 0;
-  box-shadow: none;
   clip-path: inset(0 0 100% 0);
   pointer-events: none;
 }
@@ -375,10 +344,6 @@
 
 /* Opacity, not visibility: visibility is inherited, and the page's layers
    must stay drawable for the snapshots while the canvas stands in. */
-.nse-page[data-curl-surface="webgl"] .nse-page__sheet,
-:where(:scope):is(.nse-page[data-curl-surface="webgl"]) .nse-page__sheet {
-  opacity: 0;
-}
 
 /* ---- 2D: the fold drawn by the page's own layers. ---- */
 
@@ -403,8 +368,6 @@
   inset: 0;
   z-index: 3;
   pointer-events: none;
-  opacity: var(--nse-page-shadow-opacity);
-  background: var(--nse-page-curl-shadow);
 }
 
 /*
@@ -417,26 +380,16 @@
   inset: 0;
   z-index: 5;
   overflow: hidden;
-  opacity: var(--nse-page-back-opacity);
   /* Fully opaque paper: the only front content visible on the underside is
      the deliberate ghost layer, never bleed-through. */
-  background-color: #e7ebf1;
-  background-image: linear-gradient(135deg, #fcfdff, #d9e0e9);
   border-radius: 0;
-  box-shadow: none;
   clip-path: var(--nse-page-curl-clip-path);
   /* The fold matrix is built about the page's top-left origin. */
   transform-origin: 0 0;
   transform: var(--nse-page-curl-flap-transform);
-  filter: var(--nse-page-curl-flap-filter);
   backface-visibility: visible;
   -webkit-backface-visibility: visible;
   will-change: transform, clip-path;
-}
-
-.nse-page[data-curl-renderer="css"][data-phase="dragging"] .nse-page__curl-flap,
-:where(:scope):is(.nse-page[data-curl-renderer="css"][data-phase="dragging"]) .nse-page__curl-flap {
-  filter: var(--nse-page-curl-flap-drag-filter);
 }
 
 /* Filter the already clipped paper through an unclipped parent. Applying a
@@ -450,13 +403,11 @@
   pointer-events: none;
   transform-origin: 0 0;
   transform: var(--nse-page-curl-flap-transform);
-  filter: var(--nse-page-curl-flap-filter);
 }
 
 .nse-page.nse-page-preset-book-curl[data-curl-renderer="css"] .nse-page__curl-flap,
 :where(:scope):is(.nse-page.nse-page-preset-book-curl[data-curl-renderer="css"]) .nse-page__curl-flap {
   transform: none;
-  filter: none;
 }
 
 /* ---- 2D tear: the 2D fold, then the sheet sliding away once free. ---- */
@@ -465,20 +416,9 @@
 :where(:scope):is(.nse-page[data-mode="tear"][data-curl-renderer="css"]) .nse-page__sheet {
   transform-origin: 0 0;
   transform: var(--nse-page-tear-sheet-transform);
-  opacity: var(--nse-page-tear-sheet-opacity);
-}
-
-.nse-page[data-mode="tear"][data-curl-renderer="css"][data-curling="true"] .nse-page__sheet,
-:where(:scope):is(.nse-page[data-mode="tear"][data-curl-renderer="css"][data-curling="true"]) .nse-page__sheet {
-  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.26));
 }
 
 /* A torn sheet's underside is its own paper. */
-.nse-page.nse-page[data-mode="tear"][data-curl-renderer="css"] .nse-page__curl-flap,
-:where(:scope):is(.nse-page.nse-page[data-mode="tear"][data-curl-renderer="css"]) .nse-page__curl-flap {
-  background-color: var(--nse-page-tear-paper, #e7ebf1);
-  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.06));
-}
 
 /* The ragged stub of paper a tear leaves bound in place. */
 .nse-page__tear-stub,
@@ -488,7 +428,6 @@
   z-index: 3;
   display: none;
   pointer-events: none;
-  background: var(--nse-page-tear-paper, var(--nse-page-background));
   clip-path: var(--nse-page-tear-stub-clip-path);
 }
 
@@ -498,12 +437,6 @@
 }
 
 /* Torn away: the sheet has gone, and the page's stubs take over its stub. */
-.nse-page[data-mode="tear"][data-torn="true"] .nse-page__sheet,
-:where(:scope):is(.nse-page[data-mode="tear"][data-torn="true"]) .nse-page__sheet,
-.nse-page[data-mode="tear"][data-torn="true"] .nse-page__tear-stub,
-:where(:scope):is(.nse-page[data-mode="tear"][data-torn="true"]) .nse-page__tear-stub {
-  opacity: 0;
-}
 
 /* The stubs of sheets torn away, above the sheets beneath them. */
 .nse-page__tear-stubs,
@@ -525,8 +458,6 @@
   z-index: 1;
   overflow: hidden;
   pointer-events: none;
-  opacity: 0.24;
-  filter: saturate(0.4) contrast(0.95) brightness(1.22);
 }
 
 /* The ghost stays mounted (so WebGL children initialise once) but is fully
@@ -543,7 +474,6 @@
   inset: 0;
   z-index: 2;
   pointer-events: none;
-  background: var(--nse-page-curl-shade);
 }
 
 /*
@@ -557,8 +487,6 @@
   z-index: 7;
   margin: 0;
   padding: 0;
-  border: 0;
-  background: transparent;
   appearance: none;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -571,7 +499,6 @@
 
 .nse-page__dogear:focus-visible,
 :where(:scope):is(.nse-page__dogear:focus-visible) {
-  outline: 2px solid rgba(120, 170, 255, 0.85);
   outline-offset: -3px;
   border-radius: 8px;
 }
@@ -631,61 +558,9 @@
   border-radius: inherit;
 }
 
-.nse-page__edge,
-:where(:scope):is(.nse-page__edge) {
-  opacity: calc(0.22 + var(--nse-page-progress) * 0.28);
-  box-shadow:
-    inset 0 0 0 var(--nse-page-thickness) var(--nse-page-edge-colour),
-    inset 0 -18px 28px rgba(255, 255, 255, 0.08);
-}
-
 .nse-page__curl,
 :where(:scope):is(.nse-page__curl) {
-  opacity: var(--nse-page-crease-opacity);
   clip-path: inset(var(--nse-page-curl-inset));
-  mix-blend-mode: multiply;
-  background:
-    linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.52) 22%, rgba(0,0,0,0.22) 66%, transparent 100%);
-}
-
-.nse-page[data-axis="x"] .nse-page__curl,
-:where(:scope):is(.nse-page[data-axis="x"]) .nse-page__curl {
-  background:
-    linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.46) 26%, rgba(0,0,0,0.20) 72%, transparent 100%);
-}
-
-.nse-page__crease,
-:where(:scope):is(.nse-page__crease) {
-  opacity: var(--nse-page-crease-opacity);
-  background:
-    linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.48) 43%, rgba(0,0,0,0.24) 52%, transparent 100%);
-}
-
-.nse-page[data-axis="x"] .nse-page__crease,
-:where(:scope):is(.nse-page[data-axis="x"]) .nse-page__crease {
-  background:
-    linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.42) 47%, rgba(0,0,0,0.22) 51%, transparent 100%);
-}
-
-.nse-page__grain,
-:where(:scope):is(.nse-page__grain) {
-  opacity: var(--nse-page-grain-opacity);
-  background-image:
-    repeating-linear-gradient(0deg, rgba(255,255,255,0.24) 0 1px, transparent 1px 3px),
-    repeating-linear-gradient(90deg, rgba(0,0,0,0.05) 0 1px, transparent 1px 4px);
-  mix-blend-mode: soft-light;
-}
-
-.nse-page[data-mode="flip"] .nse-page__curl,
-:where(:scope):is(.nse-page[data-mode="flip"]) .nse-page__curl,
-.nse-page[data-mode="flip"] .nse-page__crease,
-:where(:scope):is(.nse-page[data-mode="flip"]) .nse-page__crease {
-  opacity: calc(var(--nse-page-crease-opacity) * 0.42);
-}
-
-.nse-page[data-mode="peel"] .nse-page__sheet,
-:where(:scope):is(.nse-page[data-mode="peel"]) .nse-page__sheet {
-  filter: drop-shadow(0 14px 22px rgba(0, 0, 0, calc(var(--nse-page-shadow-opacity) * 0.42)));
 }
 
 .nse-page[data-mode="tear"][data-revealed="true"] .nse-page__sheet,
@@ -698,20 +573,6 @@
 .nse-page-preset-sheet,
 :where(:scope):is(.nse-page-preset-sheet) {
   --nse-page-min-height: 160px;
-}
-
-.nse-page-preset-settings-peel .nse-page__inside,
-:where(:scope):is(.nse-page-preset-settings-peel) .nse-page__inside,
-.nse-page-preset-sheet .nse-page__inside,
-:where(:scope):is(.nse-page-preset-sheet) .nse-page__inside {
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.15),
-    inset 0 18px 30px rgba(255,255,255,0.08);
-}
-
-.nse-page-preset-card-flip .nse-page__sheet,
-:where(:scope):is(.nse-page-preset-card-flip) .nse-page__sheet {
-  filter: drop-shadow(0 24px 34px rgba(0, 0, 0, calc(var(--nse-page-shadow-opacity) * 0.6)));
 }
 
 @media (prefers-reduced-motion: reduce) {

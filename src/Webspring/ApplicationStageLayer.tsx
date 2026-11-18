@@ -48,7 +48,7 @@ const multiSwitchBackdropMotion = Object.freeze({ exit: backdropFade(1, 0) });
 function MultiSwitchBackdrop() {
   const backdropRef = useRef<HTMLDivElement>(null);
   useNSEPresentation(backdropRef, multiSwitchBackdropMotion);
-  return <div ref={backdropRef} className="webspring-multiswitch-backdrop" aria-hidden="true" />;
+  return <div ref={backdropRef} data-nse-control="view" data-nse-part="backdrop" data-nse-role="application-switch" className="webspring-multiswitch-backdrop" aria-hidden="true" />;
 }
 
 function getMultiSwitchRole(

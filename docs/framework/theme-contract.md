@@ -6,7 +6,7 @@ A theme draws controls through these hooks only: `[data-nse-control]`, `[data-ns
 
 Each hook is also mirrored on its element as a class token beginning `nse:`, and the build rewrites hook selectors to those classes so the browser can index them. The classes are private and may change without notice: write the attributes, and never select on the classes.
 
-Contract version 1: 72 controls, 48 colours.
+Contract version 1: 73 controls, 48 colours.
 
 ## Controls
 
@@ -15,15 +15,20 @@ Contract version 1: 72 controls, 48 colours.
 - Parts: `bezel`, `cell`, `content`, `image`, `title`
 - States: `enabled=false`, `selected`
 - Variants:
+  - `data-nse-role`: `anchor`, `backdrop`
   - `data-nse-type`: `application`, `folder`
 
 ### `app-view-chrome`
 
-- Parts: `background`, `border`, `content-border`, `content-view`, `decoration`
+- Parts: `background`, `border`, `content`, `content-border`, `content-view`, `decoration`
 - States: `key-window=false`
 - Variants:
+  - `data-nse-background-style`: `none`, `system`
   - `data-nse-content-border`: `large`, `small`
   - `data-nse-edge`: `minY`
+  - `data-nse-material`: `metal`
+  - `data-nse-style`: `custom`, `standard`
+  - `data-nse-type`: `incoming`, `outgoing`
 
 ### `badge`
 
@@ -32,12 +37,15 @@ Contract version 1: 72 controls, 48 colours.
 
 ### `board`
 
-- Parts: `background`, `content`, `group`, `header`
-- States: none
+- Parts: `accessory`, `background`, `button`, `content`, `group`, `header`
+- States: `selected`, `state=ready`
+- Variants:
+  - `data-nse-presentation`: `idle`
+  - `data-nse-role`: `launcher`, `page-controls`
 
 ### `box`
 
-- Parts: `actions`, `background`, `bezel`, `border`, `content`, `header`, `separator`, `subtitle`, `title`
+- Parts: `actions`, `background`, `bezel`, `border`, `content`, `header`, `label`, `separator`, `subtitle`, `title`
 - States: none
 - Variants:
   - `data-nse-border-type`: `bezelBorder`, `grooveBorder`
@@ -45,7 +53,7 @@ Contract version 1: 72 controls, 48 colours.
   - `data-nse-custom-border`: `true`
   - `data-nse-custom-fill`: `true`
   - `data-nse-expanded`: `true`
-  - `data-nse-role`: `disclosure`
+  - `data-nse-role`: `disclosure`, `note`
   - `data-nse-shadow`: `true`
   - `data-nse-shadow-suppressed`: `true`
   - `data-nse-style`: `alpha`, `arrow`, `floating`, `grey`, `grouped`, `inspector`, `plain`, `sidebar`, `soft`, `surface`
@@ -75,8 +83,20 @@ Contract version 1: 72 controls, 48 colours.
   - `data-nse-has-destructive-action`: `true`
   - `data-nse-image-position`: `imageLeading`, `imageOnly`, `imageTrailing`, `noImage`
   - `data-nse-key-equivalent`: ``, ``
-  - `data-nse-role`: `back`, `close`, `current`, `default`, `ground`, `ink`, `minimise`, `sign-in`, `zoom`
+  - `data-nse-position`: `leading`, `trailing`
+  - `data-nse-role`: `archive-action`, `back`, `close`, `current`, `default`, `ground`, `ink`, `minimise`, `sign-in`, `zoom`
   - `data-nse-style`: `edited`
+
+### `chronosphere`
+
+- Parts: `accessory`, `actions`, `backdrop`, `background`, `badge`, `bezel`, `body`, `button`, `cell`, `content`, `decoration`, `face`, `footer`, `header`, `indicator`, `label`, `status`, `subtitle`, `surface`, `tick`, `title`, `track`, `viewport`
+- States: `selected`, `state=loading`, `state=open`
+- Variants:
+  - `data-nse-material`: `paper`
+  - `data-nse-position`: `past`, `present`
+  - `data-nse-revealed`: `true`
+  - `data-nse-role`: `archive`, `caption`, `current-version`, `details`, `grid`, `preparation`, `signal`, `stack`, `time-navigation`, `timeline`
+  - `data-nse-style`: `grid`, `preparation`, `stack`
 
 ### `clip-view`
 
@@ -150,13 +170,18 @@ Contract version 1: 72 controls, 48 colours.
 
 - Parts: `backdrop`, `background`, `bezel`, `border`, `cell`, `content`, `group`, `image`, `indicator`, `preview`, `title`
 - States: none
+- Variants:
+  - `data-nse-position`: `bottom`, `top`
+  - `data-nse-presentation`: `closed`, `closing`, `open`
+  - `data-nse-style`: `fade`, `split`
 
 ### `folder-tile`
 
-- Parts: `background`, `bezel`, `image`
-- States: none
+- Parts: `background`, `bezel`, `border`, `highlight`, `image`, `indicator`, `shadow`
+- States: `highlighted`
 - Variants:
-  - `data-nse-style`: `roundedRect`
+  - `data-nse-style`: `circle`, `roundedRect`
+  - `data-nse-type`: `inset`, `texture`
 
 ### `font-panel`
 
@@ -174,6 +199,8 @@ Contract version 1: 72 controls, 48 colours.
 
 - Parts: `background`, `image`, `shadow`
 - States: `selected`
+- Variants:
+  - `data-nse-role`: `artwork`
 
 ### `image-view`
 
@@ -237,15 +264,22 @@ Contract version 1: 72 controls, 48 colours.
 
 ### `notification-banner`
 
-- Parts: `accessory`, `background`, `bezel`, `cancel`, `content`, `effects`, `image`, `label`, `shadow`
+- Parts: `accessory`, `actions`, `background`, `bezel`, `cancel`, `cell`, `content`, `effects`, `face`, `image`, `label`, `paragraph`, `shadow`, `title`
 - States: none
 - Variants:
+  - `data-nse-has-destructive-action`: `true`
+  - `data-nse-level`: `standard`, `timeSensitive`
   - `data-nse-notification-presentation`: `plain`, `sliced-3d`
+  - `data-nse-role`: `action`, `application`, `dismiss`, `screen`, `shade`, `underside`, `void`
+  - `data-nse-style`: `primary`
 
 ### `notification-centre`
 
-- Parts: `accessory`, `actions`, `background`, `cancel`, `cell`, `content`, `disclosure`, `group`, `header`, `label`, `row`, `title`
+- Parts: `accessory`, `actions`, `background`, `button`, `cancel`, `cell`, `content`, `disclosure`, `group`, `header`, `label`, `paragraph`, `row`, `status`, `title`, `value`
 - States: `selected`
+- Variants:
+  - `data-nse-role`: `action`, `application`, `clear`, `clear-all`, `close`, `groups`, `history`, `message`, `metadata`
+  - `data-nse-type`: `displayed`
 
 ### `open-panel`
 
@@ -267,8 +301,17 @@ Contract version 1: 72 controls, 48 colours.
 
 ### `page-controller`
 
-- Parts: `content`
-- States: none
+- Parts: `attachment`, `backdrop`, `border`, `button`, `content`, `decoration`, `face`, `separator`, `shadow`, `sheet`, `surface`
+- States: `state=idle`, `tracking=`
+- Variants:
+  - `data-nse-edge`: `bottom`, `right`, `top`
+  - `data-nse-flow`: `book`
+  - `data-nse-orientation`: `horizontal`, `vertical`
+  - `data-nse-position`: `back`, `front`
+  - `data-nse-presentation`: `book`
+  - `data-nse-role`: `bookCurl`, `bookTurn`, `cardFlip`, `nseSheet`, `page-fold`, `page-ghost`, `page-leaf`, `page-strip`, `page-tear`, `settingsPeel`, `tearAway`
+  - `data-nse-style`: `curl`, `flip`, `fold`, `peel`, `tear`, `turn`
+  - `data-nse-type`: `css`
 
 ### `panel`
 
@@ -584,11 +627,12 @@ Contract version 1: 72 controls, 48 colours.
 
 ### `view`
 
-- Parts: `background`, `content`
+- Parts: `background`, `content`, `decoration`, `group`, `header`, `image`, `item`, `label`, `loading`, `paragraph`, `preview`, `status`, `title`, `value`
 - States: none
 - Variants:
+  - `data-nse-chrome`: `standard`
   - `data-nse-corner-curve`: `circular`, `continuous`
-  - `data-nse-role`: `runtime`
+  - `data-nse-role`: `capabilities`, `description`, `drag-proxy`, `material`, `note`, `runtime`, `startup`, `startup-material`, `startup-spinner`, `startup-spotlight`, `storage`, `updates`, `widget-shelf`
   - `data-nse-surface-ink`: `light`
   - `data-nse-view-layer`: ``
 
@@ -599,13 +643,14 @@ Contract version 1: 72 controls, 48 colours.
 
 ### `visual-effect-view`
 
-- Parts: `background`
+- Parts: `background`, `image`, `surface`
 - States: none
 - Variants:
   - `data-nse-chrome`: `standard`
   - `data-nse-focus-style`: `inset`, `within`
   - `data-nse-material`: `atmo`, `glass`, `linen`, `metal`
-  - `data-nse-style`: `panel`
+  - `data-nse-role`: `vortex`
+  - `data-nse-style`: `panel`, `vortex`
 
 ### `web-view`
 

@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+@layer nse.structure {
+
 /* A well, in the definition's folder appearance, holding a three-by-three grid
    of member icons. The well is clipped to the folder's shape; its shading is
    SVG drawn from the same path, since box shadows follow the box, not the clip. */
@@ -37,7 +39,7 @@
 }
 
 /* The grid's corners stay inside the circle. */
-.webspring-folder-tile[data-shape="circle"] {
+.webspring-folder-tile[data-nse-style="circle"] {
   padding: 19%;
 }
 
@@ -60,19 +62,8 @@
   clip-path: var(--webspring-folder-tile-clip, inset(0 round 22%));
 }
 
-.webspring-folder-tile[data-shape="circle"] > .webspring-folder-tile-surface {
+.webspring-folder-tile[data-nse-style="circle"] > .webspring-folder-tile-surface {
   clip-path: circle(closest-side);
-}
-
-.webspring-folder-tile[data-fill="inset"] > .webspring-folder-tile-surface {
-  background: linear-gradient(180deg, rgba(20, 24, 31, 0.5), rgba(48, 54, 66, 0.34));
-}
-
-.webspring-folder-tile[data-fill="texture"] > .webspring-folder-tile-surface {
-  background-color: var(--webspring-folder-tile-texture-colour);
-  background-image: var(--webspring-folder-tile-texture);
-  background-position: center;
-  background-size: var(--webspring-folder-tile-texture-size);
 }
 
 .webspring-folder-tile-rim svg,
@@ -84,45 +75,12 @@
   overflow: visible;
 }
 
-.webspring-folder-tile-inner-shadow {
-  fill: rgba(0, 0, 0, 0.62);
-  filter: blur(2.5px);
-}
-
-.webspring-folder-tile-inner-highlight {
-  fill: rgba(255, 255, 255, 0.18);
-}
-
-.webspring-folder-tile-lip {
-  fill: rgba(255, 255, 255, 0.32);
-}
-
 .webspring-folder-tile-ring {
-  opacity: 0;
   transition: opacity 180ms ease;
 }
 
-.webspring-folder-tile-ring-shadow {
-  fill: rgba(0, 0, 0, 0.45);
-  filter: blur(9px);
-}
-
-.webspring-folder-tile-ring-stroke {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.72);
-}
-
-.webspring-folder-tile[data-drop-target="true"] {
+.webspring-folder-tile[data-nse-highlighted] {
   transform: scale(1.12);
-}
-
-/* The lip gives way to the ring that follows the shape outside it. */
-.webspring-folder-tile[data-drop-target="true"] .webspring-folder-tile-lip {
-  opacity: 0;
-}
-
-.webspring-folder-tile[data-drop-target="true"] .webspring-folder-tile-ring {
-  opacity: 1;
 }
 
 .webspring-folder-tile-member {
@@ -130,7 +88,6 @@
   place-items: center;
   min-width: 0;
   aspect-ratio: 1;
-  color: #fff;
   font-size: 9px;
   line-height: 1;
 }
@@ -140,7 +97,6 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.4));
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -148,4 +104,6 @@
   .webspring-folder-tile-ring {
     transition: none;
   }
+}
+
 }

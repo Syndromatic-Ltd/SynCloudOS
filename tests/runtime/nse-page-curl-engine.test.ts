@@ -500,7 +500,7 @@ describe("NSEPageCurlLeaf React surface", () => {
       back: createElement("button", { type: "button" }, "Visual duplicate")
     }));
 
-    expect(markup).toContain('class="nse-page__curl-carrier" aria-hidden="true" inert=""');
+    expect(markup).toContain('data-nse-part="attachment" data-nse-role="page-fold" aria-hidden="true" inert=""');
   });
 
   it("marks the page as curling so it can elevate above app chrome", () => {

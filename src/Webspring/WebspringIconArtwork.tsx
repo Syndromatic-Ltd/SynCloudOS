@@ -30,7 +30,7 @@ export function WebspringIconArtwork({
   draggable = false
 }: WebspringIconArtworkProps) {
   return (
-    <span data-nse-part="image" className="webspring-icon-artwork" aria-hidden="true">
+    <span data-nse-part="image" data-nse-role="artwork" className="webspring-icon-artwork" aria-hidden="true">
       <img
         data-nse-part="shadow" className="webspring-icon-artwork__glow"
         src={src}

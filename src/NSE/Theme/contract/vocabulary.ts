@@ -11,7 +11,7 @@ export const nseThemeControls = Object.freeze([
   "tab-view", "page-controller", "ruler-view", "window", "panel", "sheet", "popover", "alert", "tooltip",
   "colour-panel", "colour-well", "colour-sliders", "colour-swatches", "colour-wheel", "font-panel", "open-panel",
   "save-panel", "web-view", "badge", "icon-well", "route-picker-view", "virtual-viewport", "view", "login-window", "notification-banner", "notification-centre",
-  "system-alert", "board", "app-icon", "folder-tile", "folder-presentation", "app-view-chrome", "quick-switch",
+  "system-alert", "chronosphere", "board", "app-icon", "folder-tile", "folder-presentation", "app-view-chrome", "quick-switch",
 ] as const);
 
 /** Parts name drawable structure, independently of any theme's artwork. */

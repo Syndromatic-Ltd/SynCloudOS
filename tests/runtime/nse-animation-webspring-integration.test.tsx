@@ -381,7 +381,7 @@ describe("Webspring owner-local choreography", () => {
     expect(dialog.hasAttribute("data-webspring-folder-panel")).toBe(true);
     // The seam runs below the label, 6 px under the cell.
     expect(dialog.style.top).toBe("216px");
-    await waitFor(() => expect(view.container.querySelector(".webspring-folder-split")?.getAttribute("data-phase")).toBe("open"), { timeout: 5000 });
+    await waitFor(() => expect(view.container.querySelector('[data-nse-control="folder-presentation"][data-nse-part="background"]')?.getAttribute("data-nse-presentation")).toBe("open"), { timeout: 5000 });
     expect(screen.getByRole("button", { name: "Open Beta" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Open Gamma" })).toBeTruthy();
 

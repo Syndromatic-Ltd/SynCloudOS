@@ -65,8 +65,8 @@ describe("WebspringFolderTile", () => {
     const options = { radius: 21.6, curve: "squircle" as const, smoothing: 0.6 };
     const path = generateSmoothSurfacePath(60, 60, options);
 
-    expect(tile.dataset.shape).toBe("roundedRect");
-    expect(tile.dataset.fill).toBe("inset");
+    expect(tile.dataset.nseStyle).toBe("roundedRect");
+    expect(tile.dataset.nseType).toBe("inset");
     expect(tile.style.getPropertyValue("--webspring-folder-tile-clip")).toBe(generateSmoothSurfaceClipPath(60, 60, options));
     // The well's shading is a frame around the same outline, clipped with the well.
     for (const shading of tile.querySelectorAll(".webspring-folder-tile-surface path")) {
@@ -90,8 +90,8 @@ describe("WebspringFolderTile", () => {
   it("clips a circle and lines it with the configured texture", () => {
     const tile = renderTile(cottonCircle);
 
-    expect(tile.dataset.shape).toBe("circle");
-    expect(tile.dataset.fill).toBe("texture");
+    expect(tile.dataset.nseStyle).toBe("circle");
+    expect(tile.dataset.nseType).toBe("texture");
     expect(tile.style.getPropertyValue("--webspring-folder-tile-clip")).toBe("circle(closest-side)");
     expect(tile.querySelector(".webspring-folder-tile-lip path")!.getAttribute("d")).toBe("M 0 30 A 30 30 0 1 0 60 30 A 30 30 0 1 0 0 30 Z");
     expect(tile.style.getPropertyValue("--webspring-folder-tile-texture")).toBe('url("/textures/\\22 cotton\\22 .jpg")');
@@ -105,7 +105,7 @@ describe("WebspringFolderTile", () => {
       const outline = resolveWebspringFolderTileGeometry(appearance.shape, 60, 60).path;
       const ring = tile.querySelector(".webspring-folder-tile-ring-stroke path")!;
 
-      expect(tile.dataset.dropTarget).toBe("true");
+      expect(tile.hasAttribute("data-nse-highlighted")).toBe(true);
       expect(ring.getAttribute("d")).toBe(outline);
       expect(ring.getAttribute("stroke-width")).toBe("6");
       // The ring and its shadow are clipped to outside the outline by an even-odd frame.

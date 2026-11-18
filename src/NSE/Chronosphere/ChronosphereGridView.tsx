@@ -125,42 +125,42 @@ function GridView<TDetail>({ model, actions, renderFace }: ChronosphereViewProps
       }}>{drawn}</span>;
     }
     const shot = present ? model.presentImage : item.screenshotSrc;
-    if (shot) return <span className="chronosphere-grid-shot" aria-hidden="true" style={{ backgroundImage: `url("${shot}")` }} />;
-    return <span className="chronosphere-grid-card" aria-hidden="true">
-      <span className="chronosphere-grid-card-label">{item.displayLabel}</span>
+    if (shot) return <span className="chronosphere-grid-shot" data-nse-part="image" data-nse-role="grid" aria-hidden="true" style={{ backgroundImage: `url("${shot}")` }} />;
+    return <span className="chronosphere-grid-card" data-nse-part="face" data-nse-role="grid" aria-hidden="true">
+      <span className="chronosphere-grid-card-label" data-nse-part="label" data-nse-role="grid">{item.displayLabel}</span>
       <span className="chronosphere-grid-card-title">{item.title}</span>
     </span>;
   };
 
-  return <div className="chronosphere-grid" data-stage={stage} data-material={shape?.material ?? "window"} role="application" aria-labelledby={titleId}>
-    <header className="chronosphere-grid-bar">
+  return <div className="chronosphere-grid" data-nse-control="chronosphere" data-nse-part="background" data-nse-style="grid" data-nse-state={stage} data-nse-material={shape?.material ?? "window"} role="application" aria-labelledby={titleId}>
+    <header className="chronosphere-grid-bar" data-nse-part="header" data-nse-role="grid">
       <span className="chronosphere-grid-bar-side" />
-      <h2 className="chronosphere-grid-title" id={titleId}>{subject.label}</h2>
+      <h2 className="chronosphere-grid-title" data-nse-part="title" data-nse-role="grid" id={titleId}>{subject.label}</h2>
       <span className="chronosphere-grid-bar-side chronosphere-grid-bar-end">
         <NSEButton title={labels.done} onClick={leave} />
       </span>
     </header>
-    <div ref={grid} className="chronosphere-grid-scroll" tabIndex={0} role="listbox" aria-label={labels.timeline}
+    <div ref={grid} className="chronosphere-grid-scroll" data-nse-part="viewport" data-nse-role="grid" tabIndex={0} role="listbox" aria-label={labels.timeline}
       aria-activedescendant={entry ? `${titleId}-${chosen}` : undefined} onKeyDown={onKeyDown}>
       <div className="chronosphere-grid-tiles" style={{ "--chronosphere-tile-width": `${tileWidth}px`, "--chronosphere-tile-height": `${tileHeight}px`,
         "--chronosphere-tile-radius": `${Math.min(14, (shape?.cornerRadius ?? 22) * (tileWidth / 640))}px` } as CSSProperties}>
         {entries.map((item, index) => {
           const active = index === chosen;
-          return <div key={item.id} id={`${titleId}-${index}`} className="chronosphere-grid-tile" data-index={index} role="option" aria-selected={active}
-            aria-label={`${item.title}, ${item.dateLabel}`} data-active={active ? "true" : "false"} data-status={item.isCurrent ? "current" : "saved"}
+          return <div key={item.id} id={`${titleId}-${index}`} className="chronosphere-grid-tile" data-nse-part="cell" data-nse-role="grid" data-index={index} role="option" aria-selected={active} data-nse-selected={active ? "" : undefined}
+            aria-label={`${item.title}, ${item.dateLabel}`} data-status={item.isCurrent ? "current" : "saved"}
             onClick={() => setChosen(index)} onDoubleClick={() => restore(item)}>
-            <span className="chronosphere-grid-page">
+            <span className="chronosphere-grid-page" data-nse-part="bezel" data-nse-role="grid">
               {face(item, active)}
-              {item.isCurrent ? <span className="chronosphere-grid-now">{labels.now}</span> : null}
+              {item.isCurrent ? <span className="chronosphere-grid-now" data-nse-part="badge" data-nse-role="grid">{labels.now}</span> : null}
             </span>
-            <span className="chronosphere-grid-date">{item.dateLabel}</span>
-            <span className="chronosphere-grid-summary">{item.summary}</span>
+            <span className="chronosphere-grid-date" data-nse-part="subtitle" data-nse-role="grid">{item.dateLabel}</span>
+            <span className="chronosphere-grid-summary" data-nse-part="body" data-nse-role="grid">{item.summary}</span>
           </div>;
         })}
       </div>
     </div>
-    <footer className="chronosphere-grid-footer">
-      <span className="chronosphere-grid-detail">{entry ? <><strong>{entry.title}</strong>{entry.dateLabel ? ` · ${entry.dateLabel}` : ""}</> : null}</span>
+    <footer className="chronosphere-grid-footer" data-nse-part="footer" data-nse-role="grid">
+      <span className="chronosphere-grid-detail" data-nse-part="content" data-nse-role="grid">{entry ? <><strong data-nse-part="title">{entry.title}</strong>{entry.dateLabel ? ` · ${entry.dateLabel}` : ""}</> : null}</span>
       {actions.restore ? <NSEButton keyEquivalent={"\r"} title={labels.restore} isEnabled={canRestore} onClick={() => entry && restore(entry)} /> : null}
     </footer>
   </div>;

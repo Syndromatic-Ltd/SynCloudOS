@@ -1,0 +1,230 @@
+/* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
+
+/* Page faces, projected paper strips, folds and tears. */
+[data-nse-control="page-controller"]:where([data-nse-part="attachment"]),
+:where(:scope):is([data-nse-control="page-controller"]:where([data-nse-part="attachment"])) {
+  color: var(--nse-page-colour);
+}
+
+[data-nse-part="content"]:where([data-nse-role="page-leaf"]),
+:where(:scope):is([data-nse-part="content"]:where([data-nse-role="page-leaf"])) {
+  opacity: var(--nse-page-inside-opacity);
+  background: var(--nse-page-inside-background);
+}
+
+[data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-presentation="book"] [data-nse-part="shadow"]:where([data-nse-role="page-leaf"]),
+:where(:scope):is([data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-presentation="book"]) [data-nse-part="shadow"]:where([data-nse-role="page-leaf"]) {
+  opacity: var(--nse-page-book-shadow-opacity);
+  filter: blur(8px);
+  background: linear-gradient(90deg, transparent, rgba(48, 35, 19, .65), transparent);
+}
+
+[data-nse-part="shadow"]:where([data-nse-role="page-leaf"]),
+:where(:scope):is([data-nse-part="shadow"]:where([data-nse-role="page-leaf"])) {
+  opacity: var(--nse-page-shadow-opacity);
+  filter: blur(18px);
+  background:
+    radial-gradient(ellipse at 60% 55%, var(--nse-page-shadow-colour), transparent 68%),
+    linear-gradient(90deg, transparent, var(--nse-page-shadow-colour), transparent);
+}
+
+[data-nse-part="face"]:where([data-nse-role="page-leaf"]),
+:where(:scope):is([data-nse-part="face"]:where([data-nse-role="page-leaf"])) {
+  color: inherit;
+  background: var(--nse-page-background);
+  box-shadow:
+    inset 0 0 0 var(--nse-page-thickness) var(--nse-page-edge-colour),
+    inset 0 1px 0 var(--nse-page-highlight-colour);
+}
+
+[data-nse-part="backdrop"]:where([data-nse-role="page-leaf"]),
+:where(:scope):is([data-nse-part="backdrop"]:where([data-nse-role="page-leaf"])) {
+  background: var(--nse-page-backstop-background, var(--nse-page-background));
+}
+
+[data-nse-position="front"]:where([data-nse-part="face"]:where([data-nse-role="page-leaf"])),
+:where(:scope):is([data-nse-position="front"]:where([data-nse-part="face"]:where([data-nse-role="page-leaf"]))) {
+  opacity: var(--nse-page-front-opacity);
+}
+
+[data-nse-position="back"]:where([data-nse-part="face"]:where([data-nse-role="page-leaf"])),
+:where(:scope):is([data-nse-position="back"]:where([data-nse-part="face"]:where([data-nse-role="page-leaf"]))) {
+  opacity: var(--nse-page-back-opacity);
+  background: var(--nse-page-back-background);
+}
+
+[data-nse-part="face"]:where([data-nse-role="page-strip"]),
+:where(:scope):is([data-nse-part="face"]:where([data-nse-role="page-strip"])) {
+  background-repeat: no-repeat;
+}
+
+[data-nse-position="back"]:where([data-nse-part="face"]:where([data-nse-role="page-strip"])),
+:where(:scope):is([data-nse-position="back"]:where([data-nse-part="face"]:where([data-nse-role="page-strip"]))) {
+  background-color: var(--nse-page-back-background);
+}
+[data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-flow="book"] [data-nse-part="shadow"]:where([data-nse-role="page-leaf"]),
+:where(:scope):is([data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-flow="book"]) [data-nse-part="shadow"]:where([data-nse-role="page-leaf"]) {
+  filter: blur(10px);
+}
+
+[data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-flow="book"][data-nse-edge="right"] [data-nse-part="shadow"]:where([data-nse-role="page-leaf"]),
+:where(:scope):is([data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-flow="book"][data-nse-edge="right"]) [data-nse-part="shadow"]:where([data-nse-role="page-leaf"]) {
+  background: linear-gradient(90deg, transparent 22%, var(--nse-page-shadow-colour));
+}
+
+[data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-flow="book"][data-nse-edge="left"] [data-nse-part="shadow"]:where([data-nse-role="page-leaf"]),
+:where(:scope):is([data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-flow="book"][data-nse-edge="left"]) [data-nse-part="shadow"]:where([data-nse-role="page-leaf"]) {
+  background: linear-gradient(90deg, var(--nse-page-shadow-colour), transparent 78%);
+}
+[data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-type="webgl"] [data-nse-style="fold"]:where([data-nse-part="face"]:where([data-nse-role="page-leaf"])),
+:where(:scope):is([data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-type="webgl"]) [data-nse-style="fold"]:where([data-nse-part="face"]:where([data-nse-role="page-leaf"])) {
+  background-color: #f3f1ec;
+  box-shadow: none;
+}
+[data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-presentation="rendered"] [data-nse-part="sheet"]:where([data-nse-role="page-leaf"]),
+:where(:scope):is([data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-presentation="rendered"]) [data-nse-part="sheet"]:where([data-nse-role="page-leaf"]) {
+  opacity: 0;
+}
+
+[data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-type="css"] [data-nse-part="shadow"]:where([data-nse-role="page-fold"]),
+:where(:scope):is([data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-type="css"]) [data-nse-part="shadow"]:where([data-nse-role="page-fold"]) {
+  opacity: var(--nse-page-shadow-opacity);
+  background: var(--nse-page-curl-shadow);
+}
+[data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-type="css"] [data-nse-style="fold"]:where([data-nse-part="face"]:where([data-nse-role="page-leaf"])),
+:where(:scope):is([data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-type="css"]) [data-nse-style="fold"]:where([data-nse-part="face"]:where([data-nse-role="page-leaf"])) {
+  opacity: var(--nse-page-back-opacity);
+  background-color: #e7ebf1;
+  background-image: linear-gradient(135deg, #fcfdff, #d9e0e9);
+  box-shadow: none;
+  filter: var(--nse-page-curl-flap-filter);
+}
+
+[data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-type="css"][data-nse-state="dragging"] [data-nse-style="fold"]:where([data-nse-part="face"]:where([data-nse-role="page-leaf"])),
+:where(:scope):is([data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-type="css"][data-nse-state="dragging"]) [data-nse-style="fold"]:where([data-nse-part="face"]:where([data-nse-role="page-leaf"])) {
+  filter: var(--nse-page-curl-flap-drag-filter);
+}
+[data-nse-role="bookCurl"]:where([data-nse-part="attachment"])[data-nse-type="css"] [data-nse-part="attachment"]:where([data-nse-role="page-fold"]),
+:where(:scope):is([data-nse-role="bookCurl"]:where([data-nse-part="attachment"])[data-nse-type="css"]) [data-nse-part="attachment"]:where([data-nse-role="page-fold"]) {
+  filter: var(--nse-page-curl-flap-filter);
+}
+
+[data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-role="bookCurl"]:where([data-nse-part="attachment"])[data-nse-type="css"] [data-nse-style="fold"]:where([data-nse-part="face"]:where([data-nse-role="page-leaf"])),
+:where(:scope):is([data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-role="bookCurl"]:where([data-nse-part="attachment"])[data-nse-type="css"]) [data-nse-style="fold"]:where([data-nse-part="face"]:where([data-nse-role="page-leaf"])) {
+  filter: none;
+}
+
+[data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-style="tear"][data-nse-type="css"] [data-nse-part="sheet"]:where([data-nse-role="page-leaf"]),
+:where(:scope):is([data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-style="tear"][data-nse-type="css"]) [data-nse-part="sheet"]:where([data-nse-role="page-leaf"]) {
+  opacity: var(--nse-page-tear-sheet-opacity);
+}
+
+[data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-style="tear"][data-nse-type="css"][data-nse-tracking] [data-nse-part="sheet"]:where([data-nse-role="page-leaf"]),
+:where(:scope):is([data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-style="tear"][data-nse-type="css"][data-nse-tracking]) [data-nse-part="sheet"]:where([data-nse-role="page-leaf"]) {
+  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.26));
+}
+[data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-style="tear"][data-nse-type="css"] [data-nse-style="fold"]:where([data-nse-part="face"]:where([data-nse-role="page-leaf"])),
+:where(:scope):is([data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-style="tear"][data-nse-type="css"]) [data-nse-style="fold"]:where([data-nse-part="face"]:where([data-nse-role="page-leaf"])) {
+  background-color: var(--nse-page-tear-paper, #e7ebf1);
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.06));
+}
+[data-nse-part="attachment"]:where([data-nse-role="page-tear"]),
+:where(:scope):is([data-nse-part="attachment"]:where([data-nse-role="page-tear"])) {
+  background: var(--nse-page-tear-paper, var(--nse-page-background));
+}
+[data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-style="tear"][data-nse-value-state="torn"] [data-nse-part="sheet"]:where([data-nse-role="page-leaf"]),
+:where(:scope):is([data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-style="tear"][data-nse-value-state="torn"]) [data-nse-part="sheet"]:where([data-nse-role="page-leaf"]),
+[data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-style="tear"][data-nse-value-state="torn"] [data-nse-part="attachment"]:where([data-nse-role="page-tear"]),
+:where(:scope):is([data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-style="tear"][data-nse-value-state="torn"]) [data-nse-part="attachment"]:where([data-nse-role="page-tear"]) {
+  opacity: 0;
+}
+[data-nse-part="face"]:where([data-nse-role="page-ghost"]),
+:where(:scope):is([data-nse-part="face"]:where([data-nse-role="page-ghost"])) {
+  opacity: 0.24;
+  filter: saturate(0.4) contrast(0.95) brightness(1.22);
+}
+
+[data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-type="css"] [data-nse-style="fold"]:where([data-nse-part="face"]:where([data-nse-role="page-leaf"]))::before,
+:where(:scope):is([data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-type="css"]) [data-nse-style="fold"]:where([data-nse-part="face"]:where([data-nse-role="page-leaf"]))::before {
+  background: var(--nse-page-curl-shade);
+}
+[data-nse-part="button"]:where([data-nse-role="page-leaf"]),
+:where(:scope):is([data-nse-part="button"]:where([data-nse-role="page-leaf"])) {
+  border: 0;
+  background: transparent;
+}
+
+[data-nse-part="button"]:where([data-nse-role="page-leaf"]):focus-visible,
+:where(:scope):is([data-nse-part="button"]:where([data-nse-role="page-leaf"]):focus-visible) {
+  outline: 2px solid rgba(120, 170, 255, 0.85);
+}
+
+[data-nse-part="border"]:where([data-nse-role="page-leaf"]),
+:where(:scope):is([data-nse-part="border"]:where([data-nse-role="page-leaf"])) {
+  opacity: calc(0.22 + var(--nse-page-progress) * 0.28);
+  box-shadow:
+    inset 0 0 0 var(--nse-page-thickness) var(--nse-page-edge-colour),
+    inset 0 -18px 28px rgba(255, 255, 255, 0.08);
+}
+
+[data-nse-part="decoration"]:where([data-nse-role="page-fold"]),
+:where(:scope):is([data-nse-part="decoration"]:where([data-nse-role="page-fold"])) {
+  opacity: var(--nse-page-crease-opacity);
+  mix-blend-mode: multiply;
+  background:
+    linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.52) 22%, rgba(0,0,0,0.22) 66%, transparent 100%);
+}
+
+[data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-orientation="horizontal"] [data-nse-part="decoration"]:where([data-nse-role="page-fold"]),
+:where(:scope):is([data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-orientation="horizontal"]) [data-nse-part="decoration"]:where([data-nse-role="page-fold"]) {
+  background:
+    linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.46) 26%, rgba(0,0,0,0.20) 72%, transparent 100%);
+}
+
+[data-nse-part="separator"]:where([data-nse-role="page-leaf"]),
+:where(:scope):is([data-nse-part="separator"]:where([data-nse-role="page-leaf"])) {
+  opacity: var(--nse-page-crease-opacity);
+  background:
+    linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.48) 43%, rgba(0,0,0,0.24) 52%, transparent 100%);
+}
+
+[data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-orientation="horizontal"] [data-nse-part="separator"]:where([data-nse-role="page-leaf"]),
+:where(:scope):is([data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-orientation="horizontal"]) [data-nse-part="separator"]:where([data-nse-role="page-leaf"]) {
+  background:
+    linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.42) 47%, rgba(0,0,0,0.22) 51%, transparent 100%);
+}
+
+[data-nse-part="decoration"]:where([data-nse-role="page-leaf"]),
+:where(:scope):is([data-nse-part="decoration"]:where([data-nse-role="page-leaf"])) {
+  opacity: var(--nse-page-grain-opacity);
+  background-image:
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.24) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, rgba(0,0,0,0.05) 0 1px, transparent 1px 4px);
+  mix-blend-mode: soft-light;
+}
+
+[data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-style="flip"] [data-nse-part="decoration"]:where([data-nse-role="page-fold"]),
+:where(:scope):is([data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-style="flip"]) [data-nse-part="decoration"]:where([data-nse-role="page-fold"]),
+[data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-style="flip"] [data-nse-part="separator"]:where([data-nse-role="page-leaf"]),
+:where(:scope):is([data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-style="flip"]) [data-nse-part="separator"]:where([data-nse-role="page-leaf"]) {
+  opacity: calc(var(--nse-page-crease-opacity) * 0.42);
+}
+
+[data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-style="peel"] [data-nse-part="sheet"]:where([data-nse-role="page-leaf"]),
+:where(:scope):is([data-nse-control="page-controller"]:where([data-nse-part="attachment"])[data-nse-style="peel"]) [data-nse-part="sheet"]:where([data-nse-role="page-leaf"]) {
+  filter: drop-shadow(0 14px 22px rgba(0, 0, 0, calc(var(--nse-page-shadow-opacity) * 0.42)));
+}
+
+[data-nse-role="settingsPeel"]:where([data-nse-part="attachment"]) [data-nse-part="content"]:where([data-nse-role="page-leaf"]),
+:where(:scope):is([data-nse-role="settingsPeel"]:where([data-nse-part="attachment"])) [data-nse-part="content"]:where([data-nse-role="page-leaf"]),
+[data-nse-role="nseSheet"]:where([data-nse-part="attachment"]) [data-nse-part="content"]:where([data-nse-role="page-leaf"]),
+:where(:scope):is([data-nse-role="nseSheet"]:where([data-nse-part="attachment"])) [data-nse-part="content"]:where([data-nse-role="page-leaf"]) {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.15),
+    inset 0 18px 30px rgba(255,255,255,0.08);
+}
+
+[data-nse-role="cardFlip"]:where([data-nse-part="attachment"]) [data-nse-part="sheet"]:where([data-nse-role="page-leaf"]),
+:where(:scope):is([data-nse-role="cardFlip"]:where([data-nse-part="attachment"])) [data-nse-part="sheet"]:where([data-nse-role="page-leaf"]) {
+  filter: drop-shadow(0 24px 34px rgba(0, 0, 0, calc(var(--nse-page-shadow-opacity) * 0.6)));
+}

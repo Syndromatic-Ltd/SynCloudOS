@@ -90,9 +90,7 @@ export function WebspringFolderTile({ folder, dropTarget = false, className }: W
     ref={setElement}
     data-nse-control="folder-tile" data-nse-part="bezel" data-nse-highlighted={dropTarget ? "" : undefined} data-nse-style={appearance.shape.kind}
     className={`webspring-folder-tile${className ? ` ${className}` : ""}`}
-    data-shape={appearance.shape.kind}
-    data-fill={fill === "inset" ? "inset" : "texture"}
-    data-drop-target={dropTarget ? "true" : undefined}
+    data-nse-type={fill === "inset" ? "inset" : "texture"}
     style={style}
     aria-hidden="true"
   >
@@ -110,7 +108,7 @@ export function WebspringFolderTile({ folder, dropTarget = false, className }: W
       </> : null}
     </span>
     {folder.apps.slice(0, 9).map((app) => <span key={app.bundleIdentifier} data-nse-part="image" className="webspring-folder-tile-member">
-      {app.iconUrl ? <img src={app.iconUrl} alt="" draggable={false} /> : <span>{app.displayName.slice(0, 1)}</span>}
+      {app.iconUrl ? <img data-nse-part="image" src={app.iconUrl} alt="" draggable={false} /> : <span>{app.displayName.slice(0, 1)}</span>}
     </span>)}
   </span>;
 }

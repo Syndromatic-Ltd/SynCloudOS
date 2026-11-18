@@ -80,7 +80,7 @@ export function WebspringWidgetShelf({ entries, surface }: {
     if (!state || isHidden(entry, state)) return null;
     const { widget } = entry;
     const failure = (reason: "failed" | "timeout") => <>
-      <p className="webspring-widget-status" role="alert">
+      <p data-nse-part="status" className="webspring-widget-status" role="alert">
         {reason === "timeout"
           ? locale.t("widgets.timeout", "This is taking too long to load.")
           : locale.t("widgets.error", "This could not be loaded.")}
@@ -89,28 +89,28 @@ export function WebspringWidgetShelf({ entries, surface }: {
     </>;
     let body: ReactNode;
     if (state.status === "loading") {
-      body = <p className="webspring-widget-status" role="status">{locale.t("widgets.loading", "Loading…")}</p>;
+      body = <p data-nse-part="status" className="webspring-widget-status" role="status">{locale.t("widgets.loading", "Loading…")}</p>;
     } else if (state.status === "error") {
       body = failure(state.reason);
     } else if (state.status === "empty") {
-      body = <p className="webspring-widget-status">{entry.emptyMessage}</p>;
+      body = <p data-nse-part="status" className="webspring-widget-status">{entry.emptyMessage}</p>;
     } else {
       const View = widget.view;
       body = <WidgetViewBoundary onFailure={failure("failed")}>
         <View data={state.data} refresh={() => controller.refresh(widget.id)} navigate={navigate} />
       </WidgetViewBoundary>;
     }
-    return <section key={widget.id} className="webspring-widget" data-widget-id={widget.id} data-widget-state={state.status} aria-busy={state.status === "loading"} aria-labelledby={`webspring-widget-${widget.id}-title`}>
-      <header className="webspring-widget-header">
-        {entry.iconUrl ? <img src={entry.iconUrl} alt="" aria-hidden="true" /> : null}
-        <h2 id={`webspring-widget-${widget.id}-title`}>{entry.title}</h2>
+    return <section key={widget.id} data-nse-part="item" className="webspring-widget" data-widget-id={widget.id} data-widget-state={state.status} aria-busy={state.status === "loading"} aria-labelledby={`webspring-widget-${widget.id}-title`}>
+      <header data-nse-part="header" className="webspring-widget-header">
+        {entry.iconUrl ? <img data-nse-part="image" src={entry.iconUrl} alt="" aria-hidden="true" /> : null}
+        <h2 data-nse-part="title" id={`webspring-widget-${widget.id}-title`}>{entry.title}</h2>
       </header>
       {body}
     </section>;
   });
 
-  return <div className="webspring-widget-shelf" style={webspringSurfaceStyle(surface, "--webspring-shelf")} aria-label={locale.t("widgets.ariaLabel", "Widgets")} role="region">
-    <div className="webspring-widget-shelf-overlay" aria-hidden="true" />
-    <div className="webspring-widget-list">{panels}</div>
+  return <div data-nse-control="view" data-nse-part="background" data-nse-role="widget-shelf" className="webspring-widget-shelf" style={webspringSurfaceStyle(surface, "--webspring-shelf")} aria-label={locale.t("widgets.ariaLabel", "Widgets")} role="region">
+    <div data-nse-part="decoration" data-nse-role="material" className="webspring-widget-shelf-overlay" aria-hidden="true" />
+    <div data-nse-part="content" className="webspring-widget-list">{panels}</div>
   </div>;
 }

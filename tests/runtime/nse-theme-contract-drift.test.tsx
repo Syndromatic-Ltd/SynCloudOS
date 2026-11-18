@@ -70,12 +70,33 @@ import { AboutDialog, NSEConfirmDialog } from "../../src/NSE/Components/NSESyste
 import { ContainerPane } from "../../src/NSE/Containers/NSEContainers";
 import { synCloudOSLogoUrl } from "../../src/SynCloudOS/Resources/frameworkAssets";
 import { SystemUILayer } from "../../src/Webspring/SystemUILayer";
-import { createTestRuntime, registerTestSynWare } from "./helpers";
+import { createTestBundle, createTestRuntime, registerTestSynWare } from "./helpers";
+import { createWebspringBoardView, defineWebspring, createWebspringFolderSplitPresentation, WebspringFolderTile, WebspringIconArtwork, type WebspringFolderItem } from "../../src/Webspring/public";
+import { WebspringFolderAppearanceProvider } from "../../src/Webspring/WebspringFolderAppearance";
+import { WebspringHost } from "../../src/Webspring/WebspringHost";
+import { AppViewContent } from "../../src/Webspring/AppViewContent";
+import { NotificationCentrePresenter } from "../../src/Webspring/NotificationCentrePresenter";
+import { SystemStartupLayer } from "../../src/Webspring/SystemStartupLayer";
+import { WebspringDragProxy } from "../../src/Webspring/WebspringDragProxy";
+import { WebspringWidgetShelf } from "../../src/Webspring/WebspringWidgetShelf";
+import { WebspringSurface } from "../../src/Webspring/webspringSurface";
+import { defineWidget } from "../../src/Webspring/webspringWidget";
+import { CapabilitiesPane } from "../../src/Webspring/Preferences/Capabilities.prefPane";
+import StoragePreference from "../../src/Webspring/Preferences/Storage.prefPane";
+import { UpdateReadinessDetails } from "../../src/Webspring/Preferences/Updates.prefPane";
 import { GlassPanel } from "../../src/NSE/Components/GlassPanel";
 import { LinenSurface } from "../../src/NSE/Components/LinenSurface";
 import { NSESlider } from "../../src/NSE/Controls/Values/NSESlider";
 import { ToolbarView } from "../../src/NSE/Toolbars/ToolbarView";
 import { GraphicalClock } from "../../src/NSE/DateTime/Calendar/graphicalClock";
+import { Chronosphere } from "../../src/NSE/Chronosphere/Chronosphere";
+import { ChronosphereGridView } from "../../src/NSE/Chronosphere/ChronosphereGridView";
+import { ChronosphereStage, type ChronospherePlatformPort } from "../../src/NSE/Chronosphere/ChronosphereStage";
+import { ChronosphereEnvironmentProvider, type ChronosphereEnvironment } from "../../src/NSE/Chronosphere/chronosphereEnvironment";
+import { createChronosphereAppSubject } from "../../src/NSE/Chronosphere/chronosphereSubject";
+import { defaultChronosphereLabels } from "../../src/NSE/Chronosphere/chronosphereViewTypes";
+import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
+import { PageCurlLeaf } from "../../src/NSE/Page/PageCurlLeaf";
 
 const repository = resolve(import.meta.dirname, "../..");
 const presentation = createStaticPresentationPort({ width: 1000, height: 800, reducedMotion: true });
@@ -776,6 +797,322 @@ it("renders the optional analogue second hand", () => {
       value={{ hour: 13, minute: 30, second: 15 }} showSeconds onValueChange={() => undefined} />
   </div></Host>);
   expect(view.container.querySelector('[data-nse-part="second-hand"]')).not.toBeNull();
+  collect();
+});
+
+it("renders both states of the Webspring Board pager", async () => {
+  const bundles = ["alpha", "beta"].map(name => createTestBundle({
+    bundleIdentifier: `com.example.theme-board.${name}`, displayName: name, policy: { public: true },
+  }));
+  const runtime = createTestRuntime({ id: "theme-contract-board", authenticationPolicy: "disabled", initialBundles: bundles });
+  const Board = createWebspringBoardView({ pageSize: 1 });
+  const shell = defineWebspring({
+    manifest: {
+      schemaVersion: 1, bundleIdentifier: "com.example.theme-board.shell", version: "1.0.0", displayName: "Theme Board",
+      webspringShell: {
+        views: [{ id: "board", presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
+        defaults: { desktop: "board", tablet: "board", mobile: "board" }, homeRoute: "/",
+        branding: { name: { key: "contract.name", fallback: "Theme Board" } },
+      },
+    },
+    components: { board: Board },
+  });
+  await runtime.boot({ initialPathname: "/" });
+  try {
+    const view = render(<Host><SynCloudOSProvider runtime={runtime}><WebspringHost shell={shell} startupPhase="complete" /></SynCloudOSProvider></Host>);
+    const first = await view.findByRole("button", { name: "Show application page 1" });
+    const second = view.getByRole("button", { name: "Show application page 2" });
+    expect(first.getAttribute("data-nse-selected")).toBe("");
+    expect(second.hasAttribute("data-nse-selected")).toBe(false);
+    expect(first.parentElement?.getAttribute("data-nse-role")).toBe("page-controls");
+    collect();
+    fireEvent.click(second);
+    expect(second.getAttribute("data-nse-selected")).toBe("");
+    collect();
+  } finally {
+    cleanup();
+    await runtime.dispose("theme contract Board specimen completed");
+  }
+});
+
+it("renders the measured textured folder receptacle and the icon artwork's glow", () => {
+  const folder: WebspringFolderItem = {
+    kind: "folder",
+    id: "folder.tools",
+    title: "Tools",
+    apps: [],
+    badgeCount: 0,
+    dialPlacement: { angle: null, iconPosition: { x: 0, y: 0 }, labelPosition: { x: 0, y: 0 }, indicatorPosition: null },
+  };
+  const dimensions = (["offsetWidth", "offsetHeight"] as const).map(name => [name, Object.getOwnPropertyDescriptor(HTMLElement.prototype, name)!] as const);
+  for (const [name, descriptor] of dimensions) {
+    Object.defineProperty(HTMLElement.prototype, name, {
+      ...descriptor,
+      get(this: HTMLElement) {
+        return this.matches('[data-nse-control="folder-tile"]') ? 60 : descriptor.get?.call(this);
+      },
+    });
+  }
+  try {
+    const view = render(
+      <Host>
+        <WebspringFolderAppearanceProvider value={{ shape: { kind: "circle" }, fill: { kind: "texture", image: synCloudOSLogoUrl, size: "cover", colour: "#20242c" } }}>
+          <WebspringFolderTile folder={folder} dropTarget />
+        </WebspringFolderAppearanceProvider>
+        <IconWell active><WebspringIconArtwork src={synCloudOSLogoUrl} /></IconWell>
+      </Host>,
+    );
+    const tile = view.container.querySelector('[data-nse-control="folder-tile"][data-nse-style="circle"][data-nse-type="texture"][data-nse-highlighted]');
+    expect(tile?.querySelector('[data-nse-part="indicator"] [data-nse-part="shadow"]')).not.toBeNull();
+    expect(view.container.querySelector('[data-nse-control="icon-well"] [data-nse-role="artwork"] > [data-nse-part="shadow"]')).not.toBeNull();
+    collect();
+  } finally {
+    cleanup();
+    for (const [name, descriptor] of dimensions) Object.defineProperty(HTMLElement.prototype, name, descriptor);
+  }
+});
+
+for (const reducedMotion of [false, true]) {
+  const style = reducedMotion ? "fade" : "split";
+  it("renders the folder " + style + " states and stage copy roles", async () => {
+    const appId = (name: string) => "com.example.theme-folder." + name.toLowerCase();
+    const runtime = createTestRuntime({
+      id: "theme-contract-folder-" + style,
+      authenticationPolicy: "disabled",
+      initialBundles: ["Documents", "Pictures", "Music"].map(name => createTestBundle({
+        bundleIdentifier: appId(name), displayName: name, policy: { public: true },
+      })),
+    });
+    const Split = createWebspringFolderSplitPresentation();
+    const shell = defineWebspring({
+      manifest: {
+        schemaVersion: 1,
+        bundleIdentifier: "com.example.theme-folder.shell",
+        version: "1.0.0",
+        displayName: "Theme Folder",
+        webspringShell: {
+          views: [{ id: "board", presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
+          defaults: { desktop: "board", tablet: "board", mobile: "board" },
+          homeRoute: "/",
+          branding: { name: { key: "theme.folder", fallback: "Theme Folder" } },
+          folders: {
+            editable: true,
+            initial: [{ id: "folder.tools", title: { key: "theme.folder.tools", fallback: "Tools" }, order: 1, apps: [appId("Pictures"), appId("Music")] }],
+          },
+        },
+      },
+      components: { board: createWebspringBoardView() },
+      folderPresentation: props => <Split {...props} reducedMotion={reducedMotion} />,
+    });
+    try {
+      await runtime.boot({ initialPathname: "/" });
+      const view = render(<Host><SynCloudOSProvider runtime={runtime}><WebspringHost shell={shell} startupPhase="complete" /></SynCloudOSProvider></Host>);
+      fireEvent.click(await view.findByRole("button", { name: "Open folder Tools" }));
+      const split = await waitFor(() => {
+        const element = view.container.querySelector<HTMLElement>('[data-nse-control="folder-presentation"][data-nse-part="background"]');
+        expect(element).not.toBeNull();
+        return element!;
+      });
+      expect(split.dataset.nseStyle).toBe(style);
+      collect();
+      await waitFor(() => expect(split.dataset.nsePresentation).toBe("open"));
+      const copies = split.querySelectorAll('[data-nse-part="preview"] [data-nse-control="board"]');
+      expect(copies).toHaveLength(3);
+      for (const copy of copies) {
+        expect(copy.querySelector('[data-nse-control="app-icon"][data-nse-role="anchor"]')).not.toBeNull();
+        expect(copy.querySelector('[data-nse-control="app-icon"][data-nse-role="backdrop"]')).not.toBeNull();
+      }
+      collect();
+      fireEvent.keyDown(view.getByRole("dialog", { name: "Tools" }), { key: "Escape" });
+      expect(split.dataset.nsePresentation).toBe("closing");
+      collect();
+    } finally {
+      cleanup();
+      await runtime.dispose("theme contract folder specimen completed");
+    }
+  });
+}
+
+it("renders the boot material and an appearance-projected drag proxy", async () => {
+  const runtime = createTestRuntime({ id: "theme-contract-startup" });
+  try {
+    const view = render(<Host><SynCloudOSProvider runtime={runtime}>
+      <SystemStartupLayer phase="material" />
+      <WebspringDragProxy point={{ x: 80, y: 100 }} app={{
+        bundleIdentifier: "com.example.archive", displayName: "Archive", iconUrl: "/archive.png",
+        route: "/archive", selected: true, running: false, state: "idle",
+        badgeCount: 0, accent: "#224466", featured: false, selectorAngle: 0,
+      }} />
+    </SynCloudOSProvider></Host>);
+    expect(view.container.querySelector('[data-nse-role="startup"] > [data-nse-role="startup-material"]')).not.toBeNull();
+    const proxy = document.body.querySelector(':scope > [data-nse-control="view"][data-nse-part="preview"][data-nse-role="drag-proxy"]');
+    expect(proxy?.hasAttribute("data-nse-theme")).toBe(true);
+    expect(proxy?.querySelector(':scope > [data-nse-part="image"]')).not.toBeNull();
+    expect(proxy?.querySelector(':scope > [data-nse-part="title"]')?.textContent).toBe("Archive");
+    collect();
+  } finally {
+    cleanup();
+    await runtime.dispose("theme contract startup specimen completed");
+  }
+});
+
+it.each([["incoming", "system", true], ["outgoing", "none", false]] as const)(
+  "renders the %s app plane and its %s body",
+  (role, background, hasTitlebar) => {
+    const view = render(<Host><AppViewChrome.Root zIndex={1} multiSwitchRole={role}>
+      <AppViewChrome.Surface material="metal" hasTitlebar={hasTitlebar} multiSwitchRole={role}>
+        <AppViewContent.Surface smoothSurface={false} background={background}><p>App content</p></AppViewContent.Surface>
+      </AppViewChrome.Surface>
+    </AppViewChrome.Root></Host>);
+    expect(view.container.querySelector(`[data-nse-control="app-view-chrome"] > [data-nse-part="content"][data-nse-type="${role}"] > [data-nse-part="content-view"][data-nse-background-style="${background}"]`)).not.toBeNull();
+    collect();
+  },
+);
+
+it("renders the widget shelf material overlay and its loading status", async () => {
+  const runtime = createTestRuntime({ id: "theme-contract-widget" });
+  const widget = defineWidget({
+    id: "archive", title: "Archive", load: () => new Promise<readonly string[]>(() => undefined),
+    view: () => null, whenEmpty: "hide",
+  });
+  try {
+    const view = render(<Host><SynCloudOSProvider runtime={runtime}><WebspringWidgetShelf entries={[{
+      widget, title: "Archive", iconUrl: "/archive.png", emptyMessage: null,
+    }]} surface={WebspringSurface.plain("#101418")} /></SynCloudOSProvider></Host>);
+    const shelf = view.getByRole("region", { name: "Widgets" });
+    expect(shelf.getAttribute("data-nse-role")).toBe("widget-shelf");
+    expect(shelf.querySelector(':scope > [data-nse-part="decoration"][data-nse-role="material"]')).not.toBeNull();
+    expect(shelf.querySelector('[data-nse-part="header"] > [data-nse-part="image"]')).not.toBeNull();
+    expect(view.getByRole("status").getAttribute("data-nse-part")).toBe("status");
+    collect();
+  } finally {
+    cleanup();
+    await runtime.dispose("theme contract widget specimen completed");
+  }
+});
+
+it("renders the notification cube faces, priority and action states", async () => {
+  const runtime = createTestRuntime({ id: "theme-contract-notification" });
+  const setting = "SynCloudOS4:debug.notificationScreenCapture";
+  const previous = window.localStorage.getItem(setting);
+  window.localStorage.setItem(setting, "disabled");
+  try {
+    await runtime.notifications.post({
+      kind: "system", title: "Backup finished", message: "Archived documents are safe.", priority: "timeSensitive",
+      actions: [{ id: "dismiss", kind: "dismiss", label: "Dismiss backup", primary: true, destructive: true }],
+    });
+    const view = render(<Host><SynCloudOSProvider runtime={runtime}><NotificationCentrePresenter
+      snapshot={runtime.store.getSnapshot()} openRequest={null}
+    /></SynCloudOSProvider></Host>);
+    const action = await view.findByRole("button", { name: "Dismiss backup" });
+    expect(action.getAttribute("data-nse-style")).toBe("primary");
+    expect(action.getAttribute("data-nse-has-destructive-action")).toBe("true");
+    expect(view.container.querySelector('[data-nse-part="bezel"][data-nse-level="timeSensitive"]')).not.toBeNull();
+    expect(view.container.querySelector('[data-nse-part="face"][data-nse-role="screen"]')).not.toBeNull();
+    expect(view.container.querySelector('[data-nse-part="face"][data-nse-role="underside"]')).not.toBeNull();
+    collect();
+  } finally {
+    if (previous === null) window.localStorage.removeItem(setting);
+    else window.localStorage.setItem(setting, previous);
+    cleanup();
+    await runtime.dispose("theme contract notification specimen completed");
+  }
+});
+
+it("renders the system observation preference panes", async () => {
+  const runtime = createTestRuntime({ id: "theme-contract-observations" });
+  const StoragePane = StoragePreference.view;
+  try {
+    const view = render(<Host><SynCloudOSProvider runtime={runtime}>
+      <CapabilitiesPane />
+      <StoragePane settings={runtime.settings.get()} appearance="light" locale={runtime.store.getSnapshot().localeServices} />
+      <UpdateReadinessDetails snapshot={runtime.updateReadiness.getSnapshot()} />
+    </SynCloudOSProvider></Host>);
+    for (const role of ["capabilities", "storage", "updates"]) {
+      expect(view.container.querySelector(`[data-nse-control="view"][data-nse-part="content"][data-nse-role="${role}"]`)).not.toBeNull();
+    }
+    collect();
+  } finally {
+    cleanup();
+    await runtime.dispose("theme contract observations specimen completed");
+  }
+});
+
+const contractArchive = createChronosphereAppSubject("contract-archive", "Versions", [
+  { id: "current", sequence: 2, title: "Current draft", dateLabel: "Today", displayLabel: "Current", summary: "Present version", isCurrent: true },
+  { id: "saved", sequence: 1, title: "Saved draft", dateLabel: "Yesterday", displayLabel: "Saved", summary: "Earlier version" },
+], { card: { aspectRatio: 1.6, material: "paper" } });
+function contractArchiveEnvironment(signal: AbortSignal): ChronosphereEnvironment {
+  return {
+    signal,
+    images: { load() { throw new Error("Contract specimen uses the still-image fallback"); } },
+    mediaQueries: { getSnapshot: () => true, subscribe: () => () => {} },
+    scheduler: {
+      requestAnimationFrame(callback) {
+        const id = window.requestAnimationFrame(callback);
+        return { dispose: () => window.cancelAnimationFrame(id) };
+      },
+      setTimeout(callback, delayMs) {
+        const id = window.setTimeout(callback, delayMs);
+        return { dispose: () => window.clearTimeout(id) };
+      },
+    },
+    animations: {
+      acquireOwner: viewId => ({ viewId, dispose() {} }),
+      animate: () => ({ progress: 1, finished: Promise.resolve(), dispose() {} }),
+    },
+  };
+}
+
+it("renders the archive preparation, grid, timeline and version detail hooks", async () => {
+  const controller = new AbortController();
+  const environment = contractArchiveEnvironment(controller.signal);
+  const stageEnvironment: ChronospherePlatformPort = {
+    matchMedia: () => ({ matches: true, subscribe: () => () => {}, dispose() {} }),
+    requestAnimationFrame: callback => window.requestAnimationFrame(callback),
+    cancelAnimationFrame: handle => window.cancelAnimationFrame(handle as number),
+    setTimeout: (callback, delayMs) => window.setTimeout(callback, delayMs),
+    clearTimeout: handle => window.clearTimeout(handle as number),
+  };
+  const view = render(<Host><ChronosphereEnvironmentProvider value={environment}>
+    <Chronosphere subject={contractArchive} view={ChronosphereGridView} capturePresent={() => new Promise(() => {})} onReturn={() => {}} />
+    <ChronosphereGridView model={{
+      subject: contractArchive, entries: contractArchive.entries, labels: defaultChronosphereLabels,
+      presentImage: null, foregroundImage: null, presentRect: null, prepared: undefined,
+    }} actions={{ exit() {} }} />
+    <ChronosphereStage subject={contractArchive} environment={stageEnvironment} immediate
+      DetailFocusScopeComponent={({ children }) => <>{children}</>} PushButtonComponent={NSEButton} />
+  </ChronosphereEnvironmentProvider></Host>);
+  try {
+    const stack = document.querySelector('[data-nse-control="chronosphere"][data-nse-style="stack"]');
+    const card = stack?.querySelector('[data-nse-part="cell"][data-nse-role="stack"][data-nse-selected]');
+    expect(card).toBeTruthy();
+    fireEvent.click(card!);
+    await waitFor(() => expect(stack?.querySelector('[data-nse-part="title"][data-nse-role="details"]')).toBeTruthy());
+    expect(document.querySelector('[data-nse-control="chronosphere"][data-nse-style="preparation"]')).toBeTruthy();
+    expect(document.querySelector('[data-nse-control="chronosphere"][data-nse-style="grid"]')).toBeTruthy();
+    expect(stack?.querySelector('[data-nse-part="track"][data-nse-role="timeline"]')).toBeTruthy();
+    await waitFor(() => expect(stack?.querySelector('[data-nse-control="visual-effect-view"][data-nse-style="vortex"] [data-nse-part="image"]')).toBeTruthy());
+    collect();
+  } finally {
+    view.unmount();
+    controller.abort();
+  }
+});
+
+it("renders the projected book strips, folded paper and tear hooks", () => {
+  const print = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a7GwAAAAASUVORK5CYII=";
+  const view = render(<Host>
+    <PageCurlLeaf preset="bookTurn" progress={0.5} reducedMotion={false} turnSurface={{ front: print, back: print, strips: 2 }} front="Front" inside="Inside" />
+    <PageCurlLeaf preset="bookCurl" progress={0.4} reducedMotion={false} backGhost front="Front" inside="Inside" />
+    <PageCurlLeaf preset="tearAway" progress={0.4} reducedMotion={false} front="Receipt" />
+    <PageCurlLeaf preset="nseSheet" front="Front" inside="Inside" />
+    <PageCurlLeaf preset="settingsPeel" front="Front" inside="Inside" />
+    <PageCurlLeaf preset="cardFlip" front="Front" back="Reverse" />
+  </Host>);
+  expect(view.container.querySelector('[data-nse-presentation="book"] [data-nse-part="face"][data-nse-role="page-strip"]')).toBeTruthy();
+  expect(view.container.querySelector('[data-nse-part="face"][data-nse-style="fold"]')).toBeTruthy();
+  expect(view.container.querySelector('[data-nse-part="attachment"][data-nse-role="page-tear"]')).toBeTruthy();
   collect();
 });
 

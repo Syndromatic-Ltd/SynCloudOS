@@ -85,7 +85,8 @@ function Surface({
     ? "webspring-app-view-body-surface webspring-app-view-body-surface-sourcelist"
     : "webspring-app-view-body-surface";
   const paint = {
-    "data-frame-background": background,
+    "data-nse-part": "content-view" as const,
+    "data-nse-background-style": background,
     "data-full-size-content": fullSizeContentView ? "" : undefined,
     style: {
       ...safeArea.properties,

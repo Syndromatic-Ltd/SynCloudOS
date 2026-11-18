@@ -52,7 +52,7 @@ export function UpdateReadinessDetails({ snapshot }: { readonly snapshot: HostUp
   ];
   const domainLabels = { documents: t('preferences.updates.domain.documents', 'Documents'), editing: t('preferences.updates.domain.editing', 'Editing'), tasks: t('preferences.updates.domain.tasks', 'Background work'), native: t('preferences.updates.domain.native', 'Native operations') };
   const inspection = snapshot.inspection;
-  return <div className="nse-update-readiness">
+  return <div data-nse-control="view" data-nse-part="content" data-nse-role="updates" className="nse-update-readiness">
     <NSEBox><div className="nse-update-readiness-section">
       <h2>{t('preferences.updates.readiness', 'Update readiness')}</h2>
       <p role="status" aria-live="polite" aria-atomic="true">{headline}</p>

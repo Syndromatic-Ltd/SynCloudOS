@@ -173,11 +173,11 @@ export function Chronosphere<TPrepared = unknown, TDetail = unknown>({ subject, 
     if (renderPreparation) return renderPreparation(state);
     // A HUD bezel over the window, as OS X shows a short wait: the document stays in view. It
     // lives in the overlay layer, outside the app, so the window capture never contains it.
-    const bezel = <div className="chronosphere-preparation" role={state.error ? "alert" : "status"} data-state={state.error ? "error" : "loading"}>
-      <div className="chronosphere-preparation-bezel">
-        {state.error ? <><p className="chronosphere-preparation-title">{labels.couldNotOpen}</p><p className="chronosphere-preparation-error">{state.error.message}</p>
-          <div className="chronosphere-preparation-actions"><NSEButton title={labels.cancel} onClick={finishReturn} /><NSEButton title={labels.retry} onClick={retry} /></div></>
-          : <><LoadingSpinner variant="dark" label="" ariaLabel={labels.opening} className="chronosphere-preparation-spinner" /><p className="chronosphere-preparation-title">{labels.opening}</p></>}
+    const bezel = <div className="chronosphere-preparation" data-nse-control="chronosphere" data-nse-part="background" data-nse-style="preparation" role={state.error ? "alert" : "status"} data-nse-state={state.error ? "error" : "loading"}>
+      <div className="chronosphere-preparation-bezel" data-nse-part="bezel" data-nse-role="preparation">
+        {state.error ? <><p className="chronosphere-preparation-title" data-nse-part="title" data-nse-role="preparation">{labels.couldNotOpen}</p><p className="chronosphere-preparation-error" data-nse-part="error" data-nse-role="preparation">{state.error.message}</p>
+          <div className="chronosphere-preparation-actions" data-nse-part="actions" data-nse-role="preparation"><NSEButton title={labels.cancel} onClick={finishReturn} /><NSEButton title={labels.retry} onClick={retry} /></div></>
+          : <><LoadingSpinner variant="dark" label="" ariaLabel={labels.opening} className="chronosphere-preparation-spinner" /><p className="chronosphere-preparation-title" data-nse-part="title" data-nse-role="preparation">{labels.opening}</p></>}
       </div>
     </div>;
     return portalHost ? createPortal(bezel, portalHost) : bezel;

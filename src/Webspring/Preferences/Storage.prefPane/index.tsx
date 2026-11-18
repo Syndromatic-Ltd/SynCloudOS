@@ -22,7 +22,7 @@ function StoragePane() {
   const unavailable = (state: "unsupported" | "denied" | "failed") => state === "unsupported" ? t("preferences.storage.unsupported", "Not supported by this browser") : state === "denied" ? t("preferences.storage.denied", "The browser refused this query") : t("preferences.storage.failed", "The query failed");
   const bytes = (value: number | null) => value === null ? t("preferences.storage.omitted", "Not reported by the browser") : t("preferences.storage.bytes", "About {bytes} bytes", { bytes: String(value) });
   return <section className="nse-storage-diagnostics" aria-label={t("preferences.storage", "Storage")}>
-    <NSEBox><div className="nse-storage-diagnostics-section">
+    <NSEBox><div data-nse-control="view" data-nse-part="content" data-nse-role="storage" className="nse-storage-diagnostics-section">
       <h2>{t("preferences.storage.heading", "Browser storage")}</h2>
       <NSEButton
         title={snapshot.state === "completed" ? t("preferences.storage.refresh", "Refresh storage status") : t("preferences.storage.inspect", "Check storage status")}

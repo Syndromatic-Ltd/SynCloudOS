@@ -62,8 +62,8 @@ it("draws the Board's folder icons in the definition's folder appearance", async
   render(<SynCloudOSProvider runtime={runtime}><WebspringHost shell={shell} startupPhase="complete" /></SynCloudOSProvider>);
 
   const tile = (await screen.findByRole("button", { name: "Open folder Tools" })).querySelector<HTMLElement>(".webspring-folder-tile")!;
-  expect(tile.dataset.shape).toBe("circle");
-  expect(tile.dataset.fill).toBe("texture");
+  expect(tile.dataset.nseStyle).toBe("circle");
+  expect(tile.dataset.nseType).toBe("texture");
   expect(tile.style.getPropertyValue("--webspring-folder-tile-texture")).toBe('url("/cotton.jpg")');
   expect(tile.style.getPropertyValue("--webspring-folder-tile-texture-size")).toBe("96px");
 });

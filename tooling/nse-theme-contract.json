@@ -14,6 +14,10 @@
         "selected"
       ],
       "variants": {
+        "role": [
+          "anchor",
+          "backdrop"
+        ],
         "type": [
           "application",
           "folder"
@@ -24,6 +28,7 @@
       "parts": [
         "background",
         "border",
+        "content",
         "content-border",
         "content-view",
         "decoration"
@@ -32,12 +37,27 @@
         "key-window=false"
       ],
       "variants": {
+        "background-style": [
+          "none",
+          "system"
+        ],
         "content-border": [
           "large",
           "small"
         ],
         "edge": [
           "minY"
+        ],
+        "material": [
+          "metal"
+        ],
+        "style": [
+          "custom",
+          "standard"
+        ],
+        "type": [
+          "incoming",
+          "outgoing"
         ]
       }
     },
@@ -50,13 +70,26 @@
     },
     "board": {
       "parts": [
+        "accessory",
         "background",
+        "button",
         "content",
         "group",
         "header"
       ],
-      "states": [],
-      "variants": {}
+      "states": [
+        "selected",
+        "state=ready"
+      ],
+      "variants": {
+        "presentation": [
+          "idle"
+        ],
+        "role": [
+          "launcher",
+          "page-controls"
+        ]
+      }
     },
     "box": {
       "parts": [
@@ -66,6 +99,7 @@
         "border",
         "content",
         "header",
+        "label",
         "separator",
         "subtitle",
         "title"
@@ -92,7 +126,8 @@
           "true"
         ],
         "role": [
-          "disclosure"
+          "disclosure",
+          "note"
         ],
         "shadow": [
           "true"
@@ -233,7 +268,12 @@
           "\r",
           "\u001b"
         ],
+        "position": [
+          "leading",
+          "trailing"
+        ],
         "role": [
+          "archive-action",
           "back",
           "close",
           "current",
@@ -246,6 +286,67 @@
         ],
         "style": [
           "edited"
+        ]
+      }
+    },
+    "chronosphere": {
+      "parts": [
+        "accessory",
+        "actions",
+        "backdrop",
+        "background",
+        "badge",
+        "bezel",
+        "body",
+        "button",
+        "cell",
+        "content",
+        "decoration",
+        "face",
+        "footer",
+        "header",
+        "indicator",
+        "label",
+        "status",
+        "subtitle",
+        "surface",
+        "tick",
+        "title",
+        "track",
+        "viewport"
+      ],
+      "states": [
+        "selected",
+        "state=loading",
+        "state=open"
+      ],
+      "variants": {
+        "material": [
+          "paper"
+        ],
+        "position": [
+          "past",
+          "present"
+        ],
+        "revealed": [
+          "true"
+        ],
+        "role": [
+          "archive",
+          "caption",
+          "current-version",
+          "details",
+          "grid",
+          "preparation",
+          "signal",
+          "stack",
+          "time-navigation",
+          "timeline"
+        ],
+        "style": [
+          "grid",
+          "preparation",
+          "stack"
         ]
       }
     },
@@ -486,18 +587,43 @@
         "title"
       ],
       "states": [],
-      "variants": {}
+      "variants": {
+        "position": [
+          "bottom",
+          "top"
+        ],
+        "presentation": [
+          "closed",
+          "closing",
+          "open"
+        ],
+        "style": [
+          "fade",
+          "split"
+        ]
+      }
     },
     "folder-tile": {
       "parts": [
         "background",
         "bezel",
-        "image"
+        "border",
+        "highlight",
+        "image",
+        "indicator",
+        "shadow"
       ],
-      "states": [],
+      "states": [
+        "highlighted"
+      ],
       "variants": {
         "style": [
+          "circle",
           "roundedRect"
+        ],
+        "type": [
+          "inset",
+          "texture"
         ]
       }
     },
@@ -544,7 +670,11 @@
       "states": [
         "selected"
       ],
-      "variants": {}
+      "variants": {
+        "role": [
+          "artwork"
+        ]
+      }
     },
     "image-view": {
       "parts": [
@@ -743,20 +873,44 @@
     "notification-banner": {
       "parts": [
         "accessory",
+        "actions",
         "background",
         "bezel",
         "cancel",
+        "cell",
         "content",
         "effects",
+        "face",
         "image",
         "label",
-        "shadow"
+        "paragraph",
+        "shadow",
+        "title"
       ],
       "states": [],
       "variants": {
+        "has-destructive-action": [
+          "true"
+        ],
+        "level": [
+          "standard",
+          "timeSensitive"
+        ],
         "notification-presentation": [
           "plain",
           "sliced-3d"
+        ],
+        "role": [
+          "action",
+          "application",
+          "dismiss",
+          "screen",
+          "shade",
+          "underside",
+          "void"
+        ],
+        "style": [
+          "primary"
         ]
       }
     },
@@ -765,6 +919,7 @@
         "accessory",
         "actions",
         "background",
+        "button",
         "cancel",
         "cell",
         "content",
@@ -772,13 +927,31 @@
         "group",
         "header",
         "label",
+        "paragraph",
         "row",
-        "title"
+        "status",
+        "title",
+        "value"
       ],
       "states": [
         "selected"
       ],
-      "variants": {}
+      "variants": {
+        "role": [
+          "action",
+          "application",
+          "clear",
+          "clear-all",
+          "close",
+          "groups",
+          "history",
+          "message",
+          "metadata"
+        ],
+        "type": [
+          "displayed"
+        ]
+      }
     },
     "open-panel": {
       "parts": [
@@ -836,10 +1009,67 @@
     },
     "page-controller": {
       "parts": [
-        "content"
+        "attachment",
+        "backdrop",
+        "border",
+        "button",
+        "content",
+        "decoration",
+        "face",
+        "separator",
+        "shadow",
+        "sheet",
+        "surface"
       ],
-      "states": [],
-      "variants": {}
+      "states": [
+        "state=idle",
+        "tracking="
+      ],
+      "variants": {
+        "edge": [
+          "bottom",
+          "right",
+          "top"
+        ],
+        "flow": [
+          "book"
+        ],
+        "orientation": [
+          "horizontal",
+          "vertical"
+        ],
+        "position": [
+          "back",
+          "front"
+        ],
+        "presentation": [
+          "book"
+        ],
+        "role": [
+          "bookCurl",
+          "bookTurn",
+          "cardFlip",
+          "nseSheet",
+          "page-fold",
+          "page-ghost",
+          "page-leaf",
+          "page-strip",
+          "page-tear",
+          "settingsPeel",
+          "tearAway"
+        ],
+        "style": [
+          "curl",
+          "flip",
+          "fold",
+          "peel",
+          "tear",
+          "turn"
+        ],
+        "type": [
+          "css"
+        ]
+      }
     },
     "panel": {
       "parts": [
@@ -1788,16 +2018,43 @@
     "view": {
       "parts": [
         "background",
-        "content"
+        "content",
+        "decoration",
+        "group",
+        "header",
+        "image",
+        "item",
+        "label",
+        "loading",
+        "paragraph",
+        "preview",
+        "status",
+        "title",
+        "value"
       ],
       "states": [],
       "variants": {
+        "chrome": [
+          "standard"
+        ],
         "corner-curve": [
           "circular",
           "continuous"
         ],
         "role": [
-          "runtime"
+          "capabilities",
+          "description",
+          "drag-proxy",
+          "material",
+          "note",
+          "runtime",
+          "startup",
+          "startup-material",
+          "startup-spinner",
+          "startup-spotlight",
+          "storage",
+          "updates",
+          "widget-shelf"
         ],
         "surface-ink": [
           "light"
@@ -1817,7 +2074,9 @@
     },
     "visual-effect-view": {
       "parts": [
-        "background"
+        "background",
+        "image",
+        "surface"
       ],
       "states": [],
       "variants": {
@@ -1834,8 +2093,12 @@
           "linen",
           "metal"
         ],
+        "role": [
+          "vortex"
+        ],
         "style": [
-          "panel"
+          "panel",
+          "vortex"
         ]
       }
     },

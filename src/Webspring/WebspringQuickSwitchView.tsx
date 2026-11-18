@@ -276,7 +276,7 @@ export function WebspringQuickSwitchView({
             aria-activedescendant={activeOptionId}
             tabIndex={0}
             ref={listRef}
-            data-overflowing={overflowing ? "true" : undefined}
+            data-nse-type={overflowing ? "overflowing" : undefined}
           >
             {apps.map((app, index) => {
               const state = lifecycle[normalizeBundleIdentifier(app.bundleIdentifier)];

@@ -114,7 +114,7 @@ export function PrivacySecurityPane({ store, userId, applicationNames, text = fa
     </div> : [...applications].map(([appId, entries]) => {
       const appName = applicationNames?.[appId] ?? appId;
       return <NSEBox key={appId} title={appName} titlePosition="noTitle" contentViewMargins={{ width: 12, height: 12 }}>
-        <NSEStackView className="nse-privacy-application" orientation="vertical" alignment="fill" spacing={16}>
+        <NSEStackView data-nse-role="application-privacy" className="nse-privacy-application" orientation="vertical" alignment="fill" spacing={16}>
           <NSETextField isEditable={false} role="heading" aria-level={2} font="headline" lineBreakMode="byCharWrapping">{appName}</NSETextField>
           {entries.map(record => <PrivacyServiceRow key={record.service} record={record} store={store} appName={appName} text={text} />)}
         </NSEStackView>

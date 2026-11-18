@@ -4,7 +4,6 @@ import { join, relative, resolve, sep } from "node:path";
 import * as cssTree from "css-tree";
 import { expect, it } from "vitest";
 import { isPaintProperty, userAgentResetValues } from "../../scripts/synware/paint-properties.mjs";
-import ratchet from "./framework-paint-ratchet.json";
 
 const root = resolve(import.meta.dirname, "../..");
 
@@ -41,11 +40,5 @@ function frameworkPaintCounts() {
 }
 
 it("framework CSS draws no paint", () => {
-  expect(frameworkPaintCounts()).toEqual(ratchet);
-});
-
-it("the ratchet only shrinks to zero", () => {
-  for (const [file, count] of Object.entries(ratchet)) {
-    expect(Number.isInteger(count) && count > 0, file).toBe(true);
-  }
+  expect(frameworkPaintCounts()).toEqual({});
 });

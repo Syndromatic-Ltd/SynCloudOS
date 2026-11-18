@@ -20,6 +20,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useNSEAppearanceProjection } from "../NSE/Appearance/NSEAppearanceProvider";
 import { WebspringFolderTile } from "./WebspringFolderTile";
 import type { WebspringApp, WebspringFolderItem } from "./webspringTypes";
 import "./WebspringPresentation.css";
@@ -145,22 +146,25 @@ export function WebspringDragProxy({
   mobile?: boolean;
   proxyRef?: (element: HTMLDivElement | null) => void;
 }) {
+  const appearance = useNSEAppearanceProjection();
   if (!point || typeof document === "undefined") return null;
   const artwork = app
-    ? <img src={app.iconUrl ?? ""} alt="" draggable={false} />
-    : folder ? <span className="webspring-drag-proxy-folder"><WebspringFolderTile folder={folder} /></span> : null;
+    ? <img data-nse-part="image" src={app.iconUrl ?? ""} alt="" draggable={false} />
+    : folder ? <span data-nse-part="image" className="webspring-drag-proxy-folder"><WebspringFolderTile folder={folder} /></span> : null;
   if (!artwork) return null;
 
   return createPortal((
     <div
+      {...appearance}
       ref={proxyRef}
+      data-nse-control="view" data-nse-part="preview" data-nse-role="drag-proxy"
       className="webspring-drag-proxy"
       data-mobile={mobile ? "true" : "false"}
       aria-hidden="true"
-      style={{ left: point.x, top: point.y }}
+      style={{ ...appearance.style, left: point.x, top: point.y }}
     >
       {artwork}
-      <span>{app?.displayName ?? folder?.title}</span>
+      <span data-nse-part="title">{app?.displayName ?? folder?.title}</span>
     </div>
   ), document.body);
 }

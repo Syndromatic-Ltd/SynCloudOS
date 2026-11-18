@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+@layer nse.structure {
+
 .webspring-icon-artwork {
   position: relative;
   z-index: 3;
@@ -45,16 +47,10 @@
 
 .webspring-icon-artwork__glow {
   z-index: 2;
-  opacity: 0;
   transform: scale(0.985);
-  filter:
-    brightness(1.42)
-    saturate(0.72)
-    blur(1.15px)
-    drop-shadow(0 0 3px rgba(226, 248, 255, 0.48))
-    drop-shadow(0 0 7px rgba(94, 202, 255, 0.26));
-  mix-blend-mode: screen;
   transition:
     opacity 260ms var(--webspring-material-ease),
     transform 360ms var(--webspring-material-ease);
+}
+
 }

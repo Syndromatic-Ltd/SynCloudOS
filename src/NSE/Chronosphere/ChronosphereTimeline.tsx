@@ -180,10 +180,10 @@ export const ChronosphereTimeline = memo(function ChronosphereTimeline({
   const ordered = [...mounted].sort((a, b) => b - a);
   const tabStop = focusedIndex !== null && focusedIndex < count ? focusedIndex : selected;
 
-  return <div className="chronosphere-rail chronosphere-timeline" role="group" aria-label={label}
+  return <div className="chronosphere-rail chronosphere-timeline" data-nse-part="accessory" data-nse-role="timeline" role="group" aria-label={label}
     aria-hidden={!visible || undefined} inert={!visible || !count} data-reduced-motion={reducedMotion}
     style={{ opacity: visible ? 1 : 0 }}>
-    <div className="chronosphere-timeline-viewport" ref={viewportRef}
+    <div className="chronosphere-timeline-viewport" data-nse-part="viewport" data-nse-role="timeline" ref={viewportRef}
       onWheel={event => event.stopPropagation()}
       onScroll={event => {
         const node = event.currentTarget;
@@ -208,17 +208,17 @@ export const ChronosphereTimeline = memo(function ChronosphereTimeline({
           if (pointerY.current === null) aim(null);
         }
       }}>
-      <ol className="chronosphere-timeline-track" role="list" style={{ height: `${trackHeight}px` }}>
+      <ol className="chronosphere-timeline-track" data-nse-part="track" data-nse-role="timeline" role="list" style={{ height: `${trackHeight}px` }}>
         {ordered.map(index => {
           const entry = entries[index], base = position(index), distance = base - lens.center;
           const magnify = reducedMotion ? 0 : lens.amount * (Math.abs(distance) < LENS_RADIUS
             ? (1 + Math.cos(Math.PI * distance / LENS_RADIUS)) / 2 : 0);
           const top = base + (reducedMotion ? 0 : lens.amount * lensOffset(distance));
           const active = index === selected;
-          return <li key={entry.id} className="chronosphere-timeline-tick" aria-posinset={count - index} aria-setsize={count}
-            data-active={active} data-labelled={count <= 20 || index % 4 === 0 || index === count - 1 || active || magnify > 0.08}
+          return <li key={entry.id} className="chronosphere-timeline-tick" data-nse-part="tick" data-nse-role="timeline" aria-posinset={count - index} aria-setsize={count}
+            data-nse-selected={active ? "" : undefined} data-nse-revealed={count <= 20 || index % 4 === 0 || index === count - 1 || active || magnify > 0.08 ? "true" : undefined}
             style={{ top: `${top}px`, "--timeline-magnify": magnify } as CSSProperties}>
-            <button type="button" className="chronosphere-timeline-hit" data-entry-index={index}
+            <button type="button" className="chronosphere-timeline-hit" data-nse-part="button" data-nse-role="timeline" data-entry-index={index}
               ref={node => { if (node) buttons.current.set(index, node); else buttons.current.delete(index); }}
               style={{ height: `${HIT_HEIGHT + magnify * 12}px` }} tabIndex={visible ? tabStop === index ? 0 : -1 : -1}
               aria-current={active ? "true" : undefined} aria-label={`${entry.dateLabel} — ${entry.displayLabel ?? entry.title}`}
@@ -232,8 +232,8 @@ export const ChronosphereTimeline = memo(function ChronosphereTimeline({
                   if (event.currentTarget.matches(":focus-visible")) aim(position(index));
                 }
               }}>
-              <span className="chronosphere-timeline-label">{entry.dateLabel}</span>
-              <span className="chronosphere-timeline-mark" aria-hidden="true" />
+              <span className="chronosphere-timeline-label" data-nse-part="label" data-nse-role="timeline">{entry.dateLabel}</span>
+              <span className="chronosphere-timeline-mark" data-nse-part="indicator" data-nse-role="timeline" aria-hidden="true" />
             </button>
           </li>;
         })}

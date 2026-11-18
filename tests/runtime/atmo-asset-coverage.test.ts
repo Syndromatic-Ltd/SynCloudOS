@@ -67,6 +67,13 @@ describe("explicit theme resource ownership", () => {
       "materials/thumb-texture.webp",
       "spinners/spinner.png",
       "spinners/spinner_signin.png",
+      "workspace/NSETileCotton.jpg",
+      "workspace/brushed-metal.webp",
+      "workspace/control-tab-left.png",
+      "workspace/control-tab-middle.png",
+      "workspace/control-tab-right.png",
+      "workspace/notification-delete-down.png",
+      "workspace/notification-delete-up.png",
     ]));
   });
 

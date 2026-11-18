@@ -1,0 +1,132 @@
+/* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
+
+[data-nse-control="board"][data-nse-part="background"],
+:where(:scope):is([data-nse-control="board"][data-nse-part="background"]) {
+  color: #fff;
+  background: var(--webspring-launcher-colour);
+}
+
+[data-nse-control="board"][data-nse-part="background"]>[data-nse-part="content"][data-nse-role="launcher"]>[data-nse-part="background"][data-nse-role="launcher"],
+:where(:scope):is([data-nse-control="board"][data-nse-part="background"])>[data-nse-part="content"][data-nse-role="launcher"]>[data-nse-part="background"][data-nse-role="launcher"] {
+  background-color: var(--webspring-launcher-colour);
+  background-image: var(--webspring-launcher-image);
+  background-size: var(--webspring-launcher-size);
+  background-repeat: var(--webspring-launcher-repeat);
+  background-position: var(--webspring-launcher-position);
+  opacity: 1;
+}
+
+[data-nse-control="board"][data-nse-part="background"]>[data-nse-part="content"][data-nse-role="launcher"]>[data-nse-part="background"][data-nse-role="launcher"]::after,
+:where(:scope):is([data-nse-control="board"][data-nse-part="background"])>[data-nse-part="content"][data-nse-role="launcher"]>[data-nse-part="background"][data-nse-role="launcher"]::after {
+  background-image: var(--webspring-launcher-overlay-image);
+  background-size: var(--webspring-launcher-overlay-size);
+  background-position: center top;
+  background-repeat: no-repeat;
+  opacity: var(--webspring-launcher-overlay-opacity);
+  mix-blend-mode: var(--webspring-launcher-overlay-blend);
+}
+
+[data-nse-control="board"][data-nse-part="background"][data-nse-state="waiting"]>[data-nse-part="content"][data-nse-role="launcher"]>[data-nse-part="background"][data-nse-role="launcher"],
+:where(:scope):is([data-nse-control="board"][data-nse-part="background"][data-nse-state="waiting"])>[data-nse-part="content"][data-nse-role="launcher"]>[data-nse-part="background"][data-nse-role="launcher"] {
+  opacity: 0;
+}
+
+[data-nse-control="board"][data-nse-part="background"][data-nse-state="holding"]>[data-nse-part="content"][data-nse-role="launcher"]>[data-nse-part="background"][data-nse-role="launcher"],
+:where(:scope):is([data-nse-control="board"][data-nse-part="background"][data-nse-state="holding"])>[data-nse-part="content"][data-nse-role="launcher"]>[data-nse-part="background"][data-nse-role="launcher"] {
+  opacity: 1;
+}
+
+[data-nse-control="board"][data-nse-part="background"][data-nse-state="ready"]>[data-nse-part="content"][data-nse-role="launcher"]>[data-nse-part="background"][data-nse-role="launcher"],
+:where(:scope):is([data-nse-control="board"][data-nse-part="background"][data-nse-state="ready"])>[data-nse-part="content"][data-nse-role="launcher"]>[data-nse-part="background"][data-nse-role="launcher"] {
+  opacity: 1;
+}
+
+[data-nse-control="board"][data-nse-part="background"]>[data-nse-part="content"][data-nse-role="launcher"]>[data-nse-part="header"],
+:where(:scope):is([data-nse-control="board"][data-nse-part="background"])>[data-nse-part="content"][data-nse-role="launcher"]>[data-nse-part="header"] {
+  color: #3c4557;
+  text-shadow: 0 1px rgba(255, 255, 255, .7);
+}
+
+[data-nse-control="board"][data-nse-part="background"] [data-nse-control="app-icon"][data-nse-part="content"]:focus-visible,
+:where(:scope):is([data-nse-control="board"][data-nse-part="background"]) [data-nse-control="app-icon"][data-nse-part="content"]:focus-visible {
+  outline-color: #fff;
+}
+
+[data-nse-control="board"][data-nse-part="background"] [data-nse-control="app-icon"][data-nse-part="content"]>[data-nse-part="image"]>[data-nse-part="bezel"]>[data-nse-part="image"],
+:where(:scope):is([data-nse-control="board"][data-nse-part="background"]) [data-nse-control="app-icon"][data-nse-part="content"]>[data-nse-part="image"]>[data-nse-part="bezel"]>[data-nse-part="image"] {
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .28)) drop-shadow(0 14px 10px rgba(9, 13, 21, .52));
+}
+
+[data-nse-control="board"][data-nse-part="background"] [data-nse-control="app-icon"][data-nse-part="content"]>[data-nse-part="image"]>[data-nse-part="bezel"][data-nse-state="loading"]>[data-nse-part="image"],
+:where(:scope):is([data-nse-control="board"][data-nse-part="background"]) [data-nse-control="app-icon"][data-nse-part="content"]>[data-nse-part="image"]>[data-nse-part="bezel"][data-nse-state="loading"]>[data-nse-part="image"] {
+  filter: brightness(.58) drop-shadow(0 2px 2px rgba(0, 0, 0, .28)) drop-shadow(0 14px 10px rgba(9, 13, 21, .52));
+}
+
+[data-nse-control="board"][data-nse-part="background"] [data-nse-control="app-icon"][data-nse-part="content"]:not([data-nse-style="editing"],[data-nse-enabled="false"]):active>[data-nse-part="image"]>[data-nse-part="bezel"]>[data-nse-part="image"],
+:where(:scope):is([data-nse-control="board"][data-nse-part="background"]) [data-nse-control="app-icon"][data-nse-part="content"]:not([data-nse-style="editing"],[data-nse-enabled="false"]):active>[data-nse-part="image"]>[data-nse-part="bezel"]>[data-nse-part="image"] {
+  filter: brightness(.8) drop-shadow(0 4px 5px rgba(9, 13, 21, .55));
+}
+
+[data-nse-control="board"][data-nse-part="background"] [data-nse-control="app-icon"][data-nse-part="content"][data-nse-enabled="false"],
+:where(:scope):is([data-nse-control="board"][data-nse-part="background"]) [data-nse-control="app-icon"][data-nse-part="content"][data-nse-enabled="false"] {
+  filter: grayscale(.7);
+  opacity: .55;
+}
+
+[data-nse-control="board"][data-nse-part="background"] [data-nse-control="app-icon"][data-nse-part="content"]>[data-nse-part="image"]>[data-nse-part="title"],
+:where(:scope):is([data-nse-control="board"][data-nse-part="background"]) [data-nse-control="app-icon"][data-nse-part="content"]>[data-nse-part="image"]>[data-nse-part="title"] {
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .9), 0 2px 5px rgba(0, 0, 0, .45);
+}
+
+[data-nse-control="board"][data-nse-part="background"] [data-nse-control="app-icon"][data-nse-part="content"][data-nse-state="dragging"],
+:where(:scope):is([data-nse-control="board"][data-nse-part="background"]) [data-nse-control="app-icon"][data-nse-part="content"][data-nse-state="dragging"] {
+  opacity: .28;
+}
+
+[data-nse-control="board"][data-nse-part="background"]>[data-nse-part="content"][data-nse-role="launcher"]>[data-nse-part="accessory"][data-nse-role="page-controls"]>[data-nse-part="button"]::after,
+:where(:scope):is([data-nse-control="board"][data-nse-part="background"])>[data-nse-part="content"][data-nse-role="launcher"]>[data-nse-part="accessory"][data-nse-role="page-controls"]>[data-nse-part="button"]::after {
+  background: rgba(255, 255, 255, .38);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .5);
+}
+
+[data-nse-control="board"][data-nse-part="background"]>[data-nse-part="content"][data-nse-role="launcher"]>[data-nse-part="accessory"][data-nse-role="page-controls"]>[data-nse-part="button"][data-nse-selected]::after,
+:where(:scope):is([data-nse-control="board"][data-nse-part="background"])>[data-nse-part="content"][data-nse-role="launcher"]>[data-nse-part="accessory"][data-nse-role="page-controls"]>[data-nse-part="button"][data-nse-selected]::after {
+  background: #fff;
+}
+
+[data-nse-control="board"][data-nse-part="background"]>[data-nse-part="content"][data-nse-role="launcher"]>[data-nse-part="accessory"][data-nse-role="page-controls"]>[data-nse-part="button"]:focus-visible,
+:where(:scope):is([data-nse-control="board"][data-nse-part="background"])>[data-nse-part="content"][data-nse-role="launcher"]>[data-nse-part="accessory"][data-nse-role="page-controls"]>[data-nse-part="button"]:focus-visible {
+  outline-color: #fff;
+}
+
+[data-nse-control="board"][data-nse-part="background"]>[data-nse-control="view"][data-nse-part="background"][data-nse-role="widget-shelf"],
+:where(:scope):is([data-nse-control="board"][data-nse-part="background"])>[data-nse-control="view"][data-nse-part="background"][data-nse-role="widget-shelf"] {
+  border-top-color: rgba(230, 235, 244, .7);
+  opacity: 1;
+}
+
+[data-nse-control="board"][data-nse-part="background"][data-nse-state="waiting"]>[data-nse-control="view"][data-nse-part="background"][data-nse-role="widget-shelf"],
+:where(:scope):is([data-nse-control="board"][data-nse-part="background"][data-nse-state="waiting"])>[data-nse-control="view"][data-nse-part="background"][data-nse-role="widget-shelf"] {
+  opacity: 0;
+}
+
+[data-nse-control="board"][data-nse-part="background"][data-nse-state="holding"]>[data-nse-control="view"][data-nse-part="background"][data-nse-role="widget-shelf"],
+:where(:scope):is([data-nse-control="board"][data-nse-part="background"][data-nse-state="holding"])>[data-nse-control="view"][data-nse-part="background"][data-nse-role="widget-shelf"] {
+  opacity: 1;
+}
+
+[data-nse-control="board"][data-nse-part="background"][data-nse-state="ready"]>[data-nse-control="view"][data-nse-part="background"][data-nse-role="widget-shelf"],
+:where(:scope):is([data-nse-control="board"][data-nse-part="background"][data-nse-state="ready"])>[data-nse-control="view"][data-nse-part="background"][data-nse-role="widget-shelf"] {
+  opacity: 1;
+}
+
+[data-nse-control="view"][data-nse-part="preview"][data-nse-role="drag-proxy"],
+:where(:scope):is([data-nse-control="view"][data-nse-part="preview"][data-nse-role="drag-proxy"]) {
+  color: #fff;
+  filter: drop-shadow(0 18px 14px rgba(9, 13, 21, .6));
+}
+
+[data-nse-control="view"][data-nse-part="preview"][data-nse-role="drag-proxy"]>[data-nse-part="image"] {
+  filter: none;
+}

@@ -312,7 +312,7 @@ describe("ApplicationStageView app menu", () => {
       </SynCloudOSProvider>,
     );
 
-    const surface = document.querySelector<HTMLElement>('.webspring-app-view-surface[data-multiswitch-role="outgoing"]');
+    const surface = document.querySelector<HTMLElement>('[data-nse-control="app-view-chrome"][data-nse-part="background"] > [data-nse-part="content"][data-nse-type="outgoing"]');
     expect(surface).not.toBeNull();
     expect(surface?.style.transform).toBe("");
   });

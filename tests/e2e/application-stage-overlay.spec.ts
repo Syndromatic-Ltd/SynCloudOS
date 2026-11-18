@@ -47,15 +47,15 @@ async function comparePoses(page: Page) {
   }, { destination, plane, frame, surface });
 }
 
-async function topPixel(page: Page) {
-  const png = await page.screenshot({ clip: { x: 20, y: 20, width: 1, height: 1 } });
+async function pixelAt(page: Page, point = { x: 20, y: 20 }) {
+  const png = await page.screenshot({ clip: { ...point, width: 1, height: 1 } });
   return Array.from(await sharp(png).ensureAlpha().raw().toBuffer());
 }
 
 test("staged portals do not paint or receive clicks, and reveal beyond the frame clip", async ({ page }) => {
   await open(page, "?staged=true");
   await expect(page.locator("#portal-action")).toBeHidden();
-  expect(await topPixel(page)).toEqual([11, 13, 17, 255]);
+  expect(await pixelAt(page)).toEqual([11, 13, 17, 255]);
   expect(await page.evaluate(() => !!document.elementFromPoint(20, 20)?.closest("[data-viewport-overlay]"))).toBe(false);
   await page.mouse.click(20, 20);
   expect(await page.evaluate(() => (window as any).stageOverlayFixture.clicks())).toBe(0);
@@ -71,7 +71,7 @@ test("staged portals do not paint or receive clicks, and reveal beyond the frame
 test("outgoing portals follow both stage planes and cannot override disabled pointer input", async ({ page }) => {
   await open(page);
   await page.evaluate(() => (window as any).stageOverlayFixture.setRole("outgoing"));
-  await page.waitForFunction(() => document.querySelector('[data-multiswitch-role="outgoing"]'));
+  await page.waitForFunction(() => document.querySelector('[data-nse-control="app-view-chrome"][data-nse-part="background"][data-nse-type="outgoing"]'));
   await page.evaluate(() => { for (const animation of document.getAnimations()) { animation.pause(); animation.currentTime = 360; } });
   const poses = await comparePoses(page);
   expect(poses.destination).toEqual(poses.frame);
@@ -79,10 +79,20 @@ test("outgoing portals follow both stage planes and cannot override disabled poi
   // Check input while the outgoing overlay is still visibly on screen;
   // an offscreen endpoint alone could pass through geometry rather than inertness.
   await page.evaluate(() => { for (const animation of document.getAnimations()) animation.currentTime = 0; });
-  expect(await topPixel(page)).toEqual([239, 45, 101, 255]);
-  expect(await page.evaluate(() => !!document.elementFromPoint(20, 20)?.closest("[data-viewport-overlay]"))).toBe(false);
+  const button = await page.locator("#portal-action").boundingBox();
+  if (!button) throw new Error("The outgoing portal action has no bounds.");
+  const point = {
+    x: Math.round(button.x + button.width / 4),
+    y: Math.round(button.y + button.height / 4),
+  };
+  // The starting 3D pose can move the button's left edge past x=20. Sample
+  // its visible interior in the top-left area clipped from the app plane.
+  expect(point.x).toBeLessThan(80);
+  expect(point.y).toBeLessThan(80);
+  expect(await pixelAt(page, point)).toEqual([239, 45, 101, 255]);
+  expect(await page.evaluate(({ x, y }) => !!document.elementFromPoint(x, y)?.closest("[data-viewport-overlay]"), point)).toBe(false);
   await expect(page.locator(destination)).toHaveAttribute("inert", "");
-  await page.mouse.click(20, 20);
+  await page.mouse.click(point.x, point.y);
   expect(await page.evaluate(() => (window as any).stageOverlayFixture.clicks())).toBe(0);
 });
 
