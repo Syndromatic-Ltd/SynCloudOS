@@ -24,11 +24,27 @@ function drawsElement(selector) {
   if (compound.some(child => child.type === "PseudoElementSelector" ||
     child.type === "PseudoClassSelector" && legacyPseudoElements.has(child.name.toLowerCase()))) return false;
   return compound.some(child => {
-    if (child.type === "AttributeSelector") return drawingHooks.has(cssTree.generate(child.name));
+    if (child.type === "AttributeSelector") return drawingHooks.has(cssTree.ident.decode(cssTree.generate(child.name)));
     if (child.type !== "PseudoClassSelector" || !["is", "where"].includes(child.name.toLowerCase())) return false;
     const argumentsList = child.children?.first;
     return argumentsList?.type === "SelectorList" && argumentsList.children.toArray().every(drawsElement);
   });
+}
+
+function confineAppDrawing(selector, root) {
+  cssTree.walk(selector, { visit: "PseudoClassSelector", enter(node, item, list) {
+    if (cssTree.ident.decode(node.name).toLowerCase() === "scope") {
+      list.replace(item, cssTree.parse(root, { context: "selector" }).children);
+    }
+  } });
+  const subject = cssTree.parse(":where(:scope,:scope *)", { context: "selector" }).children;
+  let pseudo = null;
+  selector.children.forEach((node, item) => {
+    if (node.type === "Combinator") pseudo = null;
+    if (!pseudo && (node.type === "PseudoElementSelector" ||
+        node.type === "PseudoClassSelector" && legacyPseudoElements.has(node.name.toLowerCase()))) pseudo = item;
+  });
+  selector.children.insertList(subject, pseudo);
 }
 
 function clearingRules(children) {
@@ -65,22 +81,25 @@ function clearingRules(children) {
 export function scopeThemeCSS(source, bundleIdentifier, options = {}) {
   const { layer = "nse.theme", boundary = "data-nse-theme" } = options;
   const ast = cssTree.parse(source, { parseCustomProperty: true });
+  const root = "[" + boundary + "=" + JSON.stringify(bundleIdentifier) + "]";
+  const app = boundary === "data-nse-app-theme";
   const seen = new WeakSet();
   cssTree.walk(ast, { visit: "Rule", enter(node, item, list) {
     if (seen.has(node)) return cssTree.walk.skip;
     const selectors = [];
     let needsControlScope = false;
     for (const selector of node.prelude.children) {
+      if (app) confineAppDrawing(selector, root);
       const text = cssTree.generate(selector), exclusions = gates(text);
       if (text.includes(":scope") && !text.includes("data-nse-control") && !text.includes("data-nse-part")) { selectors.push(text); continue; }
       let hasControl = false;
-      const carriesControl = child => { let found = false; cssTree.walk(child, node => { if (node.type === "AttributeSelector" && cssTree.generate(node.name) === "data-nse-control") found = true; }); return found; };
+      const carriesControl = child => { let found = false; cssTree.walk(child, node => { if (node.type === "AttributeSelector" && cssTree.ident.decode(cssTree.generate(node.name)) === "data-nse-control") found = true; }); return found; };
       for (const child of selector.children) if (carriesControl(child)) hasControl = true;
       if (!hasControl) { needsControlScope = true; selectors.push(`:scope${exclusions} ${text}`, `:scope${exclusions}:is(${text})`); continue; }
       const children = selector.children.toArray(), modified = [];
       for (let index = 0; index < children.length; index++) {
         const child = children[index]; modified.push(cssTree.generate(child));
-        if (child.type === "AttributeSelector" && ["data-nse-control", "data-nse-part"].includes(cssTree.generate(child.name)) || child.type === "PseudoClassSelector" && carriesControl(child)) modified.push(exclusions);
+        if (child.type === "AttributeSelector" && drawingHooks.has(cssTree.ident.decode(cssTree.generate(child.name))) || child.type === "PseudoClassSelector" && carriesControl(child)) modified.push(exclusions);
       }
       selectors.push(modified.join(""));
     }
@@ -92,9 +111,18 @@ export function scopeThemeCSS(source, bundleIdentifier, options = {}) {
   } });
   const clear = clearingRules(ast.children);
   const clearLayer = clear ? "@layer clear {\n" + clear + "\n}\n" : "";
-  const root = "[" + boundary + "=" + JSON.stringify(bundleIdentifier) + "]";
+  const foreignTheme = "[" + boundary + "]:not(" + root + ")";
+  const limit = app ? foreignTheme + ", [data-nse-system-surface]" : foreignTheme;
+  let content = clearLayer + cssTree.generate(ast);
+  if (app) {
+    const { appThemeControls } = JSON.parse(readFileSync(new URL("../../tooling/nse-theme-contract.json", import.meta.url), "utf8"));
+    const controls = appThemeControls.map(name => "[data-nse-control=" + JSON.stringify(name) + "]").join(",");
+    // TabStrip and window titlebar cells borrow the button hook for their base drawing.
+    const nestedControl = '[data-nse-control]:not([data-nse-control="button"][data-nse-part="cell"])';
+    content = "@scope (:scope:is(" + controls + "), :scope :is(" + controls + ")) to (" + nestedControl + ") {\n" + content + "\n}";
+  }
   // The style engine files the twins above under nothing. optimiseSelectors re-files them.
-  return optimiseSelectors(`@layer ${layer} { @scope (${root}) to ([${boundary}]:not(${root})) {\n${clearLayer}${cssTree.generate(ast)}\n} }\n`);
+  return optimiseSelectors(`@layer ${layer} { @scope (${root}) to (${limit}) {\n${content}\n} }\n`);
 }
 /** Resolve local imports before wrapping: @import is not valid inside a scope. */
 export function themeStylesheet(bundle, fileImport) {
@@ -113,7 +141,10 @@ export function themeStylesheet(bundle, fileImport) {
     });
     return cssTree.generate(ast);
   }
-  return scopeThemeCSS(stylesheet(bundle.stylesheetPath), bundle.theme.bundleIdentifier);
+  const options = bundle.theme.kind === "app"
+    ? { layer: /** @type {const} */ ("nse.app-theme"), boundary: /** @type {const} */ ("data-nse-app-theme") }
+    : undefined;
+  return scopeThemeCSS(stylesheet(bundle.stylesheetPath), bundle.theme.bundleIdentifier, options);
 }
 /** Only host source is inspected. Bundle Info.ts is parsed by validation, never executed. */
 export function referencedThemeIdentifiers(root, bundles) {
@@ -151,12 +182,18 @@ export function themeModuleSource(bundles, selected, fileImport, stylePrefix) {
   for (const bundle of bundles) {
     const theme = bundle.theme, images = {};
     if (theme.bundleIdentifier === "com.syndromatic.atmo") continue;
+    const styleImport = `import ${JSON.stringify(stylePrefix + theme.bundleIdentifier + ".css")};`;
+    if (theme.kind === "app") {
+      if (selected.has(theme.bundleIdentifier)) imports.push(styleImport);
+      entries.push(JSON.stringify(theme.bundleIdentifier) + ":freeze(" + JSON.stringify(theme) + ")");
+      continue;
+    }
     for (const [name, image] of Object.entries(theme.images)) {
       const files = {};
       for (const [scale, path] of Object.entries(image.files)) { const variable = `image${imageIndex++}`; imports.push(`import ${variable} from ${JSON.stringify(fileImport(resolve(bundle.bundlePath, "Contents", path)) + "?url")};`); files[scale] = variable; }
       images[name] = "{..." + JSON.stringify(image) + ",files:{" + Object.entries(files).map(([scale, variable]) => `${JSON.stringify(scale)}:${variable}`).join(",") + "}}";
     }
-    if (selected.has(theme.bundleIdentifier)) imports.push(`import ${JSON.stringify(stylePrefix + theme.bundleIdentifier + ".css")};`);
+    if (selected.has(theme.bundleIdentifier)) imports.push(styleImport);
     entries.push(`${JSON.stringify(theme.bundleIdentifier)}:freeze({...${JSON.stringify(theme)},images:{${Object.entries(images).map(([name, code]) => `${JSON.stringify(name)}:${code}`).join(",")}}})`);
   }
   return `${imports.join("\n")}\nconst freeze = value => { if (value && typeof value === "object") { Object.values(value).forEach(freeze); Object.freeze(value); } return value; };\nconst values = Object.freeze({${entries.join(",")}});\nexport const themes = Object.freeze(new Proxy(values, { get(target, key, receiver) { if (typeof key === "string" && key !== "toJSON" && !(key in Object.prototype) && !Object.hasOwn(target, key)) throw new TypeError("Unknown theme: " + key); return Reflect.get(target, key, receiver); } }));\n`;

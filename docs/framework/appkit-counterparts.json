@@ -316,6 +316,7 @@
     "NSEEdgeInsetsZero": "NSEdgeInsetsZero",
     "NSELayoutGuide": "NSLayoutGuide",
     "NSESafeArea": { "none": "The result of useNSESafeArea: NSView.safeAreaInsets and NSView.safeAreaRect together, as AppKit reads them from two NSView properties." },
+    "NSEAppTheme": { "none": "An app bundle’s partial CSS drawing for window and navigation chrome. NSAppearance has no public bundle type for this." },
     "NSETheme": "NSAppearance",
     "NSEThemeImage": "NSImage",
     "NSEThemeColourName": { "none": "The names a theme defines for NSColor semantic and system colours (labelColor, controlAccentColor and the rest), in British spelling. AppKit has no public type for this list." },

@@ -73,12 +73,15 @@ describe("theme paint clearing", () => {
   });
 
   it("wraps app theme paint and clearing at app theme boundaries when requested", () => {
-    const css = scopeThemeCSS(button + " " + bezel + " { background: red }", bundleIdentifier, {
+    const css = scopeThemeCSS(':scope[data-nse-colour-scheme-resolved="dark"] [data-nse-control="tab-view"] [data-nse-part="cell"] { background: red }', bundleIdentifier, {
       layer: "nse.app-theme",
       boundary: "data-nse-app-theme",
     });
     expect(css).toContain("@layer nse.app-theme");
-    expect(css).toContain('@scope ([data-nse-app-theme="com.example.paint"]) to ([data-nse-app-theme]:not([data-nse-app-theme="com.example.paint"]))');
+    expect(css).toContain('@scope ([data-nse-app-theme="com.example.paint"]) to ([data-nse-app-theme]:not([data-nse-app-theme="com.example.paint"]), [data-nse-system-surface])');
+    expect(css).toContain(') to ([data-nse-control]:not([data-nse-control="button"][data-nse-part="cell"])) {');
+    expect(css).toContain(":where(:scope,:scope *)");
+    expect(css).toContain('.nse\\:colour-scheme-resolved\\=dark[data-nse-app-theme="com.example.paint"]');
     expect(css).toContain("@layer clear");
   });
 });

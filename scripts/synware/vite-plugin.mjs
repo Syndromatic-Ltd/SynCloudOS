@@ -856,7 +856,17 @@ export function synCloudOS(options) {
 
   const refresh = () => {
     discovery = discover(resolvedConfig.root, pluginOptions);
-    themeBundles = pluginOptions.themesDirectory === false ? [] : discoverThemeBundles(resolve(resolvedConfig.root, pluginOptions.themesDirectory ?? "src/Themes"));
+    const systemThemes = pluginOptions.themesDirectory === false
+      ? []
+      : discoverThemeBundles(resolve(resolvedConfig.root, pluginOptions.themesDirectory ?? "src/Themes"));
+    const appThemes = discovery.bundles.flatMap(bundle => discoverThemeBundles(resolve(dirname(bundle.entryPath), "Resources"), { kind: "app" }));
+    const identifiers = new Set(["com.syndromatic.atmo", ...systemThemes.map(bundle => bundle.theme.bundleIdentifier)]);
+    for (const bundle of appThemes) {
+      const { bundleIdentifier } = bundle.theme;
+      if (identifiers.has(bundleIdentifier)) throw new TypeError(bundle.infoPath + ": Duplicate theme identifier " + bundleIdentifier + ".");
+      identifiers.add(bundleIdentifier);
+    }
+    themeBundles = [...systemThemes, ...appThemes];
     selectedThemes = referencedThemeIdentifiers(resolvedConfig.root, themeBundles);
     installationBuild = null;
     return discovery;

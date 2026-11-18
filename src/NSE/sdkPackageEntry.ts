@@ -68,6 +68,7 @@ export {
 } from "./Appearance";
 export type {
   NSEAppearanceDataAttributes,
+  NSEAppTheme,
   NSETheme,
   NSEThemeNavigation,
   NSEThemePresentation,

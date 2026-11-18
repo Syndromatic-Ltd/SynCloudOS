@@ -2364,6 +2364,18 @@
       "on"
     ]
   },
+  "appThemeControls": [
+    "window",
+    "app-view-chrome",
+    "toolbar",
+    "toolbar-item",
+    "tab-view",
+    "segmented-control",
+    "split-view",
+    "menu",
+    "menu-item",
+    "popover"
+  ],
   "limits": {
     "minimumHitTarget": {
       "regular": 24,

@@ -713,6 +713,10 @@ Themes can read these properties when an instance supplies a colour.
 - `presentation.notifications`: `plain`, `sliced-3d`
 - `presentation.materialLighting`: `off`, `on`
 
+## App theme controls
+
+`window`, `app-view-chrome`, `toolbar`, `toolbar-item`, `tab-view`, `segmented-control`, `split-view`, `menu`, `menu-item`, `popover`
+
 ## Limits
 
 - `minimumHitTarget`: regular 24, large 24
