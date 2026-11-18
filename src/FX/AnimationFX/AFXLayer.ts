@@ -59,6 +59,7 @@ import {
   type AFXLayerActionMap,
 } from "./AFXLayerActions";
 import type { AFXSampledAnimation } from "./AFXAnimationGroup";
+import { afxSampledVelocity, type AFXAnimationVelocity } from "./animationVelocity";
 import type {
   AFXAnimationHandle,
   AFXAnimationScalar,
@@ -194,6 +195,7 @@ type Running = {
   property: string;
   value: AFXAnimationScalar | null;
   currentValue(): AFXAnimationScalar | null;
+  currentVelocity(): AFXAnimationVelocity;
   compositor: AFXLayerCompositorPlayback | null;
 };
 let nextLayerAnimation = 0;
@@ -1668,7 +1670,8 @@ export class AFXLayer {
     const previous = [...this.#running.values()].find(
         (x) => x.property === declaredKeyPath,
       ),
-      visible = previous?.currentValue();
+      visible = previous?.currentValue(),
+      velocity = previous?.currentVelocity() ?? null;
     const declaredRetarget = visible !== null && visible !== undefined
       ? input.retarget
       : undefined;
@@ -1677,7 +1680,7 @@ export class AFXLayer {
         "This animation cannot retarget an active presentation.",
       );
     const candidate = visible !== null && visible !== undefined
-      ? declaredRetarget!.call(input, visible)
+      ? declaredRetarget!.call(input, visible, velocity)
       : input;
     const animation = contentAnimation
       ? snapshotContentAnimation(candidate, declaredKeyPath, declaredTargetId)
@@ -1752,6 +1755,11 @@ export class AFXLayer {
           running.value = animation.sample(elapsed);
         }
         return running.value;
+      },
+      currentVelocity: () => {
+        if (state !== "running" && state !== "paused") return null;
+        running.currentValue();
+        return animation.velocity?.(elapsed) ?? afxSampledVelocity(animation, elapsed);
       },
       cancelFrame: () => {},
       handle: null!,
