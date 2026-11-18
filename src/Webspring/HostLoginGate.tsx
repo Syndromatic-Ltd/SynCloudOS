@@ -35,7 +35,7 @@ function LoginModalFocusScope({ children }: PropsWithChildren) {
 function LoginBackdrop() {
   const backdropRef = useRef<HTMLDivElement>(null);
   useNSEPresentation(backdropRef, useWebspringMotion().loginBackdropDim);
-  return <div ref={backdropRef} className="syncloudos-login-backdrop" aria-hidden="true" />;
+  return <div ref={backdropRef} className="syncloudos-login-backdrop" data-nse-control="login-window" data-nse-part="backdrop" aria-hidden="true" />;
 }
 
 const subscribeNothing = () => () => undefined;

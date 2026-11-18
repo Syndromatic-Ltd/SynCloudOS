@@ -20,10 +20,8 @@
 
 import type { ReactNode } from "react";
 import "./material.css";
-import "../Appearance/Materials/cloud.css";
 import "../Appearance/Materials/glass.css";
 import "../Appearance/Materials/linen.css";
-import "../Appearance/Materials/metal.css";
 
 export type MaterialAppearance = "atmo" | "cloud" | "glass" | "linen" | "metal";
 

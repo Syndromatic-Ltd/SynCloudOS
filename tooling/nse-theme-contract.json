@@ -67,6 +67,7 @@
         "content",
         "header",
         "separator",
+        "subtitle",
         "title"
       ],
       "states": [],
@@ -240,6 +241,7 @@
           "ground",
           "ink",
           "minimise",
+          "sign-in",
           "zoom"
         ],
         "style": [
@@ -267,8 +269,12 @@
         "content",
         "image",
         "item",
+        "label",
         "media-item",
+        "primary-text",
         "row",
+        "subtitle",
+        "title",
         "viewport"
       ],
       "states": [
@@ -276,7 +282,11 @@
         "focused",
         "selected"
       ],
-      "variants": {}
+      "variants": {
+        "style": [
+          "cover-flow"
+        ]
+      }
     },
     "colour-panel": {
       "parts": [
@@ -400,6 +410,7 @@
         "previous-month",
         "previous-year",
         "row",
+        "second-hand",
         "segments",
         "separator",
         "title",
@@ -530,7 +541,9 @@
         "image",
         "shadow"
       ],
-      "states": [],
+      "states": [
+        "selected"
+      ],
       "variants": {}
     },
     "image-view": {
@@ -538,6 +551,7 @@
         "accessory",
         "background",
         "button",
+        "decoration",
         "image"
       ],
       "states": [],
@@ -545,6 +559,13 @@
         "image-scaling": [
           "none",
           "proportionallyUpOrDown"
+        ],
+        "role": [
+          "crop"
+        ],
+        "style": [
+          "editor",
+          "thumbnail"
         ]
       }
     },
@@ -575,25 +596,40 @@
       "parts": [
         "actions",
         "attachment",
+        "backdrop",
         "background",
         "badge",
         "bezel",
+        "button",
         "content",
         "decoration",
         "effects",
         "error",
+        "field",
         "image",
+        "indicator",
         "leading",
         "shadow",
         "suspension",
         "title",
         "trailing"
       ],
-      "states": [],
+      "states": [
+        "enabled=false",
+        "state=off",
+        "state=on"
+      ],
       "variants": {
         "login-presentation": [
           "ornamented",
           "plain"
+        ],
+        "role": [
+          "fastener",
+          "plate"
+        ],
+        "validation": [
+          "invalid"
         ]
       }
     },
@@ -626,6 +662,7 @@
         "bezel",
         "body",
         "content",
+        "decoration",
         "separator",
         "surface",
         "title",
@@ -666,7 +703,8 @@
           "application-menu",
           "context-menu",
           "listbox",
-          "menu"
+          "menu",
+          "popup"
         ]
       }
     },
@@ -744,18 +782,36 @@
     },
     "open-panel": {
       "parts": [
-        "background"
+        "actions",
+        "background",
+        "content-message",
+        "footer",
+        "header",
+        "sheet",
+        "sidebar",
+        "status"
       ],
       "states": [],
-      "variants": {}
+      "variants": {
+        "role": [
+          "toolbar"
+        ],
+        "style": [
+          "compact"
+        ]
+      }
     },
     "outline-view": {
       "parts": [
         "background",
         "disclosure",
+        "group",
+        "group-row",
         "label",
         "loading",
-        "row"
+        "row",
+        "separator",
+        "sidebar"
       ],
       "states": [
         "enabled=false",
@@ -765,6 +821,9 @@
         "expanded": [
           "false",
           "true"
+        ],
+        "role": [
+          "children"
         ],
         "selection-highlight-style": [
           "regular",
@@ -785,16 +844,39 @@
     "panel": {
       "parts": [
         "actions",
+        "backdrop",
         "background",
         "content",
+        "group",
+        "image",
         "label",
+        "status",
+        "surface",
         "title",
         "value"
       ],
-      "states": [],
+      "states": [
+        "state=off"
+      ],
       "variants": {
         "appearance-name": [
-          "aqua"
+          "aqua",
+          "darkAqua"
+        ],
+        "chrome": [
+          "standard"
+        ],
+        "role": [
+          "copyright",
+          "empty",
+          "lead-note",
+          "note",
+          "notifications",
+          "preference-body",
+          "preference-list",
+          "preference-pane",
+          "tagline",
+          "trademark"
         ],
         "style": [
           "about",
@@ -893,7 +975,8 @@
     },
     "predicate-editor": {
       "parts": [
-        "background"
+        "background",
+        "error"
       ],
       "states": [],
       "variants": {}
@@ -912,6 +995,7 @@
           "aqua"
         ],
         "background-style": [
+          "emphasised",
           "normal"
         ],
         "control-size": [
@@ -971,10 +1055,17 @@
     },
     "rule-editor": {
       "parts": [
-        "background"
+        "background",
+        "error",
+        "group",
+        "row"
       ],
       "states": [],
-      "variants": {}
+      "variants": {
+        "style": [
+          "alternating"
+        ]
+      }
     },
     "ruler-view": {
       "parts": [
@@ -1182,10 +1273,14 @@
       "parts": [
         "accessory",
         "bezel",
+        "border",
         "circular-body",
         "content",
+        "decoration",
         "field",
         "fill",
+        "highlight",
+        "image",
         "knob",
         "linear-alternative",
         "title",
@@ -1201,6 +1296,9 @@
           "mini",
           "regular",
           "small"
+        ],
+        "material": [
+          "metal"
         ],
         "orientation": [
           "horizontal",
@@ -1225,6 +1323,10 @@
       ],
       "states": [],
       "variants": {
+        "orientation": [
+          "horizontal",
+          "vertical"
+        ],
         "position": [
           "leading"
         ],
@@ -1275,7 +1377,11 @@
       "parts": [
         "background",
         "bezel",
+        "border",
+        "decoration",
         "fill",
+        "highlight",
+        "image",
         "knob",
         "label",
         "title",
@@ -1288,6 +1394,9 @@
         "tracking=false"
       ],
       "variants": {
+        "material": [
+          "metal"
+        ],
         "position": [
           "leading",
           "trailing"
@@ -1302,6 +1411,8 @@
         "badge",
         "content",
         "decoration",
+        "disclosure",
+        "image",
         "label",
         "title"
       ],
@@ -1315,6 +1426,9 @@
         ],
         "presentation": [
           "sheet"
+        ],
+        "role": [
+          "details"
         ],
         "type": [
           "content-view"
@@ -1398,6 +1512,7 @@
         "disclosure",
         "image",
         "leading",
+        "notice",
         "primary-text",
         "row",
         "secondary-text",
@@ -1418,6 +1533,9 @@
         "position": [
           "first",
           "last"
+        ],
+        "role": [
+          "preference-link"
         ],
         "style": [
           "list"
@@ -1508,14 +1626,23 @@
     },
     "text-view": {
       "parts": [
+        "attachment",
         "content",
-        "field"
+        "field",
+        "handle",
+        "shadow"
       ],
-      "states": [],
+      "states": [
+        "selected"
+      ],
       "variants": {
         "editable": [
           "false",
           "true"
+        ],
+        "shadow": [
+          "contact",
+          "curved"
         ]
       }
     },
@@ -1555,6 +1682,9 @@
           "bottom",
           "inline",
           "top"
+        ],
+        "presentation": [
+          "keyboard"
         ],
         "style": [
           "bevel",
@@ -1657,6 +1787,7 @@
     },
     "view": {
       "parts": [
+        "background",
         "content"
       ],
       "states": [],
@@ -1664,6 +1795,9 @@
         "corner-curve": [
           "circular",
           "continuous"
+        ],
+        "role": [
+          "runtime"
         ],
         "surface-ink": [
           "light"
@@ -1690,9 +1824,18 @@
         "chrome": [
           "standard"
         ],
+        "focus-style": [
+          "inset",
+          "within"
+        ],
         "material": [
           "atmo",
+          "glass",
+          "linen",
           "metal"
+        ],
+        "style": [
+          "panel"
         ]
       }
     },
@@ -1766,6 +1909,9 @@
           "inline-end",
           "inline-start",
           "minY"
+        ],
+        "focus-style": [
+          "ring"
         ],
         "material": [
           "cumulus",

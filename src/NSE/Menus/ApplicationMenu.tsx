@@ -72,7 +72,9 @@ export function ApplicationMenu({ model, controller, overlay, open, anchor, titl
       restoreFocus={false}
       onOpenChange={onOpenChange}
     >
-      <AppMenuSurface className="nse-application-menu" title={title} data-nse-style="application-menu" data-nse-application-menu="true">
+      <AppMenuSurface className="nse-application-menu" title={title} data-nse-style="application-menu" data-nse-application-menu="true"
+        style={{ opacity: "var(--nse-app-menu-presentation-alpha)" }}
+      >
         <MenuView appearance="application-menu" model={model} controller={controller} open={open} onOpenChange={handleMenuOpenChange} />
       </AppMenuSurface>
     </MenuOverlay>

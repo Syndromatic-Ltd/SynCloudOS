@@ -92,7 +92,7 @@ describe("attachment editing", () => {
     expect(block.attributes).toEqual({ alignment: "centre" });
     expect(block.runs[1]).toMatchObject({ kind: "attachment", id: "photo", bounds: { width: 200, height: 150 }, placement: { wrap: "around", alignment: "start" }, appearance: { reflection: 0.3 }, source: { resourceId: "photo-asset" } });
     act(() => session.select(7, 8));
-    expect(cell().dataset).toMatchObject({ wrap: "around", align: "start", selected: "true" });
+    expect(cell().dataset).toMatchObject({ wrap: "around", align: "start", nseSelected: "" });
     update(session, { placement: null, appearance: null, source: { kind: "document-resource", resourceId: "other-asset" } });
     expect(owner.getSnapshot().attributedContent.blocks[0]!.runs[1]).toMatchObject({ id: "photo", source: { resourceId: "other-asset" }, bounds: { width: 200, height: 150 } });
     expect(owner.getSnapshot().attributedContent.blocks[0]!.runs[1]).not.toHaveProperty("placement");

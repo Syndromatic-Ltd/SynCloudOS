@@ -1,0 +1,357 @@
+/* Smooth-surface focus and appearance accessibility preferences. */
+:where(:scope) [data-nse-focus-style],
+:where(:scope):is([data-nse-focus-style]) {
+  box-shadow: var(--nse-smooth-surface-shadow, none);
+}
+
+:where(:scope) [data-nse-focus-style="ring"]:focus-visible,
+:where(:scope):is([data-nse-focus-style="ring"]:focus-visible),
+:where(:scope) [data-nse-focus-style="within"]:focus-within,
+:where(:scope):is([data-nse-focus-style="within"]:focus-within),
+:where(:scope) [data-nse-focus-style="inset"]:focus-visible,
+:where(:scope):is([data-nse-focus-style="inset"]:focus-visible),
+:where(:scope) [data-nse-focus-style="inset"]:focus-within,
+:where(:scope):is([data-nse-focus-style="inset"]:focus-within) {
+  outline: 0;
+  box-shadow:
+    var(--nse-smooth-surface-shadow, none),
+    var(--nse-smooth-surface-focus-ring, 0 0 0 2px rgba(142, 212, 255, 0.76)) !important;
+}
+
+:where(:scope) [data-nse-focus-style="ring"]:focus-visible,
+:where(:scope):is([data-nse-focus-style="ring"]:focus-visible) {
+  outline: 2px solid transparent;
+  outline-offset: var(--nse-smooth-surface-focus-offset, 2px);
+}
+
+/* Transparency is an independent sensory axis. The material boundary owns the
+   flattening, so controls and SynWare do not invent local preference logic. */
+:where([data-nse-transparency="reduced"]):where(
+  [data-nse-control="visual-effect-view"][data-nse-part="background"][data-nse-material="glass"][data-nse-style="panel"],
+  [data-nse-control="panel"][data-nse-part="backdrop"][data-nse-style="preferences"],
+  :is([data-nse-control="menu"],[data-nse-control="popover"],[data-nse-control="sheet"])[data-nse-part="surface"],
+  [data-nse-control="image-view"] > [data-nse-part="accessory"]
+),
+:where(:scope):is(:where([data-nse-transparency="reduced"]):where(
+  [data-nse-control="visual-effect-view"][data-nse-part="background"][data-nse-material="glass"][data-nse-style="panel"],
+  [data-nse-control="panel"][data-nse-part="backdrop"][data-nse-style="preferences"],
+  :is([data-nse-control="menu"],[data-nse-control="popover"],[data-nse-control="sheet"])[data-nse-part="surface"],
+  [data-nse-control="image-view"] > [data-nse-part="accessory"]
+)),
+:where([data-nse-transparency="reduced"]) :where(
+  [data-nse-control="visual-effect-view"][data-nse-part="background"][data-nse-material="glass"][data-nse-style="panel"],
+  [data-nse-control="panel"][data-nse-part="backdrop"][data-nse-style="preferences"],
+  :is([data-nse-control="menu"],[data-nse-control="popover"],[data-nse-control="sheet"])[data-nse-part="surface"],
+  [data-nse-control="image-view"] > [data-nse-part="accessory"]
+),
+:where(:scope):is(:where([data-nse-transparency="reduced"])) :where(
+  [data-nse-control="visual-effect-view"][data-nse-part="background"][data-nse-material="glass"][data-nse-style="panel"],
+  [data-nse-control="panel"][data-nse-part="backdrop"][data-nse-style="preferences"],
+  :is([data-nse-control="menu"],[data-nse-control="popover"],[data-nse-control="sheet"])[data-nse-part="surface"],
+  [data-nse-control="image-view"] > [data-nse-part="accessory"]
+),
+:where([data-nse-transparency="reduced"]):is(:where(
+  [data-nse-control="visual-effect-view"][data-nse-part="background"][data-nse-material="glass"][data-nse-style="panel"],
+  [data-nse-control="panel"][data-nse-part="backdrop"][data-nse-style="preferences"],
+  :is([data-nse-control="menu"],[data-nse-control="popover"],[data-nse-control="sheet"])[data-nse-part="surface"],
+  [data-nse-control="image-view"] > [data-nse-part="accessory"]
+)) {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+:where([data-nse-transparency="reduced"]):where([data-nse-control="visual-effect-view"][data-nse-part="background"][data-nse-material="glass"][data-nse-style="panel"]),
+:where(:scope):is(:where([data-nse-transparency="reduced"]):where([data-nse-control="visual-effect-view"][data-nse-part="background"][data-nse-material="glass"][data-nse-style="panel"])),
+:where([data-nse-transparency="reduced"]) :where([data-nse-control="visual-effect-view"][data-nse-part="background"][data-nse-material="glass"][data-nse-style="panel"]),
+:where(:scope):is(:where([data-nse-transparency="reduced"])) :where([data-nse-control="visual-effect-view"][data-nse-part="background"][data-nse-material="glass"][data-nse-style="panel"]),
+:where([data-nse-transparency="reduced"]):is(:where([data-nse-control="visual-effect-view"][data-nse-part="background"][data-nse-material="glass"][data-nse-style="panel"])) {
+  background-color: Canvas;
+  background-image: none;
+}
+
+/* High contrast is an authored product mode, separate from operating-system
+   forced colours. It deliberately strengthens edges, selected paint and focus. */
+:where(:scope) :where([data-nse-contrast="high"]),
+:where(:scope):is(:where([data-nse-contrast="high"])) {
+  --nse-contrast-canvas: #fff;
+  --nse-contrast-text: #000;
+  --nse-contrast-edge: #000;
+  --nse-contrast-accent: #004fd7;
+  --nse-contrast-accent-text: #fff;
+  --nse-contrast-disabled: #555;
+  color: var(--nse-contrast-text);
+}
+
+:where([data-nse-contrast="high"]) :where(
+  [data-nse-control="box"][data-nse-part="bezel"],
+  :is([data-nse-control="menu"],[data-nse-control="popover"],[data-nse-control="sheet"])[data-nse-part="surface"],
+  [data-nse-control="visual-effect-view"][data-nse-part="background"][data-nse-material="glass"][data-nse-style="panel"],
+  [data-nse-control="menu"][data-nse-style="popup"]:where([data-nse-part="background"][data-nse-role="command-menu"]),
+  [data-nse-control="window"][data-nse-part="background"] > [data-nse-part="bezel"],
+  [data-nse-control="colour-well"],
+  [data-nse-control="colour-wheel"],
+  [data-nse-part="field"],
+  [data-nse-part="date-entry"],
+  [data-nse-control="scroller"][data-nse-part="track"],
+  [data-nse-control="pop-up-button"][data-nse-type="native"] > [data-nse-part="bezel"]
+),
+:where(:scope):is(:where([data-nse-contrast="high"])) :where(
+  [data-nse-control="box"][data-nse-part="bezel"],
+  :is([data-nse-control="menu"],[data-nse-control="popover"],[data-nse-control="sheet"])[data-nse-part="surface"],
+  [data-nse-control="visual-effect-view"][data-nse-part="background"][data-nse-material="glass"][data-nse-style="panel"],
+  [data-nse-control="menu"][data-nse-style="popup"]:where([data-nse-part="background"][data-nse-role="command-menu"]),
+  [data-nse-control="window"][data-nse-part="background"] > [data-nse-part="bezel"],
+  [data-nse-control="colour-well"],
+  [data-nse-control="colour-wheel"],
+  [data-nse-part="field"],
+  [data-nse-part="date-entry"],
+  [data-nse-control="scroller"][data-nse-part="track"],
+  [data-nse-control="pop-up-button"][data-nse-type="native"] > [data-nse-part="bezel"]
+),
+:where([data-nse-contrast="high"]):is(:where(
+  [data-nse-control="box"][data-nse-part="bezel"],
+  :is([data-nse-control="menu"],[data-nse-control="popover"],[data-nse-control="sheet"])[data-nse-part="surface"],
+  [data-nse-control="visual-effect-view"][data-nse-part="background"][data-nse-material="glass"][data-nse-style="panel"],
+  [data-nse-control="menu"][data-nse-style="popup"]:where([data-nse-part="background"][data-nse-role="command-menu"]),
+  [data-nse-control="window"][data-nse-part="background"] > [data-nse-part="bezel"],
+  [data-nse-control="colour-well"],
+  [data-nse-control="colour-wheel"],
+  [data-nse-part="field"],
+  [data-nse-part="date-entry"],
+  [data-nse-control="scroller"][data-nse-part="track"],
+  [data-nse-control="pop-up-button"][data-nse-type="native"] > [data-nse-part="bezel"]
+)) {
+  border-color: var(--nse-contrast-edge) !important;
+  color: var(--nse-contrast-text);
+  box-shadow: 0 0 0 1px var(--nse-contrast-edge);
+}
+
+:where([data-nse-contrast="high"]) :where([data-nse-control="menu-item"]:where([data-nse-part="cell"]):hover,[data-nse-control="menu-item"]:where([data-nse-part="cell"]):focus-visible,[data-nse-part="cell"][data-nse-button-type="radio"]:where([data-nse-control="matrix"] *)[data-nse-selected]),
+:where(:scope):is(:where([data-nse-contrast="high"])) :where([data-nse-control="menu-item"]:where([data-nse-part="cell"]):hover,[data-nse-control="menu-item"]:where([data-nse-part="cell"]):focus-visible,[data-nse-part="cell"][data-nse-button-type="radio"]:where([data-nse-control="matrix"] *)[data-nse-selected]),
+:where([data-nse-contrast="high"]):is(:where([data-nse-control="menu-item"]:where([data-nse-part="cell"]):hover,[data-nse-control="menu-item"]:where([data-nse-part="cell"]):focus-visible,[data-nse-part="cell"][data-nse-button-type="radio"]:where([data-nse-control="matrix"] *)[data-nse-selected])) {
+  background-color: var(--nse-contrast-accent) !important;
+  color: var(--nse-contrast-accent-text) !important;
+}
+
+:where(:scope) :where([data-nse-contrast="high"]) :where(:not(:any-link, [data-nse-control="search-field"] > [data-nse-part="bezel"] > [data-nse-part="field"])):focus-visible,
+:where(:scope):is(:where([data-nse-contrast="high"])) :where(:not(:any-link, [data-nse-control="search-field"] > [data-nse-part="bezel"] > [data-nse-part="field"])):focus-visible,
+:where(:scope) :where([data-nse-contrast="high"]):is(:where(:not(:any-link, [data-nse-control="search-field"] > [data-nse-part="bezel"] > [data-nse-part="field"])):focus-visible),
+:where([data-nse-contrast="high"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):focus-visible,
+:where(:scope):is(:where([data-nse-contrast="high"])) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):focus-visible,
+:where([data-nse-contrast="high"]):is([data-nse-control="menu-item"]:where([data-nse-part="cell"]):focus-visible) {
+  outline: 3px solid var(--nse-contrast-accent) !important;
+  outline-offset: 2px;
+}
+
+:where([data-nse-contrast="high"]) :where([data-nse-button-type="switch"] > [data-nse-part="content"] > [data-nse-part="indicator"],[data-nse-part="cell"][data-nse-button-type="radio"]:where([data-nse-control="matrix"] *)),
+:where(:scope):is(:where([data-nse-contrast="high"])) :where([data-nse-button-type="switch"] > [data-nse-part="content"] > [data-nse-part="indicator"],[data-nse-part="cell"][data-nse-button-type="radio"]:where([data-nse-control="matrix"] *)),
+:where([data-nse-contrast="high"]):is(:where([data-nse-button-type="switch"] > [data-nse-part="content"] > [data-nse-part="indicator"],[data-nse-part="cell"][data-nse-button-type="radio"]:where([data-nse-control="matrix"] *))) {
+  border-color: var(--nse-contrast-edge) !important;
+  box-shadow: 0 0 0 1px var(--nse-contrast-edge);
+}
+
+:where(:scope) :where([data-nse-contrast="high"]) :where(:disabled,[data-nse-enabled="false"]),
+:where(:scope):is(:where([data-nse-contrast="high"])) :where(:disabled,[data-nse-enabled="false"]),
+:where(:scope) :where([data-nse-contrast="high"]):is(:where(:disabled,[data-nse-enabled="false"])) {
+  color: var(--nse-contrast-disabled) !important;
+  opacity: 1 !important;
+  text-decoration: line-through;
+}
+
+/* Provider-forced and real forced-colour mode share the same raster-free
+   replacement contract. System colours preserve user palette authority. */
+:where(:scope) :where([data-nse-contrast="forced"]),
+:where(:scope):is(:where([data-nse-contrast="forced"])) {
+  forced-color-adjust: auto;
+}
+
+:where([data-nse-contrast="forced"]):where(
+  [data-nse-control="box"][data-nse-part="bezel"],
+  :is([data-nse-control="menu"],[data-nse-control="popover"],[data-nse-control="sheet"])[data-nse-part="surface"],
+  [data-nse-control="visual-effect-view"][data-nse-part="background"][data-nse-material="glass"][data-nse-style="panel"],
+  [data-nse-control="menu"][data-nse-style="popup"]:where([data-nse-part="background"][data-nse-role="command-menu"]),
+  [data-nse-control="window"][data-nse-part="background"]
+),
+:where(:scope):is(:where([data-nse-contrast="forced"]):where(
+  [data-nse-control="box"][data-nse-part="bezel"],
+  :is([data-nse-control="menu"],[data-nse-control="popover"],[data-nse-control="sheet"])[data-nse-part="surface"],
+  [data-nse-control="visual-effect-view"][data-nse-part="background"][data-nse-material="glass"][data-nse-style="panel"],
+  [data-nse-control="menu"][data-nse-style="popup"]:where([data-nse-part="background"][data-nse-role="command-menu"]),
+  [data-nse-control="window"][data-nse-part="background"]
+)),
+:where([data-nse-contrast="forced"]) :where(
+  [data-nse-control="box"][data-nse-part="bezel"],
+  :is([data-nse-control="menu"],[data-nse-control="popover"],[data-nse-control="sheet"])[data-nse-part="surface"],
+  [data-nse-control="visual-effect-view"][data-nse-part="background"][data-nse-material="glass"][data-nse-style="panel"],
+  [data-nse-control="menu"][data-nse-style="popup"]:where([data-nse-part="background"][data-nse-role="command-menu"]),
+  [data-nse-control="window"][data-nse-part="background"] > [data-nse-part="bezel"],
+  [data-nse-control="colour-well"],
+  [data-nse-control="colour-wheel"],
+  [data-nse-part="field"],
+  [data-nse-part="date-entry"],
+  [data-nse-control="scroller"][data-nse-part="track"],
+  [data-nse-control="pop-up-button"][data-nse-type="native"] > [data-nse-part="bezel"]
+),
+:where(:scope):is(:where([data-nse-contrast="forced"])) :where(
+  [data-nse-control="box"][data-nse-part="bezel"],
+  :is([data-nse-control="menu"],[data-nse-control="popover"],[data-nse-control="sheet"])[data-nse-part="surface"],
+  [data-nse-control="visual-effect-view"][data-nse-part="background"][data-nse-material="glass"][data-nse-style="panel"],
+  [data-nse-control="menu"][data-nse-style="popup"]:where([data-nse-part="background"][data-nse-role="command-menu"]),
+  [data-nse-control="window"][data-nse-part="background"] > [data-nse-part="bezel"],
+  [data-nse-control="colour-well"],
+  [data-nse-control="colour-wheel"],
+  [data-nse-part="field"],
+  [data-nse-part="date-entry"],
+  [data-nse-control="scroller"][data-nse-part="track"],
+  [data-nse-control="pop-up-button"][data-nse-type="native"] > [data-nse-part="bezel"]
+),
+:where([data-nse-contrast="forced"]):is(:where(
+  [data-nse-control="box"][data-nse-part="bezel"],
+  :is([data-nse-control="menu"],[data-nse-control="popover"],[data-nse-control="sheet"])[data-nse-part="surface"],
+  [data-nse-control="visual-effect-view"][data-nse-part="background"][data-nse-material="glass"][data-nse-style="panel"],
+  [data-nse-control="menu"][data-nse-style="popup"]:where([data-nse-part="background"][data-nse-role="command-menu"]),
+  [data-nse-control="window"][data-nse-part="background"] > [data-nse-part="bezel"],
+  [data-nse-control="colour-well"],
+  [data-nse-control="colour-wheel"],
+  [data-nse-part="field"],
+  [data-nse-part="date-entry"],
+  [data-nse-control="scroller"][data-nse-part="track"],
+  [data-nse-control="pop-up-button"][data-nse-type="native"] > [data-nse-part="bezel"]
+)) {
+  border: 1px solid CanvasText !important;
+  border-image: none !important;
+  background-color: Canvas !important;
+  background-image: none !important;
+  color: CanvasText !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+:where([data-nse-contrast="forced"]) :where([data-nse-button-type="switch"] > [data-nse-part="content"] > [data-nse-part="indicator"],[data-nse-part="cell"][data-nse-button-type="radio"]:where([data-nse-control="matrix"] *)),
+:where(:scope):is(:where([data-nse-contrast="forced"])) :where([data-nse-button-type="switch"] > [data-nse-part="content"] > [data-nse-part="indicator"],[data-nse-part="cell"][data-nse-button-type="radio"]:where([data-nse-control="matrix"] *)),
+:where([data-nse-contrast="forced"]):is(:where([data-nse-button-type="switch"] > [data-nse-part="content"] > [data-nse-part="indicator"],[data-nse-part="cell"][data-nse-button-type="radio"]:where([data-nse-control="matrix"] *))) {
+  border: 2px solid CanvasText !important;
+  border-image: none !important;
+  background: Canvas !important;
+  box-shadow: none !important;
+}
+
+:where([data-nse-contrast="forced"]) :where([data-nse-control="menu"][data-nse-style="popup"]:where([data-nse-part="background"][data-nse-role="command-menu"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):hover,[data-nse-control="menu"][data-nse-style="popup"]:where([data-nse-part="background"][data-nse-role="command-menu"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):focus-visible,[data-nse-part="cell"][data-nse-button-type="radio"]:where([data-nse-control="matrix"] *)[data-nse-selected]),
+:where(:scope):is(:where([data-nse-contrast="forced"])) :where([data-nse-control="menu"][data-nse-style="popup"]:where([data-nse-part="background"][data-nse-role="command-menu"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):hover,[data-nse-control="menu"][data-nse-style="popup"]:where([data-nse-part="background"][data-nse-role="command-menu"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):focus-visible,[data-nse-part="cell"][data-nse-button-type="radio"]:where([data-nse-control="matrix"] *)[data-nse-selected]),
+:where([data-nse-contrast="forced"]):is(:where([data-nse-control="menu"][data-nse-style="popup"]:where([data-nse-part="background"][data-nse-role="command-menu"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):hover,[data-nse-control="menu"][data-nse-style="popup"]:where([data-nse-part="background"][data-nse-role="command-menu"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):focus-visible,[data-nse-part="cell"][data-nse-button-type="radio"]:where([data-nse-control="matrix"] *)[data-nse-selected])) {
+  background: Highlight !important;
+  color: HighlightText !important;
+}
+
+:where(:scope) :where([data-nse-contrast="forced"]) :where(:not(:any-link, [data-nse-control="search-field"] > [data-nse-part="bezel"] > [data-nse-part="field"])):focus-visible,
+:where(:scope):is(:where([data-nse-contrast="forced"])) :where(:not(:any-link, [data-nse-control="search-field"] > [data-nse-part="bezel"] > [data-nse-part="field"])):focus-visible,
+:where(:scope) :where([data-nse-contrast="forced"]):is(:where(:not(:any-link, [data-nse-control="search-field"] > [data-nse-part="bezel"] > [data-nse-part="field"])):focus-visible),
+:where([data-nse-contrast="forced"]) [data-nse-control="menu"][data-nse-style="popup"]:where([data-nse-part="background"][data-nse-role="command-menu"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):focus-visible,
+:where(:scope):is(:where([data-nse-contrast="forced"])) [data-nse-control="menu"][data-nse-style="popup"]:where([data-nse-part="background"][data-nse-role="command-menu"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):focus-visible,
+:where([data-nse-contrast="forced"]):is([data-nse-control="menu"][data-nse-style="popup"]:where([data-nse-part="background"][data-nse-role="command-menu"])) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):focus-visible {
+  outline: 2px solid Highlight !important;
+  outline-offset: 2px;
+}
+
+:where(:scope) :where([data-nse-contrast="forced"]) :where(:disabled,[data-nse-enabled="false"]),
+:where(:scope):is(:where([data-nse-contrast="forced"])) :where(:disabled,[data-nse-enabled="false"]),
+:where(:scope) :where([data-nse-contrast="forced"]):is(:where(:disabled,[data-nse-enabled="false"])) {
+  border-color: GrayText !important;
+  color: GrayText !important;
+  opacity: 1 !important;
+}
+
+:where([data-nse-contrast="forced"]) :is([data-nse-control="window"][data-nse-part="background"] > [data-nse-part="shadow"],[data-nse-control="menu"][data-nse-part="background"][data-nse-role="command-menu"] > [data-nse-part="decoration"]),
+:where(:scope):is(:where([data-nse-contrast="forced"])) :is([data-nse-control="window"][data-nse-part="background"] > [data-nse-part="shadow"],[data-nse-control="menu"][data-nse-part="background"][data-nse-role="command-menu"] > [data-nse-part="decoration"]),
+:where([data-nse-contrast="forced"]):is(:is([data-nse-control="window"][data-nse-part="background"] > [data-nse-part="shadow"],[data-nse-control="menu"][data-nse-part="background"][data-nse-role="command-menu"] > [data-nse-part="decoration"])) {
+  display: none !important;
+}
+
+@media (forced-colors: active) {
+  :where(:scope) {
+    forced-color-adjust: auto;
+  }
+
+  :where(:scope):where(
+  [data-nse-control="box"][data-nse-part="bezel"],
+  :is([data-nse-control="menu"],[data-nse-control="popover"],[data-nse-control="sheet"])[data-nse-part="surface"],
+  [data-nse-control="visual-effect-view"][data-nse-part="background"][data-nse-material="glass"][data-nse-style="panel"],
+  [data-nse-control="menu"][data-nse-style="popup"]:where([data-nse-part="background"][data-nse-role="command-menu"]),
+  [data-nse-control="window"][data-nse-part="background"]
+),
+:where(:scope):is(:where(:scope):where(
+  [data-nse-control="box"][data-nse-part="bezel"],
+  :is([data-nse-control="menu"],[data-nse-control="popover"],[data-nse-control="sheet"])[data-nse-part="surface"],
+  [data-nse-control="visual-effect-view"][data-nse-part="background"][data-nse-material="glass"][data-nse-style="panel"],
+  [data-nse-control="menu"][data-nse-style="popup"]:where([data-nse-part="background"][data-nse-role="command-menu"]),
+  [data-nse-control="window"][data-nse-part="background"]
+)),
+:where(:scope) :where(
+  [data-nse-control="box"][data-nse-part="bezel"],
+  :is([data-nse-control="menu"],[data-nse-control="popover"],[data-nse-control="sheet"])[data-nse-part="surface"],
+  [data-nse-control="visual-effect-view"][data-nse-part="background"][data-nse-material="glass"][data-nse-style="panel"],
+  [data-nse-control="menu"][data-nse-style="popup"]:where([data-nse-part="background"][data-nse-role="command-menu"]),
+  [data-nse-control="window"][data-nse-part="background"] > [data-nse-part="bezel"],
+  [data-nse-control="colour-well"],
+  [data-nse-control="colour-wheel"],
+  [data-nse-part="field"],
+  [data-nse-part="date-entry"],
+  [data-nse-control="scroller"][data-nse-part="track"],
+  [data-nse-control="pop-up-button"][data-nse-type="native"] > [data-nse-part="bezel"]
+),
+:where(:scope):is(:where(
+  [data-nse-control="box"][data-nse-part="bezel"],
+  :is([data-nse-control="menu"],[data-nse-control="popover"],[data-nse-control="sheet"])[data-nse-part="surface"],
+  [data-nse-control="visual-effect-view"][data-nse-part="background"][data-nse-material="glass"][data-nse-style="panel"],
+  [data-nse-control="menu"][data-nse-style="popup"]:where([data-nse-part="background"][data-nse-role="command-menu"]),
+  [data-nse-control="window"][data-nse-part="background"] > [data-nse-part="bezel"],
+  [data-nse-control="colour-well"],
+  [data-nse-control="colour-wheel"],
+  [data-nse-part="field"],
+  [data-nse-part="date-entry"],
+  [data-nse-control="scroller"][data-nse-part="track"],
+  [data-nse-control="pop-up-button"][data-nse-type="native"] > [data-nse-part="bezel"]
+)) {
+    border: 1px solid CanvasText !important;
+    border-image: none !important;
+    background-color: Canvas !important;
+    background-image: none !important;
+    color: CanvasText !important;
+    box-shadow: none !important;
+    filter: none !important;
+  }
+
+  :where(:scope) :where([data-nse-button-type="switch"] > [data-nse-part="content"] > [data-nse-part="indicator"],[data-nse-part="cell"][data-nse-button-type="radio"]:where([data-nse-control="matrix"] *)),
+:where(:scope):is(:where([data-nse-button-type="switch"] > [data-nse-part="content"] > [data-nse-part="indicator"],[data-nse-part="cell"][data-nse-button-type="radio"]:where([data-nse-control="matrix"] *))) {
+    border: 2px solid CanvasText !important;
+    border-image: none !important;
+    background: Canvas !important;
+    box-shadow: none !important;
+  }
+
+  :where(:scope) :where([data-nse-control="menu"][data-nse-style="popup"]:where([data-nse-part="background"][data-nse-role="command-menu"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):hover,[data-nse-control="menu"][data-nse-style="popup"]:where([data-nse-part="background"][data-nse-role="command-menu"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):focus-visible,[data-nse-part="cell"][data-nse-button-type="radio"]:where([data-nse-control="matrix"] *)[data-nse-selected]),
+:where(:scope):is(:where([data-nse-control="menu"][data-nse-style="popup"]:where([data-nse-part="background"][data-nse-role="command-menu"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):hover,[data-nse-control="menu"][data-nse-style="popup"]:where([data-nse-part="background"][data-nse-role="command-menu"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):focus-visible,[data-nse-part="cell"][data-nse-button-type="radio"]:where([data-nse-control="matrix"] *)[data-nse-selected])) {
+    background: Highlight !important;
+    color: HighlightText !important;
+  }
+
+  :where(:scope) :where(:not(:any-link, [data-nse-control="search-field"] > [data-nse-part="bezel"] > [data-nse-part="field"])):focus-visible,
+:where(:scope):is(:where(:not(:any-link, [data-nse-control="search-field"] > [data-nse-part="bezel"] > [data-nse-part="field"])):focus-visible),
+:where(:scope) [data-nse-control="menu"][data-nse-style="popup"]:where([data-nse-part="background"][data-nse-role="command-menu"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):focus-visible,
+:where(:scope):is([data-nse-control="menu"][data-nse-style="popup"]:where([data-nse-part="background"][data-nse-role="command-menu"])) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):focus-visible {
+    outline: 2px solid Highlight !important;
+    outline-offset: 2px;
+  }
+
+  :where(:scope) :where(:disabled,[data-nse-enabled="false"]),
+:where(:scope):is(:where(:disabled,[data-nse-enabled="false"])) {
+    border-color: GrayText !important;
+    color: GrayText !important;
+    opacity: 1 !important;
+  }
+
+  :is([data-nse-control="window"][data-nse-part="background"] > [data-nse-part="shadow"],[data-nse-control="menu"][data-nse-part="background"][data-nse-role="command-menu"] > [data-nse-part="decoration"]),
+:where(:scope):is(:is([data-nse-control="window"][data-nse-part="background"] > [data-nse-part="shadow"],[data-nse-control="menu"][data-nse-part="background"][data-nse-role="command-menu"] > [data-nse-part="decoration"])) {
+    display: none !important;
+  }
+}

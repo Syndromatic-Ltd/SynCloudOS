@@ -151,15 +151,15 @@ describe("NSE appearance composition", () => {
   });
 
   it("defines materially distinct high contrast and raster-free forced-colour paint contracts", () => {
-    const css = readFileSync("src/NSE/Appearance/nse-appearance.css", "utf8");
+    const css = readFileSync("src/Themes/Atmo.scostheme/Contents/Resources/atmo.accessibility.css", "utf8");
     expect(css).toContain('[data-nse-contrast="high"]');
     expect(css).toContain("--nse-contrast-edge: #000");
     expect(css).toContain("--nse-contrast-accent: #004fd7");
     expect(css).toMatch(/data-nse-contrast="forced"[\s\S]*background-image:\s*none\s*!important/u);
     expect(css).toMatch(/forced-colors:\s*active[\s\S]*background-image:\s*none\s*!important/u);
-    expect(css).toContain("[data-window-shadow-layer]");
-    expect(css).toContain(".nse-menu-item:focus-visible");
-    expect(css).toContain('[aria-disabled="true"]');
+    expect(css).toContain('[data-nse-part="shadow"]');
+    expect(css).toMatch(/data-nse-control="menu-item"[^,\n]*:focus-visible/u);
+    expect(css).toContain('[data-nse-enabled="false"]');
   });
 
   it("keeps semantic disabled and invalid state when controls change", async () => {

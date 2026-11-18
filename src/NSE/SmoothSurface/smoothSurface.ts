@@ -298,6 +298,14 @@ export function getSmoothSurfaceProps(options: SmoothSurfaceOptions = {}): Smoot
   };
 }
 
+/* The renderer exposes focus policy independently of the caller-facing style helpers. */
+export function getSmoothSurfaceThemeHooks(options: SmoothSurfaceRequest) {
+  const request = normalizeRequest(options);
+  return {
+    "data-nse-focus-style": request === false ? undefined : request.focus ?? nseSmoothSurfaceDefaultOptions.focus
+  };
+}
+
 export function getOptionalSmoothSurfaceProps(
   options: SmoothSurfaceRequest,
   className?: string,

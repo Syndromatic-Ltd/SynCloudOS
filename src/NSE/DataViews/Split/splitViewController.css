@@ -1,5 +1,5 @@
 
-@layer nse.atmo {
+@layer nse.structure {
 @scope ([data-nse-theme]) to ([data-nse-theme]) {
 .nse-split-view-controller-view[data-presentation="single-pane"],
 :where(:scope):is(.nse-split-view-controller-view[data-presentation="single-pane"]) {
@@ -25,19 +25,9 @@
   padding: 8px;
 }
 
-.nse-split-view-controller-view[data-presentation="split"] [data-nse-part="split-divider"][data-orientation="horizontal"]::before,
-:where(:scope):is(.nse-split-view-controller-view[data-presentation="split"]) [data-nse-part="split-divider"][data-orientation="horizontal"]::before {
-  box-shadow: 1px 0 0 var(--nse-colour-control-background);
-}
-
-.nse-split-view-controller-view[data-presentation="split"] [data-nse-part="split-divider"][data-orientation="vertical"]::before,
-:where(:scope):is(.nse-split-view-controller-view[data-presentation="split"]) [data-nse-part="split-divider"][data-orientation="vertical"]::before {
-  box-shadow: 0 1px 0 var(--nse-colour-control-background);
-}
-
 .nse-split-view-controller-view [data-nse-part="split-divider"]:focus-visible::after,
 :where(:scope):is(.nse-split-view-controller-view) [data-nse-part="split-divider"]:focus-visible::after {
-  outline: 2px solid var(--nse-colour-control-accent);
+  outline: 2px solid;
   outline-offset: -2px;
 }
 

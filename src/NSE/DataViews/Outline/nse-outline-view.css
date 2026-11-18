@@ -1,5 +1,10 @@
 
-@layer nse.atmo {
+@layer nse.structure {
+@property --nse-outline-row-padding-inline {
+  syntax: "*";
+  inherits: false;
+}
+
 @scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
@@ -20,12 +25,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-.nse-outline-view,
-:where(:scope):is(.nse-outline-view) {
-  color: var(--nse-outline-color, inherit);
-  background: var(--nse-outline-background, transparent);
-}
 
 .nse-outline-view [data-nse-part="row"],
 :where(:scope):is(.nse-outline-view) [data-nse-part="row"] {
@@ -51,7 +50,7 @@
 
 @media (forced-colors: active) {
   .nse-outline-view [aria-selected="true"],
-:where(:scope):is(.nse-outline-view) [aria-selected="true"] { outline: 1px solid Highlight; }
+:where(:scope):is(.nse-outline-view) [aria-selected="true"] { outline: 1px solid; }
 }
 
 /* =============================================================================================
@@ -72,10 +71,6 @@
 .nse-outline-container[data-style="source-list"],
 :where(:scope):is(.nse-outline-container[data-style="source-list"]) {
   position: relative;
-  color: var(--nse-sidebar-text, #2a2f36);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0)),
-    var(--nse-sidebar-background, linear-gradient(180deg, #dfe0e2 0%, #cdcfd2 100%));
 }
 
 /* The raised content beside the rail casts a soft shadow back over it along the seam. */
@@ -87,12 +82,10 @@
   z-index: 3;
   inline-size: 15px;
   pointer-events: none;
-  background: linear-gradient(to left, var(--nse-sidebar-seam-shadow, rgba(0, 0, 0, 0.22)), transparent);
 }
 
 .nse-outline-view[data-style="source-list"],
 :where(:scope):is(.nse-outline-view[data-style="source-list"]) {
-  --nse-outline-background: transparent;
   padding-block: 12px 16px;
   scrollbar-width: none;
 }
@@ -135,12 +128,10 @@
 :where(:scope):is(.nse-outline-group-label) {
   flex: 0 0 auto;
   margin-inline-end: 9px;
-  color: var(--nse-sidebar-section-label, #3a78c2);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.03em;
   text-transform: uppercase;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.58);
 }
 
 .nse-outline-group-row::after,
@@ -150,7 +141,6 @@
   align-self: center;
   block-size: var(--nse-atmo-divider-arrow-line);
   min-inline-size: 10px;
-  background: var(--nse-atmo-divider) left center / auto var(--nse-atmo-divider-arrow-line) repeat-x;
 }
 
 /* The line takes all the room between label and arrow; a short fixed tail pins the arrow near the edge. */
@@ -205,13 +195,14 @@
 .nse-outline-view[data-style="source-list"] .nse-outline-source-row.nse-control-list-item,
 :where(:scope):is(.nse-outline-view[data-style="source-list"]) .nse-outline-source-row.nse-control-list-item {
   margin: 0;
-  padding-inline: calc(18px + var(--nse-outline-level, 0) * 12px) 18px;
+  --nse-outline-row-padding-inline: calc(18px + var(--nse-outline-level, 0) * 12px) 18px;
+  padding-inline: var(--nse-outline-row-padding-inline);
   cursor: pointer;
 }
 
 .nse-outline-view[data-style="source-list"] .nse-outline-source-row.nse-control-list-item:focus-visible,
 :where(:scope):is(.nse-outline-view[data-style="source-list"]) .nse-outline-source-row.nse-control-list-item:focus-visible {
-  outline: 2px solid rgba(89, 150, 212, 0.86);
+  outline: 2px solid;
   outline-offset: 1px;
 }
 
@@ -224,7 +215,7 @@
 /* One hairline per seam: only the top border paints, so seams never double. */
 .nse-outline-children-inner>.nse-outline-node:not(:first-child)>.nse-outline-source-row.nse-control-list-item,
 :where(:scope):is(.nse-outline-children-inner)>.nse-outline-node:not(:first-child)>.nse-outline-source-row.nse-control-list-item {
-  border-block-start: 1px solid rgba(255, 255, 255, 0.5);
+  border-block-start: 1px solid;
 }
 
 /* A table cell view in a source-list row lays out as the row's icon, title, detail and badge. */
@@ -255,7 +246,6 @@
 :where(:scope):is(.nse-outline-source-row) [data-nse-part="secondary-text"] {
   font-size: 11px;
   font-weight: 400;
-  opacity: 0.72;
 }
 
 .nse-outline-source-row [data-nse-part="badge"],
@@ -263,50 +253,9 @@
   margin-inline-start: auto;
 }
 
-/* --- Brushed-metal rail, under an app frame whose material is metal ------------------------- */
-.nse-outline-container[data-style="source-list"]:where([data-nse-material="metal"] *) {
-  --nse-sidebar-metal-bg: linear-gradient(180deg, #dfe0e2 0%, #cdcfd2 100%);
-  --nse-sidebar-metal-text: #2a2f36;
-  --nse-sidebar-metal-label: #3a78c2;
-  --nse-sidebar-metal-emboss: 0 1px 0 rgba(255, 255, 255, 0.75);
-  --nse-sidebar-metal-edge: rgba(120, 126, 134, 0.7);
-  --nse-sidebar-metal-content-shadow: rgba(0, 0, 0, 0.22);
-  --nse-sidebar-metal-grain-blend: overlay;
-  color: var(--nse-sidebar-metal-text);
-  background:
-    var(--nse-metal-grain) 0 0 / var(--nse-metal-grain-tile) repeat,
-    var(--nse-sidebar-metal-bg);
-  background-blend-mode: var(--nse-sidebar-metal-grain-blend), normal;
-  border-inline-end: 1px solid var(--nse-sidebar-metal-edge);
-  box-shadow:
-    inset -14px 0 18px -10px var(--nse-sidebar-metal-content-shadow),
-    inset -1px 0 0 rgba(255, 255, 255, 0.1);
-}
-
-[data-mode="dark"] .nse-outline-container[data-style="source-list"]:where([data-nse-material="metal"] *),
-:where(:scope):is([data-mode="dark"]) .nse-outline-container[data-style="source-list"]:where([data-nse-material="metal"] *) {
-  --nse-sidebar-metal-bg: linear-gradient(180deg, #3a3d44 0%, #202227 100%);
-  --nse-sidebar-metal-text: #dde3ea;
-  --nse-sidebar-metal-label: #6aa9e6;
-  --nse-sidebar-metal-emboss: 0 -1px 0 rgba(0, 0, 0, 0.78), 0 1px 0 rgba(255, 255, 255, 0.05);
-  --nse-sidebar-metal-edge: rgba(8, 10, 12, 0.8);
-  --nse-sidebar-metal-content-shadow: rgba(0, 0, 0, 0.42);
-  --nse-sidebar-seam-shadow: rgba(0, 0, 0, 0.42);
-}
-
-.nse-outline-container[data-style="source-list"]:where([data-nse-material="metal"] *) .nse-outline-group-label {
-  color: var(--nse-sidebar-metal-label);
-  text-shadow: var(--nse-sidebar-metal-emboss);
-}
-
-.nse-outline-source-row[data-selected="false"]:where([data-nse-material="metal"] *) .nse-control-list-primary {
-  color: var(--nse-sidebar-metal-text);
-  text-shadow: var(--nse-sidebar-metal-emboss);
-}
-
-[data-mode="dark"] .nse-outline-children-inner:where([data-nse-material="metal"] *)>.nse-outline-node:not(:first-child)>.nse-outline-source-row.nse-control-list-item,
-:where(:scope):is([data-mode="dark"]) .nse-outline-children-inner:where([data-nse-material="metal"] *)>.nse-outline-node:not(:first-child)>.nse-outline-source-row.nse-control-list-item {
-  border-block-start-color: rgba(150, 180, 214, 0.14);
+[data-nse-control="outline-view"][data-nse-part="sidebar"]:where([data-nse-material="metal"] *),
+:where(:scope):is([data-nse-control="outline-view"][data-nse-part="sidebar"]:where([data-nse-material="metal"] *)) {
+  border-inline-end: 1px solid;
 }
 
 }

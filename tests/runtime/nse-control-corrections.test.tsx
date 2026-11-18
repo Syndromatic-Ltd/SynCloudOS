@@ -85,7 +85,7 @@ describe("NSEToolbar fadeOnKeyboard", () => {
       button.focus();
       fireEvent.focusIn(button);
     });
-    expect(toolbar.classList.contains("nse-control-toolbar-fade-in")).toBe(false);
+    expect(toolbar.getAttribute("data-nse-presentation")).toBeNull();
   });
 
   it("re-fades while a text field is focused, then clears when focus leaves", () => {
@@ -104,7 +104,7 @@ describe("NSEToolbar fadeOnKeyboard", () => {
       field.focus();
       fireEvent.focusIn(field, { target: field });
     });
-    expect(toolbar.classList.contains("nse-control-toolbar-fade-in")).toBe(true);
+    expect(toolbar.getAttribute("data-nse-presentation")).toBe("keyboard");
   });
 
   it("stays inert when fadeOnKeyboard is off", () => {
@@ -120,6 +120,6 @@ describe("NSEToolbar fadeOnKeyboard", () => {
       field.focus();
       fireEvent.focusIn(field, { target: field });
     });
-    expect(toolbar.classList.contains("nse-control-toolbar-fade-in")).toBe(false);
+    expect(toolbar.getAttribute("data-nse-presentation")).toBeNull();
   });
 });

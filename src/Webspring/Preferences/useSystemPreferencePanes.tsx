@@ -49,7 +49,7 @@ function toNSEPreferencePane(definition: PreferencePaneDefinition, props: Prefer
       </PreferencePaneBoundary>
     ) : undefined,
     render: () => (
-      <PreferencePaneBoundary fallback={<p className="nse-prefs-note">{t("preferences.paneUnavailable", "This preference pane could not be loaded.")}</p>}>
+      <PreferencePaneBoundary fallback={<p data-nse-part="label" data-nse-role="note" className="nse-prefs-note">{t("preferences.paneUnavailable", "This preference pane could not be loaded.")}</p>}>
         <View {...props} />
       </PreferencePaneBoundary>
     ),

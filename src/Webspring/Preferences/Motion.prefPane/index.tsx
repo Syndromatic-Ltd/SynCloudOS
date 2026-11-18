@@ -49,7 +49,7 @@ function MotionPane({ settings }: PreferencePaneViewProps) {
           </GroupedRow>
         ))}
       </NSEBox>
-      <p className="nse-prefs-note">
+      <p data-nse-part="label" data-nse-role="note" className="nse-prefs-note">
         {t("preferences.motionNote", "Reduced motion replaces slides and zooms with a simple fade.")}
       </p>
     </div>

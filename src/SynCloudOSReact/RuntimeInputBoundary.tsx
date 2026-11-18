@@ -84,6 +84,9 @@ export function RuntimeInputBoundary({ children }: PropsWithChildren) {
         data-syncloudos-runtime-id={runtime.runtimeId}
         data-syncloudos-runtime-owner={runtime.runtimeId}
         data-syncloudos-runtime-root="true"
+        data-nse-control="view"
+        data-nse-part="background"
+        data-nse-role="runtime"
         data-appearance={appearance}
         data-mode={resolvedMode}
         data-nse-colour-scheme-resolved={resolvedMode}

@@ -25,10 +25,8 @@
 @import "../Layout/nse-layout-defaults.css";
 @import "../Appearance/nse-appearance.css";
 @import "../Appearance/nse-chrome-primitives.css";
-@import "../Appearance/Materials/cloud.css";
 @import "../Appearance/Materials/glass.css";
 @import "../Appearance/Materials/linen.css";
-@import "../Appearance/Materials/metal.css";
 @import "../Colour/colour-controls.css";
 @import "../Components/components.css";
 @import "../Components/nsePreferencesToast.css";

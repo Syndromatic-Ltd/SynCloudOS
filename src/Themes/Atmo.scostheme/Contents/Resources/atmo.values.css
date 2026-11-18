@@ -917,3 +917,58 @@
 :scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"]:is([data-nse-control-size="small"],[data-nse-height])>[data-nse-part="segment"]:is(:last-child,:has(+[data-nse-part="field"]:where([data-nse-part="field"]):last-child))>:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"],[data-nse-part="increment"],[data-nse-part="decrement"]):last-child[data-nse-selected]::after {
   border-inline-end-width:0;
 }
+
+/* Turned metal: two soft streaks in the metal and two in the sheen, added together.
+   Aligned they read as two bright streaks; as the thumb turns they part into four dim ones and meet again. */
+[data-nse-part="decoration"]:where([data-nse-material="metal"]),
+:where(:scope):is([data-nse-part="decoration"]:where([data-nse-material="metal"])) {
+  --nse-metal-thumb-base:conic-gradient(from 0deg at 50% 50%,
+    #929292 0deg, #868686 16deg, #9e9e9e 32deg, #cdcdcd 48deg, #ebebeb 60deg, #cdcdcd 72deg, #9e9e9e 88deg,
+    #868686 106deg, #8d8d8d 135deg, #979797 150deg, #8d8d8d 165deg, #868686 194deg,
+    #9e9e9e 212deg, #cdcdcd 228deg, #ebebeb 240deg, #cdcdcd 252deg, #9e9e9e 268deg,
+    #868686 286deg, #8d8d8d 315deg, #979797 330deg, #8d8d8d 345deg, #929292 360deg);
+  --nse-metal-thumb-sheen:conic-gradient(from 0deg at 50% 50%,
+    rgba(255,255,255,0) 0deg, rgba(255,255,255,0) 32deg, rgba(255,255,255,.22) 48deg, rgba(255,255,255,.62) 60deg, rgba(255,255,255,.22) 72deg, rgba(255,255,255,0) 88deg,
+    rgba(255,255,255,0) 212deg, rgba(255,255,255,.22) 228deg, rgba(255,255,255,.62) 240deg, rgba(255,255,255,.22) 252deg, rgba(255,255,255,0) 268deg, rgba(255,255,255,0) 360deg);
+  background:#a6a6a6;
+}
+[data-nse-part="decoration"]:where([data-nse-material="metal"])::before,
+:where(:scope):is([data-nse-part="decoration"]:where([data-nse-material="metal"]))::before { background:var(--nse-metal-thumb-base); }
+[data-nse-part="highlight"]:where([data-nse-part="decoration"]:where([data-nse-material="metal"]) > *),
+:where(:scope):is([data-nse-part="highlight"]:where([data-nse-part="decoration"]:where([data-nse-material="metal"]) > *)) { background:var(--nse-metal-thumb-sheen); mix-blend-mode:screen; }
+/* The plate art cropped square about its turning centre, so the rings sit on the thumb's centre at any size. */
+[data-nse-part="image"]:where([data-nse-part="decoration"]:where([data-nse-material="metal"]) > *),
+:where(:scope):is([data-nse-part="image"]:where([data-nse-part="decoration"]:where([data-nse-material="metal"]) > *)) { background:url("./materials/thumb-texture.webp") 50% 50% / 100% 100% no-repeat; mix-blend-mode:multiply; opacity:.55; }
+[data-nse-part="border"]:where([data-nse-part="decoration"]:where([data-nse-material="metal"]) > *),
+:where(:scope):is([data-nse-part="border"]:where([data-nse-part="decoration"]:where([data-nse-material="metal"]) > *)) { box-shadow:inset 0 0.7px 0 rgba(255,255,255,.9), inset 0 -0.8px 1px rgba(0,0,0,.65), inset 0 0 0 0.6px rgba(0,0,0,.35); }
+[data-nse-control="slider"] [data-nse-part="knob"][data-nse-material="metal"],
+:where(:scope):is([data-nse-control="slider"]) [data-nse-part="knob"][data-nse-material="metal"] { background-image:none; }
+/* Proportions of the 49px thumb art, so small sliders stay centred; it casts the switch knob's shadow. */
+[data-nse-control="slider"] [data-nse-part="knob"] > [data-nse-part="decoration"]:where([data-nse-material="metal"]),
+:where(:scope):is([data-nse-control="slider"]) [data-nse-part="knob"] > [data-nse-part="decoration"]:where([data-nse-material="metal"]) { filter:var(--nse-atmo-toggle-thumb-shadow,drop-shadow(0 1px 2px rgba(0,0,0,.45))); }
+[data-nse-control="switch"] [data-nse-part="knob"][data-nse-material="metal"]::before,
+:where(:scope):is([data-nse-control="switch"]) [data-nse-part="knob"][data-nse-material="metal"]::before,
+[data-nse-control="switch"] [data-nse-part="knob"][data-nse-material="metal"]::after,
+:where(:scope):is([data-nse-control="switch"]) [data-nse-part="knob"][data-nse-material="metal"]::after { display:none; }
+[data-nse-control="switch"] [data-nse-part="knob"] > [data-nse-part="decoration"]:where([data-nse-material="metal"]),
+:where(:scope):is([data-nse-control="switch"]) [data-nse-part="knob"] > [data-nse-part="decoration"]:where([data-nse-material="metal"]) { box-shadow:0 1px 1px rgba(0,0,0,.5); }
+[data-nse-control="switch"]:disabled [data-nse-part="decoration"]:where([data-nse-material="metal"]),
+:where(:scope):is([data-nse-control="switch"]:disabled) [data-nse-part="decoration"]:where([data-nse-material="metal"]) { filter:grayscale(.35); opacity:.58; }
+/* Forced colours use the semantic control's accessible thumb instead. */
+:where([data-nse-contrast="forced"]) [data-nse-part="decoration"]:where([data-nse-material="metal"]),
+:where(:scope):is(:where([data-nse-contrast="forced"])) [data-nse-part="decoration"]:where([data-nse-material="metal"]),
+:where([data-nse-contrast="forced"]):is([data-nse-part="decoration"]:where([data-nse-material="metal"])) { display:none; }
+:where([data-nse-contrast="forced"]) [data-nse-control="slider"] [data-nse-part="knob"][data-nse-material="metal"],
+:where(:scope):is(:where([data-nse-contrast="forced"])) [data-nse-control="slider"] [data-nse-part="knob"][data-nse-material="metal"],
+:where([data-nse-contrast="forced"]):is([data-nse-control="slider"]) [data-nse-part="knob"][data-nse-material="metal"] { background-image:var(--nse-atmo-slider-thumb); }
+:where([data-nse-contrast="forced"]) [data-nse-control="switch"] [data-nse-part="knob"][data-nse-material="metal"]::before,
+:where(:scope):is(:where([data-nse-contrast="forced"])) [data-nse-control="switch"] [data-nse-part="knob"][data-nse-material="metal"]::before,
+:where([data-nse-contrast="forced"]):is([data-nse-control="switch"]) [data-nse-part="knob"][data-nse-material="metal"]::before,
+:where([data-nse-contrast="forced"]) [data-nse-control="switch"] [data-nse-part="knob"][data-nse-material="metal"]::after,
+:where(:scope):is(:where([data-nse-contrast="forced"])) [data-nse-control="switch"] [data-nse-part="knob"][data-nse-material="metal"]::after,
+:where([data-nse-contrast="forced"]):is([data-nse-control="switch"]) [data-nse-part="knob"][data-nse-material="metal"]::after { display:block; }
+@media(forced-colors:active) { [data-nse-part="decoration"]:where([data-nse-material="metal"]),
+:where(:scope):is([data-nse-part="decoration"]:where([data-nse-material="metal"])) { background:ButtonFace; border:1px solid ButtonText; } [data-nse-part="decoration"]:where([data-nse-material="metal"])::before,
+:where(:scope):is([data-nse-part="decoration"]:where([data-nse-material="metal"]))::before,
+[data-nse-part="decoration"]:where([data-nse-material="metal"]) > :is([data-nse-part="highlight"], [data-nse-part="image"], [data-nse-part="border"]),
+:where(:scope):is([data-nse-part="decoration"]:where([data-nse-material="metal"])) > :is([data-nse-part="highlight"], [data-nse-part="image"], [data-nse-part="border"]) { display:none; } }

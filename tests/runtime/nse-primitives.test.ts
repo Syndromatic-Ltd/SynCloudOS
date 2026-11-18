@@ -520,7 +520,10 @@ describe("SmoothSurface", () => {
       }
     ));
 
-    expect(glassPanelMarkup).toContain("nse-material-glass-panel");
+    expect(glassPanelMarkup).toContain('data-nse-control="visual-effect-view"');
+    expect(glassPanelMarkup).toContain('data-nse-material="glass"');
+    expect(glassPanelMarkup).toContain('data-nse-style="panel"');
+    expect(glassPanelMarkup).toContain('data-nse-focus-style="ring"');
     expect(glassPanelMarkup).toContain("nse-smooth-surface-radius-custom");
     expect(glassPanelMarkup).toContain("overflow:clip");
     expect(glassPanelMarkup).toContain("contain:paint");

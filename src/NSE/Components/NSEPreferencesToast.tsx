@@ -95,7 +95,7 @@ function usePreferencesTransitions(): PreferencesTransitions {
 function PreferencesVeil() {
   const ref = useRef<HTMLDivElement>(null);
   useNSEPresentation(ref, usePreferencesTransitions().veil);
-  return <div ref={ref} className="nse-prefs-veil" aria-hidden="true" />;
+  return <div ref={ref} data-nse-control="panel" data-nse-part="backdrop" data-nse-style="preferences" className="nse-prefs-veil" aria-hidden="true" />;
 }
 
 /** A header title, passing through the other one as the stack moves. */
@@ -110,7 +110,7 @@ function PaneSlide({ children }: { children: ReactNode }) {
   const exiting = useNSEPresenceExiting();
   const ref = useRef<HTMLDivElement>(null);
   useNSEPresentation(ref, usePreferencesTransitions().pane(useContext(PaneDirectionContext)));
-  return <div ref={ref} data-nse-part="content" className="nse-prefs-pane" inert={exiting || undefined} aria-hidden={exiting || undefined}>{children}</div>;
+  return <div ref={ref} data-nse-part="content" data-nse-role="preference-pane" className="nse-prefs-pane" inert={exiting || undefined} aria-hidden={exiting || undefined}>{children}</div>;
 }
 
 function BackSlot({ children }: { children: ReactNode }) {
@@ -133,7 +133,7 @@ function PreferencesBody({ height, children }: { height: number | null; children
       tracks: [{ keyPath: "height", values: [Number(previous), height] }],
     },
   });
-  return <div ref={ref} data-nse-part="content" className="nse-prefs-body" style={{ height: height ?? "auto" }}>{children}</div>;
+  return <div ref={ref} data-nse-part="content" data-nse-role="preference-body" className="nse-prefs-body" style={{ height: height ?? "auto" }}>{children}</div>;
 }
 
 /** The panel itself, gliding up from the lower screen. */
@@ -266,6 +266,7 @@ export function PreferencesToast({ open, focusScopeId, title, panes, initialPane
           <div
             className="nse-prefs-backdrop"
             {...appearanceProjection}
+            data-nse-control="panel" data-nse-part="surface" data-nse-style="preferences"
             data-appearance={requestedAppearance}
             data-mode={projectedMode}
             data-nse-colour-scheme-resolved={projectedMode}
@@ -317,6 +318,7 @@ export function PreferencesToast({ open, focusScopeId, title, panes, initialPane
                         title={backLabel}
                         image={NSEImage.named(NSEImage.goBackTemplateName)}
                         imagePosition="imageOnly"
+                        data-nse-role="back"
                         className="nse-prefs-back"
                         onClick={() => goToPane(null)}
                       />
@@ -335,7 +337,7 @@ export function PreferencesToast({ open, focusScopeId, title, panes, initialPane
                 <PaneSlide key={active ? active.id : "__list"}>
                   <div data-nse-part="content" className="nse-prefs-pane-content" ref={trackContent}>
                   {active ? active.render() : (
-                    <div data-nse-part="content" className="nse-prefs-list">
+                    <div data-nse-part="content" data-nse-role="preference-list" className="nse-prefs-list">
                       {panes.map((pane) => (
                         <GroupedRow
                           key={pane.id}
@@ -362,7 +364,7 @@ export function PreferencesToast({ open, focusScopeId, title, panes, initialPane
                         >
                           {/* Native keyboard activation bubbles through the same row action.
                               Accessories remain siblings, never children of this button. */}
-                          <button type="button" data-nse-part="cell" className="nse-prefs-pane-link">{pane.label}</button>
+                          <button type="button" data-nse-part="cell" data-nse-role="preference-link" className="nse-prefs-pane-link">{pane.label}</button>
                         </GroupedRow>
                       ))}
                     </div>

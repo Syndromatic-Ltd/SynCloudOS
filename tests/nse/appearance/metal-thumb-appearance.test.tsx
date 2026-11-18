@@ -22,7 +22,8 @@ import { createTestTheme } from "../../fixtures/themes";
 // @vitest-environment jsdom
 import React from "react";
 import { act, cleanup, render } from "@testing-library/react";
-import { readFileSync } from "node:fs";
+import * as cssTree from "css-tree";
+import { atmoPaintCSS } from "../../fixtures/atmoStylesheets";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { type NSETheme, type NSEContrast } from "@syndromatic/syncloudos/nse";
 import { NSEAppearanceProvider } from "../../../src/NSE/Appearance";
@@ -99,16 +100,27 @@ describe("explicit metal thumbs are independent of theme identity", () => {
     expect(light.listeners.size).toBe(0);
   });
 
-  it.each(themes)("does not hide explicitly requested metal paint under $id", (appearance) => {
+  it.each(themes)("hides explicit metal paint only under forced contrast in $id", (appearance) => {
     const style = document.createElement("style");
-    // Exercise the published material's suppression rules without relying on
-    // jsdom support for the conic-gradient and texture rendering declarations.
-    const css = readFileSync("src/NSE/Appearance/metal-thumb.css", "utf8");
-    style.textContent = css.split("\n").filter((line) => line.startsWith(":where(")).join("\n");
+    // Apply the real authored-contrast rule without asking JSDOM to render the material.
+    const selectors: string[] = [];
+    cssTree.walk(cssTree.parse(atmoPaintCSS()), { visit: "Rule", enter(rule) {
+      if (rule.prelude.type !== "SelectorList") return;
+      if (!rule.block.children.some(node => node.type === "Declaration" && node.property === "display" && cssTree.generate(node.value) === "none")) return;
+      for (const node of rule.prelude.children) {
+        const selector = cssTree.generate(node);
+        if (selector.includes('[data-nse-contrast="forced"]') && selector.includes('[data-nse-part="decoration"]') && selector.includes('[data-nse-material="metal"]') && !selector.includes(":scope")) selectors.push(selector);
+      }
+    }});
+    expect(selectors.length).toBeGreaterThan(0);
+    style.textContent = selectors.join(", ") + " { display: none; }";
     document.head.append(style);
     try {
       const view = render(<NSEAppearanceProvider theme={appearance}><MetalThumb /></NSEAppearanceProvider>);
-      expect(getComputedStyle(view.container.querySelector(".nse-metal-thumb")!).display).not.toBe("none");
+      const thumb = view.container.querySelector('[data-nse-part="decoration"][data-nse-material="metal"]')!;
+      expect(getComputedStyle(thumb).display).not.toBe("none");
+      view.rerender(<NSEAppearanceProvider theme={appearance} contrast="forced"><MetalThumb /></NSEAppearanceProvider>);
+      expect(getComputedStyle(thumb).display).toBe("none");
     } finally { style.remove(); }
   });
 

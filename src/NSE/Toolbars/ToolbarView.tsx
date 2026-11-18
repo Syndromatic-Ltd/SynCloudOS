@@ -32,6 +32,7 @@ import {
   type ReactNode,
 } from "react";
 import type { SmoothSurfaceRequest } from "../SmoothSurface";
+import { getSmoothSurfaceThemeHooks } from "../SmoothSurface/smoothSurface";
 import { classes, getControlSmoothSurfaceProps } from "../Controls/Core/nseControlsShared";
 import {
   ChromeBevel,
@@ -402,8 +403,10 @@ function ChildrenToolbar({
 
   return (
     <div
-      className={classes("nse-control-toolbar", keyboardUp && "nse-control-toolbar-fade-in", surfaceProps.className)}
+      className={classes("nse-control-toolbar", surfaceProps.className)}
+      {...getSmoothSurfaceThemeHooks(smoothSurface)}
       data-nse-control="toolbar" data-nse-part="background" data-nse-position={position} data-nse-style={grouped ? "grouped" : undefined}
+      data-nse-presentation={keyboardUp ? "keyboard" : undefined}
       data-position={position}
       data-grouped={grouped ? "true" : "false"}
       data-fade-on-keyboard={fadeOnKeyboard ? "true" : undefined}

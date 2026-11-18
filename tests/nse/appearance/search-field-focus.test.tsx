@@ -28,7 +28,7 @@ import { atmoPaintCSS, atmoStructureFile } from "../../fixtures/atmoStylesheets"
 import { NSESearchField, type NSESearchFieldProps } from "../../../src/NSE/Controls/Fields/NSESearchField";
 
 const atmoCss = atmoPaintCSS();
-const appearanceCss = readFileSync("src/NSE/Appearance/nse-appearance.css", "utf8");
+const accessibilityCss = readFileSync("src/Themes/Atmo.scostheme/Contents/Resources/atmo.accessibility.css", "utf8");
 const fieldCss = readFileSync("src/NSE/Controls/Fields/nse-field-extensions.css", "utf8");
 const structureCss = readFileSync(atmoStructureFile, "utf8");
 
@@ -56,7 +56,7 @@ function unscoped(css: string, keep: (rule: cssTree.Rule) => boolean = () => tru
 // without mounting unrelated controls or the theme's large SVG data URLs.
 const isSearchPaint = (rule: cssTree.Rule) => cssTree.generate(rule.prelude).includes("search-field") ||
   rule.block.children.some(child => child.type === "Declaration" && child.property === "--nse-atmo-focus-ring");
-const paint = unscoped(appearanceCss) + fieldCss + unscoped(structureCss, isSearchPaint) + unscoped(atmoCss, isSearchPaint);
+const paint = fieldCss + unscoped(structureCss, isSearchPaint) + unscoped(atmoCss, isSearchPaint) + unscoped(accessibilityCss);
 
 afterEach(cleanup);
 

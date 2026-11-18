@@ -441,7 +441,7 @@ describe("NSESplitViewController", () => {
       expect(controller.getSnapshot().availableSize).toBe(500);
       expect(thicknesses(controller)).toEqual([300, 200]);
       const divider = screen.getByRole("separator", { name: "Resize Canvas and Analysis" });
-      expect(divider.getAttribute("data-orientation")).toBe("vertical");
+      expect(divider.getAttribute("data-nse-orientation")).toBe("vertical");
       fireEvent.keyDown(divider, { key: "ArrowDown" });
       expect(thicknesses(controller)).toEqual([316, 184]);
       height.mockImplementation(function (this: HTMLElement) { return this.classList.contains("nse-split-view-controller-view") ? 420 : 0; });

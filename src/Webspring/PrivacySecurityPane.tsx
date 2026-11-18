@@ -105,12 +105,12 @@ export function PrivacySecurityPane({ store, userId, applicationNames, text = fa
     applications.set(record.appId, existing);
   }
   return <section className="nse-prefs-section" aria-label={text("preferences.privacy", "Privacy & Security")}>
-    <p className="nse-prefs-note nse-prefs-note-lead">
+    <p data-nse-part="label" data-nse-role="lead-note" className="nse-prefs-note nse-prefs-note-lead">
       {text("preferences.privacy.scope", "Choose which apps may request access. These controls cannot grant browser permission. Your browser may still ask or refuse access.")}
     </p>
-    {applications.size === 0 ? <div className="nse-prefs-empty">
-      <span className="nse-prefs-empty-title">{text("preferences.privacy.empty", "No privacy requests yet")}</span>
-      <span className="nse-prefs-empty-detail">{text("preferences.privacy.emptyDetail", "Apps appear here after they check or request access to a device or personal information.")}</span>
+    {applications.size === 0 ? <div data-nse-part="status" data-nse-role="empty" className="nse-prefs-empty">
+      <span data-nse-part="title" className="nse-prefs-empty-title">{text("preferences.privacy.empty", "No privacy requests yet")}</span>
+      <span data-nse-part="label" className="nse-prefs-empty-detail">{text("preferences.privacy.emptyDetail", "Apps appear here after they check or request access to a device or personal information.")}</span>
     </div> : [...applications].map(([appId, entries]) => {
       const appName = applicationNames?.[appId] ?? appId;
       return <NSEBox key={appId} title={appName} titlePosition="noTitle" contentViewMargins={{ width: 12, height: 12 }}>
@@ -120,7 +120,7 @@ export function PrivacySecurityPane({ store, userId, applicationNames, text = fa
         </NSEStackView>
       </NSEBox>;
     })}
-    {applications.size > 0 ? <p className="nse-prefs-note">
+    {applications.size > 0 ? <p data-nse-part="label" data-nse-role="note" className="nse-prefs-note">
       {text("preferences.privacy.revoke", "Turning access off stops the app's active requests and sessions. Ask again clears your app choice; change a browser refusal in your browser's site settings.")}
     </p> : null}
   </section>;

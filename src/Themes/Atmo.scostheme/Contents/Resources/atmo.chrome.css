@@ -561,3 +561,18 @@
 :where(:scope):is([data-nse-control="system-alert"][data-nse-part="background"]) [data-nse-part="decoration"] > [data-nse-part="badge"]:first-child {
   filter: none;
 }
+
+[data-nse-part="split-divider"]:where([data-nse-control="split-view"] *)[data-nse-orientation="horizontal"]::before,
+:where(:scope):is([data-nse-part="split-divider"]:where([data-nse-control="split-view"] *)[data-nse-orientation="horizontal"])::before {
+  box-shadow: 1px 0 0 var(--nse-colour-control-background);
+}
+
+[data-nse-part="split-divider"]:where([data-nse-control="split-view"] *)[data-nse-orientation="vertical"]::before,
+:where(:scope):is([data-nse-part="split-divider"]:where([data-nse-control="split-view"] *)[data-nse-orientation="vertical"])::before {
+  box-shadow: 0 1px 0 var(--nse-colour-control-background);
+}
+
+[data-nse-part="split-divider"]:where([data-nse-control="split-view"] *):focus-visible::after,
+:where(:scope):is([data-nse-part="split-divider"]:where([data-nse-control="split-view"] *):focus-visible)::after {
+  outline-color: var(--nse-colour-control-accent);
+}

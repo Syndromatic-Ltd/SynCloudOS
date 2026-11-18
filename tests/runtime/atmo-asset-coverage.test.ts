@@ -62,6 +62,11 @@ describe("explicit theme resource ownership", () => {
       "chrome/metal/light/header-endcap-left.png",
       "chrome/metal/light/header-endcap-right.png",
       "chrome/metal/light/header-middle.png",
+      "login/plate-texture.webp",
+      "materials/linen.webp",
+      "materials/thumb-texture.webp",
+      "spinners/spinner.png",
+      "spinners/spinner_signin.png",
     ]));
   });
 

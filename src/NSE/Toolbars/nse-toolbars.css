@@ -1,5 +1,5 @@
 
-@layer nse.atmo {
+@layer nse.structure {
 @scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
@@ -63,16 +63,14 @@
 }
 
 /* A toolbar's chrome comes only from its resolved slot or shared primitive. */
-.nse-toolbar-item,
-:where(:scope):is(.nse-toolbar-item),
-.nse-toolbar-overflow-trigger,
-:where(:scope):is(.nse-toolbar-overflow-trigger) {
+[data-nse-control="toolbar-item"]:is([data-nse-part="item"], [data-nse-part="overflow"]),
+:where(:scope):is([data-nse-control="toolbar-item"]:is([data-nse-part="item"], [data-nse-part="overflow"])) {
   appearance: none;
   -webkit-appearance: none;
   background: transparent;
   border: 0;
   box-shadow: none;
-  color: inherit;
+  color: unset;
   font: inherit;
   isolation: isolate;
   position: relative;

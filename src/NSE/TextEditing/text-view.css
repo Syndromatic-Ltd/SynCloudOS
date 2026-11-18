@@ -1,5 +1,5 @@
 
-@layer nse.atmo {
+@layer nse.structure {
 @scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
@@ -92,33 +92,30 @@
 /* Contact shadow: pools on the surface beneath. Curved shadow: the lower corners lift off the page. */
 .nse-text-view .nse-text-attachment-shadow,
 :where(:scope):is(.nse-text-view) .nse-text-attachment-shadow { position: absolute; inset: 0; pointer-events: none; }
-.nse-text-view .nse-text-attachment-shadow:not([data-shadow]),
-:where(:scope):is(.nse-text-view) .nse-text-attachment-shadow:not([data-shadow]) { display: none; }
-.nse-text-view .nse-text-attachment-shadow[data-shadow="contact"],
-:where(:scope):is(.nse-text-view) .nse-text-attachment-shadow[data-shadow="contact"] {
+.nse-text-view .nse-text-attachment-shadow:not([data-nse-shadow]),
+:where(:scope):is(.nse-text-view) .nse-text-attachment-shadow:not([data-nse-shadow]) { display: none; }
+.nse-text-view .nse-text-attachment-shadow[data-nse-shadow="contact"],
+:where(:scope):is(.nse-text-view) .nse-text-attachment-shadow[data-nse-shadow="contact"] {
   inset: auto 4% calc(-1 * var(--nse-shadow-offset, 0px) - var(--nse-shadow-blur, 20px) * .35) 4%;
   height: calc(var(--nse-shadow-blur, 20px) * .7 + 4px);
-  background: radial-gradient(closest-side, var(--nse-shadow-colour, rgb(0 0 0 / .6)), transparent);
-  filter: blur(calc(var(--nse-shadow-blur, 20px) * .15));
 }
-.nse-text-view .nse-text-attachment-shadow[data-shadow="curved"]::before,
-:where(:scope):is(.nse-text-view) .nse-text-attachment-shadow[data-shadow="curved"]::before,
-.nse-text-view .nse-text-attachment-shadow[data-shadow="curved"]::after,
-:where(:scope):is(.nse-text-view) .nse-text-attachment-shadow[data-shadow="curved"]::after {
+.nse-text-view .nse-text-attachment-shadow[data-nse-shadow="curved"]::before,
+:where(:scope):is(.nse-text-view) .nse-text-attachment-shadow[data-nse-shadow="curved"]::before,
+.nse-text-view .nse-text-attachment-shadow[data-nse-shadow="curved"]::after,
+:where(:scope):is(.nse-text-view) .nse-text-attachment-shadow[data-nse-shadow="curved"]::after {
   content: ""; position: absolute; bottom: 14px; width: 48%; height: 20%; max-height: 60px;
-  box-shadow: 0 calc(15px + var(--nse-shadow-offset, 0px)) calc(6px + var(--nse-shadow-blur, 10px)) var(--nse-shadow-colour, rgb(0 0 0 / .55));
 }
-.nse-text-view .nse-text-attachment-shadow[data-shadow="curved"]::before,
-:where(:scope):is(.nse-text-view) .nse-text-attachment-shadow[data-shadow="curved"]::before { left: 4%; transform: rotate(calc(-1 * var(--nse-shadow-curl, 1.6deg))); transform-origin: left bottom; }
-.nse-text-view .nse-text-attachment-shadow[data-shadow="curved"]::after,
-:where(:scope):is(.nse-text-view) .nse-text-attachment-shadow[data-shadow="curved"]::after { right: 4%; transform: rotate(var(--nse-shadow-curl, 1.6deg)); transform-origin: right bottom; }
+.nse-text-view .nse-text-attachment-shadow[data-nse-shadow="curved"]::before,
+:where(:scope):is(.nse-text-view) .nse-text-attachment-shadow[data-nse-shadow="curved"]::before { left: 4%; transform: rotate(calc(-1 * var(--nse-shadow-curl, 1.6deg))); transform-origin: left bottom; }
+.nse-text-view .nse-text-attachment-shadow[data-nse-shadow="curved"]::after,
+:where(:scope):is(.nse-text-view) .nse-text-attachment-shadow[data-nse-shadow="curved"]::after { right: 4%; transform: rotate(var(--nse-shadow-curl, 1.6deg)); transform-origin: right bottom; }
 
 /* Selection, as Pages draws it: a hairline frame with square handles on its corners and edges.
    A selected image drags to move; every handle resizes it in proportion. */
-.nse-text-view .nse-text-attachment[data-selected="true"]>.nse-text-attachment-box,
-:where(:scope):is(.nse-text-view) .nse-text-attachment[data-selected="true"]>.nse-text-attachment-box { outline: 1px solid var(--nse-text-attachment-selection, #4a8fe7); outline-offset: 0; }
-.nse-text-view .nse-text-attachment[data-selected="true"]:not([data-display="image"]),
-:where(:scope):is(.nse-text-view) .nse-text-attachment[data-selected="true"]:not([data-display="image"]) { outline: 2px solid Highlight; outline-offset: 2px; }
+.nse-text-view .nse-text-attachment[data-nse-selected]>.nse-text-attachment-box,
+:where(:scope):is(.nse-text-view) .nse-text-attachment[data-nse-selected]>.nse-text-attachment-box { outline: 1px solid; outline-offset: 0; }
+.nse-text-view .nse-text-attachment[data-nse-selected]:not([data-display="image"]),
+:where(:scope):is(.nse-text-view) .nse-text-attachment[data-nse-selected]:not([data-display="image"]) { outline: 2px solid; outline-offset: 2px; }
 .nse-text-view .ProseMirror[contenteditable="true"] .nse-text-attachment[data-display="image"],
 :where(:scope):is(.nse-text-view) .ProseMirror[contenteditable="true"] .nse-text-attachment[data-display="image"] { cursor: grab; }
 .nse-text-view .nse-text-attachment[data-resizing="true"],
@@ -129,12 +126,12 @@
 :where(:scope):is(.nse-text-view) .ProseMirror[data-attachment-moving] .nse-text-attachment { cursor: grabbing; }
 .nse-text-view .ProseMirror[data-attachment-moving] .nse-text-attachment-handle,
 :where(:scope):is(.nse-text-view) .ProseMirror[data-attachment-moving] .nse-text-attachment-handle { display: none; }
-.nse-text-view .nse-text-attachment[data-selected="true"][data-display="image"],
-:where(:scope):is(.nse-text-view) .nse-text-attachment[data-selected="true"][data-display="image"] { touch-action: none; }
+.nse-text-view .nse-text-attachment[data-nse-selected][data-display="image"],
+:where(:scope):is(.nse-text-view) .nse-text-attachment[data-nse-selected][data-display="image"] { touch-action: none; }
 .nse-text-view .nse-text-attachment-handle,
 :where(:scope):is(.nse-text-view) .nse-text-attachment-handle {
   position: absolute; z-index: 2; width: 8px; height: 8px; box-sizing: border-box;
-  border: 1px solid rgb(0 0 0 / .78); background: #fff; touch-action: none;
+  border: 1px solid; touch-action: none;
   translate: -50% -50%;
 }
 .nse-text-view .nse-text-attachment-handle::after,

@@ -510,7 +510,7 @@ function renderBootstrapRecovery(element: Element, attempt: BrowserMountAttempt,
   // NSE backdrop owns physical focus; no disposed kernel provider is retained.
   root.render(<HostSiteBrandingProvider value={recovery.branding}>
     <NSEAppearanceProvider theme={appearance} colourScheme={recovery.appearance}>
-      <RubberBandProvider><div className="syncloudos-root-error-shell"><AlertBackdrop>
+      <RubberBandProvider><div className="syncloudos-root-error-shell" data-nse-control="view" data-nse-part="background" data-nse-role="runtime"><AlertBackdrop>
         <SystemAlert error={recovery.error}
           appearance={recovery.appearance} applicationIcon={recovery.applicationIcon}
           onDismiss={() => navigate(home)} onReturn={() => navigate(home)} onReload={() => navigate()}

@@ -430,11 +430,11 @@ function CommandMenuSurface({
       data-nse-menu-generation={view.generation}
       {...appearanceProjection}
       data-nse-theme={undefined}
-      data-nse-menu-variant={applicationAppearance ? "application-menu" : "popup"}
+      data-nse-style={applicationAppearance ? "application-menu" : "popup"}
       dir={direction}
       onKeyDown={handleKeyDown}
     >
-      <AppearanceNineSlice kind="menu-surface" className="nse-menu__surface-layer" />
+      <AppearanceNineSlice kind="menu-surface" data-nse-part="decoration" className="nse-menu__surface-layer" />
       {view.branchPath.length > 0 ? (
         <button
           data-nse-control="menu-item" data-nse-part="cell" className={`nse-menu-item nse-menu-back${applicationAppearance ? " nse-control-list-item" : ""}`}

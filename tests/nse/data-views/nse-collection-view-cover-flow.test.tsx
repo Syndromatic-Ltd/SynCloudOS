@@ -81,7 +81,7 @@ describe("Cover Flow collection layout", () => {
 
   it("shows the selected item as the current option with its title and subtitle", () => {
     const { view } = renderCoverFlow();
-    expect(view.getAttribute("data-layout")).toBe("cover-flow");
+    expect(view.getAttribute("data-nse-style")).toBe("cover-flow");
     expect(selectedLabel()).toBe("Two");
     expect(view.textContent).toContain("Second");
     // Without AnimationFX layers the view says why and shows the selected picture flat.

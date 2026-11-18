@@ -1,3 +1,8 @@
+/* The browser host owns its viewport backdrop. */
+[data-nse-control="view"][data-nse-part="background"][data-nse-role="runtime"]::before {
+  background: #070b10;
+}
+
 :scope [data-nse-control="scroller"],
 :scope:is([data-nse-control="scroller"]),
 :scope[data-nse-control="scroller"] {

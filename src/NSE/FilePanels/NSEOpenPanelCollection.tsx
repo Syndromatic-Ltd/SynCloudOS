@@ -28,8 +28,8 @@ export function OpenPanelCollection({ items, selectedIds, multiple, compact, wid
   return <NSECollectionView aria-label={title} className="nse-open-collection" adapter={adapter} layout={layout} viewportInlineSize={width} viewportBlockSize={height}
     selectionMode={multiple ? "multiple" : "single"} pointerActivation={compact ? "single-click" : "double-click"}
     onSelectionChange={({ snapshot }) => onSelect(snapshot.selectedIds)} onActivate={(id) => { const item = items.find(item => item.id === id); if (item && (!compact || item.kind === "directory")) onActivate(item); }}
-    renderItem={({ item, selected }) => <div className="nse-open-item" data-kind={item.kind} data-selected={selected || undefined}>
+    renderItem={({ item, selected }) => <div className="nse-open-item" data-nse-part="item" data-kind={item.kind} data-nse-selected={selected ? "" : undefined}>
       <div className="nse-open-item-picture">{items.some(source => source.id === item.id) ? <OpenPanelItemImage item={items.find(source => source.id === item.id)!} images={images} /> : null}</div>
-      <span className="nse-open-item-name">{item.name}</span>
+      <span className="nse-open-item-name" data-nse-part="label">{item.name}</span>
     </div>} />;
 }

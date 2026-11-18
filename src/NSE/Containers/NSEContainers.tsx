@@ -33,6 +33,7 @@ import {
   type SmoothSurfaceRequest,
   type SmoothSurfaceStyle
 } from "../SmoothSurface";
+import { getSmoothSurfaceThemeHooks } from "../SmoothSurface/smoothSurface";
 
 type ContainerElement = "div" | "section" | "aside" | "main" | "nav" | "article" | "ul" | "ol";
 
@@ -119,6 +120,7 @@ export function ContainerPane({
     as,
     {
       ...props,
+      ...getSmoothSurfaceThemeHooks(smoothSurface),
       className: surfaceProps.className,
       "data-variant": variant,
       "data-nse-control": "box", "data-nse-part": "background", "data-nse-box-type": "custom", "data-nse-style": variant,

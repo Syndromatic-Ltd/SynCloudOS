@@ -1,0 +1,303 @@
+/* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
+
+[data-nse-control="login-window"][data-nse-part="background"] {
+  --login-plate-metal: conic-gradient(from 0deg at 49.94% 21.52%,
+    #d6d6d6 0deg,
+    #dadada 7.25deg,
+    #d9d9d9 13.75deg,
+    #d4d4d4 18.25deg,
+    #c3c3c3 28.5deg,
+    #bfbfbf 33.75deg,
+    #c3c3c3 37.5deg,
+    #dedede 46.25deg,
+    #e0e0e0 48.25deg,
+    #e1e1e1 50deg,
+    #dedede 52.25deg,
+    #d9d9d9 54.25deg,
+    #bababa 62.5deg,
+    #b1b1b1 65.5deg,
+    #aeaeae 67.75deg,
+    #aeaeae 72.75deg,
+    #b1b1b1 77.25deg,
+    #bcbcbc 87deg,
+    #bfbfbf 91.75deg,
+    #bebebe 96.5deg,
+    #b8b8b8 106.5deg,
+    #b9b9b9 117deg,
+    #c3c3c3 121.75deg,
+    #e8e8e8 133.5deg,
+    #ededed 136.5deg,
+    #efefef 139.5deg,
+    #ebebeb 142.5deg,
+    #e3e3e3 145.5deg,
+    #d8d8d8 148.5deg,
+    #b6b6b6 156.25deg,
+    #aaaaaa 159.5deg,
+    #a3a3a3 162.75deg,
+    #a1a1a1 165.5deg,
+    #a3a3a3 170.25deg,
+    #a8a8a8 174.25deg,
+    #d1d1d1 194.25deg,
+    #dfdfdf 204.5deg,
+    #e2e2e2 207.75deg,
+    #e2e2e2 217.75deg,
+    #dfdfdf 222deg,
+    #d6d6d6 228.75deg,
+    #b8b8b8 246.25deg,
+    #b2b2b2 250.75deg,
+    #afafaf 255.75deg,
+    #b1b1b1 258.25deg,
+    #c0c0c0 263.5deg,
+    #c4c4c4 266.25deg,
+    #c1c1c1 269.75deg,
+    #afafaf 279.5deg,
+    #afafaf 299.25deg,
+    #b7b7b7 302.75deg,
+    #d7d7d7 311.25deg,
+    #dcdcdc 313.5deg,
+    #dddddd 315.5deg,
+    #dbdbdb 319deg,
+    #d6d6d6 322.75deg,
+    #bcbcbc 334.75deg,
+    #b6b6b6 338.5deg,
+    #b2b2b2 344.25deg,
+    #b8b8b8 348.25deg,
+    #d1d1d1 357.25deg,
+    #d6d6d6 360deg);
+  --login-plate-sheen: conic-gradient(from 0deg at 50% 50%,
+    #d6d6d6 0deg,
+    #dadada 7.25deg,
+    #d9d9d9 13.75deg,
+    #d4d4d4 18.25deg,
+    #c3c3c3 28.5deg,
+    #bfbfbf 33.75deg,
+    #c3c3c3 37.5deg,
+    #dedede 46.25deg,
+    #e0e0e0 48.25deg,
+    #e1e1e1 50deg,
+    #dedede 52.25deg,
+    #d9d9d9 54.25deg,
+    #bababa 62.5deg,
+    #b1b1b1 65.5deg,
+    #aeaeae 67.75deg,
+    #aeaeae 72.75deg,
+    #b1b1b1 77.25deg,
+    #bcbcbc 87deg,
+    #bfbfbf 91.75deg,
+    #bebebe 96.5deg,
+    #b8b8b8 106.5deg,
+    #b9b9b9 117deg,
+    #c3c3c3 121.75deg,
+    #e8e8e8 133.5deg,
+    #ededed 136.5deg,
+    #efefef 139.5deg,
+    #ebebeb 142.5deg,
+    #e3e3e3 145.5deg,
+    #d8d8d8 148.5deg,
+    #b6b6b6 156.25deg,
+    #aaaaaa 159.5deg,
+    #a3a3a3 162.75deg,
+    #a1a1a1 165.5deg,
+    #a3a3a3 170.25deg,
+    #a8a8a8 174.25deg,
+    #d1d1d1 194.25deg,
+    #dfdfdf 204.5deg,
+    #e2e2e2 207.75deg,
+    #e2e2e2 217.75deg,
+    #dfdfdf 222deg,
+    #d6d6d6 228.75deg,
+    #b8b8b8 246.25deg,
+    #b2b2b2 250.75deg,
+    #afafaf 255.75deg,
+    #b1b1b1 258.25deg,
+    #c0c0c0 263.5deg,
+    #c4c4c4 266.25deg,
+    #c1c1c1 269.75deg,
+    #afafaf 279.5deg,
+    #afafaf 299.25deg,
+    #b7b7b7 302.75deg,
+    #d7d7d7 311.25deg,
+    #dcdcdc 313.5deg,
+    #dddddd 315.5deg,
+    #dbdbdb 319deg,
+    #d6d6d6 322.75deg,
+    #bcbcbc 334.75deg,
+    #b6b6b6 338.5deg,
+    #b2b2b2 344.25deg,
+    #b8b8b8 348.25deg,
+    #d1d1d1 357.25deg,
+    #d6d6d6 360deg);
+  --login-plate-texture: url("./login/plate-texture.webp");
+  --login-plate-bevel:
+    inset 0 0.120cqw 0 rgba(255,255,255,0.308),
+    inset 0 0.240cqw 0 rgba(255,255,255,0.379),
+    inset 0 0.360cqw 0 rgba(255,255,255,0.16),
+    inset 0.120cqw 0 0 rgba(255,255,255,0.361),
+    inset 0.240cqw 0 0 rgba(255,255,255,0.24),
+    inset 0.360cqw 0 0 rgba(255,255,255,0.066),
+    inset 0 -0.120cqw 0 rgba(255,255,255,0.161),
+    inset -0.120cqw 0 0 rgba(255,255,255,0.095);
+  --login-plate-shadow: 0 8.16cqw 21.85cqw rgba(0, 0, 0, 0.76);
+}
+
+[data-nse-control="login-window"][data-nse-part="background"] {
+  color: #2c3036;
+}
+
+[data-nse-control="login-window"][data-nse-part="background"] [data-nse-part="suspension"] [data-nse-part="shadow"] {
+  opacity: 0;
+  filter: blur(1px);
+}
+
+[data-nse-control="login-window"][data-nse-part="background"] [data-nse-part="suspension"] :is([data-nse-part="leading"],[data-nse-part="trailing"]) {
+  filter:
+    drop-shadow(0 2px 1px rgba(255, 255, 255, 0.18))
+    drop-shadow(0 4px 3px rgba(0, 0, 0, 0.62));
+}
+
+[data-nse-control="login-window"][data-nse-part="background"] [data-nse-part="attachment"]>[data-nse-part="image"]:first-child {
+  filter: drop-shadow(0 5px 6px rgba(0, 0, 0, 0.5));
+}
+
+[data-nse-control="login-window"][data-nse-part="background"] [data-nse-part="bezel"][data-nse-role="plate"] {
+  background: #c6c7c9 var(--login-plate-metal);
+  box-shadow: var(--login-plate-shadow);
+}
+
+[data-nse-control="login-window"][data-nse-part="background"] [data-nse-part="bezel"][data-nse-role="plate"]::after {
+  box-shadow: var(--login-plate-bevel);
+}
+
+[data-nse-control="login-window"][data-nse-part="background"] [data-nse-part="bezel"][data-nse-role="plate"]>[data-nse-part="background"] {
+  background: var(--login-plate-sheen);
+}
+
+[data-nse-control="login-window"][data-nse-part="background"] [data-nse-part="bezel"][data-nse-role="plate"]>[data-nse-part="decoration"] {
+  background: var(--login-plate-texture) 0 0 / 100% 100% no-repeat;
+}
+
+[data-nse-control="login-window"][data-nse-part="background"] [data-nse-part="badge"] {
+  filter: drop-shadow(0 0.35cqw 0.4cqw rgba(0, 0, 0, 0.34));
+}
+
+[data-nse-control="login-window"][data-nse-part="background"] :is([data-nse-part="leading"],[data-nse-part="trailing"]):where([data-nse-role="fastener"]) {
+  filter: drop-shadow(0 0.25cqw 0.3cqw rgba(0, 0, 0, 0.42));
+}
+
+[data-nse-control="login-window"][data-nse-part="background"] [data-nse-part="bezel"][data-nse-role="plate"]>[data-nse-part="content"]>[data-nse-part="title"] {
+  color: #555759;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+[data-nse-control="login-window"][data-nse-part="field"]>[data-nse-part="field"] {
+  color: #f2f4f6;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.29), rgba(0, 0, 0, 0.325));
+  box-shadow:
+    inset 0 0.2cqw 0.24cqw rgba(0, 0, 0, 0.42),
+    inset 0 -0.12cqw 0 rgba(255, 255, 255, 0.14),
+    0 0.3cqw 0 rgba(255, 255, 255, 0.72);
+  outline: 0;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.4);
+}
+
+[data-nse-control="login-window"][data-nse-part="field"]>[data-nse-part="field"]::placeholder {
+  color: rgba(255, 255, 255, 0.72);
+  opacity: 1;
+}
+
+[data-nse-control="login-window"][data-nse-part="field"]>[data-nse-part="field"]:focus-visible {
+  color: #26292d;
+  background: #fbfbf9;
+  box-shadow:
+    inset 0 1.9cqw 1.9cqw -1.2cqw rgba(0, 0, 0, 0.52),
+    0 0 0 0.42cqw rgba(150, 185, 212, 0.95),
+    0 0 0 0.78cqw rgba(150, 185, 212, 0.34);
+  text-shadow: none;
+}
+
+[data-nse-control="login-window"][data-nse-part="field"]>[data-nse-part="field"]:focus::placeholder {
+  color: rgba(60, 64, 70, 0.5);
+}
+
+[data-nse-control="login-window"][data-nse-part="field"][data-nse-validation="invalid"]>[data-nse-part="field"] {
+  box-shadow:
+    inset 0 0.2cqw 0.24cqw rgba(0, 0, 0, 0.42),
+    0 0 0 0.24cqw rgba(196, 84, 84, 0.92);
+}
+
+[data-nse-control="login-window"][data-nse-part="field"][data-nse-validation="invalid"]>[data-nse-part="field"]:focus {
+  box-shadow:
+    inset 0 1.9cqw 1.9cqw -1.2cqw rgba(0, 0, 0, 0.52),
+    0 0 0 0.24cqw rgba(196, 84, 84, 0.95),
+    0 0 0 0.5cqw rgba(196, 84, 84, 0.32);
+}
+
+[data-nse-control="login-window"][data-nse-part="button"] {
+  color: #55585b;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+[data-nse-control="login-window"][data-nse-part="button"][data-nse-enabled="false"] {
+  opacity: 0.55;
+}
+
+[data-nse-control="login-window"][data-nse-part="button"]>[data-nse-part="content"]>[data-nse-part="indicator"]>[data-nse-part="image"][data-nse-state="on"] {
+  opacity: 0;
+}
+
+[data-nse-control="login-window"][data-nse-part="button"]>[data-nse-part="content"]>[data-nse-part="field"]:checked+[data-nse-part="indicator"]>[data-nse-part="image"][data-nse-state="off"] {
+  opacity: 0;
+}
+
+[data-nse-control="login-window"][data-nse-part="button"]>[data-nse-part="content"]>[data-nse-part="field"]:checked+[data-nse-part="indicator"]>[data-nse-part="image"][data-nse-state="on"] {
+  opacity: 1;
+}
+
+[data-nse-control="login-window"][data-nse-part="button"]>[data-nse-part="content"]>[data-nse-part="field"]:focus-visible+[data-nse-part="indicator"] {
+  outline-color: rgba(134, 214, 255, 0.92);
+}
+
+[data-nse-control="login-window"][data-nse-part="background"] [data-nse-part="error"] {
+  color: #8e2424;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.68);
+}
+
+:where([data-nse-control="login-window"][data-nse-part="background"]) [data-nse-part="actions"]>[data-nse-control="button"] {
+  color: #17191b;
+}
+
+[data-nse-control="login-window"][data-nse-part="background"] [data-nse-part="actions"] [data-nse-part="image"][data-nse-role="sign-in"] {
+  filter:
+    url("./login/provider-icon-inset.svg?no-inline#provider-icon-inset")
+    drop-shadow(0 1.25px 0.25px rgba(255, 255, 255, 0.8));
+}
+
+[data-nse-control="login-window"][data-nse-part="background"] [data-nse-part="actions"]>[data-nse-control="button"][data-nse-appearance-name="aqua"] {
+  --nse-atmo-btn-bevel: #f9f9f9;
+  --nse-atmo-btn-fill-a: #b2b2b2;
+  --nse-atmo-btn-fill-b: #e9e9e9;
+}
+
+[data-nse-control="login-window"][data-nse-part="background"] [data-nse-part="actions"] [data-nse-control="progress-indicator"][data-nse-style="spinning"][data-nse-appearance-name="aqua"] {
+  filter: none;
+}
+
+[data-nse-control="login-window"][data-nse-part="backdrop"] {
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.42) 34%, rgba(0,0,0,0.84) 70%, rgba(0,0,0,0.97) 100%);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* Use the placard's action geometry instead of the stock button dimensions. */
+[data-nse-control="login-window"][data-nse-part="background"] [data-nse-part="actions"]>[data-nse-control="button"] {
+  display: revert-layer;
+  height: revert-layer;
+  min-height: revert-layer;
+  border-width: revert-layer;
+}
+
+[data-nse-control="login-window"][data-nse-part="background"] [data-nse-part="actions"]>[data-nse-control="button"] > [data-nse-part="image"] {
+  display: revert-layer;
+  margin: revert-layer;
+}

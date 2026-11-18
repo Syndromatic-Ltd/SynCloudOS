@@ -73,7 +73,7 @@ export function MediaCollectionPresenter({ items, selectedIds, selection, direct
         onActivate={(_id, item) => onActivate(item)}
         renderItem={({ item, selected }) => (
           <div className="nse-media-grid-item" aria-label={`${item.name}, ${item.kind}`} data-selected={selected ? "true" : "false"} data-nse-part="media-item" data-nse-selected={selected ? "" : undefined}>
-            {item.thumbnailUrl ? <img data-nse-part="image" className="nse-media-grid-thumbnail" src={item.thumbnailUrl} alt="" /> : <span className="nse-media-grid-placeholder" aria-hidden="true">{item.kind}</span>}
+            {item.thumbnailUrl ? <img data-nse-part="image" className="nse-media-grid-thumbnail" src={item.thumbnailUrl} alt="" /> : <span data-nse-part="label" className="nse-media-grid-placeholder" aria-hidden="true">{item.kind}</span>}
             <span className="nse-media-grid-name">{item.name}</span>
           </div>
         )}

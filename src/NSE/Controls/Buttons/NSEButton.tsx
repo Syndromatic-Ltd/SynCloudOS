@@ -376,6 +376,7 @@ function SwitchButtonCell(
             id={inputId}
             data-nse-part="field"
             type="checkbox"
+            style={{ opacity: 0 }}
             disabled={disabled}
             readOnly={readOnly}
             checked={current.value === true}

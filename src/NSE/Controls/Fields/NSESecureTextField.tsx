@@ -145,7 +145,7 @@ function SecureTextFieldControl(props: NSESecureTextFieldProps) {
           onBlur={conceal}
           onKeyDown={(event) => { if (event.key === "Escape") conceal(); }}
           data-nse-part="reveal"
-          data-nse-revealed={String(revealed)} data-revealed={revealed ? "true" : "false"}
+          data-nse-revealed={String(revealed)}
         >
           <span data-nse-part="reveal-glyph" aria-hidden="true" />
         </button>

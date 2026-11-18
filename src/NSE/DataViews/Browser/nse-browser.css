@@ -1,5 +1,5 @@
 
-@layer nse.atmo {
+@layer nse.structure {
 @scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
@@ -35,8 +35,6 @@
 :where(:scope):is(.nse-browser-options) { min-inline-size: 100%; position: relative; }
 .nse-browser-option,
 :where(:scope):is(.nse-browser-option) { align-items: center; display: flex; inline-size: 100%; min-block-size: 23px; padding-inline: var(--nse-space-2, 8px); position: absolute; }
-.nse-browser-option[data-focused],
-:where(:scope):is(.nse-browser-option[data-focused]) { background: var(--nse-selection-background, Highlight); color: var(--nse-selection-foreground, HighlightText); }
 .nse-browser-resize,
 :where(:scope):is(.nse-browser-resize) { inline-size: 8px; min-inline-size: 8px; touch-action: none; }
 .nse-browser-back,

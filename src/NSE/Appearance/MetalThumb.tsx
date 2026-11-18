@@ -60,13 +60,15 @@ export function MetalThumb({ disabled = false }: { disabled?: boolean }) {
   return (
     <span
       className="nse-metal-thumb"
+      data-nse-part="decoration"
+      data-nse-material="metal"
       aria-hidden="true"
       data-lighting={light.active ? "reactive" : "static"}
       style={{ "--nse-metal-angle": light.angle + "rad" } as CSSProperties}
     >
-      <span className="nse-metal-thumb-sheen" />
-      <span className="nse-metal-thumb-texture" />
-      <span className="nse-metal-thumb-rim" />
+      <span data-nse-part="highlight" />
+      <span data-nse-part="image" />
+      <span data-nse-part="border" />
     </span>
   );
 }

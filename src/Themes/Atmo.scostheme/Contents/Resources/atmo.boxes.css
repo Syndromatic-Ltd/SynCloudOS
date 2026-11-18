@@ -182,3 +182,70 @@
 :scope[data-nse-control="box"]:where([data-nse-part="bezel"],[data-nse-part="separator"])[data-nse-box-type="custom"][data-nse-shadow="true"]:not([data-nse-shadow-suppressed="true"]) {
   box-shadow:var(--nse-shadow-offset-x) var(--nse-shadow-offset-y) var(--nse-shadow-blur) var(--nse-shadow-colour);
 }
+
+/* Container panes use the custom box surface. */
+[data-nse-part="subtitle"]:where([data-nse-control="box"][data-nse-part="background"][data-nse-box-type="custom"] > [data-nse-part="header"] *),
+:where(:scope):is([data-nse-part="subtitle"]:where([data-nse-control="box"][data-nse-part="background"][data-nse-box-type="custom"] > [data-nse-part="header"] *)) {
+  color: color-mix(in srgb, currentColor 66%, transparent);
+}
+
+[data-nse-control="box"]:where([data-nse-part="background"][data-nse-box-type="custom"]):is([data-nse-style="surface"], [data-nse-style="floating"]),
+:where(:scope):is([data-nse-control="box"]:where([data-nse-part="background"][data-nse-box-type="custom"]):is([data-nse-style="surface"], [data-nse-style="floating"])) {
+  background: color-mix(in srgb, Canvas 76%, white 8%);
+  border-color: color-mix(in srgb, currentColor 16%, transparent);
+}
+
+[data-nse-control="box"]:where([data-nse-part="background"][data-nse-box-type="custom"]):is([data-nse-style="sidebar"], [data-nse-style="inspector"]),
+:where(:scope):is([data-nse-control="box"]:where([data-nse-part="background"][data-nse-box-type="custom"]):is([data-nse-style="sidebar"], [data-nse-style="inspector"])) {
+  background: color-mix(in srgb, Canvas 82%, currentColor 4%);
+}
+
+/* Image editor well and crop guides. */
+
+[data-nse-control="image-view"][data-nse-part="background"][data-nse-style="editor"],
+:where(:scope):is([data-nse-control="image-view"][data-nse-part="background"][data-nse-style="editor"]) {
+  background: #0d0f12;
+}
+
+[data-nse-part="decoration"][data-nse-role="crop"]:where([data-nse-control="image-view"][data-nse-part="background"][data-nse-style="editor"] > *),
+:where(:scope):is([data-nse-part="decoration"][data-nse-role="crop"]:where([data-nse-control="image-view"][data-nse-part="background"][data-nse-style="editor"] > *)) {
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.82);
+  background:
+    linear-gradient(to right, transparent calc(33.333% - 1px), rgba(255, 255, 255, 0.34) calc(33.333% - 1px), rgba(255, 255, 255, 0.34) calc(33.333% + 1px), transparent calc(33.333% + 1px)),
+    linear-gradient(to right, transparent calc(66.666% - 1px), rgba(255, 255, 255, 0.34) calc(66.666% - 1px), rgba(255, 255, 255, 0.34) calc(66.666% + 1px), transparent calc(66.666% + 1px)),
+    linear-gradient(to bottom, transparent calc(33.333% - 1px), rgba(255, 255, 255, 0.34) calc(33.333% - 1px), rgba(255, 255, 255, 0.34) calc(33.333% + 1px), transparent calc(33.333% + 1px)),
+    linear-gradient(to bottom, transparent calc(66.666% - 1px), rgba(255, 255, 255, 0.34) calc(66.666% - 1px), rgba(255, 255, 255, 0.34) calc(66.666% + 1px), transparent calc(66.666% + 1px));
+}
+
+/* Glass and linen visual effect views. */
+:where([data-nse-control="visual-effect-view"][data-nse-part="background"][data-nse-material="glass"][data-nse-style="panel"]),
+:where(:scope):is(:where([data-nse-control="visual-effect-view"][data-nse-part="background"][data-nse-material="glass"][data-nse-style="panel"])) {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(185, 205, 224, 0.2) 47%, rgba(20, 31, 45, 0.24)),
+    rgba(218, 231, 244, 0.54);
+  border-color: rgba(255, 255, 255, 0.62);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.86),
+    inset 0 -1px 0 rgba(20, 29, 40, 0.32),
+    0 16px 50px rgba(4, 8, 14, 0.46);
+  backdrop-filter: blur(18px) saturate(1.16);
+}
+
+:where([data-nse-control="visual-effect-view"][data-nse-part="background"][data-nse-material="linen"][data-nse-style="panel"]),
+:where(:scope):is(:where([data-nse-control="visual-effect-view"][data-nse-part="background"][data-nse-material="linen"][data-nse-style="panel"])) {
+  background:
+    linear-gradient(180deg, rgba(21, 31, 43, 0.93), rgba(5, 8, 13, 0.98)),
+    url("./materials/linen.webp");
+  background-size: cover;
+  background-position: center 42%;
+  color: white;
+}
+
+:where([data-nse-control="visual-effect-view"][data-nse-part="background"][data-nse-material="linen"][data-nse-style="panel"])::before,
+:where(:scope):is(:where([data-nse-control="visual-effect-view"][data-nse-part="background"][data-nse-material="linen"][data-nse-style="panel"]))::before {
+  opacity: 0.35;
+  background-image:
+    linear-gradient(45deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(255, 255, 255, 0.035) 25%, transparent 25%);
+  background-size: 5px 5px;
+}

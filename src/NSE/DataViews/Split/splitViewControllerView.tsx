@@ -451,7 +451,7 @@ export function SplitViewControllerView({ controller }: { readonly controller: N
                 <div
                   role="separator"
                   data-nse-part="split-divider"
-                  data-orientation={orientation}
+                  data-nse-orientation={orientation}
                   tabIndex={allowsMutation && !animating ? 0 : -1}
                   aria-disabled={!allowsMutation || animating || undefined}
                   aria-hidden={item.isCollapsed || next.isCollapsed || undefined}

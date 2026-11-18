@@ -1409,7 +1409,6 @@
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"])>[data-nse-part="header"],
 :where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[data-nse-part="header"] {
   gap: 2px;
-  min-block-size: 30px;
 }
 
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"])>[data-nse-part="header"]>:where([data-nse-part="title"]),
@@ -1726,22 +1725,6 @@
    (radio group, slider, text field, push button) at its own controlSize;
    these rules only lay them out in a 296px utility panel.
    ========================================================================= */
-
-:where(:scope) [data-nse-control="colour-well"]>:where([data-nse-part="button"]),
-:where(:scope):is([data-nse-control="colour-well"])>:where([data-nse-part="button"]) {
-  gap: 8px;
-  min-inline-size: 112px;
-  block-size: 34px;
-  padding: 0 12px 0 5px;
-  border-radius: 10px;
-}
-
-:where(:scope) [data-nse-control="colour-well"] [data-nse-part="colour-sample"],
-:where(:scope):is([data-nse-control="colour-well"]) [data-nse-part="colour-sample"] {
-  inline-size: 36px;
-  block-size: 24px;
-  border-radius: 6px;
-}
 
 /* --- Wheel ---------------------------------------------------------------- */
 :where(:scope) [data-nse-control="colour-wheel"],

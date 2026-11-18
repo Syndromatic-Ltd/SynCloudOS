@@ -1,5 +1,5 @@
 
-@layer nse.atmo {
+@layer nse.structure {
 @scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
@@ -55,7 +55,7 @@
   border: 0;
   outline: 0;
   background: transparent;
-  color: inherit;
+  color: unset;
   font: inherit;
   appearance: none;
   -webkit-appearance: none;
@@ -90,8 +90,8 @@
   height: 24px;
   padding: 0;
   border: 0;
-  background: transparent center / contain no-repeat;
-  color: inherit;
+  background: transparent;
+  color: unset;
   font: inherit;
 }
 
@@ -127,7 +127,6 @@
   position: absolute;
   inset: 0;
   margin: 0;
-  opacity: 0;
   cursor: inherit;
 }
 
@@ -143,30 +142,11 @@
   text-overflow: ellipsis;
 }
 
-/* Secure field reveal: an eye, crossed while the text is showing. Drawn as a
-   mask in the control's ink so every theme gets a glyph, not a bullet. */
 [data-nse-control="secure-text-field"] [data-nse-part="reveal-glyph"],
 :where(:scope):is([data-nse-control="secure-text-field"]) [data-nse-part="reveal-glyph"] {
   display: block;
   inline-size: 18px;
   block-size: 18px;
-  background: currentColor;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M1.5 9s2.8-5 7.5-5 7.5 5 7.5 5-2.8 5-7.5 5-7.5-5-7.5-5z' fill='none' stroke='%23000' stroke-width='1.6' stroke-linejoin='round'/%3E%3Ccircle cx='9' cy='9' r='2.4'/%3E%3C/svg%3E") center / contain no-repeat;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M1.5 9s2.8-5 7.5-5 7.5 5 7.5 5-2.8 5-7.5 5-7.5-5-7.5-5z' fill='none' stroke='%23000' stroke-width='1.6' stroke-linejoin='round'/%3E%3Ccircle cx='9' cy='9' r='2.4'/%3E%3C/svg%3E") center / contain no-repeat;
-}
-
-[data-nse-control="secure-text-field"] [data-nse-part="reveal"][data-revealed="true"] [data-nse-part="reveal-glyph"],
-:where(:scope):is([data-nse-control="secure-text-field"]) [data-nse-part="reveal"][data-revealed="true"] [data-nse-part="reveal-glyph"] {
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M1.5 9s2.8-5 7.5-5 7.5 5 7.5 5-2.8 5-7.5 5-7.5-5-7.5-5z' fill='none' stroke='%23000' stroke-width='1.6' stroke-linejoin='round'/%3E%3Ccircle cx='9' cy='9' r='2.4'/%3E%3Cpath d='M3 15L15 3' stroke='%23000' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M1.5 9s2.8-5 7.5-5 7.5 5 7.5 5-2.8 5-7.5 5-7.5-5-7.5-5z' fill='none' stroke='%23000' stroke-width='1.6' stroke-linejoin='round'/%3E%3Ccircle cx='9' cy='9' r='2.4'/%3E%3Cpath d='M3 15L15 3' stroke='%23000' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat;
-}
-
-@media (forced-colors: active) {
-  [data-nse-control="secure-text-field"] [data-nse-part="reveal-glyph"],
-:where(:scope):is([data-nse-control="secure-text-field"]) [data-nse-part="reveal-glyph"] {
-    forced-color-adjust: none;
-    background: ButtonText;
-  }
 }
 
 }

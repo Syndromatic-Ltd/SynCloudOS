@@ -56,7 +56,7 @@ function AppearancePane({ appearance }: PreferencePaneViewProps) {
           </GroupedRow>
         ))}
       </NSEBox>
-      <p className="nse-prefs-note">
+      <p data-nse-part="label" data-nse-role="note" className="nse-prefs-note">
         {t("preferences.autoNote", "Auto follows the system setting on this device.")}
       </p>
     </div>

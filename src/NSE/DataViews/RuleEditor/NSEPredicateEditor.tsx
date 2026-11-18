@@ -95,7 +95,7 @@ function ComparisonPredicateEditor<T>({ expression, templates, publish, readOnly
         if (!validated.ok) { setError(validated.error.message); return; }
         setError(null); publish({ kind: "comparison", field: expression.field, operator, value: validated.value as never, ...compatibleOptions(template, operator) });
       }} />}
-    {error && <div role="alert" className="nse-rule-error">{error}</div>}
+    {error && <div role="alert" className="nse-rule-error" data-nse-part="error">{error}</div>}
   </>;
 }
 

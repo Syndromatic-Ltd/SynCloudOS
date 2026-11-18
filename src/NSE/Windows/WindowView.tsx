@@ -24,6 +24,7 @@ import { useNSEContentLayoutProperties } from "../Layout/windowObstructions";
 import React, { type KeyboardEventHandler, type ReactNode } from "react";
 import { AppearanceNineSlice } from "../Appearance/NSEAppearanceNineSlice";
 import { getOptionalSmoothSurfaceProps, useSmoothSurface } from "../SmoothSurface";
+import { getSmoothSurfaceThemeHooks } from "../SmoothSurface/smoothSurface";
 
 import type { SmoothSurfaceRequest } from "../SmoothSurface";
 import type { WindowSmoothSurfaceConfiguration } from "../../SynCloudOS/SynCloudOS";
@@ -152,6 +153,7 @@ export function WindowView({
       ) : null}
       <div
         ref={setSurfaceNode}
+        {...getSmoothSurfaceThemeHooks(smoothSurfaceRequest)}
         data-nse-part="bezel" className={["nse-window__surface", smoothSurfaceProps.className].filter(Boolean).join(" ")}
         data-full-size-content={titlebarDocument?.fullSizeContentView ? "" : undefined}
         style={{ ...smoothSurfaceProps.style,

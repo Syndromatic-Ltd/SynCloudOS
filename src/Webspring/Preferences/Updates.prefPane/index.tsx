@@ -56,7 +56,7 @@ export function UpdateReadinessDetails({ snapshot }: { readonly snapshot: HostUp
     <NSEBox><div className="nse-update-readiness-section">
       <h2>{t('preferences.updates.readiness', 'Update readiness')}</h2>
       <p role="status" aria-live="polite" aria-atomic="true">{headline}</p>
-      <p className="nse-prefs-note">{t('preferences.updates.scope', 'These observations do not authorize an update. Missing coverage always defers; zero observed work does not prove the host is idle.')}</p>
+      <p data-nse-part="label" data-nse-role="note" className="nse-prefs-note">{t('preferences.updates.scope', 'These observations do not authorize an update. Missing coverage always defers; zero observed work does not prove the host is idle.')}</p>
       <dl className="nse-update-readiness-counts">{rows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
     </div></NSEBox>
     <NSEBox><div className="nse-update-readiness-section">
@@ -71,13 +71,13 @@ export function UpdateReadinessDetails({ snapshot }: { readonly snapshot: HostUp
       <p>{t('preferences.updates.currentBuild', 'Host build')}: {snapshot.client.hostBuild === 'unconfigured' ? t('preferences.updates.buildNotConfigured', 'Not configured') : snapshot.client.hostBuild}</p>
       <p>{t('preferences.updates.generation', 'Observation generation')}: {snapshot.client.generation}</p>
       <p>{snapshot.compatibility.status === 'restricted' ? t('preferences.updates.restricted', 'The host restricts update compatibility.') : t('preferences.updates.unverified', 'No replacement build or storage compatibility has been verified.')}</p>
-      <p className="nse-prefs-note">{t('preferences.updates.disabled', 'Installation, automatic reload and update activation controls are disabled here.')}</p>
+      <p data-nse-part="label" data-nse-role="note" className="nse-prefs-note">{t('preferences.updates.disabled', 'Installation, automatic reload and update activation controls are disabled here.')}</p>
     </div></NSEBox>
     <NSEBox><div className="nse-update-readiness-section">
       <h3>{t('preferences.updates.otherWindows', 'Other window observations')}</h3>
       <p>{inspection.state === 'checking' ? t('preferences.updates.checking', 'Inspecting configured participants…') : inspection.state === 'stale' ? t('preferences.updates.stale', 'The previous observation is stale. Work, membership or its observation lifetime may have changed.') : inspection.state === 'failed' ? t('preferences.updates.failed', 'Participant evidence could not be established. Defer the update.') : inspection.state === 'observed' && inspection.result?.status === 'ready-at-observation' ? t('preferences.updates.observedReady', 'The inspected participants reported no blocking work at that observation.') : inspection.state === 'observed' ? t('preferences.updates.observedDefer', 'The inspected participants require deferral.') : t('preferences.updates.notInspected', 'Other windows have not been inspected.')}</p>
       {inspection.result ? <p>{t('preferences.updates.participants', 'Participants observed')}: {inspection.result.participantCount}</p> : null}
-      <p className="nse-prefs-note">{t('preferences.updates.observationLimit', 'An observation cannot lock other windows or prevent later edits. It is not permission to activate or reload.')}</p>
+      <p data-nse-part="label" data-nse-role="note" className="nse-prefs-note">{t('preferences.updates.observationLimit', 'An observation cannot lock other windows or prevent later edits. It is not permission to activate or reload.')}</p>
     </div></NSEBox>
   </div>;
 }

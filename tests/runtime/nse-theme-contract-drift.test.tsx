@@ -29,7 +29,7 @@ import { AppViewChrome } from "../../src/Webspring/AppViewChrome";
 import { WindowContentBorder } from "../../src/SynCloudOS/AppHosting/windowAccessories";
 import { WindowPresentationContent } from "../../src/Webspring/WindowPresentationContent";
 import { WindowLayer, createApplicationWindowContentRendererRegistry } from "../../src/Webspring/WindowLayer";
-import { HostSiteBrandingProvider, SynCloudOSProvider } from "../../src/SynCloudOSReact";
+import { HostSiteBrandingProvider, RuntimeInputBoundary, SynCloudOSProvider } from "../../src/SynCloudOSReact";
 import { createBrowserWindowHost } from "../../src/SynCloudOS/PlatformAdapters/BrowserWindowHost";
 import { NSEWindowFrameView } from "../../src/NSE/Application/NSEWindowFrameView";
 import { NSESplitViewController, NSESplitViewItem } from "../../src/NSE/DataViews/Split";
@@ -48,6 +48,34 @@ import { GFXColour } from "../../src/FX/GraphicsFX/GFXColour";
 import { nseUnowned } from "../../src/NSE/Controllers/ownership";
 import { TabBar, TabBarOverflowList } from "../../src/NSE/Navigation/TabBar";
 import { TabBarController } from "../../src/NSE/Navigation/TabBarController";
+import { HostLoginGate } from "../../src/Webspring/HostLoginGate";
+import { LoginWindow } from "../../src/NSE/SystemUI/LoginWindow";
+import { LoginCheckbox } from "../../src/NSE/SystemUI/LoginWindow/LoginCheckbox";
+import { LoginField } from "../../src/NSE/SystemUI/LoginWindow/LoginField";
+import { OpenPanelSheetSurface } from "../../src/NSE/Windows/windowSheetSurfaces";
+import { OpenPanelCollection } from "../../src/NSE/FilePanels/NSEOpenPanelCollection";
+import { OpenPanelSources } from "../../src/NSE/FilePanels/NSEOpenPanelSources";
+import { MediaCollectionPresenter } from "../../src/NSE/MediaPanels/NSEMediaCollectionPresenter";
+import { IFXImageView, type IFXImageResource } from "../../src/FX/ImageFX/public";
+import { NSEArrayController, NSETreeController } from "../../src/NSE/Controllers";
+import { NSECollectionView, createCoverFlowCollectionLayout } from "../../src/NSE/DataViews/Collection";
+import { NSEOutlineView } from "../../src/NSE/DataViews/Outline";
+import { NSEPredicateEditor } from "../../src/NSE/DataViews/RuleEditor";
+import { attachmentRun, attributedContent, createInMemoryNSETextOwner, paragraph, textRun } from "../../src/NSE/Text";
+import { NSETextView } from "../../src/NSE/TextEditing/NSETextView";
+import { TextEditingSession } from "../../src/NSE/TextEditing/TextEditingSession";
+import { IconWell } from "../../src/NSE/Components/IconWell";
+import { LoadingSpinner } from "../../src/NSE/Components/LoadingSpinner";
+import { AboutDialog, NSEConfirmDialog } from "../../src/NSE/Components/NSESystemDialogs";
+import { ContainerPane } from "../../src/NSE/Containers/NSEContainers";
+import { synCloudOSLogoUrl } from "../../src/SynCloudOS/Resources/frameworkAssets";
+import { SystemUILayer } from "../../src/Webspring/SystemUILayer";
+import { createTestRuntime, registerTestSynWare } from "./helpers";
+import { GlassPanel } from "../../src/NSE/Components/GlassPanel";
+import { LinenSurface } from "../../src/NSE/Components/LinenSurface";
+import { NSESlider } from "../../src/NSE/Controls/Values/NSESlider";
+import { ToolbarView } from "../../src/NSE/Toolbars/ToolbarView";
+import { GraphicalClock } from "../../src/NSE/DateTime/Calendar/graphicalClock";
 
 const repository = resolve(import.meta.dirname, "../..");
 const presentation = createStaticPresentationPort({ width: 1000, height: 800, reducedMotion: true });
@@ -309,9 +337,10 @@ it("renders the floating Cumulus titlebar and its custom frame", () => {
   expect(titlebar?.querySelector('[data-nse-part="floating-titlebar"]')).not.toBeNull();
   collect();
 });
-it("renders both dividers of a three-pane split view", () => {
+it.each([true, false])("renders both dividers of a three-pane split view (vertical=%s)", (isVertical) => {
   const controller = new NSESplitViewController({
     id: "theme-contract-split",
+    isVertical,
     splitViewItems: ["Sources", "Documents", "Inspector"].map(title => new NSESplitViewItem({
       identifier: title.toLowerCase(),
       viewController: new TestContentViewController(title, () => <p>{title}</p>),
@@ -320,7 +349,8 @@ it("renders both dividers of a three-pane split view", () => {
   try {
     const view = render(<Host><ViewControllerView controller={controller} /></Host>);
     updateTraits(controller, createStaticPresentationTraits({ width: 1000, height: 800, reducedMotion: true }));
-    expect(view.container.querySelectorAll('[data-nse-part="split-divider"]')).toHaveLength(2);
+    const orientation = isVertical ? "horizontal" : "vertical";
+    expect(view.container.querySelectorAll(`[data-nse-part="split-divider"][data-nse-orientation="${orientation}"]`)).toHaveLength(2);
     collect();
   } finally {
     cleanup();
@@ -482,6 +512,273 @@ it("renders colour panel states", async () => {
     await runtime.dispose("contract test finished");
   }
 });
+it("renders runtime and login drawing hooks", async () => {
+  const runtime = createSynCloudOS({ id: "contract-login", environment: createBrowserRuntimeEnvironment(), authenticationPolicy: "required" });
+  await runtime.boot({ initialPathname: "/" });
+  try {
+    const view = render(<Host><SynCloudOSProvider runtime={runtime}><RuntimeInputBoundary>
+      <HostLoginGate runtime={runtime} snapshot={runtime.store.getSnapshot()} authentication="required" />
+      <LoginWindow methods={[{ id: "example", label: "Continue", iconUrl: "/example.svg" }]} />
+      <LoginField label="Account" invalid />
+      <LoginCheckbox label="Remember me" disabled />
+    </RuntimeInputBoundary></SynCloudOSProvider></Host>);
+    expect(view.container.querySelector('[data-nse-control="login-window"][data-nse-part="backdrop"]')).not.toBeNull();
+    expect(view.container.querySelector('[data-nse-control="view"][data-nse-role="runtime"]')).not.toBeNull();
+    collect();
+  } finally {
+    cleanup();
+    await runtime.dispose("contract test finished");
+  }
+});
+
+it("renders attached file panels and media collection drawing hooks", async () => {
+  const noop = () => undefined;
+  const media = { id: "photo", providerId: "contract", kind: "image" as const, name: "Photograph", mimeType: "image/png", source: "/photo.png" };
+  const photograph = { id: media.id, name: media.name, kind: "media" as const, media };
+  const preview = {
+    state: "ready", src: "/photo.png", revision: 0,
+    intrinsicSize: { width: 160, height: 120 }, subscribe: () => noop, ready: Promise.resolve(), release: noop,
+  } as unknown as IFXImageResource;
+  const view = render(<Host>
+    <OpenPanelSheetSurface compact={false} onClose={noop} request={{
+      id: "contract-attached-open", title: "Open", role: "sheet", parentWindowControllerId: null,
+      anchor: null, bounds: { x: 0, y: 0, width: 640, height: 400 },
+    }}>
+      <OpenPanelSources id="contract-sources" groups={[{ id: "local", name: "Local", children: [
+        { id: "documents", name: "Documents", locked: true },
+      ] }]} selectedId={null} onSelect={noop} />
+      <OpenPanelCollection items={[photograph]} selectedIds={new Set([photograph.id])} multiple={false} compact={false}
+        width={360} height={180} title="Files" images={{ load: () => preview }} onSelect={noop} onActivate={noop} />
+    </OpenPanelSheetSurface>
+    <MediaCollectionPresenter items={[{ id: "recording", providerId: "contract", kind: "audio", name: "Recording", mimeType: "audio/ogg" }]}
+      selectedIds={new Set()} selection="single" direction="ltr" onSelectionChange={noop} onActivate={noop} />
+  </Host>);
+  expect(view.container.querySelector('[data-nse-control="open-panel"][data-nse-part="sheet"]')).not.toBeNull();
+  expect(view.getByText("Recording")).toBeTruthy();
+  expect((await view.findByRole("img", { name: "Needs permission" })).getAttribute("data-nse-part")).toBe("notice");
+  await waitFor(() => expect(view.container.querySelector('[data-nse-part="image"][data-nse-style="thumbnail"]')).not.toBeNull());
+  collect();
+});
+
+it("renders selected icon, light spinner, pane subtitle and keyboard toolbar", async () => {
+  const view = render(
+    <Host>
+      <IconWell active><img src={synCloudOSLogoUrl} alt="" /></IconWell>
+      <LoadingSpinner variant="light" label="Loading example" />
+      <ContainerPane title="Options" subtitle="More settings" variant="surface"><p>Pane content</p></ContainerPane>
+      <ToolbarView composition="children" fadeOnKeyboard><input type="text" aria-label="Search" /></ToolbarView>
+    </Host>,
+  );
+  expect(view.container.querySelector('[data-nse-control="icon-well"][data-nse-selected]')).not.toBeNull();
+  expect(view.getByRole("status", { name: "Loading example" }).getAttribute("data-nse-background-style")).toBe("emphasised");
+  expect(view.getByText("More settings").getAttribute("data-nse-part")).toBe("subtitle");
+  const field = view.getByRole("textbox", { name: "Search" });
+  act(() => field.focus());
+  await waitFor(() => expect(view.getByRole("toolbar").getAttribute("data-nse-presentation")).toBe("keyboard"));
+  collect();
+});
+
+it("renders the About and confirmation artwork", async () => {
+  const about = render(
+    <Host>
+      <AboutDialog
+        open
+        appearance="dark"
+        info={{
+          name: "SynCloudOS",
+          version: "1.0.0",
+          tagline: "Your workspace",
+          copyright: "© Syndromatic Ltd.",
+          trademark: "SynCloudOS",
+          iconSrc: synCloudOSLogoUrl,
+          iconAlt: "SynCloudOS logo",
+        }}
+        onDismiss={() => undefined}
+      />
+    </Host>,
+  );
+  expect((await about.findByRole("img", { name: "SynCloudOS logo" })).getAttribute("data-nse-part")).toBe("image");
+  collect();
+  cleanup();
+
+  render(
+    <Host>
+      <NSEConfirmDialog open title="Delete document?" message="This action cannot be undone." iconSrc={synCloudOSLogoUrl}
+        confirmLabel="Delete" cancelLabel="Cancel" onConfirm={() => undefined} onCancel={() => undefined} />
+    </Host>,
+  );
+  await waitFor(() => expect(document.querySelector('[data-nse-control="system-alert"][data-nse-part="background"] [data-nse-part="image"] > img[data-nse-part="image"]')).not.toBeNull());
+  collect();
+});
+
+it("renders empty and muted Notification preferences", async () => {
+  const runtime = createTestRuntime({ id: "theme-contract-preferences" });
+  try {
+    runtime.appearance.set("dark");
+    runtime.settings.set("notificationsEnabled", false);
+    runtime.systemUI.preferences.open("notifications");
+    const view = render(
+      <SynCloudOSProvider runtime={runtime}>
+        <RuntimeInputBoundary><SystemUILayer onLogOut={() => undefined} /></RuntimeInputBoundary>
+      </SynCloudOSProvider>,
+    );
+    expect((await view.findByText("No Apps Yet")).closest('[data-nse-part="status"]')?.getAttribute("data-nse-role")).toBe("empty");
+    expect(view.getByRole("button", { name: "Back" }).getAttribute("data-nse-role")).toBe("back");
+    collect();
+
+    await act(async () => {
+      registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: "com.example.preferences", version: "1.0.0", displayName: "Example App", services: [{ id: "notifications", required: true }] });
+    });
+    const note = await view.findByText(/All notifications are turned off/u);
+    expect(note.getAttribute("data-nse-role")).toBe("note");
+    expect(note.closest('[data-nse-role="notifications"]')?.getAttribute("data-nse-state")).toBe("off");
+    expect(view.getByText(/View notifications from/u).getAttribute("data-nse-role")).toBe("lead-note");
+    collect();
+  } finally {
+    cleanup();
+    await runtime.dispose("theme contract preferences specimen completed");
+  }
+});
+
+it("renders the outline source-list rail, group label and separators", () => {
+  type Entry = { readonly id: string; readonly children: readonly Entry[] };
+  const controller = new NSETreeController<Entry, string>({
+    owner: nseUnowned,
+    id: "theme-outline-source-list",
+    content: [{ id: "Library", children: [{ id: "Documents", children: [] }, { id: "Pictures", children: [] }] }],
+    getId: entry => entry.id,
+    getChildren: entry => entry.children,
+    withChildren: (entry, children) => ({ ...entry, children }),
+    selection: { mode: "single", allowsEmpty: true },
+  });
+  try {
+    controller.expand("Library");
+    const view = render(<Host><NSEOutlineView
+      aria-label="Library sidebar"
+      controller={controller}
+      selectionHighlightStyle="sourceList"
+      idForItem={entry => entry.id}
+      childrenForItem={entry => entry.children}
+      labelForItem={entry => entry.id}
+      delegate={{ isGroupItem: id => id === "Library" }}
+    /></Host>);
+    const rail = view.container.querySelector('[data-nse-control="outline-view"][data-nse-part="sidebar"]');
+    expect(rail?.querySelector('[data-nse-part="group-row"] > [data-nse-part="label"]')?.textContent).toBe("Library");
+    expect(rail?.querySelector('[data-nse-part="group-row"] > [data-nse-part="separator"]')).not.toBeNull();
+    expect(rail?.querySelector('[data-nse-part="group"][data-nse-role="children"]')).not.toBeNull();
+    collect();
+  } finally {
+    cleanup();
+    controller.dispose();
+  }
+});
+
+it("renders the selected Cover Flow title and subtitle", () => {
+  const covers = [{ id: "cover", title: "Quayside" }];
+  const controller = new NSEArrayController({
+    id: "theme-cover-flow",
+    content: covers,
+    getId: cover => cover.id,
+    selection: { mode: "single", allowsEmpty: false, preservesSelection: true },
+  });
+  controller.select(["cover"]);
+  try {
+    const image = { src: "/cover.png", pixelLease: () => new Promise(() => undefined) } as unknown as IFXImageResource;
+    const view = render(<Host><NSECollectionView
+      aria-label="Albums"
+      adapter={{ controller, idForItem: cover => cover.id, labelForItem: cover => cover.title }}
+      layout={createCoverFlowCollectionLayout({})}
+      imageForItem={() => image}
+      subtitleForItem={() => "Photo album"}
+    /></Host>);
+    const flow = view.getByRole("listbox", { name: "Albums" });
+    expect(flow.getAttribute("data-nse-style")).toBe("cover-flow");
+    expect(flow.querySelector('[data-nse-part="title"] > [data-nse-part="primary-text"]')?.textContent).toBe("Quayside");
+    expect(flow.querySelector('[data-nse-part="title"] > [data-nse-part="subtitle"]')?.textContent).toBe("Photo album");
+    collect();
+  } finally {
+    cleanup();
+    controller.dispose();
+  }
+});
+
+it("renders rule-editor groups, alternate rows and validation errors", () => {
+  type Person = { readonly age: number };
+  const schema = { id: "theme-rules", fields: { age: { type: "number" as const, read: (person: Person) => person.age } } };
+  const rule = { kind: "comparison", field: "age", operator: "equals", value: 24 } as const;
+  const view = render(<Host><NSEPredicateEditor<Person>
+    aria-label="People search"
+    schema={schema}
+    value={{ kind: "compound", operator: "all", children: [
+      { kind: "compound", operator: "any", children: [rule] },
+      rule,
+    ] }}
+  /></Host>);
+  const editor = view.container.querySelector('[data-nse-control="rule-editor"]');
+  expect(editor?.querySelector('[data-nse-part="group"]')).not.toBeNull();
+  expect(editor?.querySelector('[data-nse-part="row"][data-nse-style="alternating"]')).not.toBeNull();
+  fireEvent.change(view.getByLabelText("Value 2"), { target: { value: "invalid" } });
+  expect(editor?.querySelector('[data-nse-part="error"]')).not.toBeNull();
+  collect();
+
+  view.rerender(<Host><NSEPredicateEditor<Person> aria-label="People search" schema={schema} value={rule} /></Host>);
+  fireEvent.change(view.getByLabelText("Value"), { target: { value: "invalid" } });
+  expect(view.container.querySelector('[data-nse-control="predicate-editor"] > [data-nse-part="error"]')).not.toBeNull();
+  collect();
+});
+
+it("renders the image editor crop guides", () => {
+  const image = {
+    state: "ready", src: "/landscape.png", revision: 1, accessibleLabel: "Landscape",
+    intrinsicSize: { width: 200, height: 100 }, subscribe: () => () => undefined,
+  } as unknown as IFXImageResource;
+  const view = render(<Host><IFXImageView image={image} currentToolMode="crop" geometry={{
+    measure: () => ({ width: 100, height: 100 }),
+    observe: () => () => undefined,
+  }} /></Host>);
+  expect(view.container.querySelector('[data-nse-control="image-view"][data-nse-style="editor"] > [data-nse-part="decoration"][data-nse-role="crop"]')).not.toBeNull();
+  collect();
+});
+
+it.each(["contact", "curved"] as const)("renders a selected image attachment with a %s shadow", kind => {
+  const run = attachmentRun({
+    id: "photo", kind: "image", source: { kind: "document-resource", resourceId: "photo-asset" }, alt: "A photo",
+    bounds: { width: 200, height: 150 },
+    appearance: { shadow: { kind, colour: "#000000", blur: 10, offset: 2, opacity: 0.6, angle: 270 } },
+  });
+  const owner = createInMemoryNSETextOwner({ content: attributedContent([paragraph([textRun("Before "), run, textRun(" after")])]) });
+  const session = new TextEditingSession({ id: "theme-attachment", textOwner: owner });
+  const view = render(<Host><NSETextView session={session} label="Document" attachmentResolver={() => ({
+    src: "data:image/png;base64,iVBORw0KGgo=", naturalWidth: 200, naturalHeight: 150,
+  })} /></Host>);
+  act(() => session.select(7, 8));
+  const attachment = view.container.querySelector('[data-nse-part="attachment"][data-nse-selected]');
+  expect(attachment?.querySelector(`[data-nse-part="shadow"][data-nse-shadow="${kind}"]`)).not.toBeNull();
+  expect(attachment?.querySelectorAll('[data-nse-part="handle"]')).toHaveLength(8);
+  collect();
+});
+
+it("renders material surfaces, focus treatments and metal slider parts", () => {
+  const view = render(<Host>
+    <GlassPanel tabIndex={0} smoothSurface={{ focus: "within" }}>Glass</GlassPanel>
+    <LinenSurface tabIndex={0} smoothSurface={{ focus: "inset" }}>Linen</LinenSurface>
+    <NSESlider aria-label="Volume" minimum={0} maximum={100} defaultValue={50} thumbMaterial="metal" />
+  </Host>);
+  expect(view.getByText("Glass").getAttribute("data-nse-focus-style")).toBe("within");
+  expect(view.getByText("Linen").getAttribute("data-nse-focus-style")).toBe("inset");
+  expect(view.getByRole("slider").closest('[data-nse-control="slider"]')?.querySelector('[data-nse-part="knob"][data-nse-material="metal"]')).not.toBeNull();
+  collect();
+});
+
+it("renders the optional analogue second hand", () => {
+  const view = render(<Host><div data-nse-control="date-picker">
+    <GraphicalClock aria-label="Clock" locale="en-GB" timeZone="Europe/London" date={{ year: 2026, month: 11, day: 18 }}
+      value={{ hour: 13, minute: 30, second: 15 }} showSeconds onValueChange={() => undefined} />
+  </div></Host>);
+  expect(view.container.querySelector('[data-nse-part="second-hand"]')).not.toBeNull();
+  collect();
+});
+
 // A chosen menu row flashes before its menu acts and fades: drive the real flash on each open menu's first row.
 async function flashOpenMenus() {
   const rows = [...document.querySelectorAll<HTMLElement>('[data-nse-control="menu-item"][data-nse-part="cell"]:not([data-nse-enabled="false"])')];

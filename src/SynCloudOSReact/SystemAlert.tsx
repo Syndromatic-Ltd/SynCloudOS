@@ -38,8 +38,8 @@ function SystemAlertDetails({ details }: { details: string }) {
   const detailsRef = useRef<HTMLDivElement>(null);
   useNSEPresentation(detailsRef, resolveSystemAlertDetailsMotion(reducedMotion));
   return (
-    <div ref={detailsRef} className="nse-alert-details">
-      <pre className="nse-alert-details-text">{details}</pre>
+    <div ref={detailsRef} data-nse-part="content" data-nse-role="details" className="nse-alert-details">
+      <pre data-nse-part="label" className="nse-alert-details-text">{details}</pre>
     </div>
   );
 }
@@ -164,7 +164,7 @@ export function SystemAlert({
 
   return (
     <AlertSurface className="syncloudos-system-alert" appearance={appearance} labelledBy={titleId} describedBy={messageId}>
-      <div className="nse-system-alert-content">
+      <div data-nse-part="content" className="nse-system-alert-content">
         <div data-nse-part="decoration" className={`syncloudos-alert-artwork${icon.src ? "" : " is-caution-only"}`} data-alert-icon={icon.kind} aria-hidden="true">
           {icon.src ? <img data-nse-part="image" className="syncloudos-alert-logo" data-alert-logo={icon.src === synCloudOSLogo ? "syncloudos" : ""} src={icon.src} alt="" /> : null}
           <img className="syncloudos-alert-caution" data-nse-part="badge" src={cautionIcon} alt="" />
@@ -174,6 +174,7 @@ export function SystemAlert({
           <p data-nse-part="label" id={messageId}>{error.message}</p>
           <button
             type="button"
+            data-nse-part="disclosure"
             className="nse-alert-disclosure"
             aria-expanded={expanded}
             onClick={() => setExpanded((value) => !value)}
