@@ -17,13 +17,13 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getWebspringDragGrabOffset } from "../../src/Webspring/WebspringDragProxy";
+import { getWebspringDragGrabOffset } from "../../src/Webspring/WSDragProxy";
 import {
   WEBSPRING_DRAG_FOLDER_REST_MS,
   WEBSPRING_DRAG_MERGE_REST_MS,
   WEBSPRING_DRAG_REORDER_REST_MS,
   WEBSPRING_DRAG_SPRING_OPEN_MS,
-  createWebspringDragArbiter,
+  createWSDragArbiter,
   type WebspringDragEntry,
   type WebspringDragView,
 } from "../../src/Webspring/webspringDragArbiter";
@@ -56,7 +56,7 @@ function createArbiter(overrides: {
   const merge = vi.fn();
   const springOpen = vi.fn();
   const leavePanel = vi.fn();
-  const arbiter = createWebspringDragArbiter({
+  const arbiter = createWSDragArbiter({
     itemId: overrides.itemId ?? "dragged",
     kind: overrides.kind ?? "app",
     canMerge: overrides.canMerge,

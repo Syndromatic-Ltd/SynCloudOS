@@ -28,7 +28,7 @@ import type { SynCloudOSAppInfo } from "../../src/SynCloudOS/AppInfo/appInfoType
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
 import { WebspringQuickSwitchView } from "../../src/Webspring/WebspringQuickSwitchView";
 import { fitQuickSwitch } from "../../src/Webspring/quickswitchModel";
-import { defineWebspring } from "../../src/Webspring/public";
+import { createTestLauncher, createTestWebspring } from "./webspringTestShell";
 import { createTestRuntime } from "./helpers";
 
 
@@ -126,12 +126,9 @@ it("grows to the screen edge, then shrinks icons by default or scrolls when the 
 });
 
 it("captures the QuickSwitch overflow choice and rejects anything else", () => {
-  const base = { manifest: {
-    schemaVersion: 1, bundleIdentifier: "com.example.quickswitch", displayName: "QuickSwitch", version: "1.0.0",
-    webspringShell: { views: [{ id: "site", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }], defaults: { desktop: "site", tablet: "site", mobile: "site" }, homeRoute: "/", branding: { name: { key: "site.name", fallback: "QuickSwitch" } } },
-  }, components: { site: () => null } } as const;
-  expect(defineWebspring(base).quickSwitch).toBeUndefined();
-  expect(defineWebspring({ ...base, quickSwitch: { overflow: "scroll" } }).quickSwitch).toEqual({ overflow: "scroll" });
-  expect(() => defineWebspring({ ...base, quickSwitch: { overflow: "grow" as "scroll" } })).toThrow("shrink or scroll");
-  expect(() => defineWebspring({ ...base, quickSwitch: { scrollable: true } as never })).toThrow("unknown fields: scrollable");
+  const base = { info: { bundleIdentifier: "com.example.quickswitch", displayName: "QuickSwitch" }, launcher: createTestLauncher(() => null, "persistent") };
+  expect(createTestWebspring(base).quickSwitch).toBeUndefined();
+  expect(createTestWebspring({ ...base, quickSwitch: { overflow: "scroll" } }).quickSwitch).toEqual({ overflow: "scroll" });
+  expect(() => createTestWebspring({ ...base, quickSwitch: { overflow: "grow" as "scroll" } })).toThrow("shrink or scroll");
+  expect(() => createTestWebspring({ ...base, quickSwitch: { scrollable: true } as never })).toThrow("unknown fields: scrollable");
 });

@@ -111,7 +111,7 @@ Everything ships in one package, `@syndromatic/syncloudos`, with explicit subpat
 
 | Entry | Contents |
 | --- | --- |
-| `webspring` | `defineWebspring`, the Board launcher and the shell types |
+| `webspring` | `createWebspring`, `WSApplication`, the launcher classes (`WSLauncherViewController`, `WSBoardViewController`, `WSIconView`) and the shell types |
 | `webspring/styles.css` | Webspring shell styles |
 | `chronosphere` | `Chronosphere`, the version archive any application presents, with its Vortex and grid views and `VortexEffect` |
 | `chronosphere/styles.css` | Chronosphere styles |

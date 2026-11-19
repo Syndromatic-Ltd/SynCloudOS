@@ -65,7 +65,7 @@ import type { NSEData } from "@syndromatic/syncloudos/foundation";
 import { AUFXAudioChunkStream, AUFXAudioFormat, AUFXAudioPCMBuffer, AUFXClockObservation } from "@syndromatic/syncloudos/fx/audio";
 import { VFXContainerReader } from "@syndromatic/syncloudos/fx/video";
 import { VFXWebMContainerBackend } from "@syndromatic/syncloudos/fx/video/webm";
-import { defineWebspring, type WebspringViewProps } from "@syndromatic/syncloudos/webspring";
+import { WSApplication, WSLauncherViewController, createWebspring } from "@syndromatic/syncloudos/webspring";
 
 declare global { interface Window { fxAudioCodec: any; } }
 window.fxAudioCodec = { ready: false };
@@ -112,13 +112,20 @@ function Probe() {
   })().catch(error => { window.fxAudioCodec = { ready: false, error: error instanceof Error ? error.stack ?? error.message : String(error) }; }); }, [app]);
   return <p id="probe">Installed AUFX-02 Opus codec probe</p>;
 }
-function Website({ actions, applicationOutlet }: WebspringViewProps) {
-  return <main><button id="open" onClick={() => { void actions.openApp("org.example.audio-codec"); }}>Open audio codec probe</button>{applicationOutlet}</main>;
+class Website extends WSLauncherViewController {
+  static override mode = "persistent" as const;
+  override renderView() {
+    return <main><button id="open" onClick={() => { void this.openApp("org.example.audio-codec"); }}>Open audio codec probe</button></main>;
+  }
 }
-const shell = defineWebspring({ manifest: { schemaVersion: 1, bundleIdentifier: "org.example.audio-codec-shell", version: "1.0.0", displayName: "Audio codec shell",
-  webspringShell: { views: [{ id: "website", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }],
-    defaults: { desktop: "website", tablet: "website", mobile: "website" }, homeRoute: "/", branding: { name: { key: "brand", fallback: "Audio codec" } } } },
-  components: { website: Website } });
+
+class Shell extends WSApplication {
+  static override mainViewController = Website;
+}
+const shell = createWebspring({
+  info: { bundleIdentifier: "org.example.audio-codec-shell", version: "1.0.0", displayName: "Audio codec shell", branding: { name: { key: "brand", fallback: "Audio codec" } } },
+  application: Shell,
+});
 const app = createSynWare({ manifest: { schemaVersion: 1, bundleIdentifier: "org.example.audio-codec", version: "1.0.0", displayName: "Audio codec probe",
   entitlements: ["audio.play"], runtime: { policy: { public: true } }, presentations: ["desktop", "tablet", "mobile"],
   routes: [{ path: "/audio-codec", primary: true }], webspring: { visible: true, order: 1 } }, root: Probe });

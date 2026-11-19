@@ -14,7 +14,7 @@ import { WebspringController } from "../../src/Webspring/WebspringController";
 import { NSEApplication, NSEWindowController } from "../../src/NSE/Application";
 import { NSEToolbar, NSEToolbarItem } from "../../src/NSE/Toolbars";
 import { createSynWareDefinitionFromApplicationClass } from "../../src/SynCloudOS/AppHosting/applicationClass";
-import { defineWebspring } from "../../src/Webspring/public";
+import { createTestLauncher, createTestWebspring } from "./webspringTestShell";
 
 vi.mock("../../src/SynCloudOS/Runtime/createSynCloudOS", { spy: true });
 vi.mock("../../src/Webspring/WebspringController", { spy: true });
@@ -43,10 +43,10 @@ const bundle = createSynWare({ manifest: {
   routes: [{ path: "/application", primary: true }],
   runtime: { presentation: "windowedView", policy: { public: true, requiresLogin: false } },
 }, root: Application });
-const shell = defineWebspring({ manifest: {
-  schemaVersion: 1, bundleIdentifier: "com.example.application-shell", version: "1.0.0", displayName: "Shell",
-  webspringShell: { views: [{ id: "site", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }], defaults: { desktop: "site", tablet: "site", mobile: "site" }, homeRoute: "/", branding: { name: { key: "site.name", fallback: "Shell" } } },
-}, components: { site: () => <div data-testid="shell">Shell</div> } });
+const shell = createTestWebspring({
+  info: { bundleIdentifier: "com.example.application-shell", displayName: "Shell", branding: { name: { key: "site.name", fallback: "Shell" } } },
+  launcher: createTestLauncher(() => <div data-testid="shell">Shell</div>, "persistent"),
+});
 function element() { const value = document.createElement("div"); document.body.append(value); elements.push(value); return value; }
 function applicationOptions(target: Element, overrides: object = {}) {
   return { element: target, bundles: [bundle], application: { bundleIdentifier: id }, authentication: "disabled", ...overrides } as unknown as MountSynCloudOSOptions;

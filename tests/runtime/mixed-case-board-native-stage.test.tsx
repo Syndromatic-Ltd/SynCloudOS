@@ -8,7 +8,7 @@ import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { createSynWareDefinitionFromApplicationClass } from "../../src/SynCloudOS/AppHosting/applicationClass";
 import { createSynCloudOS } from "../../src/SynCloudOS/Runtime/createSynCloudOS";
 import { mountSynCloudOS, type MountedSynCloudOSHost } from "../../src/SynCloudOSReact/browserRuntime";
-import { defineWebspring, WebspringBoardView } from "../../src/Webspring/public";
+import { createTestWebspring } from "./webspringTestShell";
 import { selectApplicationStageAppIds } from "../../src/Webspring/ApplicationStageLayer";
 import { HostSiteBrandingProvider, SynCloudOSProvider } from "../../src/SynCloudOSReact";
 import { ApplicationStageLayer } from "../../src/Webspring/ApplicationStageLayer";
@@ -27,16 +27,8 @@ afterEach(async () => {
   window.history.replaceState(null, "", "/");
 });
 
-const shell = defineWebspring({
-  manifest: {
-    schemaVersion: 1, bundleIdentifier: "com.example.NotesBoard", displayName: "Notes Board", version: "1.0.0",
-    webspringShell: {
-      views: [{ id: "board", presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
-      defaults: { desktop: "board", tablet: "board", mobile: "board" }, homeRoute: "/",
-      branding: { name: { key: "host.name", fallback: "Notes Board" } },
-    },
-  },
-  components: { board: WebspringBoardView },
+const shell = createTestWebspring({
+  info: { bundleIdentifier: "com.example.NotesBoard", displayName: "Notes Board", branding: { name: { key: "host.name", fallback: "Notes Board" } } },
 });
 
 function notesBundle(events: string[]) {

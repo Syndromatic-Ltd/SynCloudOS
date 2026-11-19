@@ -56,7 +56,7 @@ import { mountSynCloudOS } from "@syndromatic/syncloudos/browser";
 import { defineSynWareServiceToken, useSCOS, useLumina } from "@syndromatic/syncloudos/sdk";
 import { createSynWare } from "@syndromatic/syncloudos/sdk/testing";
 import { LUFXSearchableItem } from "@syndromatic/syncloudos/fx/lumina";
-import { defineWebspring, type WebspringViewProps } from "@syndromatic/syncloudos/webspring";
+import { WSApplication, WSLauncherViewController, createWebspring } from "@syndromatic/syncloudos/webspring";
 import "@syndromatic/syncloudos/nse/styles.css";
 declare global { interface Window { consumer: any; } }
 window.consumer = { ready: false };
@@ -101,14 +101,24 @@ function Probe() {
   }, [app, lumina]);
   return <p id="probe">Independent installed application</p>;
 }
-function Website({ model, actions, applicationOutlet }: WebspringViewProps) {
-  useEffect(() => { window.consumer.model = model; window.consumer.actions = actions; }, [model, actions]);
-  return <main><button id="open" onClick={() => { void actions.openApp("org.example.probe"); }}>Open probe</button>{applicationOutlet}</main>;
+function WebsiteContent({ launcher }: { readonly launcher: WSLauncherViewController }) {
+  // The checks read apps and widgets and open apps through the launcher itself.
+  useEffect(() => { window.consumer.model = launcher; window.consumer.actions = launcher; }, [launcher]);
+  return <main><button id="open" onClick={() => { void launcher.openApp("org.example.probe"); }}>Open probe</button></main>;
 }
-const shell = defineWebspring({ manifest: { schemaVersion: 1, bundleIdentifier: "org.example.shell", version: "1.0.0", displayName: "Independent shell", webspringShell: {
-  views: [{ id: "website", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }],
-  defaults: { desktop: "website", tablet: "website", mobile: "website" }, homeRoute: "/", branding: { name: { key: "brand", fallback: "Independent" } }
-}}, components: { website: Website } });
+
+class Website extends WSLauncherViewController {
+  static override mode = "persistent" as const;
+  override renderView() { return <WebsiteContent launcher={this} />; }
+}
+
+class Shell extends WSApplication {
+  static override mainViewController = Website;
+}
+const shell = createWebspring({
+  info: { bundleIdentifier: "org.example.shell", version: "1.0.0", displayName: "Independent shell", branding: { name: { key: "brand", fallback: "Independent" } } },
+  application: Shell,
+});
 const app = createSynWare({ manifest: { schemaVersion: 1, bundleIdentifier: "org.example.probe", version: "1.0.0", displayName: "Probe", runtime: { policy: { public: true } }, presentations: ["desktop", "tablet", "mobile"], routes: [{ path: "/probe", primary: true }], entitlements: ["lumina.index", "lumina.query"], services: [{ id: "journal.content", required: false }, { id: "syncal.calendar", required: false }], webspring: { visible: true, order: 1 } }, root: Probe });
 const element = document.getElementById("root")!;
 mountSynCloudOS({ element, bundles: [app], shell, authentication: "disabled" }).then(host => { window.consumer.dispose = () => host.dispose("consumer verification"); }).catch(error => { window.consumer.error = String(error); });

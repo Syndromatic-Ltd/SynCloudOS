@@ -34,6 +34,7 @@ import {
 } from "../SynCloudOS/SynCloudOS";
 import { AppInfo } from "../SynCloudOS/SynCloudOS";
 import { cancelWebspringAppPrefetch, scheduleWebspringAppPrefetch } from "./webspringPrefetch";
+import { assertWSHomeConfiguration, type WSDefinition } from "./WSApplication";
 import type { NSEFontFamily } from "../NSE/NSE";
 import type {
   ActionResult,
@@ -41,10 +42,9 @@ import type {
   LocalisedText,
   Presentation,
   WebspringActions,
-  WebspringApp,
-  WebspringDefinition,
+  WSApp,
   WebspringDialPlacement,
-  WebspringItem,
+  WSItem,
   WebspringViewModel,
   WSWidgetEntry,
 } from "./webspringTypes";
@@ -85,11 +85,11 @@ export class WebspringController {
 
   constructor(
     private readonly runtime: SynCloudOSRuntime,
-    readonly shell: WebspringDefinition,
+    readonly shell: WSDefinition,
     private readonly resources: SynCloudOSShellResources | undefined,
     readonly authentication: AuthenticationInput = "disabled",
   ) {
-    this.assertHomeConfiguration();
+    assertWSHomeConfiguration(shell, (pathname) => runtime.routes.resolveRoute(pathname) as SynCloudOSRouteResolution);
     const actions: WebspringActions = {
       openApp: this.openApp.bind(this),
       returnHome: this.returnHome.bind(this),
@@ -145,33 +145,10 @@ export class WebspringController {
     this.actions = Object.freeze(actions);
   }
 
-  private assertHomeConfiguration() {
-    const declaration = this.shell.manifest.webspringShell;
-    const home = this.runtime.routes.resolveRoute(declaration.homeRoute) as SynCloudOSRouteResolution;
-    const defaultModes = (Object.keys(declaration.defaults) as Presentation[]).map((presentation) => {
-      const id = declaration.defaults[presentation];
-      return declaration.views.find((view) => view.id === id)!.mode;
-    });
-    if (defaultModes.includes("launcher") && home.kind !== "webspring") {
-      throw new TypeError(`Launcher Webspring homeRoute ${declaration.homeRoute} must resolve to the shell.`);
-    }
-    if (!defaultModes.includes("launcher") && home.kind !== "webspring" && home.kind !== "app") {
-      throw new TypeError(`Persistent Webspring homeRoute ${declaration.homeRoute} is not routeable.`);
-    }
-  }
-
-  viewId(presentation: Presentation): string {
-    return this.shell.manifest.webspringShell.defaults[presentation];
-  }
-
-  fallbackViewId(presentation: Presentation, failedViewId: string): string | null {
-    return this.shell.manifest.webspringShell.views.find((view) => view.id !== failedViewId && view.presentations.includes(presentation))?.id ?? null;
-  }
-
   model(snapshot: RuntimeSnapshot, presentation: Presentation, entrancePhase: WebspringViewModel["entrancePhase"] = "ready"): WebspringViewModel {
-    const declaration = this.shell.manifest.webspringShell;
+    const declaration = this.shell.info;
     const resourceUrls = this.resources?.resourceUrls ?? {};
-    const namespace = getSynWareNamespace(this.shell.manifest.bundleIdentifier);
+    const namespace = getSynWareNamespace(declaration.bundleIdentifier);
     const branding = resolveSiteBranding(declaration.branding, resourceUrls, this.runtime.locale, namespace);
     const resolveText = (text: LocalisedText) => resolveSiteBranding({ name: text }, {}, this.runtime.locale, namespace).name;
     const widgets = Object.freeze(this.shell.widgets.map((widget): WSWidgetEntry => Object.freeze({
@@ -188,7 +165,7 @@ export class WebspringController {
     );
     const appsById = new Map(projection.appOrder.map((appId) => {
       const app = snapshot.appInfo[normalizeBundleIdentifier(appId)]!;
-      const viewApp: WebspringApp = Object.freeze({
+      const viewApp: WSApp = Object.freeze({
         bundleIdentifier: app.bundleIdentifier,
         displayName: app.displayName,
         iconUrl: app.icon.src || null,
@@ -206,7 +183,7 @@ export class WebspringController {
       return [appId, viewApp] as const;
     }));
     const folderTitles = new Map((declaration.folders?.initial ?? []).map((folder) => [folder.id, folder.title]));
-    const items = getDesktopWebspringSlots(projection.order).slots.map((slot): WebspringItem => {
+    const items = getDesktopWebspringSlots(projection.order).slots.map((slot): WSItem => {
       const members = projection.folders[slot.id];
       if (!members) return Object.freeze({ kind: "app", id: slot.id, app: appsById.get(slot.id)!, dialPlacement: dialPlacement(slot) });
       const apps = Object.freeze(members.map((appId) => appsById.get(normalizeBundleIdentifier(appId))!));
@@ -262,7 +239,7 @@ export class WebspringController {
   /** A manifest folder's localised title; folders visitors make share one system title. */
   private folderTitle(title: LocalisedText | undefined) {
     const text = title ?? { key: "webspring.folder.untitled", fallback: "Folder" };
-    const namespace = title ? getSynWareNamespace(this.shell.manifest.bundleIdentifier) : undefined;
+    const namespace = title ? getSynWareNamespace(this.shell.info.bundleIdentifier) : undefined;
     const translated = this.runtime.locale.t(text.key, undefined, namespace);
     return translated === text.key ? text.fallback ?? text.key : translated;
   }
@@ -306,7 +283,7 @@ export class WebspringController {
   }
 
   private async returnHome(): Promise<ActionResult> {
-    const homeRoute = this.shell.manifest.webspringShell.homeRoute;
+    const homeRoute = this.shell.info.homeRoute;
     if (homeRoute === "/") return operationResult(await this.runtime.commands.dispatch("workspace.returnToWebspring", undefined, { source: "system" }));
     return operationResult(await this.runtime.routes.openRoute(homeRoute, { source: "webspring-controller" }).result);
   }

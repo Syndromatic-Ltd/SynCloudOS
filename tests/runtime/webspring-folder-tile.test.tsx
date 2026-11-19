@@ -23,13 +23,13 @@ import React from "react";
 import { cleanup, render, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { generateSmoothSurfaceClipPath, generateSmoothSurfacePath } from "../../src/NSE/SmoothSurface";
-import { useWebspringFolderAppearance, WebspringFolderTile, type WebspringFolderAppearance, type WebspringFolderItem } from "../../src/Webspring/public";
+import { useWebspringFolderAppearance, WSFolderTileView, type WebspringFolderAppearance, type WSFolderItem } from "../../src/Webspring/public";
 import { WebspringFolderAppearanceProvider, resolveWebspringFolderTileGeometry } from "../../src/Webspring/WebspringFolderAppearance";
 
-const folder: WebspringFolderItem = {
+const folder: WSFolderItem = {
   kind: "folder", id: "folder.tools", title: "Tools", badgeCount: 0,
-  dialPlacement: { index: 0 } as unknown as WebspringFolderItem["dialPlacement"],
-  apps: ["alpha", "beta"].map((id) => ({ id, title: id, iconUrl: `/${id}.png` })) as unknown as WebspringFolderItem["apps"],
+  dialPlacement: { index: 0 } as unknown as WSFolderItem["dialPlacement"],
+  apps: ["alpha", "beta"].map((id) => ({ id, title: id, iconUrl: `/${id}.png` })) as unknown as WSFolderItem["apps"],
 };
 
 const squircle: WebspringFolderAppearance = {
@@ -54,12 +54,12 @@ afterEach(() => {
 });
 
 function renderTile(appearance: WebspringFolderAppearance | null, dropTarget = false) {
-  const tile = <WebspringFolderTile folder={folder} dropTarget={dropTarget} />;
+  const tile = <WSFolderTileView folder={folder} dropTarget={dropTarget} />;
   const { container } = render(appearance ? <WebspringFolderAppearanceProvider value={appearance}>{tile}</WebspringFolderAppearanceProvider> : tile);
   return container.querySelector<HTMLElement>(".webspring-folder-tile")!;
 }
 
-describe("WebspringFolderTile", () => {
+describe("WSFolderTileView", () => {
   it("draws the default inset squircle from SmoothSurface geometry sized to the tile", () => {
     const tile = renderTile(null);
     const options = { radius: 21.6, curve: "squircle" as const, smoothing: 0.6 };

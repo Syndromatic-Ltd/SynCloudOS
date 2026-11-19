@@ -3,8 +3,7 @@ import { createSynCloudOS } from "../../../../src/SynCloudOS/Runtime/createSynCl
 import { createBrowserRuntimeEnvironment } from "../../../../src/SynCloudOS/PlatformAdapters/BrowserRuntimeEnvironment";
 import { createSynWare, createSynWareBundle } from "../../../../src/SynCloudOS/AppSDK/createSynWare";
 import { SynCloudOSProvider } from "../../../../src/SynCloudOSReact";
-import { defineWebspring } from "../../../../src/Webspring/public";
-import { WebspringBoardView } from "../../../../src/Webspring/Contents/Views/WebspringBoardView/WebspringBoardView";
+import { createWebspring } from "../../../../src/Webspring/public";
 import { WebspringHost } from "../../../../src/Webspring/WebspringHost";
 import { NotificationCentrePresenter } from "../../../../src/Webspring/NotificationCentrePresenter";
 import { StandardWindowView } from "../../../../src/NSE/Windows/StandardWindowView";
@@ -17,13 +16,10 @@ import type { NSEWindowToolbarStyle } from "../../../../src/NSE/Application/NSEW
 import type { ThemeBaselineSurface } from "./catalogue";
 import "../../../../src/Webspring/WebspringHost.css";
 
-const shell = defineWebspring({
-  manifest: { schemaVersion: 1, bundleIdentifier: "com.example.theme-baseline.shell", version: "1.0.0", displayName: "Atmo baseline",
-    webspringShell: { views: [{ id: "board", presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
-      defaults: { desktop: "board", tablet: "board", mobile: "board" }, homeRoute: "/",
-      branding: { name: { key: "baseline.name", fallback: "SynCloudOS" } },
-      folders: { editable: true, initial: [{ id: "folder.tools", title: { key: "tools", fallback: "Tools" }, order: 1, apps: ["com.example.theme-baseline.pictures", "com.example.theme-baseline.music"] }] } } },
-  components: { board: WebspringBoardView },
+const shell = createWebspring({
+  info: { bundleIdentifier: "com.example.theme-baseline.shell", version: "1.0.0", displayName: "Atmo baseline",
+    branding: { name: { key: "baseline.name", fallback: "SynCloudOS" } },
+    folders: { editable: true, initial: [{ id: "folder.tools", title: { key: "tools", fallback: "Tools" }, order: 1, apps: ["com.example.theme-baseline.pictures", "com.example.theme-baseline.music"] }] } },
 });
 
 export function SystemSurface({ kind }: { kind: "board" | "notifications" | "notification-centre" }) {

@@ -522,7 +522,7 @@ function discover(root, options) {
     if (existsSync(shellEntry)) {
       assertDirectory(shellContents, "the Webspring shell Contents directory");
       assertFile(shellEntry, "the Webspring shell entry", shellContents);
-      assertDefaultExport(shellEntry, "the Webspring shell entry", "defineWebspring(...)");
+      assertDefaultExport(shellEntry, "the Webspring shell entry", "createWebspring(...)");
       const shellResourcesDirectory = resolve(shellContents, "Resources");
       const resources = scanResources(shellResourcesDirectory, "Webspring shell Resources");
       shell = Object.freeze({ entryPath: shellEntry, resources });

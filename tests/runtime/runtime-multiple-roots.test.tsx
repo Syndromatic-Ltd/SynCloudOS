@@ -26,7 +26,7 @@ import { createElement, useRef } from "react";
 import { RuntimeInputBoundary, SynCloudOSProvider, useRuntimeSelector, useKernelSynCloudOS } from "../../src/SynCloudOSReact";
 import type { SynCloudOSRuntime } from "../../src/SynCloudOS/Runtime/runtimeInstanceTypes";
 import { WebspringController } from "../../src/Webspring/WebspringController";
-import { defineWebspring } from "../../src/Webspring/Webspring";
+import { createTestLauncher, createTestWebspring } from "./webspringTestShell";
 import { createTestBundle, createTestRuntime } from "./helpers";
 
 type LauncherApp = { readonly bundleIdentifier: string; readonly displayName: string; readonly route: string };
@@ -45,20 +45,9 @@ function LauncherButton({ app, onOpen, onHoverStart }: {
   }, app.displayName);
 }
 
-const webspring = defineWebspring({
-  manifest: {
-    schemaVersion: 1,
-    bundleIdentifier: "com.example.multiple-roots",
-    version: "1.0.0",
-    displayName: "Multiple roots fixture",
-    webspringShell: {
-      views: [{ id: "test", presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
-      defaults: { desktop: "test", tablet: "test", mobile: "test" },
-      homeRoute: "/",
-      branding: { name: { key: "site.name", fallback: "Multiple roots fixture" } },
-    },
-  },
-  components: { test: () => null },
+const webspring = createTestWebspring({
+  info: { bundleIdentifier: "com.example.multiple-roots", displayName: "Multiple roots fixture", branding: { name: { key: "site.name", fallback: "Multiple roots fixture" } } },
+  launcher: createTestLauncher(),
 });
 
 afterEach(() => cleanup());

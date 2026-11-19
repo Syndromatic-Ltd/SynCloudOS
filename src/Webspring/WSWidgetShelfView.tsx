@@ -33,6 +33,7 @@ import { NSEButton } from "@syndromatic/syncloudos/nse/controls";
 import { useObserve, type NSEOwner } from "../NSE/sdkPackageEntry";
 import { useKernelSynCloudOS } from "../SynCloudOSReact";
 import { useWebspringLocale } from "./webspringLocale";
+import { useOptionalWSLauncher } from "./WSLauncherViewController";
 import { WSSurface, defaultWSShelfSurface, webspringSurfaceStyle } from "./WSSurface";
 import {
   captureWSWidgetClass,
@@ -47,7 +48,7 @@ import {
 import type { WSActionResult, WSWidgetEntry } from "./webspringTypes";
 import "./WSWidgetShelfView.css";
 
-/** Props accepted by `WSWidgetShelfView` until launcher controllers provide them via context. */
+/** Inside a launcher the shelf needs no props: it reads the launcher's widgets and shelf surface. */
 export interface WSWidgetShelfViewProps {
   readonly entries?: readonly WSWidgetEntry[];
   readonly widgets?: readonly (WSWidgetDescriptor | WSWidgetClass)[];
@@ -89,7 +90,13 @@ function isHidden(entry: WSWidgetEntry, state: WSWidgetState | undefined) {
  * the shelf's ownership scope, draws the loading, empty, error and timeout states around
  * its view, and renders nothing at all when no widget is showing.
  */
-export function WSWidgetShelfView({ entries, widgets, surface, owner }: WSWidgetShelfViewProps = {}) {
+export function WSWidgetShelfView(props: WSWidgetShelfViewProps = {}) {
+  const launcher = useOptionalWSLauncher();
+  const fromLauncher = launcher !== null && props.entries === undefined && props.widgets === undefined;
+  const entries = fromLauncher ? launcher.widgets : props.entries;
+  const widgets = props.widgets;
+  const surface = props.surface ?? (fromLauncher ? launcher.shelfSurface : undefined);
+  const owner = props.owner ?? (fromLauncher ? launcher : undefined);
   const runtime = useKernelSynCloudOS();
   const locale = useWebspringLocale();
 

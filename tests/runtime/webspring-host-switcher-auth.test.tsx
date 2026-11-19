@@ -23,7 +23,8 @@ import React from "react";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
-import { defineWebspring } from "../../src/Webspring/public";
+import { WSLauncherViewController, type WSLauncherRootProps } from "../../src/Webspring/public";
+import { createTestLauncher, createTestWebspring } from "./webspringTestShell";
 import { WebspringHost } from "../../src/Webspring/WebspringHost";
 import { createTestBundle, createTestRuntime } from "./helpers";
 
@@ -33,17 +34,18 @@ afterEach(async () => {
   cleanup();
   for (const runtime of runtimes.splice(0)) await runtime.dispose("switcher-auth-test");
 });
-const shell = defineWebspring({
-  manifest: {
-    schemaVersion: 1, bundleIdentifier: "com.example.test.switcher-host", version: "1.0.0", displayName: "Switcher host",
-    webspringShell: {
-      views: [{ id: "main", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }],
-      defaults: { desktop: "main", tablet: "main", mobile: "main" }, homeRoute: "/",
-      branding: { name: { key: "host.name", fallback: "Switcher fixture" } },
-    },
-  },
-  components: { main: ({ applicationOutlet }) => <main>{applicationOutlet}</main> },
-});
+const switcherInfo = { bundleIdentifier: "com.example.test.switcher-host", displayName: "Switcher host", branding: { name: { key: "host.name", fallback: "Switcher fixture" } } };
+const shell = createTestWebspring({ info: switcherInfo, launcher: createTestLauncher(() => null, "persistent") });
+
+/** A persistent launcher whose root element changes with `layout`, which re-parents the live outlet. */
+function relocatingShell(layout: () => { readonly as: WSLauncherRootProps["as"]; readonly focusButton?: boolean }) {
+  class RelocatingLauncher extends WSLauncherViewController {
+    static override mode = "persistent" as const;
+    override launcherRootProps(): WSLauncherRootProps { return { as: layout().as, className: "ws-launcher" }; }
+    override renderView() { return layout().focusButton ? <button autoFocus>New layout focus</button> : null; }
+  }
+  return createTestWebspring({ info: switcherInfo, launcher: RelocatingLauncher });
+}
 async function mountHost(authentication: "disabled" | "optional" | "required", startupPhase?: "complete", initialPathname = authentication === "required" ? "/" : "/alpha") {
   const runtime = createTestRuntime({ authenticationPolicy: authentication, initialBundles: [
     createTestBundle({ bundleIdentifier: "com.example.alpha", route: "/alpha", policy: { public: true } }),
@@ -99,7 +101,7 @@ describe("WebspringHost anonymous switcher availability", () => {
 describe("Webspring application outlet transport", () => {
   it("respects a successor layout's focus and never revives a removed handoff target", async () => {
     let phase="narrow";
-    const movingShell=defineWebspring({...shell,components:{main:({applicationOutlet})=>phase==="hidden"?<article/>:phase==="wide"?<section><button autoFocus>New layout focus</button>{applicationOutlet}</section>:<main>{applicationOutlet}</main>}});
+    const movingShell=relocatingShell(()=>phase==="hidden"?{as:"div"}:phase==="wide"?{as:"section",focusButton:true}:{as:"main"});
     const runtime=createTestRuntime();runtimes.push(runtime);await runtime.boot();
     const ui=()=> <SynCloudOSProvider runtime={runtime}><WebspringHost shell={movingShell} authentication="disabled" startupPhase="complete" /></SynCloudOSProvider>;
     const view=render(ui());const container=document.querySelector<HTMLElement>(".webspring-application-outlet-host")!;
@@ -108,8 +110,7 @@ describe("Webspring application outlet transport", () => {
   });
   it("retains focus, input selection and native selection when the shell relocates its live outlet", async () => {
     let wide = false;
-    const movingShell = defineWebspring({ ...shell, components: { main: ({ applicationOutlet }) => wide
-      ? <section><aside>{applicationOutlet}</aside></section> : <main>{applicationOutlet}</main> } });
+    const movingShell = relocatingShell(() => ({ as: wide ? "section" : "main" }));
     const runtime = createTestRuntime();runtimes.push(runtime);await runtime.boot();
     const ui = () => <SynCloudOSProvider runtime={runtime}><WebspringHost shell={movingShell} authentication="disabled" startupPhase="complete" /></SynCloudOSProvider>;
     const view = render(ui());

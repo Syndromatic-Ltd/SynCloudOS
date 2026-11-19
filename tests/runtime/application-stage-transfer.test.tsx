@@ -25,7 +25,7 @@ import { expect, it, vi } from "vitest";
 import { NSEApplication, NSEWindowController } from "../../src/NSE/Application";
 import { createSynWareDefinitionFromApplicationClass } from "../../src/SynCloudOS/AppHosting/applicationClass";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
-import { defineWebspring, WebspringBoardView } from "../../src/Webspring/public";
+import { createTestWebspring } from "./webspringTestShell";
 import { WebspringHost } from "../../src/Webspring/WebspringHost";
 import { authoriseTestRuntime, createTestRuntime, registerTestSynWare } from "./helpers";
 
@@ -47,16 +47,8 @@ it("moves one production Webspring window between stage and floating frames with
     schemaVersion: 1, bundleIdentifier: id, version: "1.0.0", displayName: "Stage transfer",
 
   }));
-  const shell = defineWebspring({
-    manifest: {
-      schemaVersion: 1, bundleIdentifier: "com.example.transfer-shell", version: "1.0.0", displayName: "Transfer shell",
-      webspringShell: {
-        views: [{ id: "board", presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
-        defaults: { desktop: "board", tablet: "board", mobile: "board" }, homeRoute: "/",
-        branding: { name: { key: "transfer.shell.name", fallback: "Transfer shell" } },
-      },
-    },
-    components: { board: WebspringBoardView },
+  const shell = createTestWebspring({
+    info: { bundleIdentifier: "com.example.transfer-shell", displayName: "Transfer shell", branding: { name: { key: "transfer.shell.name", fallback: "Transfer shell" } } },
   });
   await runtime.boot({ initialPathname: "/" });
   authoriseTestRuntime(runtime);

@@ -23,14 +23,14 @@ import type { WebspringIconEffectComponent, WebspringIconEffectProps } from "./w
 
 const IconEffectContext = createContext<WebspringIconEffectComponent | null>(null);
 
-export function WebspringIconEffectProvider({ component, children }: PropsWithChildren<{
+export function WSIconEffectProvider({ component, children }: PropsWithChildren<{
   component?: WebspringIconEffectComponent;
 }>) {
   return <IconEffectContext.Provider value={component ?? null}>{children}</IconEffectContext.Provider>;
 }
 
 /** The shell supplies state; the declared shell owns the decorative recipe. */
-export function WebspringIconEffect({ active, subtle = false, className }: Omit<WebspringIconEffectProps, "subtle"> & { subtle?: boolean }) {
+export function WSIconEffect({ active, subtle = false, className }: Omit<WebspringIconEffectProps, "subtle"> & { subtle?: boolean }) {
   const Effect = useContext(IconEffectContext);
   return Effect ? <Effect active={active} subtle={subtle} className={className} /> : null;
 }

@@ -21,8 +21,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNSEAppearanceProjection } from "../NSE/Appearance";
-import { WebspringFolderTile } from "./WebspringFolderTile";
-import type { WebspringApp, WebspringFolderItem } from "./webspringTypes";
+import { WSFolderTileView } from "./WSFolderTileView";
+import type { WSApp, WSFolderItem } from "./webspringTypes";
 import "./WebspringPresentation.css";
 
 export interface WebspringDragProxyPoint {
@@ -46,11 +46,11 @@ export function getWebspringDragGrabOffset(
   if (!artwork || artwork.width <= 0 || artwork.height <= 0) return { x: 0, y: 0 };
   return {
     x: artwork.left + artwork.width / 2 - pointer.x,
-    y: artwork.top + artwork.height / 2 - pointer.y
+    y: artwork.top + artwork.height / 2 - pointer.y,
   };
 }
 
-export function useWebspringDragProxyPosition() {
+export function useWSDragProxyPosition() {
   const [point, setPoint] = useState<WebspringDragProxyPoint | null>(null);
   const proxyElementRef = useRef<HTMLDivElement | null>(null);
   const lastPointRef = useRef<WebspringDragProxyPoint | null>(null);
@@ -80,7 +80,7 @@ export function useWebspringDragProxyPosition() {
   const recordPoint = useCallback((pointer: WebspringDragProxyPoint, visible: boolean) => {
     const hitPoint = {
       x: pointer.x + grabOffsetRef.current.x,
-      y: pointer.y + grabOffsetRef.current.y
+      y: pointer.y + grabOffsetRef.current.y,
     };
     lastPointRef.current = hitPoint;
     if (!visible || typeof window === "undefined") return hitPoint;
@@ -128,20 +128,20 @@ export function useWebspringDragProxyPosition() {
     setProxyElement,
     recordPoint,
     showProxy,
-    hideProxy
+    hideProxy,
   };
 }
 
 /** The icon that follows the pointer while an app or a folder is dragged. */
-export function WebspringDragProxy({
+export function WSDragProxy({
   app = null,
   folder = null,
   point,
   mobile = false,
-  proxyRef
+  proxyRef,
 }: {
-  app?: WebspringApp | null;
-  folder?: WebspringFolderItem | null;
+  app?: WSApp | null;
+  folder?: WSFolderItem | null;
   point: WebspringDragProxyPoint | null;
   mobile?: boolean;
   proxyRef?: (element: HTMLDivElement | null) => void;
@@ -150,7 +150,7 @@ export function WebspringDragProxy({
   if (!point || typeof document === "undefined") return null;
   const artwork = app
     ? <img data-nse-part="image" src={app.iconUrl ?? ""} alt="" draggable={false} />
-    : folder ? <span data-nse-part="image" className="webspring-drag-proxy-folder"><WebspringFolderTile folder={folder} /></span> : null;
+    : folder ? <span data-nse-part="image" className="webspring-drag-proxy-folder"><WSFolderTileView folder={folder} /></span> : null;
   if (!artwork) return null;
 
   return createPortal((

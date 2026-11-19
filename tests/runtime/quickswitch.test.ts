@@ -38,8 +38,8 @@ import {
   selectQuickSwitchMnemonicIndex
 } from "../../src/Webspring/quickswitchModel";
 
-vi.mock("../../src/Webspring/WebspringIconEffect", () => ({
-  WebspringIconEffect: ({ active, className }: { active?: boolean; className?: string }) => (
+vi.mock("../../src/Webspring/WSIconEffect", () => ({
+  WSIconEffect: ({ active, className }: { active?: boolean; className?: string }) => (
     React.createElement("span", {
       className,
       "data-testid": "quickswitch-netburst",

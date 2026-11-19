@@ -31,12 +31,12 @@ import {
   type TransformComponents,
 } from "../NSE/Animation";
 import type { AFXAnimationTiming } from "../FX/AnimationFX/animationTypes";
-import { WebspringIconEffect } from "./WebspringIconEffect";
+import { WSIconEffect } from "./WSIconEffect";
 import { Badge, IconWell, LoadingSpinner } from "../NSE/NSE";
 import { useNSEFeedback } from "../NSE/hostComposition";
 import type { SynCloudOSAppInfo, SynCloudOSAppLifecycleState } from "../SynCloudOS/SynCloudOS";
 import { FocusScope, useKernelSynCloudOS } from "../SynCloudOSReact";
-import { WebspringIconArtwork } from "./WebspringIconArtwork";
+import { WSIconArtwork } from "./WSIconArtwork";
 import {
   getQuickSwitchInitialIndex,
   getQuickSwitchMnemonic,
@@ -320,8 +320,8 @@ export function WebspringQuickSwitchView({
                   onClick={() => openApp(index)}
                 >
                   <IconWell active={selected}>
-                    <WebspringIconEffect active={selected || opened} subtle={!selected} className="webspring-quickswitch-icon-effect" />
-                    <WebspringIconArtwork src={app.icon.src} />
+                    <WSIconEffect active={selected || opened} subtle={!selected} className="webspring-quickswitch-icon-effect" />
+                    <WSIconArtwork src={app.icon.src} />
                     {loading ? (
                       <LoadingSpinner
                         label={locale.t("apps.loading", "Loading {app}", { app: appName })}

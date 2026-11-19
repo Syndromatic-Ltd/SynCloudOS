@@ -9,7 +9,7 @@ import { createSynWareBundle } from "../../../src/SynCloudOS/AppSDK/createSynWar
 import { createBrowserRuntimeEnvironment } from "../../../src/SynCloudOS/PlatformAdapters/BrowserRuntimeEnvironment";
 import { createSynCloudOS } from "../../../src/SynCloudOS/Runtime/createSynCloudOS";
 import { RuntimeInputBoundary, SynCloudOSProvider } from "../../../src/SynCloudOSReact";
-import { defineWebspring, WebspringBoardView } from "../../../src/Webspring/public";
+import { createWebspring } from "../../../src/Webspring/public";
 import { WebspringHost } from "../../../src/Webspring/WebspringHost";
 import "../../../src/NSE/public/styles.css";
 import "../../../src/NSE/Appearance/atmo-theme.css";
@@ -67,17 +67,11 @@ const definition = createSynWareDefinitionFromApplicationClass(EditorApp, {
   runtime: { policy: { public: true } },
   webspring: { visible: true, order: 1 },
 });
-const shell = defineWebspring({
-  manifest: {
-    schemaVersion: 1, bundleIdentifier: "com.example.transfer-shell", displayName: "Transfer shell", version: "1.0.0",
-    webspringShell: {
-      views: [{ id: "board", mode: "launcher", presentations: ["desktop", "tablet", "mobile"] }],
-      defaults: { desktop: "board", tablet: "board", mobile: "board" },
-      homeRoute: "/",
-      branding: { name: { key: "shell.name", fallback: "Transfer shell" } },
-    },
+const shell = createWebspring({
+  info: {
+    bundleIdentifier: "com.example.transfer-shell", displayName: "Transfer shell", version: "1.0.0",
+    branding: { name: { key: "shell.name", fallback: "Transfer shell" } },
   },
-  components: { board: WebspringBoardView },
 });
 const runtime = createSynCloudOS({
   environment: createBrowserRuntimeEnvironment(),

@@ -35,7 +35,10 @@ import {
   type SynchronousDisposable,
 } from "../NSE/hostComposition";
 import { defaultWebspringFolderAppearance, defaultWebspringFolderSmoothSurface } from "./WebspringFolderAppearance";
-import { createWebspringFolderSplitPresentation } from "./WebspringFolderSplitPresentation";
+import { createWSFolderSplitPresentation } from "./WSFolderSplitView";
+import { WSLauncherViewController, type WSLauncherViewControllerClass } from "./WSLauncherViewController";
+import { defaultWSLaunchZoom } from "./Webspring.transitions";
+import { WSBoardViewController } from "./Contents/Views/WSBoardViewController/WSBoardViewController";
 import { captureWSInfo, assertKnownFields, assertPlainRecord, readOwnDataProperty, type WSCapturedInfo } from "./WSInfo";
 import { WSSurface, captureWSSurface, defaultWSShelfSurface } from "./WSSurface";
 import { captureWSWidgetClass, isWSWidgetDescriptor, type WSWidgetClass, type WSWidgetDescriptor } from "./WSWidget";
@@ -55,37 +58,13 @@ import type {
 /** Return animation tracks available for launcher controllers. */
 export const defaultWSReturnTracks = Object.freeze(["material", "icons"] as const);
 
-/** Default launch zoom timing for launchers that omit `static launchZoom`. */
-export const defaultWSLaunchZoom: Readonly<Required<WebspringLaunchZoom>> = Object.freeze({
-  delay: 0.72,
-  duration: 0.68,
-  easing: "accelerate",
-});
 
-const defaultWSFolderPresentation = createWebspringFolderSplitPresentation();
+const defaultWSFolderPresentation = createWSFolderSplitPresentation();
 const presentationSlots: readonly Presentation[] = ["desktop", "tablet", "mobile"];
 const smoothSurfaceCurves: Record<string, true> = { arc: true, squircle: true, superellipse: true, clothoid: true };
 const launchZoomEasings = new Set(["standard", "emphasized", "decelerate", "accelerate"]);
 
-/**
- * Class shape for a launcher view controller (`WSLauncherViewController` subclass).
- * Task 4 replaces this placeholder interface with the full controller class type.
- */
-export interface WSLauncherViewControllerClass {
-  new (options?: never): unknown;
-  readonly mode?: ShellMode;
-  readonly presentations?: readonly Presentation[];
-  readonly returnTracks?: readonly ("material" | "icons")[];
-  readonly launchZoom?: WebspringLaunchZoom;
-}
-
-class WSBoardViewController {
-  static readonly mode: ShellMode = "launcher";
-  static readonly presentations: readonly Presentation[] = ["desktop", "tablet", "mobile"];
-  static readonly returnTracks: readonly ("material" | "icons")[] = ["material"];
-}
-
-/** Fallback launcher controller used when a presentation slot leaves its launcher unset. */
+/** The launcher a presentation uses when the application names none, and the crash fallback. */
 export const defaultWSLauncherViewController: WSLauncherViewControllerClass = WSBoardViewController;
 
 /** Static constructor contract accepted by `createWebspring` and `constructWSApplication`. */
@@ -116,7 +95,7 @@ export class WSApplication extends NSEObject implements NSEOwner, OwnedObject {
   static launcherSurface: WSSurface = WSSurface.cotton();
   static shelfSurface: WSSurface = defaultWSShelfSurface;
   static folderAppearance: WebspringFolderAppearanceOptions = defaultWebspringFolderAppearance;
-  /** Replaces the built-in folder split; `createWebspringFolderSplitPresentation(options)` configures the built-in one. */
+  /** Replaces the built-in folder split; `createWSFolderSplitPresentation(options)` configures the built-in one. */
   static folderPresentation?: WebspringFolderPresentationComponent;
   static iconEffect?: WebspringIconEffectComponent;
   static quickSwitch?: WebspringQuickSwitchOptions;
@@ -426,7 +405,7 @@ function captureLauncherMetadata(Launcher: unknown, slot: Presentation): {
   readonly returnTracks: readonly ("material" | "icons")[];
   readonly launchZoom: Readonly<Required<WebspringLaunchZoom>>;
 } {
-  if (typeof Launcher !== "function") {
+  if (typeof Launcher !== "function" || !(Launcher === WSLauncherViewController || Launcher.prototype instanceof WSLauncherViewController)) {
     throw new TypeError(`Webspring ${slot} launcher must be a WSLauncherViewController class.`);
   }
   const label = `Webspring ${slot} launcher ${Launcher.name || slot}`;
@@ -599,4 +578,41 @@ export function createWebspring(input: WSCreateWebspringInput): WSDefinition {
   });
   capturedDefinitions.add(definition);
   return definition;
+}
+
+/** Adds the project's discovered widgets and preference panes to a definition; explicit ones keep their place. */
+export function withDiscoveredWebspringItems(
+  definition: WSDefinition,
+  items: Readonly<{
+    preferences: readonly (PreferencePaneDescriptor | NSEPreferencePaneClass)[];
+    widgets: readonly (WSWidgetClass | WSWidgetDescriptor)[];
+  }>,
+): WSDefinition {
+  if (!isWSDefinition(definition)) throw new TypeError("A Webspring definition must be created with createWebspring.");
+  if (typeof items !== "object" || items === null || !Array.isArray(items.preferences) || !Array.isArray(items.widgets)) {
+    throw new TypeError("Discovered Webspring items must list preference panes and widgets.");
+  }
+  const widgets = captureMergedDescriptors({
+    explicitInput: definition.widgets,
+    discoveredInput: items.widgets,
+    isDescriptor: isWSWidgetDescriptor,
+    capture: captureWSWidgetClass,
+    meta: (descriptor) => ({ id: descriptor.id, order: descriptor.order, targetClass: descriptor.WidgetClass }),
+    label: "Webspring widgets",
+  });
+  const panes = captureMergedDescriptors({
+    explicitInput: definition.preferences.panes,
+    discoveredInput: items.preferences,
+    isDescriptor: isPreferencePaneDescriptor,
+    capture: capturePreferencePaneClass,
+    meta: (descriptor) => ({ id: descriptor.id, order: descriptor.order, targetClass: descriptor.PaneClass }),
+    label: "Webspring preferences",
+  });
+  const merged: WSDefinition = Object.freeze({
+    ...definition,
+    widgets,
+    preferences: Object.freeze({ panes, hide: definition.preferences.hide }),
+  });
+  capturedDefinitions.add(merged);
+  return merged;
 }

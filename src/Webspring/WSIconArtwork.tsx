@@ -18,17 +18,17 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import "./WebspringIconArtwork.css";
+import "./WSIconArtwork.css";
 
-export interface WebspringIconArtworkProps {
+export interface WSIconArtworkProps {
   src: string;
   draggable?: boolean;
 }
 
-export function WebspringIconArtwork({
+export function WSIconArtwork({
   src,
-  draggable = false
-}: WebspringIconArtworkProps) {
+  draggable = false,
+}: WSIconArtworkProps) {
   return (
     <span data-nse-part="image" data-nse-role="artwork" className="webspring-icon-artwork" aria-hidden="true">
       <img

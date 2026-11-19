@@ -20,11 +20,11 @@
 
 import { useLayoutEffect, useState, type CSSProperties } from "react";
 import { resolveWebspringFolderTileGeometry, useWebspringFolderAppearance } from "./WebspringFolderAppearance";
-import type { WebspringFolderItem } from "./webspringTypes";
-import "./WebspringFolderTile.css";
+import type { WSFolderItem } from "./webspringTypes";
+import "./WSFolderTileView.css";
 
-export interface WebspringFolderTileProps {
-  readonly folder: WebspringFolderItem;
+export interface WSFolderTileViewProps {
+  readonly folder: WSFolderItem;
   /** Lit while a dragged app hovers to merge into this folder. */
   readonly dropTarget?: boolean;
   readonly className?: string;
@@ -47,7 +47,7 @@ const BLEED = 32;
  * artwork also survives notification capture, which inlines computed URLs.
  * Blurs are CSS filters and the outside clip is a CSS even-odd `path()`.
  */
-export function WebspringFolderTile({ folder, dropTarget = false, className }: WebspringFolderTileProps) {
+export function WSFolderTileView({ folder, dropTarget = false, className }: WSFolderTileViewProps) {
   const appearance = useWebspringFolderAppearance();
   const [element, setElement] = useState<HTMLSpanElement | null>(null);
   const [size, setSize] = useState<{ readonly width: number; readonly height: number } | null>(null);

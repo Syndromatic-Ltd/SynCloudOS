@@ -3,7 +3,7 @@ export * from "./sdkPackageEntry";
 export { SCOS, useSCOS } from "./scos";
 export { NSEPreferencePane } from "../Preferences";
 export type { NSEPreferencePaneClass, PreferencePaneDescriptor, PreferencePaneText, PreferencePaneViewProps } from "../Preferences";
-export { WSWidget, defineIntegration, defineWebspring } from "../../Webspring/public";
+export { WSApplication, WSWidget, createWebspring, defineIntegration } from "../../Webspring/public";
 export type { SynWareIntegrationInput, SynWareIntegrationDefinition, WSActionResult, WSWidgetClass, WSWidgetDescriptor, WSWidgetState } from "../../Webspring/public";
 export { NSEObject, observable, observe, useObserve } from "../../NSE/sdkPackageEntry";
 export type { NSEObservable } from "../../NSE/sdkPackageEntry";

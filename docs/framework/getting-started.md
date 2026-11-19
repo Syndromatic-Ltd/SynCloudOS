@@ -108,21 +108,20 @@ An application can opt into an application menu with `NSEApplication.mainMenu`, 
 Create `src/Webspring/Contents/index.tsx`:
 
 ```tsx
-import { defineWebspring } from "@syndromatic/syncloudos";
-import { WebspringBoardView } from "@syndromatic/syncloudos/webspring";
+import { WSApplication, createWebspring } from "@syndromatic/syncloudos";
 
-export default defineWebspring({
-  manifest: {
-    schemaVersion: 1, bundleIdentifier: "com.example.site", version: "0.1.0", displayName: "My Site",
-    webspringShell: {
-      views: [{ id: "board", presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
-      defaults: { desktop: "board", tablet: "board", mobile: "board" },
-      homeRoute: "/", branding: { name: { key: "site.name", fallback: "My Site" } },
-    },
+class MySite extends WSApplication {}
+
+export default createWebspring({
+  info: {
+    bundleIdentifier: "com.example.site", version: "0.1.0", displayName: "My Site",
+    homeRoute: "/", branding: { name: { key: "site.name", fallback: "My Site" } },
   },
-  components: { board: WebspringBoardView },
+  application: MySite,
 });
 ```
+
+The site shows the Board, `WSBoardViewController`, until the `WSApplication` subclass names another launcher.
 
 Use the default `synCloudOS()` options and mount with `{ element, authentication: "disabled" }`, without `application`. The discovered shell, applications, panes, widgets and integrations are supplied automatically. Shell and application-only modes are mutually exclusive. Shell and application manifests both require explicit bundle identity, display name and version.
 

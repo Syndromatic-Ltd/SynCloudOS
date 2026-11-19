@@ -23,7 +23,8 @@ import React, { useEffect } from "react";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
-import { createWebspringBoardView, defineWebspring, WebspringBoardView, type WebspringViewComponent, type WebspringViewProps } from "../../src/Webspring/public";
+import { WSBoardViewController, WSLauncherViewController, type WSLauncherViewControllerClass } from "../../src/Webspring/public";
+import { createTestWebspring } from "./webspringTestShell";
 import { WebspringHost } from "../../src/Webspring/WebspringHost";
 import { createTestBundle, createTestRuntime, createTestRuntimeEnvironment } from "./helpers";
 
@@ -35,18 +36,28 @@ afterEach(async () => {
   for (const runtime of runtimes.splice(0)) await runtime.dispose("view-return-contract-test");
 });
 
-function CompletionView({ model, actions, applicationOutlet }: WebspringViewProps) {
+function CompletionContent({ launcher }: { readonly launcher: WSLauncherViewController }) {
+  const { returnTransitionId } = launcher;
+  const { reducedMotion } = launcher.presentationTraits;
   useEffect(() => {
-    if (model.returnTransitionId && model.presentationTraits.reducedMotion) actions.completeReturnTrack("material");
-  }, [actions, model.presentationTraits.reducedMotion, model.returnTransitionId]);
+    if (returnTransitionId && reducedMotion) launcher.completeReturnTrack("material");
+  }, [launcher, reducedMotion, returnTransitionId]);
   return <main>
-    <button onClick={() => actions.completeReturnTrack("material")}>Complete material</button>
-    <button onClick={() => actions.completeReturnTrack("icons")}>Complete icons</button>
-    {applicationOutlet}
+    <button onClick={() => launcher.completeReturnTrack("material")}>Complete material</button>
+    <button onClick={() => launcher.completeReturnTrack("icons")}>Complete icons</button>
   </main>;
 }
 
-async function mountView(id: string, component: WebspringViewComponent, reducedMotion = false) {
+/** A launcher that reports its return tracks from buttons; `returnTracks` is left undeclared when omitted. */
+function completionLauncher(returnTracks?: readonly ("material" | "icons")[]) {
+  class CompletionLauncher extends WSLauncherViewController {
+    override renderView() { return <CompletionContent launcher={this} />; }
+  }
+  if (returnTracks) Object.defineProperty(CompletionLauncher, "returnTracks", { value: returnTracks, enumerable: true });
+  return CompletionLauncher;
+}
+
+async function mountView(launcher: WSLauncherViewControllerClass, reducedMotion = false) {
   const environment = createTestRuntimeEnvironment();
   environment.matchMedia = (query) => ({
     media: query, matches: reducedMotion && query.includes("prefers-reduced-motion"),
@@ -55,16 +66,9 @@ async function mountView(id: string, component: WebspringViewComponent, reducedM
   const runtime = createTestRuntime({ environment, initialBundles: [createTestBundle({ bundleIdentifier: "com.example.alpha", policy: { public: true } })] });
   runtimes.push(runtime);
   await runtime.boot({ initialPathname: "/" });
-  const shell = defineWebspring({
-    manifest: {
-      schemaVersion: 1, bundleIdentifier: "com.example.test.view-return-contract", version: "1.0.0", displayName: "Return fixture",
-      webspringShell: {
-        views: [{ id, presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
-        defaults: { desktop: id, tablet: id, mobile: id }, homeRoute: "/",
-        branding: { name: { key: "host.name", fallback: "Return fixture" } },
-      },
-    },
-    components: { [id]: component },
+  const shell = createTestWebspring({
+    info: { bundleIdentifier: "com.example.test.view-return-contract", displayName: "Return fixture", branding: { name: { key: "host.name", fallback: "Return fixture" } } },
+    launcher,
   });
   render(<SynCloudOSProvider runtime={runtime}><WebspringHost shell={shell} startupPhase="complete" /></SynCloudOSProvider>);
   let transitionId = "";
@@ -90,31 +94,30 @@ function completeMaterial(selector: string) {
 }
 
 describe("Webspring view-owned return completion", () => {
-  it("settles a custom material-only view under an arbitrary ID without the fallback timer", async () => {
-    const View = Object.assign(CompletionView, { returnTracks: ["material"] as const });
-    const { runtime, transitionId } = await mountView("custom-launcher", View);
+  it("settles a custom material-only launcher without the fallback timer", async () => {
+    const { runtime, transitionId } = await mountView(completionLauncher(["material"]));
     fireEvent.click(screen.getByRole("button", { name: "Complete material" }));
     expectAnimationSettlement(runtime, transitionId);
     fireEvent.click(screen.getByRole("button", { name: "Complete material" }));
     expectAnimationSettlement(runtime, transitionId);
   });
 
-  it("waits for a declared icon track even when a custom view uses the ID board", async () => {
-    const View = Object.assign(CompletionView, { returnTracks: ["material", "icons"] as const });
-    const { runtime, transitionId } = await mountView("board", View);
+  it("waits for a declared icon track", async () => {
+    const { runtime, transitionId } = await mountView(completionLauncher(["material", "icons"]));
     fireEvent.click(screen.getByRole("button", { name: "Complete material" }));
     expect(runtime.store.getSnapshot().webspring.returnTransitionId).toBe(transitionId);
     fireEvent.click(screen.getByRole("button", { name: "Complete icons" }));
     expectAnimationSettlement(runtime, transitionId);
   });
 
+  class Launchpad extends WSBoardViewController { static override pageSize = 4; }
   it.each([
-    { id: "board", component: WebspringBoardView, reducedMotion: false },
-    { id: "board", component: WebspringBoardView, reducedMotion: true },
-    { id: "launchpad", component: createWebspringBoardView({ pageSize: 4 }), reducedMotion: false },
-    { id: "launchpad", component: createWebspringBoardView({ pageSize: 4 }), reducedMotion: true },
-  ])("settles Board $id with reduced motion $reducedMotion", async ({ id, component, reducedMotion }) => {
-    const { runtime, transitionId } = await mountView(id, component, reducedMotion);
+    { id: "board", launcher: WSBoardViewController, reducedMotion: false },
+    { id: "board", launcher: WSBoardViewController, reducedMotion: true },
+    { id: "launchpad", launcher: Launchpad, reducedMotion: false },
+    { id: "launchpad", launcher: Launchpad, reducedMotion: true },
+  ])("settles Board $id with reduced motion $reducedMotion", async ({ launcher, reducedMotion }) => {
+    const { runtime, transitionId } = await mountView(launcher, reducedMotion);
     if (!reducedMotion) {
       expect(runtime.store.getSnapshot().webspring.returnTransitionId).toBe(transitionId);
       completeMaterial(".webspring-board-material");
@@ -122,9 +125,8 @@ describe("Webspring view-owned return completion", () => {
     expectAnimationSettlement(runtime, transitionId);
   });
 
-  it("preserves both completion tracks for an undeclared custom transition", async () => {
-    const View = (props: WebspringViewProps) => <CompletionView {...props} />;
-    const { runtime, transitionId } = await mountView("legacy", View);
+  it("preserves both completion tracks for a launcher that declares none", async () => {
+    const { runtime, transitionId } = await mountView(completionLauncher());
     fireEvent.click(screen.getByRole("button", { name: "Complete material" }));
     expect(runtime.store.getSnapshot().webspring.returnTransitionId).toBe(transitionId);
     fireEvent.click(screen.getByRole("button", { name: "Complete icons" }));

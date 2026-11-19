@@ -33,8 +33,8 @@ import {
 import { RuntimeInputBoundary, SynCloudOSProvider } from "../../src/SynCloudOSReact";
 import { SystemUILayer } from "../../src/Webspring/SystemUILayer";
 import type { SystemUIAccount } from "../../src/Webspring/Preferences/systemAccount";
-import { defineWebspring } from "../../src/Webspring/Webspring";
 import type { WebspringPreferencesOptions } from "../../src/Webspring/webspringTypes";
+import { createTestWebspring } from "./webspringTestShell";
 import { createTestRuntime } from "./helpers";
 
 afterEach(() => {
@@ -206,19 +206,12 @@ describe("System Preferences panes", () => {
   });
 });
 
-describe("defineWebspring preferences", () => {
-  function define(preferences?: unknown) {
-    return defineWebspring({
-      manifest: {
-        schemaVersion: 1, bundleIdentifier: "com.example.test.preferences", version: "1.0.0", displayName: "Preferences",
-        webspringShell: {
-          views: [{ id: "board", presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
-          defaults: { desktop: "board", tablet: "board", mobile: "board" }, homeRoute: "/",
-          branding: { name: { key: "site.name", fallback: "Fixture" } },
-        },
-      },
-      components: { board: () => null },
-      ...(preferences === undefined ? {} : { preferences: preferences as WebspringPreferencesOptions }),
+describe("WSApplication preferences", () => {
+  function define(preferences: { readonly panes?: unknown; readonly hide?: unknown } = {}) {
+    return createTestWebspring({
+      info: { bundleIdentifier: "com.example.test.preferences", displayName: "Preferences" },
+      preferencePanes: preferences.panes as never,
+      hiddenPreferencePanes: preferences.hide as never,
     });
   }
 
@@ -239,8 +232,7 @@ describe("defineWebspring preferences", () => {
   it.each([
     ["a pane not extending NSEPreferencePane", { panes: [{ id: "x", title: "x", order: 1, view: () => null }] }, /NSEPreferencePane/],
     ["duplicate pane ids", { panes: [pane("a", "A", 1), pane("a", "A again", 2)] }, /duplicate/],
-    ["a blank hidden id", { hide: [" "] }, /hide/],
-    ["unknown fields", { pane: [] }, /pane/],
+    ["a blank hidden id", { hide: [" "] }, /hid/i],
     ["panes that are not an array", { panes: pane("a", "A", 1) }, /array/],
   ])("rejects %s", (_label, preferences, message) => {
     expect(() => define(preferences)).toThrow(message);

@@ -24,20 +24,11 @@ import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
 import { createTestRuntime } from "./helpers";
-import { defineWebspring, type WebspringViewProps } from "../../src/Webspring/public";
+import { createTestLauncher, createTestWebspring } from "./webspringTestShell";
 
-const shell = defineWebspring({
-  manifest: {
-    schemaVersion: 1, bundleIdentifier: "com.example.webspring.route-test", version: "1.0.0", displayName: "Route test",
-    webspringShell: {
-      views: [{ id: "route", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }],
-      defaults: { desktop: "route", tablet: "route", mobile: "route" },
-      homeRoute: "/", branding: { name: { key: "site.name", fallback: "Route test" } },
-    },
-  },
-  components: {
-    route: ({ model }: WebspringViewProps) => <main data-testid="webspring" data-route={model.routePath} />,
-  },
+const shell = createTestWebspring({
+  info: { bundleIdentifier: "com.example.webspring.route-test", displayName: "Route test", branding: { name: { key: "site.name", fallback: "Route test" } } },
+  launcher: createTestLauncher(({ launcher }) => <main data-testid="webspring" data-route={launcher.routePath} />, "persistent"),
 });
 
 vi.mock("../../src/Webspring/SystemUILayer", () => ({

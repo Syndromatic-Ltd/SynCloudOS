@@ -1,8 +1,8 @@
 # Webspring
 
-Webspring is the shell of a SynCloudOS site. It presents the launcher, hosts the application stage, provides the app switcher and notifications, and runs the sign-in gate. You describe the shell with one manifest and one definition, and the browser host does the rest.
+Webspring is the shell of a SynCloudOS site. It presents the launcher, hosts the application stage, provides the app switcher and notifications, and runs the sign-in gate. You describe the shell with its `WSInfo` and a `WSApplication` subclass, and the browser host does the rest.
 
-The launcher that ships with the framework is the Board, a paged grid of application icons inspired by iOS Springboard. Icons hold to reorder, launch with a zoom into the application stage and return with the reverse motion, adapting from a phone to a desktop display.
+The launcher that ships with the framework is the Board, `WSBoardViewController`, a paged grid of application icons inspired by iOS Springboard. Icons hold to reorder, launch with a zoom into the application stage and return with the reverse motion, adapting from a phone to a desktop display.
 
 ## Define a shell
 
@@ -17,36 +17,32 @@ import "@syndromatic/syncloudos/nse/styles.css";
 Declare the shell in `src/Webspring/Contents/Info.ts`:
 
 ```ts
+import type { WSInfo } from "@syndromatic/syncloudos/webspring";
+
 export default {
-  schemaVersion: 1,
   bundleIdentifier: "com.example.site",
   version: "0.1.0",
   displayName: "Example Site",
-  webspringShell: {
-    views: [{ id: "board", presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
-    defaults: { desktop: "board", tablet: "board", mobile: "board" },
-    homeRoute: "/",
-    branding: {
-      name: { key: "site.name", fallback: "Example Site" },
-      logo: { resource: "./Resources/SiteLogo.svg", alternativeText: { key: "site.logoAlt", fallback: "Example Site" } },
-    },
+  homeRoute: "/",
+  branding: {
+    name: { key: "site.name", fallback: "Example Site" },
+    logo: { resource: "./Resources/SiteLogo.svg", alternativeText: { key: "site.logoAlt", fallback: "Example Site" } },
   },
-} as const;
+} satisfies WSInfo;
 ```
 
-Then create the definition in `src/Webspring/Contents/index.tsx`:
+Then subclass `WSApplication` and create the definition in `src/Webspring/Contents/index.tsx`:
 
 ```tsx
-import { defineWebspring, WebspringBoardView } from "@syndromatic/syncloudos/webspring";
-import manifest from "./Info";
+import { WSApplication, createWebspring } from "@syndromatic/syncloudos/webspring";
+import info from "./Info";
 
-export default defineWebspring({
-  manifest,
-  components: { board: WebspringBoardView },
-});
+class ExampleSite extends WSApplication {}
+
+export default createWebspring({ info, application: ExampleSite });
 ```
 
-`defineWebspring` validates the manifest, the view identifiers, the supported presentations and the component map, and it returns immutable data. Each entry in `views` names a presentation the shell can show, and `defaults` chooses which view each presentation starts with.
+`createWebspring` validates the info and the application's statics, and returns immutable data. The framework constructs the `WSApplication` itself and calls `applicationWillFinishLaunching`, `applicationDidFinishLaunching` and `applicationWillTerminate` around the shell's life. Every presentation shows the Board unless the class names another launcher with `static mainViewController`, or one per presentation with `static viewControllers`.
 
 ## The Board
 
@@ -64,10 +60,10 @@ Icon reordering uses captured slot geometry for hit testing, so neighbours do no
 
 ## Folders
 
-A folder groups applications into one entry on the launcher. Declare folders in `webspringShell.folders`:
+A folder groups applications into one entry on the launcher. Declare folders in `folders` in `Info.ts`:
 
 ```ts
-webspringShell: {
+export default {
   // ...
   folders: {
     editable: true,
@@ -75,10 +71,10 @@ webspringShell: {
       { id: "folder.experiments", title: { key: "folders.experiments", fallback: "Experiments" }, order: 40, apps: ["com.example.lab", "com.example.sketch"] },
     ],
   },
-},
+} satisfies WSInfo;
 ```
 
-- `id` starts with `folder.` and is unique. An application appears in at most one folder; `defineWebspring` rejects duplicates.
+- `id` starts with `folder.` and is unique. An application appears in at most one folder; `createWebspring` rejects duplicates.
 - `order` places the folder among the applications' `webspring.order` values. On a tie the folder comes first.
 - `editable: true` lets visitors make folders by resting an application on another, add to a folder by resting on it, and take an application out by dragging it outside the open folder. A folder that loses its last application disappears. Folders visitors make are titled "Folder" (locale key `webspring.folder.untitled`).
 - `editable: false` keeps membership as declared. Visitors can still reorder top-level entries.
@@ -87,46 +83,42 @@ An application that becomes visible later joins its declared folder if the visit
 
 The layout persists under the preference key `webspring.layout.v5` as `{ version: 5, order, folders: { [id]: { apps } }, board, updatedAt, source }`, where `order` lists top-level entry keys and `apps` contains canonical case-insensitive bundle identifier keys. Earlier layouts, including v4 with the old application identities, are ignored, not migrated.
 
-On the Board, tapping a folder opens it with the definition's `folderPresentation`. The default is the iOS 6 split: the stage is copied and parted below the folder's cell (its icon and label), revealing the folder's applications on a linen underlay. Escape, or a tap on either half, closes it; reduced motion crossfades instead. Configure or replace it in the definition:
+On the Board, tapping a folder opens it with the application's `static folderPresentation`. The default is the iOS 6 split: the stage is copied and parted below the folder's cell (its icon and label), revealing the folder's applications on a linen underlay. Escape, or a tap on either half, closes it; reduced motion crossfades instead. Configure or replace it on the `WSApplication` subclass:
 
 ```tsx
-import { createWebspringFolderSplitPresentation, defineWebspring, WebspringBoardView } from "@syndromatic/syncloudos/webspring";
+import { WSApplication, createWSFolderSplitPresentation } from "@syndromatic/syncloudos/webspring";
 
-export default defineWebspring({
-  manifest,
-  components: { board: WebspringBoardView },
-  folderPresentation: createWebspringFolderSplitPresentation({
+class ExampleSite extends WSApplication {
+  static override folderPresentation = createWSFolderSplitPresentation({
     underlay: { image: "/assets/textures/linen.webp", size: "cover", colour: "#2b3038" },
     panelHeight: "content", // or a height in pixels
     notch: true,
     edgeShadow: 0.55, // 0 to 1
     duration: 0.42, // seconds
-  }),
-});
+  });
+}
 ```
 
 A custom presentation is a component receiving `WebspringFolderPresentationProps`: `folder`, `stage` (the element to present over), `anchor` (the rect of the folder's cell, icon and label), `reducedMotion`, `renderApp(app, index)` and `onClose`. Mark the panel holding the applications with `data-webspring-folder-panel`; the Board takes an application out of the folder when a drag leaves that element.
 
 ### Folder icons
 
-Every view draws a folder's icon in one appearance, set with `folderAppearance` in the definition. `WebspringFolderTile` reads it, so a custom view that renders the tile needs no styles of its own:
+Every launcher draws a folder's icon in one appearance, set with `static folderAppearance`. `WSFolderTileView` reads it, so a custom launcher that renders the tile needs no styles of its own:
 
 ```tsx
-export default defineWebspring({
-  manifest,
-  components: { board: WebspringBoardView },
-  folderAppearance: {
+class ExampleSite extends WSApplication {
+  static override folderAppearance = {
     shape: { kind: "roundedRect", smoothSurface: { radius: "36%", curve: "squircle", smoothing: 0.6 } },
     fill: { kind: "texture", image: "/assets/textures/cotton.jpg", size: "128px", colour: "#20242c" },
-  },
-});
+  } as const;
+}
 ```
 
 - `shape` is `{ kind: "roundedRect", smoothSurface? }` or `{ kind: "circle" }`. A rounded rectangle is clipped to the internal smooth-corner geometry measured from the tile. `smoothSurface.radius` is a percentage of the tile's shorter side up to `"50%"` (which keeps the shape as the tile scales), pixels, or an NSE radius token. `curve` is `arc`, `squircle`, `superellipse` or `clothoid`, and `smoothing` runs from 0 to 1. The default is `{ kind: "roundedRect", smoothSurface: { radius: "36%", curve: "squircle", smoothing: 0.6 } }`.
 - `fill` is `"inset"`, the dark translucent well (the default), or `{ kind: "texture", image, size?, colour? }`: the image URL, a CSS `background-size` (default `cover`) and a CSS colour beneath it (default `transparent`).
 - Either fill is pressed into the surface: an inner shadow and a lower highlight inside the shape, and a light lip below it. While an application rests on the folder to join it, the tile grows and a ring follows the shape outside it. In a circle, the member icons are inset to fit inside it.
 
-`defineWebspring` throws a `TypeError` for an unknown field, shape or curve, a radius over `50%`, a smoothing outside 0 to 1, or a texture without an image. A view drawing folder-shaped artwork of its own, such as the well an application rests on before it makes a folder, reads the resolved appearance with `useWebspringFolderAppearance()`.
+`createWebspring` throws a `TypeError` for an unknown field, shape or curve, a radius over `50%`, a smoothing outside 0 to 1, or a texture without an image. A launcher drawing folder-shaped artwork of its own, such as the well an application rests on before it makes a folder, reads the resolved appearance with `useWebspringFolderAppearance()`.
 
 The open folder's underlay is set separately, on the presentation.
 
@@ -163,7 +155,7 @@ With reduced motion the halves do not move; the presentation crossfades between 
 
 ## Branding
 
-Branding lives in `webspringShell.branding`. The host resolves the logo resource before the shell and sign-in gate mount. Light, dark and compact variants fall back to the primary logo, and then to the localised site name. A SynWare reads the same values from the session:
+Branding lives in `branding` in `Info.ts`. The host resolves the logo resource before the shell and sign-in gate mount. Light, dark and compact variants fall back to the primary logo, and then to the localised site name. A SynWare reads the same values from the session:
 
 ```tsx
 import { useSCOS } from "@syndromatic/syncloudos/sdk";
@@ -194,20 +186,15 @@ their own alerts with the `NSEAlert` object and present custom content as a shee
 
 ## Background and size of the Board
 
-Left alone, the Board is a tinted cotton texture with a spotlight: lighter in the centre, darker at the edges. `background` changes it. `launcher` paints the icon area; `shelf` paints the widget area and is drawn only when the definition has widgets.
+Left alone, the Board is a tinted cotton texture with a spotlight: lighter in the centre, darker at the edges. `static launcherSurface` paints the icon area; `static shelfSurface` paints the widget area and is drawn only when the shell has widgets.
 
 ```tsx
-import { defineWebspring, WebspringBoardView, WSSurface } from "@syndromatic/syncloudos/webspring";
-import manifest from "./Info";
+import { WSApplication, WSSurface } from "@syndromatic/syncloudos/webspring";
 
-export default defineWebspring({
-  manifest,
-  components: { board: WebspringBoardView },
-  background: {
-    launcher: { ...WSSurface.cotton(), tint: { colour: "#7a4a4a", opacity: 0.12 } },
-    shelf: WSSurface.plain("#0b0d11"),
-  },
-});
+class ExampleSite extends WSApplication {
+  static override launcherSurface = { ...WSSurface.cotton(), tint: { colour: "#7a4a4a", opacity: 0.12 } };
+  static override shelfSurface = WSSurface.plain("#0b0d11");
+}
 ```
 
 A `WSSurface` is a plain object. Every field is optional:
@@ -226,11 +213,11 @@ The Board scales to the screen. An icon is the largest size that still lets a wh
 
 ## Widgets on the Board
 
-A widget is a titled panel below the icons that loads its own data, such as a list of recent posts. Declare it by subclassing `WSWidget` and list it in the definition. With no widgets there is no shelf at all.
+A widget is a titled panel below the icons that loads its own data, such as a list of recent posts. Declare it by subclassing `WSWidget` and list it in `static widgets`. With no widgets there is no shelf at all.
 
 ```tsx
-import { defineWebspring, WSWidget, WebspringBoardView } from "@syndromatic/syncloudos/webspring";
-import manifest from "./Info";
+import { WSApplication, WSWidget, createWebspring } from "@syndromatic/syncloudos/webspring";
+import info from "./Info";
 
 interface Post { readonly id: string; readonly title: string }
 
@@ -254,11 +241,11 @@ class LatestWidget extends WSWidget<readonly Post[]> {
   }
 }
 
-export default defineWebspring({
-  manifest,
-  components: { board: WebspringBoardView },
-  widgets: [LatestWidget],
-});
+class ExampleSite extends WSApplication {
+  static override widgets = [LatestWidget];
+}
+
+export default createWebspring({ info, application: ExampleSite });
 ```
 
 - `load(signal)` returns the data, of any shape. The framework owns the promise. The signal aborts when the Board unmounts, when the person retries or `refresh()` runs, and when the load times out.
@@ -294,10 +281,10 @@ When a gate is configured, the host presents the sign-in window after the icons 
 
 ## System Preferences
 
-System Preferences is a list of panes. The framework ships ten, each one a module of its own: Account (only when sign-in is on), Appearance, Audio & Haptics (`sounds`), Motion, Notifications, Privacy & Security (`privacy-security`), Language, Updates, Storage and Capabilities. Add your own by subclassing `NSEPreferencePane`, and list them in the shell definition or place them in `src/Preferences/*.prefPane/index.tsx`.
+System Preferences is a list of panes. The framework ships ten, each one a module of its own: Account (only when sign-in is on), Appearance, Audio & Haptics (`sounds`), Motion, Notifications, Privacy & Security (`privacy-security`), Language, Updates, Storage and Capabilities. Add your own by subclassing `NSEPreferencePane`, and list them in `static preferencePanes` or place them in `src/Preferences/*.prefPane/index.tsx`.
 
 ```tsx
-import { defineWebspring, NSEPreferencePane } from "@syndromatic/syncloudos/webspring";
+import { NSEPreferencePane, WSApplication } from "@syndromatic/syncloudos/webspring";
 import billingIcon from "./Resources/billing.svg";
 
 class BillingPane extends NSEPreferencePane {
@@ -311,18 +298,17 @@ class BillingPane extends NSEPreferencePane {
   }
 }
 
-export default defineWebspring({
-  manifest,
-  components: { board: WebspringBoardView },
-  preferences: { panes: [BillingPane], hide: ["sounds"] },
-});
+class ExampleSite extends WSApplication {
+  static override preferencePanes = [BillingPane];
+  static override hiddenPreferencePanes = ["sounds"];
+}
 ```
 
 - Override `renderView()` (or declare `static view`) to render the pane. The controller receives live `this.settings` (the person's current settings), `this.appearance` (`"light"`, `"dark"` or `"auto"`) and `this.locale` (the active locale and the supported ones), and re-renders when any of them changes.
 - `static title` is a string, or `{ key, fallback }` looked up in the system dictionary. `static icon` is your artwork, a URL (import the SVG), shown beside the title in the list.
 - Panes list in ascending `static order`, ties broken by `static id`. The built-ins sit at 50 (`account`), 100 (`appearance`), 200 (`sounds`), 300 (`motion`), 400 (`notifications`), 450 (`privacy-security`), 500 (`language`), 600 (`updates`), 650 (`storage`) and 660 (`capabilities`).
 - Optional `renderSummary()` (the line under the title, usually the current value) and `renderAccessory()` (a control on the list row, such as a master switch) read the same controller properties.
-- `hide` removes built-in panes by `id`: `account`, `appearance`, `sounds`, `motion`, `notifications`, `privacy-security`, `language`, `updates`, `storage`, `capabilities`. A developer pane with a built-in's `id` replaces that built-in instead, and `hide` never removes a developer pane.
+- `static hiddenPreferencePanes` removes built-in panes by `id`: `account`, `appearance`, `sounds`, `motion`, `notifications`, `privacy-security`, `language`, `updates`, `storage`, `capabilities`. A developer pane with a built-in's `id` replaces that built-in instead, and hiding never removes a developer pane.
 - A pane that throws shows "This preference pane could not be loaded." in its place, and System Preferences stays open. A summary that throws shows "Unavailable"; a throwing accessory is dropped.
 
 Themes restyle the window through custom properties alone (`--nse-prefs-panel-background`, `--nse-prefs-selection-background` and the rest, listed at the top of `nsePreferencesToast.css`); the sidebar list layout is the same in every theme. Use the `nse-prefs-section`, `nse-prefs-note` and `nse-prefs-empty` classes and the NSE controls inside a pane so it follows the theme.
@@ -339,19 +325,36 @@ The browser host also runs a private worker heartbeat while the document is visi
 
 Application alerts resolve the registered AppIcon; site alerts use configured site branding, and framework errors use the SynCloudOS artwork. The caution badge and layout remain host-owned.
 
-## Custom views
+## Custom launchers
 
-The Board is one view. You can supply another component for a view identifier, and it receives `WebspringViewProps`:
+The Board is one launcher. For another, subclass `WSLauncherViewController` and name it in `static mainViewController`, or per presentation in `static viewControllers`:
 
-- `model` is an immutable snapshot. `model.entrancePhase` is `waiting`, `holding` or `ready`. `model.launchPhase` is `idle`, `staging`, `launching`, `covered` or `returning`. `model.presentationTraits` provides `width`, `height`, `reducedMotion` and `safeAreaInsets`, and `model.branding` holds the resolved branding.
-- `model.items` lists the top-level entries in order: `{ kind: "app", id, app, dialPlacement }` or `{ kind: "folder", id, title, apps, badgeCount, dialPlacement }`. `model.apps` lists every visible application flat, folder members inline. `model.folders` holds `editable`, `openFolderId` and `dropTargetId`, and `model.layout.draggingItemId` names the app or folder being dragged.
-- `actions` is the command surface for the shell: application, home, reorder, editing, drag, folder and authentication operations. Reordering is `moveItem(itemId, index)` within the item's container (the top level, or its folder) and `moveItemByKeyboard(itemId, key, columns)`. Folders use `setDropTarget(itemId | null)` while an app hovers over an entry, `dropOnItem(appId, targetItemId)` to merge, `moveAppOutOfFolder(appId, index)`, `openFolder(folderId)` and `closeFolder()`. Drags run between `beginDrag(itemId)` and `finishDrag(commit)`; changes made during a drag persist when it commits and revert when it is cancelled. A view that draws a launch or return transition reports completion with `completeLaunch(transitionId, appId)` and `completeReturnTrack("material" | "icons")`.
-- `applicationOutlet` is a host-owned React node. Place it where the application should appear, and leave it as it is.
-- `folderPresentation` is the definition's folder presentation. Render it while `model.folders.openFolderId` is set.
+```tsx
+import { WSApplication, WSIconView, WSLauncherViewController } from "@syndromatic/syncloudos/webspring";
 
-Elements a view hands to the drag hit-testing helpers carry `data-webspring-item-id` and `data-order-index`.
+class GridLauncher extends WSLauncherViewController {
+  override renderView() {
+    return <div className="grid">{this.items.map((item, index) => <WSIconView key={item.id} item={item} index={index} />)}</div>;
+  }
+}
 
-A drag arbitrates from the dragged icon's centre, not the pointer. `useWebspringDragProxyPosition` keeps the grab offset, so the icon's centre is what rests on a target. `createWebspringDragArbiter` times the rests and reports them to the view through four commands: `reorder(index)`, `merge(targetId | null)` for the drop well, `springOpen(folderId)` and `leavePanel(folderId)`. A custom view calls `update(centre, view)` on each pointer move with the centre and its container's entries, `clear()` when its layout changes under the drag, and `end()` on release, which reports the drop well, the folder and the index the release falls on. The rules are:
+class ExampleSite extends WSApplication {
+  static override mainViewController = GridLauncher;
+}
+```
+
+- The controller reads the shell's state through getters: `items`, `apps`, `widgets`, `folders`, `branding`, `account`, `isEditing`, `draggingItemId`, `entrancePhase` (`waiting`, `holding` or `ready`), `launchPhase` (`idle`, `staging`, `launching`, `covered` or `returning`), `presentationTraits` (`width`, `height`, `reducedMotion` and `safeAreaInsets`) and the rest. `items` lists the top-level entries in order: `{ kind: "app", id, app, dialPlacement }` or `{ kind: "folder", id, title, apps, badgeCount, dialPlacement }`; `apps` lists every visible application flat.
+- Its commands act on the shell: `openApp`, `returnHome`, `beginEditing`, `finishEditing`, `moveItem(itemId, index)`, `moveItemByKeyboard(itemId, key, columns)`, `openFolder`, `closeFolder` and the rest. A launcher that draws a return transition reports it with `completeReturnTrack("material" | "icons")`.
+- `renderView()`, or `static view`, which receives `controller`, draws the launcher. `WSIconView` draws one entry: it launches, opens folders, enters editing on a long press, drags and reorders from the keyboard with no code of the launcher's own.
+- `WSLauncherRootView`, around every launcher, owns pointer capture, the drag proxy, the open folder, the launch dim, the live region and the application outlet. `launcherRootProps()` sets its element and attributes.
+- `static mode` is `"launcher"` or `"persistent"`; a persistent launcher stays on screen, so its `homeRoute` may be an application's route. `static presentations`, `static returnTracks` (default `["material", "icons"]`) and `static launchZoom` describe the rest.
+- Hooks let a launcher shape the shared behaviour: `revealItem`, `dragDidReachEdge`, `launcherDidSwipe`, `launcherWillOpenApp`, `launcherDidNotOpenApp`, `launchPhaseDidChange`, `launchCompletionDelay`, `renderFolderItem` and `folderAnchor`.
+
+If a custom launcher throws, the shell shows an alert with Use fallback view, which puts the Board in its place for that presentation.
+
+Elements a launcher hands to the drag hit-testing helpers carry `data-webspring-item-id` and `data-order-index`.
+
+A drag arbitrates from the dragged icon's centre, not the pointer. `useWSDragProxyPosition` keeps the grab offset, so the icon's centre is what rests on a target. `createWSDragArbiter` times the rests and reports them to the launcher through four commands: `reorder(index)`, `merge(targetId | null)` for the drop well, `springOpen(folderId)` and `leavePanel(folderId)`. `WSLauncherRootView` drives it for `WSIconView`; a launcher drawing its own icons calls `update(centre, view)` on each pointer move with the centre and its container's entries, `clear()` when its layout changes under the drag, and `end()` on release, which reports the drop well, the folder and the index the release falls on. The rules are:
 
 - Reorder: once the icon has rested 150 ms on the slot whose artwork is nearest its centre, it moves there. When that nearest slot is its own, nothing moves. Leaving and returning restarts the wait.
 - Merge: an app whose centre rests over another app's artwork for 350 ms arms a drop well (`setDropTarget`). The label is not part of the target. Releasing on the well calls `dropOnItem`.
@@ -360,28 +363,26 @@ A drag arbitrates from the dragged icon's centre, not the pointer. `useWebspring
 - Panel: the folder stays open while the centre is inside its panel or in the band between the folder's cell and the panel's top edge. Crossing the panel's edge calls `leavePanel`, once per departure; a member that leaves first moves out with `moveAppOutOfFolder`. Only a member reorders inside its panel. An app from the Board is held there until release and joins at the nearest member's slot.
 - Folders never merge. Where the folders are fixed (`editable: false`), an app does not merge, so no drop well or spring-open arises.
 
-`captureWebspringDragArtworkRects` measures the artwork zones the rules test against.
+`captureWSDragArtworkRects` measures the artwork zones the rules test against.
 
-A custom view owns its markup, styles and choreography. The host owns sessions, routing, application lifecycle, focus, overlays and cleanup, so a view never creates runtime sessions or reads host services. Use `model.presentationTraits.reducedMotion` to choose a static response when the user prefers less motion.
-
-A view declares which return tracks it reports by setting `returnTracks` on the component, for example `Object.assign(MyLauncher, { returnTracks: ["material", "icons"] as const })`. A view that declares none is expected to report both.
+A custom launcher owns its markup, styles and choreography. The host owns sessions, routing, application lifecycle, focus, overlays and cleanup, so a launcher never creates runtime sessions or reads host services. Use `presentationTraits.reducedMotion` to choose a static response when the user prefers less motion.
 
 The pieces the Board is built from are public, so a custom launcher can share its behaviour:
 
 | Export | Purpose |
 | --- | --- |
-| `WebspringLaunchDim`, `resolveWebspringLaunchDimMotion` | The dim drawn over the launcher while an application opens. |
-| `WebspringDragProxy`, `useWebspringDragProxyPosition`, `getWebspringDragGrabOffset` | The icon or folder that follows the pointer while the user reorders, keeping the grab offset from the icon's centre. |
-| `createWebspringDragArbiter`, `captureWebspringDragArtworkRects` | The Board's drag rules: artwork hit zones, rests, folder spring-open and the panel boundary. |
+| `WSLaunchDim`, `resolveWebspringLaunchDimMotion` | The dim drawn over the launcher while an application opens. |
+| `WSDragProxy`, `useWSDragProxyPosition`, `getWebspringDragGrabOffset` | The icon or folder that follows the pointer while the user reorders, keeping the grab offset from the icon's centre. |
+| `createWSDragArbiter`, `captureWSDragArtworkRects` | The Board's drag rules: artwork hit zones, rests, folder spring-open and the panel boundary. |
 | `captureWebspringDragReorderSlots`, `getWebspringDragReorderTargetFromPoint` | Hit testing for drag reordering against the slots the view draws. |
-| `WebspringFolderTile`, `createWebspringFolderSplitPresentation` | A folder's icon tile of its members, and the default folder presentation. |
-| `useWebspringFolderAppearance` | The definition's folder appearance, for artwork that matches the folder tile. |
-| `WSWidgetShelfView`, `WSWidget` | The widget shelf for `model.widgets`: it loads each widget and draws its loading, empty, error and timeout states. |
-| `WSSurface`, `webspringSurfaceStyle` | The surface presets, and the CSS custom properties that paint a surface. `model.background` holds the resolved launcher and shelf surfaces. |
-| `WebspringIconArtwork`, `WebspringIconEffect` | An application's icon artwork, and the shell's declared icon effect. |
+| `WSFolderTileView`, `createWSFolderSplitPresentation` | A folder's icon tile of its members, and the default folder presentation. |
+| `useWebspringFolderAppearance` | The shell's folder appearance, for artwork that matches the folder tile. |
+| `WSWidgetShelfView`, `WSWidget` | The widget shelf for the launcher's `widgets`: it loads each widget and draws its loading, empty, error and timeout states. |
+| `WSSurface`, `webspringSurfaceStyle` | The surface presets, and the CSS custom properties that paint a surface. The launcher's `launcherSurface` and `shelfSurface` hold the resolved surfaces. |
+| `WSIconArtwork`, `WSIconEffect` | An application's icon artwork, and the shell's declared icon effect. |
 | `resolveWebspringIconPresentation`, `webspringIconSprings`, `getWebspringRadialExitForIcon`, `useWebspringMotion` | Icon entrance, launch and return motion, standard and reduced. |
 | `getWebspringSelectorTransform`, `resolveWebspringOrbPresentation` | Selector and orb motion for a radial launcher. |
-| `WEBSPRING_STAGE`, `getDesktopWebspringLayout`, `stagePointStyle` | The desktop stage geometry. Each entry's radial placement is `model.items[].dialPlacement`: the first seven entries sit on the dial, the rest on the overflow shelf. |
+| `WEBSPRING_STAGE`, `getDesktopWebspringLayout`, `stagePointStyle` | The desktop stage geometry. Each entry's radial placement is `items[].dialPlacement`: the first seven entries sit on the dial, the rest on the overflow shelf. |
 
 A radial launcher with an orb and selector can be built entirely from these exports.
 

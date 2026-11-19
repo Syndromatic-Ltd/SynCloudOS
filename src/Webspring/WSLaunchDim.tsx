@@ -51,6 +51,6 @@ function LaunchDim({ motion }: { motion: WebspringLaunchDimMotion }) {
 }
 
 /** Dims the launcher while an application launches, fading out as it leaves. */
-export function WebspringLaunchDim({ visible, motion }: { visible: boolean; motion: WebspringLaunchDimMotion }) {
+export function WSLaunchDim({ visible, motion }: { visible: boolean; motion: WebspringLaunchDimMotion }) {
   return <Presence>{visible ? <LaunchDim motion={motion} /> : null}</Presence>;
 }

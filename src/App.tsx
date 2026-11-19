@@ -22,7 +22,8 @@ import { getSynWareNamespace } from "./SynCloudOS/AppSDK/useStrings";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState, type ComponentType } from "react";
 import { WebspringHost } from "./Webspring/WebspringHost";
 import type { SynCloudOSShellResources } from "./Webspring/WebspringController";
-import type { AuthenticationInput, WebspringDefinition } from "./Webspring/webspringTypes";
+import type { AuthenticationInput } from "./Webspring/webspringTypes";
+import type { WSDefinition } from "./Webspring/WSApplication";
 import { WindowContentRendererRegistry, WindowLayer, syncApplicationWindowContentRenderers, type ApplicationWindowRendererRegistrations } from "./Webspring/WindowLayer";
 import { systemStartupPhaseMachine, type SystemStartupPhase } from "./SynCloudOS/RootRuntime/startupPhaseMachine";
 import { nextState } from "./Foundation/internal/StateMachine";
@@ -41,7 +42,7 @@ function selectRuntimePresentationReady(snapshot: import("./SynCloudOS/Runtime/r
 }
 
 export function App({ shell, shellResources, authentication }: {
-  readonly shell: WebspringDefinition;
+  readonly shell: WSDefinition;
   readonly shellResources?: SynCloudOSShellResources;
   readonly authentication?: AuthenticationInput;
 }) {
@@ -62,10 +63,10 @@ export function App({ shell, shellResources, authentication }: {
   }, [apps, frameworkApplicationRenderers, frameworkTestPath, frameworkWindowRenderers, runtime]);
   const presentationReady = useRuntimeSelector(selectRuntimePresentationReady);
   const localeVersion = useRuntimeSelector((snapshot) => snapshot.localeServices.dictionaryVersion);
-  const siteNameKey = shell.manifest.webspringShell.branding.name.key;
+  const siteNameKey = shell.info.branding.name.key;
   const siteName = useMemo(() => {
-    const translated = runtime.locale.t(siteNameKey, undefined, getSynWareNamespace(shell.manifest.bundleIdentifier));
-    return translated === siteNameKey ? shell.manifest.webspringShell.branding.name.fallback ?? siteNameKey : translated;
+    const translated = runtime.locale.t(siteNameKey, undefined, getSynWareNamespace(shell.info.bundleIdentifier));
+    return translated === siteNameKey ? shell.info.branding.name.fallback ?? siteNameKey : translated;
   }, [localeVersion, runtime, shell, siteNameKey]);
   const [startupPhase, setStartupPhase] = useState<SystemStartupPhase>("booting");
 

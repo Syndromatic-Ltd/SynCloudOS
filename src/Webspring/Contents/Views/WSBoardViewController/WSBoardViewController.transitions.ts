@@ -18,10 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useMemo } from "react";
-import { useNSEAnimationEnvironment, type LayoutTransitionTiming } from "../../../../NSE/Animation";
-import { resolveWebspringLaunchDimMotion, type WebspringLaunchDimMotion } from "../../../WebspringLaunchDim";
-import { webspringIconSprings, type WebspringRadialExit } from "../../../Webspring.transitions";
+import type { LayoutTransitionTiming } from "../../../../NSE/Animation";
+import { resolveWebspringLaunchDimMotion, type WebspringLaunchDimMotion } from "../../../WSLaunchDim";
+import { webspringIconExitDuration, webspringIconSprings, type WSRadialExit } from "../../../Webspring.transitions";
 
 export interface WebspringBoardMotion {
   /** How a board slot moves to its new cell when the order changes; `null`
@@ -37,16 +36,11 @@ export function resolveWebspringBoardMotion(reducedMotion: boolean): WebspringBo
   };
 }
 
-export function useWebspringBoardMotion(): WebspringBoardMotion {
-  const { reducedMotion } = useNSEAnimationEnvironment();
-  return useMemo(() => resolveWebspringBoardMotion(reducedMotion), [reducedMotion]);
-}
-
 /** The Board's launch timing, after the iOS 6 home screen: the icons scatter
  * outward from the screen's centre while the app grows out of that centre. */
 export const webspringBoardLaunchTiming = Object.freeze({
   /** Seconds the icons take to fly past the viewer. */
-  iconExitDuration: 0.5,
+  iconExitDuration: webspringIconExitDuration,
   /** The app's zoom out of the screen centre. */
   appZoom: Object.freeze({ delay: 0.04, duration: 0.5, easing: "decelerate" as const }),
   /** How far the icon field grows as it flies past: each icon moves away from
@@ -57,14 +51,14 @@ export const webspringBoardLaunchTiming = Object.freeze({
 /** Each on-screen entry's exit while an app is open: out past the viewer, away
  * from the board's centre. The icons and folders scatter along it as the app
  * opens and fly back in along it as the app closes. */
-export type WebspringBoardLaunchExits = ReadonlyMap<string, WebspringRadialExit>;
+export type WebspringBoardLaunchExits = ReadonlyMap<string, WSRadialExit>;
 
 /** Measures the entries on screen as an app opens. */
 export function createWebspringBoardLaunchExits(board: HTMLElement): WebspringBoardLaunchExits {
   const bounds = board.getBoundingClientRect();
   const centre = { x: bounds.left + bounds.width / 2, y: bounds.top + bounds.height / 2 };
   const growth = webspringBoardLaunchTiming.iconExitScale - 1;
-  const exits = new Map<string, WebspringRadialExit>();
+  const exits = new Map<string, WSRadialExit>();
   for (const icon of board.querySelectorAll<HTMLElement>(".webspring-board-page [data-webspring-item-id]")) {
     const itemId = icon.dataset.webspringItemId;
     if (!itemId) continue;

@@ -10,7 +10,7 @@
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
  *
@@ -26,9 +26,9 @@ import { webspringIconSprings } from "./Webspring.transitions";
 import type { WebspringFolderPresentationComponent, WebspringFolderPresentationProps } from "./webspringTypes";
 import { folderSplitPhaseMachine, type FolderSplitPhase } from "./folderSplitPhaseMachine";
 import { nextState } from "../Foundation/internal/StateMachine";
+import "./WSFolderSplitView.css";
 
 const part = (phase: FolderSplitPhase) => nextState(folderSplitPhaseMachine.definition, phase, "part") ?? phase;
-import "./WebspringFolderSplitPresentation.css";
 
 /** How the default split presentation looks and moves. */
 export interface WebspringFolderSplitOptions {
@@ -407,17 +407,14 @@ function FolderSplit({ folder, stage, anchor, reducedMotion, renderApp, onClose,
 
 /**
  * The iOS 6 folder: the stage is copied into two halves that part just below the
- * folder's cell to reveal the folder's apps on an underlay. The copy is a clone
- * of the stage's DOM, so there is nothing to capture and nothing to wait for;
- * every icon but the opened folder's own fades back as the halves part, and the
- * triangle cut from the top seam is filled by a matching tab on the bottom half
- * until they part.
- * Reduced motion crossfades instead. Escape, a tap on either half, or a tap on
- * the folder icon closes it.
+ * folder's cell to reveal the folder's apps on an underlay.
  */
-export function createWebspringFolderSplitPresentation(options: WebspringFolderSplitOptions = {}): WebspringFolderPresentationComponent {
+export function createWSFolderSplitPresentation(options: WebspringFolderSplitOptions = {}): WebspringFolderPresentationComponent {
   const resolved = resolveOptions(options);
-  return function WebspringFolderSplitPresentation(props: WebspringFolderPresentationProps) {
+  return function WSFolderSplitPresentation(props: WebspringFolderPresentationProps) {
     return <FolderSplit {...props} options={resolved} />;
   };
 }
+
+/** Default folder split presentation used when `WSApplication.folderPresentation` is omitted. */
+export const WSFolderSplitView: WebspringFolderPresentationComponent = createWSFolderSplitPresentation();

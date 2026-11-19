@@ -18,17 +18,15 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { ComponentType, ExoticComponent, ReactNode } from "react";
+import type { ComponentType, ReactNode } from "react";
 import type { SmoothSurfaceCurve, SmoothSurfaceRadius } from "../NSE/SmoothSurface";
 import type {
   SynWareLocalisedText,
-  SynWareManifestV1,
   SynWarePresentation,
   SynWareResourceReference,
-  SynWareWebspringShellManifest,
 } from "../SynCloudOS/AppSDK";
 import type { NSEPreferencePaneClass, PreferencePaneDescriptor } from "../SynCloudOS/Preferences";
-import type { WSWidgetClass, WSWidgetDescriptor } from "./WSWidget";
+import type { WSWidgetDescriptor } from "./WSWidget";
 import type {
   AuthenticationConfiguration as RuntimeAuthenticationConfiguration,
   AuthenticationInput as RuntimeAuthenticationInput,
@@ -103,13 +101,17 @@ export interface WSWidgetEntry {
   readonly emptyMessage: string | null;
 }
 
-export interface WebspringViewDeclaration {
-  readonly id: string;
-  readonly presentations: readonly Presentation[];
-  readonly mode: ShellMode;
+/** The site's name and logos, resolved for the current locale and resources. */
+export interface WSResolvedBranding {
+  readonly name: string;
+  readonly logoUrl: string | null;
+  readonly logoAlt: string;
+  readonly lightLogoUrl: string | null;
+  readonly darkLogoUrl: string | null;
+  readonly compactLogoUrl: string | null;
 }
 
-export type AccountAction =
+export type WSAccountAction =
   | { readonly kind: "none" }
   | { readonly kind: "pending" }
   | { readonly kind: "signIn"; readonly label: string }
@@ -123,7 +125,7 @@ export interface WebspringDialPlacement {
   readonly labelPosition: { readonly x: number; readonly y: number };
 }
 
-export interface WebspringApp {
+export interface WSApp {
   readonly bundleIdentifier: string;
   readonly displayName: string;
   readonly iconUrl: string | null;
@@ -139,25 +141,25 @@ export interface WebspringApp {
   readonly selectorAngle: number;
 }
 
-export interface WebspringAppItem {
+export interface WSAppItem {
   readonly kind: "app";
   readonly id: string;
-  readonly app: WebspringApp;
+  readonly app: WSApp;
   readonly dialPlacement: WebspringDialPlacement;
 }
 
-export interface WebspringFolderItem {
+export interface WSFolderItem {
   readonly kind: "folder";
   readonly id: string;
   readonly title: string;
-  readonly apps: readonly WebspringApp[];
+  readonly apps: readonly WSApp[];
   /** The members' badge counts, summed. */
   readonly badgeCount: number;
   readonly dialPlacement: WebspringDialPlacement;
 }
 
 /** A top-level Webspring entry: an app, or a folder of apps. */
-export type WebspringItem = WebspringAppItem | WebspringFolderItem;
+export type WSItem = WSAppItem | WSFolderItem;
 
 export interface WebspringViewModel {
   readonly presentation: Presentation;
@@ -188,9 +190,9 @@ export interface WebspringViewModel {
     readonly safeAreaInsets: { readonly blockStart: number; readonly inlineEnd: number; readonly blockEnd: number; readonly inlineStart: number };
   };
   /** Every visible app, flat, in display order; folder members appear inline. */
-  readonly apps: readonly WebspringApp[];
+  readonly apps: readonly WSApp[];
   /** Top-level entries in order. The desktop dial holds the first seven. */
-  readonly items: readonly WebspringItem[];
+  readonly items: readonly WSItem[];
   readonly folders: {
     /** Whether visitors may create, fill and empty folders by dragging. */
     readonly editable: boolean;
@@ -201,15 +203,8 @@ export interface WebspringViewModel {
   /** The widgets the Board shows beneath its icons, in order. Empty when none are declared. */
   readonly widgets: readonly WSWidgetEntry[];
   readonly background: WebspringBackground;
-  readonly branding: {
-    readonly name: string;
-    readonly logoUrl: string | null;
-    readonly logoAlt: string;
-    readonly lightLogoUrl: string | null;
-    readonly darkLogoUrl: string | null;
-    readonly compactLogoUrl: string | null;
-  };
-  readonly account: AccountAction;
+  readonly branding: WSResolvedBranding;
+  readonly account: WSAccountAction;
 }
 
 export interface WebspringActions {
@@ -253,36 +248,18 @@ export interface WebspringActions {
 }
 
 export interface WebspringFolderPresentationProps {
-  readonly folder: WebspringFolderItem;
+  readonly folder: WSFolderItem;
   /** The element that is copied and split. */
   readonly stage: HTMLElement;
   /** The folder's whole cell (icon and label), in viewport coordinates. */
   readonly anchor: DOMRectReadOnly;
   readonly reducedMotion: boolean;
   /** The view-styled icon for a member app inside the panel. */
-  renderApp(app: WebspringApp, index: number): ReactNode;
+  renderApp(app: WSApp, index: number): ReactNode;
   /** Called once the presentation has closed. */
   onClose(): void;
 }
 export type WebspringFolderPresentationComponent = ComponentType<WebspringFolderPresentationProps>;
-
-export interface WebspringViewProps {
-  readonly model: WebspringViewModel;
-  readonly actions: WebspringActions;
-  readonly applicationOutlet: ReactNode;
-  /** How the shell presents an open folder. */
-  readonly folderPresentation: WebspringFolderPresentationComponent;
-}
-
-export type WebspringViewComponent = (ComponentType<WebspringViewProps> | ExoticComponent<WebspringViewProps>) & {
-  /** Tracks reported through completeReturnTrack before the shell return settles.
-   * Omitted declarations retain the legacy material-and-icons requirement.
-   * Declare a nonempty, distinct list on the registered component (including React wrappers). */
-  readonly returnTracks?: readonly ("material" | "icons")[];
-  /** How an application's launch zoom follows this view's own launch
-   * choreography. Omitted fields keep the defaults. */
-  readonly launchZoom?: WebspringLaunchZoom;
-};
 
 /** The zoom that presents an application launched from a Webspring view. */
 export interface WebspringLaunchZoom {
@@ -296,21 +273,6 @@ export interface WebspringLaunchZoom {
 export type AuthenticationPolicy = RuntimeAuthenticationPolicy;
 export type AuthenticationConfiguration = RuntimeAuthenticationConfiguration;
 export type AuthenticationInput = RuntimeAuthenticationInput;
-
-export interface LegacyWebspringViewManifest {
-  readonly id: string;
-  readonly presentations: readonly SynWarePresentation[];
-  readonly mode: ShellMode;
-}
-
-export interface LegacyWebspringShellManifest extends SynWareWebspringShellManifest {
-  readonly views: readonly LegacyWebspringViewManifest[];
-  readonly defaults: Readonly<Record<SynWarePresentation, string>>;
-}
-
-export type WebspringManifest = Omit<SynWareManifestV1, "webspringShell"> & {
-  readonly webspringShell: LegacyWebspringShellManifest;
-};
 
 /** QuickSwitch grows with its icons up to the screen edge; this chooses what happens there. */
 export interface WebspringQuickSwitchOptions {
@@ -380,36 +342,4 @@ export interface WebspringPreferences {
   readonly hide: readonly string[];
 }
 
-export interface WebspringDefinitionInput<TManifest extends Omit<WebspringManifest, "schemaVersion"> & { readonly schemaVersion?: 1 } = WebspringManifest> {
-  readonly manifest: TManifest;
-  readonly components: Readonly<Record<string, WebspringViewComponent>>;
-  readonly widgets?: readonly (WSWidgetClass | WSWidgetDescriptor)[];
-  /** Paints the Board. Defaults to a tinted cotton texture with a spotlight. */
-  readonly background?: WebspringBackgroundInput;
-  readonly iconEffect?: WebspringIconEffectComponent;
-  readonly quickSwitch?: WebspringQuickSwitchOptions;
-  /** Defaults to `createWebspringFolderSplitPresentation()`. */
-  readonly folderPresentation?: WebspringFolderPresentationComponent;
-  /** How folder icons look in every view. Defaults to an inset rounded rectangle. */
-  readonly folderAppearance?: WebspringFolderAppearanceOptions;
-  /** Adds panes to System Preferences and hides built-in ones. */
-  readonly preferences?: WebspringPreferencesOptions;
-}
 
-export interface WebspringDefinition<TManifest extends WebspringManifest = WebspringManifest> {
-  readonly manifest: Readonly<TManifest>;
-  readonly components: Readonly<Record<string, WebspringViewComponent>>;
-  /** Immutable requirements captured from each registered view component by defineWebspring. */
-  readonly returnTracks: Readonly<Record<string, readonly ("material" | "icons")[]>>;
-  /** Launch zooms captured from each registered view component, defaults filled in. */
-  readonly launchZooms: Readonly<Record<string, Readonly<Required<WebspringLaunchZoom>>>>;
-  readonly widgets: readonly WSWidgetDescriptor[];
-  readonly background: Readonly<WebspringBackground>;
-  readonly iconEffect?: WebspringIconEffectComponent;
-  readonly quickSwitch?: Readonly<WebspringQuickSwitchOptions>;
-  readonly folderPresentation: WebspringFolderPresentationComponent;
-  /** The folder appearance, defaults filled in. */
-  readonly folderAppearance: WebspringFolderAppearance;
-  /** System Preferences: the developer's panes and the built-ins to hide. */
-  readonly preferences: WebspringPreferences;
-}

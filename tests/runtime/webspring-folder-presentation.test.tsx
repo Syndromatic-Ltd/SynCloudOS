@@ -22,8 +22,8 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { WebspringFolderItem } from "../../src/Webspring/webspringTypes";
-import { createWebspringFolderSplitPresentation } from "../../src/Webspring/WebspringFolderSplitPresentation";
+import type { WSFolderItem } from "../../src/Webspring/webspringTypes";
+import { createWSFolderSplitPresentation } from "../../src/Webspring/WSFolderSplitView";
 import { AnimationEnvironmentProvider, type Animator } from "../../src/NSE/Animation";
 import type { AFXAnimationDefinition, AFXAnimationHandle } from "../../src/FX/AnimationFX/animationTypes";
 
@@ -33,7 +33,7 @@ const folder = {
   title: "Tools",
   apps: [{ bundleIdentifier: "com.example.beta", displayName: "Beta" }, { bundleIdentifier: "com.example.gamma", displayName: "Gamma" }],
   badgeCount: 0,
-} as unknown as WebspringFolderItem;
+} as unknown as WSFolderItem;
 
 let stageBox = new DOMRect(0, 0, 800, 600);
 let stage: HTMLElement;
@@ -80,7 +80,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-const Presentation = createWebspringFolderSplitPresentation({ panelHeight: 240, duration: 0 });
+const Presentation = createWSFolderSplitPresentation({ panelHeight: 240, duration: 0 });
 
 function renderSplit({ reducedMotion = false, onClose = vi.fn(), Split = Presentation } = {}) {
   const view = render(<Split
@@ -215,7 +215,7 @@ describe("Webspring folder split presentation", () => {
   });
 
   it("uses a straight upper seam without a cutout when the pointer is disabled", async () => {
-    const { root } = renderSplit({ Split: createWebspringFolderSplitPresentation({ panelHeight: 240, duration: 0, notch: false }) });
+    const { root } = renderSplit({ Split: createWSFolderSplitPresentation({ panelHeight: 240, duration: 0, notch: false }) });
     const [top, bottom] = root.querySelectorAll<HTMLElement>(".webspring-folder-split-half");
     expect(top.querySelector<HTMLElement>(".webspring-folder-split-clone-host")!.style.clipPath).toBe("");
     expect(bottom.querySelector<HTMLElement>(".webspring-folder-split-clone-host")!.style.clipPath).toBe("");
@@ -255,7 +255,7 @@ describe("Webspring folder split presentation", () => {
   });
 
   it("closes on Escape, telling the view once the halves have rejoined", async () => {
-    const { root, onClose } = renderSplit({ Split: createWebspringFolderSplitPresentation({ panelHeight: 240, duration: 0.3 }) });
+    const { root, onClose } = renderSplit({ Split: createWSFolderSplitPresentation({ panelHeight: 240, duration: 0.3 }) });
     await opened(root);
 
     vi.useFakeTimers();
@@ -299,7 +299,7 @@ describe("Webspring folder split presentation", () => {
       get(this: HTMLElement) { return this.classList.contains("webspring-folder-split-cell") ? [...this.parentElement!.children].indexOf(this) * 100 : 0; },
     });
     try {
-      const view = (apps: WebspringFolderItem["apps"], reducedMotion: boolean) => (
+      const view = (apps: WSFolderItem["apps"], reducedMotion: boolean) => (
         <AnimationEnvironmentProvider animator={animator} reducedMotion={reducedMotion}>
           <Presentation folder={{ ...folder, apps }} stage={stage} anchor={new DOMRect(100, 100, 80, 80)} reducedMotion={reducedMotion}
             renderApp={(app) => <button type="button">{`Open ${app.displayName}`}</button>} onClose={vi.fn()} />

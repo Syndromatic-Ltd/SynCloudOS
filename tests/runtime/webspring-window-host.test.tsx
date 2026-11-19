@@ -24,7 +24,8 @@ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import React, { useRef, type PropsWithChildren } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
-import { defineWebspring, type WebspringActions, type WebspringViewProps } from "../../src/Webspring/public";
+import { WSLauncherViewController, type WebspringActions } from "../../src/Webspring/public";
+import { createTestLauncher, createTestWebspring } from "./webspringTestShell";
 import { WebspringHost } from "../../src/Webspring/WebspringHost";
 import { useWebspringResponder } from "../../src/Webspring/useWebspringResponder";
 import { createTestBundle, createTestRuntime, createTestRuntimeEnvironment, authoriseTestRuntime } from "./helpers";
@@ -78,44 +79,21 @@ describe("Webspring window host", () => {
     await runtime.boot({ initialPathname: "/diagnostics" });
 
     let connectedActions: WebspringActions | null = null;
-    function ConnectedView({ model, actions, applicationOutlet }: WebspringViewProps) {
+    const orderedView = (testId: string) => createTestLauncher(({ model, actions }) => {
       connectedActions = actions;
-      return <main data-testid="connected-view" data-app-order={model.apps.map((app) => app.bundleIdentifier).join(",")}>{applicationOutlet}</main>;
+      return <main data-testid={testId} data-app-order={model.apps.map((app) => app.bundleIdentifier).join(",")} />;
+    }, "persistent");
+    class ThrowingLauncher extends WSLauncherViewController {
+      static override mode = "persistent" as const;
+      override renderView(): never { throw new Error("fixture view failed"); }
     }
-    function MobileView({ model, actions, applicationOutlet }: WebspringViewProps) {
-      connectedActions = actions;
-      return <main data-testid="mobile-view" data-app-order={model.apps.map((app) => app.bundleIdentifier).join(",")}>{applicationOutlet}</main>;
-    }
-    function ThrowingView(): never { throw new Error("fixture view failed"); }
-    const manifest = {
-      schemaVersion: 1, bundleIdentifier: "com.example.webspring.host", version: "1.0.0", displayName: "Host fixture",
-      webspringShell: {
-        views: [
-          { id: "connected", presentations: ["desktop", "tablet"], mode: "persistent" },
-          { id: "mobile", presentations: ["mobile"], mode: "persistent" },
-          { id: "throwing", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" },
-          { id: "fallback", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" },
-        ],
-        defaults: { desktop: "connected", tablet: "connected", mobile: "mobile" },
-        homeRoute: "/", branding: { name: { key: "site.name", fallback: "Fixture" } },
-      },
-    } as const;
-    const connectedShell = defineWebspring({ manifest, components: { connected: ConnectedView, mobile: MobileView, throwing: ThrowingView, fallback: ConnectedView } });
-    const throwingShell = defineWebspring({
-      manifest: { ...manifest, webspringShell: { ...manifest.webspringShell, defaults: { desktop: "throwing", tablet: "throwing", mobile: "throwing" } } },
-      components: { connected: ConnectedView, mobile: MobileView, throwing: ThrowingView, fallback: ConnectedView },
-    });
-    const invalidLauncherShell = defineWebspring({
-      manifest: {
-        ...manifest,
-        webspringShell: {
-          ...manifest.webspringShell,
-          views: manifest.webspringShell.views.map((view) => ({ ...view, mode: "launcher" as const })),
-          homeRoute: "/diagnostics",
-        },
-      },
-      components: { connected: ConnectedView, mobile: MobileView, throwing: ThrowingView, fallback: ConnectedView },
-    });
+    const info = { bundleIdentifier: "com.example.webspring.host", displayName: "Host fixture", branding: { name: { key: "site.name", fallback: "Fixture" } } };
+    const ConnectedLauncher = orderedView("connected-view");
+    const MobileLauncher = orderedView("mobile-view");
+    const connectedShell = createTestWebspring({ info, viewControllers: { desktop: ConnectedLauncher, tablet: ConnectedLauncher, mobile: MobileLauncher } });
+    const throwingShell = createTestWebspring({ info, launcher: ThrowingLauncher });
+    // A launcher-mode shell must home on the shell itself, so this one is refused when it is defined.
+    expect(() => createTestWebspring({ info: { ...info, homeRoute: "/diagnostics" }, launcher: createTestLauncher() })).toThrow(/must resolve to the shell/);
     const mounted = render(<SynCloudOSProvider runtime={runtime}><WebspringHost shell={connectedShell} /></SynCloudOSProvider>);
     const applicationBefore = await screen.findByTestId("stateful-application");
     expect(appMounts).toBe(1);
@@ -141,16 +119,15 @@ describe("Webspring window host", () => {
     fireEvent.click(screen.getByRole("button", { name: "Use fallback view" }));
     const applicationAfter = await screen.findByTestId("stateful-application");
     expect(applicationAfter).toBe(applicationBefore);
+    expect(document.querySelector("main.webspring-board")).not.toBeNull();
     expect(appMounts).toBe(1);
     expect(document.querySelectorAll(".webspring-application-outlet-host")).toHaveLength(1);
+    mounted.rerender(<SynCloudOSProvider runtime={runtime}><WebspringHost shell={connectedShell} /></SynCloudOSProvider>);
+    expect(await screen.findByTestId("stateful-application")).toBe(applicationBefore);
     const reordered = await connectedActions!.reorder(["com.example.contact", "com.example.diagnostics"]);
     expect(reordered.status).toBe("completed");
     expect((await screen.findByTestId("mobile-view")).getAttribute("data-app-order")).toBe("com.example.contact,com.example.diagnostics");
-    mounted.rerender(<SynCloudOSProvider runtime={runtime}><WebspringHost shell={invalidLauncherShell} /></SynCloudOSProvider>);
-    expect((await screen.findByRole("alert")).textContent).toContain("must resolve to the shell");
     expect(appMounts).toBe(1);
-    mounted.rerender(<SynCloudOSProvider runtime={runtime}><WebspringHost shell={connectedShell} /></SynCloudOSProvider>);
-    expect(await screen.findByTestId("stateful-application")).toBe(applicationBefore);
     const invalidRoute = await connectedActions!.openApp("com.example.diagnostics", "/contact");
     expect(invalidRoute.status).toBe("failed");
     expect(runtime.store.getSnapshot().application.activeAppId).toBe("com.example.diagnostics");

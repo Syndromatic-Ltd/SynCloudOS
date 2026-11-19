@@ -27,27 +27,16 @@ import { createSynCloudOS } from "../../src/SynCloudOS/Runtime/createSynCloudOS"
 import type { SynCloudOSRuntime } from "../../src/SynCloudOS/Runtime/runtimeInstanceTypes";
 import { createSynCloudOSHostContribution } from "../../src/SynCloudOS/HostContributions/hostContribution";
 import { mountSynCloudOS, type MountedSynCloudOSHost, type MountSynCloudOSOptions } from "../../src/SynCloudOSReact/browserRuntime";
-import { defineWebspring } from "../../src/Webspring/public";
+import { createTestLauncher, createTestWebspring } from "./webspringTestShell";
 
 vi.mock("../../src/SynCloudOS/Runtime/createSynCloudOS", { spy: true });
 // Keep the real runtime, ErrorManager, SystemAlert, React root and teardown.
 // Successful mounts do not need the site's application rendering for these tests.
 vi.mock("../../src/App", () => ({ App: () => <button data-testid="mounted-browser-host">Mounted host</button> }));
 
-const shell = defineWebspring({
-  manifest: {
-    schemaVersion: 1,
-    bundleIdentifier: "com.example.bootstrap-shell",
-    version: "1.0.0",
-    displayName: "Bootstrap shell",
-    webspringShell: {
-      views: [{ id: "site", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }],
-      defaults: { desktop: "site", tablet: "site", mobile: "site" },
-      homeRoute: "/",
-      branding: { name: { key: "site.name", fallback: "Bootstrap shell" } },
-    },
-  },
-  components: { site: () => null },
+const shell = createTestWebspring({
+  info: { bundleIdentifier: "com.example.bootstrap-shell", displayName: "Bootstrap shell", branding: { name: { key: "site.name", fallback: "Bootstrap shell" } } },
+  launcher: createTestLauncher(() => null, "persistent"),
 });
 
 const elements = new Set<HTMLElement>();

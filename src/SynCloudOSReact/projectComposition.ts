@@ -23,7 +23,7 @@ import type { PreferencePaneDescriptor } from "../SynCloudOS/Preferences";
 import type { SynCloudOSHostContribution } from "./browserHostContributions";
 import type { SynCloudOSAppModule } from "../SynCloudOS/BundleLoader/bundleTypes";
 import type { SynCloudOSShellResources } from "../Webspring/WebspringController";
-import type { WebspringDefinition, WSWidgetDescriptor } from "../Webspring/public";
+import type { WSDefinition, WSWidgetDescriptor } from "../Webspring/public";
 
 /** One application folder as the project discovered it: its derived manifest,
  * its lazy entry and the file URLs the manifest refers to. */
@@ -47,7 +47,7 @@ export interface SynCloudOSProjectComposition {
   readonly widgets: readonly WSWidgetDescriptor[];
   readonly contributions: readonly SynCloudOSHostContribution[];
   /** The project's shell, already carrying the discovered panes and widgets. */
-  readonly shell: WebspringDefinition | null;
+  readonly shell: WSDefinition | null;
   readonly shellResources: SynCloudOSShellResources;
 }
 

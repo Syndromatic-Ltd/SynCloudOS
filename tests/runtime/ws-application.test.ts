@@ -37,6 +37,7 @@ import {
 } from "../../src/Webspring/WSApplication";
 import { WSSurface } from "../../src/Webspring/WSSurface";
 import { WSWidget } from "../../src/Webspring/WSWidget";
+import { WSLauncherViewController } from "../../src/Webspring/WSLauncherViewController";
 
 const minimalInfo: WSInfo = {
   bundleIdentifier: "com.example.site",
@@ -316,10 +317,10 @@ describe("WSApplication", () => {
   });
 
   it("resolves launchers per presentation and validates launcher metadata", () => {
-    class Dial {
-      static presentations = ["desktop", "tablet"] as const;
-      static returnTracks = ["icons"] as const;
-      static launchZoom = { delay: 0.25, duration: 0.5, easing: "decelerate" as const };
+    class Dial extends WSLauncherViewController {
+      static override presentations = ["desktop", "tablet"] as const;
+      static override returnTracks = ["icons"] as const;
+      static override launchZoom = { delay: 0.25, duration: 0.5, easing: "decelerate" as const };
     }
 
     class DesktopDialApp extends WSApplication {
@@ -335,7 +336,7 @@ describe("WSApplication", () => {
     expect(definition.launchZooms.desktop).toEqual({ delay: 0.25, duration: 0.5, easing: "decelerate" });
     expect(definition.returnTracks.tablet).toEqual(["material"]);
 
-    class TabletMobileOnly {}
+    class TabletMobileOnly extends WSLauncherViewController {}
     (TabletMobileOnly as { presentations?: readonly string[] }).presentations = ["tablet", "mobile"];
     class BadPlacementApp extends WSApplication {
       static override mainViewController = TabletMobileOnly as never;
@@ -343,7 +344,7 @@ describe("WSApplication", () => {
     expect(() => createWebspring({ info: minimalInfo, application: BadPlacementApp })).toThrow(/does not support desktop/i);
 
     const tracksGetter = vi.fn(() => ["material"]);
-    class AccessorLauncher {}
+    class AccessorLauncher extends WSLauncherViewController {}
     Object.defineProperty(AccessorLauncher, "returnTracks", { enumerable: true, get: tracksGetter });
     class AccessorLauncherApp extends WSApplication {
       static override mainViewController = AccessorLauncher as never;
@@ -351,8 +352,8 @@ describe("WSApplication", () => {
     expect(() => createWebspring({ info: minimalInfo, application: AccessorLauncherApp })).toThrow(/accessor/i);
     expect(tracksGetter).not.toHaveBeenCalled();
 
-    class BadTracksLauncher {
-      static returnTracks = ["material", "material"] as never;
+    class BadTracksLauncher extends WSLauncherViewController {
+      static override returnTracks = ["material", "material"] as never;
     }
     class BadTracksApp extends WSApplication {
       static override mainViewController = BadTracksLauncher as never;
@@ -361,8 +362,8 @@ describe("WSApplication", () => {
   });
 
   it("enforces persistent vs launcher home routes", () => {
-    class PersistentLauncher {
-      static mode = "persistent" as const;
+    class PersistentLauncher extends WSLauncherViewController {
+      static override mode = "persistent" as const;
     }
     class PersistentSiteApp extends WSApplication {
       static override mainViewController = PersistentLauncher;
@@ -374,8 +375,8 @@ describe("WSApplication", () => {
     });
     expect(persistentDefinition.info.homeRoute).toBe("/notes");
 
-    class LauncherModeView {
-      static mode = "launcher" as const;
+    class LauncherModeView extends WSLauncherViewController {
+      static override mode = "launcher" as const;
     }
     class LauncherModeApp extends WSApplication {
       static override mainViewController = LauncherModeView;

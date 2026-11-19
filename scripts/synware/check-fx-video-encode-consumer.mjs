@@ -68,7 +68,7 @@ import {
   VFXVideoFormat,
 } from "@syndromatic/syncloudos/fx/video";
 import { VFXWebMContainerBackend } from "@syndromatic/syncloudos/fx/video/webm";
-import { defineWebspring, type WebspringViewProps } from "@syndromatic/syncloudos/webspring";
+import { WSApplication, WSLauncherViewController, createWebspring } from "@syndromatic/syncloudos/webspring";
 
 declare global { interface Window { fxVideoEncode: any; } }
 window.fxVideoEncode = { ready: false };
@@ -272,24 +272,20 @@ function Probe() {
   return <p id="probe">VFX-03 installed encode/container probe</p>;
 }
 
-function Website({ actions, applicationOutlet }: WebspringViewProps) {
-  return <main><button id="open" onClick={() => { void actions.openApp("org.example.vfx03"); }}>Open VFX-03 probe</button>{applicationOutlet}</main>;
+class Website extends WSLauncherViewController {
+  static override mode = "persistent" as const;
+  override renderView() {
+    return <main><button id="open" onClick={() => { void this.openApp("org.example.vfx03"); }}>Open VFX-03 probe</button></main>;
+  }
 }
 
-const shell = defineWebspring({
-  manifest: {
-    schemaVersion: 1,
-    bundleIdentifier: "org.example.vfx03-shell",
-    version: "1.0.0",
-    displayName: "VFX-03 shell",
-    webspringShell: {
-      views: [{ id: "website", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }],
-      defaults: { desktop: "website", tablet: "website", mobile: "website" },
-      homeRoute: "/",
-      branding: { name: { key: "brand", fallback: "VFX-03" } },
-    },
-  },
-  components: { website: Website },
+class Shell extends WSApplication {
+  static override mainViewController = Website;
+}
+
+const shell = createWebspring({
+  info: { bundleIdentifier: "org.example.vfx03-shell", version: "1.0.0", displayName: "VFX-03 shell", branding: { name: { key: "brand", fallback: "VFX-03" } } },
+  application: Shell,
 });
 
 const app = createSynWare({

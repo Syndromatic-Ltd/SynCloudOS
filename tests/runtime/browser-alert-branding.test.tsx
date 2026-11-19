@@ -26,7 +26,7 @@ import { createSynCloudOS } from "../../src/SynCloudOS/Runtime/createSynCloudOS"
 import { mountSynCloudOS, type MountedSynCloudOSHost } from "../../src/SynCloudOSReact/browserRuntime";
 import { useHostSiteBranding } from "../../src/SynCloudOSReact/siteBrandingContext";
 import { useResolvedMode } from "../../src/SynCloudOSReact/serviceHooks";
-import { defineWebspring } from "../../src/Webspring/public";
+import { createTestLauncher, createTestWebspring } from "./webspringTestShell";
 import type { SynCloudOSRuntime } from "../../src/SynCloudOS/Runtime/runtimeInstanceTypes";
 
 const scenario = vi.hoisted(() => ({ throwAtRoot: false }));
@@ -38,18 +38,17 @@ vi.mock("../../src/App", () => ({ App: () => {
   return <output data-testid="root-site-logo">{mode === "light" ? branding?.lightLogoUrl : branding?.darkLogoUrl}</output>;
 } }));
 
-const shell = defineWebspring({ manifest: {
-  schemaVersion: 1, bundleIdentifier: "com.example.recovery-shell", version: "1.0.0", displayName: "Recovery shell",
-  webspringShell: {
-    views: [{ id: "site", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }],
-    defaults: { desktop: "site", tablet: "site", mobile: "site" }, homeRoute: "/",
+const shell = createTestWebspring({
+  info: {
+    bundleIdentifier: "com.example.recovery-shell", displayName: "Recovery shell",
     branding: {
       name: { key: "site.name", fallback: "Example Site" },
       lightLogo: { resource: "./Resources/light.svg", alternativeText: { key: "site.logo", fallback: "Example Site" } },
       darkLogo: { resource: "./Resources/dark.svg", alternativeText: { key: "site.logo", fallback: "Example Site" } },
     },
   },
-}, components: { site: () => null } });
+  launcher: createTestLauncher(() => null, "persistent"),
+});
 
 const mounts: Array<{ host: MountedSynCloudOSHost; runtime: SynCloudOSRuntime; element: HTMLElement }> = [];
 async function mount() {

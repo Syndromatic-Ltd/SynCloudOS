@@ -66,7 +66,8 @@ import type { SynCloudOSRuntime, SynCloudOSRuntimeConfig } from "../SynCloudOS/R
 import type { SynCloudOSConfigurationProfile } from "../SynCloudOS/ConfigurationProfiles/policyTypes";
 import { singleApplicationConfigurationProfile } from "../SynCloudOS/ConfigurationProfiles/singleApplicationConfigurationProfile";
 import { createSynCloudOSFacade } from "../SynCloudOS/SynCloudOS";
-import type { AuthenticationInput, WebspringDefinition } from "../Webspring/webspringTypes";
+import type { AuthenticationInput } from "../Webspring/webspringTypes";
+import type { WSDefinition } from "../Webspring/WSApplication";
 import type { SynCloudOSShellResources } from "../Webspring/WebspringController";
 import { getWebspringLocaleResourceLoader } from "../Webspring/webspringLocale";
 import { webspringPresentationRoles } from "../SynCloudOS/SynCloudOS";
@@ -83,7 +84,6 @@ import {
   type SynCloudOSDiscoveredBundleDescriptor,
   type SynCloudOSProjectComposition,
 } from "./projectComposition";
-import { defineWebspring, withDiscoveredWebspringItems } from "../Webspring/Webspring";
 /** One application folder as the project discovered it; see projectComposition.ts. */
 export type { SynCloudOSDiscoveredBundleDescriptor, SynCloudOSProjectComposition } from "./projectComposition";
 
@@ -119,7 +119,7 @@ export type SynCloudOSApplicationFrameMode = "fullscreen" | "declared";
 /** A host chooses its Webspring shell, one primary application, or — with
  * neither — its project's shell or the neutral framework Board. */
 export type MountSynCloudOSOptions = BrowserHostOptions & (
-  | { readonly shell: WebspringDefinition; readonly application?: never;
+  | { readonly shell: WSDefinition; readonly application?: never;
       readonly shellResources?: SynCloudOSShellResources }
   | { readonly application: Readonly<{ bundleIdentifier: string; frame?: SynCloudOSApplicationFrameMode }>; readonly shell?: never;
       readonly shellResources?: never }
@@ -135,7 +135,7 @@ type InternalMountOptions = MountSynCloudOSOptions & { readonly persistenceNames
 
 /** The options after the project composition filled in what the host omitted. */
 interface ResolvedHostOptions extends BrowserHostOptions {
-  readonly shell?: WebspringDefinition;
+  readonly shell?: WSDefinition;
   readonly application?: Readonly<{ bundleIdentifier: string; frame?: SynCloudOSApplicationFrameMode }>;
   readonly shellResources?: SynCloudOSShellResources;
   readonly composition: SynCloudOSProjectComposition;
@@ -170,10 +170,8 @@ type ResolvedMountOptions = InternalMountOptions & ResolvedHostOptions;
  */
 function resolveHostOptions(input: InternalMountOptions): ResolvedMountOptions {
   const composition = input.composition ?? emptyProjectComposition;
-  const declaredShell = input.shell;
-  const shell = declaredShell === undefined || declaredShell === composition.shell
-    ? composition.shell
-    : withDiscoveredWebspringItems(declaredShell, composition);
+  // A declared shell gains the project's discovered items once the mount loads the shell's modules.
+  const shell = input.shell ?? composition.shell;
   return {
     ...input,
     composition,
@@ -185,8 +183,8 @@ function resolveHostOptions(input: InternalMountOptions): ResolvedMountOptions {
 }
 
 function hostBranding(options: ResolvedHostOptions, runtime: SynCloudOSRuntime): ResolvedSiteBranding {
-  if (options.shell) return resolveSiteBranding(options.shell.manifest.webspringShell.branding,
-    options.shellResources?.resourceUrls ?? {}, runtime.locale, getSynWareNamespace(options.shell.manifest.bundleIdentifier));
+  if (options.shell) return resolveSiteBranding(options.shell.info.branding,
+    options.shellResources?.resourceUrls ?? {}, runtime.locale, getSynWareNamespace(options.shell.info.bundleIdentifier));
   const app = options.application ? runtime.apps.getApp(options.application.bundleIdentifier) : undefined;
   const name = app?.displayName ?? options.application?.bundleIdentifier ?? "SynCloudOS";
   return Object.freeze({ name, logoUrl: null, logoAlt: name, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null });
@@ -525,11 +523,11 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
   validatedResourceMap(options.shellResources?.fontResourceUrls, "Shell fonts");
   const shellResourceUrls = options.shellResources?.resourceUrls ?? {};
   for (const reference of [
-    options.shell?.manifest.webspringShell.branding.logo,
-    options.shell?.manifest.webspringShell.branding.lightLogo,
-    options.shell?.manifest.webspringShell.branding.darkLogo,
-    options.shell?.manifest.webspringShell.branding.compactLogo,
-    options.shell?.manifest.webspringShell.branding.homeIcon,
+    options.shell?.info.branding.logo,
+    options.shell?.info.branding.lightLogo,
+    options.shell?.info.branding.darkLogo,
+    options.shell?.info.branding.compactLogo,
+    options.shell?.info.branding.homeIcon,
   ]) {
     if (reference && !shellResourceUrls[reference.resource]) {
       throw new TypeError(`Site branding resource ${reference.resource} is not registered.`);
@@ -691,22 +689,18 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
   }
   let initialPathname = `${environment.browser.getLocation().pathname}${environment.browser.getLocation().search}${environment.browser.getLocation().hash}`;
   try {
-    if (!options.shell && !options.application) {
-      // Resolve the actual Board after acquiring this mount's lifetime. Application-only
+    if (!options.application && options.shell !== options.composition.shell) {
+      // Load the launcher modules after acquiring this mount's lifetime. Application-only
       // hosts never load launcher assets; a replaced mount cannot publish a late Board.
-      const { WebspringBoardView } = await import("../Webspring/Contents/Views/WebspringBoardView/WebspringBoardView");
+      const { createWebspring, withDiscoveredWebspringItems } = await import("../Webspring/WSApplication");
       assertMountCurrent(options.element, attempt);
-      options = { ...options, shell: withDiscoveredWebspringItems(defineWebspring({
-        manifest: {
-          bundleIdentifier: "org.syncloudos.webspring", displayName: "SynCloudOS", version: "1.0.0",
-          webspringShell: {
-            views: [{ id: "board", presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
-            defaults: { desktop: "board", tablet: "board", mobile: "board" }, homeRoute: "/",
-            branding: { name: { key: "site.name", fallback: "SynCloudOS" } },
-          },
+      const shell = options.shell ?? createWebspring({
+        info: {
+          bundleIdentifier: "org.syncloudos.webspring", displayName: "SynCloudOS", version: "1.0.0", homeRoute: "/",
+          branding: { name: { key: "site.name", fallback: "SynCloudOS" } },
         },
-        components: { board: WebspringBoardView },
-      }), options.composition) };
+      });
+      options = { ...options, shell: withDiscoveredWebspringItems(shell, options.composition) };
     }
     const loadShellLocale = getWebspringLocaleResourceLoader();
     runtime.locale.registerBundleLocaleResourceLoader("webspring", async activeLocale => {

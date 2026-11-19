@@ -6,7 +6,9 @@ import { mountSynCloudOS, type MountedSynCloudOSHost } from "../../src/SynCloudO
 import { createSynCloudOS } from "../../src/SynCloudOS/Runtime/createSynCloudOS";
 import { WebspringController } from "../../src/Webspring/WebspringController";
 import { WSWidget, captureWSWidgetClass } from "../../src/Webspring/WSWidget";
-import { defineWebspring, withDiscoveredWebspringItems } from "../../src/Webspring/Webspring";
+import { withDiscoveredWebspringItems } from "../../src/Webspring/WSApplication";
+import { WSBoardViewController } from "../../src/Webspring/Contents/Views/WSBoardViewController/WSBoardViewController";
+import { createTestLauncher, createTestWebspring } from "./webspringTestShell";
 import { NSEPreferencePane, capturePreferencePaneClass } from "../../src/SynCloudOS/Preferences";
 import type { SynCloudOSProjectComposition } from "../../src/SynCloudOSReact/projectComposition";
 import { createSynWare } from "../../src/SynCloudOS/AppSDK/createSynWare";
@@ -45,8 +47,9 @@ it("mounts the real neutral Board without a declared shell or composition and om
   expect(element.querySelector(".webspring-board")).not.toBeNull();
   expect(element.querySelector(".webspring-widget-shelf")).toBeNull();
   expect(element.querySelector(".webspring-board-logo")).toBeNull();
-  expect(shell.manifest.webspringShell.branding.name.fallback).toBe("SynCloudOS");
-  expect(shell.manifest.webspringShell.views).toEqual([{ id: "board", presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }]);
+  expect(shell.info.branding.name.fallback).toBe("SynCloudOS");
+  expect(shell.viewControllers).toEqual({ desktop: WSBoardViewController, tablet: WSBoardViewController, mobile: WSBoardViewController });
+  expect(shell.modes).toEqual({ desktop: "launcher", tablet: "launcher", mobile: "launcher" });
   expect(shell.background.launcher.texture).toMatchObject({ size: "256px" });
 });
 
@@ -79,12 +82,11 @@ it("lists a discovered application and launches it through the default Board", a
 
 it("keeps explicit widget order, adds discoveries by order, and permits explicit ordering of the same discovered definitions", () => {
   const first = widget("first", 50), second = widget("second", -50), alpha = widget("alpha"), zeta = widget("zeta");
-  const shell = defineWebspring({ manifest: {
-    bundleIdentifier: "com.example.ordered-shell", displayName: "Ordered", version: "1.0.0", webspringShell: {
-      views: [{ id: "custom", presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
-      defaults: { desktop: "custom", tablet: "custom", mobile: "custom" }, homeRoute: "/", branding: { name: { key: "name", fallback: "Ordered" } },
-    },
-  }, components: { custom: () => null }, widgets: [first, second] });
+  const shell = createTestWebspring({
+    info: { bundleIdentifier: "com.example.ordered-shell", displayName: "Ordered", branding: { name: { key: "name", fallback: "Ordered" } } },
+    launcher: createTestLauncher(),
+    widgets: [first, second] as never,
+  });
   const merged = withDiscoveredWebspringItems(shell, { preferences: [], widgets: [zeta, first, alpha, second] });
   expect(merged.widgets).toEqual([first, second, alpha, zeta]);
   expect(shell.widgets).toEqual([first, second]);

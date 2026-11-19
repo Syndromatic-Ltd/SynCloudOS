@@ -74,13 +74,14 @@ import { ContainerPane } from "../../src/NSE/Containers/NSEContainers";
 import { synCloudOSLogoUrl } from "../../src/SynCloudOS/Resources/frameworkAssets";
 import { SystemUILayer } from "../../src/Webspring/SystemUILayer";
 import { createTestBundle, createTestRuntime, registerTestSynWare } from "./helpers";
-import { createWebspringBoardView, defineWebspring, createWebspringFolderSplitPresentation, WebspringFolderTile, WebspringIconArtwork, type WebspringFolderItem } from "../../src/Webspring/public";
+import { WSBoardViewController, createWSFolderSplitPresentation, WSFolderTileView, WSIconArtwork, type WSFolderItem } from "../../src/Webspring/public";
+import { createTestWebspring } from "./webspringTestShell";
 import { WebspringFolderAppearanceProvider } from "../../src/Webspring/WebspringFolderAppearance";
 import { WebspringHost } from "../../src/Webspring/WebspringHost";
 import { AppViewContent } from "../../src/Webspring/AppViewContent";
 import { NotificationCentrePresenter } from "../../src/Webspring/NotificationCentrePresenter";
 import { SystemStartupLayer } from "../../src/Webspring/SystemStartupLayer";
-import { WebspringDragProxy } from "../../src/Webspring/WebspringDragProxy";
+import { WSDragProxy } from "../../src/Webspring/WSDragProxy";
 import { WSWidgetShelfView } from "../../src/Webspring/WSWidgetShelfView";
 import { WSSurface } from "../../src/Webspring/WSSurface";
 import { WSWidget, captureWSWidgetClass } from "../../src/Webspring/WSWidget";
@@ -879,17 +880,10 @@ it("renders both states of the Webspring Board pager", async () => {
     bundleIdentifier: `com.example.theme-board.${name}`, displayName: name, policy: { public: true },
   }));
   const runtime = createTestRuntime({ id: "theme-contract-board", authenticationPolicy: "disabled", initialBundles: bundles });
-  const Board = createWebspringBoardView({ pageSize: 1 });
-  const shell = defineWebspring({
-    manifest: {
-      schemaVersion: 1, bundleIdentifier: "com.example.theme-board.shell", version: "1.0.0", displayName: "Theme Board",
-      webspringShell: {
-        views: [{ id: "board", presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
-        defaults: { desktop: "board", tablet: "board", mobile: "board" }, homeRoute: "/",
-        branding: { name: { key: "contract.name", fallback: "Theme Board" } },
-      },
-    },
-    components: { board: Board },
+  class OneIconBoard extends WSBoardViewController { static override pageSize = 1; }
+  const shell = createTestWebspring({
+    info: { bundleIdentifier: "com.example.theme-board.shell", displayName: "Theme Board", branding: { name: { key: "contract.name", fallback: "Theme Board" } } },
+    launcher: OneIconBoard,
   });
   await runtime.boot({ initialPathname: "/" });
   try {
@@ -910,7 +904,7 @@ it("renders both states of the Webspring Board pager", async () => {
 });
 
 it("renders the measured textured folder receptacle and the icon artwork's glow", () => {
-  const folder: WebspringFolderItem = {
+  const folder: WSFolderItem = {
     kind: "folder",
     id: "folder.tools",
     title: "Tools",
@@ -931,9 +925,9 @@ it("renders the measured textured folder receptacle and the icon artwork's glow"
     const view = render(
       <Host>
         <WebspringFolderAppearanceProvider value={{ shape: { kind: "circle" }, fill: { kind: "texture", image: synCloudOSLogoUrl, size: "cover", colour: "#20242c" } }}>
-          <WebspringFolderTile folder={folder} dropTarget />
+          <WSFolderTileView folder={folder} dropTarget />
         </WebspringFolderAppearanceProvider>
-        <IconWell active><WebspringIconArtwork src={synCloudOSLogoUrl} /></IconWell>
+        <IconWell active><WSIconArtwork src={synCloudOSLogoUrl} /></IconWell>
       </Host>,
     );
     const tile = view.container.querySelector('[data-nse-control="folder-tile"][data-nse-style="circle"][data-nse-type="texture"][data-nse-highlighted]');
@@ -957,25 +951,17 @@ for (const reducedMotion of [false, true]) {
         bundleIdentifier: appId(name), displayName: name, policy: { public: true },
       })),
     });
-    const Split = createWebspringFolderSplitPresentation();
-    const shell = defineWebspring({
-      manifest: {
-        schemaVersion: 1,
+    const Split = createWSFolderSplitPresentation();
+    const shell = createTestWebspring({
+      info: {
         bundleIdentifier: "com.example.theme-folder.shell",
-        version: "1.0.0",
         displayName: "Theme Folder",
-        webspringShell: {
-          views: [{ id: "board", presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
-          defaults: { desktop: "board", tablet: "board", mobile: "board" },
-          homeRoute: "/",
-          branding: { name: { key: "theme.folder", fallback: "Theme Folder" } },
-          folders: {
-            editable: true,
-            initial: [{ id: "folder.tools", title: { key: "theme.folder.tools", fallback: "Tools" }, order: 1, apps: [appId("Pictures"), appId("Music")] }],
-          },
+        branding: { name: { key: "theme.folder", fallback: "Theme Folder" } },
+        folders: {
+          editable: true,
+          initial: [{ id: "folder.tools", title: { key: "theme.folder.tools", fallback: "Tools" }, order: 1, apps: [appId("Pictures"), appId("Music")] }],
         },
       },
-      components: { board: createWebspringBoardView() },
       folderPresentation: props => <Split {...props} reducedMotion={reducedMotion} />,
     });
     try {
@@ -1012,7 +998,7 @@ it("renders the boot material and an appearance-projected drag proxy", async () 
   try {
     const view = render(<Host><SynCloudOSProvider runtime={runtime}>
       <SystemStartupLayer phase="material" />
-      <WebspringDragProxy point={{ x: 80, y: 100 }} app={{
+      <WSDragProxy point={{ x: 80, y: 100 }} app={{
         bundleIdentifier: "com.example.archive", displayName: "Archive", iconUrl: "/archive.png",
         route: "/archive", selected: true, running: false, state: "idle",
         badgeCount: 0, accent: "#224466", featured: false, selectorAngle: 0,

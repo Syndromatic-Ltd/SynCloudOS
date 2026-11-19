@@ -14,7 +14,7 @@ import { createBrowserRuntimeEnvironment } from "../../../../src/SynCloudOS/Plat
 import { createSynCloudOS } from "../../../../src/SynCloudOS/Runtime/createSynCloudOS";
 import { RuntimeInputBoundary, SynCloudOSProvider } from "../../../../src/SynCloudOSReact";
 import { SystemUILayer } from "../../../../src/Webspring/SystemUILayer";
-import { defineWebspring, WebspringBoardView } from "../../../../src/Webspring/public";
+import { createWebspring } from "../../../../src/Webspring/public";
 import { WebspringHost } from "../../../../src/Webspring/WebspringHost";
 import "../../../../src/Webspring/WebspringHost.css";
 
@@ -94,20 +94,13 @@ export async function mountApplication(root: HTMLElement, dusk: NSETheme, red: N
     runtime: { policy: { public: true } },
     webspring: { visible: true, order: 1 },
   });
-  const shell = defineWebspring({
-    manifest: {
-      schemaVersion: 1,
+  const shell = createWebspring({
+    info: {
       bundleIdentifier: "com.example.appearance-documents-shell",
       displayName: "Appearance Documents shell",
       version: "1.0.0",
-      webspringShell: {
-        views: [{ id: "board", mode: "launcher", presentations: ["desktop", "tablet", "mobile"] }],
-        defaults: { desktop: "board", tablet: "board", mobile: "board" },
-        homeRoute: "/",
-        branding: { name: { key: "shell.name", fallback: "Appearance Documents shell" } },
-      },
+      branding: { name: { key: "shell.name", fallback: "Appearance Documents shell" } },
     },
-    components: { board: WebspringBoardView },
   });
   const runtime = createSynCloudOS({
     id: "theme-application-scope",
