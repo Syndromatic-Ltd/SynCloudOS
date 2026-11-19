@@ -183,3 +183,17 @@
 }
 
 }
+
+/* Reduced motion zeroes every theme motion role; important declarations outrank the appearance root's inline tokens. */
+@layer nse.structure {
+@media (prefers-reduced-motion: reduce) {
+  :where([data-nse-theme]) {
+    --nse-motion-standard-duration: 0s !important;
+    --nse-motion-control-duration: 0s !important;
+    --nse-motion-selection-duration: 0s !important;
+    --nse-motion-presentation-duration: 0s !important;
+    --nse-motion-dismissal-duration: 0s !important;
+    --nse-motion-scroll-boundary-duration: 0s !important;
+  }
+}
+}

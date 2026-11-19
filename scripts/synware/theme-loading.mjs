@@ -208,7 +208,7 @@ export function themeModuleSource(bundles, selected, fileImport, stylePrefix) {
       images[name] = "{..." + JSON.stringify(image) + ",files:{" + Object.entries(files).map(([scale, variable]) => `${JSON.stringify(scale)}:${variable}`).join(",") + "}}";
     }
     if (selected.has(theme.bundleIdentifier)) imports.push(styleImport);
-    entries.push(`${JSON.stringify(theme.bundleIdentifier)}:freeze({...${JSON.stringify(theme)},images:{${Object.entries(images).map(([name, code]) => `${JSON.stringify(name)}:${code}`).join(",")}}})`);
+    entries.push(`${JSON.stringify(theme.bundleIdentifier)}:freeze({...${JSON.stringify(theme)},motion:{...builtInAtmo.motion,...${JSON.stringify(theme.motion ?? {})}},images:{${Object.entries(images).map(([name, code]) => `${JSON.stringify(name)}:${code}`).join(",")}}})`);
   }
   return `${imports.join("\n")}\nconst freeze = value => { if (value && typeof value === "object") { Object.values(value).forEach(freeze); Object.freeze(value); } return value; };\nconst values = Object.freeze({${entries.join(",")}});\nexport const themes = Object.freeze(new Proxy(values, { get(target, key, receiver) { if (typeof key === "string" && key !== "toJSON" && !(key in Object.prototype) && !Object.hasOwn(target, key)) throw new TypeError("Unknown theme: " + key); return Reflect.get(target, key, receiver); } }));\n`;
 }

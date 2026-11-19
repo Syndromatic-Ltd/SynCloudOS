@@ -2,8 +2,8 @@
  * Designed by Kavish Krishnakumar in Manchester.
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-// Atmo, the built-in theme, as an NSETheme: identity from Atmo.scostheme's Info.ts, colours, navigation, presentation
-// and images from its Theme.json. Image paths in Theme.json resolve to URLs here, one static URL per file.
+// Atmo, the built-in theme, as an NSETheme: identity from Atmo.scostheme's Info.ts, colours, navigation, presentation,
+// images and motion from its Theme.json. Image paths in Theme.json resolve to URLs here, one static URL per file.
 import { freezeNSETheme, type NSETheme, type NSEThemeImage } from "../Theme/NSETheme";
 import info from "../../Themes/Atmo.scostheme/Contents/Info";
 import definition from "../../Themes/Atmo.scostheme/Contents/Theme.json";
@@ -52,4 +52,5 @@ export const atmoTheme: NSETheme = freezeNSETheme({
   navigation: definition.navigation as NSETheme["navigation"],
   presentation: definition.presentation as NSETheme["presentation"],
   images,
+  motion: definition.motion as unknown as NSETheme["motion"],
 });

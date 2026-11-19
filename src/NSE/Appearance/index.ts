@@ -52,3 +52,4 @@ export {
 
 export type { NSEAppTheme } from "../Theme/NSEAppTheme";
 export type { NSETheme, NSEThemeNavigation, NSEThemePresentation, NSEThemeImage } from "../Theme/NSETheme";
+export type { NSEThemeMotion, NSEThemeMotionRole } from "../Theme/NSETheme";

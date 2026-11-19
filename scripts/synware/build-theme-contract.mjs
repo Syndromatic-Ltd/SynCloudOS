@@ -31,8 +31,9 @@ export function createNSEThemeContract(rendered, vocabulary, colours) {
     navigation: { compact: { placement: ["block-start", "block-end"], flow: ["in-flow", "overlay"] }, regular: { placement: ["source-list", "block-start"], flow: ["in-flow", "overlay"] } },
     presentation: { login: ["plain", "ornamented"], notifications: ["plain", "sliced-3d"], materialLighting: ["off", "on"] },
     appThemeControls: ["window", "app-view-chrome", "toolbar", "toolbar-item", "tab-view", "segmented-control", "split-view", "menu", "menu-item", "popover"],
+    motion: { roles: ["standard", "control", "selection", "presentation", "dismissal", "scrollBoundary"], properties: ["duration", "easing"], timing: ["spring", "timingFunction"] },
     typography: { properties: ["font", "font-*", "line-height", "letter-spacing", "word-spacing", "text-transform"], fontFormats: ["woff2"] },
-    limits: { minimumHitTarget: { regular: 24, large: 24 }, visibleFocusIndicator: true, reducedMotion: true, semanticProperties: ["display", "visibility", "content"], forbiddenProperties: ["animation", "transition"] },
+    limits: { minimumHitTarget: { regular: 24, large: 24 }, visibleFocusIndicator: true, reducedMotion: true, semanticProperties: ["display", "visibility", "content"], forbiddenProperties: ["animation"] },
     renamedFrom: { "toolbar.root": "toolbar.background", "circular-slider": "slider[slider-type=circular]", "slider-field": "slider[slider-type=linear]", "ruler": "ruler-view", "scroll-view-frame": "scroll-view", "toolbar-configuration-sheet": "toolbar-customisation-palette", "calendar": "date-picker[date-picker-elements=yearMonthDay]", "time-picker": "date-picker[date-picker-elements=hourMinute]", "date-time-picker": "date-picker[date-picker-elements=yearMonthDay hourMinute]", "date-range-picker": "date-picker[date-picker-mode=range]", "route-picker": "route-picker-view", "file-panel": "save-panel" },
   };
 }
@@ -87,6 +88,10 @@ export function renderNSEThemeContractMarkdown(contract) {
   lines.push("", "## Typography", "",
     "Themes can set " + list(contract.typography.properties) + ". Drawing a part resets its underlying paint and typography for that state. Omitted inherited typography properties take their values from the parent.",
     "", "Use `@font-face` with " + list(contract.typography.fontFormats) + " files under `Resources/` and a package-local `url()`.", "",
+    "## Motion", "",
+    "Each role in " + tick("motion") + " of " + tick("Theme.json") + " is a spring, " + tick("{ \"duration\", \"bounce\" }") + ", or a curve, " + tick("{ \"duration\", \"timingFunction\": [x1, y1, x2, y2] }") + ". A role the theme omits takes Atmo's timing.", "",
+    "Roles: " + list(contract.motion.roles) + ".", "",
+    "Transitions use only " + tick("var(--nse-motion-<role>-duration)") + " and " + tick("var(--nse-motion-<role>-easing)") + " for their timing, with roles in kebab case such as " + tick("scroll-boundary") + ". Literal durations, delays and easings are rejected. Reduced motion makes every duration zero.", "",
     "## App theme controls", "", list(contract.appThemeControls), "", "## Limits", "");
   for (const [name, value] of Object.entries(contract.limits)) {
     const text = Array.isArray(value) ? list(value) : value && typeof value === "object" ? Object.entries(value).map(([key, item]) => key + " " + item).join(", ") : String(value);

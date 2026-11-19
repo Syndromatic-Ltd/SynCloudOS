@@ -1,6 +1,6 @@
 # Themes
 
-A theme supplies the fills, borders, shadows, artwork, colours and typography of NSE controls and SynCloudOS chrome. The framework owns control semantics, interaction and motion.
+A theme supplies the fills, borders, shadows, artwork, colours and typography of NSE controls and SynCloudOS chrome. The framework owns control semantics and interaction; a theme times its transitions through the framework's motion roles.
 
 Atmo is the built-in theme. It is itself a theme bundle, `Atmo.scostheme`, drawn through the same contract as any theme you write.
 
@@ -12,11 +12,12 @@ A system theme is a `.scostheme` bundle of static files with an identity, a defi
 - set the 48 semantic colours, in light and dark, and optionally for high contrast;
 - supply named images, such as `NSGoBackTemplate`, and workspace artwork;
 - style control text and supply package-local WOFF2 fonts;
-- choose navigation placement and the login, notification and material-lighting presentations.
+- choose navigation placement and the login, notification and material-lighting presentations;
+- time its transitions with springs or timing curves for the motion roles.
 
 It can't:
 
-- add motion (`animation`, `transition`), because motion is framework-owned and follows the system's reduced-motion setting;
+- run animations (`animation`, `@keyframes`), or give a transition a literal duration, delay or easing;
 - hide or reveal semantics (`display`, `visibility`, `content` on a contract part);
 - remove a focused control's focus indicator without drawing another;
 - shrink a control's hit target below 24 points;
@@ -66,6 +67,10 @@ export default { bundleIdentifier: "com.example.dusk", displayName: "Dusk", vers
   "presentation": { "login": "plain", "notifications": "plain", "materialLighting": "off" },
   "images": {
     "NSGoBackTemplate": { "files": { "1x": "Resources/back.svg" }, "pointSize": { "width": 17, "height": 17 }, "template": true }
+  },
+  "motion": {
+    "control": { "duration": 0.3, "bounce": 0.15 },
+    "dismissal": { "duration": 0.2, "timingFunction": [0.42, 0, 1, 1] }
   }
 }
 ```
@@ -74,6 +79,7 @@ export default { bundleIdentifier: "com.example.dusk", displayName: "Dusk", vers
 - `navigation` chooses where window navigation sits in compact and regular widths, and whether it overlays content or takes space in the layout.
 - `presentation` chooses the login window's ornament, how notifications are drawn, and whether materials are lit.
 - `images` maps image names to files, at `1x` and optionally `2x` and `3x`. `NSEImage.named(name)` resolves through the active theme first, then Atmo. A `template` image is drawn as a mask in the current text colour.
+- `motion` is optional and partial; a role you omit takes Atmo's timing. See [Motion](#motion).
 
 ## Drawing controls
 
@@ -151,6 +157,23 @@ Declare custom fonts with `@font-face`. Each `src` must resolve to a WOFF2 file 
   letter-spacing: 0.02em;
 }
 ```
+
+## Motion
+
+The framework names six motion roles: `standard`, `control`, `selection`, `presentation`, `dismissal` and `scrollBoundary`. In `Theme.json`, give a role either a spring or a timing curve:
+
+- `{ "duration": 0.3, "bounce": 0.15 }` is a spring in Core Animation's perceptual terms. `duration` runs from 0.07 to 10 seconds, and `bounce` lies between -1 and 1: 0 is critically damped, positive bounces, negative is overdamped.
+- `{ "duration": 0.2, "timingFunction": [x1, y1, x2, y2] }` is a duration in seconds with `CAMediaTimingFunction` control points.
+
+Each role becomes `--nse-motion-<role>-duration` and `--nse-motion-<role>-easing` on the theme's boundary, in kebab case such as `--nse-motion-scroll-boundary-duration`. A spring runs for its settling time along a `linear()` curve sampled from the spring. Time every transition with these properties and nothing else; reduced motion sets every duration to zero.
+
+```css
+[data-nse-control="switch"] [data-nse-part="knob"] {
+  transition: left var(--nse-motion-selection-duration) var(--nse-motion-selection-easing);
+}
+```
+
+CSS transitions start from rest, so an interrupted transition loses its velocity. Framework animations that need to keep it, such as scrolling, read the role from the theme.
 
 ## Using a theme
 

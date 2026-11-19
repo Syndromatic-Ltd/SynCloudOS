@@ -324,6 +324,8 @@
     "NSEThemePartName": { "none": "Theme contract vocabulary: the values of data-nse-part. AppKit draws control parts with private system artwork and publishes no part names." },
     "NSEThemeNavigation": { "none": "A theme choice of where window navigation sits at compact and regular widths. AppKit fixes this per window style rather than per appearance." },
     "NSEThemePresentation": { "none": "A theme choice of login, notification and material-lighting presentation. AppKit fixes these in the system, not in NSAppearance." },
+    "NSEThemeMotion": { "none": "A theme’s timing for one motion role: a spring in CASpringAnimation’s perceptual duration and bounce, or a duration with CAMediaTimingFunction control points. NSAppearance carries no motion." },
+    "NSEThemeMotionRole": { "none": "Theme contract vocabulary: the motion roles a theme times. AppKit fixes these durations in the system rather than per appearance." },
     "NSEValueTransformer": "NSValueTransformer",
     "NSEDateFormatter": "NSDateFormatter",
     "NSEDateFormatterStyle": "NSDateFormatter.Style",

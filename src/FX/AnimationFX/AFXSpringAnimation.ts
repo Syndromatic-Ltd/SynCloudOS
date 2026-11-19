@@ -20,7 +20,7 @@
 
 import { AFXAnimation, type AFXAnimationOptions } from "./AFXAnimation";
 import { AFXKeyframeAnimation } from "./AFXKeyframeAnimation";
-import { sampleSpring, sampleSpringVelocity, springSettlingDuration } from "./AFXTimingFunction";
+import { sampleSpring, sampleSpringVelocity, springParameters, springSettlingDuration } from "./AFXTimingFunction";
 import { afxProgressVelocity, afxScaledDistance, type AFXAnimationVelocity } from "./animationVelocity";
 import { interpolateAFXValue } from "./interpolation";
 import {
@@ -78,9 +78,7 @@ export class AFXSpringAnimation {
       const bounce = input.bounce ?? 0;
       if (typeof bounce !== "number" || !Number.isFinite(bounce) || bounce <= -1 || bounce >= 1)
         throw new RangeError("spring bounce is outside its supported bounds.");
-      mass = 1;
-      stiffness = (2 * Math.PI / duration) ** 2;
-      damping = bounce >= 0 ? 4 * Math.PI * (1 - bounce) / duration : 4 * Math.PI / ((1 + bounce) * duration);
+      ({ mass, stiffness, damping } = springParameters(duration, bounce));
     }
     this.mass = afxAnimationNumber(mass, "spring mass", 0.01, 100);
     this.stiffness = afxAnimationNumber(stiffness, "spring stiffness", 0.01, 10000);

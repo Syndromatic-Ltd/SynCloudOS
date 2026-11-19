@@ -78,6 +78,15 @@ export function sampleSpring(
   );
 }
 
+/** Core Animation's perceptual spring as mass 1, stiffness and damping. Bounce 0 is critical; negative bounce is overdamped. */
+export function springParameters(perceptualDuration: number, bounce: number): Readonly<{ mass: number; stiffness: number; damping: number }> {
+  const stiffness = (2 * Math.PI / perceptualDuration) ** 2;
+  const damping = bounce >= 0
+    ? 4 * Math.PI * (1 - bounce) / perceptualDuration
+    : 4 * Math.PI / ((1 + bounce) * perceptualDuration);
+  return Object.freeze({ mass: 1, stiffness, damping });
+}
+
 const settledDisplacement = 1e-4, settledVelocity = 1e-2;
 
 /** First time after which (p + q·t)·e^(−rate·t) stays below `limit`, found by bisection past the envelope's peak. */

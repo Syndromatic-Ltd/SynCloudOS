@@ -6,8 +6,8 @@ import * as cssTree from "css-tree";
 import { SaxesParser } from "saxes";
 import ts from "typescript";
 import { parseManifest } from "./manifest-source.mjs";
-// Part 3 removes this exemption when motion tokens land.
-const ATMO_MOTION_EXEMPT_STYLESHEET = fileURLToPath(new URL("../../src/Themes/Atmo.scostheme/Contents/Resources/atmo-structure.controls.css", import.meta.url));
+// Atmo's spinners and menu animations stay keyframes; transitions use motion tokens like any theme's.
+const ATMO_KEYFRAMES_STYLESHEET = fileURLToPath(new URL("../../src/Themes/Atmo.scostheme/Contents/Resources/atmo-structure.controls.css", import.meta.url));
 const identifier = /^[a-z][a-z0-9-]*(?:\.[a-z][a-z0-9-]*)+$/u;
 const resourceExtensions = new Set([".css", ".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg", ".avif", ".woff2", ".txt", ".md", ".json", ".strings"]);
 const inside = (root, path) => { const rel = relative(root, path); return !isAbsolute(rel) && rel !== ".." && !rel.startsWith("../") && !rel.startsWith("..\\"); };
@@ -175,7 +175,21 @@ export function imageDimensions(file) {
   fail(file, "image-dimensions", "Cannot read the image dimensions.");
 }
 function validateDefinition(input, contract, file, root) {
-  record(input, ["colours", "navigation", "presentation", "images"], file);
+  record(input, ["colours", "navigation", "presentation", "images", "motion"], file);
+  if (input.motion !== undefined) {
+    record(input.motion, contract.motion.roles, file);
+    for (const [role, motion] of Object.entries(input.motion)) {
+      const spring = motion && typeof motion === "object" && "bounce" in motion;
+      record(motion, spring ? ["duration", "bounce"] : ["duration", "timingFunction"], file);
+      const finite = value => typeof value === "number" && Number.isFinite(value);
+      if (!finite(motion.duration) || motion.duration > 10 || motion.duration < (spring ? 0.07 : 0) || (!spring && motion.duration === 0)) fail(file, "motion", `motion.${role}.duration must be seconds, ${spring ? "0.07" : "above 0"} to 10.`);
+      if (spring && (!finite(motion.bounce) || motion.bounce <= -1 || motion.bounce >= 1)) fail(file, "motion", `motion.${role}.bounce must be between -1 and 1.`);
+      if (!spring) {
+        const points = motion.timingFunction;
+        if (!Array.isArray(points) || points.length !== 4 || !points.every(finite) || points[0] < 0 || points[0] > 1 || points[2] < 0 || points[2] > 1) fail(file, "motion", `motion.${role}.timingFunction must be four control points with x between 0 and 1.`);
+      }
+    }
+  }
   record(input.colours, ["light", "dark", "highContrastLight", "highContrastDark"], file);
   for (const scheme of ["light", "dark", "highContrastLight", "highContrastDark"]) {
     const values = input.colours[scheme];
@@ -283,9 +297,28 @@ export function themeRuleSummaries(source) {
   } catch { /* Syntax errors are reported by validation. */ }
   return out;
 }
+const timingKeywords = new Set(["ease", "ease-in", "ease-out", "ease-in-out", "linear", "step-start", "step-end"]);
+/** Transition timing must come from motion tokens: no literal durations, delays or easings, and no var() fallbacks. */
+function validateTransitionTiming(declaration, tokens, file) {
+  const reject = detail => fail(file, "motion", `Time transitions with motion tokens only (${detail}).`);
+  cssTree.walk(declaration.value, node => {
+    if (node.type === "Dimension") reject(`${node.value}${node.unit}`);
+    if (node.type === "Number" && Number(node.value) !== 0) reject(node.value);
+    if (node.type === "Identifier" && timingKeywords.has(node.name.toLowerCase())) reject(node.name);
+    if (node.type === "Function") {
+      if (node.name.toLowerCase() !== "var") reject(`${node.name}()`);
+      const children = node.children.toArray();
+      const name = children[0]?.type === "Identifier" ? children[0].name : "";
+      if (children.length !== 1 || !tokens.has(name)) reject(`var(${cssTree.generate(node).slice(4, -1)})`);
+      return cssTree.walk.skip;
+    }
+  });
+}
 export function validateThemeCSS(source, { file, root, contract, kind = "system", onImport = () => undefined, siblings: bundleSiblings } = {}) {
   const app = kind === "app";
-  const allowsMotion = !app && file && resolve(file) === ATMO_MOTION_EXEMPT_STYLESHEET;
+  const allowsKeyframes = !app && file && resolve(file) === ATMO_KEYFRAMES_STYLESHEET;
+  const motionRoles = contract.motion?.roles ?? [];
+  const motionTokens = new Set(motionRoles.flatMap(role => ["duration", "easing"].map(kind => `--nse-motion-${role.replace(/[A-Z]/gu, letter => "-" + letter.toLowerCase())}-${kind}`)));
   if (app && !Array.isArray(contract.appThemeControls)) fail(file, "css-control", "The theme contract does not define appThemeControls.");
   const appControls = app ? new Set(contract.appThemeControls) : null;
   const ast = cssTree.parse(source, { parseCustomProperty: true, positions: true, onParseError(error) { fail(file, "css-syntax", error.message); } });
@@ -306,7 +339,7 @@ export function validateThemeCSS(source, { file, root, contract, kind = "system"
       if (node.type === "Raw" && node.value.trim()) fail(file, "css-syntax", "Unparsed CSS is not permitted.");
       if (node.type === "Atrule") {
         const name = cssTree.ident.decode(node.name).toLowerCase();
-        if (allowsMotion && name === "keyframes") return cssTree.walk.skip;
+        if (allowsKeyframes && name === "keyframes") return cssTree.walk.skip;
         if (name === "import") {
           const match = /^(["'])([^"']+)\1\s*$/u.exec(cssTree.generate(node.prelude));
           if (!match) fail(file, "css-import", "Use a quoted local stylesheet import.");
@@ -357,7 +390,9 @@ export function validateThemeCSS(source, { file, root, contract, kind = "system"
       }
       if (node.type === "Declaration") {
         const property = cssTree.ident.decode(node.property).toLowerCase();
-        if (!allowsMotion && /^(?:animation|transition)(?:-|$)/u.test(property)) fail(file, "motion", "Themes cannot define motion.");
+        if (!allowsKeyframes && /^animation(?:-|$)/u.test(property)) fail(file, "motion", "Themes cannot define animations; time transitions with motion tokens.");
+        if (property.startsWith("--nse-motion-")) fail(file, "motion", "Motion tokens come from Theme.json.");
+        if (/^transition(?:-|$)/u.test(property)) validateTransitionTiming(node, motionTokens, file);
         if (["behavior", "-moz-binding"].includes(property)) fail(file, "css-code", "Executable CSS is forbidden.");
         validateCssValue(valueText(node), url => localPath(root, file, url), file);
       }

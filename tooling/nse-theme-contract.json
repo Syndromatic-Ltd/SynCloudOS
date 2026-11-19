@@ -2406,6 +2406,24 @@
     "menu-item",
     "popover"
   ],
+  "motion": {
+    "roles": [
+      "standard",
+      "control",
+      "selection",
+      "presentation",
+      "dismissal",
+      "scrollBoundary"
+    ],
+    "properties": [
+      "duration",
+      "easing"
+    ],
+    "timing": [
+      "spring",
+      "timingFunction"
+    ]
+  },
   "typography": {
     "properties": [
       "font",
@@ -2432,8 +2450,7 @@
       "content"
     ],
     "forbiddenProperties": [
-      "animation",
-      "transition"
+      "animation"
     ]
   },
   "renamedFrom": {

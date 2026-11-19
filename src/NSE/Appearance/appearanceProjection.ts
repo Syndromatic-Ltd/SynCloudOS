@@ -19,6 +19,7 @@
  */
 
 import { nseThemeColourStyle } from "../Theme/themeColourStyle";
+import { nseThemeMotionStyle } from "../Theme/themeMotionStyle";
 import type { EffectiveAppearance, NSEAppearanceDataAttributes } from "./nseAppearanceTypes";
 
 /** Projects the appearance environment onto views and relocated portal boundaries. */
@@ -28,7 +29,7 @@ export function projectNSEAppearance(appearance: EffectiveAppearance, relocated 
     "data-nse-theme": appearance.theme.bundleIdentifier,
     ...(appearance.appTheme && { "data-nse-app-theme": appearance.appTheme.bundleIdentifier }),
     style: appearance.appTheme && !relocated ? {}
-      : nseThemeColourStyle(colourAppearance.theme, colourAppearance.resolvedColourScheme, colourAppearance.contrast),
+      : { ...nseThemeColourStyle(colourAppearance.theme, colourAppearance.resolvedColourScheme, colourAppearance.contrast), ...nseThemeMotionStyle(appearance.theme) },
     "data-nse-chrome": appearance.chrome,
     "data-nse-colour-scheme-requested": appearance.requestedColourScheme,
     "data-nse-colour-scheme-resolved": appearance.resolvedColourScheme,

@@ -728,6 +728,14 @@ Themes can set `font`, `font-*`, `line-height`, `letter-spacing`, `word-spacing`
 
 Use `@font-face` with `woff2` files under `Resources/` and a package-local `url()`.
 
+## Motion
+
+Each role in `motion` of `Theme.json` is a spring, `{ "duration", "bounce" }`, or a curve, `{ "duration", "timingFunction": [x1, y1, x2, y2] }`. A role the theme omits takes Atmo's timing.
+
+Roles: `standard`, `control`, `selection`, `presentation`, `dismissal`, `scrollBoundary`.
+
+Transitions use only `var(--nse-motion-<role>-duration)` and `var(--nse-motion-<role>-easing)` for their timing, with roles in kebab case such as `scroll-boundary`. Literal durations, delays and easings are rejected. Reduced motion makes every duration zero.
+
 ## App theme controls
 
 `window`, `app-view-chrome`, `toolbar`, `toolbar-item`, `tab-view`, `segmented-control`, `split-view`, `menu`, `menu-item`, `popover`
@@ -738,7 +746,7 @@ Use `@font-face` with `woff2` files under `Resources/` and a package-local `url(
 - `visibleFocusIndicator`: true
 - `reducedMotion`: true
 - `semanticProperties`: `display`, `visibility`, `content`
-- `forbiddenProperties`: `animation`, `transition`
+- `forbiddenProperties`: `animation`
 
 ## Renamed identities
 

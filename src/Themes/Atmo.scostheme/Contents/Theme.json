@@ -287,5 +287,31 @@
         "height": 96
       }
     }
+  },
+  "motion": {
+    "standard": {
+      "duration": 0.18,
+      "timingFunction": [0.25, 0.1, 0.25, 1]
+    },
+    "control": {
+      "duration": 0.14,
+      "timingFunction": [0.25, 0.1, 0.25, 1]
+    },
+    "selection": {
+      "duration": 0.18,
+      "timingFunction": [0.22, 0.75, 0.28, 1]
+    },
+    "presentation": {
+      "duration": 0.18,
+      "timingFunction": [0, 0, 0.58, 1]
+    },
+    "dismissal": {
+      "duration": 0.16,
+      "timingFunction": [0.42, 0, 1, 1]
+    },
+    "scrollBoundary": {
+      "duration": 0.5,
+      "timingFunction": [0.25, 0.1, 0.25, 1]
+    }
   }
 }
