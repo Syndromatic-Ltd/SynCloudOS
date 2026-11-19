@@ -16,7 +16,7 @@ import type { ToolbarPreferences, ToolbarRuntimePort } from "../../../src/NSE/To
 import { NSEView } from "../../../src/NSE/Views/NSEView";
 import { StandardWindowView } from "../../../src/NSE/Windows/StandardWindowView";
 import type { WindowRecord } from "../../../src/SynCloudOS/Windows";
-import { AppViewChrome } from "../../../src/Webspring/AppViewChrome";
+import { WSStageWindowFrame, WSStageWindowSurface } from "../../../src/Webspring/WSStageWindowHost";
 import { defaultsFrom } from "../../fixtures/userDefaults";
 import { Spec } from "../specimens";
 import { themes } from "virtual:atmo-lab/app-themes";
@@ -119,11 +119,11 @@ export default function PartialAppTheme() {
     <div className="lab-group-body">
       <Spec wide label="Window bezel, red button bezelColour, and stock Cancel button"><ThemedWindow /></Spec>
       <Spec wide label="Staged app chrome">
-        <AppViewChrome.Root zIndex={1} keyWindow className="lab-themed-stage">
-          <AppViewChrome.Surface material="cumulus" hasTitlebar={false}>
+        <WSStageWindowFrame zIndex={1} keyWindow className="lab-themed-stage">
+          <WSStageWindowSurface material="cumulus" hasTitlebar={false}>
             <p>Library workspace</p>
-          </AppViewChrome.Surface>
-        </AppViewChrome.Root>
+          </WSStageWindowSurface>
+        </WSStageWindowFrame>
       </Spec>
       <Spec wide label="Toolbar and toolbar item"><ThemedToolbar /></Spec>
       <Spec wide label="Tabs">

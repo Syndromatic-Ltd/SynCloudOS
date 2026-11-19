@@ -25,7 +25,7 @@ import { WindowView } from "../../src/NSE/Windows/WindowView";
 import { TitlebarGlyphButton } from "../../src/NSE/Windows/TitlebarGlyphButton";
 import { nseTopBarGlyphs } from "../../src/NSE/Windows/Chrome/topBarAssets";
 import { ApplicationNavigationBackButton } from "../../src/Webspring/ApplicationNavigationBackButton";
-import { AppViewChrome } from "../../src/Webspring/AppViewChrome";
+import { WSStageContentView, WSStageWindowFrame, WSStageWindowSurface } from "../../src/Webspring/WSStageWindowHost";
 import { WindowContentBorder } from "../../src/SynCloudOS/AppHosting/windowAccessories";
 import { WindowPresentationContent } from "../../src/Webspring/WindowPresentationContent";
 import { WindowLayer, createApplicationWindowContentRendererRegistry } from "../../src/Webspring/WindowLayer";
@@ -78,7 +78,6 @@ import { WSBoardViewController, createWSFolderSplitPresentation, WSFolderTileVie
 import { createTestWebspring } from "./webspringTestShell";
 import { WebspringFolderAppearanceProvider } from "../../src/Webspring/WebspringFolderAppearance";
 import { WebspringHost } from "../../src/Webspring/WebspringHost";
-import { AppViewContent } from "../../src/Webspring/AppViewContent";
 import { NotificationCentrePresenter } from "../../src/Webspring/NotificationCentrePresenter";
 import { SystemStartupLayer } from "../../src/Webspring/SystemStartupLayer";
 import { WSDragProxy } from "../../src/Webspring/WSDragProxy";
@@ -342,9 +341,9 @@ it.each(["menu", "popover"] as const)("renders the %s overlay phase hooks", asyn
 it("renders the large content border on embedded application chrome", () => {
   const view = render(
     <Host>
-      <AppViewChrome.Root zIndex={1}>
+      <WSStageWindowFrame zIndex={1}>
         <WindowContentBorder thickness={44} />
-      </AppViewChrome.Root>
+      </WSStageWindowFrame>
     </Host>,
   );
   expect(view.container.querySelector('[data-nse-control="window"][data-nse-presentation="stage"] [data-nse-part="content-border"][data-nse-content-border="large"]')).not.toBeNull();
@@ -1018,11 +1017,11 @@ it("renders the boot material and an appearance-projected drag proxy", async () 
 it.each([["incoming", "system", true], ["outgoing", "none", false]] as const)(
   "renders the %s app plane and its %s body",
   (role, background, hasTitlebar) => {
-    const view = render(<Host><AppViewChrome.Root zIndex={1} multiSwitchRole={role}>
-      <AppViewChrome.Surface material="metal" hasTitlebar={hasTitlebar} multiSwitchRole={role}>
-        <AppViewContent.Surface smoothSurface={false} background={background}><p>App content</p></AppViewContent.Surface>
-      </AppViewChrome.Surface>
-    </AppViewChrome.Root></Host>);
+    const view = render(<Host><WSStageWindowFrame zIndex={1} multiSwitchRole={role}>
+      <WSStageWindowSurface material="metal" hasTitlebar={hasTitlebar} multiSwitchRole={role}>
+        <WSStageContentView smoothSurface={false} background={background}><p>App content</p></WSStageContentView>
+      </WSStageWindowSurface>
+    </WSStageWindowFrame></Host>);
     expect(view.container.querySelector(`[data-nse-control="window"][data-nse-presentation="stage"] > [data-nse-part="content"][data-nse-transition="${role}"] > [data-nse-part="content-view"][data-nse-background-style="${background}"]`)).not.toBeNull();
     collect();
   },

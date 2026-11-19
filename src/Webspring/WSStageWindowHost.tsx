@@ -18,12 +18,22 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type Ref, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, type FocusEventHandler, type Ref, type ReactNode } from "react";
 import { nseUnowned } from "../NSE/sdkPackageEntry";
 import { useWebspringLaunchZoom } from "./WebspringLaunchZoomContext";
 import { useNSEAnimationEnvironment, useNSEPresenceExiting, useNSEPresentation, type PresentationSpec } from "../NSE/Animation";
-import { useApplicationStageMotion } from "./ApplicationStage.transitions";
-import { WEBSPRING_MULTI_SWITCH_ROLES, WEBSPRING_PRESENTATION_ROLES, type WebspringMultiSwitchRole } from "../SynCloudOS/SynCloudOS";
+import { useApplicationStageMotion, type ApplicationStagePartMotion } from "./ApplicationStage.transitions";
+import {
+  AppPresentationErrorFallback,
+  SynCloudOSWatchdog,
+  WEBSPRING_MULTI_SWITCH_ROLES,
+  WEBSPRING_PRESENTATION_ROLES,
+  type SynCloudOSAppInfo,
+  type SynCloudOSAppLifecycleState,
+  type SynCloudOSPresentationTraits,
+  type WebspringMultiSwitchRole,
+  type WindowSmoothSurfaceConfiguration,
+} from "../SynCloudOS/SynCloudOS";
 import {
   FocusPortProvider,
   ControlRuntimeProvider,
@@ -36,17 +46,259 @@ import {
 } from "../NSE/NSE";
 import { ApplicationNavigationBackButton } from "./ApplicationNavigationBackButton";
 import { activateResponderHierarchy, clearOwnedResponderAnchor, QuickSwitchTriggerProvider, ResponderScope, useHostSiteBranding, useRuntimeNSEControlPort, useRuntimeNSEFocusPort, useRuntimeNSEOverlayPort, useRuntimeSelector, useKernelSynCloudOS } from "../SynCloudOSReact";
-import type { SynCloudOSAppInfo } from "../SynCloudOS/SynCloudOS";
-import { AppViewChrome, type AppViewPresentation } from "./AppViewChrome";
-import { TitlebarGlyphButton, ViewAppearanceBoundary, WindowTitlebarView, nseTopBarGlyphs, type WindowTitlebarSlots } from "../NSE/hostComposition";
-import { AppViewContent } from "./AppViewContent";
-import { nseAppCornerRadius } from "../NSE/SmoothSurface";
+import {
+  TitlebarGlyphButton, ViewAppearanceBoundary, WindowTitlebarView, nseTopBarGlyphs, type WindowTitlebarSlots,
+  WindowLayoutContext, WindowLayoutModel, useNSEContentLayoutProperties, useInPlaceAppearanceProjection, isWithinNSEFocusOrigin, useNSEViewSafeArea,
+  WindowTitlebarHostContext, type WindowTitlebarDocument, type WindowTitlebarHost,
+} from "../NSE/hostComposition";
+import {
+  SmoothSurface,
+  nseAppCornerRadius,
+  nseSmoothSurfaceDefaultPhysicality,
+  type SmoothSurfaceRequest
+} from "../NSE/SmoothSurface";
 import { WindowPresentationSlot, useWindowPresentationContent } from "./WindowPresentationContent";
 import { SynWareEntryRenderer } from "./SynWareEntryRenderer";
-import { WindowTitlebarHostContext, type WindowTitlebarDocument, type WindowTitlebarHost } from "../NSE/hostComposition";
 import { useWebspringLocale } from "./webspringLocale";
 import type { ApplicationStagePresentation } from "./webspringTypes";
 import { createTransientWindowSurfaceBridge, type WindowContentRendererRegistry } from "./WindowLayer";
+
+/** A stage element's AnimationFX presentation, and who hears it finish. */
+interface StagePresentation {
+  readonly motion: ApplicationStagePartMotion;
+  readonly onPresented?: (state: string) => void;
+}
+
+function useStagePresentation(element: { current: HTMLElement | null }, presentation: StagePresentation | undefined) {
+  useNSEPresentation(element, {
+    state: presentation?.motion.state,
+    enter: presentation?.motion.enter ?? null,
+    exit: presentation?.motion.exit ?? null,
+    onPresented: presentation?.onPresented,
+  });
+}
+
+type WSStageWindowFrameProps = {
+  safeAreaInsets?: SynCloudOSPresentationTraits["safeAreaInsets"];
+  zIndex: number;
+  multiSwitchRole?: "incoming" | "outgoing" | null;
+  staged?: boolean;
+  /** The focused application stage: once presented it becomes the key window. */
+  keyWindow?: boolean;
+  hasAppearanceOverride?: boolean;
+  rootRef?: Ref<HTMLDivElement>;
+  children: ReactNode;
+  presentation?: StagePresentation;
+  className?: string;
+  style?: CSSProperties;
+  onFocusCapture?: FocusEventHandler<HTMLDivElement>;
+  "data-syncloudos-runtime-owner"?: string;
+  "data-syncloudos-responder-id"?: string;
+  "data-syncloudos-focus-scope"?: string;
+};
+
+/** The stage window's `background` part: layout, key-window focus and the frame's motion. */
+export function WSStageWindowFrame({
+  zIndex,
+  safeAreaInsets,
+  multiSwitchRole,
+  staged = false,
+  keyWindow = false,
+  hasAppearanceOverride = false,
+  rootRef,
+  children,
+  presentation,
+  className,
+  style,
+  ...hostProps
+}: WSStageWindowFrameProps) {
+  const projection = useInPlaceAppearanceProjection();
+  const appearanceProjection = hasAppearanceOverride ? projection : undefined;
+  const frameRef = useRef<HTMLDivElement | null>(null);
+  const layout = useMemo(() => new WindowLayoutModel(), []);
+  useNSEDeferredDisposal(layout);
+  useLayoutEffect(() => frameRef.current ? layout.connectRoot(frameRef.current) : undefined, [layout]);
+  useLayoutEffect(() => { if (safeAreaInsets) layout.setLogicalScreenInsets(safeAreaInsets); }, [layout, safeAreaInsets]);
+  const setFrame = useCallback((element: HTMLDivElement | null) => {
+    frameRef.current = element;
+    if (typeof rootRef === "function") rootRef(element);
+    else if (rootRef) rootRef.current = element;
+  }, [rootRef]);
+  useStagePresentation(frameRef, presentation);
+  const exiting = useNSEPresenceExiting();
+  const inactive = staged || multiSwitchRole === "outgoing" || exiting;
+  useEffect(() => {
+    // Hand keyboard ownership from this runtime's launcher or previous stage
+    // to the presented key stage, without taking focus from its own editor,
+    // its portalled controls, or another runtime.
+    if (inactive || !keyWindow) return;
+    const frame = frameRef.current, document = frame?.ownerDocument, active = document?.activeElement;
+    if (!frame) return;
+    if (active && active !== document.body) {
+      if (isWithinNSEFocusOrigin(frame, active)) return;
+      const owner = frame.dataset.syncloudosRuntimeOwner;
+      if (!owner || active.closest<HTMLElement>("[data-syncloudos-runtime-owner]")?.dataset.syncloudosRuntimeOwner !== owner) return;
+    }
+    // The window's content takes focus, not a view controller drawn in its title bar (an accessory).
+    const inTitlebar = (element: Element) => element.closest(".nse-window-titlebar-accessory-slot, .nse-window-titlebar-accessories, .nse-document-titlebar");
+    const firstOutsideTitlebar = (selector: string) => [...frame.querySelectorAll<HTMLElement>(selector)].find((element) => !inTitlebar(element));
+    const target = firstOutsideTitlebar("[data-nse-initial-focus]")
+      ?? firstOutsideTitlebar("[data-nse-view-controller]")
+      ?? frame;
+    target.focus({ preventScroll: true, focusVisible: false } as FocusOptions);
+  }, [inactive, keyWindow]);
+  return (
+    <WindowLayoutContext.Provider value={layout}>
+    <div
+      {...appearanceProjection}
+      {...hostProps}
+      ref={setFrame}
+      tabIndex={-1}
+      data-nse-control="window" data-nse-part="background" data-nse-presentation="stage" data-nse-role="standard"
+      data-nse-key-window={keyWindow ? undefined : "false"}
+      className={`webspring-app-view-frame ${multiSwitchRole ? `is-multiswitch-${multiSwitchRole}` : ""} ${className ?? ""}`}
+      data-nse-transition={multiSwitchRole ?? undefined}
+      // A staged frame is mounted and painted but not yet presented: it must not take pointer
+      // input or join the accessibility tree until the launch zoom hands the screen over to it.
+      data-launch-staged={staged ? "true" : undefined}
+      aria-hidden={inactive ? true : undefined}
+      inert={inactive ? true : undefined}
+      style={{ ...appearanceProjection?.style, ...style, ...presentation?.motion.style, zIndex, ...(inactive ? { pointerEvents: "none" as const } : {}) }}
+    >
+      {children}
+    </div>
+    </WindowLayoutContext.Provider>
+  );
+}
+
+/** The stage window's `content` part, which carries its material and top-bar state. */
+export function WSStageWindowSurface({
+  material, hasTitlebar,
+  multiSwitchRole,
+  children,
+  presentation
+}: {
+  material: "cumulus" | "metal";
+  hasTitlebar: boolean;
+  multiSwitchRole?: "incoming" | "outgoing" | null;
+  children: ReactNode;
+  presentation?: StagePresentation;
+}) {
+  const surfaceRef = useRef<HTMLDivElement>(null);
+  const contentLayoutProperties = useNSEContentLayoutProperties();
+  // A role change starts its presentation during layout, so the outgoing
+  // plane shows its first 3D pose in the same frame its role changes.
+  useStagePresentation(surfaceRef, presentation);
+  const surfaceClass = hasTitlebar ? "webspring-app-view-surface-generic" : "webspring-app-view-surface-custom";
+  const topBarHeight = hasTitlebar ? `var(--nse-topbar-height, var(--nse-topbar-height-${material}))` : "0px";
+
+  return (
+    <div
+      ref={surfaceRef}
+      data-nse-part="content" className={`webspring-app-view-surface ${surfaceClass}`}
+      data-frame-material={material === "metal" ? "metal" : "standard"}
+      data-frame-top-bar={hasTitlebar ? "standard" : "none"}
+      data-nse-material={material === "metal" ? "metal" : undefined}
+      data-nse-transition={multiSwitchRole ?? undefined}
+      data-nse-titlebar={hasTitlebar ? undefined : "hidden"}
+      style={{ ...contentLayoutProperties, ...presentation?.motion.style, "--webspring-app-top-bar-height": topBarHeight } as CSSProperties}
+    >
+      {children}
+    </div>
+  );
+}
+
+function appFrameSmoothSurfaceToNSE(
+  smoothSurface: WindowSmoothSurfaceConfiguration
+): SmoothSurfaceRequest {
+  if (smoothSurface === "off" || smoothSurface === false) return false;
+
+  const base = {
+    radius: nseAppCornerRadius,
+    curve: "squircle" as const,
+    smoothing: 0.6,
+    overflow: "hidden" as const,
+    physicality: nseSmoothSurfaceDefaultPhysicality,
+    performance: "paint" as const,
+    autoEffects: false
+  };
+
+  if (typeof smoothSurface === "number") {
+    return { ...base, radius: smoothSurface };
+  }
+
+  return {
+    ...base,
+    ...smoothSurface,
+    physicality: smoothSurface.physicality === "off"
+      ? "off"
+      : smoothSurface.physicality && smoothSurface.physicality !== "default"
+        ? smoothSurface.physicality
+        : nseSmoothSurfaceDefaultPhysicality
+  };
+}
+
+/** The stage window's `content-view`, drawn as a SmoothSurface unless the app turns it off. */
+export function WSStageContentView({
+  smoothSurface,
+  background,
+  header,
+  containsHeader = false,
+  backgroundColour,
+  fullSizeContentView = false,
+  children
+}: {
+  smoothSurface: WindowSmoothSurfaceConfiguration;
+  /** What fills the body behind the content: the system light or dark background, nothing, or a surface. */
+  background: "system" | "none";
+  /** The rounded surface clips the titlebar and its content together. */
+  header?: ReactNode;
+  containsHeader?: boolean;
+  backgroundColour?: string | null;
+  fullSizeContentView?: boolean;
+  children: ReactNode;
+}) {
+  const surface = useRef<HTMLDivElement>(null);
+  const safeArea = useNSEViewSafeArea(surface);
+  const request = appFrameSmoothSurfaceToNSE(smoothSurface);
+  const className = containsHeader
+    ? "webspring-app-view-body-surface webspring-app-view-body-surface-sourcelist"
+    : "webspring-app-view-body-surface";
+  const paint = {
+    "data-nse-part": "content-view" as const,
+    "data-nse-background-style": background,
+    "data-full-size-content": fullSizeContentView ? "" : undefined,
+    style: {
+      ...safeArea.properties,
+      ...(backgroundColour ? { backgroundColor: backgroundColour } : {}),
+      "--nse-content-inset-top": fullSizeContentView
+        ? "var(--nse-content-layout-inset-top, 0px)"
+        : containsHeader ? "0px" : "var(--nse-safe-area-inset-top, 0px)",
+    } as CSSProperties,
+  };
+
+  if (!request) {
+    return (
+      <div ref={surface} className={`${className} webspring-app-view-body-surface-off`} {...paint}>
+        {header}
+        {children}
+      </div>
+    );
+  }
+
+  return (
+    <SmoothSurface
+      ref={surface}
+      className={className}
+      smoothSurface={request}
+      autoEffects={false}
+      {...paint}
+    >
+      {header}
+      {children}
+    </SmoothSurface>
+  );
+}
 
 /** Navigation chrome that slides in with the navigation it belongs to. */
 function NavigationChromeSlot({ className, enter, children }: {
@@ -59,7 +311,76 @@ function NavigationChromeSlot({ className, enter, children }: {
   return <span ref={slotRef} className={className}>{children}</span>;
 }
 
-export function ApplicationStageView({
+/** A stage application's props, as WSStageLayer and the single-application host pass them. */
+export interface WSStageWindowHostProps {
+  readonly windowContentRegistry: WindowContentRendererRegistry;
+  readonly stage: ApplicationStagePresentation;
+  readonly app: SynCloudOSAppInfo;
+  readonly lifecycle: SynCloudOSAppLifecycleState;
+  readonly multiSwitchId?: string | null;
+  readonly multiSwitchRole?: WebspringMultiSwitchRole | null;
+  readonly staged?: boolean;
+  readonly launchTransitionId?: string | null;
+  readonly presentationSettlementId?: string | null;
+  readonly quickSwitchOpen?: boolean;
+  readonly standalone?: boolean;
+  readonly onQuickSwitchRequest?: () => void;
+  readonly onMultiSwitchAnimationComplete?: (switchId: string, role: WebspringMultiSwitchRole) => void;
+}
+
+async function decodeStagedArtwork(frame: Element) {
+  const images = Array.from(frame.querySelectorAll("img")).filter(
+    (image) => image.currentSrc || image.src
+  );
+  await Promise.all(images.map((image) => image.decode?.().catch(() => undefined)));
+}
+
+/** A full-screen application's window on the stage: its frame, top bar and content, under one watchdog. */
+export function WSStageWindowHost(props: WSStageWindowHostProps) {
+  const { stage, app, staged = false, launchTransitionId = null } = props;
+  const runtime = useKernelSynCloudOS();
+  const presentationRootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!staged || !launchTransitionId) return;
+    let cancelled = false;
+    let outerFrame: unknown = null;
+    let innerFrame: unknown = null;
+    const report = () => {
+      if (!cancelled) runtime.webspring.completeLaunchStage(launchTransitionId, app.bundleIdentifier);
+    };
+    outerFrame = runtime.environment.requestAnimationFrame(() => {
+      innerFrame = runtime.environment.requestAnimationFrame(() => {
+        if (cancelled) return;
+        const frame = presentationRootRef.current;
+        if (!frame) report();
+        else void decodeStagedArtwork(frame).then(report);
+      });
+    });
+    return () => {
+      cancelled = true;
+      if (outerFrame !== null) runtime.environment.cancelAnimationFrame(outerFrame);
+      if (innerFrame !== null) runtime.environment.cancelAnimationFrame(innerFrame);
+    };
+  }, [app.bundleIdentifier, launchTransitionId, runtime, staged]);
+
+  return (
+    <SynCloudOSWatchdog
+      runtime={runtime}
+      watchdogName={`${app.packageName} presentation`}
+      scope="app"
+      app={app}
+      presentation={{ id: stage.id, kind: "stage", zIndex: stage.zIndex }}
+      resetKey={`${stage.id}:${app.bundleIdentifier}`}
+      fallback={() => <AppPresentationErrorFallback app={app} presentation={{ id: stage.id, kind: "stage", zIndex: stage.zIndex }} />}
+    >
+      <StageWindow {...props} presentationRootRef={presentationRootRef} />
+    </SynCloudOSWatchdog>
+  );
+}
+
+/** The stage window's tree, inside WSStageWindowHost's watchdog. */
+function StageWindow({
   windowContentRegistry,
   stage,
   app,
@@ -73,21 +394,7 @@ export function ApplicationStageView({
   onQuickSwitchRequest,
   standalone = false,
   onMultiSwitchAnimationComplete,
-}: {
-  windowContentRegistry: WindowContentRendererRegistry;
-  stage: ApplicationStagePresentation;
-  app: SynCloudOSAppInfo;
-  lifecycle: string;
-  multiSwitchId?: string | null;
-  multiSwitchRole?: WebspringMultiSwitchRole | null;
-  staged?: boolean;
-  presentationRootRef?: Ref<HTMLDivElement>;
-  quickSwitchOpen?: boolean;
-  standalone?: boolean;
-  presentationSettlementId?: string | null;
-  onQuickSwitchRequest?: () => void;
-  onMultiSwitchAnimationComplete?: (switchId: string, role: WebspringMultiSwitchRole) => void;
-}) {
+}: WSStageWindowHostProps & { readonly presentationRootRef: Ref<HTMLDivElement> }) {
   const runtime = useKernelSynCloudOS();
   const sharedPresentation = useWindowPresentationContent();
   const presentationTraits = useSyncExternalStore(runtime.presentationTraits.subscribe, runtime.presentationTraits.getSnapshot, runtime.presentationTraits.getSnapshot);
@@ -212,7 +519,7 @@ export function ApplicationStageView({
   const isLoading = !isMultiSwitching && (lifecycle === "loading" || lifecycle === "launching");
   // The frame reports each MultiSwitch role once its slide lands; the surface
   // settles the application enter once the launch presentation lands.
-  const rootPresentation = useMemo<AppViewPresentation>(() => ({
+  const rootPresentation = useMemo<StagePresentation>(() => ({
     motion: stageMotion.root,
     onPresented: (state) => {
       if (!multiSwitchId || (state !== WEBSPRING_MULTI_SWITCH_ROLES[0] && state !== WEBSPRING_MULTI_SWITCH_ROLES[1])) return;
@@ -223,7 +530,7 @@ export function ApplicationStageView({
   const settlesOnPresented = useCallback((state: string) => {
     if (state === "presented" && !reducedMotion) completePresentation();
   }, [completePresentation, reducedMotion]);
-  const surfacePresentation = useMemo<AppViewPresentation>(
+  const surfacePresentation = useMemo<StagePresentation>(
     () => ({ motion: stageMotion.surface, onPresented: settlesOnPresented }),
     [settlesOnPresented, stageMotion.surface],
   );
@@ -254,7 +561,7 @@ export function ApplicationStageView({
     };
   }, [applicationResponderId, runtime, stage.isFocused, stage.windowId]);
   const stageRoot = (
-    <AppViewChrome.Root
+    <WSStageWindowFrame
       safeAreaInsets={presentationTraits.safeAreaInsets}
       zIndex={stage.zIndex + 70}
       multiSwitchRole={multiSwitchRole}
@@ -264,14 +571,14 @@ export function ApplicationStageView({
       rootRef={presentationRootRef}
       presentation={rootPresentation}
     >
-      <AppViewChrome.Surface
+      <WSStageWindowSurface
         material={material} hasTitlebar={showsTitlebar}
         multiSwitchRole={multiSwitchRole}
         presentation={surfacePresentation}
       >
         <FocusPortProvider port={nseFocusPort}>
           <QuickSwitchTriggerProvider port={quickSwitchTrigger}>
-          <AppViewContent.Surface
+          <WSStageContentView
             smoothSurface={titlebarDocument?.cornerRadius ?? nseAppCornerRadius}
             background={titlebarDocument?.isOpaque === false ? "none" : "system"}
             backgroundColour={titlebarDocument?.backgroundColour}
@@ -300,11 +607,11 @@ export function ApplicationStageView({
               /> : null}
               </WindowTitlebarHostContext.Provider>
             </div>
-          </AppViewContent.Surface>
+          </WSStageContentView>
           </QuickSwitchTriggerProvider>
         </FocusPortProvider>
-      </AppViewChrome.Surface>
-    </AppViewChrome.Root>
+      </WSStageWindowSurface>
+    </WSStageWindowFrame>
   );
   return <ViewAppearanceBoundary appearance={appearance} projectBoundary={false}>
     <OverlayProvider runtimePort={nseOverlayPort} defaultParentResponderId={applicationResponderId} portalContainer={overlayDestination}>

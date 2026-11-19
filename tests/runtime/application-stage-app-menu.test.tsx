@@ -34,7 +34,7 @@ import { ResponderScope, useStrings } from "@syndromatic/syncloudos/sdk";
 import { SynWareProvider } from "../../src/SynCloudOS/AppSDK/SynWareContext";
 import { createSynWareContextValue } from "../../src/SynCloudOS/AppSDK/createSynWareContextValue";
 import { createSynWare } from "@syndromatic/syncloudos/sdk/testing";
-import { ApplicationStageView } from "../../src/Webspring/ApplicationStageView";
+import { WSStageWindowHost } from "../../src/Webspring/WSStageWindowHost";
 import { tabViewController } from "../fixtures/tabViewController";
 import { nseUpdateTraits } from "../../src/NSE/Application/NSEViewController";
 import { ViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
@@ -104,7 +104,7 @@ function renderFrame(beforeRender?: (runtime: ReturnType<typeof createTestRuntim
   render(
     <SynCloudOSProvider runtime={runtime}>
       <HostSiteBrandingProvider value={stageSiteBranding}>
-      <ApplicationStageView
+      <WSStageWindowHost
         app={appInfo}
         lifecycle="ready"
         stage={{ appId: "com.example.test-app", id: "application-stage:com.example.test-app", title: "Test App", isFocused: true, zIndex: 10 }}
@@ -164,7 +164,7 @@ function CustomQuickSwitchTitleFixture() {
   );
 }
 
-describe("ApplicationStageView app menu", () => {
+describe("WSStageWindowHost app menu", () => {
   it("projects the shell-owned QuickSwitch action and subscribed open state into custom app chrome", async () => {
     const runtime = createTestRuntime();
     runtime.apps.registerBundle(createTestBundle(
@@ -177,7 +177,7 @@ describe("ApplicationStageView app menu", () => {
     const frame = (open: boolean) => (
       <HostSiteBrandingProvider value={stageSiteBranding}>
       <SynCloudOSProvider runtime={runtime}>
-        <ApplicationStageView
+        <WSStageWindowHost
           app={createAppInfo("content")}
           lifecycle="active"
           quickSwitchOpen={open}
@@ -211,7 +211,7 @@ describe("ApplicationStageView app menu", () => {
     render(
       <SynCloudOSProvider runtime={runtime}>
         <HostSiteBrandingProvider value={stageSiteBranding}>
-        <ApplicationStageView
+        <WSStageWindowHost
           app={createAppInfo()}
           lifecycle="active"
           stage={{ appId: "com.example.test-app", id: "application-stage:com.example.test-app", title: "Test App", isFocused: true, zIndex: 10 }}
@@ -251,7 +251,7 @@ describe("ApplicationStageView app menu", () => {
       <React.StrictMode>
         <SynCloudOSProvider runtime={runtime}>
           <HostSiteBrandingProvider value={stageSiteBranding}>
-          <ApplicationStageView
+          <WSStageWindowHost
             app={createAppInfo()}
             lifecycle="active"
             stage={{ appId: "com.example.test-app", id: "application-stage:com.example.test-app", title: "Test App", isFocused: true, zIndex: 10 }}
@@ -278,7 +278,7 @@ describe("ApplicationStageView app menu", () => {
     render(
       <SynCloudOSProvider runtime={runtime}>
         <HostSiteBrandingProvider value={stageSiteBranding}>
-        <ApplicationStageView
+        <WSStageWindowHost
           app={createAppInfo("content")}
           lifecycle="active"
           stage={{ appId: "com.example.test-app", id: "application-stage:test-app:content", title: "Test App", isFocused: true, zIndex: 10 }}
@@ -301,7 +301,7 @@ describe("ApplicationStageView app menu", () => {
     render(
       <SynCloudOSProvider runtime={runtime}>
         <HostSiteBrandingProvider value={stageSiteBranding}>
-        <ApplicationStageView
+        <WSStageWindowHost
           app={createAppInfo()}
           lifecycle="active"
           multiSwitchId="switch:reduced-motion"
@@ -373,7 +373,7 @@ describe("ApplicationStageView app menu", () => {
     const frame = (stageId: string) => (
       <SynCloudOSProvider runtime={runtime}>
         <HostSiteBrandingProvider value={stageSiteBranding}>
-        <ApplicationStageView
+        <WSStageWindowHost
           key={stageId}
           app={createAppInfo()}
           lifecycle="active"
@@ -427,7 +427,7 @@ describe("ApplicationStageView app menu", () => {
     render(
       <SynCloudOSProvider runtime={runtime}>
         <HostSiteBrandingProvider value={stageSiteBranding}>
-        <ApplicationStageView
+        <WSStageWindowHost
           app={createAppInfo()}
           lifecycle="active"
           stage={{ appId: "com.example.test-app", id: "application-stage:com.example.test-app", title: "Test App", isFocused: true, zIndex: 10 }}
@@ -475,7 +475,7 @@ describe("ApplicationStageView app menu", () => {
     render(
       <SynCloudOSProvider runtime={runtime}>
         <HostSiteBrandingProvider value={stageSiteBranding}>
-        <ApplicationStageView
+        <WSStageWindowHost
           app={createAppInfo()}
           lifecycle="active"
           stage={{ appId: "com.example.test-app", id: "application-stage:com.example.test-app", title: "Test App", isFocused: true, zIndex: 10 }}
@@ -537,7 +537,7 @@ describe("ApplicationStageView app menu", () => {
       <React.StrictMode>
         <SynCloudOSProvider runtime={runtime}>
           <HostSiteBrandingProvider value={stageSiteBranding}>
-          <ApplicationStageView
+          <WSStageWindowHost
             key={stageId}
             app={createAppInfo()}
             lifecycle="active"
@@ -597,7 +597,7 @@ describe("ApplicationStageView app menu", () => {
     const view = render(
       <SynCloudOSProvider runtime={runtime}>
         <HostSiteBrandingProvider value={stageSiteBranding}>
-        <ApplicationStageView
+        <WSStageWindowHost
           app={createAppInfo()}
           lifecycle="active"
           stage={{ appId: "com.example.test-app", id: "application-stage:com.example.test-app", title: "Test App", isFocused: true, zIndex: 10 }}

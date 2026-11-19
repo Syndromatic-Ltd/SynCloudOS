@@ -33,7 +33,7 @@ import { WSLauncherRootView, wsSetLauncherHostState, type WSLauncherHostState, t
 import { WSBoardViewController } from "./Contents/Views/WSBoardViewController/WSBoardViewController";
 import { SystemStartupLayer } from "./SystemStartupLayer";
 import type { SystemStartupPhase } from "../SynCloudOS/RootRuntime";
-import { ApplicationStageLayer } from "./ApplicationStageLayer";
+import { WSStageLayer } from "./WSStageLayer";
 import { syncApplicationWindowContentRenderers, WindowContentRendererRegistry, WindowLayer, type ApplicationWindowRendererRegistrations } from "./WindowLayer";
 import { HostSiteBrandingProvider, useKernelSynCloudOS, useRuntimeNSEFocusPort, useRuntimeSelector } from "../SynCloudOSReact";
 import { presentationForSizeClass, WebspringController, type SynCloudOSShellResources } from "./WebspringController";
@@ -338,7 +338,7 @@ export function WebspringHost({
   const outletFocusHandoff = useRef<OutletFocusSnapshot | null>(null);
   const applicationOutlet = <ApplicationOutletSlot container={outletContainer} focusHandoff={outletFocusHandoff} />;
   const launchZoom = usingFallback ? WSBoardViewController.launchZoom : shell.launchZooms[presentation];
-  const applicationStage = <WebspringLaunchZoomContext.Provider value={launchZoom}><ApplicationStageLayer
+  const applicationStage = <WebspringLaunchZoomContext.Provider value={launchZoom}><WSStageLayer
     windowContentRegistry={registry}
     apps={snapshot.appInfo}
     lifecycle={snapshot.lifecycle}

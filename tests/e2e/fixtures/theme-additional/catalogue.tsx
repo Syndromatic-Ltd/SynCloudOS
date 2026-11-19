@@ -5,7 +5,7 @@ import { SynCloudOSProvider } from "../../../../src/SynCloudOSReact";
 import { WebspringQuickSwitchView } from "../../../../src/Webspring/WebspringQuickSwitchView";
 import { SystemAlert } from "../../../../src/SynCloudOSReact/SystemAlert";
 import { AlertBackdrop } from "../../../../src/NSE/Components/NSEAlertBackdrop";
-import { AppViewChrome } from "../../../../src/Webspring/AppViewChrome";
+import { WSStageWindowFrame } from "../../../../src/Webspring/WSStageWindowHost";
 import { WindowContentBorder } from "../../../../src/SynCloudOS/AppHosting/windowAccessories";
 import "../../../../src/SynCloudOS/AppHosting/window-chrome.css";
 import { WindowTitlebarContent } from "../../../../src/NSE/Windows/windowTitlebarContext";
@@ -27,7 +27,7 @@ export const additionalThemeCatalogue: readonly AdditionalThemeSurface[] = [
   ...[false, true].map(keyWindow => ({
     id: `stage-status-${keyWindow ? "key" : "inactive"}`,
     render: () => (
-      <AppViewChrome.Root zIndex={1} keyWindow={keyWindow}>
+      <WSStageWindowFrame zIndex={1} keyWindow={keyWindow}>
         <div className="nse-window-chrome-frame window-content-border-specimen" style={{ position: "relative", minHeight: 180 }}>
           <WindowTitlebarContent title="Documents" subtitle="3 items" toolbarStyle="unified" />
           <div className="nse-window-chrome-content" data-nse-part="content-view" data-nse-content-border="small" style={{ minHeight: 120 }}>
@@ -36,7 +36,7 @@ export const additionalThemeCatalogue: readonly AdditionalThemeSurface[] = [
             <WindowContentBorder thickness={24} />
           </div>
         </div>
-      </AppViewChrome.Root>
+      </WSStageWindowFrame>
     ),
   })),
   ...["textFieldAndStepper", "clockAndCalendar"].map(datePickerStyle => ({ id: `date-picker-combined-${datePickerStyle}`, render: () => <NSEDatePicker aria-label="Appointment" locale="en-GB" timeZone="Europe/London" datePickerElements={["yearMonthDay", "hourMinute"]} datePickerStyle={datePickerStyle as "textFieldAndStepper" | "clockAndCalendar"} defaultValue={{ date, time, timeZone: "Europe/London", disambiguation: "reject" }} /> })),

@@ -10,7 +10,7 @@ import { applicationSessionFor, ensureApplicationSession } from "../../src/SynCl
 import { createMountedSynWareRuntime } from "../../src/SynCloudOS/AppSDK/appRuntimeFacade";
 import { useSCOS } from "../../src/SynCloudOS/AppSDK/scos";
 import { HostSiteBrandingProvider, SynCloudOSProvider } from "../../src/SynCloudOSReact";
-import { ApplicationStageView } from "../../src/Webspring/ApplicationStageView";
+import { WSStageWindowHost } from "../../src/Webspring/WSStageWindowHost";
 import { createApplicationWindowContentRendererRegistry, WindowLayer } from "../../src/Webspring/WindowLayer";
 import type { WindowHostEvent } from "../../src/SynCloudOS/Windows/WindowHostEnvironment";
 import { createTestBundle } from "./helpers";
@@ -100,7 +100,7 @@ describe("class application undo", () => {
     const registry = createApplicationWindowContentRendererRegistry(host.runtime, { [appId]: app });
     const view = render(<SynCloudOSProvider runtime={host.runtime}>
       <HostSiteBrandingProvider value={{ name: "Class application host", logoAlt: "", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null }}>
-        <ApplicationStageView app={app} lifecycle="active" windowContentRegistry={registry}
+        <WSStageWindowHost app={app} lifecycle="active" windowContentRegistry={registry}
           stage={{ appId, id: `application-stage:${appId}`, title: app.window.title, isFocused: true, zIndex: 1 }} />
       </HostSiteBrandingProvider>
     </SynCloudOSProvider>);
@@ -514,7 +514,7 @@ describe("opening more windows", () => {
     const registry = createApplicationWindowContentRendererRegistry(host.runtime, { [appId]: app });
     const view = render(<SynCloudOSProvider runtime={host.runtime}>
       <HostSiteBrandingProvider value={{ name: "Class application host", logoAlt: "", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null }}>
-        <ApplicationStageView app={app} lifecycle="active" windowContentRegistry={registry}
+        <WSStageWindowHost app={app} lifecycle="active" windowContentRegistry={registry}
           stage={{ appId, id: `application-stage:${appId}`, title: app.window.title, isFocused: true, zIndex: 1 }} />
       </HostSiteBrandingProvider>
     </SynCloudOSProvider>);

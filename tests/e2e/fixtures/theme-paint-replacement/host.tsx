@@ -25,7 +25,7 @@ import { ToolbarView } from "../../../../src/NSE/Toolbars/ToolbarView";
 import type { ToolbarPreferences, ToolbarRuntimePort } from "../../../../src/NSE/Toolbars/toolbarTypes";
 import { StandardWindowView } from "../../../../src/NSE/Windows/StandardWindowView";
 import type { WindowRecord } from "../../../../src/SynCloudOS/Windows";
-import { AppViewChrome } from "../../../../src/Webspring/AppViewChrome";
+import { WSStageWindowFrame, WSStageWindowSurface } from "../../../../src/Webspring/WSStageWindowHost";
 import { createStaticPresentationPort } from "../../../fixtures/presentationTraits";
 import { defaultsFrom } from "../../../fixtures/userDefaults";
 import "../../../../src/NSE/public/styles.css";
@@ -98,11 +98,11 @@ function WindowSpecimen({ chrome }: { chrome: "standard" | "metal" }) {
 
 function StageSpecimen() {
   return <div style={{ position: "relative", width: 640, height: 300 }}>
-    <AppViewChrome.Root zIndex={1} keyWindow>
-      <AppViewChrome.Surface material="metal" hasTitlebar>
+    <WSStageWindowFrame zIndex={1} keyWindow>
+      <WSStageWindowSurface material="metal" hasTitlebar>
         <p>Application content</p>
-      </AppViewChrome.Surface>
-    </AppViewChrome.Root>
+      </WSStageWindowSurface>
+    </WSStageWindowFrame>
   </div>;
 }
 

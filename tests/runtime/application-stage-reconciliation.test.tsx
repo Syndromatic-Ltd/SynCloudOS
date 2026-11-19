@@ -24,7 +24,7 @@ import { render } from "@testing-library/react";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
-import { ApplicationStageLayer } from "../../src/Webspring/ApplicationStageLayer";
+import { WSStageLayer } from "../../src/Webspring/WSStageLayer";
 import { WindowContentRendererRegistry } from "../../src/Webspring/WindowLayer";
 import { createTestBundle, createTestRuntime } from "./helpers";
 
@@ -43,7 +43,7 @@ vi.mock("../../src/Webspring/SynWareEntryRenderer", async () => {
   };
 });
 
-describe("ApplicationStageLayer reconciliation", () => {
+describe("WSStageLayer reconciliation", () => {
   it("does not replay the outgoing stage when an incoming MultiSwitch stage is inserted", () => {
     const runtime = createTestRuntime({ id: "runtime:stage-reconciliation" });
     runtime.apps.registerMany([
@@ -57,7 +57,7 @@ describe("ApplicationStageLayer reconciliation", () => {
     const frame = (switching: boolean) => (
       <React.StrictMode>
         <SynCloudOSProvider runtime={runtime}>
-          <ApplicationStageLayer
+          <WSStageLayer
             windowContentRegistry={registry}
             apps={apps}
             lifecycle={switching ? { "com.example.studio": "suspended", "com.example.software": "active" } : { "com.example.studio": "active", "com.example.software": "idle" }}

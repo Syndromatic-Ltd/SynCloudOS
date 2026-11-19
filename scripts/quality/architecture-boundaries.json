@@ -546,7 +546,7 @@
           "src/SynWare/SynCalShared/index.ts"
         ],
         "webspring": [
-          "src/Webspring/ApplicationStageView.tsx",
+          "src/Webspring/WSStageWindowHost.tsx",
           "src/Webspring/WindowLayer/index.ts",
           "src/Webspring/public.ts"
         ],

@@ -21,11 +21,11 @@
 // @vitest-environment jsdom
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import React from "react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, onTestFinished, vi } from "vitest";
 import { NSEAnimationEnvironmentProvider } from "@syndromatic/syncloudos/nse";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
-import { ApplicationStageLayer } from "../../src/Webspring/ApplicationStageLayer";
-import { ApplicationStageView } from "../../src/Webspring/ApplicationStageView";
+import { WSStageLayer } from "../../src/Webspring/WSStageLayer";
+import { WSStageWindowHost } from "../../src/Webspring/WSStageWindowHost";
 import { TestLauncherHost, createTestWebspring } from "./webspringTestShell";
 import { WebspringController } from "../../src/Webspring/WebspringController";
 import { WindowContentRendererRegistry } from "../../src/Webspring/WindowLayer";
@@ -82,17 +82,22 @@ function runtimeWithStagePresentations() {
 const boardInfo = { bundleIdentifier: "com.example.board", displayName: "Board fixture", branding: { name: { key: "site.name", fallback: "Board fixture" } } };
 const webspring = createTestWebspring({ info: boardInfo });
 
-vi.mock("../../src/Webspring/ApplicationStageHost", () => ({
-  ApplicationStageHost: ({ multiSwitchId, multiSwitchRole, onMultiSwitchAnimationComplete }: {
-    multiSwitchId: string | null;
-    multiSwitchRole: "incoming" | "outgoing" | null;
-    onMultiSwitchAnimationComplete?: (id: string, role: "incoming" | "outgoing") => void;
-  }) => multiSwitchId && multiSwitchRole ? (
-    <button type="button" onClick={() => onMultiSwitchAnimationComplete?.(multiSwitchId, multiSwitchRole)}>
-      finish {multiSwitchRole}
-    </button>
-  ) : null,
-}));
+// The stage layer's tests drive a stand-in host; the stage window tests render the real one.
+const stageHost = vi.hoisted(() => ({ stubbed: true }));
+vi.mock("../../src/Webspring/WSStageWindowHost", async (importActual) => {
+  const actual = await importActual<typeof import("../../src/Webspring/WSStageWindowHost")>();
+  return {
+    WSStageWindowHost: (props: Parameters<typeof actual.WSStageWindowHost>[0]) => {
+      if (!stageHost.stubbed) return <actual.WSStageWindowHost {...props} />;
+      const { multiSwitchId, multiSwitchRole, onMultiSwitchAnimationComplete } = props;
+      return multiSwitchId && multiSwitchRole ? (
+        <button type="button" onClick={() => onMultiSwitchAnimationComplete?.(multiSwitchId, multiSwitchRole)}>
+          finish {multiSwitchRole}
+        </button>
+      ) : null;
+    },
+  };
+});
 describe("Webspring owner-local choreography", () => {
 
   it("keeps radial launch geometry interned and replaces it with a reduced fade", () => {
@@ -126,7 +131,7 @@ describe("Webspring owner-local choreography", () => {
     const switchId = "switch:animation";
     const view = render(
       <SynCloudOSProvider runtime={runtime}>
-        <ApplicationStageLayer
+        <WSStageLayer
           windowContentRegistry={new WindowContentRendererRegistry()}
           apps={apps}
           lifecycle={{ from: "suspended", to: "active" }}
@@ -162,7 +167,7 @@ describe("Webspring owner-local choreography", () => {
     const complete = vi.spyOn(runtime.webspring, "completeReturnRole").mockReturnValue(true);
     const stage = (returnTransitionId: string | null) => (
       <SynCloudOSProvider runtime={runtime}>
-        <ApplicationStageLayer
+        <WSStageLayer
           windowContentRegistry={new WindowContentRendererRegistry()}
           apps={apps}
           lifecycle={{ leaving: "active" }}
@@ -221,6 +226,8 @@ describe("Webspring owner-local choreography", () => {
   });
 
   it("completes reduced app entry immediately without bypassing the launch-cover gate", () => {
+    stageHost.stubbed = false;
+    onTestFinished(() => { stageHost.stubbed = true; });
     const runtime = createTestRuntime();
     runtime.settings.set("motion", "reduced");
     runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.reduced-entry", route: "/reduced-entry" }));
@@ -233,7 +240,7 @@ describe("Webspring owner-local choreography", () => {
     });
     const view = render(
       <SynCloudOSProvider runtime={runtime}>
-        <ApplicationStageView
+        <WSStageWindowHost
           windowContentRegistry={new WindowContentRendererRegistry()}
           stage={{ id: "application-stage:com.example.reduced-entry", appId: "com.example.reduced-entry", title: app!.window.title, isFocused: true, zIndex: 1 }}
           app={app!}
@@ -252,6 +259,8 @@ describe("Webspring owner-local choreography", () => {
   });
 
   it("settles application entry from the app surface animation, with no content card", async () => {
+    stageHost.stubbed = false;
+    onTestFinished(() => { stageHost.stubbed = true; });
     const { runtime, presentations } = runtimeWithStagePresentations();
     runtime.apps.registerBundle(createTestBundle({
       bundleIdentifier: "com.example.defacto-entry",
@@ -266,7 +275,7 @@ describe("Webspring owner-local choreography", () => {
     });
     const view = render(
       <SynCloudOSProvider runtime={runtime}>
-        <ApplicationStageView
+        <WSStageWindowHost
           windowContentRegistry={new WindowContentRendererRegistry()}
           stage={{ id: "application-stage:com.example.defacto-entry", appId: "com.example.defacto-entry", title: app!.window.title, isFocused: true, zIndex: 1 }}
           app={app!}

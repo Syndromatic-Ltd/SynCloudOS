@@ -27,7 +27,7 @@ import { compileNSEPresentation, Presence, type PresentationEnter, type Presenta
 import { useNSEOverlayProvider } from "../../src/NSE/Overlays";
 import { createSynWare } from "../../src/SynCloudOS/AppSDK/createSynWare";
 import { resolveApplicationStageMotion } from "../../src/Webspring/ApplicationStage.transitions";
-import { ApplicationStageView } from "../../src/Webspring/ApplicationStageView";
+import { WSStageWindowHost } from "../../src/Webspring/WSStageWindowHost";
 import { HostSiteBrandingProvider, SynCloudOSProvider } from "../../src/SynCloudOSReact";
 import { WindowContentRendererRegistry } from "../../src/Webspring/WindowLayer";
 import { authoriseTestRuntime, createTestBundle, createTestRuntime, createTestRuntimeEnvironment, registerTestSynWare } from "./helpers";
@@ -168,7 +168,7 @@ describe("mounted content presentation", () => {
     const registry = new WindowContentRendererRegistry();
     const fixture = (staged: boolean, shown = true) => <SynCloudOSProvider runtime={runtime}>
       <HostSiteBrandingProvider value={{ name: "Stage", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null, logoAlt: "Stage" }}>
-        <Presence onExitComplete={exited}>{shown ? <ApplicationStageView key={app.bundleIdentifier} windowContentRegistry={registry}
+        <Presence onExitComplete={exited}>{shown ? <WSStageWindowHost key={app.bundleIdentifier} windowContentRegistry={registry}
           stage={{ id: "application-stage:com.example.content-plane", appId: app.bundleIdentifier, title: app.window.title, isFocused: true, zIndex: 2 }}
           app={app} lifecycle="active" staged={staged} presentationSettlementId={settlement.id} /> : null}</Presence>
       </HostSiteBrandingProvider>
@@ -224,7 +224,7 @@ describe("stage overlay ownership", () => {
     const registry = new WindowContentRendererRegistry();
     const view = (staged = false, role: "incoming" | "outgoing" | null = null, shown = true) => <SynCloudOSProvider runtime={runtime}>
       <HostSiteBrandingProvider value={{ name: "Stage", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null, logoAlt: "Stage" }}>
-        <Presence initial={false} onExitComplete={exited}>{shown ? <ApplicationStageView key={app.bundleIdentifier}
+        <Presence initial={false} onExitComplete={exited}>{shown ? <WSStageWindowHost key={app.bundleIdentifier}
           windowContentRegistry={registry} app={app} lifecycle="active" staged={staged}
           stage={{ id: "application-stage:com.example.overlay-owner", appId: app.bundleIdentifier, title: app.window.title, isFocused: true, zIndex: 2 }}
           multiSwitchRole={role} multiSwitchId={role ? "overlay-switch" : null} onMultiSwitchAnimationComplete={onRole} /> : null}</Presence>
@@ -312,7 +312,7 @@ describe("stage view MultiSwitch", () => {
     const onRole = vi.fn();
     const view = (role: "incoming" | "outgoing") => (
       <SynCloudOSProvider runtime={runtime}>
-        <ApplicationStageView
+        <WSStageWindowHost
           windowContentRegistry={new WindowContentRendererRegistry()}
           stage={{ id: "application-stage:com.example.switched", appId: "com.example.switched", title: app.window.title, isFocused: true, zIndex: 1 }}
           app={app}

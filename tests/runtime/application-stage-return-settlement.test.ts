@@ -21,9 +21,9 @@
 /** @vitest-environment jsdom */
 
 import { describe, expect, it } from "vitest";
-import { selectApplicationStageAppIds } from "../../src/Webspring/ApplicationStageLayer";
+import { selectApplicationStageAppIds } from "../../src/Webspring/WSStageLayer";
 
-describe("ApplicationStageLayer return settlement", () => {
+describe("WSStageLayer return settlement", () => {
   it("removes the full-stage presentation when return begins so AnimatePresence owns its exit", () => {
     expect(selectApplicationStageAppIds({
       activeAppId: null,

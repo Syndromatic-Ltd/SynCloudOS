@@ -132,9 +132,8 @@ export function inspectBrowserGlobals(path: string, text: string) {
 }
 
 const webspringSurfaces = [
-  "src/Webspring/ApplicationStageLayer.tsx",
-  "src/Webspring/ApplicationStageHost.tsx",
-  "src/Webspring/ApplicationStageView.tsx",
+  "src/Webspring/WSStageLayer.tsx",
+  "src/Webspring/WSStageWindowHost.tsx",
   "src/Webspring/Contents/Views/WSBoardViewController/WSBoardViewController.tsx",
   "src/Webspring/WSLauncherViewController.tsx",
   "src/Webspring/WSIconView.tsx",

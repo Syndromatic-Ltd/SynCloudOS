@@ -21,7 +21,7 @@
 import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
 import { useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from "react";
 import { Presence, useNSEPresentation, type PresentationSpec } from "../NSE/Animation";
-import { ApplicationStageHost } from "./ApplicationStageHost";
+import { WSStageWindowHost } from "./WSStageWindowHost";
 import type {
   SynCloudOSAppInfo,
   SynCloudOSAppLifecycleState,
@@ -89,7 +89,8 @@ export function selectApplicationStageAppIds({
   return activeAppId ? [activeAppId] : [];
 }
 
-export function ApplicationStageLayer({
+/** The stage: the active application's window, both windows of a MultiSwitch, and the switch's backdrop. */
+export function WSStageLayer({
   windowContentRegistry,
   apps,
   lifecycle,
@@ -242,7 +243,7 @@ export function ApplicationStageLayer({
           const app = apps[normalizeBundleIdentifier(presentation.appId)];
           if (!app) return null;
           return (
-            <ApplicationStageHost
+            <WSStageWindowHost
               windowContentRegistry={windowContentRegistry}
               key={presentation.id}
               stage={presentation}

@@ -27,7 +27,7 @@ import { createSynWare, createSynWareBundle } from "../../../src/SynCloudOS/AppS
 import { createBrowserRuntimeEnvironment } from "../../../src/SynCloudOS/PlatformAdapters/BrowserRuntimeEnvironment";
 import { createSynCloudOS } from "../../../src/SynCloudOS/Runtime/createSynCloudOS";
 import { HostSiteBrandingProvider, SynCloudOSProvider } from "../../../src/SynCloudOSReact";
-import { ApplicationStageView } from "../../../src/Webspring/ApplicationStageView";
+import { WSStageWindowHost } from "../../../src/Webspring/WSStageWindowHost";
 import { WindowContentRendererRegistry } from "../../../src/Webspring/WindowLayer";
 import "../../../src/NSE/public/styles.css";
 import "../../../src/Webspring/WebspringHost.css";
@@ -63,7 +63,7 @@ function Fixture() {
   return <SynCloudOSProvider runtime={runtime}>
     <HostSiteBrandingProvider value={{ name: "Stage", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null, logoAlt: "Stage" }}>
       <div className="webspring-apps-container">
-        <Presence initial={false} onExitComplete={() => { exits++; }}>{shown ? <ApplicationStageView key={app.bundleIdentifier}
+        <Presence initial={false} onExitComplete={() => { exits++; }}>{shown ? <WSStageWindowHost key={app.bundleIdentifier}
           app={app} lifecycle="active" staged={staged} multiSwitchRole={role} windowContentRegistry={registry}
           stage={{ id: "application-stage:overlay", appId: app.bundleIdentifier, title: app.window.title, isFocused: true, zIndex: 2 }} /> : null}</Presence>
       </div>

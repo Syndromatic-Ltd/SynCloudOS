@@ -25,17 +25,17 @@ import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { SynCloudOSAppInfo } from "../../src/SynCloudOS/AppInfo/appInfoTypes";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
-import { ApplicationStageLayer } from "../../src/Webspring/ApplicationStageLayer";
+import { WSStageLayer } from "../../src/Webspring/WSStageLayer";
 import { createWindowTestDependencies, modalWindow } from "../fixtures/windowTestDependencies";
 import { WindowContentRendererRegistry } from "../../src/Webspring/WindowLayer/WindowContentRendererRegistry";
 
-vi.mock("../../src/Webspring/ApplicationStageHost", () => ({
-  ApplicationStageHost: ({ app }: { readonly app: SynCloudOSAppInfo }) => (
+vi.mock("../../src/Webspring/WSStageWindowHost", () => ({
+  WSStageWindowHost: ({ app }: { readonly app: SynCloudOSAppInfo }) => (
     <div data-application-stage-host={app.bundleIdentifier}>{app.displayName}</div>
   ),
 }));
 
-describe("ApplicationStageLayer modal domain", () => {
+describe("WSStageLayer modal domain", () => {
   afterEach(() => vi.restoreAllMocks());
 
   it("keeps full-screen application views in the canonical work area as host chrome changes", async () => {
@@ -46,7 +46,7 @@ describe("ApplicationStageLayer modal domain", () => {
     const listeners = new Set<Parameters<typeof source.subscribe>[0]>();
     vi.spyOn(source, "getSnapshot").mockImplementation(() => snapshot);
     vi.spyOn(source, "subscribe").mockImplementation(listener => { listeners.add(listener); return () => { listeners.delete(listener); }; });
-    const view = render(<SynCloudOSProvider runtime={fixture.runtime}><ApplicationStageLayer windowContentRegistry={new WindowContentRendererRegistry()} apps={{}} lifecycle={{}} /></SynCloudOSProvider>);
+    const view = render(<SynCloudOSProvider runtime={fixture.runtime}><WSStageLayer windowContentRegistry={new WindowContentRendererRegistry()} apps={{}} lifecycle={{}} /></SynCloudOSProvider>);
     try {
       const stage = view.container.querySelector<HTMLElement>(".webspring-apps-container")!;
       expect(stage.style.top).toBe("32px");
@@ -70,7 +70,7 @@ describe("ApplicationStageLayer modal domain", () => {
     await fixture.manager.open(modal.id);
     const view = render(
       <SynCloudOSProvider runtime={fixture.runtime}>
-        <ApplicationStageLayer
+        <WSStageLayer
           apps={{ [app.bundleIdentifier]: app }}
           lifecycle={{ [app.bundleIdentifier]: "active" }}
           activeAppId={app.bundleIdentifier}
@@ -103,7 +103,7 @@ describe("ApplicationStageLayer modal domain", () => {
     await fixture.manager.open(modal.id);
     const view = render(
       <SynCloudOSProvider runtime={fixture.runtime}>
-        <ApplicationStageLayer
+        <WSStageLayer
           apps={{ [app.bundleIdentifier]: app }}
           lifecycle={{ [app.bundleIdentifier]: "active" }}
           activeAppId={app.bundleIdentifier}

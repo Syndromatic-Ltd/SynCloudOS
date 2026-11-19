@@ -9,9 +9,9 @@ import { createSynWareDefinitionFromApplicationClass } from "../../src/SynCloudO
 import { createSynCloudOS } from "../../src/SynCloudOS/Runtime/createSynCloudOS";
 import { mountSynCloudOS, type MountedSynCloudOSHost } from "../../src/SynCloudOSReact/browserRuntime";
 import { createTestWebspring } from "./webspringTestShell";
-import { selectApplicationStageAppIds } from "../../src/Webspring/ApplicationStageLayer";
+import { selectApplicationStageAppIds } from "../../src/Webspring/WSStageLayer";
 import { HostSiteBrandingProvider, SynCloudOSProvider } from "../../src/SynCloudOSReact";
-import { ApplicationStageLayer } from "../../src/Webspring/ApplicationStageLayer";
+import { WSStageLayer } from "../../src/Webspring/WSStageLayer";
 import { createApplicationWindowContentRendererRegistry } from "../../src/Webspring/WindowLayer";
 import { createClassApplicationHost } from "./fixtures/classApplicationHost";
 
@@ -102,7 +102,7 @@ describe("mixed-case native application Board stages", () => {
     const frame = (selection: string) => (
       <SynCloudOSProvider runtime={host.runtime}>
         <HostSiteBrandingProvider value={{ name: "Notes Board", logoAlt: "", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null }}>
-          <ApplicationStageLayer windowContentRegistry={registry} apps={snapshot.appInfo}
+          <WSStageLayer windowContentRegistry={registry} apps={snapshot.appInfo}
             lifecycle={snapshot.lifecycle} activeAppId={selection} />
         </HostSiteBrandingProvider>
       </SynCloudOSProvider>

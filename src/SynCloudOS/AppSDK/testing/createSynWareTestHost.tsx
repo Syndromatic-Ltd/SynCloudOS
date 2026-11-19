@@ -25,7 +25,7 @@ import { trustSynWareBundleForTest } from "../../BundleLoader/trustedBundleProve
 import { installHostDiagnosticsProvision } from "../../Testing/hostDiagnosticsProvision";
 import { createSynCloudOS } from "../../SynCloudOS";
 import { RuntimeInputBoundary, SynCloudOSProvider } from "../../../SynCloudOSReact";
-import { ApplicationStageView } from "../../../Webspring/ApplicationStageView";
+import { WSStageWindowHost } from "../../../Webspring/WSStageWindowHost";
 import { HostSiteBrandingProvider } from "../../../SynCloudOSReact";
 import { SCOSAlertPresenter } from "../../../SynCloudOSReact/SCOSAlertPresenter";
 import {
@@ -240,7 +240,7 @@ export function createSynWareTestHost(options: CreateSynWareTestHostOptions): Sy
   const settlementRegistry = getRuntimeSettlement(runtime);
   // The production stage owns the application responder lifecycle. The former
   // direct mount needed a host-side registration here; retaining it would
-  // collide with ApplicationStageView's ResponderScope.
+  // collide with WSStageWindowHost's ResponderScope.
   const windowContentRegistry = createApplicationWindowContentRendererRegistry(runtime, { [app.bundleIdentifier]: app });
   const stage = Object.freeze({
     id: `application-stage:synapp-test:${app.bundleIdentifier}`,
@@ -454,7 +454,7 @@ export function createSynWareTestHost(options: CreateSynWareTestHostOptions): Sy
           <SynCloudOSProvider runtime={runtime}>
           <RuntimeInputBoundary>
             {options.surface !== "window" ? (
-              <ApplicationStageView
+              <WSStageWindowHost
                 windowContentRegistry={windowContentRegistry}
                 stage={stage}
                 app={app}

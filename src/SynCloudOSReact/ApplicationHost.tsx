@@ -23,7 +23,7 @@ import { useRuntimeSelector } from "./runtimeHooks";
 import { useResolvedMode } from "./serviceHooks";
 import { useHostSiteBranding } from "./siteBrandingContext";
 import { SystemAlert } from "./SystemAlert";
-import { ApplicationStageHost } from "../Webspring/ApplicationStageHost";
+import { WSStageWindowHost } from "../Webspring/WSStageWindowHost";
 import { WindowPresentationContent } from "../Webspring/WindowPresentationContent";
 
 /** An application-only host has no Webspring to return to: every recovery
@@ -123,7 +123,7 @@ export function ApplicationHost({ applicationId, authentication, home }: Applica
         hidden={!presented && !behindAnotherApplication} inert={!presented ? true : undefined}
         aria-hidden={behindAnotherApplication ? true : undefined} aria-label={appName}
         className="webspring-apps-container" style={{ position: "fixed", inset: 0, margin: 0 }}>
-        <ApplicationStageHost windowContentRegistry={renderers} app={app} lifecycle={state ?? "registered"} standalone
+        <WSStageWindowHost windowContentRegistry={renderers} app={app} lifecycle={state ?? "registered"} standalone
           stage={{ id: mainWindow.id, windowId: mainWindow.id, appId: applicationId,
             title: mainWindow.record.title, isFocused: presented, zIndex: 1 }} />
       </section> : null}
