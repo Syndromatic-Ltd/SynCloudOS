@@ -31,18 +31,15 @@ export default {
 } satisfies WSInfo;
 ```
 
-Then subclass `WSApplication` and create the definition in `src/Webspring/Contents/index.tsx`:
+Then default-export a `WSApplication` subclass from `src/Webspring/Contents/index.tsx`, as an application's `index.tsx` default-exports its `NSEApplication` subclass:
 
 ```tsx
-import { WSApplication, createWebspring } from "@syndromatic/syncloudos/webspring";
-import info from "./Info";
+import { WSApplication } from "@syndromatic/syncloudos/webspring";
 
-class ExampleSite extends WSApplication {}
-
-export default createWebspring({ info, application: ExampleSite });
+export default class ExampleSite extends WSApplication {}
 ```
 
-`createWebspring` validates the info and the application's statics, and returns immutable data. The framework constructs the `WSApplication` itself and calls `applicationWillFinishLaunching`, `applicationDidFinishLaunching` and `applicationWillTerminate` around the shell's life. Every presentation shows the Board unless the class names another launcher with `static mainViewController`, or one per presentation with `static viewControllers`.
+The Vite plugin pairs `Info.ts` with that class. With `Info.ts` alone it uses the base `WSApplication`, and with neither file the site mounts the base `WSApplication` as "SynCloudOS" (`org.syncloudos.webspring`), unless `webspringEntry` is `false`. Without the plugin, `createWebspring({ info, application })` builds the same definition, for unit tests or for `mountSynCloudOS({ element, shell })`. It validates the info and the application's statics, and returns immutable data. The framework constructs the `WSApplication` itself and calls `applicationWillFinishLaunching`, `applicationDidFinishLaunching` and `applicationWillTerminate` around the shell's life. Every presentation shows the Board unless the class names another launcher with `static mainViewController`, or one per presentation with `static viewControllers`.
 
 ## The Board
 
@@ -88,7 +85,7 @@ On the Board, tapping a folder opens it with the application's `static folderPre
 ```tsx
 import { WSApplication, createWSFolderSplitPresentation } from "@syndromatic/syncloudos/webspring";
 
-class ExampleSite extends WSApplication {
+export default class ExampleSite extends WSApplication {
   static override folderPresentation = createWSFolderSplitPresentation({
     underlay: { image: "/assets/textures/linen.webp", size: "cover", colour: "#2b3038" },
     panelHeight: "content", // or a height in pixels
@@ -99,14 +96,14 @@ class ExampleSite extends WSApplication {
 }
 ```
 
-A custom presentation is a component receiving `WebspringFolderPresentationProps`: `folder`, `stage` (the element to present over), `anchor` (the rect of the folder's cell, icon and label), `reducedMotion`, `renderApp(app, index)` and `onClose`. Mark the panel holding the applications with `data-webspring-folder-panel`; the Board takes an application out of the folder when a drag leaves that element.
+A custom presentation is a component receiving `WSFolderPresentationProps`: `folder`, `stage` (the element to present over), `anchor` (the rect of the folder's cell, icon and label), `reducedMotion`, `renderApp(app, index)` and `onClose`. Mark the panel holding the applications with `data-webspring-folder-panel`; the Board takes an application out of the folder when a drag leaves that element.
 
 ### Folder icons
 
 Every launcher draws a folder's icon in one appearance, set with `static folderAppearance`. `WSFolderTileView` reads it, so a custom launcher that renders the tile needs no styles of its own:
 
 ```tsx
-class ExampleSite extends WSApplication {
+export default class ExampleSite extends WSApplication {
   static override folderAppearance = {
     shape: { kind: "roundedRect", smoothSurface: { radius: "36%", curve: "squircle", smoothing: 0.6 } },
     fill: { kind: "texture", image: "/assets/textures/cotton.jpg", size: "128px", colour: "#20242c" },
@@ -191,7 +188,7 @@ Left alone, the Board is a tinted cotton texture with a spotlight: lighter in th
 ```tsx
 import { WSApplication, WSSurface } from "@syndromatic/syncloudos/webspring";
 
-class ExampleSite extends WSApplication {
+export default class ExampleSite extends WSApplication {
   static override launcherSurface = { ...WSSurface.cotton(), tint: { colour: "#7a4a4a", opacity: 0.12 } };
   static override shelfSurface = WSSurface.plain("#0b0d11");
 }
@@ -213,11 +210,10 @@ The Board scales to the screen. An icon is the largest size that still lets a wh
 
 ## Widgets on the Board
 
-A widget is a titled panel below the icons that loads its own data, such as a list of recent posts. Declare it by subclassing `WSWidget` and list it in `static widgets`. With no widgets there is no shelf at all.
+A widget is a titled panel below the icons that loads its own data, such as a list of recent posts. Declare it by subclassing `WSWidget`, and list it in `static widgets` or place it in `src/Widgets/<Name>.widget/index.tsx`. Discovered widgets follow the listed ones, by `static order` and then `static id`. With no widgets there is no shelf at all.
 
 ```tsx
-import { WSApplication, WSWidget, createWebspring } from "@syndromatic/syncloudos/webspring";
-import info from "./Info";
+import { WSApplication, WSWidget } from "@syndromatic/syncloudos/webspring";
 
 interface Post { readonly id: string; readonly title: string }
 
@@ -241,11 +237,9 @@ class LatestWidget extends WSWidget<readonly Post[]> {
   }
 }
 
-class ExampleSite extends WSApplication {
+export default class ExampleSite extends WSApplication {
   static override widgets = [LatestWidget];
 }
-
-export default createWebspring({ info, application: ExampleSite });
 ```
 
 - `load(signal)` returns the data, of any shape. The framework owns the promise. The signal aborts when the Board unmounts, when the person retries or `refresh()` runs, and when the load times out.
@@ -271,7 +265,7 @@ const host = await mountSynCloudOS({
 await host.dispose("application shutdown");
 ```
 
-The Vite plugin discovers `src/SynWare/*.app`, `src/Preferences/*.prefPane`, `src/Widgets/*.widget`, `src/Integrations/*.integration.ts` and the optional shell in `src/Webspring/Contents/index.tsx`. It injects that project into `mountSynCloudOS` automatically. Each application requires `Contents/index.tsx` and `Info.ts` with explicit `bundleIdentifier`, `displayName` and `version`; only schema version, icon and locale resources are filled in. Directory options and `webspringEntry: false` customise discovery. It rejects symbolic links and path/resource collisions, and watches additions and removals.
+The Vite plugin discovers `src/SynWare/*.app`, `src/Preferences/*.prefPane`, `src/Widgets/*.widget`, `src/Integrations/*.integration.ts` and the shell in `src/Webspring/Contents/` (`Info.ts`, with an optional `index.tsx`). It injects that project into `mountSynCloudOS` automatically. Each application requires `Contents/index.tsx` and `Info.ts` with explicit `bundleIdentifier`, `displayName` and `version`; only schema version, icon and locale resources are filled in. Directory options and `webspringEntry: false` customise discovery. It rejects symbolic links and path/resource collisions, and watches additions and removals.
 
 ## Authentication
 
@@ -298,7 +292,7 @@ class BillingPane extends NSEPreferencePane {
   }
 }
 
-class ExampleSite extends WSApplication {
+export default class ExampleSite extends WSApplication {
   static override preferencePanes = [BillingPane];
   static override hiddenPreferencePanes = ["sounds"];
 }
@@ -338,7 +332,7 @@ class GridLauncher extends WSLauncherViewController {
   }
 }
 
-class ExampleSite extends WSApplication {
+export default class ExampleSite extends WSApplication {
   static override mainViewController = GridLauncher;
 }
 ```

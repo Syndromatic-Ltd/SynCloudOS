@@ -61,7 +61,7 @@ it("gives the default launcher discovered panes and widget order from an explici
     override renderView() { return null; }
   }
   const pane = capturePreferencePaneClass(BillingPane);
-  const { element, shell } = await mount({ bundles: [], preferences: [pane], widgets: [widget("late", 20), widget("zeta", 0), widget("alpha", 0), widget("early", -10)], contributions: [], shell: null, shellResources: {} });
+  const { element, shell } = await mount({ bundles: [], preferences: [pane], widgets: [widget("late", 20), widget("zeta", 0), widget("alpha", 0), widget("early", -10)], contributions: [], webspring: null, shellResources: {} });
   expect(shell.preferences.panes).toContain(pane);
   expect(shell.widgets.map(item => item.id)).toEqual(["early", "alpha", "zeta", "late"]);
   await waitFor(() => expect(element.querySelectorAll('[data-widget-state="ready"]')).toHaveLength(4));
@@ -73,7 +73,7 @@ it("lists a discovered application and launches it through the default Board", a
     bundleIdentifier: "com.example.neutral-notes", schemaVersion: 1, displayName: "Neutral Notes", version: "1.0.0",
     routes: [{ path: "/neutral-notes", primary: true }], webspring: { visible: true, order: 1 }, runtime: { policy: { public: true } },
   }, root: () => <p data-testid="neutral-notes">A running discovered application</p> });
-  const { element } = await mount({ bundles: [{ manifest: app.manifest, modulePath: "src/SynWare/Notes.app/Contents/index.tsx", loadModule: async () => ({ default: app }) }], preferences: [], widgets: [], contributions: [], shell: null, shellResources: {} });
+  const { element } = await mount({ bundles: [{ manifest: app.manifest, modulePath: "src/SynWare/Notes.app/Contents/index.tsx", loadModule: async () => ({ default: app }) }], preferences: [], widgets: [], contributions: [], webspring: null, shellResources: {} });
   const launch = await within(element).findByRole("button", { name: "Open Neutral Notes" });
   await act(async () => { fireEvent.click(launch); });
   await waitFor(() => expect(element.querySelector('[data-testid="neutral-notes"]')?.textContent).toBe("A running discovered application"));

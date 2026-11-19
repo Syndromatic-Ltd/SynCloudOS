@@ -23,7 +23,7 @@ import { LayoutView } from "../NSE/Animation";
 import { FocusScope } from "../NSE/NSE";
 import { setNSEHook } from "../NSE/hostComposition";
 import { webspringIconSprings } from "./Webspring.transitions";
-import type { WebspringFolderPresentationComponent, WebspringFolderPresentationProps } from "./webspringTypes";
+import type { WSFolderPresentationComponent, WSFolderPresentationProps } from "./webspringTypes";
 import { folderSplitPhaseMachine, type FolderSplitPhase } from "./folderSplitPhaseMachine";
 import { nextState } from "../Foundation/internal/StateMachine";
 import "./WSFolderSplitView.css";
@@ -153,7 +153,7 @@ function cloneStage(stage: HTMLElement, folderId: string) {
   return clone;
 }
 
-function FolderSplit({ folder, stage, anchor, reducedMotion, renderApp, onClose, options }: WebspringFolderPresentationProps & { options: ResolvedSplitOptions }) {
+function FolderSplit({ folder, stage, anchor, reducedMotion, renderApp, onClose, options }: WSFolderPresentationProps & { options: ResolvedSplitOptions }) {
   const titleId = useId();
   const scopeId = useId();
   const contentRef = useRef<HTMLDivElement>(null);
@@ -409,12 +409,12 @@ function FolderSplit({ folder, stage, anchor, reducedMotion, renderApp, onClose,
  * The iOS 6 folder: the stage is copied into two halves that part just below the
  * folder's cell to reveal the folder's apps on an underlay.
  */
-export function createWSFolderSplitPresentation(options: WebspringFolderSplitOptions = {}): WebspringFolderPresentationComponent {
+export function createWSFolderSplitPresentation(options: WebspringFolderSplitOptions = {}): WSFolderPresentationComponent {
   const resolved = resolveOptions(options);
-  return function WSFolderSplitPresentation(props: WebspringFolderPresentationProps) {
+  return function WSFolderSplitPresentation(props: WSFolderPresentationProps) {
     return <FolderSplit {...props} options={resolved} />;
   };
 }
 
 /** Default folder split presentation used when `WSApplication.folderPresentation` is omitted. */
-export const WSFolderSplitView: WebspringFolderPresentationComponent = createWSFolderSplitPresentation();
+export const WSFolderSplitView: WSFolderPresentationComponent = createWSFolderSplitPresentation();

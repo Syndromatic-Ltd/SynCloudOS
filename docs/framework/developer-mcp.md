@@ -67,7 +67,7 @@ Every successful call includes both JSON text content and the same object in MCP
 
 Input: `{ projectRoot?: string, appsDirectory?: string, webspringEntry?: string | false }`.
 
-Output: `{ projectRoot, sdk: { version, path, buildReceipt }, vite: { config, pluginPresent, options, unresolved }, bundles: [{ directory, id, manifest, entry, error }], shell: { enabled, path, exists }, dependencies, devDependencies }`.
+Output: `{ projectRoot, sdk: { version, path, buildReceipt }, vite: { config, pluginPresent, options, unresolved }, bundles: [{ directory, id, manifest, entry, error }], shell: { enabled, path, exists, info, infoExists }, dependencies, devDependencies }`.
 
 Discovers direct `*.app` bundles using the Vite plugin's shared discovery rules: default `src/SynWare`, case-insensitive bundle suffixes, no case-colliding names or symbolic links, and `Contents/Info.ts` plus `Contents/index.tsx`. It reports incomplete bundles so they can be repaired. The default shell is `src/Webspring/Contents/index.tsx`.
 
@@ -143,7 +143,7 @@ Validation does not run package scripts or builds. TypeScript checks may write t
 
 ### `scaffold`
 
-Input: `{ projectRoot?, appsDirectory?, preferencesDirectory?, widgetsDirectory?, integrationsDirectory?, webspringEntry?, kind?: "application" | "preferencePane" | "widget" | "integration", organisation?, bundleIdentifier?, id?, name, route?, owners?, policy?, presentation?, contentApplicationMenu?, authoring?: "separate" | "inline" | "function" }`. `kind` defaults to `"application"`; `id` is only for non-application contributions. Integrations require nonempty owner bundle identifiers.
+Input: `{ projectRoot?, appsDirectory?, preferencesDirectory?, widgetsDirectory?, integrationsDirectory?, webspringEntry?, kind?: "application" | "preferencePane" | "widget" | "integration" | "webspring", organisation?, bundleIdentifier?, id?, name, route?, owners?, policy?, presentation?, contentApplicationMenu?, authoring?: "separate" | "inline" | "function" }`. `kind` defaults to `"application"`; `id` is only for non-application contributions. Integrations require nonempty owner bundle identifiers.
 
 Output: `{ createdPaths: string[], nextSteps: string[] }`.
 

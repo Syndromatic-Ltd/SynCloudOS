@@ -61,6 +61,31 @@ describe("developer MCP tools", () => {
     expect((await inspectProject({ projectRoot: project })).folders).toHaveLength(1);
     expect((await validateProject({ projectRoot: project, typescript: false })).ok).toBe(true);
   });
+  it("scaffolds the Webspring as Info.ts and a WSApplication subclass", async () => {
+    put("vite.config.ts", 'import { synCloudOS } from "@syndromatic/syncloudos/vite"; export default {plugins:[synCloudOS({appsDirectory:"applications"})]};');
+    const result = await scaffold({ projectRoot: project, kind: "webspring", name: "Example Site", organisation: "org.example" });
+    expect(result.createdPaths).toEqual(["src/Webspring/Contents/Info.ts", "src/Webspring/Contents/index.tsx"]);
+    expect(readFileSync(resolve(project, "src/Webspring/Contents/Info.ts"), "utf8")).toContain('bundleIdentifier: "org.example.example-site"');
+    expect(readFileSync(resolve(project, "src/Webspring/Contents/index.tsx"), "utf8")).toContain("export default class ExampleSite extends WSApplication {}");
+    expect((await inspectProject({ projectRoot: project })).shell).toMatchObject({ enabled: true, exists: true, info: "src/Webspring/Contents/Info.ts", infoExists: true });
+    await expect(scaffold({ projectRoot: project, kind: "webspring", name: "Again" })).rejects.toThrow(/already exists/u);
+  });
+  it("names the class that replaces each removed Webspring helper", async () => {
+    put("vite.config.ts", 'import { synCloudOS } from "@syndromatic/syncloudos/vite"; export default {plugins:[synCloudOS({appsDirectory:"applications"})]};');
+    put("src/Webspring/Contents/Info.ts", 'export default { bundleIdentifier: "org.example.site", displayName: "Site", version: "1.0.0" };');
+    put("src/Webspring/Contents/index.tsx", 'import { defineWebspring } from "@syndromatic/syncloudos/webspring";\nexport default defineWebspring({});');
+    put("src/Widgets/News.widget/index.tsx", 'import { defineWidget } from "@syndromatic/syncloudos";\nexport default class News {}\nvoid defineWidget;');
+    const { findings } = await validateProject({ projectRoot: project, typescript: false, idioms: false });
+    const retired = findings.filter((finding: { rule: string }) => finding.rule === "synware.retired");
+    expect(retired.map((finding: { message: string }) => finding.message)).toEqual([
+      expect.stringMatching(/defineWidget was removed: default-export a WSWidget subclass/u),
+      expect.stringMatching(/defineWebspring was removed: .*WSApplication subclass/u),
+    ]);
+    put("node_modules/@syndromatic/syncloudos/sdk.d.ts", "export declare class WSApplication {}\nexport declare function createWebspring(input: unknown): unknown;\n");
+    const lookup = await lookupSdk({ projectRoot: project, entry: "sdk", query: "defineWebspring" });
+    expect(lookup.retired).toMatchObject({ name: "defineWebspring", replacements: ["WSApplication", "createWebspring"] });
+    expect(lookup.symbols.map((symbol: { name: string }) => symbol.name).sort()).toEqual(["WSApplication", "createWebspring"]);
+  });
   it("lists entries and returns signatures, JSDoc and relevant offline sections", async () => {
     expect((await lookupSdk({ projectRoot: project })).entries).toContain("sdk");
     const result = await lookupSdk({ projectRoot: project, entry: "sdk", query: "createSynWre" });

@@ -105,20 +105,23 @@ An application can opt into an application menu with `NSEApplication.mainMenu`, 
 
 ## Add a Webspring launcher instead
 
-Create `src/Webspring/Contents/index.tsx`:
+Use the [Developer MCP](developer-mcp.md) `scaffold` tool with `kind: "webspring"`, or create the two files yourself. `src/Webspring/Contents/Info.ts` holds the site's identity:
+
+```ts
+import type { WSInfo } from "@syndromatic/syncloudos/webspring";
+
+export default {
+  bundleIdentifier: "com.example.my-site", version: "0.1.0", displayName: "My Site",
+  homeRoute: "/", branding: { name: { key: "site.name", fallback: "My Site" } },
+} as const satisfies WSInfo;
+```
+
+`src/Webspring/Contents/index.tsx` default-exports a `WSApplication` subclass:
 
 ```tsx
-import { WSApplication, createWebspring } from "@syndromatic/syncloudos";
+import { WSApplication } from "@syndromatic/syncloudos/webspring";
 
-class MySite extends WSApplication {}
-
-export default createWebspring({
-  info: {
-    bundleIdentifier: "com.example.site", version: "0.1.0", displayName: "My Site",
-    homeRoute: "/", branding: { name: { key: "site.name", fallback: "My Site" } },
-  },
-  application: MySite,
-});
+export default class MySite extends WSApplication {}
 ```
 
 The site shows the Board, `WSBoardViewController`, until the `WSApplication` subclass names another launcher.

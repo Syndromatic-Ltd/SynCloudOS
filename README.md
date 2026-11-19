@@ -140,7 +140,7 @@ Bundle identifiers use reverse-DNS syntax with at least two dots; lookups and st
 
 Everything ships in `@syndromatic/syncloudos` with explicit subpath entries so deep imports are rejected:
 
-- `@syndromatic/syncloudos`: `SCOS`, `useSCOS`, application and controller classes, decorators, reactive hooks, and `define*` helpers (`defineWebspring`, `definePreferencePane`, `defineWidget`, `defineIntegration`)
+- `@syndromatic/syncloudos`: `SCOS`, `useSCOS`, application and controller classes, decorators, reactive hooks, the Webspring and preference classes (`WSApplication`, `WSWidget`, `NSEPreferencePane`, `createWebspring`), and `defineIntegration`
 - `sdk`, `sdk/testing`, `sdk/animation-host`: scoped client types, routing, manifest validation, deterministic test host (`createSynWareTestHost`), and custom AnimationFX host types
 - `foundation`: immutable collections, ranges, predicates, formatters, `NSEData`, `NSEUUID`, and `NSEUndoManager`
 - `nse`, `nse/controls`, `nse/text`, `nse/content`, `nse/theme`, `nse/appearance`, `nse/layout`, `nse/scroll`, `nse/page`, `nse/system-ui`: the application kit and its focused subsets, plus `nse/styles.css`

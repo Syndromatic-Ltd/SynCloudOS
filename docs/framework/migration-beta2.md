@@ -71,16 +71,14 @@ export default NotesView;
 
 An application class instead declares `static routes = notesRoutes`. Do not also export named `routes` from that module, because class and named-module declarations of the same lifecycle field are rejected rather than merged.
 
-`mountSynCloudOS` consumes `virtual:syncloudos/project` when no explicit composition is supplied. Remove duplicate hand-written app, preference, widget and integration registries. The generated `shellResources` contains the shell's resource URLs and localised strings:
+`mountSynCloudOS` consumes `virtual:syncloudos/project` when no explicit composition is supplied. Remove duplicate hand-written app, preference, widget, integration and shell registries. The generated module exports the shell as `webspring`, a `WSDefinition` built from `src/Webspring/Contents/`, and `shellResources`, the shell's resource URLs and localised strings:
 
 ```tsx
 import { mountSynCloudOS } from "@syndromatic/syncloudos/browser";
-import { shellResources } from "virtual:syncloudos/project";
-import shell from "./Webspring/Contents";
 
 const element = document.getElementById("root");
 if (!element) throw new Error("Missing application root.");
-await mountSynCloudOS({ element, shell, shellResources });
+await mountSynCloudOS({ element });
 ```
 
 Do not replace that resource map with a whitelist of branding images: doing so also removes resources used by widgets and preferences. Custom host composition remains available for hosts without discovery. See [Project structure](project-structure.md).
@@ -155,7 +153,7 @@ Hosts that genuinely build rendering surfaces use `createAFXLayer(surface, sched
 
 | Before | After |
 | --- | --- |
-| Brushed metal, paper and glow built into the default Board | Generic cotton/spotlight defaults; declare site-owned `background.launcher` and `.shelf` surfaces to retain a custom look |
+| Brushed metal, paper and glow built into the default Board | Generic cotton/spotlight defaults; declare site-owned `static launcherSurface` and `static shelfSurface` on the `WSApplication` subclass to retain a custom look |
 | `content`, `contentSources`, `registerContentSource` and `LowerContentShelfView` | `WSWidget` and `WSWidgetShelfView` |
 | An always-present loading shelf | No widgets means no shelf; each widget declares empty behaviour and has bounded loading/error/retry states |
 | `frame.layout: "simple"` or `"defacto"` | Removed; content is full-bleed in the app frame |
@@ -168,7 +166,31 @@ A widget owns its feed and React view; the generic shelf supplies loading, empty
 
 Integrations declare their actual application owners. Owner matching is case-insensitive; selected applications constrain installation and seed authority. Use `applicationDocuments(environment)` when construction needs the host clock, timers or recovery-store environment. Do not replace persistent recovery with an in-memory workaround. See [Webspring](webspring.md).
 
-## 7. Move to themes and the theme contract
+## 7. Move the shell to `WSApplication`
+
+The shell is a `WSInfo` in `src/Webspring/Contents/Info.ts` and a `WSApplication` subclass that `index.tsx` default-exports. There are no aliases for the names it replaces:
+
+| Before | After |
+| --- | --- |
+| `defineWebspring({ manifest, components, ... })` | `Info.ts` (`WSInfo`) and a default-exported `WSApplication` subclass; `createWebspring({ info, application })` without the Vite plugin |
+| `webspringShell: { homeRoute, branding, folders }` | The same fields at the top level of `WSInfo` |
+| `webspringShell.views` and `defaults` | `static mainViewController`, or `static viewControllers` per presentation |
+| `components: { board: WebspringBoardView }` | `WSBoardViewController`, the default launcher |
+| A view component taking `WebspringViewProps` | A `WSLauncherViewController` subclass; `WSIconView` draws each entry |
+| `returnTracks` assigned to a view component | `static returnTracks` on the launcher |
+| `background: { launcher, shelf }` | `static launcherSurface` and `static shelfSurface` |
+| `folderAppearance`, `folderPresentation`, `iconEffect`, `quickSwitch` | The statics of the same names |
+| `widgets: [...]` | `static widgets`, or `src/Widgets/<Name>.widget` |
+| `preferences: { panes, hide }` | `static preferencePanes` and `static hiddenPreferencePanes` |
+| `defineWidget(...)` | A `WSWidget` subclass |
+| `definePreferencePane(...)` | An `NSEPreferencePane` subclass |
+| `WebspringDefinition` | `WSDefinition` |
+| `WebspringFolderAppearanceOptions`, `WebspringFolderPresentationComponent`, `WebspringFolderPresentationProps`, `WebspringIconEffectComponent`, `WebspringIconEffectProps`, `WebspringQuickSwitchOptions`, `WebspringLaunchZoom` | `WSFolderAppearanceOptions`, `WSFolderPresentationComponent`, `WSFolderPresentationProps`, `WSIconEffectComponent`, `WSIconEffectProps`, `WSQuickSwitchOptions`, `WSLaunchZoom` |
+| A composition's `shell` field | `webspring` |
+
+`create-synware src/Webspring` and the Developer MCP `scaffold` tool (`kind: "webspring"`) write both files. The `validate` tool and the folder validator name the replacement when a source still uses a removed helper, and `lookup_sdk` answers a removed name with the classes that replace it. See [Webspring](webspring.md).
+
+## 8. Move to themes and the theme contract
 
 Appearance definitions, slots and recipes are replaced by `.scostheme` theme bundles drawn through a public contract ([Themes](themes.md), [contract reference](theme-contract.md)). None of the removed names has an alias.
 
@@ -203,7 +225,7 @@ Theme and application CSS that selected the old identities uses their replacemen
 
 Only a theme draws NSE controls. Application CSS that selects private `.nse-*` classes, or contract hooks such as `[data-nse-control]` and `[data-nse-part]`, is reported by the Developer MCP as `idiom.control-internals`. Draw your own content with the semantic colours, and leave NSE controls to the theme.
 
-## 8. Verify the installed consumer, not only the source tree
+## 9. Verify the installed consumer, not only the source tree
 
 Use `createSynWareTestHost({ application: AppClass, manifest })` from `/sdk/testing` for actual class instances, windows, routes, commands and preferences. `host.application` is the live instance after rendering. Supply trusted host fixtures through the documented test-host configuration, not app-constructor clients. Native keyboard events use the production input boundary.
 

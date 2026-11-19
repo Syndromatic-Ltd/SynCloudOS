@@ -40,6 +40,26 @@ export function deriveManifestForFolder(target) {
   });
 }
 
+/** Removed Webspring helpers, and the classes that replace them. lookup_sdk answers with the same table. */
+export const retiredWebspringNames = Object.freeze({
+  defineWebspring: Object.freeze({ replacements: Object.freeze(["WSApplication", "createWebspring"]), message: "defineWebspring was removed: declare the shell in Info.ts and default-export a WSApplication subclass from index.tsx, or call createWebspring({ info, application })." }),
+  defineWidget: Object.freeze({ replacements: Object.freeze(["WSWidget"]), message: "defineWidget was removed: default-export a WSWidget subclass." }),
+  definePreferencePane: Object.freeze({ replacements: Object.freeze(["NSEPreferencePane"]), message: "definePreferencePane was removed: default-export an NSEPreferencePane subclass." }),
+  WebspringBoardView: Object.freeze({ replacements: Object.freeze(["WSBoardViewController"]), message: "WebspringBoardView was removed: the Board is WSBoardViewController, the default launcher." }),
+  WebspringViewProps: Object.freeze({ replacements: Object.freeze(["WSLauncherViewController"]), message: "WebspringViewProps was removed: a custom launcher subclasses WSLauncherViewController." }),
+});
+
+/** Findings for each removed Webspring helper a source file still names. */
+export function retiredWebspringNameFindings(path) {
+  const text = readFileSync(path, "utf8");
+  const findings = [];
+  for (const [name, { message }] of Object.entries(retiredWebspringNames)) {
+    const index = text.search(new RegExp(`\\b${name}\\b`, "u"));
+    if (index !== -1) findings.push({ file: path, line: text.slice(0, index).split("\n").length, rule: "synware.retired", message });
+  }
+  return findings;
+}
+
 const expectedDefaultExport = {
   application: "a React component or an NSEApplication subclass",
   preferencePane: "an NSEPreferencePane subclass",
@@ -98,6 +118,7 @@ export function createSynWareValidator({ schema, allowedImports, dependencies = 
       }
     }
     if (existsSync(entryPath)) {
+      findings.push(...retiredWebspringNameFindings(entryPath));
       try { validateImports(entryPath); }
       catch (error) { findings.push({file:entryPath,line:1,rule:"synware.imports",message:error.message}); }
       try {

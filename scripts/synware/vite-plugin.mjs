@@ -87,6 +87,9 @@ const defaultPreferencesDirectory = "src/Preferences";
 const defaultWidgetsDirectory = "src/Widgets";
 const defaultIntegrationsDirectory = "src/Integrations";
 const defaultWebspringEntry = "src/Webspring/Contents/index.tsx";
+const emptyShellResources = Object.freeze({ files: Object.freeze([]), resourceUrls: Object.freeze([]), localeResources: Object.freeze([]), fontResourceUrls: Object.freeze([]) });
+// The identity a project without Webspring files mounts under, as browserRuntime.tsx does.
+const neutralWebspringInfo = '{ bundleIdentifier: "org.syncloudos.webspring", displayName: "SynCloudOS", version: "1.0.0", branding: { name: { key: "site.name", fallback: "SynCloudOS" } } }';
 const derivationModulePath = fileURLToPath(new URL("./project-derivation.mjs", import.meta.url));
 const fontExtensions = new Set([".otf", ".ttf", ".woff", ".woff2"]);
 const sourceExtensions = new Set([
@@ -325,7 +328,7 @@ function generateProjectModule(discovery) {
   };
 
   imports.push(`import { selectProjectBundles, selectProjectIntegrations } from ${quote(toViteFileImport(derivationModulePath))};`);
-  imports.push('import { capturePreferencePaneClass, captureWSWidgetClass, createIntegrationContribution, integrationOwners, withDiscoveredWebspringItems } from "@syndromatic/syncloudos/webspring";');
+  imports.push('import { WSApplication, capturePreferencePaneClass, captureWSWidgetClass, createIntegrationContribution, createWebspring, integrationOwners, isWSApplicationClass, withDiscoveredWebspringItems } from "@syndromatic/syncloudos/webspring";');
 
   discovery.bundles.forEach((bundle) => {
     const resourceVariables = addUrlImports(bundle.resources.resourceUrls, "url", "resource");
@@ -357,13 +360,20 @@ function generateProjectModule(discovery) {
 
   let shellExpression = "null";
   let shellResourcesExpression = "Object.freeze({ resourceUrls: Object.freeze({}), localeResources: Object.freeze({}), fontResourceUrls: Object.freeze({}) })";
-  if (discovery.shell) {
-    const shellModuleVariable = "shellModule";
-    imports.push(`import * as ${shellModuleVariable} from ${quote(toViteFileImport(discovery.shell.entryPath))};`);
+  if (discovery.shell && discovery.shell.infoPath === null) {
+    shellExpression = `createWebspring({ info: ${neutralWebspringInfo} })`;
+  } else if (discovery.shell) {
+    imports.push(`import * as shellInfo from ${quote(toViteFileImport(discovery.shell.infoPath))};`);
+    let application = "WSApplication";
+    if (discovery.shell.entryPath !== null) {
+      imports.push(`import * as shellModule from ${quote(toViteFileImport(discovery.shell.entryPath))};`);
+      body.push(`if (!isWSApplicationClass(shellModule.default)) throw new TypeError(${quote(`${discovery.shell.sourcePath} must default-export a WSApplication subclass.`)});`);
+      application = "shellModule.default";
+    }
     const resourceVariables = addUrlImports(discovery.shell.resources.resourceUrls, "url", "shellResource");
     const localeVariables = addUrlImports(discovery.shell.resources.localeResources, "raw", "shellLocale");
     const fontVariables = addUrlImports(discovery.shell.resources.fontResourceUrls, "url", "shellFont");
-    shellExpression = `${shellModuleVariable}.default ?? null`;
+    shellExpression = `createWebspring({ info: shellInfo.default, application: ${application} })`;
     shellResourcesExpression = `Object.freeze({\n  resourceUrls: ${renderMap(discovery.shell.resources.resourceUrls, resourceVariables)},\n  localeResources: ${renderLocaleResourceMap(discovery.shell.resources.localeResources, localeVariables)},\n  fontResourceUrls: ${renderMap(discovery.shell.resources.fontResourceUrls, fontVariables)},\n})`;
   }
 
@@ -379,7 +389,7 @@ function generateProjectModule(discovery) {
   catch (error) { throw new TypeError(\`\${path} must default-export a WSWidget subclass: \${error instanceof Error ? error.message : String(error)}\`); }
 }).sort((left, right) => left.order - right.order || left.id.localeCompare(right.id)));`);
   body.push(`const shellDefinition = ${shellExpression};`);
-  body.push("export const shell = shellDefinition === null ? null : withDiscoveredWebspringItems(shellDefinition, { preferences, widgets });");
+  body.push("export const webspring = shellDefinition === null ? null : withDiscoveredWebspringItems(shellDefinition, { preferences, widgets });");
   body.push(`const allBundles = Object.freeze([\n${bundleExpressions.join(",\n")}\n]);`);
   body.push("const applications = " + (discovery.applications === null ? "null" : renderSourceList(discovery.applications)) + ";");
   body.push("export const bundles = selectProjectBundles(allBundles, { applications, development: import.meta.env.DEV });");
@@ -519,14 +529,30 @@ function discover(root, options) {
   if (options.webspringEntry !== false) {
     const shellEntry = resolve(root, options.webspringEntry ?? defaultWebspringEntry);
     const shellContents = dirname(shellEntry);
-    if (existsSync(shellEntry)) {
+    const infoPath = resolve(shellContents, "Info.ts");
+    const hasEntry = existsSync(shellEntry);
+    const hasInfo = existsSync(infoPath);
+    // Neither file still mounts the base WSApplication under the neutral identity.
+    shell = Object.freeze({ entryPath: null, infoPath: null, sourcePath: null, resources: emptyShellResources });
+    if (hasEntry || hasInfo) {
       assertDirectory(shellContents, "the Webspring shell Contents directory");
-      assertFile(shellEntry, "the Webspring shell entry", shellContents);
-      assertDefaultExport(shellEntry, "the Webspring shell entry", "createWebspring(...)");
+      if (!hasInfo) throw new TypeError(`SynCloudOS expected ${slash(relative(root, infoPath))} beside the Webspring shell entry ${slash(relative(root, shellEntry))}.`);
+      assertFile(infoPath, "the Webspring Info.ts", shellContents);
+      if (hasEntry) {
+        assertFile(shellEntry, "the Webspring shell entry", shellContents);
+        assertDefaultExport(shellEntry, "the Webspring shell entry", "a WSApplication subclass");
+      }
       const shellResourcesDirectory = resolve(shellContents, "Resources");
       const resources = scanResources(shellResourcesDirectory, "Webspring shell Resources");
-      shell = Object.freeze({ entryPath: shellEntry, resources });
+      shell = Object.freeze({
+        entryPath: hasEntry ? shellEntry : null,
+        infoPath,
+        sourcePath: hasEntry ? slash(relative(root, shellEntry)) : null,
+        resources,
+      });
       watchRoots.push(shellContents, shellResourcesDirectory);
+    } else if (existsSync(shellContents)) {
+      watchRoots.push(shellContents);
     }
   }
 
@@ -539,7 +565,7 @@ function discover(root, options) {
     ...preferences.flatMap((pane) => [pane.entryPath]),
     ...widgets.flatMap((widget) => [widget.entryPath]),
     ...integrations.map((integration) => integration.entryPath),
-    ...(shell ? [shell.entryPath, ...shell.resources.files] : []),
+    ...(shell ? [...[shell.entryPath, shell.infoPath].filter(Boolean), ...shell.resources.files] : []),
   ];
   const uniqueWatchRoots = [...new Set(watchRoots.map(displayPath))];
   const uniqueWatchPaths = [...new Set(watchPaths.map(displayPath))];

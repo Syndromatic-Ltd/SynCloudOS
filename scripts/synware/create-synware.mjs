@@ -185,21 +185,36 @@ export function scaffoldProjectFiles({ kind = "application", name, organisation 
   if (kind === "application") return scaffoldFiles(bundleIdentifier ?? scaffoldBundleIdentifier(name, organisation), [], title, authoring, { applicationMenuToolbar });
   if (kind === "preferencePane") return new Map([["index.tsx", `import { NSEPreferencePane } from "@syndromatic/syncloudos";\n\nexport default class ${pascalClassName(title, "PreferencePane")} extends NSEPreferencePane {\n  static id = ${JSON.stringify(id)};\n  static title = ${JSON.stringify(title)};\n  static order = 100;\n\n  override renderView() {\n    return <p>${title}</p>;\n  }\n}\n`]]);
   if (kind === "widget") return new Map([["index.tsx", `import { WSWidget } from "@syndromatic/syncloudos";\n\nexport default class ${pascalClassName(title, "Widget")} extends WSWidget<string> {\n  static id = ${JSON.stringify(id)};\n  static title = ${JSON.stringify(title)};\n  static whenEmpty = "hide" as const;\n\n  override async load() {\n    return new Date().toLocaleDateString();\n  }\n\n  override renderView() {\n    return <p>{this.data}</p>;\n  }\n}\n`]]);
+  if (kind === "webspring") return scaffoldWebspringFiles(bundleIdentifier ?? scaffoldBundleIdentifier(kebabCase(name), organisation), title);
   if (kind === "integration") {
     if (!owners.length) throw new TypeError("An integration needs at least one owner application ID.");
     return new Map([["", `import { defineIntegration } from "@syndromatic/syncloudos";\n\nexport default defineIntegration({ owners: ${JSON.stringify(owners)}, install(context) { return context.bootNotifications.register(${JSON.stringify(id)}, () => console.info(${JSON.stringify(`${title} ready`)})); } });\n`]]);
   }
   throw new TypeError(`Unknown project folder kind: ${kind}.`);
 }
+/** A site's Webspring: its identity in Info.ts and the WSApplication subclass index.tsx default-exports. */
+function scaffoldWebspringFiles(bundleIdentifier, title) {
+  const info = `import type { WSInfo } from "@syndromatic/syncloudos/webspring";\n\nexport default {\n  bundleIdentifier: ${JSON.stringify(bundleIdentifier)},\n  displayName: ${JSON.stringify(title)},\n  version: "1.0.0",\n  homeRoute: "/",\n  branding: { name: { key: "site.name", fallback: ${JSON.stringify(title)} } },\n} as const satisfies WSInfo;\n`;
+  const application = `import { WSApplication } from "@syndromatic/syncloudos/webspring";\n\n// The Board is the launcher until static mainViewController names another.\nexport default class ${pascalClassName(title, "Site")} extends WSApplication {}\n`;
+  return new Map([["Contents/Info.ts", info], ["Contents/index.tsx", application]]);
+}
+
 function main() {
   const [targetArgument, ...options] = process.argv.slice(2);
   if (!targetArgument) {
-    fail("Usage: create-synware <Name.app|Name.prefPane|Name.widget|Name.integration.ts> [--organisation com.example] [--owners bundle-identifier,...] [--fx recipe,...] [--authoring separate|inline|function] [--application-menu-toolbar]");
+    fail("Usage: create-synware <Name.app|Name.prefPane|Name.widget|Name.integration.ts|Webspring> [--name \"Site Name\"] [--organisation com.example] [--owners bundle-identifier,...] [--fx recipe,...] [--authoring separate|inline|function] [--application-menu-toolbar]");
     return;
   }
-  if (!/\.(?:app|prefPane|widget|integration\.tsx?)$/u.test(targetArgument)) { fail("The target must name an .app, .prefPane, .widget or .integration.ts entry."); return; }
-  const name = basename(targetArgument).replace(/\.(?:app|prefPane|widget|integration\.tsx?)$/u, "");
-  const kind = targetArgument.endsWith(".prefPane") ? "preferencePane" : targetArgument.endsWith(".widget") ? "widget" : /\.integration\.tsx?$/u.test(targetArgument) ? "integration" : "application";
+  const webspring = basename(targetArgument) === "Webspring";
+  if (!webspring && !/\.(?:app|prefPane|widget|integration\.tsx?)$/u.test(targetArgument)) { fail("The target must name an .app, .prefPane, .widget or .integration.ts entry, or the Webspring folder."); return; }
+  let name = basename(targetArgument).replace(/\.(?:app|prefPane|widget|integration\.tsx?)$/u, "");
+  const kind = webspring ? "webspring" : targetArgument.endsWith(".prefPane") ? "preferencePane" : targetArgument.endsWith(".widget") ? "widget" : /\.integration\.tsx?$/u.test(targetArgument) ? "integration" : "application";
+  const nameOption = options.indexOf("--name");
+  if (nameOption !== -1) {
+    if (!webspring || !options[nameOption + 1]) { fail("--name takes the site's display name and applies to the Webspring scaffold only."); return; }
+    name = options[nameOption + 1];
+    options.splice(nameOption, 2);
+  }
   const appId = kebabCase(name);
   if (!APP_ID.test(appId)) { fail("Provide a valid application ID."); return; }
   let owners = [];
@@ -225,7 +240,7 @@ function main() {
   }
   if (kind !== "application" && (authoring !== undefined || applicationMenuToolbar)) { fail("--authoring and --application-menu-toolbar apply to .app scaffolds only."); return; }
   if (authoring !== undefined && authoring !== "function" && selected.length) { fail("--fx recipes use function authoring; compose hook-based recipe components in class views explicitly."); return; }
-  const files = kind === "application" ? scaffoldFiles(scaffoldBundleIdentifier(name, organisation), selected, titleFromFolderName(name), authoring ?? defaultAuthoring(selected), { applicationMenuToolbar }) : scaffoldProjectFiles({ kind, name, id: appId, owners });
+  const files = kind === "application" ? scaffoldFiles(scaffoldBundleIdentifier(name, organisation), selected, titleFromFolderName(name), authoring ?? defaultAuthoring(selected), { applicationMenuToolbar }) : scaffoldProjectFiles({ kind, name, organisation, id: appId, owners });
   if (kind !== "integration") mkdirSync(target, { recursive: true });
   for (const [relativePath, contents] of files) {
     const path = relativePath ? resolve(target, relativePath) : target;

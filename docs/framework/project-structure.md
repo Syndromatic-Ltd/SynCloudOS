@@ -14,6 +14,7 @@ src/
   Preferences/Billing.prefPane/index.tsx
   Widgets/Latest.widget/index.tsx
   Integrations/Journal.integration.ts
+  Webspring/Contents/Info.ts
   Webspring/Contents/index.tsx
 ```
 
@@ -114,6 +115,7 @@ node scripts/synware/create-synware.mjs src/SynWare/Notes.app --organisation com
 node scripts/synware/create-synware.mjs src/Preferences/Billing.prefPane
 node scripts/synware/create-synware.mjs src/Widgets/Latest.widget
 node scripts/synware/create-synware.mjs src/Integrations/Journal.integration.ts --owners com.example.journal
+node scripts/synware/create-synware.mjs src/Webspring --name "Example Site" --organisation com.example
 node scripts/synware/validate-synware.mjs src/SynWare/Notes.app
 ```
 

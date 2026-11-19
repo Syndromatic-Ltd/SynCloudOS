@@ -71,7 +71,7 @@ export function createExamplePersistenceHost(options: { readonly databaseName: s
       const app = createTextSystemExampleApp({ ...appOptions, nativeDestination: nativeLocation, ...(reopen ? { openLocation: nativeLocation } : {}) });
       // Browser routing starts from the browser location. This host-only launch selects the declared app route.
       history.replaceState(history.state, "", "/examples/text-system");
-      const composition = { bundles: [{ manifest, modulePath: "./TextSystem.app/Contents/index.tsx", loadModule: async () => ({ default: app }) }], preferences: [], widgets: [], contributions: [contribution], shell, shellResources: {} };
+      const composition = { bundles: [{ manifest, modulePath: "./TextSystem.app/Contents/index.tsx", loadModule: async () => ({ default: app }) }], preferences: [], widgets: [], contributions: [contribution], webspring: shell, shellResources: {} };
       const host = await mountSynCloudOS({ element, composition, authentication: "disabled" }); hostsMounted++; runtimeIds.push(runtimeId);
       return host;
     },

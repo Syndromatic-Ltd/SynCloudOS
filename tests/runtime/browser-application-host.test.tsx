@@ -161,7 +161,7 @@ describe("application-only browser host", () => {
           manifest: menuBundle.manifest, modulePath: "./Application.app/Contents/index.tsx",
           loadModule: async () => ({ default: menuBundle }),
         }],
-        preferences: [], widgets: [], contributions: [], shell: null, shellResources: {},
+        preferences: [], widgets: [], contributions: [], webspring: null, shellResources: {},
       },
     };
     const { element: target, runtime } = await mount(element(), { ...overrides, about });

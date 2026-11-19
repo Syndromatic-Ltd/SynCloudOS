@@ -19,18 +19,18 @@
  */
 
 import { createContext, useContext, type PropsWithChildren } from "react";
-import type { WebspringIconEffectComponent, WebspringIconEffectProps } from "./webspringTypes";
+import type { WSIconEffectComponent, WSIconEffectProps } from "./webspringTypes";
 
-const IconEffectContext = createContext<WebspringIconEffectComponent | null>(null);
+const IconEffectContext = createContext<WSIconEffectComponent | null>(null);
 
 export function WSIconEffectProvider({ component, children }: PropsWithChildren<{
-  component?: WebspringIconEffectComponent;
+  component?: WSIconEffectComponent;
 }>) {
   return <IconEffectContext.Provider value={component ?? null}>{children}</IconEffectContext.Provider>;
 }
 
 /** The shell supplies state; the declared shell owns the decorative recipe. */
-export function WSIconEffect({ active, subtle = false, className }: Omit<WebspringIconEffectProps, "subtle"> & { subtle?: boolean }) {
+export function WSIconEffect({ active, subtle = false, className }: Omit<WSIconEffectProps, "subtle"> & { subtle?: boolean }) {
   const Effect = useContext(IconEffectContext);
   return Effect ? <Effect active={active} subtle={subtle} className={className} /> : null;
 }

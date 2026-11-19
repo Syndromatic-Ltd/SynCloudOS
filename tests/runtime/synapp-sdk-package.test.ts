@@ -284,6 +284,14 @@ describe("portable SynWare SDK packages", () => {
       "NSEPageController", "NSEPageControllerOptions", "NSEPageControllerSnapshot",
       "NSEPageControllerSpineLocation", "NSEPageControllerTransitionStyle",
     ].sort());
+    const webspringTypes = sourceExports(join(installedPackage, "types", "Webspring", "public.d.ts"));
+    expect(webspringTypes).toEqual(expect.arrayContaining([
+      "WSApplication", "WSDefinition", "WSInfo", "WSLauncherViewController", "WSLauncherContext", "WSBoardViewController", "WSIconView", "WSWidget",
+      "WSFolderAppearanceOptions", "WSFolderPresentationComponent", "WSIconEffectComponent", "WSQuickSwitchOptions", "WSLaunchZoom", "createWebspring",
+    ]));
+    for (const removed of ["defineWebspring", "WebspringBoardView", "createWebspringBoardView", "WebspringViewProps", "WebspringDefinition", "defineWidget", "definePreferencePane", "WebspringLaunchZoom", "WebspringQuickSwitchOptions"]) {
+      expect(webspringTypes).not.toContain(removed);
+    }
     expect(JSON.parse(readFileSync(join(installedPackage, "package.json"), "utf8")).license).toBe("AGPL-3.0-or-later AND Apache-2.0");
     expect(JSON.parse(readFileSync(join(installedPackage, "sdk", "package.json"), "utf8")).license).toBe("Apache-2.0");
     expect(readFileSync(join(installedPackage, "LICENSE"), "utf8")).toBe(readFileSync(join(repositoryRoot, "LICENSE"), "utf8"));
@@ -335,6 +343,7 @@ assert.deepEqual(Object.keys(webspring), [
   "WSIconEffect",
   "WSIconView",
   "WSLaunchDim",
+  "WSLauncherContext",
   "WSLauncherRootView",
   "WSLauncherViewController",
   "WSSurface",

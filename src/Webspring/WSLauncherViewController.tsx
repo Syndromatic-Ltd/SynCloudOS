@@ -59,8 +59,8 @@ import type {
   Presentation,
   ShellMode,
   WebspringActions,
-  WebspringFolderPresentationComponent,
-  WebspringLaunchZoom,
+  WSFolderPresentationComponent,
+  WSLaunchZoom,
   WebspringViewModel,
   WSAccountAction,
   WSApp,
@@ -75,7 +75,7 @@ export interface WSLauncherHostState {
   readonly application: WSApplication;
   readonly model: WebspringViewModel;
   readonly actions: WebspringActions;
-  readonly folderPresentation: WebspringFolderPresentationComponent;
+  readonly folderPresentation: WSFolderPresentationComponent;
 }
 
 /** @internal The host sets a launcher's state through this method before it renders. */
@@ -106,7 +106,7 @@ export type WSLauncherViewControllerClass = (abstract new (...args: never[]) => 
   readonly mode?: ShellMode;
   readonly presentations?: readonly Presentation[];
   readonly returnTracks?: readonly ("material" | "icons")[];
-  readonly launchZoom?: WebspringLaunchZoom;
+  readonly launchZoom?: WSLaunchZoom;
 };
 
 
@@ -121,7 +121,7 @@ export class WSLauncherViewController<TApp extends WSApplication = WSApplication
   static presentations: readonly Presentation[] = ["desktop", "tablet", "mobile"];
   /** The tracks reported through `completeReturnTrack` before a return settles. */
   static returnTracks: readonly ("material" | "icons")[] = ["material", "icons"];
-  static launchZoom: WebspringLaunchZoom = defaultWSLaunchZoom;
+  static launchZoom: WSLaunchZoom = defaultWSLaunchZoom;
 
   #host: WSLauncherHostState | null = null;
   #openingAppId: string | null = null;
@@ -255,7 +255,8 @@ export interface WSLauncherPlumbing {
   readonly beginDrag: (itemId: string) => void;
 }
 
-const WSLauncherContext = createContext<WSLauncherViewController | null>(null);
+/** The launcher WSLauncherRootView renders, for the views inside it. */
+export const WSLauncherContext = createContext<WSLauncherViewController | null>(null);
 /** @internal */
 export const WSLauncherPlumbingContext = createContext<WSLauncherPlumbing | null>(null);
 

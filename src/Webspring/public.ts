@@ -31,7 +31,7 @@ export type {
   WSCreateWebspringInput,
   WSDefinition,
 } from "./WSApplication";
-export { WSLauncherRootView, WSLauncherViewController, useWSLauncher } from "./WSLauncherViewController";
+export { WSLauncherContext, WSLauncherRootView, WSLauncherViewController, useWSLauncher } from "./WSLauncherViewController";
 export type { WSLauncherFolders, WSLauncherRootProps, WSLauncherViewControllerClass } from "./WSLauncherViewController";
 export { WSIconView } from "./WSIconView";
 export type { WSIconViewProps } from "./WSIconView";
@@ -125,22 +125,22 @@ export type {
   WSAppItem,
   WebspringDialPlacement,
   WebspringFolderAppearance,
-  WebspringFolderAppearanceOptions,
+  WSFolderAppearanceOptions,
   WebspringFolderCornerRadius,
   WebspringFolderFill,
   WSFolderItem,
-  WebspringFolderPresentationComponent,
-  WebspringFolderPresentationProps,
+  WSFolderPresentationComponent,
+  WSFolderPresentationProps,
   WebspringFolderShape,
   WebspringFolderSmoothSurface,
   WebspringFolderTexture,
-  WebspringIconEffectComponent,
-  WebspringIconEffectProps,
+  WSIconEffectComponent,
+  WSIconEffectProps,
   WSItem,
   WebspringPreferences,
   WebspringPreferencesOptions,
-  WebspringQuickSwitchOptions,
-  WebspringLaunchZoom,
+  WSQuickSwitchOptions,
+  WSLaunchZoom,
   WebspringViewModel,
   WSWidgetEntry,
   WSResolvedBranding,

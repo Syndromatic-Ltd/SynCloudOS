@@ -35,7 +35,7 @@ declare module "virtual:syncloudos/project" {
   export const preferences: readonly PreferencePaneDescriptor[];
   export const widgets: readonly WSWidgetDescriptor[];
   export const contributions: readonly SynCloudOSHostContribution[];
-  export const shell: WSDefinition | null;
+  export const webspring: WSDefinition | null;
   export const shellResources: SynCloudOSShellResources;
   const composition: SynCloudOSProjectComposition;
   export default composition;

@@ -38,12 +38,12 @@ export type ShellMode = "launcher" | "persistent";
 export type LocalisedText = SynWareLocalisedText;
 export type ResourceReference = SynWareResourceReference;
 
-export interface WebspringIconEffectProps {
+export interface WSIconEffectProps {
   readonly active: boolean;
   readonly subtle: boolean;
   readonly className?: string;
 }
-export type WebspringIconEffectComponent = ComponentType<WebspringIconEffectProps>;
+export type WSIconEffectComponent = ComponentType<WSIconEffectProps>;
 
 export type WSActionResult =
   | { readonly status: "completed" }
@@ -247,7 +247,7 @@ export interface WebspringActions {
   requestSignOut(): Promise<ActionResult>;
 }
 
-export interface WebspringFolderPresentationProps {
+export interface WSFolderPresentationProps {
   readonly folder: WSFolderItem;
   /** The element that is copied and split. */
   readonly stage: HTMLElement;
@@ -259,10 +259,10 @@ export interface WebspringFolderPresentationProps {
   /** Called once the presentation has closed. */
   onClose(): void;
 }
-export type WebspringFolderPresentationComponent = ComponentType<WebspringFolderPresentationProps>;
+export type WSFolderPresentationComponent = ComponentType<WSFolderPresentationProps>;
 
 /** The zoom that presents an application launched from a Webspring view. */
-export interface WebspringLaunchZoom {
+export interface WSLaunchZoom {
   /** Seconds the zoom waits after the launch starts. Defaults to 0.72. */
   readonly delay?: number;
   /** Seconds the zoom takes. Defaults to 0.68. */
@@ -275,7 +275,7 @@ export type AuthenticationConfiguration = RuntimeAuthenticationConfiguration;
 export type AuthenticationInput = RuntimeAuthenticationInput;
 
 /** QuickSwitch grows with its icons up to the screen edge; this chooses what happens there. */
-export interface WebspringQuickSwitchOptions {
+export interface WSQuickSwitchOptions {
   /** `shrink` (default) scales the icons down so every one fits; `scroll` keeps them full size
    *  and scrolls the row, fading its ends. */
   readonly overflow?: "shrink" | "scroll";
@@ -315,7 +315,7 @@ export interface WebspringFolderTexture {
 export type WebspringFolderFill = "inset" | WebspringFolderTexture;
 
 /** How every view draws a folder's icon. */
-export interface WebspringFolderAppearanceOptions {
+export interface WSFolderAppearanceOptions {
   /** Defaults to a `roundedRect` with the default smooth surface. */
   readonly shape?: WebspringFolderShape;
   /** Defaults to `inset`. */

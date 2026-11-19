@@ -47,12 +47,12 @@ import type {
   ShellMode,
   WebspringBackground,
   WebspringFolderAppearance,
-  WebspringFolderAppearanceOptions,
-  WebspringFolderPresentationComponent,
-  WebspringIconEffectComponent,
-  WebspringLaunchZoom,
+  WSFolderAppearanceOptions,
+  WSFolderPresentationComponent,
+  WSIconEffectComponent,
+  WSLaunchZoom,
   WebspringPreferences,
-  WebspringQuickSwitchOptions,
+  WSQuickSwitchOptions,
 } from "./webspringTypes";
 
 /** Return animation tracks available for launcher controllers. */
@@ -74,10 +74,10 @@ export interface WSApplicationClass<TApp extends WSApplication = WSApplication> 
   readonly viewControllers?: Readonly<Partial<Record<Presentation, WSLauncherViewControllerClass>>>;
   readonly launcherSurface?: WSSurface;
   readonly shelfSurface?: WSSurface;
-  readonly folderAppearance?: WebspringFolderAppearanceOptions;
-  readonly folderPresentation?: WebspringFolderPresentationComponent;
-  readonly iconEffect?: WebspringIconEffectComponent;
-  readonly quickSwitch?: WebspringQuickSwitchOptions;
+  readonly folderAppearance?: WSFolderAppearanceOptions;
+  readonly folderPresentation?: WSFolderPresentationComponent;
+  readonly iconEffect?: WSIconEffectComponent;
+  readonly quickSwitch?: WSQuickSwitchOptions;
   readonly widgets?: readonly WSWidgetClass[];
   readonly preferencePanes?: readonly NSEPreferencePaneClass[];
   readonly hiddenPreferencePanes?: readonly string[];
@@ -94,11 +94,11 @@ export class WSApplication extends NSEObject implements NSEOwner, OwnedObject {
   static viewControllers?: Readonly<Partial<Record<Presentation, WSLauncherViewControllerClass>>>;
   static launcherSurface: WSSurface = WSSurface.cotton();
   static shelfSurface: WSSurface = defaultWSShelfSurface;
-  static folderAppearance: WebspringFolderAppearanceOptions = defaultWebspringFolderAppearance;
+  static folderAppearance: WSFolderAppearanceOptions = defaultWebspringFolderAppearance;
   /** Replaces the built-in folder split; `createWSFolderSplitPresentation(options)` configures the built-in one. */
-  static folderPresentation?: WebspringFolderPresentationComponent;
-  static iconEffect?: WebspringIconEffectComponent;
-  static quickSwitch?: WebspringQuickSwitchOptions;
+  static folderPresentation?: WSFolderPresentationComponent;
+  static iconEffect?: WSIconEffectComponent;
+  static quickSwitch?: WSQuickSwitchOptions;
   /** Explicit widgets in display order; discovered `src/Widgets/*.widget` follow by order, then id. */
   static widgets?: readonly WSWidgetClass[];
   /** Explicit panes; discovered `src/Preferences/*.prefPane` follow by order, then id. */
@@ -185,12 +185,12 @@ export interface WSDefinition {
   readonly viewControllers: Readonly<Record<Presentation, WSLauncherViewControllerClass>>;
   readonly modes: Readonly<Record<Presentation, ShellMode>>;
   readonly returnTracks: Readonly<Record<Presentation, readonly ("material" | "icons")[]>>;
-  readonly launchZooms: Readonly<Record<Presentation, Readonly<Required<WebspringLaunchZoom>>>>;
+  readonly launchZooms: Readonly<Record<Presentation, Readonly<Required<WSLaunchZoom>>>>;
   readonly background: Readonly<WebspringBackground>;
   readonly folderAppearance: WebspringFolderAppearance;
-  readonly folderPresentation: WebspringFolderPresentationComponent;
-  readonly iconEffect?: WebspringIconEffectComponent;
-  readonly quickSwitch?: Readonly<WebspringQuickSwitchOptions>;
+  readonly folderPresentation: WSFolderPresentationComponent;
+  readonly iconEffect?: WSIconEffectComponent;
+  readonly quickSwitch?: Readonly<WSQuickSwitchOptions>;
   readonly widgets: readonly WSWidgetDescriptor[];
   readonly preferences: Readonly<WebspringPreferences>;
 }
@@ -249,7 +249,7 @@ function isReactComponent(component: unknown): boolean {
   ));
 }
 
-function captureQuickSwitch(input: unknown): Readonly<WebspringQuickSwitchOptions> | undefined {
+function captureQuickSwitch(input: unknown): Readonly<WSQuickSwitchOptions> | undefined {
   if (input === undefined) return undefined;
   assertPlainRecord(input, "Webspring quickSwitch");
   assertKnownFields(input, "Webspring quickSwitch", ["overflow"]);
@@ -403,7 +403,7 @@ function captureLauncherMetadata(Launcher: unknown, slot: Presentation): {
   readonly LauncherClass: WSLauncherViewControllerClass;
   readonly mode: ShellMode;
   readonly returnTracks: readonly ("material" | "icons")[];
-  readonly launchZoom: Readonly<Required<WebspringLaunchZoom>>;
+  readonly launchZoom: Readonly<Required<WSLaunchZoom>>;
 } {
   if (typeof Launcher !== "function" || !(Launcher === WSLauncherViewController || Launcher.prototype instanceof WSLauncherViewController)) {
     throw new TypeError(`Webspring ${slot} launcher must be a WSLauncherViewController class.`);
@@ -466,7 +466,7 @@ function captureLauncherMetadata(Launcher: unknown, slot: Presentation): {
     launchZoom: Object.freeze({
       delay: seconds("delay", defaultWSLaunchZoom.delay),
       duration: seconds("duration", defaultWSLaunchZoom.duration),
-      easing: easing as Required<WebspringLaunchZoom>["easing"],
+      easing: easing as Required<WSLaunchZoom>["easing"],
     }),
   };
 }
@@ -499,7 +499,7 @@ export function createWebspring(input: WSCreateWebspringInput): WSDefinition {
   if (folderPresentationInput !== undefined && !isReactComponent(folderPresentationInput)) {
     throw new TypeError("Webspring folderPresentation must be a React component.");
   }
-  const folderPresentation = (folderPresentationInput ?? defaultWSFolderPresentation) as WebspringFolderPresentationComponent;
+  const folderPresentation = (folderPresentationInput ?? defaultWSFolderPresentation) as WSFolderPresentationComponent;
 
   const iconEffectInput = readStaticData(ApplicationClass, "iconEffect", appLabel);
   if (iconEffectInput !== undefined && !isReactComponent(iconEffectInput)) {
@@ -544,7 +544,7 @@ export function createWebspring(input: WSCreateWebspringInput): WSDefinition {
   const viewControllers = {} as Record<Presentation, WSLauncherViewControllerClass>;
   const modes = {} as Record<Presentation, ShellMode>;
   const returnTracks = {} as Record<Presentation, readonly ("material" | "icons")[]>;
-  const launchZooms = {} as Record<Presentation, Readonly<Required<WebspringLaunchZoom>>>;
+  const launchZooms = {} as Record<Presentation, Readonly<Required<WSLaunchZoom>>>;
   let hasLauncherMode = false;
 
   for (const slot of presentationSlots) {
@@ -571,7 +571,7 @@ export function createWebspring(input: WSCreateWebspringInput): WSDefinition {
     background,
     folderAppearance,
     folderPresentation,
-    ...(iconEffectInput === undefined ? {} : { iconEffect: iconEffectInput as WebspringIconEffectComponent }),
+    ...(iconEffectInput === undefined ? {} : { iconEffect: iconEffectInput as WSIconEffectComponent }),
     ...(quickSwitch === undefined ? {} : { quickSwitch }),
     widgets,
     preferences,

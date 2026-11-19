@@ -148,7 +148,7 @@ The `webspring` block controls how the application appears in the launcher.
 | `featured` | Highlight the application. |
 | `defaultSelected` | Select the application when the launcher first appears. |
 
-Shells declare `webspringShell` instead. Its optional `folders` block, `{ editable, initial: [{ id, title, order, apps }] }`, groups launcher applications into folders: each `id` matches `folder.<name>`, `title` is localised text, `order` is a whole number placed among the applications' `webspring.order` values, and `apps` lists at least one application ID without repeats. See [Webspring](webspring.md#folders).
+A shell declares its identity in a `WSInfo` instead (see [Webspring](webspring.md#define-a-shell)). Its optional `folders` block, `{ editable, initial: [{ id, title, order, apps }] }`, groups launcher applications into folders: each `id` matches `folder.<name>`, `title` is localised text, `order` is a whole number placed among the applications' `webspring.order` values, and `apps` lists at least one application ID without repeats. See [Webspring](webspring.md#folders).
 
 ## Validate a manifest
 

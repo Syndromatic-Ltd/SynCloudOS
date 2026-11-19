@@ -171,7 +171,7 @@ type ResolvedMountOptions = InternalMountOptions & ResolvedHostOptions;
 function resolveHostOptions(input: InternalMountOptions): ResolvedMountOptions {
   const composition = input.composition ?? emptyProjectComposition;
   // A declared shell gains the project's discovered items once the mount loads the shell's modules.
-  const shell = input.shell ?? composition.shell;
+  const shell = input.shell ?? composition.webspring;
   return {
     ...input,
     composition,
@@ -689,7 +689,7 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
   }
   let initialPathname = `${environment.browser.getLocation().pathname}${environment.browser.getLocation().search}${environment.browser.getLocation().hash}`;
   try {
-    if (!options.application && options.shell !== options.composition.shell) {
+    if (!options.application && options.shell !== options.composition.webspring) {
       // Load the launcher modules after acquiring this mount's lifetime. Application-only
       // hosts never load launcher assets; a replaced mount cannot publish a late Board.
       const { createWebspring, withDiscoveredWebspringItems } = await import("../Webspring/WSApplication");

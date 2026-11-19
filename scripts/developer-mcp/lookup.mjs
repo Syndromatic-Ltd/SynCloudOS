@@ -6,6 +6,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { relative, resolve } from "node:path";
 import ts from "typescript";
 import { inside, projectContext, slash } from "./project.mjs";
+import { retiredWebspringNames } from "../synware/validation-core.mjs";
 export function similarity(query, candidate) {
   const a = query.toLowerCase(), b = candidate.toLowerCase();
   if (a === b) return 1;
@@ -101,11 +102,14 @@ export async function lookupSdk({projectRoot,entry,query,limit=8,full=false}={})
   const program=ts.createProgram(selected.map(value=>value.path),{noLib:true,skipLibCheck:true,moduleResolution:ts.ModuleResolutionKind.Bundler,module:ts.ModuleKind.ESNext,allowJs:false});
   // One result per declaration: a symbol re-exported by several entries lists every entry once.
   const checker=program.getTypeChecker(),symbols=[],byDeclaration=new Map(),counterparts=appkitCounterparts(sdkRoot);
+  // A removed Webspring helper answers with the classes that replace it.
+  const retired=query && Object.hasOwn(retiredWebspringNames,query) ? retiredWebspringNames[query] : null;
+  const queries=[query,...(retired?.replacements ?? [])];
   for (const value of selected) {
     const source=program.getSourceFile(value.path),module=source && checker.getSymbolAtLocation(source);
     if (!module) continue;
     for (const exported of checker.getExportsOfModule(module)) {
-      const name=exported.getName(),score=query ? symbolScore(query,name) : 1;
+      const name=exported.getName(),score=query ? Math.max(...queries.map(candidate=>symbolScore(candidate,name))) : 1;
       if (score<0.55) continue;
       const symbol=exported.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(exported) : exported;
       const declarations=symbol.getDeclarations() ?? [];
@@ -128,5 +132,5 @@ export async function lookupSdk({projectRoot,entry,query,limit=8,full=false}={})
   const rank=name=>name==="sdk" ? 0 : name==="." ? 1 : name==="nse" ? 2 : 3;
   for (const record of symbols) { record.entries.sort((a,b)=>rank(a)-rank(b) || a.localeCompare(b)); record.entry=record.entries[0]; }
   const matches=symbols.sort((a,b)=>b.score-a.score || rank(a.entry)-rank(b.entry) || a.name.localeCompare(b.name)).slice(0,limit);
-  return {version:sdk.version,symbols:matches,docs:docSections(sdkRoot,applicationMenuQuery(query) ? query : matches[0]?.name ?? query ?? entry)};
+  return {version:sdk.version,symbols:matches,...(retired ? {retired:{name:query,replacements:retired.replacements,message:retired.message}} : {}),docs:docSections(sdkRoot,applicationMenuQuery(query) ? query : matches[0]?.name ?? query ?? entry)};
 }

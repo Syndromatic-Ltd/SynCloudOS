@@ -47,7 +47,7 @@ export interface SynCloudOSProjectComposition {
   readonly widgets: readonly WSWidgetDescriptor[];
   readonly contributions: readonly SynCloudOSHostContribution[];
   /** The project's shell, already carrying the discovered panes and widgets. */
-  readonly shell: WSDefinition | null;
+  readonly webspring: WSDefinition | null;
   readonly shellResources: SynCloudOSShellResources;
 }
 
@@ -59,7 +59,7 @@ export const emptyProjectComposition: SynCloudOSProjectComposition = Object.free
   preferences: Object.freeze([]),
   widgets: Object.freeze([]),
   contributions: Object.freeze([]),
-  shell: null,
+  webspring: null,
   shellResources: Object.freeze({}),
 });
 
