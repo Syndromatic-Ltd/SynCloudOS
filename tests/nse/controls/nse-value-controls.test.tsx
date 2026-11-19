@@ -139,6 +139,12 @@ describe("value controls", () => {
     fireEvent.click(control, { clientX: 80, clientY: 4, detail: 1 });
     expect(change.mock.calls).toEqual([[2, "commit"], [4, "commit"]]);
   });
+  it("publishes a decorative divider between rounded segments", () => {
+    render(<NSESegmentedControl aria-label="View" items={[{ id: "a", label: "A" }, { id: "b", label: "B" }, { id: "c", label: "C" }]}
+      selection={{ mode: "select-one", selectedIds: new Set(["a"]), allowsEmpty: false }} />);
+    const group = screen.getByRole("group", { name: "View" });
+    expect(group.querySelectorAll('[data-nse-part="divider"][aria-hidden="true"]')).toHaveLength(2);
+  });
   it("wraps an angle dial round through its start and speaks its value",()=>{const change=vi.fn();render(<NSESlider sliderType="circular" aria-label="Shadow angle" value={345} minimum={0} maximum={360} step={15} wraps controlSize="small" valueText={(value)=>`${value} degrees`} onValueChange={change}/>);const dial=screen.getByRole("slider",{name:"Shadow angle"});expect(dial.getAttribute("aria-valuetext")).toBe("345 degrees");expect(dial.closest('[data-nse-control="slider"][data-nse-slider-type="circular"]')?.getAttribute("data-nse-control-size")).toBe("small");fireEvent.keyDown(dial,{key:"ArrowRight"});expect(change).toHaveBeenLastCalledWith(0,"commit");});
   it("maps circular pointer angle rather than horizontal range position",()=>{const change=vi.fn();const{container}=render(<NSESlider sliderType="circular" aria-label="Angle" value={0} minimum={0} maximum={360} step={15} onValueChange={change}/>);const body=container.querySelector('[data-nse-part="circular-body"]') as HTMLElement;Object.assign(body,{setPointerCapture:vi.fn(),getBoundingClientRect:()=>({left:0,top:0,width:100,height:100,right:100,bottom:100,x:0,y:0,toJSON:()=>({})})});fireEvent.pointerDown(body,{pointerId:1,clientX:100,clientY:50});fireEvent.pointerUp(body,{pointerId:1,clientX:100,clientY:50});expect(change).toHaveBeenCalledWith(90,"commit");});
   it("exposes meter thresholds and interactive rating semantics",()=>{const change=vi.fn();const {rerender}=render(<NSELevelIndicator aria-label="Capacity" value={80} minimum={0} maximum={100} warningValue={70} criticalValue={90}/>);expect(screen.getByRole("meter").getAttribute("data-state")).toBe("warning");rerender(<NSELevelIndicator aria-label="Rating" value={2} minimum={0} maximum={5} mode="rating" onValueChange={change}/>);fireEvent.click(screen.getByRole("radio",{name:"4"}));expect(change).toHaveBeenCalledWith(4,"commit");});

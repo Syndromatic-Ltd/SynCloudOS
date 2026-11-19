@@ -134,6 +134,33 @@ test("the native titlebar inherits a custom theme's colour scheme", async ({ pag
   await expect(header).not.toHaveAttribute("data-nse-colour-scheme-resolved");
 });
 
+test("the scroller knob follows its proportion and the focused native range", async ({ page }) => {
+  await openSpecimen(page, "scroller", "none");
+  for (const orientation of ["horizontal", "vertical"] as const) {
+    const track = page.locator(control("scroller") + `[data-nse-orientation="${orientation}"]`);
+    const input = track.getByRole("slider", { name: orientation + " scroller" });
+    const knob = track.locator(part("knob"));
+    const bounds = (await track.boundingBox())!;
+    const field = (await input.boundingBox())!;
+    const initial = (await knob.boundingBox())!;
+    expect(Math.min(field.width, field.height)).toBeGreaterThanOrEqual(24);
+    await expect(knob).toHaveCSS("pointer-events", "none");
+    const axis = orientation === "horizontal" ? "x" : "y";
+    const size = orientation === "horizontal" ? "width" : "height";
+    expect(initial[size]).toBeCloseTo((bounds[size] - 2) / 4, 0);
+    expect(initial[axis] - bounds[axis] - 1).toBeCloseTo((bounds[size] - 2 - initial[size]) / 4, 0);
+    if (orientation === "horizontal") await page.mouse.click(field.x + field.width / 2, field.y + 2);
+    else await page.mouse.click(field.x + 2, field.y + field.height / 2);
+    await expect(input).toBeFocused();
+    await expect.poll(async () => Number(await input.inputValue())).toBeGreaterThan(25);
+    await input.press("End");
+    await expect(input).toBeFocused();
+    await expect(input).toHaveValue("100");
+    const end = (await knob.boundingBox())!;
+    expect(end[axis] + end[size]).toBeCloseTo(bounds[axis] + bounds[size] - 1, 0);
+  }
+});
+
 test("undrawn states keep base paint", async ({ page }) => {
   for (const [specimen, name] of [["tabs", "cell"], ["segments", "bezel"]]) {
     const selector = "#" + specimen + " " + part(name) + ":not(" + selected + ")";

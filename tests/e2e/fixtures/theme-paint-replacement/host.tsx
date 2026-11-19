@@ -19,6 +19,7 @@ import { TabBarController } from "../../../../src/NSE/Navigation/TabBarControlle
 import tabIcon from "../../../../src/NSE/Navigation/nse-tab-bar-more.svg";
 import { StandaloneControlHost } from "../../../../src/NSE/Overlays/NSEStandaloneControlHost";
 import { NSEPopover } from "../../../../src/NSE/Overlays/NSEPopover";
+import { NSEScroller } from "../../../../src/NSE/Scroll/NSEScroller";
 import { NSEToolbarController } from "../../../../src/NSE/Toolbars/NSEToolbarController";
 import { ToolbarView } from "../../../../src/NSE/Toolbars/ToolbarView";
 import type { ToolbarPreferences, ToolbarRuntimePort } from "../../../../src/NSE/Toolbars/toolbarTypes";
@@ -191,6 +192,15 @@ const popup = () => <NSEPopUpButton accessibleLabel="Order" label="Order" labelH
   isEnabled={!disabled} bezelColour={customColour} contentTintColour={template ? customColour : undefined}
   defaultValue="name" items={[{ title: "Name", value: "name" }, { title: "Date", value: "date" }]} />;
 
+function Scrollers() {
+  const [horizontal, setHorizontal] = useState(25);
+  const [vertical, setVertical] = useState(25);
+  return <>
+    <NSEScroller orientation="horizontal" value={horizontal} maximum={100} knobProportion={0.25} style={{ width: 200 }} onValueChange={setHorizontal} />
+    <NSEScroller orientation="vertical" value={vertical} maximum={100} knobProportion={0.25} style={{ height: 200 }} onValueChange={setVertical} />
+  </>;
+}
+
 const specimens = {
   "window-standard": () => <WindowSpecimen chrome="standard" />,
   "window-metal": () => <WindowSpecimen chrome="metal" />,
@@ -218,6 +228,7 @@ const specimens = {
     borderColour={parameters.has("border") ? "#c8102e" : undefined} style={{ width: 620, minHeight: 240 }}><p>Options</p></NSEBox>,
   "search-field": () => <NSESearchField aria-label="Search" width={880} height={36} showsSearchIcon defaultValue="Documents" />,
   switch: () => <NSESwitch aria-label="Sync" />,
+  scroller: () => <Scrollers />,
 } satisfies Record<string, () => ReactNode>;
 
 const entries = Object.entries(specimens).filter(([id]) => selected === null || id === selected);

@@ -1387,6 +1387,8 @@
     },
     "scroller": {
       "parts": [
+        "field",
+        "knob",
         "track"
       ],
       "states": [
@@ -1458,6 +1460,7 @@
         "cell",
         "content",
         "disclosure",
+        "divider",
         "field",
         "overflow",
         "segment",
@@ -1560,7 +1563,9 @@
       "states": [
         "enabled=false",
         "focused",
-        "tracking=false"
+        "highlighted",
+        "tracking=false",
+        "tracking=true"
       ],
       "variants": {
         "control-size": [
@@ -1660,9 +1665,11 @@
       ],
       "states": [
         "enabled=false",
+        "highlighted",
         "state=off",
         "state=on",
-        "tracking=false"
+        "tracking=false",
+        "tracking=true"
       ],
       "variants": {
         "material": [

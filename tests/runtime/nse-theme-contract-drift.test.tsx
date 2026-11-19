@@ -100,7 +100,7 @@ import { createChronosphereAppSubject } from "../../src/NSE/Chronosphere/chronos
 import { defaultChronosphereLabels } from "../../src/NSE/Chronosphere/chronosphereViewTypes";
 import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
 import { NSESegmentedControl } from "../../src/NSE/Controls/Values/NSESegmentedControl";
-import { NSEBox } from "../../src/NSE/Controls/Fields/NSEFields";
+import { NSEBox, NSESwitch } from "../../src/NSE/Controls/Fields/NSEFields";
 import { NSEPopUpButton } from "../../src/NSE/Menus/NSEPopUpButton";
 import { PageCurlLeaf } from "../../src/NSE/Page/PageCurlLeaf";
 
@@ -130,6 +130,26 @@ function collect() {
 }
 function Host({ children }: { children: React.ReactNode }) { return <NSEAppearanceProvider theme={atmoTheme} colourScheme="light"><StandaloneControlHost document={document} window={window} presentation={presentation}>{children}</StandaloneControlHost></NSEAppearanceProvider>; }
 afterEach(cleanup);
+it("renders the switch and slider tracking states during pointer interaction", () => {
+  const view = render(<Host>
+    <NSESwitch aria-label="Sync" />
+    <NSESlider aria-label="Level" value={50} />
+    <NSESlider aria-label="Angle" sliderType="circular" value={50} onValueChange={() => {}} />
+  </Host>);
+  for (const control of [view.getByRole("switch"), view.getByRole("slider", { name: "Level" }), view.getByRole("slider", { name: "Angle" })]) {
+    Object.assign(control, { setPointerCapture() {}, hasPointerCapture: () => false });
+    const root = control.closest("[data-nse-control]")!;
+    fireEvent.pointerDown(control, { button: 0, pointerId: 1, clientX: 10, clientY: 10 });
+    expect(root.getAttribute("data-nse-highlighted")).toBe("");
+    expect(root.getAttribute("data-nse-tracking")).toBe("true");
+    collect();
+    fireEvent.pointerCancel(control, { pointerId: 1 });
+    expect(root.hasAttribute("data-nse-highlighted")).toBe(false);
+    expect(root.getAttribute("data-nse-tracking")).toBe("false");
+  }
+  collect();
+});
+
 for (const surface of themeBaselineCatalogue) it(`renders ${surface.id}`, async () => {
   const view = render(<Host>{surface.render()}</Host>);
   if (surface.id === "web-view") {

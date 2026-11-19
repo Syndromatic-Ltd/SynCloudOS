@@ -428,7 +428,7 @@ Contract version 1: 73 controls, 48 colours.
 
 ### `scroller`
 
-- Parts: `track`
+- Parts: `field`, `knob`, `track`
 - States: `enabled=false`
 - Variants:
   - `data-nse-orientation`: `vertical`
@@ -454,7 +454,7 @@ Contract version 1: 73 controls, 48 colours.
 
 ### `segmented-control`
 
-- Parts: `bezel`, `cell`, `content`, `disclosure`, `field`, `overflow`, `segment`, `title`
+- Parts: `bezel`, `cell`, `content`, `disclosure`, `divider`, `field`, `overflow`, `segment`, `title`
 - States: `enabled=false`, `focused`, `highlighted`, `hovered`, `selected`, `state=off`, `state=on`
 - Variants:
   - `data-nse-button-type`: `radio`
@@ -483,7 +483,7 @@ Contract version 1: 73 controls, 48 colours.
 ### `slider`
 
 - Parts: `accessory`, `bezel`, `border`, `circular-body`, `content`, `decoration`, `field`, `fill`, `highlight`, `image`, `knob`, `linear-alternative`, `title`, `track`
-- States: `enabled=false`, `focused`, `tracking=false`
+- States: `enabled=false`, `focused`, `highlighted`, `tracking=false`, `tracking=true`
 - Variants:
   - `data-nse-control-size`: `mini`, `regular`, `small`
   - `data-nse-material`: `metal`
@@ -517,7 +517,7 @@ Contract version 1: 73 controls, 48 colours.
 ### `switch`
 
 - Parts: `background`, `bezel`, `border`, `decoration`, `fill`, `highlight`, `image`, `knob`, `label`, `title`, `track`
-- States: `enabled=false`, `state=off`, `state=on`, `tracking=false`
+- States: `enabled=false`, `highlighted`, `state=off`, `state=on`, `tracking=false`, `tracking=true`
 - Variants:
   - `data-nse-material`: `metal`
   - `data-nse-position`: `leading`, `trailing`

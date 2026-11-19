@@ -168,6 +168,17 @@ describe("scroll progress and navigation", () => {
     view.unmount();
   });
   it("keeps an always-visible zero-range scroller disabled", () => { render(<NSEScroller orientation="vertical" policy="always" value={0} maximum={0} onValueChange={() => {}} />); expect(screen.getByRole("slider")).toHaveProperty("disabled", true); });
+  it.each(["horizontal", "vertical"] as const)("exposes a %s scroller knob while retaining the native range", orientation => {
+    const change = vi.fn();
+    render(<NSEScroller orientation={orientation} value={25} maximum={50} knobProportion={0.25} onValueChange={change} />);
+    const input = screen.getByRole("slider", { name: orientation + " scroller" });
+    const track = input.closest<HTMLElement>('[data-nse-control="scroller"][data-nse-part="track"]')!;
+    expect(track.querySelector('[data-nse-part="knob"]')?.getAttribute("aria-hidden")).toBe("true");
+    expect(track.style.getPropertyValue("--nse-scroller-knob-length")).toBe("25%");
+    expect(track.style.getPropertyValue("--nse-scroller-position")).toBe("0.5");
+    fireEvent.change(input, { target: { value: "42" } });
+    expect(change).toHaveBeenCalledWith(42);
+  });
   it("exposes the system chrome spinner's accessible status and visual variant", () => {
     render(<Spinner size="large" tone="dark" label="Loading records" />);
     const spinner = screen.getByRole("status", { name: "Loading records" });

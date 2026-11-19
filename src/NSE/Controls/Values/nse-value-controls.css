@@ -216,3 +216,14 @@ meter[data-nse-control="level-indicator"]::-webkit-meter-even-less-good-value,
 }
 
 }
+
+@layer nse.structure {
+  [data-nse-control="segmented-control"] > [data-nse-part="segment"] { position: relative; }
+  [data-nse-control="segmented-control"] > [data-nse-part="segment"] > [data-nse-part="divider"] {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 0;
+    inline-size: 0;
+    pointer-events: none;
+  }
+}

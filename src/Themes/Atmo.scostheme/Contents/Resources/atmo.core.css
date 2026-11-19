@@ -6,6 +6,8 @@
 :scope [data-nse-control="scroller"],
 :scope:is([data-nse-control="scroller"]),
 :scope[data-nse-control="scroller"] {
+  --nse-scroller-knob-length: 36px;
+  --nse-scroller-knob-thickness: 9px;
   margin:3px;
   width:calc(100% - 6px);
   height:11px;
@@ -22,59 +24,25 @@
   height:calc(100% - 6px);
 }
 
-:scope [data-nse-control="scroller"]::-webkit-slider-runnable-track,
-:scope:is([data-nse-control="scroller"]::-webkit-slider-runnable-track),
-:scope[data-nse-control="scroller"]::-webkit-slider-runnable-track {
-  background:transparent;
-  border:0;
-}
-
-:scope [data-nse-control="scroller"]::-webkit-slider-thumb,
-:scope:is([data-nse-control="scroller"]::-webkit-slider-thumb),
-:scope[data-nse-control="scroller"]::-webkit-slider-thumb {
-  width:36px;
-  height:9px;
-  border:0;
+[data-nse-control="scroller"] > [data-nse-part="knob"] {
   border-radius:5px;
   background:linear-gradient(#8a8e93,#b0b4b9);
   box-shadow:inset 0 0 0 1px rgba(0,0,0,0.28),inset 0 1px 0 rgba(255,255,255,0.35);
 }
 
-:scope [data-nse-control="scroller"][data-nse-orientation="vertical"]::-webkit-slider-thumb,
-:scope:is([data-nse-control="scroller"][data-nse-orientation="vertical"]::-webkit-slider-thumb),
-:scope[data-nse-control="scroller"][data-nse-orientation="vertical"]::-webkit-slider-thumb {
-  width:9px;
-  height:36px;
+[data-nse-control="scroller"][data-nse-orientation="vertical"] > [data-nse-part="knob"] {
   background:linear-gradient(to right,#92969b,#b4b8bd 50%,#92969b);
 }
 
-:scope [data-nse-control="scroller"]::-moz-range-thumb,
-:scope:is([data-nse-control="scroller"]::-moz-range-thumb),
-:scope[data-nse-control="scroller"]::-moz-range-thumb {
-  width:36px;
-  height:9px;
-  border:0;
-  border-radius:5px;
-  background:linear-gradient(#8a8e93,#b0b4b9);
-}
-
-:scope [data-nse-control="scroller"]:hover::-webkit-slider-thumb,
-:scope:is([data-nse-control="scroller"]:hover::-webkit-slider-thumb),
-:scope[data-nse-control="scroller"]:hover::-webkit-slider-thumb {
+[data-nse-control="scroller"]:hover > [data-nse-part="knob"] {
   background:linear-gradient(#6f7378,#969a9f);
 }
 
-:scope [data-nse-control="scroller"]:focus-visible,
-:scope:is([data-nse-control="scroller"]:focus-visible),
-:scope[data-nse-control="scroller"]:focus-visible {
+[data-nse-control="scroller"]:has(> [data-nse-part="field"]:focus-visible) {
   box-shadow:var(--nse-atmo-focus-ring);
 }
 
-:scope [data-nse-control="scroller"]:disabled,
-:scope:is([data-nse-control="scroller"]:disabled),
-:scope[data-nse-control="scroller"]:disabled {
-  opacity:0.45;
-}
+[data-nse-control="scroller"][data-nse-enabled="false"] { opacity:0.45; }
 
 :scope[data-nse-colour-scheme-resolved="dark"] [data-nse-control="scroller"],
 :scope[data-nse-colour-scheme-resolved="dark"]:is([data-nse-control="scroller"]),
@@ -86,11 +54,11 @@
   box-shadow:inset 0 1px 2px rgba(0,0,0,0.5),0 1px 0 rgba(255,255,255,0.06);
 }
 
-:scope[data-nse-colour-scheme-resolved="dark"] [data-nse-control="scroller"]::-webkit-slider-thumb,
-:scope[data-nse-colour-scheme-resolved="dark"]:is([data-nse-control="scroller"]::-webkit-slider-thumb),
-:scope [data-nse-colour-scheme-resolved="dark"] [data-nse-control="scroller"]::-webkit-slider-thumb,
-:scope:is([data-nse-colour-scheme-resolved="dark"]) [data-nse-control="scroller"]::-webkit-slider-thumb,
-:scope:is([data-nse-colour-scheme-resolved="dark"]):is([data-nse-control="scroller"]::-webkit-slider-thumb) {
+:scope[data-nse-colour-scheme-resolved="dark"] [data-nse-control="scroller"] > [data-nse-part="knob"],
+:scope[data-nse-colour-scheme-resolved="dark"]:is([data-nse-control="scroller"]) > [data-nse-part="knob"],
+:scope [data-nse-colour-scheme-resolved="dark"] [data-nse-control="scroller"] > [data-nse-part="knob"],
+:scope:is([data-nse-colour-scheme-resolved="dark"]) [data-nse-control="scroller"] > [data-nse-part="knob"],
+:scope:is([data-nse-colour-scheme-resolved="dark"]):is([data-nse-control="scroller"]) > [data-nse-part="knob"] {
   background:linear-gradient(#5c646e,#444b54);
   box-shadow:inset 0 0 0 1px rgba(0,0,0,0.55),inset 0 1px 0 rgba(255,255,255,0.12);
 }
