@@ -219,6 +219,35 @@ describe("WSLauncherViewController and WSIconView", () => {
     expect(screen.getByRole("button", { name: "Open Beta" })).toBeTruthy();
   });
 
+  it("shows a launching app's spinner on its folder only where a launcher asks for it", async () => {
+    const runtime = await createBootedRuntime(["com.example.one", "com.example.alpha", "com.example.beta"]);
+    class SpinnerLauncher extends WSLauncherViewController {
+      override renderView() {
+        return <div>{this.items.map((item, index) => <WSIconView key={item.id} item={item} index={index} folderSpinner={item.id === "folder.tools"} />)}</div>;
+      }
+    }
+    class SpinnerApp extends WSApplication {
+      static override mainViewController = SpinnerLauncher;
+    }
+    const info: WSInfo = {
+      ...baseInfo,
+      folders: { editable: true, initial: [{ id: "folder.tools", title: { key: "folders.tools", fallback: "Tools" }, order: 1, apps: ["com.example.alpha", "com.example.beta"] }] },
+    };
+    render(
+      <SynCloudOSProvider runtime={runtime}>
+        <WebspringHost shell={createWebspring({ info, application: SpinnerApp })} startupPhase="complete" />
+      </SynCloudOSProvider>,
+    );
+    const folder = await screen.findByRole("button", { name: "Open folder Tools" });
+    expect(folder.querySelector('[aria-label="Loading Tools"]')).toBeNull();
+    fireEvent.click(folder);
+    fireEvent.click(await screen.findByRole("button", { name: "Open Alpha" }));
+    await waitFor(() => {
+      expect(folder.querySelector('[aria-label="Loading Tools"]')).not.toBeNull();
+      expect(folder.querySelector(".webspring-board-icon-artwork > .webspring-board-icon-well")?.getAttribute("data-nse-state")).toBe("loading");
+    });
+  });
+
   it("drags an app out of a folder and drops it between top-level items", async () => {
     vi.useFakeTimers();
     const runtime = await createBootedRuntime([

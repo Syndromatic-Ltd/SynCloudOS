@@ -63,6 +63,8 @@ export interface WSIconViewProps {
   readonly jiggle?: boolean;
   /** `false` leaves the entrance, launch and return to the launcher's own motion. Defaults to `true`. */
   readonly choreography?: boolean;
+  /** A folder shows a spinner while one of its apps opens or launches. */
+  readonly folderSpinner?: boolean;
 }
 
 /** What ended a hover: the pointer leaving, or focus moving away. */
@@ -288,7 +290,7 @@ function AppIcon({ launcher, plumbing, app, index, columns = 4, radialExit, layo
   </button></LayoutView>;
 }
 
-function FolderIcon({ launcher, plumbing, folder, index, columns = 4, radialExit, layoutTransition, showLabel = true, className, style, onHoverStart, onHoverEnd, iconEffect, jiggle, choreography = true }: IconProps & { readonly folder: WSFolderItem }) {
+function FolderIcon({ launcher, plumbing, folder, index, columns = 4, radialExit, layoutTransition, showLabel = true, className, style, onHoverStart, onHoverEnd, iconEffect, jiggle, choreography = true, folderSpinner }: IconProps & { readonly folder: WSFolderItem }) {
   const interaction = useIconInteraction(launcher, plumbing, folder.id, folder.title, false, index, launcher.items.map((item) => item.id), columns, { onHoverStart, onHoverEnd });
   const reorderMotion = useReorderMotion(layoutTransition);
   const { reducedMotion } = useNSEAnimationEnvironment();
@@ -299,6 +301,8 @@ function FolderIcon({ launcher, plumbing, folder, index, columns = 4, radialExit
   const jiggles = Boolean(jiggle) && editing && !reducedMotion;
   const open = launcher.folders.openFolder?.id === folder.id;
   const drawing = useNSEThemeInteraction<HTMLButtonElement>(true, true);
+  const launchingIds = [launcher.openingAppId, launcher.launchingAppId].filter(Boolean).map(normalizeBundleIdentifier);
+  const loading = Boolean(folderSpinner) && folder.apps.some((app) => launchingIds.includes(normalizeBundleIdentifier(app.bundleIdentifier)));
 
   return <LayoutView className="webspring-board-slot" layoutTransition={dragging ? null : reorderMotion}><button
     type="button"
@@ -323,9 +327,10 @@ function FolderIcon({ launcher, plumbing, folder, index, columns = 4, radialExit
     onClick={(event) => plumbing.openFolder(folder, event.currentTarget)}
   >
     <Artwork choreography={choreography} index={index} total={launcher.items.length} state={iconState(launcher, radialExit)} exit={radialExit}>
-      <span data-nse-part="bezel" className="webspring-board-icon-well">
+      <span data-nse-part="bezel" className="webspring-board-icon-well" data-nse-state={loading ? "loading" : undefined}>
         {iconEffect ? <WSIconEffect active={(interaction.hovered || interaction.focused || selected) && !editing} className="webspring-icon-effect" /> : null}
         <WSFolderTileView folder={folder} dropTarget={launcher.folders.dropTargetId === folder.id} />
+        {loading ? <LoadingSpinner label={`Loading ${folder.title}`} variant="dark" /> : null}
         <Badge count={folder.badgeCount} />
       </span>
       {showLabel ? <span data-nse-part="title" className="webspring-board-icon-label">{folder.title}</span> : null}
