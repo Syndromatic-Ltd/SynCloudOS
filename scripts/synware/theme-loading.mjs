@@ -162,7 +162,83 @@ export function themeStylesheet(bundle, fileImport) {
 }
 /** Only host source is inspected. Bundle Info.ts is parsed by validation, never executed. */
 export function referencedThemeIdentifiers(root, bundles) {
-  const known = new Set(["com.syndromatic.atmo", ...bundles.map(bundle => bundle.theme.bundleIdentifier)]), selected = new Set();
+  const moduleName = "virtual:syncloudos/themes";
+  const known = new Set(["com.syndromatic.atmo", ...bundles.map(bundle => bundle.theme.bundleIdentifier)]);
+  const selected = new Set();
+
+  function analyse(file, text) {
+    const sourcePath = file.replaceAll("\\", "/");
+    const source = ts.createSourceFile(sourcePath, text, ts.ScriptTarget.Latest, true);
+    const options = { noResolve: true, noLib: true, allowJs: true };
+    const host = { ...ts.createCompilerHost(options), getSourceFile: name => name === sourcePath ? source : undefined };
+    const checker = ts.createProgram([sourcePath], options, host).getTypeChecker();
+    const registries = new Set(), namespaces = new Set();
+    const isVirtualModule = node => node && ts.isStringLiteralLike(node) && node.text === moduleName;
+
+    for (const statement of source.statements) {
+      if (!ts.isImportDeclaration(statement) || !isVirtualModule(statement.moduleSpecifier) || statement.importClause?.isTypeOnly) continue;
+      const named = statement.importClause?.namedBindings;
+      if (!named) continue;
+      if (ts.isNamespaceImport(named)) namespaces.add(checker.getSymbolAtLocation(named.name));
+      else for (const binding of named.elements) {
+        if (!binding.isTypeOnly && (binding.propertyName?.text ?? binding.name.text) === "themes") {
+          registries.add(checker.getSymbolAtLocation(binding.name));
+        }
+      }
+    }
+
+    function unsupported(node) {
+      const position = source.getLineAndCharacterOfPosition(node.getStart(source));
+      throw new TypeError(file + ":" + (position.line + 1) + ":" + (position.character + 1) +
+        ": Unsupported use of " + moduleName + ". Select a theme directly with themes[id].");
+    }
+
+    function select(registry) {
+      const access = registry.parent;
+      if (!ts.isElementAccessExpression(access) || access.expression !== registry) unsupported(registry);
+      const key = access.argumentExpression;
+      if (!ts.isStringLiteralLike(key)) {
+        for (const id of known) selected.add(id);
+        return;
+      }
+      if (!known.has(key.text)) throw new TypeError(file + ": Unknown theme " + key.text + ".");
+      selected.add(key.text);
+    }
+
+    function inspect(node) {
+      if (ts.isImportDeclaration(node) || ts.isTypeNode(node) && !ts.isExpressionWithTypeArguments(node)) return;
+      if (ts.isExportDeclaration(node)) {
+        if (node.isTypeOnly) return;
+        const names = node.exportClause && ts.isNamedExports(node.exportClause) ? node.exportClause.elements : null;
+        if (isVirtualModule(node.moduleSpecifier) && (!names || names.some(name => !name.isTypeOnly))) unsupported(node);
+        if (!node.moduleSpecifier) for (const name of names ?? []) {
+          if (name.isTypeOnly) continue;
+          const symbol = checker.getExportSpecifierLocalTargetSymbol(name);
+          if (symbol && (registries.has(symbol) || namespaces.has(symbol))) unsupported(name);
+        }
+        return;
+      }
+      if (ts.isImportEqualsDeclaration(node) && !node.isTypeOnly && ts.isExternalModuleReference(node.moduleReference) &&
+          isVirtualModule(node.moduleReference.expression)) unsupported(node);
+      if (ts.isCallExpression(node) && isVirtualModule(node.arguments[0]) &&
+          (node.expression.kind === ts.SyntaxKind.ImportKeyword || ts.isIdentifier(node.expression) && node.expression.text === "require")) unsupported(node);
+      if (ts.isIdentifier(node)) {
+        const parent = node.parent;
+        const symbol = ts.isShorthandPropertyAssignment(parent)
+          ? checker.getShorthandAssignmentValueSymbol(parent)
+          : checker.getSymbolAtLocation(node);
+        if (symbol && registries.has(symbol)) select(node);
+        if (symbol && namespaces.has(symbol)) {
+          if (!ts.isPropertyAccessExpression(parent) || parent.expression !== node || parent.name.text !== "themes") unsupported(node);
+          select(parent);
+        }
+      }
+      ts.forEachChild(node, inspect);
+    }
+
+    inspect(source);
+  }
+
   function visit(directory) {
     for (const entry of readdirSync(directory, { withFileTypes: true })) {
       const file = resolve(directory, entry.name);
@@ -170,25 +246,12 @@ export function referencedThemeIdentifiers(root, bundles) {
       if (entry.isDirectory()) { visit(file); continue; }
       if (!/\.(?:tsx?|jsx?|mjs|mts)$/u.test(entry.name) || /\.(?:test|spec)\.[^.]+$/u.test(entry.name)) continue;
       const text = readFileSync(file, "utf8");
-      if (!text.includes("virtual:syncloudos/themes")) continue;
-      const source = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true, /tsx|jsx/u.test(entry.name) ? ts.ScriptKind.TSX : ts.ScriptKind.TS);
-      const bindings = new Set(), namespaces = new Set();
-      for (const node of source.statements) if (ts.isImportDeclaration(node) && node.moduleSpecifier.text === "virtual:syncloudos/themes") {
-        const named = node.importClause?.namedBindings;
-        if (named && ts.isNamedImports(named)) for (const binding of named.elements) if ((binding.propertyName?.text ?? binding.name.text) === "themes") bindings.add(binding.name.text);
-        if (named && ts.isNamespaceImport(named)) namespaces.add(named.name.text);
-      }
-      function inspect(node) {
-        if (ts.isElementAccessExpression(node) && (ts.isIdentifier(node.expression) && bindings.has(node.expression.text) || ts.isPropertyAccessExpression(node.expression) && node.expression.name.text === "themes" && namespaces.has(node.expression.expression.getText(source)))) {
-          if (ts.isStringLiteralLike(node.argumentExpression)) { if (!known.has(node.argumentExpression.text)) throw new TypeError(`${file}: Unknown theme ${node.argumentExpression.text}.`); selected.add(node.argumentExpression.text); }
-          else for (const id of known) selected.add(id);
-        }
-        ts.forEachChild(node, inspect);
-      }
-      inspect(source);
+      if (text.includes(moduleName)) analyse(file, text);
     }
   }
-  visit(root); return selected;
+
+  visit(root);
+  return selected;
 }
 export function themeModuleSource(bundles, selected, fileImport, stylePrefix) {
   const imports = ['import { atmoTheme as builtInAtmo } from "@syndromatic/syncloudos/nse/themes/atmo";'], entries = ['"com.syndromatic.atmo":builtInAtmo'];

@@ -37,6 +37,46 @@ describe("theme loading", () => {
     const css = outputs.filter(output => output.type === "asset" && output.fileName.endsWith(".css")).map(output => String(output.source)).join("\n");
     expect(css).toContain("--paper-marker"); expect(css).not.toContain("--unused-marker"); expect(css).toContain("nse.atmo");
   }, 30_000);
+  it.each([
+    ['import { themes as registry } from "virtual:syncloudos/themes";', "registry[key]"],
+    ['import * as registry from "virtual:syncloudos/themes";', "registry.themes[key]"],
+  ])("includes every stylesheet for direct runtime keys (%s)", async (statement, access) => {
+    const root = project();
+    writeFileSync(join(root, "src/main.ts"), statement + '\nconst key = location.hash.slice(1); console.log(' + access + ');');
+    const plugin = synCloudOS({ webspringEntry: false });
+    await plugin.configResolved({ root, command: "build" });
+    const code = plugin.load("\0virtual:syncloudos/themes");
+    expect(code).toContain('import "virtual:syncloudos/theme-style/com.example.paper.css";');
+    expect(code).toContain('import "virtual:syncloudos/theme-style/com.example.unused.css";');
+  });
+  it("follows the imported binding through lexical shadowing and type-only references", async () => {
+    const root = project();
+    writeFileSync(join(root, "src/main.ts"), `
+      import { themes as registry } from "virtual:syncloudos/themes";
+      type Registry = typeof registry;
+      function log(registry: Registry, key: string) { console.log(registry, registry[key]); }
+      console.log(registry["com.example.paper"], log);
+    `);
+    const plugin = synCloudOS({ webspringEntry: false });
+    await plugin.configResolved({ root, command: "build" });
+    const code = plugin.load("\0virtual:syncloudos/themes");
+    expect(code).toContain('import "virtual:syncloudos/theme-style/com.example.paper.css";');
+    expect(code).not.toContain('import "virtual:syncloudos/theme-style/com.example.unused.css";');
+  });
+  it.each([
+    'import { themes } from "virtual:syncloudos/themes";\nconst copied = themes;',
+    'import { themes } from "virtual:syncloudos/themes";\nconst { "com.example.paper": paper } = themes;',
+    'import { themes } from "virtual:syncloudos/themes";\nconsole.log({ themes });',
+    'import * as registry from "virtual:syncloudos/themes";\nconst { themes } = registry;',
+    'import { themes } from "virtual:syncloudos/themes";\nexport { themes };',
+    'const { themes } = await import("virtual:syncloudos/themes");',
+  ])("reports a source location when the registry escapes static analysis (%s)", async source => {
+    const root = project();
+    writeFileSync(join(root, "src/main.ts"), source);
+    const plugin = synCloudOS({ webspringEntry: false });
+    await expect(plugin.configResolved({ root, command: "build" }))
+      .rejects.toThrow(/main\.ts:\d+:\d+: Unsupported use of virtual:syncloudos\/themes/u);
+  });
   it("disables discovery when themesDirectory is false", async () => { const root = project(); const plugin = synCloudOS({ webspringEntry: false, themesDirectory: false }); await plugin.configResolved({ root, command: "serve" }); const code = plugin.load("\0virtual:syncloudos/themes"); expect(code).not.toContain("com.example.paper"); });
   it("a .frame.css import is an ordinary stylesheet", async () => {
     const root = project();
