@@ -132,7 +132,7 @@ describe("WSLauncherViewController and WSIconView", () => {
     class DialLikeLauncher extends WSLauncherViewController {
       override renderView() {
         return <div className="dial-like">{this.items.map((item, index) => (
-          <WSIconView key={item.id} item={item} index={index} iconEffect glowArtwork jiggle className="dial-icon" onHoverStart={(id) => hovered.push(id)} />
+          <WSIconView key={item.id} item={item} index={index} iconEffect glowArtwork jiggle choreography={false} className="dial-icon" onHoverStart={(id) => hovered.push(id)} />
         ))}</div>;
       }
     }
@@ -149,6 +149,8 @@ describe("WSLauncherViewController and WSIconView", () => {
     expect(one.classList.contains("dial-icon")).toBe(true);
     expect(one.classList.contains("webspring-board-icon")).toBe(false);
     expect(one.querySelector(".webspring-icon-artwork__glow")).not.toBeNull();
+    // The launcher moves these icons itself, so their artwork has no presentation style.
+    expect((one.querySelector(".webspring-board-icon-artwork") as HTMLElement).getAttribute("style")).toBeNull();
     fireEvent.pointerEnter(one, { pointerId: 1 });
     expect(hovered).toEqual(["com.example.one"]);
     // The handler replaces the default preview.
