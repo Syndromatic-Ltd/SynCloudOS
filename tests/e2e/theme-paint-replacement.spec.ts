@@ -103,6 +103,25 @@ test("paint-only themes keep the typography inherited by a drawn part", async ({
   await expect(title).toHaveCSS("line-height", "27px");
 });
 
+test("switch state labels are opt-in without changing their accessible state", async ({ page }) => {
+  const toggle = page.getByRole("switch", { name: "Sync" });
+  const labels = toggle.locator(part("label"));
+  await openSpecimen(page, "switch", "none");
+  await expect(labels.first()).toHaveCSS("display", "inline-block");
+  await expect(labels.last()).toHaveCSS("display", "inline-block");
+
+  await openSpecimen(page, "switch");
+  await expect(labels.first()).toBeHidden();
+  await expect(labels.last()).toBeHidden();
+  await expect(toggle).toHaveAttribute("aria-checked", "false");
+  await toggle.press("Space");
+  await expect(toggle).toHaveAttribute("aria-checked", "true");
+
+  await page.addStyleTag({ content: control("switch") + " " + part("label") + " { --nse-switch-state-label-display: inline-block; }" });
+  await expect(labels.first()).toHaveCSS("display", "inline-block");
+  await expect(labels.last()).toHaveCSS("display", "inline-block");
+});
+
 test("undrawn states keep base paint", async ({ page }) => {
   for (const [specimen, name] of [["tabs", "cell"], ["segments", "bezel"]]) {
     const selector = "#" + specimen + " " + part(name) + ":not(" + selected + ")";

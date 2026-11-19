@@ -6,7 +6,7 @@ import { atmoTheme } from "../../../../src/NSE/Appearance/atmo";
 import { NSEAppearanceProvider, useNSEAppearance } from "../../../../src/NSE/Appearance/NSEAppearanceProvider";
 import { NSEImage } from "../../../../src/NSE/Controls/Images/NSEImageResource";
 import { NSEButton } from "../../../../src/NSE/Controls/Buttons/NSEButton";
-import { NSEBox } from "../../../../src/NSE/Controls/Fields/NSEFields";
+import { NSEBox, NSESwitch } from "../../../../src/NSE/Controls/Fields/NSEFields";
 import { NSESearchField } from "../../../../src/NSE/Controls/Fields/NSESearchField";
 import { NSESegmentedControl } from "../../../../src/NSE/Controls/Values/NSESegmentedControl";
 import { NSEUserDefaultsController } from "../../../../src/NSE/Controllers/NSEUserDefaultsController";
@@ -217,6 +217,7 @@ const specimens = {
   box: () => <NSEBox title="Document export and display options" titlePosition="atTop" fillColour={parameters.has("colour") ? "#ff00ff" : undefined}
     borderColour={parameters.has("border") ? "#c8102e" : undefined} style={{ width: 620, minHeight: 240 }}><p>Options</p></NSEBox>,
   "search-field": () => <NSESearchField aria-label="Search" width={880} height={36} showsSearchIcon defaultValue="Documents" />,
+  switch: () => <NSESwitch aria-label="Sync" />,
 } satisfies Record<string, () => ReactNode>;
 
 const entries = Object.entries(specimens).filter(([id]) => selected === null || id === selected);

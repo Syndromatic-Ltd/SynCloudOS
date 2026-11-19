@@ -139,6 +139,8 @@ SVG works the same way, as a file or a `data:` URL, and stays sharp at every den
 
 Atmo is always loaded in the `nse.atmo` layer beneath installed themes. When a theme draws an element in a particular state, the build clears the underlying paint and typography on that element and its `::before` and `::after`. Other parts and states keep their underlying drawing. `validate_theme` reports coverage for a whole system theme.
 
+Switch state labels are optional. To show them, set `--nse-switch-state-label-display: inline-block` on the switch's `label` parts. The switch reports its state through `aria-checked` whether or not the labels are drawn.
+
 ## Typography
 
 Set `font`, its longhands, `line-height`, `letter-spacing`, `word-spacing` and `text-transform` on the parts you draw. When a drawing omits an inherited typography property, the part takes that property from its parent.

@@ -179,7 +179,10 @@
   inset: 0;
 }
 :where(:scope) [data-nse-part="label"]:where([data-nse-control="switch"] *),
-:where(:scope):is([data-nse-part="label"]:where([data-nse-control="switch"] *)) { display: inline-block; white-space: nowrap; }
+:where(:scope):is([data-nse-part="label"]:where([data-nse-control="switch"] *)) {
+  display: var(--nse-switch-state-label-display, none);
+  white-space: nowrap;
+}
 :where(:scope) [data-nse-part="title"]:where([data-nse-control="switch"] *),
 :where(:scope):is([data-nse-part="title"]:where([data-nse-control="switch"] *)) {
   position:absolute;
