@@ -103,6 +103,86 @@ describe("WSLauncherViewController and WSIconView", () => {
     expect(proxy!.textContent).toContain("One");
   });
 
+  it("previews on hover and focus, and enters edit mode on a double-click", async () => {
+    const runtime = await createBootedRuntime(["com.example.one", "com.example.two"]);
+    class MinimalApp extends WSApplication {
+      static override mainViewController = MinimalGridLauncher;
+    }
+    render(
+      <SynCloudOSProvider runtime={runtime}>
+        <WebspringHost shell={createWebspring({ info: baseInfo, application: MinimalApp })} startupPhase="complete" />
+      </SynCloudOSProvider>,
+    );
+    const one = screen.getByRole("button", { name: "Open One" });
+    fireEvent.pointerEnter(one, { pointerId: 1 });
+    await waitFor(() => expect(runtime.store.getSnapshot().webspring.hoveredAppId).toBe("com.example.one"));
+    fireEvent.pointerLeave(one, { pointerId: 1 });
+    await waitFor(() => expect(runtime.store.getSnapshot().webspring.hoveredAppId).toBeNull());
+    fireEvent.focus(screen.getByRole("button", { name: "Open Two" }));
+    await waitFor(() => expect(runtime.store.getSnapshot().webspring.hoveredAppId).toBe("com.example.two"));
+
+    fireEvent.doubleClick(one);
+    await waitFor(() => expect(screen.getByRole("button", { name: "Move One" })).toBeTruthy());
+  });
+
+  it("draws the icon effect, glow artwork and jiggle only where a launcher asks for them", async () => {
+    vi.useFakeTimers();
+    const runtime = await createBootedRuntime(["com.example.one", "com.example.two"]);
+    const hovered: string[] = [];
+    class DialLikeLauncher extends WSLauncherViewController {
+      override renderView() {
+        return <div className="dial-like">{this.items.map((item, index) => (
+          <WSIconView key={item.id} item={item} index={index} iconEffect glowArtwork jiggle className="dial-icon" onHoverStart={(id) => hovered.push(id)} />
+        ))}</div>;
+      }
+    }
+    class DialApp extends WSApplication {
+      static override mainViewController = DialLikeLauncher;
+      static override iconEffect = ({ active }: { readonly active: boolean }) => <i data-testid="effect" data-active={String(active)} />;
+    }
+    const view = render(
+      <SynCloudOSProvider runtime={runtime}>
+        <WebspringHost shell={createWebspring({ info: baseInfo, application: DialApp })} startupPhase="complete" />
+      </SynCloudOSProvider>,
+    );
+    const one = screen.getByRole("button", { name: "Open One" });
+    expect(one.classList.contains("dial-icon")).toBe(true);
+    expect(one.classList.contains("webspring-board-icon")).toBe(false);
+    expect(one.querySelector(".webspring-icon-artwork__glow")).not.toBeNull();
+    fireEvent.pointerEnter(one, { pointerId: 1 });
+    expect(hovered).toEqual(["com.example.one"]);
+    // The handler replaces the default preview.
+    expect(runtime.store.getSnapshot().webspring.hoveredAppId).toBeNull();
+    expect(one.querySelector('[data-testid="effect"]')?.getAttribute("data-active")).toBe("true");
+
+    fireEvent.pointerDown(one, { button: 0, isPrimary: true, pointerId: 2, clientX: 10, clientY: 10 });
+    await act(async () => { await vi.advanceTimersByTimeAsync(520); });
+    fireEvent.pointerUp(view.container.querySelector(".ws-launcher")!, { pointerId: 2, clientX: 10, clientY: 10 });
+    const jiggling = view.container.querySelectorAll('[data-jiggle="true"]');
+    expect(jiggling).toHaveLength(2);
+    expect((jiggling[1] as HTMLElement).style.getPropertyValue("--webspring-jiggle-direction")).toBe("-1");
+  });
+
+  it("leaves the Board's icons without the effect, glow artwork or jiggle", async () => {
+    vi.useFakeTimers();
+    const runtime = await createBootedRuntime(["com.example.one", "com.example.two"]);
+    class EffectApp extends WSApplication {
+      static override iconEffect = () => <i data-testid="effect" />;
+    }
+    const view = render(
+      <SynCloudOSProvider runtime={runtime}>
+        <WebspringHost shell={createWebspring({ info: baseInfo, application: EffectApp })} startupPhase="complete" />
+      </SynCloudOSProvider>,
+    );
+    const one = screen.getByRole("button", { name: "Open One" });
+    fireEvent.pointerEnter(one, { pointerId: 1 });
+    fireEvent.pointerDown(one, { button: 0, isPrimary: true, pointerId: 2, clientX: 10, clientY: 10 });
+    await act(async () => { await vi.advanceTimersByTimeAsync(520); });
+    expect(view.container.querySelector('[data-testid="effect"]')).toBeNull();
+    expect(view.container.querySelector(".webspring-icon-artwork__glow")).toBeNull();
+    expect(view.container.querySelector("[data-jiggle]")).toBeNull();
+  });
+
   it("opens a folder with no extra subclass code", async () => {
     const runtime = await createBootedRuntime(["com.example.one", "com.example.alpha", "com.example.beta"]);
     class FolderApp extends WSApplication {

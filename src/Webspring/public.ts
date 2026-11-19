@@ -34,7 +34,7 @@ export type {
 export { WSLauncherContext, WSLauncherRootView, WSLauncherViewController, useWSLauncher } from "./WSLauncherViewController";
 export type { WSLauncherFolders, WSLauncherRootProps, WSLauncherViewControllerClass } from "./WSLauncherViewController";
 export { WSIconView } from "./WSIconView";
-export type { WSIconViewProps } from "./WSIconView";
+export type { WSIconHoverEndEvent, WSIconViewProps } from "./WSIconView";
 export { WSBoardViewController } from "./Contents/Views/WSBoardViewController/WSBoardViewController";
 export { captureWSInfo } from "./WSInfo";
 export type { WSBranding, WSCapturedBranding, WSCapturedInfo, WSInfo } from "./WSInfo";
