@@ -549,8 +549,10 @@ export function WSLauncherRootView({ controller, applicationOutlet }: {
       else if (commit && dropFolder && !member) joined = actions.dropOnItem(dragId, dropFolder.id);
       if (commit && result.dropIndex !== null && (joined || member)) actions.moveItem(dragId, result.dropIndex, false);
       actions.finishDrag(commit);
-      if (joined) feedback?.trigger("success", { intensity: .45 });
-      else if (commit) feedback?.trigger("light", { intensity: .35 });
+      if (joined) {
+        feedback?.trigger("success", { intensity: .45 });
+        setAnnouncement("Folder updated.");
+      } else if (commit) feedback?.trigger("light", { intensity: .35 });
       activeDragId.current = null;
       suppressNextClick.current = true;
     }

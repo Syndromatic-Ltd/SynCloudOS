@@ -30,7 +30,7 @@ import { WSBoardViewController } from "../../src/Webspring/Contents/Views/WSBoar
 import { WSIconView } from "../../src/Webspring/WSIconView";
 import { WSLauncherViewController } from "../../src/Webspring/WSLauncherViewController";
 import { WebspringHost } from "../../src/Webspring/WebspringHost";
-import { WEBSPRING_DRAG_REORDER_REST_MS } from "../../src/Webspring/webspringDragArbiter";
+import { WEBSPRING_DRAG_MERGE_REST_MS, WEBSPRING_DRAG_REORDER_REST_MS } from "../../src/Webspring/webspringDragArbiter";
 import type { WSInfo } from "../../src/Webspring/WSInfo";
 import { createTestBundle, createTestRuntime } from "./helpers";
 
@@ -340,6 +340,34 @@ describe("WSLauncherViewController and WSIconView", () => {
     expect(topIds).toEqual(["com.example.one", "com.example.alpha", "com.example.two", "folder.tools"]);
     expect(runtime.store.getSnapshot().webspring.layout.preference.folders["folder.tools"]?.apps).toEqual(["com.example.beta"]);
     getRectSpy.mockRestore();
+  });
+
+  it("announces a drop that makes a folder", async () => {
+    vi.useFakeTimers();
+    const runtime = await createBootedRuntime(["com.example.one", "com.example.two"]);
+    class MergeApp extends WSApplication {
+      static override mainViewController = MinimalGridLauncher;
+    }
+    const shell = createWebspring({ info: { ...baseInfo, folders: { editable: true, initial: [] } }, application: MergeApp });
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) {
+      const id = this.closest<HTMLElement>("[data-webspring-item-id]")?.dataset.webspringItemId;
+      return new DOMRect(id === "com.example.two" ? 200 : id === "com.example.one" ? 0 : -1000, 0, 60, 60);
+    });
+    const view = render(
+      <SynCloudOSProvider runtime={runtime}>
+        <WebspringHost shell={shell} startupPhase="complete" />
+      </SynCloudOSProvider>,
+    );
+    const root = view.container.querySelector<HTMLElement>(".ws-launcher")!;
+    fireEvent.pointerDown(screen.getByRole("button", { name: "Open One" }), { button: 0, isPrimary: true, pointerId: 8, clientX: 30, clientY: 30 });
+    await act(async () => { await vi.advanceTimersByTimeAsync(520); });
+    await act(async () => {
+      fireEvent.pointerMove(root, { pointerId: 8, clientX: 230, clientY: 30 });
+      await vi.advanceTimersByTimeAsync(WEBSPRING_DRAG_MERGE_REST_MS + 10);
+    });
+    await act(async () => { fireEvent.pointerUp(root, { pointerId: 8, clientX: 230, clientY: 30 }); });
+    expect(Object.values(runtime.store.getSnapshot().webspring.layout.preference.folders).some((folder) => folder?.apps.includes("com.example.one"))).toBe(true);
+    expect(view.container.querySelector('[aria-live="polite"]')?.textContent).toBe("Folder updated.");
   });
 
   it("supports keyboard reorder with live announcements and Escape commit", async () => {
