@@ -447,11 +447,12 @@
 
 :where(:scope) [data-nse-control="stepper"]>[data-nse-part="bezel"]>:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"],[data-nse-part="increment"],[data-nse-part="decrement"])::before,
 :where(:scope):is([data-nse-control="stepper"])>[data-nse-part="bezel"]>:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"],[data-nse-part="increment"],[data-nse-part="decrement"])::before {
-  -webkit-mask:var(--nse-atmo-stepper-glyph) center/8px 5px no-repeat;
-  mask:var(--nse-atmo-stepper-glyph) center/8px 5px no-repeat;
+  -webkit-mask:var(--nse-atmo-stepper-glyph, var(--nse-image-stepper-increment, image-set(url("./controls/stepper-increment.svg") 1x, url("./controls/stepper-increment@2x.svg") 2x))) center/8px 5px no-repeat;
+  mask:var(--nse-atmo-stepper-glyph, var(--nse-image-stepper-increment, image-set(url("./controls/stepper-increment.svg") 1x, url("./controls/stepper-increment@2x.svg") 2x))) center/8px 5px no-repeat;
 }
 
 :where(:scope) [data-nse-control="stepper"]>[data-nse-part="bezel"]>:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"],[data-nse-part="increment"],[data-nse-part="decrement"])[data-nse-part="decrement"]::before,
 :where(:scope):is([data-nse-control="stepper"])>[data-nse-part="bezel"]>:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"],[data-nse-part="increment"],[data-nse-part="decrement"])[data-nse-part="decrement"]::before {
-  transform:scaleY(-1);
+  --nse-atmo-stepper-glyph: var(--nse-image-stepper-decrement, image-set(url("./controls/stepper-decrement.svg#svgView(viewBox(0,0,8,5))") 1x, url("./controls/stepper-decrement@2x.svg#svgView(viewBox(0,0,8,5))") 2x));
+  transform:var(--nse-image-stepper-decrement-transform, scaleY(-1));
 }

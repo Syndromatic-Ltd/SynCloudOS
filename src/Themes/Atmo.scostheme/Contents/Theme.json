@@ -117,6 +117,72 @@
     "materialLighting": "on"
   },
   "images": {
+    "NSRightFacingTriangleTemplate": {
+      "files": {
+        "1x": "Resources/controls/disclosure-triangle.svg",
+        "2x": "Resources/controls/disclosure-triangle@2x.svg"
+      },
+      "pointSize": {
+        "width": 10,
+        "height": 10
+      },
+      "template": true
+    },
+    "NSEStepperIncrementTemplate": {
+      "files": {
+        "1x": "Resources/controls/stepper-increment.svg",
+        "2x": "Resources/controls/stepper-increment@2x.svg"
+      },
+      "pointSize": {
+        "width": 8,
+        "height": 5
+      },
+      "template": true
+    },
+    "NSEStepperDecrementTemplate": {
+      "files": {
+        "1x": "Resources/controls/stepper-decrement.svg",
+        "2x": "Resources/controls/stepper-decrement@2x.svg"
+      },
+      "pointSize": {
+        "width": 8,
+        "height": 5
+      },
+      "template": true
+    },
+    "NSEPopUpButtonChevron": {
+      "files": {
+        "1x": "Resources/controls/pop-up-chevron.svg",
+        "2x": "Resources/controls/pop-up-chevron@2x.svg"
+      },
+      "pointSize": {
+        "width": 13,
+        "height": 7
+      },
+      "template": false
+    },
+    "NSTouchBarSearchTemplate": {
+      "files": {
+        "1x": "Resources/controls/search-field-magnifier.svg",
+        "2x": "Resources/controls/search-field-magnifier@2x.svg"
+      },
+      "pointSize": {
+        "width": 16,
+        "height": 16
+      },
+      "template": true
+    },
+    "NSESearchFieldCancel": {
+      "files": {
+        "1x": "Resources/controls/search-field-cancel.svg",
+        "2x": "Resources/controls/search-field-cancel@2x.svg"
+      },
+      "pointSize": {
+        "width": 43,
+        "height": 42
+      },
+      "template": false
+    },
     "NSGoBackTemplate": {
       "files": {
         "1x": "Resources/navigation-back.svg"

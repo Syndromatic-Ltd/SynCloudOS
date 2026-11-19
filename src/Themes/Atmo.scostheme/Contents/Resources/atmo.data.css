@@ -284,8 +284,8 @@
 :scope[data-nse-control="outline-view"] [data-nse-part="disclosure"]::before {
   background:currentColor;
   opacity:0.62;
-  -webkit-mask:url(data:image/svg+xml,%3Csvg\ xmlns=\'http://www.w3.org/2000/svg\'\ viewBox=\'0\ 0\ 10\ 10\'%3E%3Cpath\ d=\'M3\ 1.5L7.5\ 5\ 3\ 8.5z\'/%3E%3C/svg%3E)center/contain no-repeat;
-  mask:url(data:image/svg+xml,%3Csvg\ xmlns=\'http://www.w3.org/2000/svg\'\ viewBox=\'0\ 0\ 10\ 10\'%3E%3Cpath\ d=\'M3\ 1.5L7.5\ 5\ 3\ 8.5z\'/%3E%3C/svg%3E)center/contain no-repeat;
+  -webkit-mask:var(--nse-image-disclosure-triangle, image-set(url("./controls/disclosure-triangle.svg") 1x, url("./controls/disclosure-triangle@2x.svg") 2x)) center/contain no-repeat;
+  mask:var(--nse-image-disclosure-triangle, image-set(url("./controls/disclosure-triangle.svg") 1x, url("./controls/disclosure-triangle@2x.svg") 2x)) center/contain no-repeat;
 }
 
 :scope [data-nse-control="outline-view"] [data-nse-part="disclosure"][data-nse-expanded="true"]::before,

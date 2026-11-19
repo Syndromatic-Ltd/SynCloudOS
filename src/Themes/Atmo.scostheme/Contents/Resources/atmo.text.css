@@ -106,7 +106,7 @@
 :scope [data-nse-part="cancel"]:where([data-nse-control="search-field"]>[data-nse-part="bezel"]>*)[data-nse-part="cancel"],
 :scope:is([data-nse-part="cancel"]:where([data-nse-control="search-field"]>[data-nse-part="bezel"]>*)[data-nse-part="cancel"]),
 :scope[data-nse-part="cancel"]:where([data-nse-control="search-field"]>[data-nse-part="bezel"]>*)[data-nse-part="cancel"] {
-  background-image:url(data:image/svg+xml,<svg\ xmlns=\"http://www.w3.org/2000/svg\"\ viewBox=\"0\ 0\ 43\ 42\"><defs><linearGradient\ id=\"s\"\ x1=\"0\"\ y1=\"0\"\ x2=\"0\"\ y2=\"1\"><stop\ offset=\"0\"\ stop-color=\"%23ffffff\"\ stop-opacity=\"0.55\"/><stop\ offset=\"0.5\"\ stop-color=\"%23ffffff\"\ stop-opacity=\"0.08\"/><stop\ offset=\"1\"\ stop-color=\"%23ffffff\"\ stop-opacity=\"0.18\"/></linearGradient></defs><circle\ cx=\"21.5\"\ cy=\"21\"\ r=\"20\"\ fill=\"url\(%23s\)\"\ stroke=\"rgba\(0,0,0,0.35\)\"\ stroke-width=\"1.5\"/><path\ d=\"M14.5\ 14\ L28.5\ 28\ M28.5\ 14\ L14.5\ 28\"\ stroke=\"rgba\(255,255,255,0.9\)\"\ stroke-width=\"3.6\"\ stroke-linecap=\"round\"/></svg>);
+  background-image:var(--nse-image-search-field-cancel, image-set(url("./controls/search-field-cancel.svg") 1x, url("./controls/search-field-cancel@2x.svg") 2x));
   /* Atmo paints the cross, so the framework's fallback glyph stays unseen. */
   color:transparent;
 }
@@ -387,8 +387,8 @@
   block-size:calc(var(--nse-control-height,50px)*0.34);
   margin-inline-start:2px;
   background:#8d9399;
-  -webkit-mask:url(data:image/svg+xml,%3Csvg\ xmlns=\'http://www.w3.org/2000/svg\'\ viewBox=\'0\ 0\ 16\ 16\'%3E%3Ccircle\ cx=\'6.6\'\ cy=\'6.6\'\ r=\'4.6\'\ fill=\'none\'\ stroke=\'%23000\'\ stroke-width=\'2\'/%3E%3Cpath\ d=\'M10\ 10l4.2\ 4.2\'\ stroke=\'%23000\'\ stroke-width=\'2.4\'\ stroke-linecap=\'round\'/%3E%3C/svg%3E)center/contain no-repeat;
-  mask:url(data:image/svg+xml,%3Csvg\ xmlns=\'http://www.w3.org/2000/svg\'\ viewBox=\'0\ 0\ 16\ 16\'%3E%3Ccircle\ cx=\'6.6\'\ cy=\'6.6\'\ r=\'4.6\'\ fill=\'none\'\ stroke=\'%23000\'\ stroke-width=\'2\'/%3E%3Cpath\ d=\'M10\ 10l4.2\ 4.2\'\ stroke=\'%23000\'\ stroke-width=\'2.4\'\ stroke-linecap=\'round\'/%3E%3C/svg%3E)center/contain no-repeat;
+  -webkit-mask:var(--nse-image-search-field-magnifier, image-set(url("./controls/search-field-magnifier.svg") 1x, url("./controls/search-field-magnifier@2x.svg") 2x)) center/contain no-repeat;
+  mask:var(--nse-image-search-field-magnifier, image-set(url("./controls/search-field-magnifier.svg") 1x, url("./controls/search-field-magnifier@2x.svg") 2x)) center/contain no-repeat;
 }
 
 :scope [data-nse-control="search-field"]:is(:focus-within,[data-nse-value-state="populated"]:where(:not([data-nse-enabled="false"],[data-nse-editable="false"]))) [data-nse-part="image"]:where([data-nse-control="search-field"]>[data-nse-part="bezel"]>*),

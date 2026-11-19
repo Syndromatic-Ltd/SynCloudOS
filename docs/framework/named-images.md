@@ -26,3 +26,16 @@ geometry (`M15 4 L7 12 L15 20`, round 3-point stroke in a 24-point view box).
 Forward has its own asset and path; no CSS reflection is used. Stage, Preferences
 and Open panel navigation use these shared images. Application navigation chrome
 currently draws an image-only back control in its standard circular back slot.
+
+## Control image slots
+
+A system theme can replace these control glyphs through the `images` object in `Theme.json`. Omitted slots use Atmo's artwork. The controls keep their slot dimensions and select the supplied file for the display density. Template slots use the image's alpha channel and the control's tint. The two coloured slots draw the supplied artwork directly.
+
+| Name | Control glyph | Drawing |
+| --- | --- | --- |
+| `NSRightFacingTriangleTemplate` | Disclosure triangle in buttons and outlines | Template |
+| `NSEStepperIncrementTemplate` | Stepper increment | Template |
+| `NSEStepperDecrementTemplate` | Stepper decrement | Template |
+| `NSEPopUpButtonChevron` | Pop-up chevron | Coloured |
+| `NSTouchBarSearchTemplate` | Search field magnifier | Template |
+| `NSESearchFieldCancel` | Search field cancel | Coloured |

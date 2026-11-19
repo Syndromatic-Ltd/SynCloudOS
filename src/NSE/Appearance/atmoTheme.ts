@@ -9,6 +9,18 @@ import info from "../../Themes/Atmo.scostheme/Contents/Info";
 import definition from "../../Themes/Atmo.scostheme/Contents/Theme.json";
 
 const files: Readonly<Record<string, string>> = {
+  "Resources/controls/disclosure-triangle.svg": new URL("../../Themes/Atmo.scostheme/Contents/Resources/controls/disclosure-triangle.svg", import.meta.url).href,
+  "Resources/controls/disclosure-triangle@2x.svg": new URL("../../Themes/Atmo.scostheme/Contents/Resources/controls/disclosure-triangle@2x.svg", import.meta.url).href,
+  "Resources/controls/stepper-increment.svg": new URL("../../Themes/Atmo.scostheme/Contents/Resources/controls/stepper-increment.svg", import.meta.url).href,
+  "Resources/controls/stepper-increment@2x.svg": new URL("../../Themes/Atmo.scostheme/Contents/Resources/controls/stepper-increment@2x.svg", import.meta.url).href,
+  "Resources/controls/stepper-decrement.svg": new URL("../../Themes/Atmo.scostheme/Contents/Resources/controls/stepper-decrement.svg", import.meta.url).href,
+  "Resources/controls/stepper-decrement@2x.svg": new URL("../../Themes/Atmo.scostheme/Contents/Resources/controls/stepper-decrement@2x.svg", import.meta.url).href,
+  "Resources/controls/pop-up-chevron.svg": new URL("../../Themes/Atmo.scostheme/Contents/Resources/controls/pop-up-chevron.svg", import.meta.url).href,
+  "Resources/controls/pop-up-chevron@2x.svg": new URL("../../Themes/Atmo.scostheme/Contents/Resources/controls/pop-up-chevron@2x.svg", import.meta.url).href,
+  "Resources/controls/search-field-magnifier.svg": new URL("../../Themes/Atmo.scostheme/Contents/Resources/controls/search-field-magnifier.svg", import.meta.url).href,
+  "Resources/controls/search-field-magnifier@2x.svg": new URL("../../Themes/Atmo.scostheme/Contents/Resources/controls/search-field-magnifier@2x.svg", import.meta.url).href,
+  "Resources/controls/search-field-cancel.svg": new URL("../../Themes/Atmo.scostheme/Contents/Resources/controls/search-field-cancel.svg", import.meta.url).href,
+  "Resources/controls/search-field-cancel@2x.svg": new URL("../../Themes/Atmo.scostheme/Contents/Resources/controls/search-field-cancel@2x.svg", import.meta.url).href,
   "Resources/navigation-back.svg": new URL("../../Themes/Atmo.scostheme/Contents/Resources/navigation-back.svg", import.meta.url).href,
   "Resources/navigation-forward.svg": new URL("../../Themes/Atmo.scostheme/Contents/Resources/navigation-forward.svg", import.meta.url).href,
   "Resources/workspace/document-generic-24.png": new URL("../../Themes/Atmo.scostheme/Contents/Resources/workspace/document-generic-24.png", import.meta.url).href,

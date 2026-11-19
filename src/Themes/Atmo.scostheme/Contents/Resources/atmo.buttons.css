@@ -396,8 +396,8 @@
   block-size:10px;
   background:currentColor;
   opacity:0.7;
-  -webkit-mask:url(data:image/svg+xml,%3Csvg\ xmlns=\'http://www.w3.org/2000/svg\'\ viewBox=\'0\ 0\ 10\ 10\'%3E%3Cpath\ d=\'M3\ 1.5L7.5\ 5\ 3\ 8.5z\'/%3E%3C/svg%3E)center/contain no-repeat;
-  mask:url(data:image/svg+xml,%3Csvg\ xmlns=\'http://www.w3.org/2000/svg\'\ viewBox=\'0\ 0\ 10\ 10\'%3E%3Cpath\ d=\'M3\ 1.5L7.5\ 5\ 3\ 8.5z\'/%3E%3C/svg%3E)center/contain no-repeat;
+  -webkit-mask:var(--nse-image-disclosure-triangle, image-set(url("./controls/disclosure-triangle.svg") 1x, url("./controls/disclosure-triangle@2x.svg") 2x)) center/contain no-repeat;
+  mask:var(--nse-image-disclosure-triangle, image-set(url("./controls/disclosure-triangle.svg") 1x, url("./controls/disclosure-triangle@2x.svg") 2x)) center/contain no-repeat;
 }
 
 :scope [data-nse-bezel-style="disclosure"]:where(:not([data-nse-button-type="switch"],[data-nse-button-type="radio"])):has(>[data-nse-part="title"]:where([data-nse-control="button"]:not([data-nse-button-type="switch"],[data-nse-button-type="radio"])>*,[data-nse-control="route-picker-view"]>*)):hover:not(:disabled),
