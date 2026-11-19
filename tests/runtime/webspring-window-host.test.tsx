@@ -121,7 +121,7 @@ describe("Webspring window host", () => {
     expect(applicationAfter).toBe(applicationBefore);
     expect(document.querySelector("main.webspring-board")).not.toBeNull();
     expect(appMounts).toBe(1);
-    expect(document.querySelectorAll(".webspring-application-outlet-host")).toHaveLength(1);
+    expect(document.querySelectorAll(".webspring-stage-host")).toHaveLength(1);
     mounted.rerender(<SynCloudOSProvider runtime={runtime}><WebspringHost shell={connectedShell} /></SynCloudOSProvider>);
     expect(await screen.findByTestId("stateful-application")).toBe(applicationBefore);
     const reordered = await connectedActions!.reorder(["com.example.contact", "com.example.diagnostics"]);

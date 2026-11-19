@@ -313,9 +313,8 @@ function sameId(left: string | null | undefined, right: string | null | undefine
  * Renders a launcher controller's view inside the plumbing every launcher shares: pointer
  * drags, the open folder, the launch dim, the drag proxy and the reorder live region.
  */
-export function WSLauncherRootView({ controller, applicationOutlet }: {
+export function WSLauncherRootView({ controller }: {
   readonly controller: WSLauncherViewController;
-  readonly applicationOutlet?: ReactNode;
 }) {
   useObserve(controller);
   const { model, actions, folderPresentation: FolderPresentation } = controller[wsLauncherHostState]();
@@ -358,6 +357,7 @@ export function WSLauncherRootView({ controller, applicationOutlet }: {
   const [folderIconSize, setFolderIconSize] = useState<number | null>(null);
   const previousLaunchPhase = useRef(model.launchPhase);
   const previousOpenFolderId = useRef(model.folders.openFolderId);
+  const previousActiveAppId = useRef(model.activeAppId);
   draggingItemIdRef.current = model.layout.draggingItemId;
 
   useEffect(() => () => {
@@ -421,6 +421,19 @@ export function WSLauncherRootView({ controller, applicationOutlet }: {
     if (!previous || model.folders.openFolderId || model.launchPhase !== "idle" || activeDragId.current || !rootElement.current) return;
     topLevelElements(rootElement.current).find((element) => element.dataset.webspringItemId === previous)?.focus({ preventScroll: true });
   }, [model.folders.openFolderId, model.launchPhase]);
+
+  // Focus returns to the launched icon when the user returns home from a stage app.
+  useEffect(() => {
+    const previous = previousActiveAppId.current;
+    previousActiveAppId.current = model.activeAppId;
+    const root = rootElement.current;
+    if (!previous || model.activeAppId || model.folders.openFolderId || activeDragId.current || !root) return;
+    const active = root.ownerDocument.activeElement;
+    if (active && active !== root.ownerDocument.body && !active.closest(".webspring-stage-host")) return;
+    const folder = model.items.find((item): item is WSFolderItem => item.kind === "folder" && item.apps.some((app) => sameId(app.bundleIdentifier, previous)));
+    const targetId = folder?.id ?? previous;
+    topLevelElements(root).find((element) => sameId(element.dataset.webspringItemId, targetId))?.focus({ preventScroll: true, focusVisible: false } as FocusOptions);
+  }, [model.activeAppId, model.folders.openFolderId, model.items]);
 
   useEffect(() => {
     const previous = previousLaunchPhase.current;
@@ -654,7 +667,6 @@ export function WSLauncherRootView({ controller, applicationOutlet }: {
             />
           </div> : null}
           <WSLaunchDim visible={model.launchPhase === "launching"} motion={launchDim} />
-          {applicationOutlet}
           <WSDragProxy app={draggingApp} folder={draggingFolder} point={point} mobile proxyRef={dragProxyRef} />
           <span className="webspring-reorder-announcement" aria-live="polite">{announcement}</span>
         </Root>

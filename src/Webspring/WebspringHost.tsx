@@ -20,7 +20,6 @@
 
 import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
 import { Component, createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ErrorInfo, type ReactNode } from "react";
-import { createPortal } from "react-dom";
 import { FocusPortProvider, useNSEDeferredDisposal } from "../NSE/NSE";
 import { useNSEAnimationEnvironment } from "../NSE/Animation";
 import { nseDisposeFor, useNSEFeedback } from "../NSE/hostComposition";
@@ -105,68 +104,13 @@ class WebspringViewBoundary extends Component<ViewBoundaryProps, ViewBoundarySta
   }
 }
 
-interface OutletFocusSnapshot {
-  readonly element: HTMLElement;
-  readonly visible: boolean;
-  readonly selection: { readonly anchor: Node; readonly anchorOffset: number; readonly focus: Node; readonly focusOffset: number } | null;
-}
-
-function captureOutletFocus(container: HTMLElement): OutletFocusSnapshot | null {
-  const active = container.ownerDocument.activeElement;
-  if (!(active instanceof HTMLElement) || !container.contains(active)) return null;
-  const selection = container.ownerDocument.getSelection();
-  let visible = false;
-  try { visible = active.matches(":focus-visible"); } catch { /* Older engines retain their native focus treatment. */ }
-  return {
-    element: active, visible,
-    selection: selection?.anchorNode && selection.focusNode && container.contains(selection.anchorNode) && container.contains(selection.focusNode)
-      ? { anchor: selection.anchorNode, anchorOffset: selection.anchorOffset, focus: selection.focusNode, focusOffset: selection.focusOffset } : null,
-  };
-}
-
-function validSelectionOffset(node: Node, offset: number): boolean {
-  const characterData = node.nodeType === Node.TEXT_NODE || node.nodeType === Node.CDATA_SECTION_NODE || node.nodeType === Node.COMMENT_NODE;
-  return offset >= 0 && offset <= (characterData ? node.nodeValue?.length ?? 0 : node.childNodes.length);
-}
-
-function ApplicationOutletSlot({ container, focusHandoff }: { readonly container: HTMLElement; readonly focusHandoff: { current: OutletFocusSnapshot | null } }) {
-  const slot = useRef<HTMLDivElement>(null);
-  useLayoutEffect(() => {
-    const element = slot.current;
-    if (!element) return;
-    // A shell view can detach its slot before the successor adopts the same
-    // live application DOM. Capture on detach as well as before a direct move.
-    const previous = captureOutletFocus(container) ?? focusHandoff.current;
-    focusHandoff.current = null;
-    if (container.parentElement !== element) element.appendChild(container);
-    const document = container.ownerDocument;
-    const active = document.activeElement;
-    if (previous?.element.isConnected && container.contains(previous.element)
-      && !previous.element.closest("[inert], [hidden], [aria-hidden='true']") && !previous.element.matches(":disabled")
-      && (!active || active === document.body || active === document.documentElement || active === previous.element)) {
-      previous.element.focus({ preventScroll: true, ...(previous.visible ? { focusVisible: true } : {}) } as FocusOptions);
-      const selection = previous.selection;
-      if (document.activeElement === previous.element && selection?.anchor.isConnected && selection.focus.isConnected
-        && container.contains(selection.anchor) && container.contains(selection.focus)
-        && validSelectionOffset(selection.anchor, selection.anchorOffset) && validSelectionOffset(selection.focus, selection.focusOffset)) {
-        document.getSelection()?.setBaseAndExtent(selection.anchor, selection.anchorOffset, selection.focus, selection.focusOffset);
-      }
-    }
-    return () => {
-      if (container.parentElement === element) focusHandoff.current = captureOutletFocus(container);
-    };
-  }, [container, focusHandoff]);
-  return <div ref={slot} className="webspring-application-outlet" />;
-}
-
 /** Gives the launcher this render's state, then renders it inside its root view. */
-function HostedLauncher({ launcher, state, applicationOutlet }: {
+function HostedLauncher({ launcher, state }: {
   readonly launcher: WSLauncherViewController;
   readonly state: WSLauncherHostState;
-  readonly applicationOutlet: ReactNode;
 }) {
   launcher[wsSetLauncherHostState](state);
-  return <WSLauncherRootView controller={launcher} applicationOutlet={applicationOutlet} />;
+  return <WSLauncherRootView controller={launcher} />;
 }
 
 type HostRuntime = ReturnType<typeof useKernelSynCloudOS>;
@@ -258,13 +202,6 @@ export function WebspringHost({
     syncApplicationWindowContentRenderers(registry, runtime, snapshot.appInfo, applicationRenderers);
   }, [applicationRenderers, registry, runtime, snapshot.appInfo]);
   useNSEDeferredDisposal(registry);
-  const [outletContainer] = useState(() => {
-    const document = runtime.environment.browser.getDocument();
-    if (!document) throw new TypeError("WebspringHost requires a browser document.");
-    const element = document.createElement("div");
-    element.className = "webspring-application-outlet-host";
-    return element;
-  });
   const stagingAppId = snapshot.webspring.launchPhase === "staging" ? snapshot.webspring.launchingAppId : null;
   const feedback = useNSEFeedback();
   const { reducedMotion } = useNSEAnimationEnvironment();
@@ -335,8 +272,6 @@ export function WebspringHost({
   useEffect(() => {
     if (quickSwitchOpen && !canUseQuickSwitch) setQuickSwitchOpen(false);
   }, [canUseQuickSwitch, quickSwitchOpen]);
-  const outletFocusHandoff = useRef<OutletFocusSnapshot | null>(null);
-  const applicationOutlet = <ApplicationOutletSlot container={outletContainer} focusHandoff={outletFocusHandoff} />;
   const launchZoom = usingFallback ? WSBoardViewController.launchZoom : shell.launchZooms[presentation];
   const applicationStage = <WebspringLaunchZoomContext.Provider value={launchZoom}><WSStageLayer
     windowContentRegistry={registry}
@@ -369,7 +304,7 @@ export function WebspringHost({
   return <HostSiteBrandingProvider value={model?.branding ?? lastBranding.current}><MaterialProvider><WSIconEffectProvider component={shell.iconEffect}>
     <WebspringFolderAppearanceProvider value={shell.folderAppearance}>
     <WebspringHostPresentationContext.Provider value={presentationContext}>
-    <div className="webspring-view-host">
+    <div className="webspring-view-host" data-syncloudos-runtime-owner={runtime.runtimeId}>
     {/* Keep entrance-owned inertness separate from the modal focus scope's sibling restoration. */}
     <div className="webspring-entrance-surface" inert={entrancePhase !== "ready"} aria-hidden={entrancePhase !== "ready" ? true : undefined}>
     {controller && model && viewActions ? <WebspringViewBoundary
@@ -381,7 +316,6 @@ export function WebspringHost({
         {application && launcher ? <HostedLauncher
           launcher={launcher}
           state={{ application, model, actions: viewActions, folderPresentation: shell.folderPresentation }}
-          applicationOutlet={applicationOutlet}
         /> : null}
       </FocusPortProvider>
     </WebspringViewBoundary> : <section role="alert" className="webspring-view-recovery">
@@ -395,7 +329,12 @@ export function WebspringHost({
     {/* Before the app stage, so the system's Colours panel is the one drawn. */}
     <SystemPanelsLayer windowContentRegistry={registry} />
     <WindowPresentationContent>
-      {createPortal(applicationStage, outletContainer)}
+      {/* The launcher's next sibling in its stacking context. The entrance's inertness stays on an inner element, apart from a modal's sibling containment. */}
+      <div className="webspring-stage-host">
+        <div className="webspring-stage-entrance" inert={entrancePhase !== "ready"} aria-hidden={entrancePhase !== "ready" ? true : undefined}>
+          {applicationStage}
+        </div>
+      </div>
       <WindowLayer contentRegistry={registry} />
     </WindowPresentationContent>
     <WebspringQuickSwitchView

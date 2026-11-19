@@ -81,12 +81,11 @@ export function createTestWebspring({ info, launcher, ...statics }: TestWebsprin
 }
 
 /** Renders a launcher straight from a model, as `WebspringHost` does, for tests that drive one by hand. */
-export function TestLauncherHost({ shell, launcher: LauncherClass = WSBoardViewController, model, actions, applicationOutlet = null }: {
+export function TestLauncherHost({ shell, launcher: LauncherClass = WSBoardViewController, model, actions }: {
   readonly shell: WSDefinition;
   readonly launcher?: WSLauncherViewControllerClass;
   readonly model: WebspringViewModel;
   readonly actions: WebspringActions;
-  readonly applicationOutlet?: ReactNode;
 }) {
   const [{ application, launcher }] = useState(() => {
     const created = constructWSApplication(shell.application);
@@ -94,5 +93,5 @@ export function TestLauncherHost({ shell, launcher: LauncherClass = WSBoardViewC
     return { application: created, launcher: new Launcher({ owner: created }) };
   });
   launcher[wsSetLauncherHostState]({ application, model, actions, folderPresentation: shell.folderPresentation });
-  return <WSLauncherRootView controller={launcher} applicationOutlet={applicationOutlet} />;
+  return <WSLauncherRootView controller={launcher} />;
 }

@@ -241,10 +241,10 @@ export function OverlayProvider({
         ref={screenSafeArea.ref}
         style={{ ...screenSafeArea.properties, display: "contents" }}
       >
+        {/* Portal before children so outer providers precede nested ones in a shared destination. */}
+        {relocated && destination ? createPortal(portalHostNode, destination) : null}
         {children}
-        {relocated
-          ? destination && createPortal(portalHostNode, destination)
-          : portalHostNode}
+        {relocated ? null : portalHostNode}
       </div>
     </OverlayContext.Provider>
   );

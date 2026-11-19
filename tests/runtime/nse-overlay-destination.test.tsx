@@ -54,8 +54,30 @@ it.each([undefined, null])("inherits an explicit destination only when a nested 
     expect(inner!.portalHost!.parentElement).toBe(destination);
     expect(destination.querySelector("[data-captured-overlay]")).not.toBeNull();
     expect(rendered.container.querySelector("[data-clipped-frame]")!.contains(inner!.portalHost!)).toBe(false);
+    expect(outer!.portalHost!.compareDocumentPosition(inner!.portalHost!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   } else {
     expect(inner!.portalHost).toBeNull();
     expect(destination.querySelector("[data-captured-overlay]")).toBeNull();
   }
+});
+
+it("places an outer provider's portal host before a nested one when their destination arrives later", () => {
+  const runtime = createTestRuntime();
+  const destination = document.createElement("div");
+  document.body.appendChild(destination);
+  let outer: ReturnType<typeof useNSEOverlayProvider> | undefined;
+  let inner: ReturnType<typeof useNSEOverlayProvider> | undefined;
+  function Probe() { inner = useNSEOverlayProvider(); return null; }
+  function Nested() {
+    outer = useNSEOverlayProvider();
+    return <OverlayProvider runtimePort={outer.runtime}><Probe /></OverlayProvider>;
+  }
+  function Host({ target }: { readonly target: HTMLElement | null }) {
+    const port = useRuntimeNSEOverlayPort("application:order");
+    return <OverlayProvider runtimePort={port} portalContainer={target}><Nested /></OverlayProvider>;
+  }
+  const view = render(<SynCloudOSProvider runtime={runtime}><Host target={null} /></SynCloudOSProvider>);
+  expect(destination.children).toHaveLength(0);
+  view.rerender(<SynCloudOSProvider runtime={runtime}><Host target={destination} /></SynCloudOSProvider>);
+  expect([...destination.children]).toEqual([outer!.portalHost, inner!.portalHost]);
 });

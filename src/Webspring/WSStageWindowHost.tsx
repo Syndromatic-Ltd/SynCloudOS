@@ -136,7 +136,7 @@ export function WSStageWindowFrame({
     if (!frame) return;
     if (active && active !== document.body) {
       if (isWithinNSEFocusOrigin(frame, active)) return;
-      const owner = frame.dataset.syncloudosRuntimeOwner;
+      const owner = frame.dataset.syncloudosRuntimeOwner ?? frame.closest<HTMLElement>("[data-syncloudos-runtime-owner]")?.dataset.syncloudosRuntimeOwner;
       if (!owner || active.closest<HTMLElement>("[data-syncloudos-runtime-owner]")?.dataset.syncloudosRuntimeOwner !== owner) return;
     }
     // The window's content takes focus, not a view controller drawn in its title bar (an accessory).

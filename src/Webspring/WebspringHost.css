@@ -37,7 +37,9 @@
 }
 
 .webspring-view-host,
-.webspring-entrance-surface {
+.webspring-entrance-surface,
+.webspring-stage-host,
+.webspring-stage-entrance {
   display: contents;
 }
 
@@ -982,14 +984,15 @@
   overflow: hidden;
 }
 
-.webspring-view[data-launch-phase="launching"] .webspring-app-view-frame,
-[data-nse-control="board"][data-nse-presentation="launching"] .webspring-app-view-frame {
+/* The stage is the launcher's sibling, so it reads the launch phase through :has(). */
+:where(:root):has(.webspring-view[data-launch-phase="launching"]) .webspring-app-view-frame,
+:where(:root):has([data-nse-control="board"][data-nse-presentation="launching"]) .webspring-app-view-frame {
   animation: webspring-launch-frame-blackout 360ms 300ms linear both;
 }
 
 /* On the Board the wallpaper stays visible while the app grows out of its
    icon, and darkens only as the zoom lands. */
-[data-nse-control="board"][data-nse-presentation="launching"] .webspring-app-view-frame {
+:where(:root):has([data-nse-control="board"][data-nse-presentation="launching"]) .webspring-app-view-frame {
   animation-duration: 180ms;
   animation-delay: 380ms;
 }
@@ -1006,8 +1009,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .webspring-view[data-launch-phase="launching"] .webspring-app-view-frame,
-  [data-nse-control="board"][data-nse-presentation="launching"] .webspring-app-view-frame {
+  :where(:root):has(.webspring-view[data-launch-phase="launching"]) .webspring-app-view-frame,
+  :where(:root):has([data-nse-control="board"][data-nse-presentation="launching"]) .webspring-app-view-frame {
     animation-duration: 120ms;
     animation-delay: 0ms;
   }
