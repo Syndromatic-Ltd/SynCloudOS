@@ -110,21 +110,41 @@ for (const scheme of ["light", "dark"] as const) for (let partition = 0; partiti
 }
 
 // A non-image acceptance check: the frozen corpus above is unchanged.
-test("stepper hit targets preserve the painted bezel", async ({ page }) => {
-  await page.goto("/tests/e2e/fixtures/theme-baseline/index.html?scheme=light&surface=stepper-normal");
+test("stepper hit targets preserve the painted bezel", async ({ page, browser, baseURL }) => {
+  const fixture = "/tests/e2e/fixtures/theme-baseline/index.html?scheme=light&surface=stepper-normal";
+  await page.goto(fixture);
   const control = page.locator('[data-nse-control="stepper"]');
   const bezel = control.locator(':scope > [data-nse-part="bezel"]');
   await expect(control).toBeVisible();
-  const bounds = await control.boundingBox(), paint = await bezel.boundingBox();
-  expect(bounds).not.toBeNull(); expect(paint).not.toBeNull();
-  expect(bounds!.width).toBeGreaterThanOrEqual(24);
-  expect(bounds!.height).toBeGreaterThanOrEqual(48);
-  expect(paint!.width).toBe(22); expect(paint!.height).toBe(34);
-  for (const [part, y] of [["increment", bounds!.y + 1], ["decrement", bounds!.y + bounds!.height - 1]] as const) {
-    await page.mouse.move(bounds!.x + bounds!.width - 0.5, y);
-    await page.mouse.down();
-    await expect(control.locator(`[data-nse-part="${part}"]`)).toHaveAttribute("data-nse-highlighted", "");
-    await page.mouse.up();
-    await expect(control.locator(`[data-nse-part="${part}"]`)).not.toHaveAttribute("data-nse-highlighted");
+  await expect(control).toHaveCSS("width", "22px");
+  await expect(control).toHaveCSS("height", "34px");
+  await expect(bezel).toHaveCSS("width", "22px");
+  await expect(bezel).toHaveCSS("height", "34px");
+  await expect(control.locator(".nse-stepper-hit-area")).toHaveCSS("min-block-size", "24px");
+
+  const touch = await browser.newContext({ baseURL, hasTouch: true, viewport: { width: 390, height: 844 } });
+  try {
+    const phone = await touch.newPage();
+    await phone.goto(fixture);
+    expect(await phone.evaluate(() => matchMedia("(pointer: coarse)").matches)).toBe(true);
+    const stepper = phone.locator('[data-nse-control="stepper"]');
+    await expect(stepper).toHaveCSS("width", "22px");
+    await expect(stepper).toHaveCSS("height", "34px");
+    const hitArea = stepper.locator(".nse-stepper-hit-area");
+    await expect(hitArea).toHaveCSS("width", "24px");
+    await expect(hitArea).toHaveCSS("height", "48px");
+    const bounds = (await stepper.boundingBox())!;
+    const x = bounds.x + bounds.width / 2 + 11.5;
+    const centre = bounds.y + bounds.height / 2;
+    for (const [part, y] of [["increment", centre - 23], ["decrement", centre + 23]] as const) {
+      const button = stepper.locator(`[data-nse-part="${part}"]`);
+      await phone.mouse.move(x, y);
+      await phone.mouse.down();
+      await expect(button).toHaveAttribute("data-nse-highlighted", "");
+      await phone.mouse.up();
+      await expect(button).not.toHaveAttribute("data-nse-highlighted");
+    }
+  } finally {
+    await touch.close();
   }
 });
