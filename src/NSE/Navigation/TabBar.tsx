@@ -106,37 +106,6 @@ function tabIconStyle(icon: NSENavigationIcon): TabIconStyle | undefined {
   return { "--nse-tab-icon-source": source } as TabIconStyle;
 }
 
-/**
- * The tall-chrome icon material, as the Atmo UserInfo glyph paints it: the
- * ring and glyph are 75% translucent, with a soft white rim just inside every
- * edge and a drop shadow that is knocked out from under the body (so the bar
- * shows through rather than the shadow). CSS masks can paint the body but not
- * an inner rim, so Atmo reaches this filter through `--nse-tab-icon-material`.
- */
-function TabIconMaterial({ id }: { readonly id: string }) {
-  return (
-    <svg className="nse-tab-bar-icon-material" aria-hidden="true" focusable="false" width="0" height="0">
-      <filter id={id} x="-20%" y="-20%" width="140%" height="150%" colorInterpolationFilters="sRGB">
-        <feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 .78 0" result="body" />
-        <feGaussianBlur in="SourceAlpha" stdDeviation="0.75" result="soft" />
-        <feComposite in="SourceAlpha" in2="soft" operator="out" result="edge" />
-        <feFlood floodColor="#fff" floodOpacity="0.85" />
-        <feComposite in2="edge" operator="in" result="rim" />
-        <feGaussianBlur in="SourceAlpha" stdDeviation="1" />
-        <feOffset dy="1.2" result="drop" />
-        <feFlood floodColor="#000" floodOpacity="0.62" />
-        <feComposite in2="drop" operator="in" />
-        <feComposite in2="SourceAlpha" operator="out" result="shadow" />
-        <feMerge>
-          <feMergeNode in="shadow" />
-          <feMergeNode in="body" />
-          <feMergeNode in="rim" />
-        </feMerge>
-      </filter>
-    </svg>
-  );
-}
-
 export interface TabBarProps {
   /** The semantic owner. This renderer never creates or disposes it. */
   readonly controller: TabBarController<ReactNode>;
@@ -292,11 +261,9 @@ export function TabBar({
   const moreIconStyle = tabIconStyle(nseTabBarMoreIcon);
 
   const usesTallTabChrome = true;
-  const iconMaterialId = `${resolvedIdScope.replace(/[^\w-]/g, "")}-nse-tab-icon-material`;
   const tabListStyle = {
     "--nse-tab-visible-count": controls.length,
     "--nse-tab-visible-minimum-width": `${controls.length * 64}px`,
-    ...(usesTallTabChrome ? { "--nse-tab-icon-material": `url("#${iconMaterialId}")` } : {}),
   } as CSSProperties;
 
   return (
@@ -311,7 +278,6 @@ export function TabBar({
         dir={dir}
         style={tabListStyle}
       >
-        {usesTallTabChrome ? <TabIconMaterial id={iconMaterialId} /> : null}
         <div className="nse-tab-bar-scroll-viewport" data-nse-part="viewport" data-nse-tab-scroll-viewport="true">
         <div
           className={classes("nse-tab-bar", usesTallTabChrome && "nse-control-toolbar")}
