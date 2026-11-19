@@ -419,6 +419,7 @@ function createWindowMount(appRuntime: SynWareRuntime, alerts: WindowAlertQueue,
   return {
     get windowId() { return current()?.id ?? null; },
     getSnapshot: current,
+    declaredStyle: currentWindow.declaredStyle,
     subscribe: (listener) => windows.subscribe(listener),
     focus: () => { windows.focus(requireId("focus the window")); },
     minimise: () => { windows.minimise(requireId("minimise the window")); },

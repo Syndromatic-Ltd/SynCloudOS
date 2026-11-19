@@ -4539,6 +4539,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
     cleanupOnAbort(() => { unsubscribePrivacyIdentity(); unsubscribePrivacyProfile(); unsubscribeCanonicalPrivacySession(); privacyOwner.abort(); });
     const environmentClients = Object.freeze({
       currentWindow: {
+        declaredStyle: app.window.style,
         setStyle(style: readonly import("../SynCloudOS").WindowStyle[]) {
           if (windowControllerId !== undefined) runtime.windows.setStyle(ownedWindow(windowControllerId).id, style);
         },

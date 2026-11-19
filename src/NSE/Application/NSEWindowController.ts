@@ -177,6 +177,8 @@ export interface WindowMount {
   /** The window's identity, or `null` on the stage. */
   readonly windowId: string | null;
   getSnapshot(): SynWareOwnedWindowSnapshot | null;
+  /** The application's declared window style, for a window the stage presents without a window record. */
+  readonly declaredStyle?: NonNullable<SynWareOwnedWindowSnapshot["style"]>;
   subscribe(listener: () => void): () => void;
   focus(): void;
   minimise(): void;
@@ -371,7 +373,10 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
     this.#window = Object.freeze({
       get styleMask() {
         const record = controller.#mount?.getSnapshot();
-        return record?.style ? projectWindowStyle(record.style) : controller.#styleMask ?? Object.freeze([]);
+        if (record?.style) return projectWindowStyle(record.style);
+        // On the stage there is no window record; an undeclared mask is the one the application's manifest declares.
+        const declared = controller.#mount?.declaredStyle;
+        return controller.#styleMask ?? (declared ? projectWindowStyle(declared) : Object.freeze([]));
       },
       set styleMask(value: readonly NSEWindowStyle[]) {
         if (!Array.isArray(value) || value.some(bit => !["titled", "closable", "miniaturizable", "resizable", "fullSizeContentView", "texturedBackground", "fullScreen"].includes(bit)) ||

@@ -56,6 +56,8 @@ import type { FocusScopeHandle, FocusScopeRegistration } from "../SynCloudOS";
  * façade object. The context receives only already-projected client values. */
 export interface MountedAppEnvironmentClients {
   readonly currentWindow: {
+    /** The window style the application's manifest declares, which the stage has no window record to carry. */
+    readonly declaredStyle: readonly import("../SynCloudOS").WindowStyle[];
     setStyle(style: readonly import("../SynCloudOS").WindowStyle[]): void;
     setCollectionBehavior(behavior: import("../SynCloudOS").WindowCollectionBehavior): void;
     toggleFullScreen(): void;
