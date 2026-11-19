@@ -204,7 +204,7 @@ function Scrollers() {
 const specimens = {
   "window-standard": () => <WindowSpecimen chrome="standard" />,
   "window-metal": () => <WindowSpecimen chrome="metal" />,
-  "app-view-chrome": () => <StageSpecimen />,
+  "stage-window": () => <StageSpecimen />,
   toolbar: () => <ToolbarView composition="children" position="inline" style={{ width: 600 }}><NSEButton title="Open" /></ToolbarView>,
   "toolbar-item": () => <ConfiguredToolbar />,
   tabs: () => <Tabs />,

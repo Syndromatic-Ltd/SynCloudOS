@@ -118,9 +118,10 @@ function Root({
       {...hostProps}
       ref={setFrame}
       tabIndex={-1}
-      data-nse-control="app-view-chrome" data-nse-part="background" data-nse-key-window={keyWindow ? undefined : "false"}
+      data-nse-control="window" data-nse-part="background" data-nse-presentation="stage" data-nse-role="standard"
+      data-nse-key-window={keyWindow ? undefined : "false"}
       className={`webspring-app-view-frame ${multiSwitchRole ? `is-multiswitch-${multiSwitchRole}` : ""} ${className ?? ""}`}
-      data-nse-type={multiSwitchRole ?? undefined}
+      data-nse-transition={multiSwitchRole ?? undefined}
       // A staged frame is mounted and painted but not yet presented: it must not take pointer
       // input or join the accessibility tree until the launch zoom hands the screen over to it.
       data-launch-staged={staged ? "true" : undefined}
@@ -160,9 +161,9 @@ function Surface({
       data-nse-part="content" className={`webspring-app-view-surface ${surfaceClass}`}
       data-frame-material={material === "metal" ? "metal" : "standard"}
       data-frame-top-bar={hasTitlebar ? "standard" : "none"}
-      data-nse-material={material === "metal" ? "metal" : "standard"}
-      data-nse-type={multiSwitchRole ?? undefined}
-      data-nse-style={hasTitlebar ? "standard" : "custom"}
+      data-nse-material={material === "metal" ? "metal" : undefined}
+      data-nse-transition={multiSwitchRole ?? undefined}
+      data-nse-titlebar={hasTitlebar ? undefined : "hidden"}
       style={{ ...contentLayoutProperties, ...presentation?.motion.style, "--webspring-app-top-bar-height": topBarHeight } as CSSProperties}
     >
       {children}

@@ -6,7 +6,7 @@ A theme draws controls through these hooks only: `[data-nse-control]`, `[data-ns
 
 Each hook is also mirrored on its element as a class token beginning `nse:`, and the build rewrites hook selectors to those classes so the browser can index them. The classes are private and may change without notice: write the attributes, and never select on the classes.
 
-Contract version 1: 73 controls, 48 colours.
+Contract version 1: 72 controls, 48 colours.
 
 ## Controls
 
@@ -17,18 +17,6 @@ Contract version 1: 73 controls, 48 colours.
 - Variants:
   - `data-nse-role`: `anchor`, `backdrop`
   - `data-nse-type`: `application`, `folder`
-
-### `app-view-chrome`
-
-- Parts: `background`, `border`, `content`, `content-border`, `content-view`, `decoration`
-- States: `key-window=false`
-- Variants:
-  - `data-nse-background-style`: `none`, `system`
-  - `data-nse-content-border`: `large`, `small`
-  - `data-nse-edge`: `minY`
-  - `data-nse-material`: `metal`
-  - `data-nse-style`: `custom`, `standard`
-  - `data-nse-type`: `incoming`, `outgoing`
 
 ### `badge`
 
@@ -678,15 +666,18 @@ Contract version 1: 73 controls, 48 colours.
 - States: `key-window=false`, `selected`
 - Variants:
   - `data-nse-alignment`: `center`, `end`, `start`
+  - `data-nse-background-style`: `none`, `system`
   - `data-nse-chrome`: `hud`, `metal`, `standard`
   - `data-nse-content-border`: `large`, `small`
   - `data-nse-edge`: `block-end`, `block-end-inline-end`, `block-end-inline-start`, `block-start`, `block-start-inline-end`, `block-start-inline-start`, `inline-end`, `inline-start`, `minY`
   - `data-nse-focus-style`: `ring`
   - `data-nse-material`: `cumulus`, `metal`
-  - `data-nse-presentation`: `attached`, `floating`
+  - `data-nse-presentation`: `attached`, `floating`, `stage`
   - `data-nse-role`: `borderless`, `hud`, `modal`, `panel`, `popover`, `sheet`, `standard`, `titlebar`, `transfer`
   - `data-nse-style`: `hud`, `panel`, `standard`, `titlebar`
+  - `data-nse-titlebar`: `hidden`
   - `data-nse-toolbar-style`: `automatic`, `expanded`, `preference`, `unified`, `unifiedCompact`
+  - `data-nse-transition`: `incoming`, `outgoing`
   - `data-nse-transparent`: `true`
   - `data-nse-type`: `custom`, `frameless`, `system`
 - Mark a document region in custom window content with `data-nse-part="document"` so its titles can be distinguished from window chrome.
@@ -738,7 +729,7 @@ Transitions use only `var(--nse-motion-<role>-duration)` and `var(--nse-motion-<
 
 ## App theme controls
 
-`window`, `app-view-chrome`, `toolbar`, `toolbar-item`, `tab-view`, `segmented-control`, `split-view`, `menu`, `menu-item`, `popover`
+`window`, `toolbar`, `toolbar-item`, `tab-view`, `segmented-control`, `split-view`, `menu`, `menu-item`, `popover`
 
 ## Limits
 
@@ -764,3 +755,4 @@ Earlier names and the hooks that replaced them. None is accepted as an alias.
 - `date-range-picker` → `date-picker[date-picker-mode=range]`
 - `route-picker` → `route-picker-view`
 - `file-panel` → `save-panel`
+- `app-view-chrome` → `window[presentation=stage]`

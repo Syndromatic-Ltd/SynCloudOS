@@ -30,11 +30,11 @@ export function createNSEThemeContract(rendered, vocabulary, colours) {
     appearance: { "colour-scheme-resolved": ["light", "dark"], contrast: ["normal", "high", "forced"], transparency: ["normal", "reduced"] },
     navigation: { compact: { placement: ["block-start", "block-end"], flow: ["in-flow", "overlay"] }, regular: { placement: ["source-list", "block-start"], flow: ["in-flow", "overlay"] } },
     presentation: { login: ["plain", "ornamented"], notifications: ["plain", "sliced-3d"], materialLighting: ["off", "on"] },
-    appThemeControls: ["window", "app-view-chrome", "toolbar", "toolbar-item", "tab-view", "segmented-control", "split-view", "menu", "menu-item", "popover"],
+    appThemeControls: ["window", "toolbar", "toolbar-item", "tab-view", "segmented-control", "split-view", "menu", "menu-item", "popover"],
     motion: { roles: ["standard", "control", "selection", "presentation", "dismissal", "scrollBoundary"], properties: ["duration", "easing"], timing: ["spring", "timingFunction"] },
     typography: { properties: ["font", "font-*", "line-height", "letter-spacing", "word-spacing", "text-transform"], fontFormats: ["woff2"] },
     limits: { minimumHitTarget: { regular: 24, large: 24 }, visibleFocusIndicator: true, reducedMotion: true, semanticProperties: ["display", "visibility", "content"], forbiddenProperties: ["animation"] },
-    renamedFrom: { "toolbar.root": "toolbar.background", "circular-slider": "slider[slider-type=circular]", "slider-field": "slider[slider-type=linear]", "ruler": "ruler-view", "scroll-view-frame": "scroll-view", "toolbar-configuration-sheet": "toolbar-customisation-palette", "calendar": "date-picker[date-picker-elements=yearMonthDay]", "time-picker": "date-picker[date-picker-elements=hourMinute]", "date-time-picker": "date-picker[date-picker-elements=yearMonthDay hourMinute]", "date-range-picker": "date-picker[date-picker-mode=range]", "route-picker": "route-picker-view", "file-panel": "save-panel" },
+    renamedFrom: { "toolbar.root": "toolbar.background", "circular-slider": "slider[slider-type=circular]", "slider-field": "slider[slider-type=linear]", "ruler": "ruler-view", "scroll-view-frame": "scroll-view", "toolbar-configuration-sheet": "toolbar-customisation-palette", "calendar": "date-picker[date-picker-elements=yearMonthDay]", "time-picker": "date-picker[date-picker-elements=hourMinute]", "date-time-picker": "date-picker[date-picker-elements=yearMonthDay hourMinute]", "date-range-picker": "date-picker[date-picker-mode=range]", "route-picker": "route-picker-view", "file-panel": "save-panel", "app-view-chrome": "window[presentation=stage]" },
   };
 }
 /** Read the reviewed result; the drift gate compares it with a fresh render. */

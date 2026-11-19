@@ -71,7 +71,7 @@ test("staged portals do not paint or receive clicks, and reveal beyond the frame
 test("outgoing portals follow both stage planes and cannot override disabled pointer input", async ({ page }) => {
   await open(page);
   await page.evaluate(() => (window as any).stageOverlayFixture.setRole("outgoing"));
-  await page.waitForFunction(() => document.querySelector('[data-nse-control="app-view-chrome"][data-nse-part="background"][data-nse-type="outgoing"]'));
+  await page.waitForFunction(() => document.querySelector('[data-nse-control="window"][data-nse-part="background"][data-nse-presentation="stage"][data-nse-transition="outgoing"]'));
   await page.evaluate(() => { for (const animation of document.getAnimations()) { animation.pause(); animation.currentTime = 360; } });
   const poses = await comparePoses(page);
   expect(poses.destination).toEqual(poses.frame);

@@ -24,43 +24,6 @@
         ]
       }
     },
-    "app-view-chrome": {
-      "parts": [
-        "background",
-        "border",
-        "content",
-        "content-border",
-        "content-view",
-        "decoration"
-      ],
-      "states": [
-        "key-window=false"
-      ],
-      "variants": {
-        "background-style": [
-          "none",
-          "system"
-        ],
-        "content-border": [
-          "large",
-          "small"
-        ],
-        "edge": [
-          "minY"
-        ],
-        "material": [
-          "metal"
-        ],
-        "style": [
-          "custom",
-          "standard"
-        ],
-        "type": [
-          "incoming",
-          "outgoing"
-        ]
-      }
-    },
     "badge": {
       "parts": [
         "badge"
@@ -2213,6 +2176,10 @@
           "end",
           "start"
         ],
+        "background-style": [
+          "none",
+          "system"
+        ],
         "chrome": [
           "hud",
           "metal",
@@ -2242,7 +2209,8 @@
         ],
         "presentation": [
           "attached",
-          "floating"
+          "floating",
+          "stage"
         ],
         "role": [
           "borderless",
@@ -2261,12 +2229,19 @@
           "standard",
           "titlebar"
         ],
+        "titlebar": [
+          "hidden"
+        ],
         "toolbar-style": [
           "automatic",
           "expanded",
           "preference",
           "unified",
           "unifiedCompact"
+        ],
+        "transition": [
+          "incoming",
+          "outgoing"
         ],
         "transparent": [
           "true"
@@ -2404,7 +2379,6 @@
   },
   "appThemeControls": [
     "window",
-    "app-view-chrome",
     "toolbar",
     "toolbar-item",
     "tab-view",
@@ -2473,6 +2447,7 @@
     "date-time-picker": "date-picker[date-picker-elements=yearMonthDay hourMinute]",
     "date-range-picker": "date-picker[date-picker-mode=range]",
     "route-picker": "route-picker-view",
-    "file-panel": "save-panel"
+    "file-panel": "save-panel",
+    "app-view-chrome": "window[presentation=stage]"
   }
 }

@@ -1,5 +1,5 @@
 [data-nse-control="window"] > [data-nse-part="bezel"],
-[data-nse-control="app-view-chrome"][data-nse-part="background"],
+[data-nse-control="window"][data-nse-part="background"][data-nse-presentation="stage"],
 [data-nse-control="toolbar"][data-nse-position="inline"][data-nse-part="background"],
 [data-nse-control="toolbar-item"][data-nse-part="item"],
 [data-nse-control="tab-view"] [data-nse-part="cell"][data-nse-selected],
@@ -17,7 +17,7 @@
 }
 
 [data-nse-control="window"] > [data-nse-part="bezel"] > [data-nse-part],
-[data-nse-control="app-view-chrome"][data-nse-part="background"] > [data-nse-part],
+[data-nse-control="window"][data-nse-part="background"][data-nse-presentation="stage"] > [data-nse-part],
 [data-nse-control="toolbar"][data-nse-position="inline"][data-nse-part="background"] > [data-nse-part],
 [data-nse-control="toolbar-item"][data-nse-part="item"] [data-nse-part],
 [data-nse-control="tab-view"] [data-nse-part="cell"][data-nse-selected] [data-nse-part],

@@ -216,7 +216,7 @@ Run.app/
 
 Use the usual `Info.ts` identity and `themeContractVersion`. The Vite plugin discovers the bundle with the app. An app theme contains stylesheets and their local artwork. The enclosing system theme supplies semantic colours, navigation, presentation and named images, so omit `Theme.json`.
 
-An app theme can draw `window`, `app-view-chrome`, `toolbar`, `toolbar-item`, `tab-view`, `segmented-control`, `split-view`, `menu`, `menu-item` and `popover`. Anchor each selector to an allowed control and use its published parts, states and variants. The app bundle validator accepts partial coverage. See [App theme controls](theme-contract.md#app-theme-controls).
+An app theme can draw `window`, `toolbar`, `toolbar-item`, `tab-view`, `segmented-control`, `split-view`, `menu`, `menu-item` and `popover`. A full-screen application's frame is a `window` with `data-nse-presentation="stage"`. Anchor each selector to an allowed control and use its published parts, states and variants. The app bundle validator accepts partial coverage. See [App theme controls](theme-contract.md#app-theme-controls).
 
 ```css
 [data-nse-control="tab-view"] [data-nse-part="cell"][data-nse-selected] {

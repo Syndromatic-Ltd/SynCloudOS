@@ -11,7 +11,7 @@ export const nseThemeControls = Object.freeze([
   "tab-view", "page-controller", "ruler-view", "window", "panel", "sheet", "popover", "alert", "tooltip",
   "colour-panel", "colour-well", "colour-sliders", "colour-swatches", "colour-wheel", "font-panel", "open-panel",
   "save-panel", "web-view", "badge", "icon-well", "route-picker-view", "virtual-viewport", "view", "login-window", "notification-banner", "notification-centre",
-  "system-alert", "chronosphere", "board", "app-icon", "folder-tile", "folder-presentation", "app-view-chrome", "quick-switch",
+  "system-alert", "chronosphere", "board", "app-icon", "folder-tile", "folder-presentation", "quick-switch",
 ] as const);
 
 /** Parts name drawable structure, independently of any theme's artwork. */
@@ -36,7 +36,7 @@ export const nseThemeVariants = Object.freeze([
   "login-presentation", "notification-presentation", "appearance-name", "key-equivalent", "has-destructive-action", "image-position",
   "sort-direction", "selection-highlight-style", "highlight-style", "material", "transparent", "custom-fill", "custom-border", "border-colour", "custom-bezel", "content-tint", "background-tint", "shadow", "shadow-suppressed", "validation", "value-state", "revealed", "indeterminate", "height", "expanded", "orientation", "alignment", "position", "placement", "flow", "style", "role", "type", "edge", "level",
   "pulls-down", "title-position", "border-type", "image-scaling", "text-role", "text-colour", "background-style", "editable", "date-picker-style", "date-picker-mode", "date-picker-elements", "navigation-placement", "navigation-flow", "distribution", "menu-flash", "menu-chosen", "brightness-placement", "toolbar-size-mode", "toolbar-bordered", "presentation", "content-border", "view-layer", "corner-curve", "surface-ink", "focus-style",
-  "suspended", "motion", "overlay-state",
+  "suspended", "motion", "overlay-state", "transition", "titlebar",
 ] as const);
 
 export type NSEThemeControlName = typeof nseThemeControls[number];

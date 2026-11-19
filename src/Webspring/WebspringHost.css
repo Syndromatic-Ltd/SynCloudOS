@@ -1016,17 +1016,17 @@
 /* No per-frame perspective here: each plane inherits the apps-container
    stage above. overflow: visible keeps preserve-3d effective and lets the
    plane's cast shadow render outside its scaled-down surface. */
-.webspring-app-view-frame:is([data-nse-type="incoming"], [data-nse-type="outgoing"]) {
+.webspring-app-view-frame:is([data-nse-transition="incoming"], [data-nse-transition="outgoing"]) {
   overflow: visible;
   transform-style: preserve-3d;
 }
 
-.webspring-app-view-frame[data-nse-type="outgoing"] {
+.webspring-app-view-frame[data-nse-transition="outgoing"] {
   pointer-events: none;
   transform-origin: 50% 50%;
 }
 
-.webspring-app-view-frame[data-nse-type="incoming"] {
+.webspring-app-view-frame[data-nse-transition="incoming"] {
   transform-origin: 50% 50%;
 }
 
@@ -1039,18 +1039,18 @@
   will-change: transform, opacity, filter;
 }
 
-.webspring-app-view-surface:is([data-nse-type="incoming"], [data-nse-type="outgoing"]) {
+.webspring-app-view-surface:is([data-nse-transition="incoming"], [data-nse-transition="outgoing"]) {
   backface-visibility: hidden;
 }
 
 /* Centre origins: both planes scale/lean around their own centre so they
    sit inset in the shared stage like the iOS reference, rather than
    hugging an outer edge. */
-.webspring-app-view-surface[data-nse-type="outgoing"] {
+.webspring-app-view-surface[data-nse-transition="outgoing"] {
   transform-origin: 50% 50%;
 }
 
-.webspring-app-view-surface[data-nse-type="incoming"] {
+.webspring-app-view-surface[data-nse-transition="incoming"] {
   transform-origin: 50% 50%;
 }
 

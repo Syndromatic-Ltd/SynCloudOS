@@ -1,5 +1,5 @@
 [data-nse-control="window"][data-nse-part="background"] > [data-nse-part="bezel"],
-[data-nse-control="app-view-chrome"][data-nse-part="background"] > [data-nse-part="content"],
+[data-nse-control="window"][data-nse-part="background"][data-nse-presentation="stage"] > [data-nse-part="content"],
 [data-nse-control="menu"][data-nse-part="background"][data-nse-role="command-menu"],
 [data-nse-control="popover"][data-nse-part="surface"] {
   background: #f6dde2;
@@ -34,7 +34,7 @@
 }
 
 :scope[data-nse-colour-scheme-resolved="dark"] [data-nse-control="window"][data-nse-part="background"] > [data-nse-part="bezel"],
-:scope[data-nse-colour-scheme-resolved="dark"] [data-nse-control="app-view-chrome"][data-nse-part="background"] > [data-nse-part="content"],
+:scope[data-nse-colour-scheme-resolved="dark"] [data-nse-control="window"][data-nse-part="background"][data-nse-presentation="stage"] > [data-nse-part="content"],
 :scope[data-nse-colour-scheme-resolved="dark"] [data-nse-control="menu"][data-nse-part="background"][data-nse-role="command-menu"],
 :scope[data-nse-colour-scheme-resolved="dark"] [data-nse-control="popover"][data-nse-part="surface"] {
   background: #461c2e;

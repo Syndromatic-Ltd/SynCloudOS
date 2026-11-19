@@ -92,7 +92,7 @@ const windowTheme = "com.example.blue-chrome";
 
 async function openApplicationWindows(page: Page) {
   await page.goto(fixture + "?host=application");
-  const stage = page.locator('[data-nse-control="app-view-chrome"]').filter({ has: page.locator("#main-document") });
+  const stage = page.locator('[data-nse-control="window"][data-nse-presentation="stage"]').filter({ has: page.locator("#main-document") });
   await stage.getByRole("button", { name: "Open secondary window" }).click();
   const secondary = page.locator('[data-window-id][data-nse-control="window"]').filter({ has: page.locator("#secondary-document") });
   await expect(secondary).toBeVisible();

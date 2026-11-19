@@ -9,6 +9,11 @@ import { parseManifest } from "./manifest-source.mjs";
 // Atmo's spinners and menu animations stay keyframes; transitions use motion tokens like any theme's.
 const ATMO_KEYFRAMES_STYLESHEET = fileURLToPath(new URL("../../src/Themes/Atmo.scostheme/Contents/Resources/atmo-structure.controls.css", import.meta.url));
 const identifier = /^[a-z][a-z0-9-]*(?:\.[a-z][a-z0-9-]*)+$/u;
+// A retired hook stays rejected; the error names what replaced it.
+const renamedTo = (contract, name, part = false) => {
+  const entry = Object.entries(contract.renamedFrom ?? {}).find(([from]) => part ? from.endsWith("." + name) : from === name);
+  return entry ? ` Renamed to ${entry[1]}.` : "";
+};
 const resourceExtensions = new Set([".css", ".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg", ".avif", ".woff2", ".txt", ".md", ".json", ".strings"]);
 const inside = (root, path) => { const rel = relative(root, path); return !isAbsolute(rel) && rel !== ".." && !rel.startsWith("../") && !rel.startsWith("..\\"); };
 function walk(root) {
@@ -368,10 +373,10 @@ export function validateThemeCSS(source, { file, root, contract, kind = "system"
             if (appControls && !appControls.has(control)) {
               fail(file, "css-control", `App themes cannot draw ${control}. Allowed controls: ${contract.appThemeControls.join(", ")}.`);
             }
-            if (control && !contract.controls[control]) fail(file, "css-control", `Unknown control ${control}.`);
+            if (control && !contract.controls[control]) fail(file, "css-control", `Unknown control ${control}.${renamedTo(contract, control)}`);
           }
           if (name === "data-nse-part" && value && !Object.values(contract.controls).some(control => control.parts.includes(value))) {
-            fail(file, "css-part", `Unknown part ${value}.`);
+            fail(file, "css-part", `Unknown part ${value}.${renamedTo(contract, value, true)}`);
           }
         });
         if (app) {

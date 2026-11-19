@@ -53,7 +53,7 @@ describe("app themes", () => {
 
   it("rejects a control outside appThemeControls and lists the allowed controls", () => {
     const bundle = appTheme(temp(), '[data-nse-control="slider"] { background: red }');
-    expect(() => readThemeBundle(bundle, { kind: "app" })).toThrow(/slider.*window.*app-view-chrome.*toolbar.*tab-view.*popover/i);
+    expect(() => readThemeBundle(bundle, { kind: "app" })).toThrow(/slider.*window.*toolbar.*tab-view.*popover/i);
   });
 
   it.each([

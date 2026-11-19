@@ -347,7 +347,7 @@ it("renders the large content border on embedded application chrome", () => {
       </AppViewChrome.Root>
     </Host>,
   );
-  expect(view.container.querySelector('[data-nse-control="app-view-chrome"] [data-nse-part="content-border"][data-nse-content-border="large"]')).not.toBeNull();
+  expect(view.container.querySelector('[data-nse-control="window"][data-nse-presentation="stage"] [data-nse-part="content-border"][data-nse-content-border="large"]')).not.toBeNull();
   collect();
 });
 it("renders the floating Cumulus titlebar and its custom frame", () => {
@@ -1023,7 +1023,7 @@ it.each([["incoming", "system", true], ["outgoing", "none", false]] as const)(
         <AppViewContent.Surface smoothSurface={false} background={background}><p>App content</p></AppViewContent.Surface>
       </AppViewChrome.Surface>
     </AppViewChrome.Root></Host>);
-    expect(view.container.querySelector(`[data-nse-control="app-view-chrome"] > [data-nse-part="content"][data-nse-type="${role}"] > [data-nse-part="content-view"][data-nse-background-style="${background}"]`)).not.toBeNull();
+    expect(view.container.querySelector(`[data-nse-control="window"][data-nse-presentation="stage"] > [data-nse-part="content"][data-nse-transition="${role}"] > [data-nse-part="content-view"][data-nse-background-style="${background}"]`)).not.toBeNull();
     collect();
   },
 );

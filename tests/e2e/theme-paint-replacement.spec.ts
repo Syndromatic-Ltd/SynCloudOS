@@ -60,7 +60,7 @@ async function expectMagenta(drawing: Locator, info: TestInfo, style?: string) {
 const cases: readonly { specimen: string; name: string; selector: string; captureStyle?: string }[] = [
   { specimen: "window-standard", name: "standard window bezel", selector: "#window-standard " + control("window") + " > " + part("bezel") },
   { specimen: "window-metal", name: "Metal window bezel", selector: "#window-metal " + control("window") + " > " + part("bezel") },
-  { specimen: "app-view-chrome", name: "app view", selector: "#app-view-chrome " + control("app-view-chrome") + part("background") },
+  { specimen: "stage-window", name: "stage window", selector: "#stage-window " + control("window") + '[data-nse-presentation="stage"]' + part("background") },
   { specimen: "toolbar", name: "toolbar background", selector: "#toolbar " + control("toolbar") + part("background") },
   { specimen: "toolbar-item", name: "toolbar item", selector: "#toolbar-item " + control("toolbar-item") + part("item") },
   { specimen: "tabs", name: "selected phone tab endcaps", selector: "#tabs " + part("cell") + selected },

@@ -20,7 +20,7 @@ describe("system surface theme hooks", () => {
   it("publishes the stage's key state and the window content border", () => {
     const surface = (keyWindow: boolean) => <SurfaceHost><AppViewChrome.Root zIndex={1} keyWindow={keyWindow}><WindowContentBorder thickness={24} /></AppViewChrome.Root></SurfaceHost>;
     const view = render(surface(false));
-    const root = view.container.querySelector<HTMLElement>('[data-nse-control="app-view-chrome"]')!;
+    const root = view.container.querySelector<HTMLElement>('[data-nse-control="window"][data-nse-presentation="stage"]')!;
     expect(root.dataset.nseKeyWindow).toBe("false");
     expect(root.querySelector('[data-nse-part="content-border"]')).not.toBeNull();
     view.rerender(surface(true));

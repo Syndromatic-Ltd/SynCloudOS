@@ -135,16 +135,16 @@
   border-color: inherit;
 }
 
-[data-nse-control="window"]:where([data-nse-part="background"]):not([data-nse-type="frameless"]),
-:where(:scope):is([data-nse-control="window"]:where([data-nse-part="background"]):not([data-nse-type="frameless"])) {
+[data-nse-control="window"]:where([data-nse-part="background"]):not([data-nse-type="frameless"]):where(:not([data-nse-presentation="stage"])),
+:where(:scope):is([data-nse-control="window"]:where([data-nse-part="background"]):not([data-nse-type="frameless"]):where(:not([data-nse-presentation="stage"]))) {
   color: var(--nse-window-foreground, #17202a);
   background: var(--nse-window-background, #f4f5f6);
   border-color: var(--nse-window-border, rgb(31 41 55 / 42%));
   box-shadow: none;
 }
 
-[data-nse-control="window"]:where([data-nse-part="background"]):not([data-nse-type="frameless"]) > [data-nse-part="bezel"],
-:where(:scope):is([data-nse-control="window"]:where([data-nse-part="background"]):not([data-nse-type="frameless"])) > [data-nse-part="bezel"] {
+[data-nse-control="window"]:where([data-nse-part="background"]):not([data-nse-type="frameless"]):where(:not([data-nse-presentation="stage"])) > [data-nse-part="bezel"],
+:where(:scope):is([data-nse-control="window"]:where([data-nse-part="background"]):not([data-nse-type="frameless"]):where(:not([data-nse-presentation="stage"]))) > [data-nse-part="bezel"] {
   box-shadow: var(--nse-window-shadow, 0 14px 42px rgb(15 23 42 / 26%));
 }
 

@@ -34,42 +34,42 @@
   color: #263448;
 }
 
-[data-nse-control="app-view-chrome"][data-nse-part="background"],
-:where(:scope):is([data-nse-control="app-view-chrome"][data-nse-part="background"]) {
+[data-nse-control="window"][data-nse-part="background"][data-nse-presentation="stage"],
+:where(:scope):is([data-nse-control="window"][data-nse-part="background"][data-nse-presentation="stage"]) {
   background: var(--webspring-launch-frame-shade, #000);
 }
 
-[data-nse-control="app-view-chrome"][data-nse-part="background"]:is([data-nse-type="outgoing"], [data-nse-type="incoming"]),
-:where(:scope):is([data-nse-control="app-view-chrome"][data-nse-part="background"]:is([data-nse-type="outgoing"], [data-nse-type="incoming"])) {
+[data-nse-control="window"][data-nse-part="background"][data-nse-presentation="stage"]:is([data-nse-transition="outgoing"], [data-nse-transition="incoming"]),
+:where(:scope):is([data-nse-control="window"][data-nse-part="background"][data-nse-presentation="stage"]:is([data-nse-transition="outgoing"], [data-nse-transition="incoming"])) {
   --webspring-launch-frame-shade: transparent;
   background: var(--webspring-launch-frame-shade, transparent);
 }
 
-[data-nse-control="app-view-chrome"][data-nse-part="background"] > [data-nse-part="content"],
-:where(:scope):is([data-nse-control="app-view-chrome"][data-nse-part="background"]) > [data-nse-part="content"] {
+[data-nse-control="window"][data-nse-part="background"][data-nse-presentation="stage"] > [data-nse-part="content"],
+:where(:scope):is([data-nse-control="window"][data-nse-part="background"][data-nse-presentation="stage"]) > [data-nse-part="content"] {
   color: #1e1b17;
   background: #111;
 }
 
-[data-nse-control="app-view-chrome"][data-nse-part="background"] > [data-nse-part="content"]:is([data-nse-type="outgoing"], [data-nse-type="incoming"]),
-:where(:scope):is([data-nse-control="app-view-chrome"][data-nse-part="background"]) > [data-nse-part="content"]:is([data-nse-type="outgoing"], [data-nse-type="incoming"]) {
+[data-nse-control="window"][data-nse-part="background"][data-nse-presentation="stage"] > [data-nse-part="content"]:is([data-nse-transition="outgoing"], [data-nse-transition="incoming"]),
+:where(:scope):is([data-nse-control="window"][data-nse-part="background"][data-nse-presentation="stage"]) > [data-nse-part="content"]:is([data-nse-transition="outgoing"], [data-nse-transition="incoming"]) {
   box-shadow: 0 44px 96px rgba(0, 0, 0, 0.55),
     0 10px 32px rgba(0, 0, 0, 0.4);
 }
 
-[data-nse-control="app-view-chrome"][data-nse-part="background"] > [data-nse-part="content"][data-nse-style="standard"],
-:where(:scope):is([data-nse-control="app-view-chrome"][data-nse-part="background"]) > [data-nse-part="content"][data-nse-style="standard"] {
+[data-nse-control="window"][data-nse-part="background"][data-nse-presentation="stage"] > [data-nse-part="content"]:not([data-nse-titlebar="hidden"]),
+:where(:scope):is([data-nse-control="window"][data-nse-part="background"][data-nse-presentation="stage"]) > [data-nse-part="content"]:not([data-nse-titlebar="hidden"]) {
   background: #000;
 }
 
-[data-nse-control="app-view-chrome"][data-nse-part="background"] [data-nse-part="content-view"],
-:where(:scope):is([data-nse-control="app-view-chrome"][data-nse-part="background"]) [data-nse-part="content-view"] {
+[data-nse-control="window"][data-nse-part="background"][data-nse-presentation="stage"] [data-nse-part="content-view"],
+:where(:scope):is([data-nse-control="window"][data-nse-part="background"][data-nse-presentation="stage"]) [data-nse-part="content-view"] {
   color: var(--nse-colour-label);
   background-color: var(--nse-colour-window-background);
 }
 
-[data-nse-control="app-view-chrome"][data-nse-part="background"] [data-nse-part="content-view"][data-nse-background-style="none"],
-:where(:scope):is([data-nse-control="app-view-chrome"][data-nse-part="background"]) [data-nse-part="content-view"][data-nse-background-style="none"] {
+[data-nse-control="window"][data-nse-part="background"][data-nse-presentation="stage"] [data-nse-part="content-view"][data-nse-background-style="none"],
+:where(:scope):is([data-nse-control="window"][data-nse-part="background"][data-nse-presentation="stage"]) [data-nse-part="content-view"][data-nse-background-style="none"] {
   background: none;
 }
 

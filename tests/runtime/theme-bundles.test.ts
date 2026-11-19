@@ -15,6 +15,13 @@ describe("static .scostheme bundles", () => {
     for (const item of [value.theme, value.theme.colours, value.theme.colours.light, value.theme.navigation.compact, value.theme.presentation, value.theme.images]) expect(Object.isFrozen(item)).toBe(true);
     expect(discoverThemeBundles(directory).map((entry: any) => entry.theme.bundleIdentifier)).toEqual(["com.example.paper"]);
   });
+  it.each([
+    ['[data-nse-control="ruler"] { color: red; }', "ruler-view"],
+    ['[data-nse-control="app-view-chrome"][data-nse-part="background"] { background: red; }', "window\\[presentation=stage\\]"],
+  ])("names the replacement for a renamed control: %s", (css, replacement) => {
+    write("Resources/theme.css", css);
+    expect(() => readThemeBundle(bundle)).toThrow(new RegExp("Unknown control .*Renamed to " + replacement));
+  });
   it("rejects explicit regular and large hit-target minima below 24px", () => {
     for (const size of ["regular", "large"]) {
       for (const property of ["min-width", "min-height", "min-inline-size", "min-block-size"]) {
