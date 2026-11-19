@@ -261,7 +261,9 @@
 .nse-popover:not([data-nse-positioned="true"]),
 :where(:scope):is(.nse-popover:not([data-nse-positioned="true"])) { visibility: hidden; }
 .nse-popover-frame,
-:where(:scope):is(.nse-popover-frame) {
+:where(:scope):is(.nse-popover-frame),
+.nse-popover-backdrop,
+:where(:scope):is(.nse-popover-backdrop) {
   position: absolute;
   inset: -12px;
   width: calc(100% + 24px);

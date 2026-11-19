@@ -1183,6 +1183,7 @@
       "parts": [
         "actions",
         "arrow",
+        "backdrop",
         "calendar-sheet",
         "centre",
         "clock",

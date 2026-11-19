@@ -349,7 +349,7 @@ Contract version 1: 73 controls, 48 colours.
 
 ### `popover`
 
-- Parts: `actions`, `arrow`, `calendar-sheet`, `centre`, `clock`, `clock-sheet`, `content`, `face`, `hour-hand`, `minute-hand`, `numeric`, `popover-arrow-fill`, `popover-frame`, `popover-outline`, `range-fields`, `surface`, `title`
+- Parts: `actions`, `arrow`, `backdrop`, `calendar-sheet`, `centre`, `clock`, `clock-sheet`, `content`, `face`, `hour-hand`, `minute-hand`, `numeric`, `popover-arrow-fill`, `popover-frame`, `popover-outline`, `range-fields`, `surface`, `title`
 - States: none
 - Variants:
   - `data-nse-chrome`: `standard`

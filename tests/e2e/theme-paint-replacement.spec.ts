@@ -161,6 +161,43 @@ test("the scroller knob follows its proportion and the focused native range", as
   }
 });
 
+test("the popover backdrop blurs through the arrow and stays inside the outline", async ({ page }) => {
+  await openSpecimen(page, "popover", "none");
+  const surface = page.locator(control("popover") + part("surface"));
+  await expect(surface).toHaveAttribute("data-placement", /^bottom/u);
+  const backdrop = surface.locator(":scope > " + part("backdrop"));
+  await expect(backdrop).toHaveCSS("clip-path", /^path\(/u);
+  await page.addStyleTag({ content: `
+    html { background: repeating-linear-gradient(to right, black 0 2px, white 2px 4px) !important; }
+    ${control("popover")}, ${control("popover")} > ${part("content")} {
+      background: transparent !important;
+      animation: none !important;
+      filter: none !important;
+      box-shadow: none !important;
+    }
+    ${part("popover-outline")}, ${part("popover-arrow-fill")} { fill: none !important; stroke: none !important; }
+  ` });
+  const card = (await surface.boundingBox())!;
+  const anchorArrow = (await surface.locator(":scope > " + part("arrow")).boundingBox())!;
+  const lhs = Math.round(anchorArrow.x + anchorArrow.width / 2) - 4;
+  const arrowY = Math.round(card.y) - 4;
+  const cardY = Math.round(card.y) + 4;
+  const sample = async (x: number, y: number) => sharp(await page.screenshot({
+    ...capture, clip: { x, y, width: 8, height: 1 },
+  })).removeAlpha().raw().toBuffer();
+  const contrast = (pixels: Buffer) => Math.max(...pixels) - Math.min(...pixels);
+
+  const arrowBefore = await sample(lhs, arrowY);
+  const cardBefore = await sample(lhs, cardY);
+  const outsideBefore = await sample(lhs + 20, arrowY);
+  expect(contrast(arrowBefore)).toBe(255);
+  expect(contrast(cardBefore)).toBe(255);
+  await page.addStyleTag({ content: control("popover") + " > " + part("backdrop") + " { backdrop-filter: blur(5px); }" });
+  expect(contrast(await sample(lhs, arrowY))).toBeLessThan(50);
+  expect(contrast(await sample(lhs, cardY))).toBeLessThan(50);
+  expect(await sample(lhs + 20, arrowY)).toEqual(outsideBefore);
+});
+
 test("undrawn states keep base paint", async ({ page }) => {
   for (const [specimen, name] of [["tabs", "cell"], ["segments", "bezel"]]) {
     const selector = "#" + specimen + " " + part(name) + ":not(" + selected + ")";
