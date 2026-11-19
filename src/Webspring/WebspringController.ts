@@ -22,7 +22,6 @@ import { getSynWareNamespace } from "../SynCloudOS/AppSDK";
 import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
 import {
   WEBSPRING_PRESENTATION_ROLES,
-  getDesktopWebspringSlots,
   reconcileWebspringLayout,
   resolveSiteBranding,
   type RuntimeSnapshot,
@@ -30,7 +29,6 @@ import {
   type SynCloudOSLocaleBundleResourceInput,
   type SynCloudOSRouteResolution,
   type SynCloudOSRuntime,
-  type WebspringDesktopSlot,
 } from "../SynCloudOS/SynCloudOS";
 import { AppInfo } from "../SynCloudOS/SynCloudOS";
 import { cancelWebspringAppPrefetch, scheduleWebspringAppPrefetch } from "./webspringPrefetch";
@@ -43,7 +41,6 @@ import type {
   Presentation,
   WebspringActions,
   WSApp,
-  WebspringDialPlacement,
   WSItem,
   WebspringViewModel,
   WSWidgetEntry,
@@ -62,15 +59,6 @@ function operationResult(result: { readonly status: string; readonly error?: unk
   if (result.status === "completed" || result.status === "executed") return { status: "completed" };
   if (result.status === "cancelled") return { status: "cancelled" };
   return { status: "failed", message: result.error instanceof Error ? result.error.message : "The operation could not be completed." };
-}
-
-function dialPlacement(slot: WebspringDesktopSlot): WebspringDialPlacement {
-  return Object.freeze({
-    angle: slot.angle,
-    iconPosition: Object.freeze({ ...slot.iconPosition }),
-    indicatorPosition: slot.indicatorPosition ? Object.freeze({ ...slot.indicatorPosition }) : null,
-    labelPosition: Object.freeze({ ...slot.labelPosition }),
-  });
 }
 
 export function presentationForSizeClass(sizeClass: SynCloudOSHorizontalSizeClass): Presentation {
@@ -178,22 +166,20 @@ export class WebspringController {
         badgeLabel: app.notifications.badgeLabel,
         accent: app.webspring.accent ?? "#eaf6ff",
         featured: Boolean(app.webspring.featured),
-        selectorAngle: app.webspring.selectorAngle ?? app.webspring.dialPosition ?? 0,
       });
       return [appId, viewApp] as const;
     }));
     const folderTitles = new Map((declaration.folders?.initial ?? []).map((folder) => [folder.id, folder.title]));
-    const items = getDesktopWebspringSlots(projection.order).slots.map((slot): WSItem => {
-      const members = projection.folders[slot.id];
-      if (!members) return Object.freeze({ kind: "app", id: slot.id, app: appsById.get(slot.id)!, dialPlacement: dialPlacement(slot) });
+    const items = projection.order.map((id): WSItem => {
+      const members = projection.folders[id];
+      if (!members) return Object.freeze({ kind: "app", id, app: appsById.get(id)! });
       const apps = Object.freeze(members.map((appId) => appsById.get(normalizeBundleIdentifier(appId))!));
       return Object.freeze({
         kind: "folder",
-        id: slot.id,
-        title: this.folderTitle(folderTitles.get(slot.id)),
+        id,
+        title: this.folderTitle(folderTitles.get(id)),
         apps,
         badgeCount: apps.reduce((total, app) => total + app.badgeCount, 0),
-        dialPlacement: dialPlacement(slot),
       });
     });
     return Object.freeze({
@@ -205,8 +191,6 @@ export class WebspringController {
       entrancePhase,
       selectedAppId: snapshot.webspring.selectedAppId,
       hoveredAppId: snapshot.webspring.hoveredAppId,
-      activeIndicatorId: snapshot.webspring.activeIndicatorId,
-      selectorAngle: snapshot.webspring.selectorAngle,
       previewAppId: snapshot.webspring.previewAppId,
       launchingAppId: snapshot.webspring.launchingAppId,
       launchTransitionId: snapshot.webspring.launchTransitionId,

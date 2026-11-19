@@ -117,14 +117,6 @@ export type WSAccountAction =
   | { readonly kind: "signIn"; readonly label: string }
   | { readonly kind: "account"; readonly label: string; readonly signOutLabel: string };
 
-/** Where an entry sits on the desktop stage. */
-export interface WebspringDialPlacement {
-  readonly angle: number | null;
-  readonly iconPosition: { readonly x: number; readonly y: number };
-  readonly indicatorPosition: { readonly x: number; readonly y: number } | null;
-  readonly labelPosition: { readonly x: number; readonly y: number };
-}
-
 export interface WSApp {
   readonly bundleIdentifier: string;
   readonly displayName: string;
@@ -138,14 +130,12 @@ export interface WSApp {
   readonly badgeLabel?: string;
   readonly accent: string;
   readonly featured: boolean;
-  readonly selectorAngle: number;
 }
 
 export interface WSAppItem {
   readonly kind: "app";
   readonly id: string;
   readonly app: WSApp;
-  readonly dialPlacement: WebspringDialPlacement;
 }
 
 export interface WSFolderItem {
@@ -155,7 +145,6 @@ export interface WSFolderItem {
   readonly apps: readonly WSApp[];
   /** The members' badge counts, summed. */
   readonly badgeCount: number;
-  readonly dialPlacement: WebspringDialPlacement;
 }
 
 /** A top-level Webspring entry: an app, or a folder of apps. */
@@ -170,8 +159,6 @@ export interface WebspringViewModel {
   readonly entrancePhase: "waiting" | "holding" | "ready";
   readonly selectedAppId: string | null;
   readonly hoveredAppId: string | null;
-  readonly activeIndicatorId: string | null;
-  readonly selectorAngle: number;
   readonly previewAppId: string | null;
   readonly launchingAppId: string | null;
   readonly launchTransitionId: string | null;
@@ -342,4 +329,12 @@ export interface WebspringPreferences {
   readonly hide: readonly string[];
 }
 
-
+/** One application's frame on the stage, as the stage layer orders and focuses them. */
+export interface ApplicationStagePresentation {
+  readonly id: string;
+  readonly appId: string;
+  readonly windowId?: string;
+  readonly title: string;
+  readonly isFocused: boolean;
+  readonly zIndex: number;
+}

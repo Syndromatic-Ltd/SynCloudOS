@@ -29,7 +29,7 @@ import type {
 } from "../SynCloudOS/SynCloudOS";
 import { useKernelSynCloudOS } from "../SynCloudOSReact";
 import { NSE } from "../NSE/NSE";
-import type { ApplicationStagePresentation } from "./stage";
+import type { ApplicationStagePresentation } from "./webspringTypes";
 import type { WindowContentRendererRegistry } from "./WindowLayer";
 import {
   WEBSPRING_MULTI_SWITCH_ROLES,

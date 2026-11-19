@@ -27,7 +27,7 @@ import {
   type SynCloudOSAppLifecycleState,
 } from "../SynCloudOS/SynCloudOS";
 import { useKernelSynCloudOS } from "../SynCloudOSReact";
-import type { ApplicationStagePresentation } from "./stage";
+import type { ApplicationStagePresentation } from "./webspringTypes";
 import type { WindowContentRendererRegistry } from "./WindowLayer";
 
 async function decodeStagedArtwork(frame: Element) {

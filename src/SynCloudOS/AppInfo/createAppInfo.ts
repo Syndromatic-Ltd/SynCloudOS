@@ -341,9 +341,6 @@ export function validateAppManifest(manifest: unknown): SynCloudOSAppInfoValidat
     if (!isFiniteNumber(webspring.order)) {
       addIssue(issues, "error", "manifest.webspring.order.required", "webspring.order", "webspring.order must be a finite number.");
     }
-    if (webspring.dialPosition !== undefined && !isFiniteNumber(webspring.dialPosition)) {
-      addIssue(issues, "warning", "manifest.webspring.dialPosition.ignored", "webspring.dialPosition", "webspring.dialPosition is not used for normal Webspring layout and must be finite when present.");
-    }
   }
 
   const window = getNestedRecord(manifest, "window");

@@ -80,7 +80,6 @@ describe("SynCloudOSWatchdog component", () => {
     runtime = createTestRuntime();
     runtime.store.mutate((draft) => {
       draft.errors = [];
-      draft.webspring.lowerShelfMode = "news";
     });
     vi.spyOn(console, "error").mockImplementation(() => undefined);
   });

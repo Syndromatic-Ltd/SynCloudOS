@@ -23,7 +23,6 @@ import {
   WEBSPRING_LAYOUT_PREFERENCE_KEY,
   createWebspringFolderId,
   createWebspringLayoutPreference,
-  getDesktopWebspringSlotForApp,
   getKeyboardReorderIndex,
   moveWebspringEntryToIndex,
   readWebspringLayoutPreference,
@@ -125,28 +124,9 @@ function setWorkingPreference(
   return preference;
 }
 
-function selectorFor(state: RuntimeSnapshot, appId: string | null) {
-  const app = appId ? state.appInfo[normalizeBundleIdentifier(appId)] : null;
-  const slot = getDesktopWebspringSlotForApp(getProjection(state), appId);
-  return {
-    activeIndicatorId: slot?.region === "dial" ? slot.id : null,
-    selectorAngle: slot?.angle ?? app?.webspring.selectorAngle ?? app?.webspring.dialPosition ?? 180,
-    selectorPosition: slot?.indicatorPosition ?? null,
-  };
-}
-
-function syncSelector(draft: RuntimeSnapshot, appId: string | null) {
-  Object.assign(draft.webspring, selectorFor(draft, appId));
-}
-
 /** Whether hovering this app would leave every field it writes as it is. */
 function hoverAlreadyShown(state: RuntimeSnapshot, appId: string | null) {
-  const { webspring } = state;
-  if (webspring.hoveredAppId !== appId || webspring.previewAppId !== appId || webspring.hoverLabelAppId !== appId) return false;
-  if (webspring.lowerShelfMode !== (appId ? "preview" : "news")) return false;
-  const selector = selectorFor(state, appId);
-  return webspring.activeIndicatorId === selector.activeIndicatorId && webspring.selectorAngle === selector.selectorAngle
-    && webspring.selectorPosition?.x === selector.selectorPosition?.x && webspring.selectorPosition?.y === selector.selectorPosition?.y;
+  return state.webspring.hoveredAppId === appId && state.webspring.previewAppId === appId;
 }
 
 function persistPreference(preference: SynCloudOSWebspringLayoutPreference | null) {
@@ -193,7 +173,6 @@ const webspringState = {
         initial: configuration.initial.map((folder) => ({ id: folder.id, order: folder.order, apps: [...folder.apps] })),
       };
       if (draft.webspring.openFolderId && !getProjection(draft).folders[draft.webspring.openFolderId]) draft.webspring.openFolderId = null;
-      syncSelector(draft, draft.webspring.hoveredAppId ?? draft.webspring.selectedAppId);
     });
   },
 
@@ -202,7 +181,6 @@ const webspringState = {
 
     RuntimeStore.mutate((draft) => {
       draft.webspring.layout.preference = stored;
-      syncSelector(draft, draft.webspring.hoveredAppId ?? draft.webspring.selectedAppId);
     });
 
     EventBus.publish("webspring.layout.hydrate", { order: stored.order }, "Webspring");
@@ -220,7 +198,6 @@ const webspringState = {
         updatedAt: null,
         source: "seed"
       };
-      syncSelector(draft, draft.webspring.hoveredAppId ?? draft.webspring.selectedAppId);
     });
   },
 
@@ -230,9 +207,6 @@ const webspringState = {
     if (!hoverAlreadyShown(RuntimeStore.getSnapshot(), appId)) RuntimeStore.mutate((draft) => {
       draft.webspring.hoveredAppId = appId;
       draft.webspring.previewAppId = appId;
-      draft.webspring.hoverLabelAppId = appId;
-      draft.webspring.lowerShelfMode = appId ? "preview" : "news";
-      syncSelector(draft, appId);
     });
     EventBus.publish("webspring.hover", { appId }, appId ?? "none");
   },
@@ -243,7 +217,6 @@ const webspringState = {
       draft.webspring.selectedAppId = appId;
       draft.webspring.focusedAppId = appId;
       draft.webspring.layout.keyboardAppId = normalizeBundleIdentifier(appId);
-      syncSelector(draft, appId);
       if (appId) draft.webspring.focusIndex = getProjection(draft).appOrder.indexOf(normalizeBundleIdentifier(appId));
     });
     EventBus.publish("webspring.select", { appId }, appId ?? "none");
@@ -259,7 +232,6 @@ const webspringState = {
       draft.webspring.layout.keyboardAppId = itemId ?? normalizeBundleIdentifier(draft.webspring.focusedAppId);
       draft.webspring.layout.launchSuppressedUntil = Date.now() + 650;
       if (itemId) draft.webspring.focusedAppId = itemId;
-      syncSelector(draft, itemId ?? draft.webspring.hoveredAppId ?? draft.webspring.selectedAppId);
     });
     EventBus.publish("webspring.edit.begin", { itemId: itemId ?? null }, itemId ?? "Webspring");
   },
@@ -280,7 +252,6 @@ const webspringState = {
       draft.webspring.layout.dropTargetId = null;
       draft.webspring.layout.keyboardAppId = null;
       draft.webspring.layout.launchSuppressedUntil = Date.now() + 260;
-      syncSelector(draft, draft.webspring.hoveredAppId ?? draft.webspring.selectedAppId);
     });
 
     if (commit) persistPreference(preference);
@@ -310,7 +281,6 @@ const webspringState = {
         preference = setWorkingPreference(draft, getWorkingLayout(getProjection(draft)), "user");
       } else if (dragOriginalPreference) {
         draft.webspring.layout.preference = dragOriginalPreference;
-        syncSelector(draft, draft.webspring.hoveredAppId ?? draft.webspring.selectedAppId);
       }
       draft.webspring.layout.draggingItemId = null;
       draft.webspring.layout.dropTargetId = null;
@@ -343,7 +313,6 @@ const webspringState = {
       draft.webspring.focusedAppId = itemId;
       draft.webspring.layout.keyboardAppId = itemId;
       draft.webspring.layout.launchSuppressedUntil = Date.now() + 450;
-      syncSelector(draft, itemId);
     });
 
     if (didMove && commit) persistPreference(preference);
@@ -370,7 +339,6 @@ const webspringState = {
       layout.order = [...order];
       preference = setWorkingPreference(draft, layout, "user");
       draft.webspring.layout.launchSuppressedUntil = Date.now() + 260;
-      syncSelector(draft, draft.webspring.hoveredAppId ?? draft.webspring.selectedAppId);
     });
 
     if (!preference) return false;
@@ -425,7 +393,6 @@ const webspringState = {
       preference = setWorkingPreference(draft, layout, "user");
       draft.webspring.layout.dropTargetId = null;
       draft.webspring.layout.launchSuppressedUntil = Date.now() + 450;
-      syncSelector(draft, draft.webspring.hoveredAppId ?? draft.webspring.selectedAppId);
     });
 
     if (!preference) return false;
@@ -450,7 +417,6 @@ const webspringState = {
       draft.webspring.focusedAppId = appId;
       draft.webspring.layout.keyboardAppId = normalizeBundleIdentifier(appId);
       draft.webspring.layout.launchSuppressedUntil = Date.now() + 450;
-      syncSelector(draft, appId);
     });
 
     if (!preference) return false;
@@ -492,7 +458,6 @@ const webspringState = {
       preference = setWorkingPreference(draft, getWorkingLayout(getProjection(draft)), "user");
       committedOrder = [...preference.order];
       draft.webspring.layout.launchSuppressedUntil = Date.now() + 260;
-      syncSelector(draft, draft.webspring.hoveredAppId ?? draft.webspring.selectedAppId);
     });
 
     persistPreference(preference);
@@ -505,7 +470,6 @@ const webspringState = {
       draft.webspring.layout.launchSuppressedUntil = Date.now() + 320;
       draft.webspring.focusIndex = -1;
       draft.webspring.layout.lastCommittedAt = preference.updatedAt;
-      syncSelector(draft, draft.webspring.hoveredAppId ?? draft.webspring.selectedAppId);
     });
     Persistence.removePreference(WEBSPRING_LAYOUT_PREFERENCE_KEY);
     EventBus.publish("webspring.reorder.reset", {}, "Webspring");
@@ -524,8 +488,6 @@ const webspringState = {
         draft.webspring.launchingAppId = null;
         draft.webspring.launchTransitionId = null;
         draft.webspring.isAnimating = false;
-        draft.webspring.lowerShelfMode = draft.webspring.previewAppId ? "preview" : "news";
-        syncSelector(draft, draft.webspring.previewAppId);
         return;
       }
 
@@ -535,8 +497,6 @@ const webspringState = {
       draft.webspring.returningAppId = null;
       draft.webspring.returnTransitionId = null;
       draft.webspring.isAnimating = true;
-      draft.webspring.lowerShelfMode = "launching";
-      syncSelector(draft, appId);
     });
   },
 
@@ -549,8 +509,6 @@ const webspringState = {
       draft.webspring.returningAppId = null;
       draft.webspring.returnTransitionId = null;
       draft.webspring.isAnimating = Boolean(appId);
-      draft.webspring.lowerShelfMode = appId ? "launching" : draft.webspring.previewAppId ? "preview" : "news";
-      syncSelector(draft, appId ?? draft.webspring.previewAppId);
     });
   },
 
@@ -572,8 +530,6 @@ const webspringState = {
       draft.webspring.returningAppId = null;
       draft.webspring.returnTransitionId = null;
       draft.webspring.isAnimating = Boolean(appId) && !contentMotion;
-      draft.webspring.lowerShelfMode = "news";
-      syncSelector(draft, appId);
     });
   },
 
@@ -588,9 +544,6 @@ const webspringState = {
       draft.webspring.isAnimating = true;
       draft.webspring.hoveredAppId = null;
       draft.webspring.previewAppId = null;
-      draft.webspring.hoverLabelAppId = null;
-      draft.webspring.lowerShelfMode = "news";
-      syncSelector(draft, null);
     });
     return returnTransitionId;
   },
@@ -602,7 +555,6 @@ const webspringState = {
       draft.webspring.returningAppId = null;
       draft.webspring.returnTransitionId = null;
       draft.webspring.isAnimating = false;
-      syncSelector(draft, draft.webspring.hoveredAppId);
     });
   },
 
@@ -610,7 +562,6 @@ const webspringState = {
     RuntimeStore.mutate((draft) => {
       draft.webspring.lastRefreshAt = Date.now();
       draft.webspring.isBooted = true;
-      syncSelector(draft, draft.webspring.hoveredAppId);
     });
   },
 

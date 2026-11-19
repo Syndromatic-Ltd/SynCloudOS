@@ -73,9 +73,7 @@ export { WSLaunchDim, resolveWebspringLaunchDimMotion } from "./WSLaunchDim";
 export type { WebspringLaunchDimMotion } from "./WSLaunchDim";
 export {
   getWebspringRadialExitForIcon,
-  getWebspringSelectorTransform,
   resolveWebspringIconPresentation,
-  resolveWebspringOrbPresentation,
   useWebspringMotion,
   webspringIconSprings,
 } from "./Webspring.transitions";
@@ -106,7 +104,6 @@ export type {
 } from "./webspringDragArbiter";
 export { captureWSDragArtworkRects, captureWebspringDragReorderSlots, getWebspringDragReorderTargetFromPoint } from "./webspringDragReorder";
 export type { WebspringDragReorderSlots } from "./webspringDragReorder";
-export { WEBSPRING_STAGE, getDesktopWebspringLayout, stagePointStyle } from "./stage";
 export type {
   WSAccountAction,
   ActionResult,
@@ -123,7 +120,6 @@ export type {
   WebspringActions,
   WSApp,
   WSAppItem,
-  WebspringDialPlacement,
   WebspringFolderAppearance,
   WSFolderAppearanceOptions,
   WebspringFolderCornerRadius,

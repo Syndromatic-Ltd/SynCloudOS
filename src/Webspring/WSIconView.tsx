@@ -81,11 +81,9 @@ function jiggleStyle(index: number): CSSProperties {
   };
 }
 
-const unplaced: WSFolderItem["dialPlacement"] = Object.freeze({ angle: null, iconPosition: Object.freeze({ x: 0, y: 0 }), labelPosition: Object.freeze({ x: 0, y: 0 }), indicatorPosition: null });
-
 /** The empty folder a drop onto `app` would make, drawn as its rising well. */
 function pendingFolder(app: WSApp): WSFolderItem {
-  return { kind: "folder", id: `${app.bundleIdentifier}:pending-folder`, title: app.displayName, apps: [], badgeCount: 0, dialPlacement: unplaced };
+  return { kind: "folder", id: `${app.bundleIdentifier}:pending-folder`, title: app.displayName, apps: [], badgeCount: 0 };
 }
 
 /** Where an icon is in the entrance and launch choreography. Only icons with an exit take part in a launch. */

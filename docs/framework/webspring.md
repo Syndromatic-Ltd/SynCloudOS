@@ -337,7 +337,7 @@ export default class ExampleSite extends WSApplication {
 }
 ```
 
-- The controller reads the shell's state through getters: `items`, `apps`, `widgets`, `folders`, `branding`, `account`, `isEditing`, `draggingItemId`, `entrancePhase` (`waiting`, `holding` or `ready`), `launchPhase` (`idle`, `staging`, `launching`, `covered` or `returning`), `presentationTraits` (`width`, `height`, `reducedMotion` and `safeAreaInsets`) and the rest. `items` lists the top-level entries in order: `{ kind: "app", id, app, dialPlacement }` or `{ kind: "folder", id, title, apps, badgeCount, dialPlacement }`; `apps` lists every visible application flat.
+- The controller reads the shell's state through getters: `items`, `apps`, `widgets`, `folders`, `branding`, `account`, `isEditing`, `draggingItemId`, `entrancePhase` (`waiting`, `holding` or `ready`), `launchPhase` (`idle`, `staging`, `launching`, `covered` or `returning`), `presentationTraits` (`width`, `height`, `reducedMotion` and `safeAreaInsets`) and the rest. `items` lists the top-level entries in order: `{ kind: "app", id, app }` or `{ kind: "folder", id, title, apps, badgeCount }`; `apps` lists every visible application flat.
 - Its commands act on the shell: `openApp`, `returnHome`, `beginEditing`, `finishEditing`, `moveItem(itemId, index)`, `moveItemByKeyboard(itemId, key, columns)`, `openFolder`, `closeFolder` and the rest. A launcher that draws a return transition reports it with `completeReturnTrack("material" | "icons")`.
 - `renderView()`, or `static view`, which receives `controller`, draws the launcher. `WSIconView` draws one entry: it launches, opens folders, enters editing on a long press, drags and reorders from the keyboard with no code of the launcher's own.
 - `WSLauncherRootView`, around every launcher, owns pointer capture, the drag proxy, the open folder, the launch dim, the live region and the application outlet. `launcherRootProps()` sets its element and attributes.
@@ -375,10 +375,8 @@ The pieces the Board is built from are public, so a custom launcher can share it
 | `WSSurface`, `webspringSurfaceStyle` | The surface presets, and the CSS custom properties that paint a surface. The launcher's `launcherSurface` and `shelfSurface` hold the resolved surfaces. |
 | `WSIconArtwork`, `WSIconEffect` | An application's icon artwork, and the shell's declared icon effect. |
 | `resolveWebspringIconPresentation`, `webspringIconSprings`, `getWebspringRadialExitForIcon`, `useWebspringMotion` | Icon entrance, launch and return motion, standard and reduced. |
-| `getWebspringSelectorTransform`, `resolveWebspringOrbPresentation` | Selector and orb motion for a radial launcher. |
-| `WEBSPRING_STAGE`, `getDesktopWebspringLayout`, `stagePointStyle` | The desktop stage geometry. Each entry's radial placement is `items[].dialPlacement`: the first seven entries sit on the dial, the rest on the overflow shelf. |
 
-A radial launcher with an orb and selector can be built entirely from these exports.
+A launcher's own layout, such as a radial dial's geometry and selector, belongs to the launcher. Webspring hands it `items` in order and leaves placing them to it.
 
 ## Scope
 

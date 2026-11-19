@@ -155,21 +155,13 @@ export type {
 } from "./NotificationCenter/notificationDeliveryTypes";
 export type { CapturedSynCloudOSError } from "./ErrorManager/errorTypes";
 export {
-  DESKTOP_DIAL_ITEM_LIMIT,
   EMPTY_WEBSPRING_FOLDER_CONFIGURATION,
   WEBSPRING_LAYOUT_PREFERENCE_KEY,
-  WEBSPRING_STAGE,
-  getDesktopDialAngles,
-  getDesktopWebspringSlots,
-  getDialPoint,
   getKeyboardReorderIndex,
   getOrderedVisibleWebspringApps,
   reconcileWebspringLayout,
 } from "./WebspringState/webspringStateProjection";
 export type {
-  WebspringDesktopLayout,
-  WebspringDesktopSlot,
-  WebspringDesktopSlotRegion,
   WebspringLayoutInput,
   WebspringLayoutProjection,
 } from "./WebspringState/webspringStateProjection";

@@ -412,7 +412,6 @@ describe("WSLauncherViewController and WSIconView", () => {
       badgeCount: 0,
       accent: "#eaf6ff",
       featured: false,
-      selectorAngle: 0,
     }} />)).toThrow(/WSLauncherRootView/);
 
     const app = {
@@ -426,11 +425,10 @@ describe("WSLauncherViewController and WSIconView", () => {
       badgeCount: 0,
       accent: "#eaf6ff",
       featured: false,
-      selectorAngle: 0,
     };
     class BadIconLauncher extends WSLauncherViewController {
       override renderView() {
-        return <WSIconView index={0} item={{ kind: "app", id: "com.example.one", app, dialPlacement: { angle: null, iconPosition: { x: 0, y: 0 }, labelPosition: { x: 0, y: 0 }, indicatorPosition: null } }} app={app} />;
+        return <WSIconView index={0} item={{ kind: "app", id: "com.example.one", app }} app={app} />;
       }
     }
     const runtime = await createBootedRuntime(["com.example.one"]);

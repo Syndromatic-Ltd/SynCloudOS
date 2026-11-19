@@ -76,13 +76,11 @@ export interface SynCloudOSStagePoint {
 export interface SynCloudOSAppWebspringManifest {
   visible: boolean;
   order: number;
-  dialPosition?: number;
   featured?: boolean;
   defaultSelected?: boolean;
   accent?: string;
   stagePosition?: SynCloudOSStagePoint;
   indicatorPosition?: SynCloudOSStagePoint;
-  selectorAngle?: number;
   labelPosition?: SynCloudOSStagePoint;
   labelAsset?: string;
 }

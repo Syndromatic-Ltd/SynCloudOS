@@ -23,7 +23,6 @@ import { compileNSEPresentation, type PresentationEnter, type PresentationSpec }
 import {
   getWebspringRadialExitForIcon,
   resolveWebspringIconPresentation,
-  resolveWebspringOrbPresentation,
   webspringIconSprings,
   type WebspringIconState,
 } from "../../src/Webspring/Webspring.transitions";
@@ -77,15 +76,5 @@ describe("launcher icon presentation", () => {
     expect(icon("launching", true).style).toEqual({ opacity: 0 });
     expect(endpoints(into(icon("launching", true).enter, "ready"))).toEqual({ opacity: [1, 0] });
     expect(into(icon("ready", true).enter, "waiting")).toMatchObject({ duration: 0.08, timing: "ease-in-out" });
-  });
-
-  it("swells the orb only while launching, and only between launch and rest", () => {
-    const launching = resolveWebspringOrbPresentation(false, true);
-    expect(launching.style).toEqual({ transform: "translate(0px, 0px) scale(1.06)" });
-    expect(into(launching.enter, null)).toBeNull();
-    expect(endpoints(into(launching.enter, "rest"))).toEqual({ transform: ["none", "translate(0px, 0px) scale(1.06)"] });
-    expect(endpoints(into(resolveWebspringOrbPresentation(false, false).enter, "launching"))).toEqual({ transform: ["translate(0px, 0px) scale(1.06)", "none"] });
-    expect(resolveWebspringOrbPresentation(true, true)).toMatchObject({ style: {} });
-    expect(into(resolveWebspringOrbPresentation(true, true).enter, "rest")).toBeNull();
   });
 });

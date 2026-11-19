@@ -93,10 +93,6 @@ export type WSRadialExit = Readonly<{
 
 const radialExitDefinitions = new Map<string, WSRadialExit>();
 
-export function getWebspringSelectorTransform(angle: number, radius = -60): string {
-  return `translate(-50%, -50%) rotate(${angle}deg) translateY(${radius}px)`;
-}
-
 export function getWebspringRadialExitForIcon(index: number, total: number, angle?: number): WSRadialExit {
   const key = `${index}:${total}:${angle ?? "auto"}`;
   const interned = radialExitDefinitions.get(key);
@@ -122,26 +118,6 @@ export function resolveWebspringMotion(reducedMotion: boolean): WebspringMotion 
 export function useWebspringMotion(): WebspringMotion {
   const { reducedMotion } = useNSETraitCollection();
   return useMemo(() => resolveWebspringMotion(reducedMotion), [reducedMotion]);
-}
-
-/** The orb's scale while an application launches (its model value) and the
- * 0.45 s tween that swells it and settles it back. */
-export function resolveWebspringOrbPresentation(reducedMotion: boolean, launching: boolean): Readonly<{
-  state: "launching" | "rest";
-  style: CSSProperties;
-  enter: PresentationEnter;
-}> {
-  const pulse = (reducedMotion ? orbLaunchPulse.reduced : orbLaunchPulse.standard).scale;
-  const scale = launching ? pulse : 1, from = launching ? 1 : pulse;
-  return {
-    state: launching ? "launching" : "rest",
-    style: scale === 1 ? {} : { transform: nseTransformStyle({ scale }) },
-    // The orb appears at rest; it only animates between launch and rest.
-    enter: (previous) => previous === null || from === scale ? null : Object.freeze({
-      duration: 0.45, timing: framerTween,
-      tracks: [{ keyPath: "transform" as const, values: [{ scale: from }, { scale }] }],
-    }),
-  };
 }
 
 // --- Launcher icons --------------------------------------------------------

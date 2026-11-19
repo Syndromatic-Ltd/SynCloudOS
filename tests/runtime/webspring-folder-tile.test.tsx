@@ -28,7 +28,6 @@ import { WebspringFolderAppearanceProvider, resolveWebspringFolderTileGeometry }
 
 const folder: WSFolderItem = {
   kind: "folder", id: "folder.tools", title: "Tools", badgeCount: 0,
-  dialPlacement: { index: 0 } as unknown as WSFolderItem["dialPlacement"],
   apps: ["alpha", "beta"].map((id) => ({ id, title: id, iconUrl: `/${id}.png` })) as unknown as WSFolderItem["apps"],
 };
 

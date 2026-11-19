@@ -910,7 +910,6 @@ it("renders the measured textured folder receptacle and the icon artwork's glow"
     title: "Tools",
     apps: [],
     badgeCount: 0,
-    dialPlacement: { angle: null, iconPosition: { x: 0, y: 0 }, labelPosition: { x: 0, y: 0 }, indicatorPosition: null },
   };
   const dimensions = (["offsetWidth", "offsetHeight"] as const).map(name => [name, Object.getOwnPropertyDescriptor(HTMLElement.prototype, name)!] as const);
   for (const [name, descriptor] of dimensions) {
@@ -1001,7 +1000,7 @@ it("renders the boot material and an appearance-projected drag proxy", async () 
       <WSDragProxy point={{ x: 80, y: 100 }} app={{
         bundleIdentifier: "com.example.archive", displayName: "Archive", iconUrl: "/archive.png",
         route: "/archive", selected: true, running: false, state: "idle",
-        badgeCount: 0, accent: "#224466", featured: false, selectorAngle: 0,
+        badgeCount: 0, accent: "#224466", featured: false,
       }} />
     </SynCloudOSProvider></Host>);
     expect(view.container.querySelector('[data-nse-role="startup"] > [data-nse-role="startup-material"]')).not.toBeNull();

@@ -70,12 +70,7 @@ export interface SynCloudOSWebspringState {
   launchPhase: "idle" | "staging" | "launching" | "covered" | "returning";
   returningAppId: string | null;
   returnTransitionId: string | null;
-  activeIndicatorId: string | null;
-  selectorAngle: number;
-  selectorPosition: { x: number; y: number } | null;
-  lowerShelfMode: "news" | "preview" | "launching" | "error";
   previewAppId: string | null;
-  hoverLabelAppId: string | null;
   isBooted: boolean;
   isAnimating: boolean;
   isAppContainerOpen: boolean;

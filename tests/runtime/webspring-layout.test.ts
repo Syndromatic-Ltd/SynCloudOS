@@ -24,11 +24,9 @@ import {
   createWebspringBoardProjection,
 } from "../../src/Webspring/webspringLayout";
 import {
-  DESKTOP_DIAL_ITEM_LIMIT,
   EMPTY_WEBSPRING_FOLDER_CONFIGURATION,
   WEBSPRING_LAYOUT_PREFERENCE_KEY,
   createWebspringFolderId,
-  getDesktopWebspringSlots,
   getKeyboardReorderIndex,
   moveWebspringEntryToIndex,
   readWebspringLayoutPreference,
@@ -65,9 +63,7 @@ function createOrderedManifest(id: string, order: number, visible = true) {
     route: `/${id.split(".").at(-1)}`,
     webspring: {
       visible,
-      order,
-      dialPosition: 999 - order,
-      selectorAngle: 999 - order
+      order
     }
   });
 }
@@ -102,19 +98,6 @@ describe("Webspring layout helpers", () => {
       "com.example.beta",
       "com.example.alpha"
     ]);
-  });
-
-  it("limits the desktop dial to seven entries and places overflow deterministically", () => {
-    const desktop = getDesktopWebspringSlots(Array.from({ length: 9 }, (_unused, index) => `app-${index + 1}`));
-
-    expect(desktop.dialSlots).toHaveLength(DESKTOP_DIAL_ITEM_LIMIT);
-    expect(desktop.overflowSlots.map((slot) => slot.id)).toEqual(["app-8", "app-9"]);
-    expect(desktop.overflowSlots[0]).toMatchObject({
-      region: "overflow",
-      index: 7,
-      angle: null,
-      indicatorPosition: null
-    });
   });
 
   it("moves entries by pointer index and keyboard grid intent", () => {

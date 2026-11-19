@@ -45,7 +45,7 @@ import { WindowPresentationSlot, useWindowPresentationContent } from "./WindowPr
 import { SynWareEntryRenderer } from "./SynWareEntryRenderer";
 import { WindowTitlebarHostContext, type WindowTitlebarDocument, type WindowTitlebarHost } from "../NSE/hostComposition";
 import { useWebspringLocale } from "./webspringLocale";
-import type { ApplicationStagePresentation } from "./stage";
+import type { ApplicationStagePresentation } from "./webspringTypes";
 import { createTransientWindowSurfaceBridge, type WindowContentRendererRegistry } from "./WindowLayer";
 
 /** Navigation chrome that slides in with the navigation it belongs to. */
