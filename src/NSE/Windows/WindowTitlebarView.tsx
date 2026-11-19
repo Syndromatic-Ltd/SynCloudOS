@@ -13,7 +13,6 @@ export interface WindowTitlebarViewProps {
   readonly titleId?: string;
   readonly material?: "standard" | "cumulus" | "metal";
   readonly variant?: "standard" | "panel" | "hud";
-  readonly mode?: "light" | "dark";
   readonly controls?: ReactNode;
   readonly sidebar?: { readonly width: number; readonly content: ReactNode };
   readonly leading?: ReactNode;
@@ -39,7 +38,7 @@ function interactiveTarget(target: EventTarget | null, header: HTMLElement): boo
 }
 
 /** @internal Shared composition; the window's existing toolbar renderer owns overflow and commands. */
-export function WindowTitlebarView({ document, isKeyWindow, titleId, material = "standard", variant = "standard", mode = "light",
+export function WindowTitlebarView({ document, isKeyWindow, titleId, material = "standard", variant = "standard",
   controls, sidebar, leading, trailing, toolbar, bottomAccessories, menuBar, titleAction, nativeControlExclusion,
   onSlotsChange, moveHandleProps, className = "", style }: WindowTitlebarViewProps) {
   const header = useRef<HTMLElement>(null);
@@ -140,7 +139,7 @@ export function WindowTitlebarView({ document, isKeyWindow, titleId, material = 
     const titleHidden = document.titleVisibility === "hidden";
     const bar = metal
       ? <header data-nse-control="window" data-nse-part="header" data-nse-chrome="metal" data-window-titlebar-bar=""
-          className="nse-app-topbar nse-app-topbar-metal" data-variant="atmoMetal" data-mode={mode} data-nse-colour-scheme-resolved={mode}
+          className="nse-app-topbar nse-app-topbar-metal" data-variant="atmoMetal"
           data-has-rail={metalRail ? "true" : "false"} data-toolbar-row={stackedToolbar ? "true" : undefined}
           style={metalRail ? { "--nse-topbar-rail": `${sidebarWidth}px` } as CSSProperties : undefined}>
           {stackedToolbar ? <span data-nse-part="decoration" className="nse-app-topbar-metal-grain" aria-hidden="true" /> : null}
@@ -157,7 +156,7 @@ export function WindowTitlebarView({ document, isKeyWindow, titleId, material = 
           {stackedToolbar ? <div data-nse-part="toolbar-row" className="nse-app-topbar-metal-toolbar-row" data-window-titlebar-toolbar-row="">{toolbarSlot}</div> : null}
         </header>
       : <header data-nse-control="window" data-nse-part="header" data-nse-chrome="standard" data-nse-material="cumulus" data-window-titlebar-bar=""
-          className="nse-app-topbar" data-variant="atmoCumulus" data-mode={mode} data-nse-colour-scheme-resolved={mode}>
+          className="nse-app-topbar" data-variant="atmoCumulus">
           {presentation === "floating" ? <div data-nse-part="floating-titlebar" className="nse-window-titlebar-view__floating-surface" aria-hidden="true" />
             : <div data-nse-part="background" className="nse-app-topbar-base" aria-hidden="true"><span data-nse-part="bezel" className="nse-app-topbar-base-glass" /></div>}
           <div data-nse-part="content" className="nse-app-topbar-content" data-window-titlebar-row="">
@@ -173,7 +172,6 @@ export function WindowTitlebarView({ document, isKeyWindow, titleId, material = 
       data-titlebar-presentation={presentation} data-window-frame-view={document.frameViewClass ? "" : undefined}
       data-titlebar-transparent={document.titlebarAppearsTransparent ? "true" : undefined} data-has-toolbar={hasToolbar ? "true" : "false"}
       data-window-titlebar="" data-window-active={isKeyWindow ? "true" : "false"} data-nse-key-window={isKeyWindow ? undefined : "false"}
-      data-mode={mode}
       onPointerDown={event => { if (!interactiveTarget(event.target, event.currentTarget)) onPointerDown?.(event); }}
       onDoubleClick={event => { if (!interactiveTarget(event.target, event.currentTarget)) onDoubleClick?.(event); }}>
       <div ref={setMenu} data-nse-part="menu" data-window-menu-slot="" className="nse-window-titlebar-view__menu" data-window-no-drag="">{menuBar}</div>
@@ -192,7 +190,6 @@ export function WindowTitlebarView({ document, isKeyWindow, titleId, material = 
     data-titlebar-transparent={document.titlebarAppearsTransparent ? "true" : undefined} data-has-toolbar={hasToolbar ? "true" : "false"}
     data-window-titlebar="" data-window-hud-titlebar={variant === "hud" ? "" : undefined} data-window-panel-titlebar={variant === "panel" ? "" : undefined}
     data-window-active={isKeyWindow ? "true" : "false"} data-nse-key-window={isKeyWindow ? undefined : "false"}
-    data-mode={mode} data-nse-colour-scheme-resolved={mode}
     onPointerDown={event => { if (!interactiveTarget(event.target, event.currentTarget)) onPointerDown?.(event); }}
     onDoubleClick={event => { if (!interactiveTarget(event.target, event.currentTarget)) onDoubleClick?.(event); }}>
     <div ref={setMenu} data-nse-part="menu" data-window-menu-slot="" className="nse-window-titlebar-view__menu" data-window-no-drag="">{menuBar}</div>

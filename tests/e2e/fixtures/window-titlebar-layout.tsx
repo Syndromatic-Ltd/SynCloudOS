@@ -131,7 +131,7 @@ function Fixture() {
   return <div ref={frame} data-layout-fixture="" style={{ width: Number(params.get("width") ?? 900), margin: 20 }}>
     {titlebarDocument && <ViewAppearanceBoundary appearance={titlebarDocument.appearance ?? null} projectBoundary={params.has("frame")}>
       <WindowTitlebarView document={titlebarDocument}
-        isKeyWindow mode={scheme} material={params.has("cumulus") ? "cumulus" : "metal"} controls={nativeRect ? null : <button style={{ width: 50, height: 26 }}>Close</button>}
+        isKeyWindow material={params.has("cumulus") ? "cumulus" : "metal"} controls={nativeRect ? null : <button style={{ width: 50, height: 26 }}>Close</button>}
         leading={<button style={{ width: 60, height: 26 }}>Leading</button>}
         trailing={<select aria-label="Trailing accessory" style={{ width: 90, height: 26 }}><option>Trailing</option></select>}
         toolbar={<MeasuredToolbar />} nativeControlExclusion={nativeRect}

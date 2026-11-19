@@ -122,6 +122,18 @@ test("switch state labels are opt-in without changing their accessible state", a
   await expect(labels.last()).toHaveCSS("display", "inline-block");
 });
 
+test("the native titlebar inherits a custom theme's colour scheme", async ({ page }) => {
+  const header = page.locator("#window-standard " + control("window") + " > " + part("bezel") + " > " + part("header"));
+  await openSpecimen(page, "window-standard", "magenta", { scheme: "dark" });
+  await expect(header).toHaveCSS("color-scheme", "dark");
+  await expect(header).not.toHaveAttribute("data-nse-colour-scheme-resolved");
+  await expect(header).not.toHaveAttribute("data-mode");
+
+  await openSpecimen(page, "window-standard", "none", { scheme: "dark" });
+  await expect(header).toHaveCSS("color-scheme", "light");
+  await expect(header).not.toHaveAttribute("data-nse-colour-scheme-resolved");
+});
+
 test("undrawn states keep base paint", async ({ page }) => {
   for (const [specimen, name] of [["tabs", "cell"], ["segments", "bezel"]]) {
     const selector = "#" + specimen + " " + part(name) + ":not(" + selected + ")";

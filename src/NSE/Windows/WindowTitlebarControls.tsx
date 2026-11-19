@@ -20,7 +20,6 @@
 
 
 import React, { useState, type HTMLAttributes } from "react";
-import { useRelocatedAppearance } from "../Appearance/NSEAppearanceProvider";
 import type { WindowRecord } from "../../SynCloudOS/SynCloudOS";
 import { WindowTitlebarDocumentContext, WindowTitlebarHostContext } from "./windowTitlebarContext";
 import { WindowTitlebarView } from "./WindowTitlebarView";
@@ -97,10 +96,8 @@ export function WindowTitlebarControls({
 }: WindowTitlebarControlsProps) {
   const document = React.useContext(WindowTitlebarDocumentContext);
   const host = React.useContext(WindowTitlebarHostContext);
-  const appearance = useRelocatedAppearance();
-  const mode = document?.appearance ? appearance?.resolvedColourScheme : undefined;
   return (
-    <WindowTitlebarView document={document ?? { title: record.title, subtitle: "", documentEdited: dirty }} mode={mode}
+    <WindowTitlebarView document={document ?? { title: record.title, subtitle: "", documentEdited: dirty }}
       material={document?.texturedBackground ? "metal" : document?.titlebarPresentation === "floating" ? "cumulus" : "standard"} isKeyWindow={record.isKey} titleId={`${record.id}-title`} variant={variant} moveHandleProps={moveHandleProps}
       onSlotsChange={host?.setSlots}
       controls={<><div data-nse-part="accessory" className="nse-window__controls" data-syncloudos-focus-chrome="">

@@ -234,7 +234,7 @@ function Specimen({ id, render }: { id: string; render: () => ReactNode }) {
 }
 
 createRoot(document.getElementById("root")!).render(
-  <NSEAppearanceProvider theme={theme} colourScheme="light">
+  <NSEAppearanceProvider theme={theme} colourScheme={parameters.get("scheme") === "dark" ? "dark" : "light"}>
     <main>{entries.map(([id, render]) => <Specimen key={id} id={id} render={render} />)}</main>
   </NSEAppearanceProvider>,
 );

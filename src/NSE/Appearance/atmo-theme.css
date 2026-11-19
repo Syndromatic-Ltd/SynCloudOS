@@ -9,4 +9,12 @@
       --nse-switch-state-label-display: inline-block;
     }
   }
+  @scope ([data-nse-theme="com.syndromatic.atmo"]:not([data-nse-app-theme])) to ([data-nse-theme], [data-nse-app-theme]) {
+    :where([data-nse-control="window"][data-nse-part="background"]:not([data-nse-colour-scheme-resolved]))
+      > [data-nse-part="bezel"] > [data-nse-role="titlebar"][data-nse-part="header"],
+    :where([data-nse-control="window"][data-nse-part="background"]:not([data-nse-colour-scheme-resolved]))
+      > [data-nse-part="bezel"] > [data-nse-role="titlebar"] > [data-nse-part="header"] {
+      color-scheme: light;
+    }
+  }
 }

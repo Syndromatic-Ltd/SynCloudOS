@@ -303,8 +303,10 @@
   --nse-metal-rim-crest: inset 0 1px 0 var(--nse-metal-rim-top);
 }
 
-[data-nse-part="header"]:where([data-nse-control="window"][data-nse-chrome="metal"])[data-nse-colour-scheme-resolved="dark"],
-:where(:scope):is([data-nse-part="header"]:where([data-nse-control="window"][data-nse-chrome="metal"])[data-nse-colour-scheme-resolved="dark"]) {
+:scope[data-nse-colour-scheme-resolved="dark"] [data-nse-part="header"]:where(
+  [data-nse-control="window"][data-nse-chrome="metal"]:not([data-nse-control="window"][data-nse-part="background"]:not([data-nse-colour-scheme-resolved]) *)
+),
+:scope[data-nse-colour-scheme-resolved="dark"][data-nse-part="header"]:where([data-nse-control="window"][data-nse-chrome="metal"]) {
   --nse-metal-header-mid: url("./chrome/metal/dark/header-middle.png");
   --nse-metal-header-endcap-l: url("./chrome/metal/dark/header-endcap-left.png");
   --nse-metal-header-endcap-r: url("./chrome/metal/dark/header-endcap-right.png");

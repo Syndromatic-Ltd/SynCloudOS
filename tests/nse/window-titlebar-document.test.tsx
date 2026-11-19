@@ -22,6 +22,7 @@
 import React from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { ViewAppearanceBoundary } from "../../src/NSE/Appearance/NSEAppearanceProvider";
 import { WindowTitlebarView } from "../../src/NSE/Windows/WindowTitlebarView";
 import { ApplicationMenuToolbarButton, WindowApplicationMenuContext } from "../../src/NSE/Toolbars/ApplicationMenuToolbarButton";
 import { nseTopBarGlyphs } from "../../src/NSE/Windows/Chrome/topBarAssets";
@@ -33,11 +34,13 @@ describe("Window titlebar document and controls", () => {
     const toggle = vi.fn();
     const open = vi.fn();
     const { container } = render(<WindowApplicationMenuContext.Provider value={{ open: false, activate: open }}>
-      <WindowTitlebarView material="metal" mode="dark" isKeyWindow
-        document={{ title: "My post", subtitle: "Publisher", documentEdited: false, toolbarStyle: "unified" }}
-        controls={<button type="button">Return to Webspring</button>}
-        titleAction={<button type="button" aria-label="Switch apps" onClick={toggle}>My post</button>}
-        toolbar={<ApplicationMenuToolbarButton glyph="gear" />} />
+      <ViewAppearanceBoundary appearance={{ name: "darkAqua" }}>
+        <WindowTitlebarView material="metal" isKeyWindow
+          document={{ title: "My post", subtitle: "Publisher", documentEdited: false, toolbarStyle: "unified" }}
+          controls={<button type="button">Return to Webspring</button>}
+          titleAction={<button type="button" aria-label="Switch apps" onClick={toggle}>My post</button>}
+          toolbar={<ApplicationMenuToolbarButton glyph="gear" />} />
+      </ViewAppearanceBoundary>
     </WindowApplicationMenuContext.Provider>);
     const row = container.querySelector("[data-window-titlebar-row]");
     const title = screen.getByRole("heading", { name: "My post Publisher" });

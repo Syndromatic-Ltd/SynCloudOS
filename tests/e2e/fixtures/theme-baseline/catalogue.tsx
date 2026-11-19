@@ -15,6 +15,7 @@ import { NSESplitView } from "../../../../src/NSE/DataViews/Split/NSESplitView";
 import { NSEDrawer } from "../../../../src/NSE/Containers/NSEContainers";
 import { NSEScrollView } from "../../../../src/NSE/Scroll/NSEScrollView";
 import { NSEView } from "../../../../src/NSE/Views/NSEView";
+import { ViewAppearanceBoundary } from "../../../../src/NSE/Appearance/NSEAppearanceProvider";
 import { WindowTitlebarView } from "../../../../src/NSE/Windows/WindowTitlebarView";
 import { TitlebarGlyphButton } from "../../../../src/NSE/Windows/TitlebarGlyphButton";
 import { nseTopBarGlyphs } from "../../../../src/NSE/Windows/Chrome/topBarAssets";
@@ -119,7 +120,7 @@ for (const placement of ["leading", "trailing", "top", "bottom"] as const) add(`
 add("scroll-view", () => <NSEScrollView style={{ height: 240 }} verticalScrollerPolicy="always"><div style={{ height: 600 }}>Scrolling content</div></NSEScrollView>);
 add("view", () => <NSEView><p>Window content</p></NSEView>);
 for (const variant of ["atmoCumulus", "atmoMetal"] as const) for (const scheme of ["light", "dark"] as const) {
-  add(`top-bar-${variant}-${scheme}`, () => <WindowTitlebarView document={{ title: "Documents", subtitle: "", documentEdited: false }} isKeyWindow mode={scheme} material={variant === "atmoMetal" ? "metal" : "cumulus"} controls={<TitlebarGlyphButton label="Home" glyph={nseTopBarGlyphs.webspring} />} trailing={<TitlebarGlyphButton label="Settings" glyph={nseTopBarGlyphs.settings} position="right" />} />);
+  add(`top-bar-${variant}-${scheme}`, () => <ViewAppearanceBoundary appearance={{ name: scheme === "dark" ? "darkAqua" : "aqua" }}><WindowTitlebarView document={{ title: "Documents", subtitle: "", documentEdited: false }} isKeyWindow material={variant === "atmoMetal" ? "metal" : "cumulus"} controls={<TitlebarGlyphButton label="Home" glyph={nseTopBarGlyphs.webspring} />} trailing={<TitlebarGlyphButton label="Settings" glyph={nseTopBarGlyphs.settings} position="right" />} /></ViewAppearanceBoundary>);
 }
 for (const state of ["normal", "error", "loading"] as const) add(`login-window-${state}`, () => <LoginWindow title="SynCloudOS" methods={[{ id: "example", label: "Continue" }]} authenticationStatus={state === "loading" ? "authenticating" : "signedOut"} error={state === "error" ? "Sign-in failed. Try again." : undefined} />, { fullPage: true });
 add("about", () => <AboutDialog open info={{ name: "SynCloudOS", version: "1.0.0", build: "Beta 2", tagline: "Your workspace", copyright: "© 2026 Syndromatic Ltd.", trademark: "SynCloudOS" }} onDismiss={noop} />, { fullPage: true });

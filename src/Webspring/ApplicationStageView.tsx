@@ -35,7 +35,7 @@ import {
   useNSEDeferredDisposal,
 } from "../NSE/NSE";
 import { ApplicationNavigationBackButton } from "./ApplicationNavigationBackButton";
-import { activateResponderHierarchy, clearOwnedResponderAnchor, QuickSwitchTriggerProvider, ResponderScope, useHostSiteBranding, useResolvedMode, useRuntimeNSEControlPort, useRuntimeNSEFocusPort, useRuntimeNSEOverlayPort, useRuntimeSelector, useKernelSynCloudOS } from "../SynCloudOSReact";
+import { activateResponderHierarchy, clearOwnedResponderAnchor, QuickSwitchTriggerProvider, ResponderScope, useHostSiteBranding, useRuntimeNSEControlPort, useRuntimeNSEFocusPort, useRuntimeNSEOverlayPort, useRuntimeSelector, useKernelSynCloudOS } from "../SynCloudOSReact";
 import type { SynCloudOSAppInfo } from "../SynCloudOS/SynCloudOS";
 import { AppViewChrome, type AppViewPresentation } from "./AppViewChrome";
 import { TitlebarGlyphButton, ViewAppearanceBoundary, WindowTitlebarView, nseTopBarGlyphs, type WindowTitlebarSlots } from "../NSE/hostComposition";
@@ -116,10 +116,8 @@ export function ApplicationStageView({
     overlayPlaneRef.current = element;
     setOverlayDestination(element);
   }, []);
-  const systemMode = useResolvedMode();
   const [titlebarDocument, setTitlebarDocument] = useState<WindowTitlebarDocument | null>(null);
   const appearance = titlebarDocument?.appearance ?? null;
-  const resolvedMode = appearance?.name ? appearance.name === "darkAqua" ? "dark" : "light" : systemMode;
   // An untitled window draws all of its own chrome, as a borderless NSWindow does.
   const usesStandardTopBar = titlebarDocument?.titled !== false
     && (standalone || frame.presentationMotion !== "content" || Boolean(titlebarDocument?.hasToolbar));
@@ -190,7 +188,7 @@ export function ApplicationStageView({
     ? { width: titlebarDocument.sidebarWidth, content: quickSwitchTitle(appName) } : undefined;
   const standardTopBar = showsTitlebar ? <WindowTitlebarView
     document={{ ...(titlebarDocument ?? { subtitle: "", documentEdited: false }), title: currentTitle }}
-    isKeyWindow={stage.isFocused} material={material} mode={resolvedMode}
+    isKeyWindow={stage.isFocused} material={material}
     onSlotsChange={setSlots}
     controls={returnControl}
     sidebar={sidebarRail}
