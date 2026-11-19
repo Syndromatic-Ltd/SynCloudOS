@@ -13,7 +13,6 @@ import { createSynWareBundle } from "../../../../src/SynCloudOS/AppSDK/createSyn
 import { createBrowserRuntimeEnvironment } from "../../../../src/SynCloudOS/PlatformAdapters/BrowserRuntimeEnvironment";
 import { createSynCloudOS } from "../../../../src/SynCloudOS/Runtime/createSynCloudOS";
 import { RuntimeInputBoundary, SynCloudOSProvider } from "../../../../src/SynCloudOSReact";
-import { SystemUILayer } from "../../../../src/Webspring/SystemUILayer";
 import { createWebspring } from "../../../../src/Webspring/public";
 import { WebspringHost } from "../../../../src/Webspring/WebspringHost";
 import "../../../../src/Webspring/WebspringHost.css";
@@ -116,7 +115,6 @@ export async function mountApplication(root: HTMLElement, dusk: NSETheme, red: N
       <NSEAppearanceProvider theme={dusk} appearanceService={runtime.appearance}>
         <RuntimeInputBoundary>
           <WebspringHost shell={shell} startupPhase="complete" />
-          <SystemUILayer />
         </RuntimeInputBoundary>
       </NSEAppearanceProvider>
     </SynCloudOSProvider>,

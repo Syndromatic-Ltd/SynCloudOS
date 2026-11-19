@@ -32,7 +32,7 @@ import { createTestLauncher, createTestWebspring } from "./webspringTestShell";
 vi.mock("../../src/SynCloudOS/Runtime/createSynCloudOS", { spy: true });
 // Keep the real runtime, ErrorManager, SystemAlert, React root and teardown.
 // Successful mounts do not need the site's application rendering for these tests.
-vi.mock("../../src/App", () => ({ App: () => <button data-testid="mounted-browser-host">Mounted host</button> }));
+vi.mock("../../src/Webspring/WebspringHost", () => ({ WebspringHost: () => <button data-testid="mounted-browser-host">Mounted host</button> }));
 
 const shell = createTestWebspring({
   info: { bundleIdentifier: "com.example.bootstrap-shell", displayName: "Bootstrap shell", branding: { name: { key: "site.name", fallback: "Bootstrap shell" } } },

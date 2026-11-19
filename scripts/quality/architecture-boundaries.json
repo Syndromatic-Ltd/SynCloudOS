@@ -670,7 +670,6 @@
     {
       "id": "browser-host",
       "include": [
-        "src/App.tsx",
         "src/SynCloudOSReact/browser.tsx",
         "src/SynCloudOSReact/browserRuntime.tsx",
         "src/SynCloudOSReact/browserHostContributions.ts",

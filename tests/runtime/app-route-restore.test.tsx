@@ -44,10 +44,10 @@ describe("App root composition", () => {
   afterEach(cleanup);
 
   it("renders provider-owned routes without restoring a persisted previous app", async () => {
-    const { App } = await import("../../src/App");
+    const { WebspringHost } = await import("../../src/Webspring/WebspringHost");
     const runtime = createTestRuntime();
     runtime.store.mutate((draft) => { draft.application.routePath = "/studio"; });
-    const rendered = render(React.createElement(SynCloudOSProvider, { runtime }, React.createElement(App, { shell })));
+    const rendered = render(React.createElement(SynCloudOSProvider, { runtime }, React.createElement(WebspringHost, { shell })));
 
     expect(screen.getByTestId("webspring").getAttribute("data-route")).toBe("/studio");
     expect(screen.getByTestId("system-ui")).toBeTruthy();
@@ -64,7 +64,7 @@ describe("App root composition", () => {
   });
 
   it("releases the startup curtain at the presentable statechart boundary before boot completion", async () => {
-    const { App } = await import("../../src/App");
+    const { WebspringHost } = await import("../../src/Webspring/WebspringHost");
     const runtime = createTestRuntime();
     runtime.store.mutate((draft) => {
       draft.booted = false;
@@ -72,7 +72,7 @@ describe("App root composition", () => {
       draft.application.routePath = "/studio";
     });
 
-    const rendered = render(React.createElement(SynCloudOSProvider, { runtime }, React.createElement(App, { shell })));
+    const rendered = render(React.createElement(SynCloudOSProvider, { runtime }, React.createElement(WebspringHost, { shell })));
 
     expect(runtime.store.getSnapshot().booted).toBe(false);
     expect(runtime.store.getSnapshot().statechart.currentState).toBe("active.application.active");

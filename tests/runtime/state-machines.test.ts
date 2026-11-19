@@ -63,7 +63,7 @@ describe("phase fields are written only through their machines", () => {
     { name: "drag phase", roots: ["src/SynCloudOS/Drag"], write: /\bphase:\s*"(dragging|over-destination|dropping|completed|cancelled)"/, owners: ["src/SynCloudOS/Drag/dragPhaseMachine.ts"] },
     { name: "page turn phase", roots: ["src/NSE/Page/pageTurnController.ts"], write: /\bphase:\s*"/, owners: [] },
     { name: "folder split phase", roots: ["src/Webspring/WSFolderSplitView.tsx"], write: /setPhase\(\s*"/, owners: [] },
-    { name: "system startup phase", roots: ["src/App.tsx", "src/SynCloudOS/RootRuntime"], write: /(setStartupPhase|onStartupPhase)\(\s*"/, owners: [] },
+    { name: "system startup phase", roots: ["src/Webspring/WebspringHost.tsx", "src/SynCloudOS/RootRuntime"], write: /(setStartupPhase|onStartupPhase)\(\s*"/, owners: [] },
     { name: "MultiSwitch settlement", roots: ["src/SynCloudOS/LaunchServices/LaunchServices.ts"], write: /\b(firstFrame|presentationFrame|settleTimer)\s*=(?!=)/, owners: [] },
   ];
 

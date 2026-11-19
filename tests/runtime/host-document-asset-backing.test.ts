@@ -40,7 +40,7 @@ import { createTestLauncher, createTestWebspring } from "./webspringTestShell";
 import { noteType } from "../fixtures/noteDocumentType";
 
 vi.mock("../../src/SynCloudOS/Runtime/createSynCloudOS", { spy: true });
-vi.mock("../../src/App", () => ({ App: () => null }));
+vi.mock("../../src/Webspring/WebspringHost", () => ({ WebspringHost: () => null }));
 
 const environment = {} as SynCloudOSRuntimeEnvironment;
 const stores: DocumentAssetStore[] = [];

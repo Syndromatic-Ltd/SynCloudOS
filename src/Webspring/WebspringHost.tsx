@@ -31,7 +31,9 @@ import { constructWSApplication, resolveLauncher, type WSApplication, type WSDef
 import { WSLauncherRootView, wsSetLauncherHostState, type WSLauncherHostState, type WSLauncherViewController } from "./WSLauncherViewController";
 import { WSBoardViewController } from "./Contents/Views/WSBoardViewController/WSBoardViewController";
 import { SystemStartupLayer } from "./SystemStartupLayer";
-import type { SystemStartupPhase } from "../SynCloudOS/RootRuntime";
+import { SystemUILayer } from "./SystemUILayer";
+import { nextState } from "../Foundation/internal/StateMachine";
+import { systemStartupPhaseMachine, type SystemStartupPhase } from "../SynCloudOS/RootRuntime";
 import { WSStageLayer } from "./WSStageLayer";
 import { syncApplicationWindowContentRenderers, WindowContentRendererRegistry, WindowLayer, type ApplicationWindowRendererRegistrations } from "./WindowLayer";
 import { HostSiteBrandingProvider, useKernelSynCloudOS, useRuntimeNSEFocusPort, useRuntimeSelector } from "../SynCloudOSReact";
@@ -79,6 +81,10 @@ function equalHostSnapshot(left: RuntimeSnapshot, right: RuntimeSnapshot) {
     left.notifications === right.notifications &&
     left.statechart === right.statechart &&
     left.webspring === right.webspring;
+}
+
+function selectRuntimePresentationReady(snapshot: RuntimeSnapshot) {
+  return snapshot.booted || snapshot.statechart.currentState !== "booting";
 }
 
 interface ViewBoundaryProps {
@@ -205,8 +211,19 @@ export function WebspringHost({
   const stagingAppId = snapshot.webspring.launchPhase === "staging" ? snapshot.webspring.launchingAppId : null;
   const feedback = useNSEFeedback();
   const { reducedMotion } = useNSEAnimationEnvironment();
-  const phase = startupPhase ?? "complete";
+  const presentationReady = useRuntimeSelector(selectRuntimePresentationReady);
+  const [derivedStartupPhase, setStartupPhase] = useState<SystemStartupPhase>("booting");
+  useEffect(() => {
+    if (startupPhase !== undefined) return;
+    setStartupPhase((current) => nextState(systemStartupPhaseMachine.definition, current, presentationReady ? "presentationReady" : "presentationPending") ?? current);
+  }, [presentationReady, startupPhase]);
+  const phase = startupPhase ?? derivedStartupPhase;
   const authenticationPolicy = typeof authentication === "object" ? authentication.policy : authentication;
+  const handleLogOut = useCallback(async () => {
+    const result = await runtime.commands.dispatch("session.logOut", undefined, { source: "system" });
+    if (result.status === "failed" || result.status === "cancelled") return false;
+    return result.status === "executed";
+  }, [runtime]);
   useEffect(() => {
     if (authenticationPolicy === "disabled" || !controller) return;
     const command = runtime.commands.register({
@@ -266,8 +283,8 @@ export function WebspringHost({
     runtime.webspring.hydrateLayoutPreference();
   }, [runtime, shell]);
   useEffect(() => {
-    if (startupPhase === "complete" && snapshot.loginServices.isAuthorised) scheduleWebspringIdlePrefetch(runtime);
-  }, [runtime, snapshot.loginServices.isAuthorised, startupPhase]);
+    if (phase === "complete" && snapshot.loginServices.isAuthorised) scheduleWebspringIdlePrefetch(runtime);
+  }, [phase, runtime, snapshot.loginServices.isAuthorised]);
   useEffect(() => runtime.events.subscribe("webspring.quickSwitch.toggle", toggleQuickSwitch), [runtime, toggleQuickSwitch]);
   useEffect(() => {
     if (quickSwitchOpen && !canUseQuickSwitch) setQuickSwitchOpen(false);
@@ -366,6 +383,11 @@ export function WebspringHost({
     />
     <WebspringStatusLayer errors={snapshot.errors} />
     <SystemStartupLayer phase={phase} />
+    <SystemUILayer
+      onLogOut={authenticationPolicy === "disabled" ? undefined : handleLogOut}
+      preferences={shell.preferences}
+      siteName={model?.branding.name ?? lastBranding.current?.name ?? shell.info.branding.name.fallback ?? shell.info.branding.name.key}
+    />
     </WebspringFolderAppearanceProvider>
   </WSIconEffectProvider></MaterialProvider></HostSiteBrandingProvider>;
 }

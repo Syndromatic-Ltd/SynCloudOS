@@ -27,7 +27,7 @@ import { createTestLauncher, createTestWebspring } from "./webspringTestShell";
 import { SystemPanelsLayer } from "../../src/Webspring/SystemPanelsLayer";
 import { WindowContentRendererRegistry } from "../../src/Webspring/WindowLayer";
 
-vi.mock("../../src/App", () => ({ App: () => <SystemPanelsLayer windowContentRegistry={new WindowContentRendererRegistry()} /> }));
+vi.mock("../../src/Webspring/WebspringHost", () => ({ WebspringHost: () => <SystemPanelsLayer windowContentRegistry={new WindowContentRendererRegistry()} /> }));
 vi.mock("../../src/NSE/NSE", async importOriginal => ({
   ...await importOriginal<typeof import("../../src/NSE/NSE")>(),
   NSEFontPanel: ({ manager }: { manager: { availableFamilies: unknown } }) => <output data-testid="host-fonts">{JSON.stringify(manager.availableFamilies)}</output>,

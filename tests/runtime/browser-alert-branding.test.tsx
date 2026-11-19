@@ -31,7 +31,7 @@ import type { SynCloudOSRuntime } from "../../src/SynCloudOS/Runtime/runtimeInst
 
 const scenario = vi.hoisted(() => ({ throwAtRoot: false }));
 vi.mock("../../src/SynCloudOS/Runtime/createSynCloudOS", { spy: true });
-vi.mock("../../src/App", () => ({ App: () => {
+vi.mock("../../src/Webspring/WebspringHost", () => ({ WebspringHost: () => {
   const branding = useHostSiteBranding();
   const mode = useResolvedMode();
   if (scenario.throwAtRoot) throw new Error("Root recovery specimen");

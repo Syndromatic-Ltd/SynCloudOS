@@ -31,7 +31,7 @@ import { NSEWindowController } from "../../src/NSE/Application/NSEWindowControll
 import { createSynWareDefinitionFromApplicationClass } from "../../src/SynCloudOS/AppHosting/applicationClass";
 import { createAppSCOS } from "../../src/SynCloudOS/AppSDK/scos/scosFacade";
 import { useFonts } from "../../src/SynCloudOS/AppSDK/fontAccess";
-vi.mock("../../src/App", () => ({ App: () => { const manager = useHostFontManager(); return <output>{manager.availableFamilies.map(family=>family.id).join(",")}</output>; } }));
+vi.mock("../../src/Webspring/WebspringHost", () => ({ WebspringHost: () => { const manager = useHostFontManager(); return <output>{manager.availableFamilies.map(family=>family.id).join(",")}</output>; } }));
 const shell = createTestWebspring({ info: { bundleIdentifier: "com.example.font-host", displayName: "Fonts", branding: { name: { key: "site.name", fallback: "Fonts" } } }, launcher: createTestLauncher(() => null, "persistent") });
 const declaration = defineFontDeclaration({ resources:{regular:"Resources/Regular.woff2"},families:[{id:"managed",label:"Managed",defaultFaceId:"managed.regular",faces:[{id:"managed.regular",label:"Regular",browserFamily:"Managed",resource:"regular",weight:400,style:"normal"}]}] });
 it("mounts the catalogue from the managed declaration without an independent metadata list", async()=>{

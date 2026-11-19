@@ -24,9 +24,10 @@ import { installedApplicationRoute } from "../SynCloudOS/InstalledApplications/i
 import { installBrowserApplications } from "../SynCloudOS/InstalledApplications/installBrowserApplications";
 import { getSynWareNamespace } from "../SynCloudOS/AppSDK/useStrings";
 import "../SynCloudOS/styles/runtime.css";
-import { StrictMode, type PropsWithChildren } from "react";
+import { StrictMode, useLayoutEffect, useMemo, type ComponentType, type PropsWithChildren } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import type { App as ShellApp } from "../App";
+import type { WebspringHost as ShellHost } from "../Webspring/WebspringHost";
+import type { ApplicationWindowRendererRegistrations, WindowContentRendererRegistry } from "../Webspring/WindowLayer";
 import { ApplicationHost, applicationRecoveryError } from "./ApplicationHost";
 import { createApplicationHostHome, type ApplicationHostHome } from "./applicationHome";
 import { NSEAppearanceProvider, type NSETheme } from "../NSE/Appearance";
@@ -71,7 +72,7 @@ import type { WSDefinition } from "../Webspring/WSApplication";
 import type { SynCloudOSShellResources } from "../Webspring/WebspringController";
 import { getWebspringLocaleResourceLoader } from "../Webspring/webspringLocale";
 import { webspringPresentationRoles } from "../SynCloudOS/SynCloudOS";
-import { FocusScope, RuntimeInputBoundary, SynCloudOSProvider } from "./index";
+import { FocusScope, RuntimeInputBoundary, SynCloudOSProvider, useKernelSynCloudOS, useRuntimeSelector } from "./index";
 import {
   composeSynCloudOSHostContributions,
   createSynCloudOSHostInstallContext,
@@ -356,6 +357,43 @@ function RootRecoveryBoundary({ runtime, options, fontCatalogue, children }: Pro
   </HostFontsProvider></HostSiteBrandingProvider>;
 }
 
+/** The development-only test host's props, declared structurally so the test harness never enters published declarations. */
+interface DevelopmentTestHostProps {
+  readonly pathname: string;
+  readonly windowRendererRegistration?: { readonly register: WindowContentRendererRegistry["register"] };
+}
+
+interface DevelopmentFrameworkTestMount {
+  readonly pathname: string;
+  readonly Host: ComponentType<DevelopmentTestHostProps>;
+  readonly windowLayer: typeof import("../Webspring/WindowLayer");
+}
+
+function DevelopmentFrameworkTestHost({ pathname, Host, windowLayer }: DevelopmentFrameworkTestMount) {
+  const runtime = useKernelSynCloudOS();
+  const windowRenderers = useMemo(() => new windowLayer.WindowContentRendererRegistry(), [windowLayer]);
+  const applicationRenderers = useMemo<ApplicationWindowRendererRegistrations>(() => new Map(), []);
+  const apps = useRuntimeSelector((snapshot) => snapshot.appInfo);
+  const windowRendererRegistration = useMemo(() => ({
+    register: windowRenderers.register.bind(windowRenderers),
+  }), [windowRenderers]);
+  useLayoutEffect(() => {
+    windowLayer.syncApplicationWindowContentRenderers(windowRenderers, runtime, apps, applicationRenderers);
+  }, [apps, applicationRenderers, runtime, windowLayer, windowRenderers]);
+  const windowManagement = pathname.startsWith("/__framework-tests/windows/management");
+  const usesWindows = windowManagement || pathname.startsWith("/__framework-tests/navigation/adaptive");
+  const WindowLayer = windowLayer.WindowLayer;
+  return (
+    <>
+      <Host
+        pathname={pathname}
+        windowRendererRegistration={windowManagement ? windowRendererRegistration : undefined}
+      />
+      {usesWindows ? <WindowLayer contentRegistry={windowRenderers} /> : null}
+    </>
+  );
+}
+
 function renderHost(
   element: Element,
   runtime: SynCloudOSRuntime,
@@ -363,7 +401,8 @@ function renderHost(
   fontCatalogue: SynWareFontCatalogue,
   appearance: NSETheme,
   home: ApplicationHostHome | null,
-  Shell: typeof ShellApp | undefined,
+  Shell: typeof ShellHost | undefined,
+  frameworkTest: DevelopmentFrameworkTestMount | null,
 ): Root {
   const root = createRoot(element);
   root.render(
@@ -373,9 +412,11 @@ function renderHost(
           <RuntimeInputBoundary>
             {/* Above the recovery boundary, so the root error window scrolls like every other surface. */}
             <RubberBandProvider><RootRecoveryBoundary runtime={runtime} options={options} fontCatalogue={fontCatalogue}>
-              {home
-                ? <ApplicationHost applicationId={home.primaryId} authentication={options.authentication ?? "disabled"} home={home} />
-                : Shell && <Shell shell={options.shell!} shellResources={options.shellResources} authentication={options.authentication} />}
+              {frameworkTest
+                ? <DevelopmentFrameworkTestHost {...frameworkTest} />
+                : home
+                  ? <ApplicationHost applicationId={home.primaryId} authentication={options.authentication ?? "disabled"} home={home} />
+                  : Shell && <Shell shell={options.shell!} shellResources={options.shellResources} authentication={options.authentication} />}
               {!home ? <SCOSAlertPresenter center={runtime.alerts} presentation={runtime.presentationTraits} /> : null}
             </RootRecoveryBoundary></RubberBandProvider>
           </RuntimeInputBoundary>
@@ -810,9 +851,18 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
       browserRoutes.start();
     }
     assertMountCurrent(options.element, attempt);
-    // Load the optional shell only for shell hosts; awaiting it keeps mounting
+    // Load the optional shell or dev-only fixture host; awaiting it keeps mounting
     // and bootstrap recovery atomic without attaching launcher CSS to apps.
-    const Shell = options.shell ? (await import("../App")).App : undefined;
+    const frameworkTest: DevelopmentFrameworkTestMount | null = import.meta.env.DEV && frameworkTestPath
+      ? {
+          pathname: location.pathname,
+          Host: (await import("../FrameworkTests/FrameworkTestHost")).FrameworkTestHost,
+          windowLayer: await import("../Webspring/WindowLayer"),
+        }
+      : null;
+    const Shell = !frameworkTest && options.shell
+      ? (await import("../Webspring/WebspringHost")).WebspringHost
+      : undefined;
     assertMountCurrent(options.element, attempt);
     root = renderHost(
       options.element,
@@ -822,6 +872,7 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
       options.theme ?? atmoTheme,
       home,
       Shell,
+      frameworkTest,
     );
     if (!frameworkTestPath) await runtime.boot({ initialPathname });
     assertMountCurrent(options.element, attempt);
