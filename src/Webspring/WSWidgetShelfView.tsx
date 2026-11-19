@@ -33,7 +33,7 @@ import { NSEButton } from "@syndromatic/syncloudos/nse/controls";
 import { useObserve, type NSEOwner } from "../NSE/sdkPackageEntry";
 import { useKernelSynCloudOS } from "../SynCloudOSReact";
 import { useWebspringLocale } from "./webspringLocale";
-import { WebspringSurface, webspringSurfaceStyle } from "./webspringSurface";
+import { WSSurface, defaultWSShelfSurface, webspringSurfaceStyle } from "./WSSurface";
 import {
   captureWSWidgetClass,
   isWSWidgetDescriptor,
@@ -52,7 +52,7 @@ export interface WSWidgetShelfViewProps {
   readonly entries?: readonly WSWidgetEntry[];
   readonly widgets?: readonly (WSWidgetDescriptor | WSWidgetClass)[];
   /** The shelf's background, from `launcher.shelfSurface`. */
-  readonly surface?: WebspringSurface;
+  readonly surface?: WSSurface;
   /** Optional owning controller whose disposal tears down live widgets. */
   readonly owner?: NSEOwner;
 }
@@ -179,7 +179,7 @@ export function WSWidgetShelfView({ entries, widgets, surface, owner }: WSWidget
   if (stableEntries.every((entry, index) => isHidden(entry, states[index]))) return null;
 
   const retry = locale.t("widgets.retry", "Retry");
-  const shelfSurface = surface ?? WebspringSurface.plain("#0b0d11");
+  const shelfSurface = surface ?? defaultWSShelfSurface;
 
   const panels = stableEntries.map((entry, index) => {
     const widget = liveWidgets[index];

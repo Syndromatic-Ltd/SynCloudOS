@@ -45,7 +45,6 @@ export type {
   SynWareWebspringFoldersManifest,
   SynWareWebspringManifest,
   SynWareWebspringShellManifest,
-  SynWareWebspringViewManifest,
   SynWareResourceReference,
   SynWareWindowDefaultsManifest,
   WindowSmoothSurfaceCurve,

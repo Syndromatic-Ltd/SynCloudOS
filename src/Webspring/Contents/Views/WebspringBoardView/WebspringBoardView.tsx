@@ -30,7 +30,7 @@ import { NSEButton, NSESegmentedControl } from "@syndromatic/syncloudos/nse/cont
 import { MaterialProvider } from "../../../../NSE/Material";
 import { getKeyboardReorderIndex } from "../../../../SynCloudOS/SynCloudOS";
 import { WSWidgetShelfView } from "../../../WSWidgetShelfView";
-import { webspringSurfaceStyle } from "../../../webspringSurface";
+import { webspringSurfaceStyle } from "../../../WSSurface";
 import { WebspringDragProxy, useWebspringDragProxyPosition } from "../../../WebspringDragProxy";
 import { WebspringFolderTile } from "../../../WebspringFolderTile";
 import { captureWebspringDragArtworkRects, type WebspringDragReorderSlots } from "../../../webspringDragReorder";

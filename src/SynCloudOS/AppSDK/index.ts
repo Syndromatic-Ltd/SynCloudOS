@@ -69,7 +69,6 @@ export type {
   SynWareWebspringFoldersManifest,
   SynWareWebspringManifest,
   SynWareWebspringShellManifest,
-  SynWareWebspringViewManifest,
   SynWareResourceReference,
   SynWareWindowDefaultsManifest,
 } from "./manifest";

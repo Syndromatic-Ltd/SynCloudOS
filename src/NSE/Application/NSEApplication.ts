@@ -28,7 +28,7 @@ import { NSEObject } from "../Objects/NSEObject";
 import { publishObservableChange } from "../Objects/observable";
 import type { NSEMenu } from "../Menus/NSEMenu";
 import type { NSEAppearance } from "../Appearance/NSEAppearance";
-import { ObjectLifetime } from "./objectLifetime";
+import { assertFrameworkConstructedApplication, ObjectLifetime } from "./objectLifetime";
 import { ownNSEFactory, type Disposable, type SynchronousDisposable } from "./ownedFactory";
 import type { NSEAnyWindowController, NSEWindowController, NSEWindowControllerClass } from "./NSEWindowController";
 import type { AppBounds, AppOwnedWindowSnapshot } from "../../SynCloudOS/nseRuntimeContracts";
@@ -165,9 +165,7 @@ export class NSEApplication extends NSEObject implements NSEOwner, OwnedObject {
   constructor() {
     super();
     this.#lifetime = new ObjectLifetime(this, "NSEApplication", new.target.name || "NSEApplication", {});
-    if (!this.#lifetime.constructedByFramework) {
-      throw new TypeError(`${new.target.name} is created by the framework; export it as the default export of the application module instead of calling new.`);
-    }
+    assertFrameworkConstructedApplication(this.#lifetime, new.target.name);
   }
 
   /** The application's identifier, from its manifest. */

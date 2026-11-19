@@ -23,10 +23,11 @@ import { captureSynWareManifest, type SynWareWebspringFoldersManifest } from "..
 import { createWebspringFolderSplitPresentation } from "./WebspringFolderSplitPresentation";
 import { defaultWebspringFolderAppearance, defaultWebspringFolderSmoothSurface } from "./WebspringFolderAppearance";
 import { nseSmoothSurfaceRadiusTokens } from "../NSE/SmoothSurface";
-import { captureWebspringBackground } from "./webspringSurface";
+import { captureWebspringBackground } from "./WSSurface";
 import { captureWSWidgetClass, isWSWidgetDescriptor, type WSWidgetClass, type WSWidgetDescriptor } from "./WSWidget";
 import { capturePreferencePaneClass, isPreferencePaneDescriptor, type PreferencePaneDescriptor } from "../SynCloudOS/Preferences";
 import type {
+  LegacyWebspringShellManifest,
   WebspringFolderAppearance,
   WebspringFolderPresentationComponent,
   WebspringDefinition,
@@ -360,11 +361,12 @@ export function defineWebspring<const TManifest extends Omit<WebspringManifest, 
   const folderAppearance = captureFolderAppearance(dataProperty(input, "folderAppearance", false));
   const capturedManifest = captureSynWareManifest(manifestInput);
   if (!capturedManifest.ok) throw manifestError(capturedManifest.errors);
-  if (!capturedManifest.value.webspringShell) throw new TypeError("A Webspring manifest requires manifest.webspringShell.");
+  const rawShell = capturedManifest.value.webspringShell as LegacyWebspringShellManifest | undefined;
+  if (!rawShell) throw new TypeError("A Webspring manifest requires manifest.webspringShell.");
 
   const components = captureComponents(componentsInput);
   const ids = new Set<string>();
-  for (const view of capturedManifest.value.webspringShell.views) {
+  for (const view of rawShell.views) {
     if (ids.has(view.id)) throw new TypeError(`Webspring manifest contains duplicate view ID ${view.id}.`);
     ids.add(view.id);
   }
@@ -373,11 +375,11 @@ export function defineWebspring<const TManifest extends Omit<WebspringManifest, 
   if (missing.length > 0) throw new TypeError(`Webspring components are missing declared view IDs: ${missing.join(", ")}.`);
   const extra = componentIds.filter((id) => !ids.has(id));
   if (extra.length > 0) throw new TypeError(`Webspring components contain extra undeclared view IDs: ${extra.join(", ")}.`);
-  assertFolders(capturedManifest.value.webspringShell.folders);
+  assertFolders(rawShell.folders);
 
   for (const presentation of ["desktop", "tablet", "mobile"] as const) {
-    const defaultId = capturedManifest.value.webspringShell.defaults[presentation];
-    const view = capturedManifest.value.webspringShell.views.find((candidate) => candidate.id === defaultId);
+    const defaultId = rawShell.defaults[presentation];
+    const view = rawShell.views.find((candidate) => candidate.id === defaultId);
     if (!view) throw new TypeError(`Webspring ${presentation} default references unknown view ID ${defaultId}.`);
     if (!view.presentations.includes(presentation)) {
       throw new TypeError(`Webspring ${presentation} default ${defaultId} does not support ${presentation}.`);

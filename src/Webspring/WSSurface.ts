@@ -19,13 +19,13 @@
  */
 
 import type { CSSProperties } from "react";
-import type { WebspringBackground, WebspringSurface as WebspringSurfaceShape } from "./webspringTypes";
+import type { WebspringBackground, WSSurface as WSSurfaceShape } from "./webspringTypes";
 
-export type WebspringSurface = WebspringSurfaceShape;
+export type WSSurface = WSSurfaceShape;
 
 const cottonTexture = new URL("../../public/assets/textures/NSETileCotton.jpg?no-inline", import.meta.url).href;
 
-function cotton(): WebspringSurface {
+function cotton(): WSSurface {
   return {
     colour: "#5a6170",
     texture: { image: cottonTexture, size: "256px" },
@@ -34,12 +34,12 @@ function cotton(): WebspringSurface {
   };
 }
 
-function plain(colour: string): WebspringSurface {
+function plain(colour: string): WSSurface {
   return { colour };
 }
 
 /** Ready-made surfaces. They are plain objects: spread one to change a field. */
-export const WebspringSurface = Object.freeze({
+export const WSSurface = Object.freeze({
   /** Tinted cotton with a spotlight: the Board's default. */
   cotton,
   /** A single flat colour. */
@@ -49,7 +49,7 @@ export const WebspringSurface = Object.freeze({
 /** Where the spotlight sits. */
 const vignetteCentre = "50% 45%";
 
-const defaultShelf: WebspringSurface = Object.freeze(plain("#171c26"));
+export const defaultWSShelfSurface: WSSurface = Object.freeze(plain("#171c26"));
 
 function asObject(value: unknown, label: string): Record<string, unknown> {
   if (typeof value !== "object" || value === null || Array.isArray(value)) throw new TypeError(`${label} must be an object.`);
@@ -85,10 +85,10 @@ function object(input: Record<string, unknown>, key: string, label: string, know
 }
 
 /** Validates a surface and returns a frozen copy; a wrong shape throws a `TypeError` naming `label`. */
-export function captureWebspringSurface(raw: unknown, label: string): WebspringSurface {
+export function captureWSSurface(raw: unknown, label: string): WSSurface {
   const input = asObject(raw, label);
   assertKnown(input, label, ["colour", "texture", "tint", "vignette", "overlay"]);
-  const surface: { -readonly [Key in keyof WebspringSurface]: WebspringSurface[Key] } = {};
+  const surface: { -readonly [Key in keyof WSSurface]: WSSurface[Key] } = {};
   const colour = text(input, "colour", label);
   if (colour !== undefined) surface.colour = colour;
 
@@ -152,13 +152,13 @@ export function captureWebspringSurface(raw: unknown, label: string): WebspringS
 
 /** Validates the `background` option and fills in the defaults: tinted cotton for the launcher, a plain dark shelf. */
 export function captureWebspringBackground(input: unknown): WebspringBackground {
-  if (input === undefined) return Object.freeze({ launcher: Object.freeze(cotton()), shelf: defaultShelf });
+  if (input === undefined) return Object.freeze({ launcher: Object.freeze(cotton()), shelf: defaultWSShelfSurface });
   const background = asObject(input, "Webspring background");
   assertKnown(background, "Webspring background", ["launcher", "shelf"]);
   if (background.launcher === undefined) throw new TypeError("Webspring background needs a launcher surface.");
   return Object.freeze({
-    launcher: captureWebspringSurface(background.launcher, "Webspring background.launcher"),
-    shelf: background.shelf === undefined ? defaultShelf : captureWebspringSurface(background.shelf, "Webspring background.shelf"),
+    launcher: captureWSSurface(background.launcher, "Webspring background.launcher"),
+    shelf: background.shelf === undefined ? defaultWSShelfSurface : captureWSSurface(background.shelf, "Webspring background.shelf"),
   });
 }
 
@@ -172,7 +172,7 @@ function cssUrl(image: string) {
  * entry per layer, top layer first) and `-overlay-image`, `-overlay-size`, `-overlay-opacity` and
  * `-overlay-blend`. A stylesheet reads them with one rule per layer, so a theme can still override them.
  */
-export function webspringSurfaceStyle(surface: WebspringSurface, prefix = "--webspring-surface"): CSSProperties {
+export function webspringSurfaceStyle(surface: WSSurface, prefix = "--webspring-surface"): CSSProperties {
   const images: string[] = [];
   const sizes: string[] = [];
   const repeats: string[] = [];

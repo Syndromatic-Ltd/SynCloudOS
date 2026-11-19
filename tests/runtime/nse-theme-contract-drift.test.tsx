@@ -82,7 +82,7 @@ import { NotificationCentrePresenter } from "../../src/Webspring/NotificationCen
 import { SystemStartupLayer } from "../../src/Webspring/SystemStartupLayer";
 import { WebspringDragProxy } from "../../src/Webspring/WebspringDragProxy";
 import { WSWidgetShelfView } from "../../src/Webspring/WSWidgetShelfView";
-import { WebspringSurface } from "../../src/Webspring/webspringSurface";
+import { WSSurface } from "../../src/Webspring/WSSurface";
 import { WSWidget, captureWSWidgetClass } from "../../src/Webspring/WSWidget";
 import { CapabilitiesPane } from "../../src/Webspring/Preferences/Capabilities.prefPane";
 import { StoragePane } from "../../src/Webspring/Preferences/Storage.prefPane";
@@ -1056,7 +1056,7 @@ it("renders the widget shelf material overlay and its loading status", async () 
   try {
     const view = render(<Host><SynCloudOSProvider runtime={runtime}><WSWidgetShelfView entries={[{
       widget, title: "Archive", iconUrl: "/archive.png", emptyMessage: null,
-    }]} surface={WebspringSurface.plain("#101418")} /></SynCloudOSProvider></Host>);
+    }]} surface={WSSurface.plain("#101418")} /></SynCloudOSProvider></Host>);
     const shelf = view.getByRole("region", { name: "Widgets" });
     expect(shelf.getAttribute("data-nse-role")).toBe("widget-shelf");
     expect(shelf.querySelector(':scope > [data-nse-part="decoration"][data-nse-role="material"]')).not.toBeNull();

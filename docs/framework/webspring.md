@@ -197,20 +197,20 @@ their own alerts with the `NSEAlert` object and present custom content as a shee
 Left alone, the Board is a tinted cotton texture with a spotlight: lighter in the centre, darker at the edges. `background` changes it. `launcher` paints the icon area; `shelf` paints the widget area and is drawn only when the definition has widgets.
 
 ```tsx
-import { defineWebspring, WebspringBoardView, WebspringSurface } from "@syndromatic/syncloudos/webspring";
+import { defineWebspring, WebspringBoardView, WSSurface } from "@syndromatic/syncloudos/webspring";
 import manifest from "./Info";
 
 export default defineWebspring({
   manifest,
   components: { board: WebspringBoardView },
   background: {
-    launcher: { ...WebspringSurface.cotton(), tint: { colour: "#7a4a4a", opacity: 0.12 } },
-    shelf: WebspringSurface.plain("#0b0d11"),
+    launcher: { ...WSSurface.cotton(), tint: { colour: "#7a4a4a", opacity: 0.12 } },
+    shelf: WSSurface.plain("#0b0d11"),
   },
 });
 ```
 
-A `WebspringSurface` is a plain object. Every field is optional:
+A `WSSurface` is a plain object. Every field is optional:
 
 | Field | Meaning |
 | --- | --- |
@@ -220,7 +220,7 @@ A `WebspringSurface` is a plain object. Every field is optional:
 | `vignette` | `{ centre?, edge? }`: a spotlight. `centre` lightens the middle with white and `edge` darkens the rim with black, each from 0 to 1. `false` draws none. |
 | `overlay` | `{ image, size?, opacity?, blend? }`: an image over everything else, such as a glow. |
 
-`WebspringSurface.cotton()` is the default. `WebspringSurface.plain(colour)` is a flat colour. Spread a preset to change one field. The Board sets the surface as CSS custom properties (`--webspring-launcher-*` and `--webspring-shelf-*`), so a theme can still override them. The framework ships no other Board artwork: supply your own images for a metal or paper look.
+`WSSurface.cotton()` is the default. `WSSurface.plain(colour)` is a flat colour. Spread a preset to change one field. The Board sets the surface as CSS custom properties (`--webspring-launcher-*` and `--webspring-shelf-*`), so a theme can still override them. The framework ships no other Board artwork: supply your own images for a metal or paper look.
 
 The Board scales to the screen. An icon is the largest size that still lets a whole page (four columns by the page's rows) fit without scrolling: the smaller of what the width and the height allow, held between 54 and 180 CSS pixels. On a phone the width decides; on a desktop the height does.
 
@@ -377,7 +377,7 @@ The pieces the Board is built from are public, so a custom launcher can share it
 | `WebspringFolderTile`, `createWebspringFolderSplitPresentation` | A folder's icon tile of its members, and the default folder presentation. |
 | `useWebspringFolderAppearance` | The definition's folder appearance, for artwork that matches the folder tile. |
 | `WSWidgetShelfView`, `WSWidget` | The widget shelf for `model.widgets`: it loads each widget and draws its loading, empty, error and timeout states. |
-| `WebspringSurface`, `webspringSurfaceStyle` | The surface presets, and the CSS custom properties that paint a surface. `model.background` holds the resolved launcher and shelf surfaces. |
+| `WSSurface`, `webspringSurfaceStyle` | The surface presets, and the CSS custom properties that paint a surface. `model.background` holds the resolved launcher and shelf surfaces. |
 | `WebspringIconArtwork`, `WebspringIconEffect` | An application's icon artwork, and the shell's declared icon effect. |
 | `resolveWebspringIconPresentation`, `webspringIconSprings`, `getWebspringRadialExitForIcon`, `useWebspringMotion` | Icon entrance, launch and return motion, standard and reduced. |
 | `getWebspringSelectorTransform`, `resolveWebspringOrbPresentation` | Selector and orb motion for a radial launcher. |

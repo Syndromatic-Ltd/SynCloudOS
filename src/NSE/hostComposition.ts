@@ -78,3 +78,14 @@ export { WindowTitlebarView } from "./Windows/WindowTitlebarView";
 export { TitlebarGlyphButton } from "./Windows/TitlebarGlyphButton";
 export type { WindowTitlebarSlots } from "./Windows/windowTitlebarContext";
 export { nseTopBarGlyphs } from "./Windows/Chrome/topBarAssets";
+
+// Application lifetime and ownership primitives shared with Webspring's WSApplication host.
+export { ObjectLifetime, assertFrameworkConstructedApplication } from "./Application/objectLifetime";
+export { ownNSEFactory, type Disposable, type SynchronousDisposable } from "./Application/ownedFactory";
+export {
+  OwnershipScope,
+  instantiateInOwnerScope,
+  nseDisposeFor,
+  type NSEOwner,
+  type OwnedObject,
+} from "./Controllers/ownership";

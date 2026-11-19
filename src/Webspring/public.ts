@@ -20,6 +20,21 @@
 
 export { defineWebspring, isDefinedWebspring, withDiscoveredWebspringItems } from "./Webspring";
 export {
+  WSApplication,
+  createWebspring,
+  isWSApplicationClass,
+  isWSDefinition,
+  resolveLauncher,
+} from "./WSApplication";
+export type {
+  WSApplicationClass,
+  WSCreateWebspringInput,
+  WSDefinition,
+  WSLauncherViewControllerClass,
+} from "./WSApplication";
+export { captureWSInfo } from "./WSInfo";
+export type { WSBranding, WSCapturedBranding, WSCapturedInfo, WSInfo } from "./WSInfo";
+export {
   createIntegrationContribution,
   defineIntegration,
   integrationOwners,
@@ -39,7 +54,7 @@ export type { WebspringBoardConfiguration } from "./Contents/Views/WebspringBoar
 export { WSWidgetShelfView } from "./WSWidgetShelfView";
 export type { WSWidgetShelfViewProps } from "./WSWidgetShelfView";
 export { useWebspringHapticEngine } from "./webspringHaptics";
-export { WebspringSurface, webspringSurfaceStyle } from "./webspringSurface";
+export { WSSurface, webspringSurfaceStyle } from "./WSSurface";
 export { WSWidget, captureWSWidgetClass } from "./WSWidget";
 export type { WSWidgetClass, WSWidgetDescriptor, WSWidgetState, WSWidgetTimers } from "./WSWidget";
 export { WebspringDragProxy, getWebspringDragGrabOffset, useWebspringDragProxyPosition } from "./WebspringDragProxy";

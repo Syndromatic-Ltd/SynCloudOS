@@ -82,7 +82,7 @@ export interface SynWareWindowDefaultsManifest {
 }
 
 /** A painted area for an app's background: colour, texture, tint, spotlight and an overlay, drawn in that order.
- *  Image values are URLs. The same shape as the Webspring Board's `WebspringSurface`. */
+ *  Image values are URLs. The same shape as the Webspring Board's `WSSurface`. */
 export interface SynWareSurfaceManifest {
   /** The base colour, beneath the texture. */
   readonly colour?: string;
@@ -198,12 +198,6 @@ export interface SynWareResourceReference {
   readonly alternativeText: SynWareLocalisedText;
 }
 
-export interface SynWareWebspringViewManifest {
-  readonly id: string;
-  readonly presentations: readonly SynWarePresentation[];
-  readonly mode: "launcher" | "persistent";
-}
-
 /** A folder the Webspring shell seeds on first run. */
 export interface SynWareWebspringFolderManifest {
   /** `folder.` followed by a lowercase slug; unique, and never an app ID. */
@@ -223,8 +217,6 @@ export interface SynWareWebspringFoldersManifest {
 }
 
 export interface SynWareWebspringShellManifest {
-  readonly views: readonly SynWareWebspringViewManifest[];
-  readonly defaults: Readonly<Record<SynWarePresentation, string>>;
   readonly homeRoute: string;
   readonly branding: {
     readonly name: SynWareLocalisedText;

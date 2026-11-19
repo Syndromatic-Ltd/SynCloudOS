@@ -25,7 +25,7 @@ import * as React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
 import type { SynCloudOSRuntime } from "../../src/SynCloudOS/Runtime/runtimeInstanceTypes";
-import { WebspringSurface } from "../../src/Webspring/webspringSurface";
+import { WSSurface } from "../../src/Webspring/WSSurface";
 import {
   WSWidget,
   captureWSWidgetClass,
@@ -389,7 +389,7 @@ describe("WSWidgetShelfView", () => {
     runtimes.push(runtime);
     return render(
       <SynCloudOSProvider runtime={runtime}>
-        <WSWidgetShelfView entries={entries} surface={WebspringSurface.plain("#101418")} />
+        <WSWidgetShelfView entries={entries} surface={WSSurface.plain("#101418")} />
       </SynCloudOSProvider>,
     );
   }
@@ -426,7 +426,7 @@ describe("WSWidgetShelfView", () => {
 
     render(
       <SynCloudOSProvider runtime={runtime}>
-        <WSWidgetShelfView entries={[entryFor(LinksWidget)]} surface={WebspringSurface.plain("#101418")} />
+        <WSWidgetShelfView entries={[entryFor(LinksWidget)]} surface={WSSurface.plain("#101418")} />
       </SynCloudOSProvider>,
     );
     await act(settle);

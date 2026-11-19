@@ -166,7 +166,6 @@ export type {
   SynWareWebspringFoldersManifest,
   SynWareWebspringManifest,
   SynWareWebspringShellManifest,
-  SynWareWebspringViewManifest,
   SynWareResourceReference,
 } from "./manifest";
 export type { SynWareContextValue, SynWareRuntimeInfo, SynWareSiteBranding } from "./appContextTypes";

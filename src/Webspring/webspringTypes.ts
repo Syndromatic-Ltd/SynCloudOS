@@ -55,7 +55,7 @@ export type WSActionResult =
 export type ActionResult = WSActionResult;
 
 /** A painted area: colour, texture, tint, spotlight and an overlay, drawn in that order. */
-export interface WebspringSurface {
+export interface WSSurface {
   /** The base colour, beneath the texture. Defaults to transparent. */
   readonly colour?: string;
   /** An image under the tint; `"none"` (or omitted) draws none. */
@@ -84,14 +84,14 @@ export interface WebspringSurface {
 
 /** The Board's two painted areas. `shelf` is drawn only when the definition has widgets. */
 export interface WebspringBackgroundInput {
-  readonly launcher: WebspringSurface;
-  readonly shelf?: WebspringSurface;
+  readonly launcher: WSSurface;
+  readonly shelf?: WSSurface;
 }
 
 /** A background with every default filled in. */
 export interface WebspringBackground {
-  readonly launcher: WebspringSurface;
-  readonly shelf: WebspringSurface;
+  readonly launcher: WSSurface;
+  readonly shelf: WSSurface;
 }
 
 /** A widget as a view shows it: its text and icon resolved. */
@@ -297,8 +297,19 @@ export type AuthenticationPolicy = RuntimeAuthenticationPolicy;
 export type AuthenticationConfiguration = RuntimeAuthenticationConfiguration;
 export type AuthenticationInput = RuntimeAuthenticationInput;
 
-export type WebspringManifest = SynWareManifestV1 & {
-  readonly webspringShell: SynWareWebspringShellManifest;
+export interface LegacyWebspringViewManifest {
+  readonly id: string;
+  readonly presentations: readonly SynWarePresentation[];
+  readonly mode: ShellMode;
+}
+
+export interface LegacyWebspringShellManifest extends SynWareWebspringShellManifest {
+  readonly views: readonly LegacyWebspringViewManifest[];
+  readonly defaults: Readonly<Record<SynWarePresentation, string>>;
+}
+
+export type WebspringManifest = Omit<SynWareManifestV1, "webspringShell"> & {
+  readonly webspringShell: LegacyWebspringShellManifest;
 };
 
 /** QuickSwitch grows with its icons up to the screen edge; this chooses what happens there. */

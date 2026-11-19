@@ -27,7 +27,7 @@ import type { SynCloudOSRuntime } from "../../src/SynCloudOS/Runtime/runtimeInst
 import { WebspringBoardView } from "../../src/Webspring/Contents/Views/WebspringBoardView/WebspringBoardView";
 import { WebspringController } from "../../src/Webspring/WebspringController";
 import * as publicApi from "../../src/Webspring/public";
-import { WebspringSurface, WSWidget, defineWebspring, webspringSurfaceStyle, type WebspringDefinition, type WebspringDefinitionInput } from "../../src/Webspring/public";
+import { WSSurface, WSWidget, defineWebspring, webspringSurfaceStyle, type WebspringDefinition, type WebspringDefinitionInput } from "../../src/Webspring/public";
 import { createTestRuntime } from "./helpers";
 
 type Options = Partial<Pick<WebspringDefinitionInput, "background" | "widgets">>;
@@ -74,8 +74,8 @@ const property = (element: HTMLElement, name: string) => element.style.getProper
 describe("Board background", () => {
   it("defaults to tinted cotton with a spotlight", () => {
     const shell = defineBoard();
-    expect(shell.background.launcher).toEqual(WebspringSurface.cotton());
-    const style = webspringSurfaceStyle(WebspringSurface.cotton(), "--x") as Record<string, string>;
+    expect(shell.background.launcher).toEqual(WSSurface.cotton());
+    const style = webspringSurfaceStyle(WSSurface.cotton(), "--x") as Record<string, string>;
     expect(style["--x-colour"]).toBe("#5a6170");
     expect(style["--x-image"]).toContain("/assets/textures/NSETileCotton.jpg");
     expect(style["--x-image"]).toContain("radial-gradient");
@@ -90,14 +90,14 @@ describe("Board background", () => {
   });
 
   it("paints a flat colour with no layers when asked for a plain surface", () => {
-    const { board } = renderBoard(defineBoard({ background: { launcher: WebspringSurface.plain("#223344") } }));
+    const { board } = renderBoard(defineBoard({ background: { launcher: WSSurface.plain("#223344") } }));
     expect(property(board, "--webspring-launcher-colour")).toBe("#223344");
     expect(property(board, "--webspring-launcher-image")).toBe("none");
     expect(property(board, "--webspring-launcher-overlay-image")).toBe("none");
   });
 
   it("lets a developer spread a preset and change one field", () => {
-    const launcher = { ...WebspringSurface.cotton(), vignette: false as const };
+    const launcher = { ...WSSurface.cotton(), vignette: false as const };
     const style = webspringSurfaceStyle(launcher, "--x") as Record<string, string>;
     expect(style["--x-image"]).not.toContain("radial-gradient");
     expect(style["--x-image"]).toContain("#4a6fa5");
@@ -124,7 +124,7 @@ describe("Board background", () => {
     expect(() => defineBoard({ background: { launcher: { tint: { colour: "red", opacity: 2 } } } })).toThrow(/opacity/iu);
     expect(() => defineBoard({ background: { launcher: { vignette: { edge: -1 } } } })).toThrow(/edge/iu);
     expect(() => defineBoard({ background: { launcher: { glow: true } as never } })).toThrow(/glow/iu);
-    expect(() => defineBoard({ background: { shelf: WebspringSurface.plain("#000") } as never })).toThrow(/launcher/iu);
+    expect(() => defineBoard({ background: { shelf: WSSurface.plain("#000") } as never })).toThrow(/launcher/iu);
   });
 });
 
@@ -138,7 +138,7 @@ describe("Board widget shelf", () => {
   }
 
   it("renders no shelf element, and no shelf background, without widgets", async () => {
-    const { board } = renderBoard(defineBoard({ background: { launcher: WebspringSurface.cotton(), shelf: WebspringSurface.plain("#ff0000") } }));
+    const { board } = renderBoard(defineBoard({ background: { launcher: WSSurface.cotton(), shelf: WSSurface.plain("#ff0000") } }));
     await act(async () => undefined);
     expect(board.querySelector(".webspring-widget-shelf")).toBeNull();
     expect(board.querySelector("[data-widget-id]")).toBeNull();
@@ -147,7 +147,7 @@ describe("Board widget shelf", () => {
   });
 
   it("renders the shelf, on the shelf surface, when a widget is declared", async () => {
-    const { board } = renderBoard(defineBoard({ widgets: [LatestWidget], background: { launcher: WebspringSurface.cotton(), shelf: WebspringSurface.plain("#0b0d11") } }));
+    const { board } = renderBoard(defineBoard({ widgets: [LatestWidget], background: { launcher: WSSurface.cotton(), shelf: WSSurface.plain("#0b0d11") } }));
     await act(async () => undefined);
     const shelf = board.querySelector<HTMLElement>(".webspring-widget-shelf");
     expect(shelf).not.toBeNull();
@@ -159,7 +159,7 @@ describe("Board widget shelf", () => {
 describe("removed content APIs", () => {
   it("are no longer exported or accepted", () => {
     expect(Object.keys(publicApi)).not.toContain("LowerContentShelfView");
-    expect(Object.keys(publicApi)).toEqual(expect.arrayContaining(["WSWidget", "WebspringSurface"]));
+    expect(Object.keys(publicApi)).toEqual(expect.arrayContaining(["WSWidget", "WSSurface"]));
     expect(defineBoard()).not.toHaveProperty("content");
   });
 
