@@ -85,7 +85,7 @@ import { WebspringWidgetShelf } from "../../src/Webspring/WebspringWidgetShelf";
 import { WebspringSurface } from "../../src/Webspring/webspringSurface";
 import { defineWidget } from "../../src/Webspring/webspringWidget";
 import { CapabilitiesPane } from "../../src/Webspring/Preferences/Capabilities.prefPane";
-import StoragePreference from "../../src/Webspring/Preferences/Storage.prefPane";
+import { StoragePane } from "../../src/Webspring/Preferences/Storage.prefPane";
 import { UpdateReadinessDetails } from "../../src/Webspring/Preferences/Updates.prefPane";
 import { GlassPanel } from "../../src/NSE/Components/GlassPanel";
 import { LinenSurface } from "../../src/NSE/Components/LinenSurface";
@@ -1095,11 +1095,10 @@ it("renders the notification cube faces, priority and action states", async () =
 
 it("renders the system observation preference panes", async () => {
   const runtime = createTestRuntime({ id: "theme-contract-observations" });
-  const StoragePane = StoragePreference.view;
   try {
     const view = render(<Host><SynCloudOSProvider runtime={runtime}>
       <CapabilitiesPane />
-      <StoragePane settings={runtime.settings.get()} appearance="light" locale={runtime.store.getSnapshot().localeServices} />
+      <StoragePane />
       <UpdateReadinessDetails snapshot={runtime.updateReadiness.getSnapshot()} />
     </SynCloudOSProvider></Host>);
     for (const role of ["capabilities", "storage", "updates"]) {

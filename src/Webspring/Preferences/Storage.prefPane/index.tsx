@@ -1,7 +1,7 @@
 /* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { NSEButton, NSEBox } from "../../../NSE/public/controls";
-import { definePreferencePane } from "../../../SynCloudOS/Preferences";
+import { NSEPreferencePane } from "../../../SynCloudOS/Preferences";
 import { useKernelSynCloudOS } from "../../../SynCloudOSReact";
 import { useSystemText } from "../useSystemText";
 import { StorageDiagnosticsController, initialStorageDiagnostics } from "./StorageDiagnosticsController";
@@ -9,7 +9,7 @@ import "./storageDiagnostics.css";
 
 const subscribeIdle = () => () => {};
 const getIdle = () => initialStorageDiagnostics;
-function StoragePane() {
+export function StoragePane() {
   const runtime = useKernelSynCloudOS(), t = useSystemText();
   const [controller, setController] = useState<StorageDiagnosticsController | null>(null);
   useEffect(() => {
@@ -44,4 +44,16 @@ function StorageSummary() {
   const t = useSystemText();
   return <>{t("preferences.storage.summary", "Read-only browser observations")}</>;
 }
-export default definePreferencePane({ id: "storage", title: { key: "preferences.storage", fallback: "Storage" }, order: 650, summary: StorageSummary, view: StoragePane });
+export default class StoragePreferencePane extends NSEPreferencePane {
+  static id = "storage";
+  static title = { key: "preferences.storage", fallback: "Storage" };
+  static order = 650;
+
+  override renderSummary() {
+    return <StorageSummary />;
+  }
+
+  override renderView() {
+    return <StoragePane />;
+  }
+}

@@ -1,7 +1,8 @@
 /** Application authoring surface; the Vite plugin binds SCOS per app folder. */
 export * from "./sdkPackageEntry";
 export { SCOS, useSCOS } from "./scos";
-export { definePreferencePane } from "../Preferences";
+export { NSEPreferencePane } from "../Preferences";
+export type { NSEPreferencePaneClass, PreferencePaneDescriptor, PreferencePaneText, PreferencePaneViewProps } from "../Preferences";
 export { defineWidget, defineIntegration, defineWebspring } from "../../Webspring/public";
 export type { SynWareIntegrationInput, SynWareIntegrationDefinition } from "../../Webspring/public";
 export { NSEObject, observable, observe, useObserve } from "../../NSE/sdkPackageEntry";

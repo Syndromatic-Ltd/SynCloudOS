@@ -7,7 +7,7 @@ import { createSynCloudOS } from "../../src/SynCloudOS/Runtime/createSynCloudOS"
 import { WebspringController } from "../../src/Webspring/WebspringController";
 import { defineWidget } from "../../src/Webspring/webspringWidget";
 import { defineWebspring, withDiscoveredWebspringItems } from "../../src/Webspring/Webspring";
-import { definePreferencePane } from "../../src/SynCloudOS/Preferences";
+import { NSEPreferencePane, capturePreferencePaneClass } from "../../src/SynCloudOS/Preferences";
 import type { SynCloudOSProjectComposition } from "../../src/SynCloudOSReact/projectComposition";
 import { createSynWare } from "../../src/SynCloudOS/AppSDK/createSynWare";
 
@@ -44,7 +44,13 @@ it("mounts the real neutral Board without a declared shell or composition and om
 });
 
 it("gives the default launcher discovered panes and widget order from an explicit composition", async () => {
-  const pane = definePreferencePane({ id: "billing", title: "Billing", order: 600, view: () => null });
+  class BillingPane extends NSEPreferencePane {
+    static override id = "billing";
+    static override title = "Billing";
+    static override order = 600;
+    override renderView() { return null; }
+  }
+  const pane = capturePreferencePaneClass(BillingPane);
   const { element, shell } = await mount({ bundles: [], preferences: [pane], widgets: [widget("late", 20), widget("zeta", 0), widget("alpha", 0), widget("early", -10)], contributions: [], shell: null, shellResources: {} });
   expect(shell.preferences.panes).toContain(pane);
   expect(shell.widgets.map(item => item.id)).toEqual(["early", "alpha", "zeta", "late"]);

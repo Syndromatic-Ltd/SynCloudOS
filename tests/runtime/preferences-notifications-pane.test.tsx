@@ -28,7 +28,7 @@ import { SystemUILayer } from "../../src/Webspring/SystemUILayer";
 import { RuntimeInputBoundary, SynCloudOSProvider } from "../../src/SynCloudOSReact";
 
 import { createTestRuntime, registerTestSynWare } from "./helpers";
-import { definePreferencePane } from "../../src/SynCloudOS/Preferences";
+import { NSEPreferencePane } from "../../src/SynCloudOS/Preferences";
 
 /**
  * The empty Notifications pane, which is otherwise unreachable in the running
@@ -122,7 +122,13 @@ describe("Notifications pane with nothing to list", () => {
   it("contains a throwing developer pane without taking down System Preferences", () => {
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
     const Broken = () => { throw new Error("pane render failed"); };
-    renderSystemUI("broken", undefined, { panes: [definePreferencePane({ id: "broken", title: "Broken", order: 50, view: Broken })] });
+    class BrokenPane extends NSEPreferencePane {
+      static override id = "broken";
+      static override title = "Broken";
+      static override order = 50;
+      override renderView() { return <Broken />; }
+    }
+    renderSystemUI("broken", undefined, { panes: [BrokenPane] });
 
     expect(screen.getByRole("dialog", { name: "Broken" })).toBeTruthy();
     expect(screen.getByText("This preference pane could not be loaded.")).toBeTruthy();

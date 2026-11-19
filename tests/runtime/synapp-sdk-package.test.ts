@@ -356,6 +356,7 @@ assert.equal(typeof nse.NSEStackView, "function");
 assert.equal(nse.NSEStackView, layout.NSEStackView);
 assert.equal(nse.NSEAppearanceProvider, appearance.NSEAppearanceProvider);
 assert.deepEqual(Object.keys(webspring), [
+  "NSEPreferencePane",
   "WEBSPRING_DRAG_FOLDER_CATCH_MARGIN",
   "WEBSPRING_DRAG_FOLDER_REST_MS",
   "WEBSPRING_DRAG_MERGE_REST_MS",
@@ -370,6 +371,7 @@ assert.deepEqual(Object.keys(webspring), [
   "WebspringLaunchDim",
   "WebspringSurface",
   "WebspringWidgetShelf",
+  "capturePreferencePaneClass",
   "captureWebspringDragArtworkRects",
   "captureWebspringDragReorderSlots",
   "createIntegrationContribution",
@@ -377,7 +379,6 @@ assert.deepEqual(Object.keys(webspring), [
   "createWebspringDragArbiter",
   "createWebspringFolderSplitPresentation",
   "defineIntegration",
-  "definePreferencePane",
   "defineWebspring",
   "defineWidget",
   "getDesktopWebspringLayout",
@@ -389,7 +390,7 @@ assert.deepEqual(Object.keys(webspring), [
   "isDefinedWebspring",
   "isDefinedWebspringWidget",
   "isIntegrationDefinition",
-  "isPreferencePaneDefinition",
+  "resolvePreferencePanes",
   "resolveWebspringIconPresentation",
   "resolveWebspringLaunchDimMotion",
   "resolveWebspringOrbPresentation",

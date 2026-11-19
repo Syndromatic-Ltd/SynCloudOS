@@ -25,7 +25,7 @@ import { defaultWebspringFolderAppearance, defaultWebspringFolderSmoothSurface }
 import { nseSmoothSurfaceRadiusTokens } from "../NSE/SmoothSurface";
 import { captureWebspringBackground } from "./webspringSurface";
 import { isDefinedWebspringWidget } from "./webspringWidget";
-import { isPreferencePaneDefinition, type PreferencePaneDefinition } from "../SynCloudOS/Preferences";
+import { capturePreferencePaneClass, isPreferencePaneDescriptor, type PreferencePaneDescriptor } from "../SynCloudOS/Preferences";
 import type {
   WebspringWidget,
   WebspringFolderAppearance,
@@ -323,10 +323,10 @@ function capturePreferences(input: unknown): WebspringPreferences {
   const hideInput = dataProperty(input, "hide", false);
   if (panesInput !== undefined && !Array.isArray(panesInput)) throw new TypeError("Webspring preferences.panes must be an array.");
   if (hideInput !== undefined && !Array.isArray(hideInput)) throw new TypeError("Webspring preferences.hide must be an array.");
-  const panes: PreferencePaneDefinition[] = [];
+  const panes: PreferencePaneDescriptor[] = [];
   const ids = new Set<string>();
-  for (const pane of panesInput ?? []) {
-    if (!isPreferencePaneDefinition(pane)) throw new TypeError("Webspring preferences.panes must be created with definePreferencePane.");
+  for (const candidate of panesInput ?? []) {
+    const pane = isPreferencePaneDescriptor(candidate) ? candidate : capturePreferencePaneClass(candidate);
     if (ids.has(pane.id)) throw new TypeError(`Webspring preferences.panes contain duplicate ID ${pane.id}.`);
     ids.add(pane.id);
     panes.push(pane);
@@ -415,7 +415,7 @@ export function isDefinedWebspring(value: unknown): value is WebspringDefinition
  */
 export function withDiscoveredWebspringItems<TManifest extends WebspringManifest>(
   definition: WebspringDefinition<TManifest>,
-  items: Readonly<{ preferences: readonly PreferencePaneDefinition[]; widgets: readonly WebspringWidget[] }>,
+  items: Readonly<{ preferences: readonly PreferencePaneDescriptor[]; widgets: readonly WebspringWidget[] }>,
 ): WebspringDefinition<TManifest> {
   if (!isDefinedWebspring(definition)) throw new TypeError("A Webspring definition must be created with defineWebspring.");
   if (typeof items !== "object" || items === null || !Array.isArray(items.preferences) || !Array.isArray(items.widgets)) {
@@ -423,8 +423,8 @@ export function withDiscoveredWebspringItems<TManifest extends WebspringManifest
   }
   const panes = [...definition.preferences.panes];
   const paneIds = new Set(panes.map((pane) => pane.id));
-  for (const pane of items.preferences) {
-    if (!isPreferencePaneDefinition(pane)) throw new TypeError("Discovered preference panes must be created with definePreferencePane.");
+  for (const candidate of items.preferences) {
+    const pane = isPreferencePaneDescriptor(candidate) ? candidate : capturePreferencePaneClass(candidate);
     if (paneIds.has(pane.id)) throw new TypeError(`Preference pane ${pane.id} is declared both by defineWebspring and by a project folder.`);
     paneIds.add(pane.id);
     panes.push(pane);

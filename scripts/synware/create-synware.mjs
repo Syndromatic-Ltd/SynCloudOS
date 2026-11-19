@@ -172,11 +172,18 @@ it("hosts the class application with its bound search field", async () => {
   return files;
 }
 
+function preferencePaneClassName(title) {
+  const words = title.replace(/[^A-Za-z0-9]+/gu, " ").trim().split(/\s+/u).filter(Boolean);
+  const pascal = words.map(word => word.charAt(0).toUpperCase() + word.slice(1)).join("");
+  const base = !pascal || /^[0-9]/u.test(pascal) ? `Custom${pascal}` : pascal;
+  return base.endsWith("PreferencePane") ? base : `${base}PreferencePane`;
+}
+
 /** The same folder templates are used by the CLI and developer MCP. */
 export function scaffoldProjectFiles({ kind = "application", name, organisation = "com.example", bundleIdentifier, id = kebabCase(name), owners = [], authoring = defaultAuthoring(), applicationMenuToolbar = false }) {
   const title = titleFromFolderName(name);
   if (kind === "application") return scaffoldFiles(bundleIdentifier ?? scaffoldBundleIdentifier(name, organisation), [], title, authoring, { applicationMenuToolbar });
-  if (kind === "preferencePane") return new Map([["index.tsx", `import { definePreferencePane } from "@syndromatic/syncloudos";\n\nexport default definePreferencePane({ id: ${JSON.stringify(id)}, title: ${JSON.stringify(title)}, order: 100, view: function Preferences() { return <p>${title}</p>; } });\n`]]);
+  if (kind === "preferencePane") return new Map([["index.tsx", `import { NSEPreferencePane } from "@syndromatic/syncloudos";\n\nexport default class ${preferencePaneClassName(title)} extends NSEPreferencePane {\n  static id = ${JSON.stringify(id)};\n  static title = ${JSON.stringify(title)};\n  static order = 100;\n\n  override renderView() {\n    return <p>${title}</p>;\n  }\n}\n`]]);
   if (kind === "widget") return new Map([["index.tsx", `import { defineWidget } from "@syndromatic/syncloudos";\n\nexport default defineWidget({ id: ${JSON.stringify(id)}, title: ${JSON.stringify(title)}, load: async () => new Date().toLocaleDateString(), view: ({ data }) => <p>{data}</p>, whenEmpty: "hide" });\n`]]);
   if (kind === "integration") {
     if (!owners.length) throw new TypeError("An integration needs at least one owner application ID.");

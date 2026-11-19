@@ -48,7 +48,7 @@ import { useIsSystemSurfaceAppearance } from "../Appearance/NSEAppearanceProvide
  * Its panel owns a preference-style title bar. Atmo supplies its plate and typography.
  */
 
-export interface NSEPreferencePane {
+export interface PreferencesToastPane {
   id: string;
   label: ReactNode;
   /** Artwork beside the label on the list row. */
@@ -68,7 +68,7 @@ export interface PreferencesToastProps {
   /** Runtime hosts can provide a stable logical scope identity. */
   focusScopeId?: string;
   title: ReactNode;
-  panes: NSEPreferencePane[];
+  panes: PreferencesToastPane[];
   /** Open straight onto this pane instead of the root list. */
   initialPane?: string;
   /** Accessible name for the circular back control. */

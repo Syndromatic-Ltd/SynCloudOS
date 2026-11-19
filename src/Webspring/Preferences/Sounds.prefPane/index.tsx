@@ -19,7 +19,7 @@
  */
 
 import { NSESwitch } from "../../../NSE/public/controls";
-import { definePreferencePane, type PreferencePaneViewProps } from "../../../SynCloudOS/Preferences";
+import { NSEPreferencePane, type PreferencePaneViewProps } from "../../../SynCloudOS/Preferences";
 import { useKernelSynCloudOS } from "../../../SynCloudOSReact";
 import { useSystemText } from "../useSystemText";
 import { AudioHapticsPane } from "./AudioHapticsPane";
@@ -43,11 +43,20 @@ function SoundsSwitch({ settings }: PreferencePaneViewProps) {
   );
 }
 
-export default definePreferencePane({
-  id: "sounds",
-  title: { key: "preferences.audioHaptics", fallback: "Audio & Haptics" },
-  order: 200,
-  summary: SoundsSummary,
-  accessory: SoundsSwitch,
-  view: AudioHapticsPane,
-});
+export default class SoundsPreferencePane extends NSEPreferencePane {
+  static id = "sounds";
+  static title = { key: "preferences.audioHaptics", fallback: "Audio & Haptics" };
+  static order = 200;
+
+  override renderSummary() {
+    return <SoundsSummary settings={this.settings} appearance={this.appearance} locale={this.locale} />;
+  }
+
+  override renderAccessory() {
+    return <SoundsSwitch settings={this.settings} appearance={this.appearance} locale={this.locale} />;
+  }
+
+  override renderView() {
+    return <AudioHapticsPane />;
+  }
+}

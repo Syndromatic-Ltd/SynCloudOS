@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'react';
 import { NSEButton, NSEBox } from '../../../NSE/public/controls';
-import { definePreferencePane } from '../../../SynCloudOS/Preferences';
+import { NSEPreferencePane } from '../../../SynCloudOS/Preferences';
 import type { HostUpdateReadinessSnapshot, HostReadinessGap } from '../../../SynCloudOS/SynCloudOS';
 import { useKernelSynCloudOS } from '../../../SynCloudOSReact';
 import { useSystemText } from '../useSystemText';
@@ -105,4 +105,16 @@ function UpdatesSummary() {
   const snapshot = useSyncExternalStore(runtime.updateReadiness.subscribe, runtime.updateReadiness.getSnapshot, runtime.updateReadiness.getSnapshot);
   return <>{snapshot.ended ? t('preferences.updates.unavailable', 'Unavailable') : t('preferences.updates.partial', 'Incomplete')}</>;
 }
-export default definePreferencePane({ id: 'updates', title: { key: 'preferences.updates', fallback: 'Updates' }, order: 600, summary: UpdatesSummary, view: UpdatesPane });
+export default class UpdatesPreferencePane extends NSEPreferencePane {
+  static id = 'updates';
+  static title = { key: 'preferences.updates', fallback: 'Updates' };
+  static order = 600;
+
+  override renderSummary() {
+    return <UpdatesSummary />;
+  }
+
+  override renderView() {
+    return <UpdatesPane />;
+  }
+}

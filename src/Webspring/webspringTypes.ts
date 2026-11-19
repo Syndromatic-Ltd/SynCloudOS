@@ -27,7 +27,7 @@ import type {
   SynWareResourceReference,
   SynWareWebspringShellManifest,
 } from "../SynCloudOS/AppSDK";
-import type { PreferencePaneDefinition } from "../SynCloudOS/Preferences";
+import type { NSEPreferencePaneClass, PreferencePaneDescriptor } from "../SynCloudOS/Preferences";
 import type {
   AuthenticationConfiguration as RuntimeAuthenticationConfiguration,
   AuthenticationInput as RuntimeAuthenticationInput,
@@ -396,14 +396,14 @@ export interface WebspringFolderAppearance {
 }
 
 export interface WebspringPreferencesOptions {
-  /** Panes made with `definePreferencePane`. A pane with a built-in's id replaces it. */
-  readonly panes?: readonly PreferencePaneDefinition[];
+  /** Subclasses extending `NSEPreferencePane`. A pane with a built-in's id replaces it. */
+  readonly panes?: readonly (NSEPreferencePaneClass | PreferencePaneDescriptor)[];
   /** Built-in pane ids to remove: appearance, sounds, motion, notifications, language, account. */
   readonly hide?: readonly string[];
 }
 
 export interface WebspringPreferences {
-  readonly panes: readonly PreferencePaneDefinition[];
+  readonly panes: readonly PreferencePaneDescriptor[];
   readonly hide: readonly string[];
 }
 

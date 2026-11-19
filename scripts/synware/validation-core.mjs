@@ -42,7 +42,7 @@ export function deriveManifestForFolder(target) {
 
 const expectedDefaultExport = {
   application: "a React component or an NSEApplication subclass",
-  preferencePane: "definePreferencePane(...)",
+  preferencePane: "an NSEPreferencePane subclass",
   widget: "defineWidget(...)",
   integration: "defineIntegration(...)",
 };
@@ -101,7 +101,7 @@ export function createSynWareValidator({ schema, allowedImports, dependencies = 
       try { validateImports(entryPath); }
       catch (error) { findings.push({file:entryPath,line:1,rule:"synware.imports",message:error.message}); }
       try {
-        assertExpectedDefaultExport(entryPath, kind === "application" ? null : { preferencePane: "definePreferencePane", widget: "defineWidget", integration: "defineIntegration" }[kind], expectedDefaultExport[kind]);
+        assertExpectedDefaultExport(entryPath, kind === "application" || kind === "preferencePane" ? null : { widget: "defineWidget", integration: "defineIntegration" }[kind], expectedDefaultExport[kind]);
       } catch (error) {
         findings.push({file:entryPath,line:1,rule:"synware.structure",message:error.message});
       }

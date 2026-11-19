@@ -162,7 +162,7 @@ Hosts that genuinely build rendering surfaces use `createAFXLayer(surface, sched
 | A hard-coded cotton app body | `NSEWindow.backgroundColour` and `NSEWindow.isOpaque` |
 | Hard-coded return artwork | `branding.homeIcon`, or the generic house glyph |
 | A generic "Preferences" system entry | "System Preferences…", distinct from an app's own preferences |
-| Private preference-pane registration | `definePreferencePane` and discovered `.prefPane` folders |
+| Private preference-pane registration | `NSEPreferencePane` subclasses and discovered `.prefPane` folders |
 
 A widget owns its feed and React view; the generic shelf supplies loading, empty, error, timeout and retry handling. Use its supplied `navigate(route)` for normal in-shell navigation, retaining an anchor's `href` for modified clicks. Resource paths such as a widget's `icon` resolve through the shell's generated Resources map. Site-specific News titles, fonts, artwork and layout belong to the site, not the framework.
 

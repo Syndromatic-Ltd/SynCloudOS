@@ -24,7 +24,12 @@ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import * as React from "react";
 import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { definePreferencePane, type PreferencePaneViewProps } from "../../src/SynCloudOS/Preferences";
+import {
+  NSEPreferencePane,
+  capturePreferencePaneClass,
+  type PreferencePaneText,
+  type PreferencePaneViewProps,
+} from "../../src/SynCloudOS/Preferences";
 import { RuntimeInputBoundary, SynCloudOSProvider } from "../../src/SynCloudOSReact";
 import { SystemUILayer } from "../../src/Webspring/SystemUILayer";
 import type { SystemUIAccount } from "../../src/Webspring/Preferences/systemAccount";
@@ -58,8 +63,17 @@ function listedTitles(known: readonly string[]) {
     .map((row) => known.find((title) => (row.textContent ?? "").startsWith(title)) ?? row.textContent ?? "");
 }
 
-const pane = (id: string, title: string, order: number, view: () => ReactNode = () => null) =>
-  definePreferencePane({ id, title, order, view });
+const pane = (
+  id: string,
+  title: PreferencePaneText,
+  order: number,
+  view: () => ReactNode = () => null,
+) => capturePreferencePaneClass(class extends NSEPreferencePane {
+  static override id = id;
+  static override title = title;
+  static override order = order;
+  override renderView() { return view(); }
+});
 
 describe("System Preferences panes", () => {
   it("lists the built-ins in their default order, without Account when sign-in is not offered", () => {
@@ -116,11 +130,19 @@ describe("System Preferences panes", () => {
 
   it("renders a developer pane with settings, appearance and locale", () => {
     const seen: PreferencePaneViewProps[] = [];
-    const Billing = (props: PreferencePaneViewProps) => {
+    const BillingView = (props: PreferencePaneViewProps) => {
       seen.push(props);
       return <p>{`${props.settings.motion}|${props.appearance}|${props.locale.activeLocale}`}</p>;
     };
-    const { runtime } = renderPreferences({ open: "billing", preferences: { panes: [definePreferencePane({ id: "billing", title: "Billing", order: 600, view: Billing })] } });
+    class BillingPane extends NSEPreferencePane {
+      static override id = "billing";
+      static override title = "Billing";
+      static override order = 600;
+      override renderView() {
+        return <BillingView settings={this.settings} appearance={this.appearance} locale={this.locale} />;
+      }
+    }
+    const { runtime } = renderPreferences({ open: "billing", preferences: { panes: [BillingPane] } });
     expect(screen.getByText(/^system\|auto\|/)).toBeTruthy();
     act(() => { runtime.appearance.set("dark"); });
     expect(screen.getByText(/\|dark\|/)).toBeTruthy();
@@ -130,29 +152,39 @@ describe("System Preferences panes", () => {
   });
 
   it("shows a developer pane summary and accessory on its list row", () => {
-    const Summary = ({ settings }: PreferencePaneViewProps) => <>{settings.soundEnabled ? "loud" : "quiet"}</>;
-    const Accessory = () => <button type="button">row switch</button>;
-    renderPreferences({ preferences: { panes: [definePreferencePane({ id: "billing", title: "Billing", order: 600, view: () => null, summary: Summary, accessory: Accessory })] } });
+    class BillingPane extends NSEPreferencePane {
+      static override id = "billing";
+      static override title = "Billing";
+      static override order = 600;
+      override renderSummary() { return <>{this.settings.soundEnabled ? "loud" : "quiet"}</>; }
+      override renderAccessory() { return <button type="button">row switch</button>; }
+      override renderView() { return null; }
+    }
+    renderPreferences({ preferences: { panes: [BillingPane] } });
     expect(screen.getByText(/loud|quiet/)).toBeTruthy();
     expect(screen.getByRole("button", { name: "row switch" })).toBeTruthy();
   });
 
   it("translates a localisable title from the system dictionary", async () => {
-    const { runtime } = renderPreferences({ preferences: { panes: [definePreferencePane({ id: "billing", title: { key: "preferences.language", fallback: "Billing" }, order: 600, view: () => null })] } });
+    const { runtime } = renderPreferences({
+      preferences: { panes: [pane("billing", { key: "preferences.language", fallback: "Billing" }, 600)] },
+    });
     expect(screen.getAllByText("Language")).toHaveLength(2);
     await act(async () => { runtime.locale.setLocale("fr-FR"); });
     expect(screen.getAllByText("Langue")).toHaveLength(2);
   });
 
   it("uses the fallback of a localisable title no dictionary knows", () => {
-    renderPreferences({ preferences: { panes: [definePreferencePane({ id: "billing", title: { key: "billing.title", fallback: "Billing" }, order: 600, view: () => null })] } });
+    renderPreferences({
+      preferences: { panes: [pane("billing", { key: "billing.title", fallback: "Billing" }, 600)] },
+    });
     expect(screen.getByText("Billing")).toBeTruthy();
   });
 
   it("contains a failing pane behind the unavailable message while System Preferences stays up", () => {
     vi.spyOn(console, "error").mockImplementation(() => undefined);
     const Broken = () => { throw new Error("boom"); };
-    renderPreferences({ open: "broken", preferences: { panes: [definePreferencePane({ id: "broken", title: "Broken", order: 1, view: Broken })] } });
+    renderPreferences({ open: "broken", preferences: { panes: [pane("broken", "Broken", 1, () => <Broken />)] } });
     expect(screen.getByText("This preference pane could not be loaded.")).toBeTruthy();
     expect(screen.getByRole("dialog", { name: "Broken" })).toBeTruthy();
   });
@@ -160,7 +192,15 @@ describe("System Preferences panes", () => {
   it("shows Unavailable for a failing summary and drops a failing accessory", () => {
     vi.spyOn(console, "error").mockImplementation(() => undefined);
     const Broken = () => { throw new Error("boom"); };
-    renderPreferences({ preferences: { panes: [definePreferencePane({ id: "broken", title: "Broken", order: 1, view: () => null, summary: Broken, accessory: Broken })] } });
+    class BrokenPane extends NSEPreferencePane {
+      static override id = "broken";
+      static override title = "Broken";
+      static override order = 1;
+      override renderSummary() { return <Broken />; }
+      override renderAccessory() { return <Broken />; }
+      override renderView() { return null; }
+    }
+    renderPreferences({ preferences: { panes: [BrokenPane] } });
     expect(screen.getByText("Unavailable")).toBeTruthy();
     expect(screen.getByText("Broken")).toBeTruthy();
   });
@@ -197,7 +237,7 @@ describe("defineWebspring preferences", () => {
   });
 
   it.each([
-    ["a pane not made with definePreferencePane", { panes: [{ id: "x", title: "x", order: 1, view: () => null }] }, /definePreferencePane/],
+    ["a pane not extending NSEPreferencePane", { panes: [{ id: "x", title: "x", order: 1, view: () => null }] }, /NSEPreferencePane/],
     ["duplicate pane ids", { panes: [pane("a", "A", 1), pane("a", "A again", 2)] }, /duplicate/],
     ["a blank hidden id", { hide: [" "] }, /hide/],
     ["unknown fields", { pane: [] }, /pane/],

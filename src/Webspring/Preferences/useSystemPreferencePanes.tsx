@@ -18,12 +18,15 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useLayoutEffect, useMemo, useSyncExternalStore } from "react";
-import type { NSEPreferencePane } from "../../NSE/SystemUI";
+import { useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ComponentType } from "react";
+import type { PreferencesToastPane } from "../../NSE/SystemUI";
+import { NSEWindowController, useObserve } from "../../NSE/sdkPackageEntry";
 import {
+  nseUpdatePreferencePaneState,
   registerPreferencePane,
   resolvePreferencePanes,
-  type PreferencePaneDefinition,
+  type NSEPreferencePane,
+  type PreferencePaneDescriptor,
   type PreferencePaneViewProps,
 } from "../../SynCloudOS/Preferences";
 import { useAppearance, useKernelSynCloudOS, useLocaleServicesSnapshot, useSettings } from "../../SynCloudOSReact";
@@ -32,25 +35,52 @@ import { accountPreferencePane, builtInPreferencePanes } from "../builtInPrefere
 import { PreferencePaneBoundary } from "./PreferencePaneBoundary";
 import { useSystemText, type SystemText } from "./useSystemText";
 
-function toNSEPreferencePane(definition: PreferencePaneDefinition, props: PreferencePaneViewProps, t: SystemText): NSEPreferencePane {
-  const { title, icon, summary: Summary, accessory: Accessory, view: View } = definition;
+function PreferencePaneContent({ pane }: { readonly pane: NSEPreferencePane }) {
+  useObserve(pane);
+  if (pane.isDisposed) return null;
+  if (typeof pane.renderView === "function") return <>{pane.renderView()}</>;
+  const View = (pane.constructor as { readonly view?: ComponentType<{ readonly controller: NSEPreferencePane }> }).view;
+  if (!View) throw new TypeError(`${pane.constructor.name} has no static view or renderView; declare one rendering form.`);
+  return <View controller={pane} />;
+}
+
+function PreferencePaneSummary({ pane }: { readonly pane: NSEPreferencePane }) {
+  useObserve(pane);
+  if (pane.isDisposed) return null;
+  return <>{pane.renderSummary?.()}</>;
+}
+
+function PreferencePaneAccessory({ pane }: { readonly pane: NSEPreferencePane }) {
+  useObserve(pane);
+  if (pane.isDisposed) return null;
+  return <>{pane.renderAccessory?.()}</>;
+}
+
+function toPreferencesToastPane(
+  descriptor: PreferencePaneDescriptor,
+  pane: NSEPreferencePane,
+  t: SystemText,
+): PreferencesToastPane {
+  const { title, icon } = descriptor;
+  const hasSummary = typeof pane.renderSummary === "function";
+  const hasAccessory = typeof pane.renderAccessory === "function";
   return {
-    id: definition.id,
+    id: descriptor.id,
     label: typeof title === "string" ? title : t(title.key, title.fallback ?? title.key),
     icon: icon ? <img className="nse-prefs-app-icon" src={icon} alt="" aria-hidden="true" /> : undefined,
-    meta: Summary ? (
+    meta: hasSummary ? (
       <PreferencePaneBoundary fallback={t("preferences.unavailable", "Unavailable")}>
-        <Summary {...props} />
+        <PreferencePaneSummary pane={pane} />
       </PreferencePaneBoundary>
     ) : undefined,
-    accessory: Accessory ? (
+    accessory: hasAccessory ? (
       <PreferencePaneBoundary fallback={null}>
-        <Accessory {...props} />
+        <PreferencePaneAccessory pane={pane} />
       </PreferencePaneBoundary>
     ) : undefined,
     render: () => (
       <PreferencePaneBoundary fallback={<p data-nse-part="label" data-nse-role="note" className="nse-prefs-note">{t("preferences.paneUnavailable", "This preference pane could not be loaded.")}</p>}>
-        <View {...props} />
+        <PreferencePaneContent pane={pane} />
       </PreferencePaneBoundary>
     ),
   };
@@ -64,7 +94,7 @@ function toNSEPreferencePane(definition: PreferencePaneDefinition, props: Prefer
 export function useSystemPreferencePanes({ offersAccount, preferences }: {
   readonly offersAccount: boolean;
   readonly preferences?: WebspringPreferencesOptions;
-}): NSEPreferencePane[] {
+}): PreferencesToastPane[] {
   const runtime = useKernelSynCloudOS();
   const t = useSystemText();
   const settings = useSettings();
@@ -73,6 +103,16 @@ export function useSystemPreferencePanes({ offersAccount, preferences }: {
   const developerPanes = preferences?.panes;
   const hidden = preferences?.hide;
 
+  const [owner, setOwner] = useState<NSEWindowController | null>(null);
+  useLayoutEffect(() => {
+    const lifetime = new AbortController();
+    const controller = new NSEWindowController({ ownerSignal: lifetime.signal });
+    setOwner(controller);
+    return () => {
+      lifetime.abort();
+    };
+  }, []);
+
   const resolved = useMemo(() => resolvePreferencePanes({
     builtIn: offersAccount ? [accountPreferencePane, ...builtInPreferencePanes] : builtInPreferencePanes,
     developer: developerPanes,
@@ -80,7 +120,7 @@ export function useSystemPreferencePanes({ offersAccount, preferences }: {
   }), [developerPanes, hidden, offersAccount]);
 
   useLayoutEffect(() => {
-    const registrations = resolved.map((definition) => registerPreferencePane(runtime.preferencePanes, definition));
+    const registrations = resolved.map((descriptor) => registerPreferencePane(runtime.preferencePanes, descriptor));
     return () => {
       for (const registration of registrations.reverse()) registration.dispose();
     };
@@ -91,8 +131,46 @@ export function useSystemPreferencePanes({ offersAccount, preferences }: {
     runtime.preferencePanes.getSnapshot,
     runtime.preferencePanes.getSnapshot,
   );
+
+  const panesRef = useRef<{
+    owner: NSEWindowController | null;
+    byDescriptor: Map<PreferencePaneDescriptor, NSEPreferencePane>;
+  }>({ owner: null, byDescriptor: new Map() });
+
+  useLayoutEffect(() => {
+    if (!owner || owner.isDisposed) return;
+    if (panesRef.current.owner !== owner) {
+      panesRef.current.owner = owner;
+      panesRef.current.byDescriptor.clear();
+    }
+    const active = new Set(definitions);
+    for (const [descriptor, pane] of panesRef.current.byDescriptor) {
+      if (!active.has(descriptor)) {
+        panesRef.current.byDescriptor.delete(descriptor);
+        if (!pane.isDisposed) pane.dispose();
+      }
+    }
+    const state: PreferencePaneViewProps = { settings, appearance, locale };
+    for (const pane of panesRef.current.byDescriptor.values()) {
+      if (!pane.isDisposed) pane[nseUpdatePreferencePaneState](state);
+    }
+  }, [appearance, definitions, locale, owner, settings]);
+
   return useMemo(() => {
-    const props: PreferencePaneViewProps = { settings, appearance, locale };
-    return definitions.map((definition) => toNSEPreferencePane(definition, props, t));
-  }, [appearance, definitions, locale, settings, t]);
+    if (!owner || owner.isDisposed) return [];
+    if (panesRef.current.owner !== owner) {
+      panesRef.current.owner = owner;
+      panesRef.current.byDescriptor.clear();
+    }
+    const initialState: PreferencePaneViewProps = { settings, appearance, locale };
+    return definitions.map((descriptor) => {
+      let pane = panesRef.current.byDescriptor.get(descriptor);
+      if (!pane || pane.isDisposed) {
+        pane = new descriptor.PaneClass({ owner });
+        pane[nseUpdatePreferencePaneState](initialState);
+        panesRef.current.byDescriptor.set(descriptor, pane);
+      }
+      return toPreferencesToastPane(descriptor, pane, t);
+    });
+  }, [appearance, definitions, locale, owner, settings, t]);
 }

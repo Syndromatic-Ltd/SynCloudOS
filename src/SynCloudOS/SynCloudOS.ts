@@ -204,7 +204,7 @@ export type {
 } from "./LocaleServices/localeTypes";
 export { DocumentError, DocumentNotFoundError } from "./Documents/DocumentErrors";
 export { useResolvedMode } from "./Appearance/useAppearance";
-export type { PreferencePaneDefinition, PreferencePaneRegistry, PreferencePaneViewProps } from "./Preferences";
+export type { PreferencePaneDescriptor, PreferencePaneRegistry, PreferencePaneViewProps } from "./Preferences";
 export { WEBSPRING_LAYOUT_PREFERENCE_VERSION } from "./WebspringState/webspringStateTypes";
 export type {
   SynCloudOSWebspringFolderConfiguration,

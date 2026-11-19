@@ -38,7 +38,6 @@
     "NSEColourPicker": "NSColorPicker",
     "NSEController": "NSController",
     "NSEPopoverBehavior": "NSPopover.Behavior",
-    "NSEPreferencePane": "NSPreferencePane",
     "NSEScroller": "NSScroller",
     "NSETableHeaderView": "NSTableHeaderView",
     "NSETrackingOption": "NSTrackingArea.Options"
@@ -571,6 +570,8 @@
     "NSEPopup": "NSPanel",
     "NSEPredicateEditor": "NSPredicateEditor",
     "NSEPreferenceDescriptor": "UserDefaults",
+    "NSEPreferencePane": "NSPreferencePane",
+    "NSEPreferencePaneClass": "NSPreferencePane",
     "NSEProgressIndicator": "NSProgressIndicator",
     "NSEProjectedAttachment": "NSTextAttachment",
     "NSEProjectedAttachmentSource": "NSTextAttachment.fileWrapper",

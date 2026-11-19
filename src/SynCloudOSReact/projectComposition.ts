@@ -19,7 +19,7 @@
  */
 
 import type { SynCloudOSLocaleBundleResourceInput } from "../SynCloudOS/LocaleServices/localeTypes";
-import type { PreferencePaneDefinition } from "../SynCloudOS/Preferences";
+import type { PreferencePaneDescriptor } from "../SynCloudOS/Preferences";
 import type { SynCloudOSHostContribution } from "./browserHostContributions";
 import type { SynCloudOSAppModule } from "../SynCloudOS/BundleLoader/bundleTypes";
 import type { SynCloudOSShellResources } from "../Webspring/WebspringController";
@@ -43,7 +43,7 @@ export interface SynCloudOSDiscoveredBundleDescriptor {
  */
 export interface SynCloudOSProjectComposition {
   readonly bundles: readonly SynCloudOSDiscoveredBundleDescriptor[];
-  readonly preferences: readonly PreferencePaneDefinition[];
+  readonly preferences: readonly PreferencePaneDescriptor[];
   readonly widgets: readonly WebspringWidget[];
   readonly contributions: readonly SynCloudOSHostContribution[];
   /** The project's shell, already carrying the discovered panes and widgets. */

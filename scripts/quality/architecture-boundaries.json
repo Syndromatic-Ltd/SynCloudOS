@@ -814,6 +814,22 @@
       }
     },
     {
+      "id": "preferences-ui",
+      "include": [
+        "src/SynCloudOS/Preferences/NSEPreferencePane.ts"
+      ],
+      "mayImportLayers": [
+        "preferences-ui",
+        "runtime",
+        "nse"
+      ],
+      "mayImportEntrypoints": {
+        "nse": [
+          "src/NSE/Application/NSEViewController.ts"
+        ]
+      }
+    },
+    {
       "id": "runtime",
       "include": [
         "src/SynCloudOS/**",
@@ -821,6 +837,7 @@
       ],
       "mayImportLayers": [
         "runtime",
+        "preferences-ui",
         "fx",
         "synapp-contract",
         "runtime-inspector",

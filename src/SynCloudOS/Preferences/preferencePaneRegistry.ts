@@ -19,7 +19,12 @@
  */
 
 import type { SynCloudOSRuntimeId } from "../Runtime/runtimeInstanceTypes";
-import { isPreferencePaneDefinition, type PreferencePaneDefinition } from "./definePreferencePane";
+import {
+  capturePreferencePaneClass,
+  isPreferencePaneDescriptor,
+  type NSEPreferencePaneClass,
+  type PreferencePaneDescriptor,
+} from "./NSEPreferencePane";
 
 export interface PreferencePaneRegistration {
   readonly id: string;
@@ -28,21 +33,21 @@ export interface PreferencePaneRegistration {
 
 export interface PreferencePaneRegistry {
   readonly runtimeId: SynCloudOSRuntimeId;
-  getSnapshot(): readonly PreferencePaneDefinition[];
+  getSnapshot(): readonly PreferencePaneDescriptor[];
   subscribe(listener: () => void): () => void;
   dispose(): void;
 }
 
-const registrars = new WeakMap<PreferencePaneRegistry, (definition: PreferencePaneDefinition) => PreferencePaneRegistration>();
+const registrars = new WeakMap<PreferencePaneRegistry, (descriptor: PreferencePaneDescriptor) => PreferencePaneRegistration>();
 
 export function createPreferencePaneRegistry(runtimeId: SynCloudOSRuntimeId): PreferencePaneRegistry {
-  const registrations = new Map<string, { token: object; definition: PreferencePaneDefinition }>();
+  const registrations = new Map<string, { token: object; descriptor: PreferencePaneDescriptor }>();
   const listeners = new Set<() => void>();
-  let snapshot: readonly PreferencePaneDefinition[] = Object.freeze([]);
+  let snapshot: readonly PreferencePaneDescriptor[] = Object.freeze([]);
   let disposed = false;
   const publish = () => {
     snapshot = Object.freeze([...registrations.values()]
-      .map(({ definition }) => definition)
+      .map(({ descriptor }) => descriptor)
       .sort((left, right) => left.order - right.order || left.id.localeCompare(right.id)));
     for (const listener of [...listeners]) listener();
   };
@@ -64,21 +69,23 @@ export function createPreferencePaneRegistry(runtimeId: SynCloudOSRuntimeId): Pr
       registrars.delete(registry);
     },
   };
-  registrars.set(registry, (definition) => {
+  registrars.set(registry, (descriptor) => {
     if (disposed) throw new Error(`Preference pane registry ${runtimeId} is disposed.`);
-    if (!isPreferencePaneDefinition(definition)) throw new TypeError("Preference panes must be created with definePreferencePane.");
-    if (registrations.has(definition.id)) throw new Error(`Preference pane ${definition.id} is already registered.`);
+    if (!isPreferencePaneDescriptor(descriptor)) {
+      throw new TypeError("Preference panes must be a class extending NSEPreferencePane.");
+    }
+    if (registrations.has(descriptor.id)) throw new Error(`Preference pane ${descriptor.id} is already registered.`);
     const token = {};
-    registrations.set(definition.id, { token, definition });
+    registrations.set(descriptor.id, { token, descriptor });
     publish();
     let active = true;
     return Object.freeze({
-      id: definition.id,
+      id: descriptor.id,
       dispose() {
         if (!active) return;
         active = false;
-        if (registrations.get(definition.id)?.token !== token) return;
-        registrations.delete(definition.id);
+        if (registrations.get(descriptor.id)?.token !== token) return;
+        registrations.delete(descriptor.id);
         if (!disposed) publish();
       },
     });
@@ -90,8 +97,12 @@ export function createPreferencePaneRegistry(runtimeId: SynCloudOSRuntimeId): Pr
  * Lists a pane in the runtime's System Preferences. A pane id is listed once
  * per runtime, and a disposed or foreign registry refuses the registration.
  */
-export function registerPreferencePane(registry: PreferencePaneRegistry, definition: PreferencePaneDefinition): PreferencePaneRegistration {
+export function registerPreferencePane(
+  registry: PreferencePaneRegistry,
+  pane: PreferencePaneDescriptor | NSEPreferencePaneClass,
+): PreferencePaneRegistration {
   const register = registrars.get(registry);
   if (!register) throw new Error(`Preference pane registry ${registry.runtimeId} is disposed or foreign.`);
-  return register(definition);
+  const descriptor = isPreferencePaneDescriptor(pane) ? pane : capturePreferencePaneClass(pane);
+  return register(descriptor);
 }

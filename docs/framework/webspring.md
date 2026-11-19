@@ -294,35 +294,34 @@ When a gate is configured, the host presents the sign-in window after the icons 
 
 ## System Preferences
 
-System Preferences is a list of panes. The framework ships ten, each one a module of its own: Account (only when sign-in is on), Appearance, Audio & Haptics (`sounds`), Motion, Notifications, Privacy & Security (`privacy-security`), Language, Updates, Storage and Capabilities. Add your own with `definePreferencePane`, and list them in the shell definition.
+System Preferences is a list of panes. The framework ships ten, each one a module of its own: Account (only when sign-in is on), Appearance, Audio & Haptics (`sounds`), Motion, Notifications, Privacy & Security (`privacy-security`), Language, Updates, Storage and Capabilities. Add your own by subclassing `NSEPreferencePane`, and list them in the shell definition or place them in `src/Preferences/*.prefPane/index.tsx`.
 
 ```tsx
-import { defineWebspring, definePreferencePane, type PreferencePaneViewProps } from "@syndromatic/syncloudos/webspring";
+import { defineWebspring, NSEPreferencePane } from "@syndromatic/syncloudos/webspring";
 import billingIcon from "./Resources/billing.svg";
 
-function BillingPane({ settings, appearance, locale }: PreferencePaneViewProps) {
-  return <p className="nse-prefs-note">{locale.activeLocale}, {appearance}</p>;
-}
+class BillingPane extends NSEPreferencePane {
+  static id = "billing";
+  static title = { key: "billing.title", fallback: "Billing" };
+  static icon = billingIcon;
+  static order = 700;
 
-const billing = definePreferencePane({
-  id: "billing",
-  title: { key: "billing.title", fallback: "Billing" },
-  icon: billingIcon,
-  order: 700,
-  view: BillingPane,
-});
+  override renderView() {
+    return <p className="nse-prefs-note">{this.locale.activeLocale}, {this.appearance}</p>;
+  }
+}
 
 export default defineWebspring({
   manifest,
   components: { board: WebspringBoardView },
-  preferences: { panes: [billing], hide: ["sounds"] },
+  preferences: { panes: [BillingPane], hide: ["sounds"] },
 });
 ```
 
-- `view` is a React component. It receives `settings` (the person's current settings), `appearance` (`"light"`, `"dark"` or `"auto"`) and `locale` (the active locale and the supported ones). It re-renders when any of them changes.
-- `title` is a string, or `{ key, fallback }` looked up in the system dictionary. `icon` is your artwork, a URL (import the SVG), shown beside the title in the list.
-- Panes list in ascending `order`, ties broken by `id`. The built-ins sit at 50 (`account`), 100 (`appearance`), 200 (`sounds`), 300 (`motion`), 400 (`notifications`), 450 (`privacy-security`), 500 (`language`), 600 (`updates`), 650 (`storage`) and 660 (`capabilities`).
-- Optional `summary` (the line under the title, usually the current value) and `accessory` (a control on the list row, such as a master switch) are React components that receive the same props.
+- Override `renderView()` (or declare `static view`) to render the pane. The controller receives live `this.settings` (the person's current settings), `this.appearance` (`"light"`, `"dark"` or `"auto"`) and `this.locale` (the active locale and the supported ones), and re-renders when any of them changes.
+- `static title` is a string, or `{ key, fallback }` looked up in the system dictionary. `static icon` is your artwork, a URL (import the SVG), shown beside the title in the list.
+- Panes list in ascending `static order`, ties broken by `static id`. The built-ins sit at 50 (`account`), 100 (`appearance`), 200 (`sounds`), 300 (`motion`), 400 (`notifications`), 450 (`privacy-security`), 500 (`language`), 600 (`updates`), 650 (`storage`) and 660 (`capabilities`).
+- Optional `renderSummary()` (the line under the title, usually the current value) and `renderAccessory()` (a control on the list row, such as a master switch) read the same controller properties.
 - `hide` removes built-in panes by `id`: `account`, `appearance`, `sounds`, `motion`, `notifications`, `privacy-security`, `language`, `updates`, `storage`, `capabilities`. A developer pane with a built-in's `id` replaces that built-in instead, and `hide` never removes a developer pane.
 - A pane that throws shows "This preference pane could not be loaded." in its place, and System Preferences stays open. A summary that throws shows "Unavailable"; a throwing accessory is dropped.
 

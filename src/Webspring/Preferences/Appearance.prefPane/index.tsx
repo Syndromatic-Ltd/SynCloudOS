@@ -21,7 +21,7 @@
 import { useMemo } from "react";
 import { NSEBox } from "../../../NSE/public/controls";
 import { GroupedRow } from "../../../NSE/Controls/Selection/GroupedRow";
-import { definePreferencePane, type PreferencePaneViewProps } from "../../../SynCloudOS/Preferences";
+import { NSEPreferencePane, type PreferencePaneViewProps } from "../../../SynCloudOS/Preferences";
 import { useKernelSynCloudOS } from "../../../SynCloudOSReact";
 import { useSystemText } from "../useSystemText";
 
@@ -63,10 +63,16 @@ function AppearancePane({ appearance }: PreferencePaneViewProps) {
   );
 }
 
-export default definePreferencePane({
-  id: "appearance",
-  title: { key: "preferences.appearance", fallback: "Appearance" },
-  order: 100,
-  summary: AppearanceSummary,
-  view: AppearancePane,
-});
+export default class AppearancePreferencePane extends NSEPreferencePane {
+  static id = "appearance";
+  static title = { key: "preferences.appearance", fallback: "Appearance" };
+  static order = 100;
+
+  override renderSummary() {
+    return <AppearanceSummary settings={this.settings} appearance={this.appearance} locale={this.locale} />;
+  }
+
+  override renderView() {
+    return <AppearancePane settings={this.settings} appearance={this.appearance} locale={this.locale} />;
+  }
+}

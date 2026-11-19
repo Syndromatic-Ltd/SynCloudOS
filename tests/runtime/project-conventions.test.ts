@@ -10,7 +10,7 @@ import * as derivation from "../../scripts/synware/project-derivation.mjs";
 // @ts-expect-error Plain ESM validator.
 import { createSynWareValidator } from "../../scripts/synware/validation-core.mjs";
 import * as webspring from "../../src/Webspring/public";
-import { definePreferencePane } from "../../src/SynCloudOS/Preferences";
+import { NSEPreferencePane, capturePreferencePaneClass } from "../../src/SynCloudOS/Preferences";
 import type { SynCloudOSProjectComposition } from "../../src/SynCloudOSReact/projectComposition";
 import type { SynWareManifestV1 } from "../../src/SynCloudOS/AppSDK/manifest";
 import { createSynCloudOSHostInstallContext, prepareSynCloudOSHostContributions } from "../../src/SynCloudOS/HostContributions/hostContribution";
@@ -72,8 +72,14 @@ describe("folder-derived projects with explicit app identity", () => {
     f.put("src/SynWare/NSEControlGallery.app/Contents/Resources/AppIcon.svg", "<svg/>");
     f.put("src/SynWare/NSEControlGallery.app/Contents/Resources/AppIcon.png", "png");
     f.put("src/SynWare/NSEControlGallery.app/Contents/Resources/Localised/Base.locale/Localisable.strings", '"hello" = "Hello";');
-    const pane = definePreferencePane({ id: "billing", title: "Billing", order: 2, view: () => null });
-    f.put("src/Preferences/Billing.prefPane/index.tsx", "export default definePreferencePane({});", { default: pane });
+    class BillingPane extends NSEPreferencePane {
+      static override id = "billing";
+      static override title = "Billing";
+      static override order = 2;
+      override renderView() { return null; }
+    }
+    const pane = capturePreferencePaneClass(BillingPane);
+    f.put("src/Preferences/Billing.prefPane/index.tsx", "export default class BillingPane extends NSEPreferencePane {}", { default: BillingPane });
     const widget = webspring.defineWidget({ id: "latest", title: "Latest", load: async () => "Latest", view: () => null, whenEmpty: "hide" });
     f.put("src/Widgets/Latest.widget/index.tsx", "export default defineWidget({});", { default: widget });
     f.put("src/Integrations/Journal.integration.ts", "export default defineIntegration({});", { default: webspring.defineIntegration({ owners: ["Com.Example.NSEControlGallery"], install() {} }) });
@@ -160,7 +166,7 @@ describe("folder-derived projects with explicit app identity", () => {
     const f = fixture(); if (path.includes("Notes.app")) f.app("Notes"); f.put(path, "export const value = 1;"); expect(() => f.project()).toThrow(/default-export/);
   });
   it("rejects wrong pane exports with the expected declaration", () => {
-    const f = fixture(); f.put("src/Preferences/Billing.prefPane/index.tsx", "export default {};", { default: {} }); expect(() => f.project()).toThrow(/Billing.prefPane.*definePreferencePane/);
+    const f = fixture(); f.put("src/Preferences/Billing.prefPane/index.tsx", "export default {};", { default: {} }); expect(() => f.project()).toThrow(/Billing\.prefPane.*NSEPreferencePane/);
   });
   it.each(["export default 42;", "export default {};", "// export default Fake\nexport const value = 1;"])("rejects an invalid application export during discovery: %s", source => {
     const f = fixture(); f.app("Notes"); f.put("src/SynWare/Notes.app/Contents/index.tsx", source); expect(() => f.project()).toThrow(/Notes.app.*default-export/);

@@ -30,8 +30,8 @@ export type {
   SynWareIntegrationDiscovered,
   SynWareIntegrationInput,
 } from "./webspringIntegration";
-export { definePreferencePane, isPreferencePaneDefinition } from "../SynCloudOS/Preferences";
-export type { PreferencePaneDefinition, PreferencePaneInput, PreferencePaneText, PreferencePaneViewProps } from "../SynCloudOS/Preferences";
+export { NSEPreferencePane, capturePreferencePaneClass, resolvePreferencePanes } from "../SynCloudOS/Preferences";
+export type { NSEPreferencePaneClass, PreferencePaneDescriptor, PreferencePaneText, PreferencePaneViewProps } from "../SynCloudOS/Preferences";
 export { WebspringBoardView, createWebspringBoardView } from "./Contents/Views/WebspringBoardView/WebspringBoardView";
 export type { WebspringBoardConfiguration } from "./Contents/Views/WebspringBoardView/WebspringBoardView";
 

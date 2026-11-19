@@ -19,7 +19,7 @@
  */
 
 import { useMemo, useSyncExternalStore } from "react";
-import { definePreferencePane } from "../../../SynCloudOS/Preferences";
+import { NSEPreferencePane } from "../../../SynCloudOS/Preferences";
 import { useKernelSynCloudOS, useRuntimeSelector } from "../../../SynCloudOSReact";
 import { PrivacySecurityPane } from "../../PrivacySecurityPane";
 import { useSystemText } from "../useSystemText";
@@ -43,4 +43,12 @@ function PrivacyPane() {
  const applicationNames = useMemo(() => Object.fromEntries(Object.values(apps).map(app => [app.bundleIdentifier.toLowerCase(),app.displayName])), [apps]);
  return <PrivacySecurityPane store={runtime.privacy} userId={userId} applicationNames={applicationNames} text={text} />;
 }
-export default definePreferencePane({ id:"privacy-security",title:{key:"preferences.privacy",fallback:"Privacy & Security"},order:450,view:PrivacyPane });
+export default class PrivacySecurityPreferencePane extends NSEPreferencePane {
+  static id = "privacy-security";
+  static title = { key: "preferences.privacy", fallback: "Privacy & Security" };
+  static order = 450;
+
+  override renderView() {
+    return <PrivacyPane />;
+  }
+}

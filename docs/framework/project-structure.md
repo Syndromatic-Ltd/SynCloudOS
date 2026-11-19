@@ -61,7 +61,7 @@ Imports of `@syndromatic/syncloudos` within `<Name>.app/**` resolve to `virtual:
 
 ## Preference panes and widgets
 
-`Billing.prefPane/index.tsx` default-exports `definePreferencePane({ id, title, order, view })`. `Latest.widget/index.tsx` default-exports `defineWidget({ id, title, load, view })`. Both helpers are available from the package root.
+`Billing.prefPane/index.tsx` default-exports an `NSEPreferencePane` subclass. `Latest.widget/index.tsx` default-exports `defineWidget({ id, title, load, view })`. Both helpers are available from the package root.
 
 Discovered entries augment `defineWebspring` declarations. Explicit shell entries keep their order; discovered panes use their `order` field. `preferences: { hide }` continues to hide built-in panes. The application and shell must not separately register the same ID.
 

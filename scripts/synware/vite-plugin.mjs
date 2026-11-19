@@ -325,7 +325,7 @@ function generateProjectModule(discovery) {
   };
 
   imports.push(`import { selectProjectBundles, selectProjectIntegrations } from ${quote(toViteFileImport(derivationModulePath))};`);
-  imports.push('import { createIntegrationContribution, integrationOwners, isDefinedWebspringWidget, isPreferencePaneDefinition, withDiscoveredWebspringItems } from "@syndromatic/syncloudos/webspring";');
+  imports.push('import { capturePreferencePaneClass, createIntegrationContribution, integrationOwners, isDefinedWebspringWidget, withDiscoveredWebspringItems } from "@syndromatic/syncloudos/webspring";');
 
   discovery.bundles.forEach((bundle) => {
     const resourceVariables = addUrlImports(bundle.resources.resourceUrls, "url", "resource");
@@ -370,8 +370,8 @@ function generateProjectModule(discovery) {
   body.push(`export const shellResources = ${shellResourcesExpression};`);
   body.push(`const definedPreferences = [\n${preferenceSources.join(",\n")}\n];`);
   body.push(`export const preferences = Object.freeze(definedPreferences.map(({ path, definition }) => {
-  if (!isPreferencePaneDefinition(definition)) throw new TypeError(\`\${path} must default-export definePreferencePane(...).\`);
-  return definition;
+  try { return capturePreferencePaneClass(definition); }
+  catch (error) { throw new TypeError(\`\${path} must default-export an NSEPreferencePane subclass: \${error instanceof Error ? error.message : String(error)}\`); }
 }).sort((left, right) => left.order - right.order || left.id.localeCompare(right.id)));`);
   body.push(`const definedWidgets = [\n${widgetSources.join(",\n")}\n];`);
   body.push(`export const widgets = Object.freeze(definedWidgets.map(({ path, definition }) => {
@@ -475,7 +475,7 @@ function discover(root, options) {
     isPreferencePaneFolderName,
     "the SynWare preference panes directory",
     "index.tsx",
-    "definePreferencePane(...)",
+    "an NSEPreferencePane subclass",
     { root },
   );
   const widgets = kindFolders(

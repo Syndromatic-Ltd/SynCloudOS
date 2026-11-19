@@ -22,7 +22,7 @@ import { useMemo } from "react";
 import { NSESwitch, NSEBox } from "../../../NSE/public/controls";
 import { GroupedRow } from "../../../NSE/Controls/Selection/GroupedRow";
 import type { RuntimeSnapshot } from "../../../SynCloudOS/SynCloudOS";
-import { definePreferencePane, type PreferencePaneViewProps } from "../../../SynCloudOS/Preferences";
+import { NSEPreferencePane, type PreferencePaneViewProps } from "../../../SynCloudOS/Preferences";
 import { useKernelSynCloudOS, useRuntimeSelector } from "../../../SynCloudOSReact";
 import { useSystemText } from "../useSystemText";
 
@@ -130,11 +130,20 @@ function NotificationsPane({ settings }: PreferencePaneViewProps) {
   );
 }
 
-export default definePreferencePane({
-  id: "notifications",
-  title: { key: "system.notifications", fallback: "Notifications" },
-  order: 400,
-  summary: NotificationsSummary,
-  accessory: NotificationsSwitch,
-  view: NotificationsPane,
-});
+export default class NotificationsPreferencePane extends NSEPreferencePane {
+  static id = "notifications";
+  static title = { key: "system.notifications", fallback: "Notifications" };
+  static order = 400;
+
+  override renderSummary() {
+    return <NotificationsSummary settings={this.settings} appearance={this.appearance} locale={this.locale} />;
+  }
+
+  override renderAccessory() {
+    return <NotificationsSwitch settings={this.settings} appearance={this.appearance} locale={this.locale} />;
+  }
+
+  override renderView() {
+    return <NotificationsPane settings={this.settings} appearance={this.appearance} locale={this.locale} />;
+  }
+}

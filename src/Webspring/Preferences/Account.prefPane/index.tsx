@@ -20,7 +20,7 @@
 
 import { NSEButton, NSEBox } from "../../../NSE/public/controls";
 import { GroupedRow } from "../../../NSE/Controls/Selection/GroupedRow";
-import { definePreferencePane } from "../../../SynCloudOS/Preferences";
+import { NSEPreferencePane } from "../../../SynCloudOS/Preferences";
 import { useKernelSynCloudOS } from "../../../SynCloudOSReact";
 import { useSystemUIAccount } from "../systemAccount";
 import { useSystemText } from "../useSystemText";
@@ -71,10 +71,16 @@ function AccountPane() {
 }
 
 /** Listed only where the host offers sign-in. */
-export default definePreferencePane({
-  id: "account",
-  title: { key: "preferences.account", fallback: "Account" },
-  order: 50,
-  summary: AccountSummary,
-  view: AccountPane,
-});
+export default class AccountPreferencePane extends NSEPreferencePane {
+  static id = "account";
+  static title = { key: "preferences.account", fallback: "Account" };
+  static order = 50;
+
+  override renderSummary() {
+    return <AccountSummary />;
+  }
+
+  override renderView() {
+    return <AccountPane />;
+  }
+}

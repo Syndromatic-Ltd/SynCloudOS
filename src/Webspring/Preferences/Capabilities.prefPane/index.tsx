@@ -21,7 +21,7 @@
 import { systemCapabilityReport, type SystemCapabilityRow } from "../../../SynCloudOS/SynCloudOS";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { NSEBox, NSEButton } from "../../../NSE/public/controls";
-import { definePreferencePane } from "../../../SynCloudOS/Preferences";
+import { NSEPreferencePane } from "../../../SynCloudOS/Preferences";
 import { useKernelSynCloudOS } from "../../../SynCloudOSReact";
 import { installedApplicationForDocument } from "../../../SynCloudOS/SynCloudOS";
 import { useSystemText } from "../useSystemText";
@@ -59,4 +59,12 @@ export function CapabilitiesPane() {
     <p data-nse-part="paragraph" data-nse-role="description">{t("preferences.capabilities.limit", "Support does not imply permission. Offline availability covers the application shell and bundled resources; server data still needs a connection.")}</p>
   </div></NSEBox></section>;
 }
-export default definePreferencePane({ id: "capabilities", title: { key: "preferences.capabilities", fallback: "Capabilities" }, order: 660, view: CapabilitiesPane });
+export default class CapabilitiesPreferencePane extends NSEPreferencePane {
+  static id = "capabilities";
+  static title = { key: "preferences.capabilities", fallback: "Capabilities" };
+  static order = 660;
+
+  override renderView() {
+    return <CapabilitiesPane />;
+  }
+}
