@@ -5,7 +5,7 @@ import { afterEach, expect, it, vi } from "vitest";
 import { mountSynCloudOS, type MountedSynCloudOSHost } from "../../src/SynCloudOSReact/browserRuntime";
 import { createSynCloudOS } from "../../src/SynCloudOS/Runtime/createSynCloudOS";
 import { WebspringController } from "../../src/Webspring/WebspringController";
-import { defineWidget } from "../../src/Webspring/webspringWidget";
+import { WSWidget, captureWSWidgetClass } from "../../src/Webspring/WSWidget";
 import { defineWebspring, withDiscoveredWebspringItems } from "../../src/Webspring/Webspring";
 import { NSEPreferencePane, capturePreferencePaneClass } from "../../src/SynCloudOS/Preferences";
 import type { SynCloudOSProjectComposition } from "../../src/SynCloudOSReact/projectComposition";
@@ -30,7 +30,14 @@ async function mount(composition?: SynCloudOSProjectComposition) {
     shell: vi.mocked(WebspringController).mock.calls.at(-1)![1] };
 }
 
-const widget = (id: string, order = 0) => defineWidget({ id, title: id, order, load: () => id, view: ({ data }) => <p>{data}</p>, whenEmpty: "hide" });
+const widget = (id: string, order = 0) => captureWSWidgetClass(class extends WSWidget<string> {
+  static override id = id;
+  static override title = id;
+  static override order = order;
+  static override whenEmpty = "hide" as const;
+  override load() { return id; }
+  override renderView() { return <p>{this.data}</p>; }
+});
 
 it("mounts the real neutral Board without a declared shell or composition and omits an empty shelf", async () => {
   const { element, runtime, shell } = await mount();

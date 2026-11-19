@@ -36,10 +36,12 @@ export { WebspringBoardView, createWebspringBoardView } from "./Contents/Views/W
 export type { WebspringBoardConfiguration } from "./Contents/Views/WebspringBoardView/WebspringBoardView";
 
 // The pieces a site's own launcher view is built from, as the Board is.
-export { WebspringWidgetShelf } from "./WebspringWidgetShelf";
+export { WSWidgetShelfView } from "./WSWidgetShelfView";
+export type { WSWidgetShelfViewProps } from "./WSWidgetShelfView";
 export { useWebspringHapticEngine } from "./webspringHaptics";
 export { WebspringSurface, webspringSurfaceStyle } from "./webspringSurface";
-export { defineWidget, isDefinedWebspringWidget } from "./webspringWidget";
+export { WSWidget, captureWSWidgetClass } from "./WSWidget";
+export type { WSWidgetClass, WSWidgetDescriptor, WSWidgetState, WSWidgetTimers } from "./WSWidget";
 export { WebspringDragProxy, getWebspringDragGrabOffset, useWebspringDragProxyPosition } from "./WebspringDragProxy";
 export type { WebspringDragProxyPoint, WebspringDragProxyRect } from "./WebspringDragProxy";
 export { createWebspringFolderSplitPresentation } from "./WebspringFolderSplitPresentation";
@@ -91,6 +93,7 @@ export { WEBSPRING_STAGE, getDesktopWebspringLayout, stagePointStyle } from "./s
 export type {
   AccountAction,
   ActionResult,
+  WSActionResult,
   AuthenticationPolicy,
   AuthenticationConfiguration,
   AuthenticationInput,
@@ -127,9 +130,6 @@ export type {
   WebspringLaunchZoom,
   WebspringViewDeclaration,
   WebspringViewModel,
-  WebspringWidget,
-  WebspringWidgetEntry,
-  WebspringWidgetInput,
-  WebspringWidgetViewProps,
+  WSWidgetEntry,
   WebspringViewProps,
 } from "./webspringTypes";

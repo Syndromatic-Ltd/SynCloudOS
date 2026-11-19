@@ -24,10 +24,9 @@ import { createWebspringFolderSplitPresentation } from "./WebspringFolderSplitPr
 import { defaultWebspringFolderAppearance, defaultWebspringFolderSmoothSurface } from "./WebspringFolderAppearance";
 import { nseSmoothSurfaceRadiusTokens } from "../NSE/SmoothSurface";
 import { captureWebspringBackground } from "./webspringSurface";
-import { isDefinedWebspringWidget } from "./webspringWidget";
+import { captureWSWidgetClass, isWSWidgetDescriptor, type WSWidgetClass, type WSWidgetDescriptor } from "./WSWidget";
 import { capturePreferencePaneClass, isPreferencePaneDescriptor, type PreferencePaneDescriptor } from "../SynCloudOS/Preferences";
 import type {
-  WebspringWidget,
   WebspringFolderAppearance,
   WebspringFolderPresentationComponent,
   WebspringDefinition,
@@ -301,17 +300,19 @@ function assertFolders(folders: SynWareWebspringFoldersManifest | undefined) {
   }
 }
 
-/** The widgets a definition declares, in order; each must come from `defineWidget` and ids must be unique. */
-function captureWidgets(input: unknown): readonly WebspringWidget[] {
+/** The widgets a definition declares, in order; each must extend `WSWidget` and ids must be unique. */
+function captureWidgets(input: unknown): readonly WSWidgetDescriptor[] {
   if (input === undefined) return Object.freeze([]);
   if (!Array.isArray(input)) throw new TypeError("Webspring widgets must be an array.");
   const ids = new Set<string>();
-  for (const widget of input) {
-    if (!isDefinedWebspringWidget(widget)) throw new TypeError("Webspring widgets must be created with defineWidget.");
+  const widgets: WSWidgetDescriptor[] = [];
+  for (const candidate of input) {
+    const widget = isWSWidgetDescriptor(candidate) ? candidate : captureWSWidgetClass(candidate);
     if (ids.has(widget.id)) throw new TypeError(`Webspring widgets contain duplicate ID ${widget.id}.`);
     ids.add(widget.id);
+    widgets.push(widget);
   }
-  return Object.freeze([...input] as WebspringWidget[]);
+  return Object.freeze(widgets);
 }
 
 /** The System Preferences panes a definition adds and the built-ins it hides. */
@@ -415,7 +416,7 @@ export function isDefinedWebspring(value: unknown): value is WebspringDefinition
  */
 export function withDiscoveredWebspringItems<TManifest extends WebspringManifest>(
   definition: WebspringDefinition<TManifest>,
-  items: Readonly<{ preferences: readonly PreferencePaneDescriptor[]; widgets: readonly WebspringWidget[] }>,
+  items: Readonly<{ preferences: readonly PreferencePaneDescriptor[]; widgets: readonly (WSWidgetClass | WSWidgetDescriptor)[] }>,
 ): WebspringDefinition<TManifest> {
   if (!isDefinedWebspring(definition)) throw new TypeError("A Webspring definition must be created with defineWebspring.");
   if (typeof items !== "object" || items === null || !Array.isArray(items.preferences) || !Array.isArray(items.widgets)) {
@@ -429,11 +430,13 @@ export function withDiscoveredWebspringItems<TManifest extends WebspringManifest
     paneIds.add(pane.id);
     panes.push(pane);
   }
+  const explicitClasses = new Set(definition.widgets.map((widget) => widget.WidgetClass));
+  const discovered = [...captureWidgets(items.widgets)]
+    .sort((left, right) => left.order - right.order || left.id.localeCompare(right.id))
+    .filter((widget) => !explicitClasses.has(widget.WidgetClass));
   return Object.freeze({
     ...definition,
-    widgets: captureWidgets([...definition.widgets, ...[...captureWidgets(items.widgets)]
-      .sort((left, right) => left.order - right.order || left.id.localeCompare(right.id))
-      .filter(widget => !definition.widgets.includes(widget))]),
+    widgets: captureWidgets([...definition.widgets, ...discovered]),
     preferences: Object.freeze({ panes: Object.freeze(panes), hide: definition.preferences.hide }),
   });
 }

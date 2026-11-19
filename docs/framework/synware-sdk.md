@@ -101,7 +101,7 @@ See [Applications](applications.md) for the complete class tree and ownership ru
 | `host.mediaQueries.setMatches(query, matches)` | Controls the test environment's real media queries. Set initial matches before rendering; for live frame-coalesced changes call `host.clock.advance(16)` inside `act`. |
 | `NSEPopup` | Omitting `parentResponderId` inherits the nearest class controller. Child controllers inside its portal join its focus scope, so modal focus containment and ancestor action lookup both hold. |
 | `SynWareIntegrationInput.applicationDocuments` | A configuration or `(environment) => configuration \| Promise<configuration>`; construct recovery storage with the injected environment. Installation receives scoped clock/timer ports as `context.environment`. |
-| `WebspringWidgetViewProps.navigate(route)` | `Promise<ActionResult>` from shell navigation. Prevent a link's default navigation, then call `navigate("/notes/latest")`. |
+| `WSWidget.navigate(route)` | `Promise<WSActionResult>` from shell navigation. Prevent a link's default navigation, then call `this.navigate("/notes/latest")`. |
 
 `SCOS` is established before application launch callbacks, not by the first React render.
 Every controller accepts an ambient owner or `owner: this` and is disposed with that owner;

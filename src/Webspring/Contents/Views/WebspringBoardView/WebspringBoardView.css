@@ -293,7 +293,7 @@
   border-radius: 50%;
 }
 
-/* The widget shelf (see WebspringWidgetShelf.css) rises into place after the icons. */
+/* The widget shelf (see WSWidgetShelfView.css) rises into place after the icons. */
 .webspring-board .webspring-widget-shelf {
   min-height: 26svh;
   border-top-width: 2px;

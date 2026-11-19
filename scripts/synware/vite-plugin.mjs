@@ -325,7 +325,7 @@ function generateProjectModule(discovery) {
   };
 
   imports.push(`import { selectProjectBundles, selectProjectIntegrations } from ${quote(toViteFileImport(derivationModulePath))};`);
-  imports.push('import { capturePreferencePaneClass, createIntegrationContribution, integrationOwners, isDefinedWebspringWidget, withDiscoveredWebspringItems } from "@syndromatic/syncloudos/webspring";');
+  imports.push('import { capturePreferencePaneClass, captureWSWidgetClass, createIntegrationContribution, integrationOwners, withDiscoveredWebspringItems } from "@syndromatic/syncloudos/webspring";');
 
   discovery.bundles.forEach((bundle) => {
     const resourceVariables = addUrlImports(bundle.resources.resourceUrls, "url", "resource");
@@ -375,8 +375,8 @@ function generateProjectModule(discovery) {
 }).sort((left, right) => left.order - right.order || left.id.localeCompare(right.id)));`);
   body.push(`const definedWidgets = [\n${widgetSources.join(",\n")}\n];`);
   body.push(`export const widgets = Object.freeze(definedWidgets.map(({ path, definition }) => {
-  if (!isDefinedWebspringWidget(definition)) throw new TypeError(\`\${path} must default-export defineWidget(...).\`);
-  return definition;
+  try { return captureWSWidgetClass(definition); }
+  catch (error) { throw new TypeError(\`\${path} must default-export a WSWidget subclass: \${error instanceof Error ? error.message : String(error)}\`); }
 }).sort((left, right) => left.order - right.order || left.id.localeCompare(right.id)));`);
   body.push(`const shellDefinition = ${shellExpression};`);
   body.push("export const shell = shellDefinition === null ? null : withDiscoveredWebspringItems(shellDefinition, { preferences, widgets });");
@@ -483,7 +483,7 @@ function discover(root, options) {
     isWidgetFolderName,
     "the SynWare widgets directory",
     "index.tsx",
-    "defineWidget(...)",
+    "a WSWidget subclass",
     { root },
   );
 

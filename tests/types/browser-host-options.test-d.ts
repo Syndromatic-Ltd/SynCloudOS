@@ -3,7 +3,7 @@ import type { WebspringDefinition } from "../../src/Webspring/webspringTypes";
 import { IndexedDBDocumentRecoveryStore } from "../../src/SynCloudOS/Documents/IndexedDBDocumentRecoveryStore";
 import { InMemoryDocumentAdapter } from "../../src/SynCloudOS/Documents/Adapters/InMemoryDocumentAdapter";
 import { defineIntegration } from "../../src/Webspring/webspringIntegration";
-import type { ActionResult, WebspringWidgetViewProps } from "../../src/Webspring/webspringTypes";
+import type { WSActionResult, WSWidget } from "../../src/Webspring/public";
 declare const element: Element;
 declare const shell: WebspringDefinition;
 mountSynCloudOS({ element, shell, authentication: "optional" });
@@ -29,8 +29,8 @@ defineIntegration({
     context.environment.browser.getWindow();
   },
 });
-declare const widget: WebspringWidgetViewProps<readonly string[]>;
-const navigation: Promise<ActionResult> = widget.navigate("/notes/one");
+declare const widget: WSWidget<readonly string[]>;
+const navigation: Promise<WSActionResult> = widget.navigate("/notes/one");
 void navigation;
 // A folder-discovered host may use its generated project without an explicit mode.
 mountSynCloudOS({ element });

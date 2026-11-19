@@ -46,7 +46,7 @@ import type {
   WebspringDialPlacement,
   WebspringItem,
   WebspringViewModel,
-  WebspringWidgetEntry,
+  WSWidgetEntry,
 } from "./webspringTypes";
 
 export interface SynCloudOSShellResources {
@@ -174,7 +174,7 @@ export class WebspringController {
     const namespace = getSynWareNamespace(this.shell.manifest.bundleIdentifier);
     const branding = resolveSiteBranding(declaration.branding, resourceUrls, this.runtime.locale, namespace);
     const resolveText = (text: LocalisedText) => resolveSiteBranding({ name: text }, {}, this.runtime.locale, namespace).name;
-    const widgets = Object.freeze(this.shell.widgets.map((widget): WebspringWidgetEntry => Object.freeze({
+    const widgets = Object.freeze(this.shell.widgets.map((widget): WSWidgetEntry => Object.freeze({
       widget,
       title: resolveText(widget.title),
       iconUrl: widget.icon ? resourceUrls[widget.icon] ?? null : null,

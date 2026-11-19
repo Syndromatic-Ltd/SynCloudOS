@@ -58,10 +58,20 @@ function fixture() {
 describe("folder-derived projects with explicit app identity", () => {
   it("orders generated widgets by declared order with an ID tie-break instead of folder order", () => {
     const f = fixture();
-    const declared = (id: string, order?: number) => webspring.defineWidget({ id, title: id, order, load: () => id, view: () => null, whenEmpty: "hide" });
+    const declared = (id: string, order?: number) => {
+      class DeclaredWidget extends webspring.WSWidget<string> {
+        static override id = id;
+        static override title = id;
+        static override order = order ?? 0;
+        static override whenEmpty = "hide" as const;
+        override load() { return id; }
+        override renderView() { return null; }
+      }
+      return webspring.captureWSWidgetClass(DeclaredWidget);
+    };
     const late = declared("late", 10), early = declared("early", -10), alpha = declared("alpha"), zeta = declared("zeta");
     for (const [folder, definition] of [["A", late], ["B", zeta], ["C", alpha], ["Z", early]] as const) {
-      f.put(`src/Widgets/${folder}.widget/index.tsx`, "export default defineWidget({});", { default: definition });
+      f.put(`src/Widgets/${folder}.widget/index.tsx`, "export default class FixtureWidget extends WSWidget {}", { default: definition.WidgetClass });
     }
     const project = f.project();
     expect(project.widgets).toEqual([early, alpha, zeta, late]);
@@ -80,8 +90,15 @@ describe("folder-derived projects with explicit app identity", () => {
     }
     const pane = capturePreferencePaneClass(BillingPane);
     f.put("src/Preferences/Billing.prefPane/index.tsx", "export default class BillingPane extends NSEPreferencePane {}", { default: BillingPane });
-    const widget = webspring.defineWidget({ id: "latest", title: "Latest", load: async () => "Latest", view: () => null, whenEmpty: "hide" });
-    f.put("src/Widgets/Latest.widget/index.tsx", "export default defineWidget({});", { default: widget });
+    class LatestWidget extends webspring.WSWidget<string> {
+      static override id = "latest";
+      static override title = "Latest";
+      static override whenEmpty = "hide" as const;
+      override async load() { return "Latest"; }
+      override renderView() { return null; }
+    }
+    const widget = webspring.captureWSWidgetClass(LatestWidget);
+    f.put("src/Widgets/Latest.widget/index.tsx", "export default class LatestWidget extends WSWidget {}", { default: LatestWidget });
     f.put("src/Integrations/Journal.integration.ts", "export default defineIntegration({});", { default: webspring.defineIntegration({ owners: ["Com.Example.NSEControlGallery"], install() {} }) });
     const project = f.project();
     expect(project.bundles[0].manifest).toMatchObject({ schemaVersion: 1, bundleIdentifier: "com.example.NSEControlGallery", displayName: "NSE Control Gallery", version: "1.2.0", webspring: { icon: "./Resources/AppIcon.svg" } });

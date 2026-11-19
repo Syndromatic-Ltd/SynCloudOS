@@ -29,7 +29,7 @@ import { useNSEFeedback } from "../../../../NSE/hostComposition";
 import { NSEButton, NSESegmentedControl } from "@syndromatic/syncloudos/nse/controls";
 import { MaterialProvider } from "../../../../NSE/Material";
 import { getKeyboardReorderIndex } from "../../../../SynCloudOS/SynCloudOS";
-import { WebspringWidgetShelf } from "../../../WebspringWidgetShelf";
+import { WSWidgetShelfView } from "../../../WSWidgetShelfView";
 import { webspringSurfaceStyle } from "../../../webspringSurface";
 import { WebspringDragProxy, useWebspringDragProxyPosition } from "../../../WebspringDragProxy";
 import { WebspringFolderTile } from "../../../WebspringFolderTile";
@@ -644,7 +644,7 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
         {board.pages.map((_items, index) => <button key={index} type="button" data-nse-part="button" data-nse-selected={index === activePage ? "" : undefined} aria-label={`Show application page ${index + 1}`} aria-current={index === activePage ? "page" : undefined} onClick={() => setPage(index)} onPointerEnter={() => { if (model.layout.draggingItemId) setPage(index); }} />)}
       </nav> : null}
       </section>
-      {model.widgets.length > 0 ? <WebspringWidgetShelf entries={model.widgets} surface={model.background.shelf} /> : null}
+      {model.widgets.length > 0 ? <WSWidgetShelfView entries={model.widgets} surface={model.background.shelf} /> : null}
       {openFolder && folderAnchor && stageElement ? <div
         data-nse-part="content" className="webspring-board-folder-layer"
         style={folderIconSize ? { "--webspring-board-icon-size": `${folderIconSize}px` } as CSSProperties : undefined}

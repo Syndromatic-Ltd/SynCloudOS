@@ -226,46 +226,46 @@ The Board scales to the screen. An icon is the largest size that still lets a wh
 
 ## Widgets on the Board
 
-A widget is a titled panel below the icons that loads its own data, such as a list of recent posts. Declare it with `defineWidget` and list it in the definition. With no widgets there is no shelf at all.
+A widget is a titled panel below the icons that loads its own data, such as a list of recent posts. Declare it by subclassing `WSWidget` and list it in the definition. With no widgets there is no shelf at all.
 
 ```tsx
-import { defineWebspring, defineWidget, WebspringBoardView, type WebspringWidgetViewProps } from "@syndromatic/syncloudos/webspring";
+import { defineWebspring, WSWidget, WebspringBoardView } from "@syndromatic/syncloudos/webspring";
 import manifest from "./Info";
 
 interface Post { readonly id: string; readonly title: string }
 
-function LatestView({ data, refresh }: WebspringWidgetViewProps<readonly Post[]>) {
-  return <>
-    <ul>{data.map((post) => <li key={post.id}>{post.title}</li>)}</ul>
-    <button type="button" onClick={refresh}>Refresh</button>
-  </>;
-}
+class LatestWidget extends WSWidget<readonly Post[]> {
+  static id = "latest";
+  static title = { key: "site.latest", fallback: "Latest" };
+  static icon = "./Resources/news.svg";
+  static whenEmpty = "hide" as const;
 
-const latest = defineWidget({
-  id: "latest",
-  title: { key: "site.latest", fallback: "Latest" },
-  icon: "./Resources/news.svg",
-  load: async (signal) => {
+  override async load(signal: AbortSignal) {
     const response = await fetch("/api/public-posts?limit=6", { credentials: "same-origin", signal });
     if (!response.ok) throw new Error(`Public posts request failed: ${response.status}`);
     return (await response.json()) as readonly Post[];
-  },
-  view: LatestView,
-  whenEmpty: "hide",
-});
+  }
+
+  override renderView() {
+    return <>
+      <ul>{this.data.map((post) => <li key={post.id}>{post.title}</li>)}</ul>
+      <button type="button" onClick={() => this.refresh()}>Refresh</button>
+    </>;
+  }
+}
 
 export default defineWebspring({
   manifest,
   components: { board: WebspringBoardView },
-  widgets: [latest],
+  widgets: [LatestWidget],
 });
 ```
 
-- `load(signal)` returns the data, of any shape. The framework owns the promise. The signal aborts when the Board unmounts, when the person retries or the widget refreshes, and when the load times out.
-- `view` is a React component that receives `{ data, refresh }` once the load has succeeded. A view that throws shows the error state; the rest of the Board is untouched.
-- `whenEmpty` is `"hide"` (the widget disappears, and so does the shelf if every widget is hidden) or `{ message }` (the message shows in its place). Empty means an empty array, `null` or `undefined`; `isEmpty(data)` replaces that rule.
-- The framework draws the other states: while loading it shows a placeholder, a rejected load shows an error with Retry, and a load that has not settled after `timeout` milliseconds (10 000 by default) is aborted and shows a timeout error with Retry, so a widget can never stay on "Loading…".
-- `title` is a string, or `{ key, fallback }` looked up in the app's strings. `icon` is a resource path, resolved through the shell's resources.
+- `load(signal)` returns the data, of any shape. The framework owns the promise. The signal aborts when the Board unmounts, when the person retries or `refresh()` runs, and when the load times out.
+- `renderView()` (or `static view`) draws the view once the load has succeeded, reading `this.data`. A view that throws shows the error state; the rest of the Board is untouched.
+- `static whenEmpty` is `"hide"` (the widget disappears, and so does the shelf if every widget is hidden) or `{ message }` (the message shows in its place). Empty means an empty array, `null` or `undefined`; overriding `isEmpty(data)` replaces that rule.
+- The framework draws the other states: while loading it shows a placeholder, a rejected load shows an error with Retry, and a load that has not settled after `static timeout` milliseconds (10 000 by default) is aborted and shows a timeout error with Retry, so a widget can never stay on "Loading…".
+- `static title` is a string, or `{ key, fallback }` looked up in the app's strings. `static icon` is a resource path, resolved through the shell's resources.
 
 The endpoint behind `load` decides what is public. Filter drafts, future dated items and deleted records there.
 
@@ -376,7 +376,7 @@ The pieces the Board is built from are public, so a custom launcher can share it
 | `captureWebspringDragReorderSlots`, `getWebspringDragReorderTargetFromPoint` | Hit testing for drag reordering against the slots the view draws. |
 | `WebspringFolderTile`, `createWebspringFolderSplitPresentation` | A folder's icon tile of its members, and the default folder presentation. |
 | `useWebspringFolderAppearance` | The definition's folder appearance, for artwork that matches the folder tile. |
-| `WebspringWidgetShelf`, `defineWidget` | The widget shelf for `model.widgets`: it loads each widget and draws its loading, empty, error and timeout states. |
+| `WSWidgetShelfView`, `WSWidget` | The widget shelf for `model.widgets`: it loads each widget and draws its loading, empty, error and timeout states. |
 | `WebspringSurface`, `webspringSurfaceStyle` | The surface presets, and the CSS custom properties that paint a surface. `model.background` holds the resolved launcher and shelf surfaces. |
 | `WebspringIconArtwork`, `WebspringIconEffect` | An application's icon artwork, and the shell's declared icon effect. |
 | `resolveWebspringIconPresentation`, `webspringIconSprings`, `getWebspringRadialExitForIcon`, `useWebspringMotion` | Icon entrance, launch and return motion, standard and reduced. |

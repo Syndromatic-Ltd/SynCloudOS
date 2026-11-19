@@ -27,7 +27,7 @@ import type { SynCloudOSRuntime } from "../../src/SynCloudOS/Runtime/runtimeInst
 import { WebspringBoardView } from "../../src/Webspring/Contents/Views/WebspringBoardView/WebspringBoardView";
 import { WebspringController } from "../../src/Webspring/WebspringController";
 import * as publicApi from "../../src/Webspring/public";
-import { WebspringSurface, defineWebspring, defineWidget, webspringSurfaceStyle, type WebspringDefinition, type WebspringDefinitionInput } from "../../src/Webspring/public";
+import { WebspringSurface, WSWidget, defineWebspring, webspringSurfaceStyle, type WebspringDefinition, type WebspringDefinitionInput } from "../../src/Webspring/public";
 import { createTestRuntime } from "./helpers";
 
 type Options = Partial<Pick<WebspringDefinitionInput, "background" | "widgets">>;
@@ -129,7 +129,13 @@ describe("Board background", () => {
 });
 
 describe("Board widget shelf", () => {
-  const latest = defineWidget({ id: "latest", title: "Latest", load: async () => ["First post"] as readonly string[], view: ({ data }) => <p>{data[0]}</p>, whenEmpty: "hide" });
+  class LatestWidget extends WSWidget<readonly string[]> {
+    static override id = "latest";
+    static override title = "Latest";
+    static override whenEmpty = "hide" as const;
+    override async load() { return ["First post"] as readonly string[]; }
+    override renderView() { return <p>{this.data[0]}</p>; }
+  }
 
   it("renders no shelf element, and no shelf background, without widgets", async () => {
     const { board } = renderBoard(defineBoard({ background: { launcher: WebspringSurface.cotton(), shelf: WebspringSurface.plain("#ff0000") } }));
@@ -141,7 +147,7 @@ describe("Board widget shelf", () => {
   });
 
   it("renders the shelf, on the shelf surface, when a widget is declared", async () => {
-    const { board } = renderBoard(defineBoard({ widgets: [latest], background: { launcher: WebspringSurface.cotton(), shelf: WebspringSurface.plain("#0b0d11") } }));
+    const { board } = renderBoard(defineBoard({ widgets: [LatestWidget], background: { launcher: WebspringSurface.cotton(), shelf: WebspringSurface.plain("#0b0d11") } }));
     await act(async () => undefined);
     const shelf = board.querySelector<HTMLElement>(".webspring-widget-shelf");
     expect(shelf).not.toBeNull();
@@ -153,16 +159,22 @@ describe("Board widget shelf", () => {
 describe("removed content APIs", () => {
   it("are no longer exported or accepted", () => {
     expect(Object.keys(publicApi)).not.toContain("LowerContentShelfView");
-    expect(Object.keys(publicApi)).toEqual(expect.arrayContaining(["defineWidget", "WebspringSurface"]));
+    expect(Object.keys(publicApi)).toEqual(expect.arrayContaining(["WSWidget", "WebspringSurface"]));
     expect(defineBoard()).not.toHaveProperty("content");
   });
 
-  it("require widgets to come from defineWidget", () => {
-    expect(() => defineBoard({ widgets: [{ id: "latest" }] as never })).toThrow(/defineWidget/u);
+  it("require widgets to extend WSWidget", () => {
+    expect(() => defineBoard({ widgets: [{ id: "latest" }] as never })).toThrow(/WSWidget/u);
     expect(() => defineBoard({ widgets: [latestWidget("a"), latestWidget("a")] })).toThrow(/duplicate/iu);
   });
 });
 
 function latestWidget(id: string) {
-  return defineWidget({ id, title: id, load: () => [] as readonly string[], view: () => null, whenEmpty: "hide" });
+  return class extends WSWidget<readonly string[]> {
+    static override id = id;
+    static override title = id;
+    static override whenEmpty = "hide" as const;
+    override load() { return [] as readonly string[]; }
+    override renderView() { return null; }
+  };
 }

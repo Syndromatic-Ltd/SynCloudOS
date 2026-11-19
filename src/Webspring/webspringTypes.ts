@@ -28,6 +28,7 @@ import type {
   SynWareWebspringShellManifest,
 } from "../SynCloudOS/AppSDK";
 import type { NSEPreferencePaneClass, PreferencePaneDescriptor } from "../SynCloudOS/Preferences";
+import type { WSWidgetClass, WSWidgetDescriptor } from "./WSWidget";
 import type {
   AuthenticationConfiguration as RuntimeAuthenticationConfiguration,
   AuthenticationInput as RuntimeAuthenticationInput,
@@ -46,10 +47,12 @@ export interface WebspringIconEffectProps {
 }
 export type WebspringIconEffectComponent = ComponentType<WebspringIconEffectProps>;
 
-export type ActionResult =
+export type WSActionResult =
   | { readonly status: "completed" }
   | { readonly status: "cancelled" }
   | { readonly status: "failed"; readonly message: string };
+
+export type ActionResult = WSActionResult;
 
 /** A painted area: colour, texture, tint, spotlight and an overlay, drawn in that order. */
 export interface WebspringSurface {
@@ -91,50 +94,9 @@ export interface WebspringBackground {
   readonly shelf: WebspringSurface;
 }
 
-/** What a widget's `view` receives once its data has loaded. */
-export interface WebspringWidgetViewProps<TData> {
-  readonly data: TData;
-  /** Loads the data again; the widget shows its loading state until it settles. */
-  readonly refresh: () => void;
-  /** Opens a declared route through the shell, without leaving the host page. */
-  readonly navigate: (route: string) => Promise<ActionResult>;
-}
-
-export interface WebspringWidgetInput<TData> {
-  readonly id: string;
-  /** Discovery position, ascending; ties sort by id. Explicit shell lists keep their authored order. Defaults to 0. */
-  readonly order?: number;
-  /** Plain text, or a localised string looked up in the app's own strings. */
-  readonly title: LocalisedText | string;
-  /** A resource path to the widget's icon, such as `./Resources/news.svg`. */
-  readonly icon?: string;
-  /** Fetches the widget's data. `signal` aborts on unmount, Retry, refresh and timeout. */
-  readonly load: (signal: AbortSignal) => Promise<TData> | TData;
-  readonly view: ComponentType<WebspringWidgetViewProps<TData>>;
-  /** What an empty result shows: nothing, or a message. */
-  readonly whenEmpty: "hide" | { readonly message: string };
-  /** Defaults to treating an empty array, `null` and `undefined` as empty. */
-  readonly isEmpty?: (data: TData) => boolean;
-  /** Milliseconds a load may take before it counts as failed. Defaults to 10 000. */
-  readonly timeout?: number;
-}
-
-/** A widget declared with `defineWidget`, defaults filled in. */
-export interface WebspringWidget {
-  readonly id: string;
-  readonly order: number;
-  readonly title: LocalisedText;
-  readonly icon?: string;
-  readonly load: (signal: AbortSignal) => Promise<unknown>;
-  readonly view: ComponentType<WebspringWidgetViewProps<unknown>>;
-  readonly whenEmpty: "hide" | { readonly message: LocalisedText };
-  readonly isEmpty: (data: unknown) => boolean;
-  readonly timeout: number;
-}
-
 /** A widget as a view shows it: its text and icon resolved. */
-export interface WebspringWidgetEntry {
-  readonly widget: WebspringWidget;
+export interface WSWidgetEntry {
+  readonly widget: WSWidgetDescriptor;
   readonly title: string;
   readonly iconUrl: string | null;
   /** The text shown when the widget is empty and `whenEmpty` is a message. */
@@ -237,7 +199,7 @@ export interface WebspringViewModel {
     readonly dropTargetId: string | null;
   };
   /** The widgets the Board shows beneath its icons, in order. Empty when none are declared. */
-  readonly widgets: readonly WebspringWidgetEntry[];
+  readonly widgets: readonly WSWidgetEntry[];
   readonly background: WebspringBackground;
   readonly branding: {
     readonly name: string;
@@ -410,7 +372,7 @@ export interface WebspringPreferences {
 export interface WebspringDefinitionInput<TManifest extends Omit<WebspringManifest, "schemaVersion"> & { readonly schemaVersion?: 1 } = WebspringManifest> {
   readonly manifest: TManifest;
   readonly components: Readonly<Record<string, WebspringViewComponent>>;
-  readonly widgets?: readonly WebspringWidget[];
+  readonly widgets?: readonly (WSWidgetClass | WSWidgetDescriptor)[];
   /** Paints the Board. Defaults to a tinted cotton texture with a spotlight. */
   readonly background?: WebspringBackgroundInput;
   readonly iconEffect?: WebspringIconEffectComponent;
@@ -430,7 +392,7 @@ export interface WebspringDefinition<TManifest extends WebspringManifest = Websp
   readonly returnTracks: Readonly<Record<string, readonly ("material" | "icons")[]>>;
   /** Launch zooms captured from each registered view component, defaults filled in. */
   readonly launchZooms: Readonly<Record<string, Readonly<Required<WebspringLaunchZoom>>>>;
-  readonly widgets: readonly WebspringWidget[];
+  readonly widgets: readonly WSWidgetDescriptor[];
   readonly background: Readonly<WebspringBackground>;
   readonly iconEffect?: WebspringIconEffectComponent;
   readonly quickSwitch?: Readonly<WebspringQuickSwitchOptions>;

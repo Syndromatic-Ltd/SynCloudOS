@@ -81,9 +81,9 @@ import { AppViewContent } from "../../src/Webspring/AppViewContent";
 import { NotificationCentrePresenter } from "../../src/Webspring/NotificationCentrePresenter";
 import { SystemStartupLayer } from "../../src/Webspring/SystemStartupLayer";
 import { WebspringDragProxy } from "../../src/Webspring/WebspringDragProxy";
-import { WebspringWidgetShelf } from "../../src/Webspring/WebspringWidgetShelf";
+import { WSWidgetShelfView } from "../../src/Webspring/WSWidgetShelfView";
 import { WebspringSurface } from "../../src/Webspring/webspringSurface";
-import { defineWidget } from "../../src/Webspring/webspringWidget";
+import { WSWidget, captureWSWidgetClass } from "../../src/Webspring/WSWidget";
 import { CapabilitiesPane } from "../../src/Webspring/Preferences/Capabilities.prefPane";
 import { StoragePane } from "../../src/Webspring/Preferences/Storage.prefPane";
 import { UpdateReadinessDetails } from "../../src/Webspring/Preferences/Updates.prefPane";
@@ -1045,12 +1045,16 @@ it.each([["incoming", "system", true], ["outgoing", "none", false]] as const)(
 
 it("renders the widget shelf material overlay and its loading status", async () => {
   const runtime = createTestRuntime({ id: "theme-contract-widget" });
-  const widget = defineWidget({
-    id: "archive", title: "Archive", load: () => new Promise<readonly string[]>(() => undefined),
-    view: () => null, whenEmpty: "hide",
-  });
+  class ArchiveWidget extends WSWidget<readonly string[]> {
+    static override id = "archive";
+    static override title = "Archive";
+    static override whenEmpty = "hide" as const;
+    override load() { return new Promise<readonly string[]>(() => undefined); }
+    override renderView() { return null; }
+  }
+  const widget = captureWSWidgetClass(ArchiveWidget);
   try {
-    const view = render(<Host><SynCloudOSProvider runtime={runtime}><WebspringWidgetShelf entries={[{
+    const view = render(<Host><SynCloudOSProvider runtime={runtime}><WSWidgetShelfView entries={[{
       widget, title: "Archive", iconUrl: "/archive.png", emptyMessage: null,
     }]} surface={WebspringSurface.plain("#101418")} /></SynCloudOSProvider></Host>);
     const shelf = view.getByRole("region", { name: "Widgets" });

@@ -156,7 +156,7 @@ Hosts that genuinely build rendering surfaces use `createAFXLayer(surface, sched
 | Before | After |
 | --- | --- |
 | Brushed metal, paper and glow built into the default Board | Generic cotton/spotlight defaults; declare site-owned `background.launcher` and `.shelf` surfaces to retain a custom look |
-| `content`, `contentSources`, `registerContentSource` and `LowerContentShelfView` | `defineWidget` and `WebspringWidgetShelf` |
+| `content`, `contentSources`, `registerContentSource` and `LowerContentShelfView` | `WSWidget` and `WSWidgetShelfView` |
 | An always-present loading shelf | No widgets means no shelf; each widget declares empty behaviour and has bounded loading/error/retry states |
 | `frame.layout: "simple"` or `"defacto"` | Removed; content is full-bleed in the app frame |
 | A hard-coded cotton app body | `NSEWindow.backgroundColour` and `NSEWindow.isOpaque` |

@@ -24,10 +24,15 @@ import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
 import type { SynCloudOSRuntime } from "../../src/SynCloudOS/Runtime/runtimeInstanceTypes";
-import { WebspringWidgetShelf } from "../../src/Webspring/WebspringWidgetShelf";
+import { WSWidgetShelfView } from "../../src/Webspring/WSWidgetShelfView";
 import { WebspringSurface } from "../../src/Webspring/webspringSurface";
-import { WebspringWidgetController, defineWidget } from "../../src/Webspring/webspringWidget";
-import type { WebspringWidget, WebspringWidgetEntry, WebspringWidgetViewProps } from "../../src/Webspring/webspringTypes";
+import {
+  WSWidget,
+  captureWSWidgetClass,
+  wsBindWidgetHost,
+  wsStartWidgetLoad,
+} from "../../src/Webspring/WSWidget";
+import type { WSWidgetEntry } from "../../src/Webspring/webspringTypes";
 import { createTestBundle, createTestRuntime } from "./helpers";
 
 function deferred<T>() {
@@ -37,7 +42,7 @@ function deferred<T>() {
   return { promise, resolve, reject };
 }
 
-function Items({ data }: WebspringWidgetViewProps<readonly string[]>) {
+function Items({ data }: { readonly data: readonly string[] }) {
   return <ul>{data.map((item) => <li key={item}>{item}</li>)}</ul>;
 }
 
@@ -49,163 +54,315 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-describe("defineWidget", () => {
+describe("captureWSWidgetClass", () => {
   it("captures a finite discovery order and defaults it to zero", () => {
-    const input = { id: "ordered", title: "Ordered", load: () => [], view: () => null, whenEmpty: "hide" } as const;
-    expect(defineWidget(input).order).toBe(0);
-    expect(defineWidget({ ...input, order: -10 }).order).toBe(-10);
-    for (const order of [NaN, Infinity, -Infinity, "one"]) expect(() => defineWidget({ ...input, order: order as number })).toThrow(/order/i);
+    class DefaultOrder extends WSWidget<readonly string[]> {
+      static override id = "ordered";
+      static override title = "Ordered";
+      static override whenEmpty = "hide" as const;
+      override load() { return []; }
+      override renderView() { return null; }
+    }
+    class NegativeOrder extends WSWidget<readonly string[]> {
+      static override id = "ordered";
+      static override title = "Ordered";
+      static override order = -10;
+      static override whenEmpty = "hide" as const;
+      override load() { return []; }
+      override renderView() { return null; }
+    }
+    expect(captureWSWidgetClass(DefaultOrder).order).toBe(0);
+    expect(captureWSWidgetClass(NegativeOrder).order).toBe(-10);
+    for (const order of [NaN, Infinity, -Infinity, "one"]) {
+      class InvalidOrder extends WSWidget<readonly string[]> {
+        static override id = "ordered";
+        static override title = "Ordered";
+        static override order = order as number;
+        static override whenEmpty = "hide" as const;
+        override load() { return []; }
+        override renderView() { return null; }
+      }
+      expect(() => captureWSWidgetClass(InvalidOrder)).toThrow(/order/i);
+    }
   });
+
   it("fills in the title, the empty rule and a ten second time limit", () => {
-    const widget = defineWidget({ id: "latest", title: "Latest", load: () => [] as readonly string[], view: Items, whenEmpty: "hide" });
+    class Latest extends WSWidget<unknown> {
+      static override id = "latest";
+      static override title = "Latest";
+      static override whenEmpty = "hide" as const;
+      override load() { return []; }
+      override renderView() { return <Items data={this.data as readonly string[]} />; }
+    }
+    const widget = captureWSWidgetClass(Latest);
     expect(widget.timeout).toBe(10_000);
     expect(widget.title).toEqual({ key: "widgets.latest.title", fallback: "Latest" });
-    expect([[], null, undefined].map(widget.isEmpty)).toEqual([true, true, true]);
-    expect([["one"], "text", 0].map(widget.isEmpty)).toEqual([false, false, false]);
+    const lifetime = new AbortController();
+    const instance = new widget.WidgetClass({ ownerSignal: lifetime.signal });
+    expect([[], null, undefined].map((value) => instance.isEmpty(value))).toEqual([true, true, true]);
+    expect([["one"], "text", 0].map((value) => instance.isEmpty(value))).toEqual([false, false, false]);
+    lifetime.abort();
   });
 
   it("uses the developer's own emptiness rule", () => {
-    const widget = defineWidget({ id: "count", title: "Count", load: () => 0, view: () => null, whenEmpty: "hide", isEmpty: (total) => total === 0 });
-    expect(widget.isEmpty(0)).toBe(true);
-    expect(widget.isEmpty(3)).toBe(false);
+    class Count extends WSWidget<number> {
+      static override id = "count";
+      static override title = "Count";
+      static override whenEmpty = "hide" as const;
+      override load() { return 0; }
+      override isEmpty(total: number) { return total === 0; }
+      override renderView() { return null; }
+    }
+    const lifetime = new AbortController();
+    const instance = new Count({ ownerSignal: lifetime.signal });
+    expect(instance.isEmpty(0)).toBe(true);
+    expect(instance.isEmpty(3)).toBe(false);
+    lifetime.abort();
   });
 
   it("rejects definitions the framework cannot run", () => {
-    const valid = { id: "latest", title: "Latest", load: () => [], view: () => null, whenEmpty: "hide" } as const;
-    expect(() => defineWidget({ ...valid, id: "" })).toThrow(/id/iu);
-    expect(() => defineWidget({ ...valid, load: undefined as never })).toThrow(/load/iu);
-    expect(() => defineWidget({ ...valid, view: undefined as never })).toThrow(/view/iu);
-    expect(() => defineWidget({ ...valid, whenEmpty: undefined as never })).toThrow(/whenEmpty/iu);
-    expect(() => defineWidget({ ...valid, timeout: 0 })).toThrow(/timeout/iu);
+    class BadId extends WSWidget {
+      static override id = "";
+      static override title = "Latest";
+      static override whenEmpty = "hide" as const;
+      override load() { return []; }
+      override renderView() { return null; }
+    }
+    class BadLoad extends (WSWidget as unknown as { new(): WSWidget }) {
+      static id = "latest";
+      static title = "Latest";
+      static whenEmpty = "hide" as const;
+      renderView() { return null; }
+    }
+    class BadView extends WSWidget {
+      static override id = "latest";
+      static override title = "Latest";
+      static override whenEmpty = "hide" as const;
+      override load() { return []; }
+    }
+    class BadEmpty extends WSWidget {
+      static override id = "latest";
+      static override title = "Latest";
+      static override whenEmpty = undefined as never;
+      override load() { return []; }
+      override renderView() { return null; }
+    }
+    class BadTimeout extends WSWidget {
+      static override id = "latest";
+      static override title = "Latest";
+      static override whenEmpty = "hide" as const;
+      static override timeout = 0;
+      override load() { return []; }
+      override renderView() { return null; }
+    }
+    expect(() => captureWSWidgetClass(BadId)).toThrow(/id/iu);
+    expect(() => captureWSWidgetClass(BadLoad)).toThrow(/load/iu);
+    expect(() => captureWSWidgetClass(BadView)).toThrow(/view/iu);
+    expect(() => captureWSWidgetClass(BadEmpty)).toThrow(/whenEmpty/iu);
+    expect(() => captureWSWidgetClass(BadTimeout)).toThrow(/timeout/iu);
   });
 });
 
-describe("WebspringWidgetController", () => {
+describe("WSWidget controller state", () => {
   it("moves from loading to ready with the loaded data", async () => {
     const load = deferred<readonly string[]>();
-    const controller = new WebspringWidgetController([defineWidget({ id: "latest", title: "Latest", load: () => load.promise, view: Items, whenEmpty: "hide" })]);
-    controller.start();
-    expect(controller.getSnapshot()).toEqual([{ status: "loading" }]);
+    class Latest extends WSWidget<readonly string[]> {
+      static override id = "latest";
+      static override title = "Latest";
+      static override whenEmpty = "hide" as const;
+      override load() { return load.promise; }
+      override renderView() { return <Items data={this.data} />; }
+    }
+    const lifetime = new AbortController();
+    const controller = new Latest({ ownerSignal: lifetime.signal });
+    controller[wsStartWidgetLoad]();
+    expect(controller.state).toEqual({ status: "loading" });
     load.resolve(["one"]);
     await settle();
-    expect(controller.getSnapshot()).toEqual([{ status: "ready", data: ["one"] }]);
-    controller.dispose();
+    expect(controller.state).toEqual({ status: "ready", data: ["one"] });
+    lifetime.abort();
   });
 
   it("reports an empty result and a rejected load as different states", async () => {
-    const controller = new WebspringWidgetController([
-      defineWidget({ id: "none", title: "None", load: async () => [] as readonly string[], view: Items, whenEmpty: "hide" }),
-      defineWidget({ id: "broken", title: "Broken", load: async (): Promise<readonly string[]> => { throw new Error("offline"); }, view: Items, whenEmpty: "hide" }),
-    ]);
-    controller.start();
+    class None extends WSWidget<readonly string[]> {
+      static override id = "none";
+      static override title = "None";
+      static override whenEmpty = "hide" as const;
+      override async load() { return []; }
+      override renderView() { return <Items data={this.data} />; }
+    }
+    class Broken extends WSWidget<readonly string[]> {
+      static override id = "broken";
+      static override title = "Broken";
+      static override whenEmpty = "hide" as const;
+      override async load(): Promise<readonly string[]> { throw new Error("offline"); }
+      override renderView() { return <Items data={this.data} />; }
+    }
+    const lifetime = new AbortController();
+    const none = new None({ ownerSignal: lifetime.signal });
+    const broken = new Broken({ ownerSignal: lifetime.signal });
+    none[wsStartWidgetLoad]();
+    broken[wsStartWidgetLoad]();
     await settle();
-    expect(controller.getSnapshot()).toEqual([{ status: "empty" }, { status: "error", reason: "failed" }]);
-    controller.dispose();
+    expect([none.state, broken.state]).toEqual([{ status: "empty" }, { status: "error", reason: "failed" }]);
+    lifetime.abort();
   });
 
   it("turns a load that never settles into a timeout error and aborts it", async () => {
     let signal!: AbortSignal;
-    const controller = new WebspringWidgetController([defineWidget({
-      id: "hung", title: "Hung", view: Items, whenEmpty: "hide",
-      load: (given) => { signal = given; return new Promise<readonly string[]>(() => undefined); },
-    })]);
-    controller.start();
+    class Hung extends WSWidget<readonly string[]> {
+      static override id = "hung";
+      static override title = "Hung";
+      static override whenEmpty = "hide" as const;
+      override load(given: AbortSignal) { signal = given; return new Promise<readonly string[]>(() => undefined); }
+      override renderView() { return <Items data={this.data} />; }
+    }
+    const lifetime = new AbortController();
+    const controller = new Hung({ ownerSignal: lifetime.signal });
+    controller[wsStartWidgetLoad]();
     await vi.advanceTimersByTimeAsync(9_999);
-    expect(controller.getSnapshot()).toEqual([{ status: "loading" }]);
+    expect(controller.state).toEqual({ status: "loading" });
     expect(signal.aborted).toBe(false);
     await vi.advanceTimersByTimeAsync(1);
-    expect(controller.getSnapshot()).toEqual([{ status: "error", reason: "timeout" }]);
+    expect(controller.state).toEqual({ status: "error", reason: "timeout" });
     expect(signal.aborted).toBe(true);
-    controller.dispose();
+    lifetime.abort();
   });
 
   it("honours a widget's own time limit and ignores a result that arrives after it", async () => {
     const late = deferred<readonly string[]>();
-    const controller = new WebspringWidgetController([defineWidget({ id: "slow", title: "Slow", load: () => late.promise, view: Items, whenEmpty: "hide", timeout: 500 })]);
-    controller.start();
+    class Slow extends WSWidget<readonly string[]> {
+      static override id = "slow";
+      static override title = "Slow";
+      static override whenEmpty = "hide" as const;
+      static override timeout = 500;
+      override load() { return late.promise; }
+      override renderView() { return <Items data={this.data} />; }
+    }
+    const lifetime = new AbortController();
+    const controller = new Slow({ ownerSignal: lifetime.signal });
+    controller[wsStartWidgetLoad]();
     await vi.advanceTimersByTimeAsync(500);
-    expect(controller.getSnapshot()).toEqual([{ status: "error", reason: "timeout" }]);
+    expect(controller.state).toEqual({ status: "error", reason: "timeout" });
     late.resolve(["too late"]);
     await settle();
-    expect(controller.getSnapshot()).toEqual([{ status: "error", reason: "timeout" }]);
-    controller.dispose();
+    expect(controller.state).toEqual({ status: "error", reason: "timeout" });
+    lifetime.abort();
   });
 
   it("aborts a pending load when it is disposed, and nothing it reports afterwards is used", async () => {
     const load = deferred<readonly string[]>();
     let signal!: AbortSignal;
-    const controller = new WebspringWidgetController([defineWidget({ id: "latest", title: "Latest", view: Items, whenEmpty: "hide", load: (given) => { signal = given; return load.promise; } })]);
+    class Latest extends WSWidget<readonly string[]> {
+      static override id = "latest";
+      static override title = "Latest";
+      static override whenEmpty = "hide" as const;
+      override load(given: AbortSignal) { signal = given; return load.promise; }
+      override renderView() { return <Items data={this.data} />; }
+    }
+    const lifetime = new AbortController();
+    const controller = new Latest({ ownerSignal: lifetime.signal });
     const listener = vi.fn();
     controller.subscribe(listener);
-    controller.start();
+    controller[wsStartWidgetLoad]();
     listener.mockClear();
     controller.dispose();
     expect(signal.aborted).toBe(true);
+    const disposedNotifications = listener.mock.calls.length;
     load.resolve(["ignored"]);
     await settle();
-    expect(listener).not.toHaveBeenCalled();
+    expect(listener).toHaveBeenCalledTimes(disposedNotifications);
+    lifetime.abort();
   });
 
   it("does not abort a load that has already settled", async () => {
     let signal!: AbortSignal;
-    const controller = new WebspringWidgetController([defineWidget({ id: "latest", title: "Latest", view: Items, whenEmpty: "hide", load: async (given) => { signal = given; return ["one"] as readonly string[]; } })]);
-    controller.start();
+    class Latest extends WSWidget<readonly string[]> {
+      static override id = "latest";
+      static override title = "Latest";
+      static override whenEmpty = "hide" as const;
+      override async load(given: AbortSignal) { signal = given; return ["one"]; }
+      override renderView() { return <Items data={this.data} />; }
+    }
+    const lifetime = new AbortController();
+    const controller = new Latest({ ownerSignal: lifetime.signal });
+    controller[wsStartWidgetLoad]();
     await settle();
     controller.dispose();
     expect(signal.aborted).toBe(false);
+    lifetime.abort();
   });
 
   it("aborts the previous load on refresh and keeps only the newest result", async () => {
     const loads = [deferred<readonly string[]>(), deferred<readonly string[]>()];
     const signals: AbortSignal[] = [];
-    const controller = new WebspringWidgetController([defineWidget({
-      id: "latest", title: "Latest", view: Items, whenEmpty: "hide",
-      load: (given) => { signals.push(given); return loads[signals.length - 1]!.promise; },
-    })]);
-    controller.start();
-    controller.refresh("latest");
+    class Latest extends WSWidget<readonly string[]> {
+      static override id = "latest";
+      static override title = "Latest";
+      static override whenEmpty = "hide" as const;
+      override load(given: AbortSignal) { signals.push(given); return loads[signals.length - 1]!.promise; }
+      override renderView() { return <Items data={this.data} />; }
+    }
+    const lifetime = new AbortController();
+    const controller = new Latest({ ownerSignal: lifetime.signal });
+    controller[wsStartWidgetLoad]();
+    controller.refresh();
     expect(signals.map((signal) => signal.aborted)).toEqual([true, false]);
     loads[1]!.resolve(["fresh"]);
     await settle();
     loads[0]!.resolve(["stale"]);
     await settle();
-    expect(controller.getSnapshot()).toEqual([{ status: "ready", data: ["fresh"] }]);
-    controller.dispose();
+    expect(controller.state).toEqual({ status: "ready", data: ["fresh"] });
+    lifetime.abort();
   });
 
-  it("runs again after being disposed", async () => {
+  it("loads afresh on a new instance after disposal", async () => {
     const load = vi.fn(async () => ["one"] as readonly string[]);
-    const controller = new WebspringWidgetController([defineWidget({ id: "latest", title: "Latest", load, view: Items, whenEmpty: "hide" })]);
-    controller.start();
-    controller.dispose();
-    controller.start();
+    class Latest extends WSWidget<readonly string[]> {
+      static override id = "latest";
+      static override title = "Latest";
+      static override whenEmpty = "hide" as const;
+      override load() { return load(); }
+      override renderView() { return <Items data={this.data} />; }
+    }
+    const first = new Latest({ ownerSignal: new AbortController().signal });
+    first[wsBindWidgetHost]({ timers: globalThis, navigate: async () => ({ status: "completed" }) });
+    first[wsStartWidgetLoad]();
+    first.dispose();
+
+    const lifetime = new AbortController();
+    const second = new Latest({ ownerSignal: lifetime.signal });
+    second[wsStartWidgetLoad]();
     await settle();
     expect(load).toHaveBeenCalledTimes(2);
-    expect(controller.getSnapshot()).toEqual([{ status: "ready", data: ["one"] }]);
-    controller.dispose();
+    expect(second.state).toEqual({ status: "ready", data: ["one"] });
+    lifetime.abort();
   });
 });
 
-describe("WebspringWidgetShelf", () => {
+describe("WSWidgetShelfView", () => {
   const runtimes: SynCloudOSRuntime[] = [];
 
   afterEach(async () => {
     for (const runtime of runtimes.splice(0)) await runtime.dispose({ reason: "test-complete", inFlight: "cancel" });
   });
 
-  const entryFor = (widget: WebspringWidget, title = "Latest"): WebspringWidgetEntry => ({
-    widget,
-    title,
-    iconUrl: null,
-    emptyMessage: widget.whenEmpty === "hide" ? null : widget.whenEmpty.message.fallback ?? null,
-  });
+  const entryFor = (WidgetClass: Parameters<typeof captureWSWidgetClass>[0], title = "Latest"): WSWidgetEntry => {
+    const widget = captureWSWidgetClass(WidgetClass);
+    return {
+      widget,
+      title,
+      iconUrl: null,
+      emptyMessage: widget.whenEmpty === "hide" ? null : widget.whenEmpty.message.fallback ?? null,
+    };
+  };
 
-  function renderShelf(entries: readonly WebspringWidgetEntry[]) {
+  function renderShelf(entries: readonly WSWidgetEntry[]) {
     const runtime = createTestRuntime();
     runtimes.push(runtime);
     return render(
       <SynCloudOSProvider runtime={runtime}>
-        <WebspringWidgetShelf entries={entries} surface={WebspringSurface.plain("#101418")} />
+        <WSWidgetShelfView entries={entries} surface={WebspringSurface.plain("#101418")} />
       </SynCloudOSProvider>,
     );
   }
@@ -223,15 +380,20 @@ describe("WebspringWidgetShelf", () => {
     expect(runtime.store.getSnapshot().loginServices.isAuthorised).toBe(false);
     const results: unknown[] = [];
     let navigation!: Promise<void>;
-    const widget = defineWidget({
-      id: "links", title: "Links", load: () => "Read the note", whenEmpty: "hide",
-      view: ({ data, navigate }: WebspringWidgetViewProps<string>) => <>
-        <a href="/widget-target" onClick={event => { event.preventDefault(); navigation = navigate("/widget-target").then(result => { results.push(result); }); }}>{data}</a>
-        <button onClick={() => { navigation = navigate("/missing-widget-target").then(result => { results.push(result); }); }}>Missing note</button>
-      </>,
-    });
+    class Links extends WSWidget<string> {
+      static override id = "links";
+      static override title = "Links";
+      static override whenEmpty = "hide" as const;
+      override load() { return "Read the note"; }
+      override renderView() {
+        return <>
+          <a href="/widget-target" onClick={(event) => { event.preventDefault(); navigation = this.navigate("/widget-target").then((result) => { results.push(result); }); }}>{this.data}</a>
+          <button onClick={() => { navigation = this.navigate("/missing-widget-target").then((result) => { results.push(result); }); }}>Missing note</button>
+        </>;
+      }
+    }
     render(<SynCloudOSProvider runtime={runtime}>
-      <WebspringWidgetShelf entries={[entryFor(widget)]} surface={WebspringSurface.plain("#101418")} />
+      <WSWidgetShelfView entries={[entryFor(Links)]} surface={WebspringSurface.plain("#101418")} />
     </SynCloudOSProvider>);
     await act(settle);
     await act(async () => {
@@ -260,8 +422,14 @@ describe("WebspringWidgetShelf", () => {
 
   it("shows a loading state, then the developer's view with the loaded data", async () => {
     const load = deferred<readonly string[]>();
-    const widget = defineWidget({ id: "latest", title: "Latest", load: () => load.promise, view: Items, whenEmpty: "hide" });
-    const view = renderShelf([entryFor(widget)]);
+    class Latest extends WSWidget<readonly string[]> {
+      static override id = "latest";
+      static override title = "Latest";
+      static override whenEmpty = "hide" as const;
+      override load() { return load.promise; }
+      override renderView() { return <Items data={this.data} />; }
+    }
+    const view = renderShelf([entryFor(Latest)]);
     await act(settle);
     expect(screen.getByRole("status").textContent).toBe("Loading…");
     expect(view.container.querySelector("[data-widget-id='latest']")?.getAttribute("data-widget-state")).toBe("loading");
@@ -273,17 +441,41 @@ describe("WebspringWidgetShelf", () => {
   });
 
   it("hides the whole shelf when its only widget is empty and set to hide", async () => {
-    const widget = defineWidget({ id: "latest", title: "Latest", load: async () => [] as readonly string[], view: Items, whenEmpty: "hide" });
-    const view = renderShelf([entryFor(widget)]);
+    class Latest extends WSWidget<readonly string[]> {
+      static override id = "latest";
+      static override title = "Latest";
+      static override whenEmpty = "hide" as const;
+      override async load() { return []; }
+      override renderView() { return <Items data={this.data} />; }
+    }
+    const view = renderShelf([entryFor(Latest)]);
     await act(settle);
     expect(view.container.querySelector(".webspring-widget-shelf")).toBeNull();
   });
 
   it("shows the empty message, and keeps showing the widgets that have data", async () => {
-    const empty = defineWidget({ id: "inbox", title: "Inbox", load: async () => [] as readonly string[], view: Items, whenEmpty: { message: "Nothing new." } });
-    const hidden = defineWidget({ id: "quiet", title: "Quiet", load: async () => [] as readonly string[], view: Items, whenEmpty: "hide" });
-    const full = defineWidget({ id: "latest", title: "Latest", load: async () => ["A post"] as readonly string[], view: Items, whenEmpty: "hide" });
-    const view = renderShelf([entryFor(empty, "Inbox"), entryFor(hidden, "Quiet"), entryFor(full)]);
+    class Empty extends WSWidget<readonly string[]> {
+      static override id = "inbox";
+      static override title = "Inbox";
+      static override whenEmpty = { message: "Nothing new." } as const;
+      override async load() { return []; }
+      override renderView() { return <Items data={this.data} />; }
+    }
+    class Hidden extends WSWidget<readonly string[]> {
+      static override id = "quiet";
+      static override title = "Quiet";
+      static override whenEmpty = "hide" as const;
+      override async load() { return []; }
+      override renderView() { return <Items data={this.data} />; }
+    }
+    class Full extends WSWidget<readonly string[]> {
+      static override id = "latest";
+      static override title = "Latest";
+      static override whenEmpty = "hide" as const;
+      override async load() { return ["A post"]; }
+      override renderView() { return <Items data={this.data} />; }
+    }
+    const view = renderShelf([entryFor(Empty, "Inbox"), entryFor(Hidden, "Quiet"), entryFor(Full)]);
     await act(settle);
     expect(screen.getByText("Nothing new.")).toBeTruthy();
     expect(screen.getByText("A post")).toBeTruthy();
@@ -294,8 +486,14 @@ describe("WebspringWidgetShelf", () => {
     const load = vi.fn<(signal: AbortSignal) => Promise<readonly string[]>>()
       .mockRejectedValueOnce(new Error("offline"))
       .mockResolvedValueOnce(["Back online"]);
-    const widget = defineWidget({ id: "latest", title: "Latest", load, view: Items, whenEmpty: "hide" });
-    renderShelf([entryFor(widget)]);
+    class Latest extends WSWidget<readonly string[]> {
+      static override id = "latest";
+      static override title = "Latest";
+      static override whenEmpty = "hide" as const;
+      override load(signal: AbortSignal) { return load(signal); }
+      override renderView() { return <Items data={this.data} />; }
+    }
+    renderShelf([entryFor(Latest)]);
     await act(settle);
     expect(screen.getByRole("alert").textContent).toBe("This could not be loaded.");
     await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Retry" })); await settle(); });
@@ -306,11 +504,14 @@ describe("WebspringWidgetShelf", () => {
 
   it("turns a load that never settles into a timeout error with Retry", async () => {
     let signal!: AbortSignal;
-    const widget = defineWidget({
-      id: "latest", title: "Latest", view: Items, whenEmpty: "hide",
-      load: (given) => { signal = given; return new Promise<readonly string[]>(() => undefined); },
-    });
-    renderShelf([entryFor(widget)]);
+    class Latest extends WSWidget<readonly string[]> {
+      static override id = "latest";
+      static override title = "Latest";
+      static override whenEmpty = "hide" as const;
+      override load(given: AbortSignal) { signal = given; return new Promise<readonly string[]>(() => undefined); }
+      override renderView() { return <Items data={this.data} />; }
+    }
+    renderShelf([entryFor(Latest)]);
     await act(settle);
     expect(screen.getByRole("status")).toBeTruthy();
     await act(async () => { await vi.advanceTimersByTimeAsync(10_000); });
@@ -322,11 +523,14 @@ describe("WebspringWidgetShelf", () => {
 
   it("aborts a pending load when the shelf unmounts", async () => {
     let signal!: AbortSignal;
-    const widget = defineWidget({
-      id: "latest", title: "Latest", view: Items, whenEmpty: "hide",
-      load: (given) => { signal = given; return new Promise<readonly string[]>(() => undefined); },
-    });
-    const view = renderShelf([entryFor(widget)]);
+    class Latest extends WSWidget<readonly string[]> {
+      static override id = "latest";
+      static override title = "Latest";
+      static override whenEmpty = "hide" as const;
+      override load(given: AbortSignal) { signal = given; return new Promise<readonly string[]>(() => undefined); }
+      override renderView() { return <Items data={this.data} />; }
+    }
+    const view = renderShelf([entryFor(Latest)]);
     await act(settle);
     expect(signal.aborted).toBe(false);
     view.unmount();
@@ -335,9 +539,21 @@ describe("WebspringWidgetShelf", () => {
 
   it("shows the error state when a widget's own view throws, and leaves its neighbours alone", async () => {
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
-    const broken = defineWidget({ id: "broken", title: "Broken", load: async () => ["x"] as readonly string[], view: () => { throw new Error("render failed"); }, whenEmpty: "hide" });
-    const fine = defineWidget({ id: "latest", title: "Latest", load: async () => ["A post"] as readonly string[], view: Items, whenEmpty: "hide" });
-    renderShelf([entryFor(broken, "Broken"), entryFor(fine)]);
+    class Broken extends WSWidget<readonly string[]> {
+      static override id = "broken";
+      static override title = "Broken";
+      static override whenEmpty = "hide" as const;
+      override async load() { return ["x"]; }
+      override renderView(): React.ReactNode { throw new Error("render failed"); }
+    }
+    class Fine extends WSWidget<readonly string[]> {
+      static override id = "latest";
+      static override title = "Latest";
+      static override whenEmpty = "hide" as const;
+      override async load() { return ["A post"]; }
+      override renderView() { return <Items data={this.data} />; }
+    }
+    renderShelf([entryFor(Broken, "Broken"), entryFor(Fine)]);
     await act(settle);
     expect(screen.getByRole("alert").textContent).toBe("This could not be loaded.");
     expect(screen.getByText("A post")).toBeTruthy();
