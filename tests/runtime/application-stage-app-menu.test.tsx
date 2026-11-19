@@ -78,7 +78,7 @@ function createAppInfo(presentationMotion: "content" | "host" = "host"): SynClou
     about: { copyright: "© Test", trademark: "", tagline: "A test app" },
     isDisabled: false,
     notifications: { badgeCount: 0, showsNotifications: false },
-    presentation: "appView",
+    presentation: "stage",
     route: "/test",
     window: {
       defaultHeight: 720,

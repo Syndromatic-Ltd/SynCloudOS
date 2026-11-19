@@ -40,14 +40,14 @@ export type {
 } from "../AppSDK/manifest/manifestTypes";
 
 export type SynCloudOSAppType = "internal" | "external" | "system";
-export type SynCloudOSAppPresentation = "appView" | "windowedView" | "systemSheet" | "backgroundService";
+export type SynCloudOSAppPresentation = "stage" | "window" | "systemSheet" | "backgroundService";
 export function normalizeSynCloudOSAppPresentation(
   presentation: unknown,
-  fallback: SynCloudOSAppPresentation = "appView"
+  fallback: SynCloudOSAppPresentation = "stage"
 ): SynCloudOSAppPresentation {
   if (
-    presentation === "appView" ||
-    presentation === "windowedView" ||
+    presentation === "stage" ||
+    presentation === "window" ||
     presentation === "systemSheet" ||
     presentation === "backgroundService"
   ) {
@@ -93,7 +93,7 @@ export interface SynCloudOSAppWindowManifest {
   minHeight: number;
   smoothSurface: WindowSmoothSurfaceConfiguration;
   resizable: boolean;
-  /** Canonical NSE window role used by windowedView presentations. */
+  /** Canonical NSE window role used by window presentations. */
   role: Extract<WindowRole, "standard" | "panel" | "hud">;
   defaultBounds: WindowBounds;
   minimumSize: { readonly width: number; readonly height: number };

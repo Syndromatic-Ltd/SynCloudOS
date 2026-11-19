@@ -63,7 +63,7 @@ describe("ApplicationStageLayer modal domain", () => {
     const app = {
       bundleIdentifier: "com.syndromatic.notes",
       displayName: "Notes",
-      presentation: "appView",
+      presentation: "stage",
       window: { title: "Notes" },
     } as SynCloudOSAppInfo;
     const modal = fixture.manager.create(modalWindow("application-stage-modal", null, { applicationId: "com.syndromatic.notes" }));
@@ -93,7 +93,7 @@ describe("ApplicationStageLayer modal domain", () => {
     const app = {
       bundleIdentifier: "com.syndromatic.notes",
       displayName: "Notes",
-      presentation: "appView",
+      presentation: "stage",
       window: { title: "Notes" },
     } as SynCloudOSAppInfo;
     const modal = fixture.manager.create(modalWindow("system-application-stage-modal", null, {

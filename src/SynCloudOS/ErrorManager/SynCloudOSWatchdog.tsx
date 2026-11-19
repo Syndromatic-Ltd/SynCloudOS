@@ -28,7 +28,7 @@ type WatchdogScope = "root" | "app";
 
 export interface AppPresentationWatchdogContext {
   readonly id: string;
-  readonly kind: "appView" | "window";
+  readonly kind: "stage" | "window";
   readonly zIndex: number;
 }
 

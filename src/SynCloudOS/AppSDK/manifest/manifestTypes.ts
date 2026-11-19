@@ -167,7 +167,7 @@ export interface SynWareRuntimeManifest {
   /** Keep the app registered while blocking launch and module preloading. */
   readonly disabled?: boolean;
   readonly disabledReason?: string;
-  readonly presentation?: "appView" | "windowedView" | "systemSheet" | "backgroundService";
+  readonly presentation?: "stage" | "window" | "systemSheet" | "backgroundService";
   readonly type?: "internal" | "system" | "external";
   readonly policy?: {
     readonly public?: boolean;

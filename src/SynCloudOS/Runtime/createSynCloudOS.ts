@@ -500,7 +500,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
       representedDocument: null,
       toolbar: null,
       role,
-      ...(app.presentation === "appView" && role === "standard" ? { fullScreen: "on", collectionBehavior: "fullScreenPrimary" } as const : {}),
+      ...(app.presentation === "stage" && role === "standard" ? { fullScreen: "on", collectionBehavior: "fullScreenPrimary" } as const : {}),
       style: app.presentation === "systemSheet" ? ["titled", "closable"] : app.window.style,
       smoothSurface: app.window.smoothSurface,
       title: app.window.title,

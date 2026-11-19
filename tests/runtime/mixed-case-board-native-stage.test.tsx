@@ -53,7 +53,7 @@ function notesBundle(events: string[]) {
   return createSynWareDefinitionFromApplicationClass(NotesApplication, {
     schemaVersion: 1, bundleIdentifier: appId, displayName: "Beta Notes", version: "1.0.0",
     routes: [{ path: "/notes", primary: true }],
-    runtime: { presentation: "appView", policy: { public: true, requiresLogin: false } },
+    runtime: { presentation: "stage", policy: { public: true, requiresLogin: false } },
   });
 }
 

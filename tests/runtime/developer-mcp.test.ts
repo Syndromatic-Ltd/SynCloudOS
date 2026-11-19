@@ -117,13 +117,13 @@ describe("developer MCP tools", () => {
   });
   it.each([true, false])("preserves an explicit public=%s policy and windowed presentation", async isPublic => {
     const policy = { public: isPublic, requiresLogin: !isPublic, requiredCapabilities: ["documents.read"], requiredAccessClasses: ["team"] };
-    const result = await scaffold({ projectRoot: project, bundleIdentifier: "org.example.inspector", name: "Inspector", route: "/inspector", policy, presentation: "windowedView" });
-    expect(parseManifest(resolve(project, result.createdPaths[0])).runtime).toEqual({ policy, presentation: "windowedView" });
+    const result = await scaffold({ projectRoot: project, bundleIdentifier: "org.example.inspector", name: "Inspector", route: "/inspector", policy, presentation: "window" });
+    expect(parseManifest(resolve(project, result.createdPaths[0])).runtime).toEqual({ policy, presentation: "window" });
     expect((await validateProject({ projectRoot: project, typescript: false })).ok).toBe(true);
   });
   it("rejects policy fields and presentations outside the installed manifest schema before writing", async () => {
     await expect(scaffold({ projectRoot: project, bundleIdentifier: "org.example.bad", name: "Bad", route: "/bad", policy: { access: "public" } })).rejects.toThrow();
-    await expect(scaffold({ projectRoot: project, bundleIdentifier: "org.example.bad", name: "Bad", route: "/bad", presentation: "window" })).rejects.toThrow();
+    await expect(scaffold({ projectRoot: project, bundleIdentifier: "org.example.bad", name: "Bad", route: "/bad", presentation: "floating" })).rejects.toThrow();
     expect((await inspectProject({ projectRoot: project })).bundles).toEqual([]);
   });
   it.each([false, true])("adds a toolbar item only when requested (%s)", async applicationMenuToolbar => {
@@ -136,7 +136,7 @@ describe("developer MCP tools", () => {
   it.each([
     ["authentication: \"disabled\", application: { bundleIdentifier: \"org.example.primary\" }", undefined, false],
     ["application: { bundleIdentifier: \"org.example.primary\" }", undefined, false],
-    ["authentication: \"optional\", application: { bundleIdentifier: \"org.example.primary\", frame: \"declared\" }", "windowedView", false],
+    ["authentication: \"optional\", application: { bundleIdentifier: \"org.example.primary\", frame: \"declared\" }", "window", false],
     ["authentication: \"required\", application: { bundleIdentifier: \"org.example.primary\" }", undefined, true],
   ])("does not flag supported literal host configurations: %s", async (options, presentation, applicationMenuToolbar) => {
     await scaffold({ projectRoot: project, bundleIdentifier: "org.example.primary", name: "Primary", route: "/primary", presentation, applicationMenuToolbar });

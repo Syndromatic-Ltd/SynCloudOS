@@ -37,7 +37,7 @@ const app = {
 
 const appPresentation = {
   id: "window-memo-journal",
-  kind: "appView",
+  kind: "stage",
   zIndex: 112
 } as never;
 
@@ -149,7 +149,7 @@ describe("SynCloudOSWatchdog component", () => {
       exception: "Error",
       source: "SynCloudOS.AppWatchdog",
       context: {
-        presentation: "appView",
+        presentation: "stage",
         watchdog: "MemoJournal.app presentation",
       }
     });

@@ -581,13 +581,13 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
       if (bundle.manifest.route === "/") {
         throw new TypeError(`Application ${bundle.manifest.bundleIdentifier} needs a non-root entry route; / is the host's alias for ${primaryId}.`);
       }
-      if (normalizeBundleIdentifier(bundle.manifest.bundleIdentifier) !== primaryId && (bundle.manifest.presentation ?? "appView") === "appView") {
-        throw new TypeError(`Application ${bundle.manifest.bundleIdentifier} declares the appView presentation; only the primary application fills an application-only host, so other applications must present in windows.`);
+      if (normalizeBundleIdentifier(bundle.manifest.bundleIdentifier) !== primaryId && (bundle.manifest.presentation ?? "stage") === "stage") {
+        throw new TypeError(`Application ${bundle.manifest.bundleIdentifier} declares the stage presentation; only the primary application fills an application-only host, so other applications must present in windows.`);
       }
     }
     if ((options.application.frame ?? "fullscreen") === "fullscreen") {
       initialBundles = initialBundles.map(bundle => normalizeBundleIdentifier(bundle.manifest.bundleIdentifier) !== primaryId ? bundle : Object.freeze({ ...bundle,
-        manifest: Object.freeze({ ...bundle.manifest, presentation: "appView" as const,
+        manifest: Object.freeze({ ...bundle.manifest, presentation: "stage" as const,
           frame: Object.freeze({ ...bundle.manifest.frame, presentationMotion: "content" as const }),
         }) }));
     }

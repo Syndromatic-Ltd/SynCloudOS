@@ -131,7 +131,7 @@ Use `runtime.disabled: true` to keep an application registered while blocking ro
 | --- | --- |
 | `disabled` | Optional boolean, default `false`. Blocks loading and launch without changing `webspring.visible`. |
 | `disabledReason` | Optional explanation shown for a disabled application. It does not itself disable the application. |
-| `presentation` | `"appView"`, `"windowedView"`, `"systemSheet"` or `"backgroundService"`. |
+| `presentation` | `"stage"`, `"window"`, `"systemSheet"` or `"backgroundService"`. |
 | `type` | `"internal"`, `"system"` or `"external"`. |
 | `policy` | `public`, `requiresLogin`, `requiredRoles`, `requiredCapabilities`, `requiredEntitlements` and `requiredAccessClasses` (`"team"` or `"external"`). These are app access requirements applied by the site configuration profile. |
 | `notifications` | An initial `badgeCount`. |

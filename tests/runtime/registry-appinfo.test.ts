@@ -94,7 +94,7 @@ describe("AppRegistry and AppInfo registration preflight", () => {
       route: "/com.example.hello-world",
       path: "HelloWorld.app/",
       componentKey: "HelloWorld",
-      presentation: "appView",
+      presentation: "stage",
       webspring: {
         visible: true,
         order: 1000,
@@ -123,7 +123,7 @@ describe("AppRegistry and AppInfo registration preflight", () => {
       routes: [{ path: "/renamed-publisher", primary: true }],
       services: [{ id: "notifications", required: true }],
       runtime: {
-        presentation: "windowedView",
+        presentation: "window",
         policy: { requiresLogin: true, requiredCapabilities: ["journal.publisher.open"] },
         notifications: { badgeCount: 2 },
       },
@@ -136,7 +136,7 @@ describe("AppRegistry and AppInfo registration preflight", () => {
 
     expect(manifest).toMatchObject({
       bundleIdentifier: "com.example.renamed-publisher",
-      presentation: "windowedView",
+      presentation: "window",
       policy: { requiresLogin: true, requiredCapabilities: ["journal.publisher.open"] },
       notifications: { showsNotifications: true, badgeCount: 2 },
     });

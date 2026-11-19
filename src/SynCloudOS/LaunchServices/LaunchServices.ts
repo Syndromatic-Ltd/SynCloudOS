@@ -614,11 +614,11 @@ function createRouteAwareMultiSwitch(app: SynCloudOSAppInfo, options: SynCloudOS
   const snapshot = RuntimeStore.getSnapshot();
   const fromAppId = snapshot.application.activeAppId;
   const fromRoute = snapshot.application.routePath;
-  if (!fromAppId || normalizeBundleIdentifier(fromAppId) === normalizeBundleIdentifier(app.bundleIdentifier) || fromRoute === "/" || app.presentation !== "appView") return null;
+  if (!fromAppId || normalizeBundleIdentifier(fromAppId) === normalizeBundleIdentifier(app.bundleIdentifier) || fromRoute === "/" || app.presentation !== "stage") return null;
 
   const fromApp = AppRegistry.getApp(fromAppId);
   const routedFromApp = AppRegistry.getAppForRoute(fromRoute);
-  if (!fromApp || fromApp.presentation !== "appView" || normalizeBundleIdentifier(routedFromApp?.bundleIdentifier) !== normalizeBundleIdentifier(fromAppId)) return null;
+  if (!fromApp || fromApp.presentation !== "stage" || normalizeBundleIdentifier(routedFromApp?.bundleIdentifier) !== normalizeBundleIdentifier(fromAppId)) return null;
 
   return {
     fromAppId,
@@ -875,7 +875,7 @@ function restoreHotMultiSwitchSettle() {
 
 async function runLaunch(request: SynCloudOSLaunchRequestDetails) {
   const app = request.app;
-  const opensAppView = app.presentation === "appView";
+  const opensAppView = app.presentation === "stage";
   let multiSwitchId: string | null = null;
   let multiSwitch: RouteAwareMultiSwitch | null = null;
 

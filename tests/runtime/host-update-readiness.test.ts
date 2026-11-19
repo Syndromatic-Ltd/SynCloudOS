@@ -123,7 +123,7 @@ describe('host readiness owner integration', () => {
   });
   it('invalidates participant evidence for real runtime-owned window creation and closure', async () => {
     const runtime = fixture({ updateReadiness: { inspectParticipants: async () => ready } }), appId = 'com.example.readiness-window';
-    runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: appId, route: '/generated-window', presentation: 'windowedView' }));
+    runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: appId, route: '/generated-window', presentation: 'window' }));
     await runtime.updateReadiness.inspectParticipants(); const first = runtime.updateReadiness.getSnapshot().client.generation;
     const window = await runtime.windows.openApplicationWindow(appId); expect(window).toBeTruthy();
     expect(runtime.updateReadiness.getSnapshot().counts.windows).toBe(1); expect(runtime.updateReadiness.getSnapshot().client.generation).toBeGreaterThan(first); expect(runtime.updateReadiness.getSnapshot().inspection.state).toBe('stale');

@@ -45,7 +45,7 @@ function createWindowedTestRuntime(appId = "com.example.diagnostics") {
   runtime.apps.registerBundle(createTestBundle({
     bundleIdentifier: appId,
     route: `/${appId.split(".").at(-1)}`,
-    presentation: "windowedView",
+    presentation: "window",
   }));
   return runtime;
 }
@@ -69,10 +69,10 @@ describe("Webspring window host", () => {
       id: "runtime:webspring-persistent-outlet",
       environment,
       initialBundles: [createTestBundle({
-        bundleIdentifier: "com.example.diagnostics", route: "/diagnostics", presentation: "appView",
+        bundleIdentifier: "com.example.diagnostics", route: "/diagnostics", presentation: "stage",
         frame: { material: "standard", topBar: "standard", smoothSurface: "off" },
       }, { loadModule }), createTestBundle({
-        bundleIdentifier: "com.example.contact", route: "/contact", presentation: "appView",
+        bundleIdentifier: "com.example.contact", route: "/contact", presentation: "stage",
         frame: { material: "standard", topBar: "standard", smoothSurface: "off" },
       })],
     }));

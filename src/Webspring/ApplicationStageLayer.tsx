@@ -132,7 +132,7 @@ export function ApplicationStageLayer({
     return appIds
       .map((appId, index): ApplicationStagePresentation | null => {
         const app = apps[normalizeBundleIdentifier(appId)];
-        if (!app || app.presentation !== "appView") return null;
+        if (!app || app.presentation !== "stage") return null;
         const main = runtime.windows.list({ applicationId: app.bundleIdentifier }).find(({ record }) =>
           record.role === "standard" && record.documentId === null && record.state === "open");
         if (main && main.record.fullScreen !== "on" && main.record.fullScreen !== "exiting") return null;

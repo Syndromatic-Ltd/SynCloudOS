@@ -63,7 +63,7 @@ describe("Diagnostics Inspector runtime report", () => {
       createTestManifest({
         bundleIdentifier: "com.example.inspector-app",
         route: "/inspector",
-        presentation: "windowedView",
+        presentation: "window",
         requiredServices: ["webspring", "routing"]
       }),
       createTestManifest({

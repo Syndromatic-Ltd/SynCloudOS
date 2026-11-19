@@ -77,8 +77,8 @@ describe("runtime routes, services, windows, and launch services", () => {
   it("opens, focuses, reuses, and closes runtime windows", async () => {
     const { AppRegistry, WindowManager, RuntimeController } = createRuntimeHarness(createTestRuntime());
     AppRegistry.registerMany([
-      createTestManifest({ bundleIdentifier: "com.example.first-window", presentation: "windowedView", window: { title: "First Window" } }),
-      createTestManifest({ bundleIdentifier: "com.example.second-window", presentation: "windowedView", window: { title: "Second Window" } })
+      createTestManifest({ bundleIdentifier: "com.example.first-window", presentation: "window", window: { title: "First Window" } }),
+      createTestManifest({ bundleIdentifier: "com.example.second-window", presentation: "window", window: { title: "Second Window" } })
     ]);
 
     const first = await WindowManager.openApplicationWindow("com.example.first-window");
@@ -105,7 +105,7 @@ describe("runtime routes, services, windows, and launch services", () => {
     const runtime = createTestRuntime();
     const harness = createRuntimeHarness(runtime);
     const appId = `com.example.document-entry-${_entryPoint.startsWith("Launch") ? "launch" : "registry"}`;
-    harness.AppRegistry.registerBundle(createTestBundle({ bundleIdentifier: appId, presentation: "windowedView" }));
+    harness.AppRegistry.registerBundle(createTestBundle({ bundleIdentifier: appId, presentation: "window" }));
     runtime.documents.registerType(noteType);
     const document = await runtime.documents.newDocument({
       documentId: `${appId}-document`,
@@ -184,7 +184,7 @@ describe("runtime routes, services, windows, and launch services", () => {
   it("launches an authorised app through manager lifecycle, windows, and route state", async () => {
     vi.useFakeTimers();
     const { AppRegistry, LaunchServices, LoginServices, RuntimeController, WindowManager } = createRuntimeHarness(createTestRuntime());
-    AppRegistry.registerBundle(createTestBundle({ bundleIdentifier: "com.example.studio", route: "/studio", presentation: "windowedView" }));
+    AppRegistry.registerBundle(createTestBundle({ bundleIdentifier: "com.example.studio", route: "/studio", presentation: "window" }));
     const unlock = unlockRuntime(LoginServices);
 
     const manager = LaunchServices.openApp("com.example.studio");

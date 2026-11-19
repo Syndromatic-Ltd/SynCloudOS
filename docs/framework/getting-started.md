@@ -99,7 +99,7 @@ const host = await mountSynCloudOS({
 import.meta.hot?.dispose(() => host.dispose("hot reload"));
 ```
 
-This mounts the application's real session without Webspring or a top bar. The default `application.frame: "fullscreen"` fills the host element rather than calling the browser's native Fullscreen API, while `"declared"` honours its manifest presentation. Secondary applications must use `windowedView`, `systemSheet` or `backgroundService`, rather than `appView`. The site root opens the primary application's entry route while declared nested routes remain available.
+This mounts the application's real session without Webspring or a top bar. The default `application.frame: "fullscreen"` fills the host element rather than calling the browser's native Fullscreen API, while `"declared"` honours its manifest presentation. Secondary applications must use `window`, `systemSheet` or `backgroundService`, rather than `stage`. The site root opens the primary application's entry route while declared nested routes remain available.
 
 An application can opt into an application menu with `NSEApplication.mainMenu`, `NSEToolbarItem.applicationMenu("gear")`, or both. The [authentication guide](authentication.md) explains the account actions.
 

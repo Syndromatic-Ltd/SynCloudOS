@@ -41,7 +41,7 @@ function Application() {
 const bundle = createSynWare({ manifest: {
   schemaVersion: 1, bundleIdentifier: id, version: "1.0.0", displayName: "Application host",
   routes: [{ path: "/application", primary: true }],
-  runtime: { presentation: "windowedView", policy: { public: true, requiresLogin: false } },
+  runtime: { presentation: "window", policy: { public: true, requiresLogin: false } },
 }, root: Application });
 const shell = createTestWebspring({
   info: { bundleIdentifier: "com.example.application-shell", displayName: "Shell", branding: { name: { key: "site.name", fallback: "Shell" } } },
@@ -70,7 +70,7 @@ function Secondary() {
 const secondary = createSynWare({ manifest: {
   schemaVersion: 1, bundleIdentifier: secondaryId, version: "1.0.0", displayName: "Secondary",
   routes: [{ path: "/secondary", primary: true }],
-  runtime: { presentation: "windowedView", policy: { public: true, requiresLogin: false } },
+  runtime: { presentation: "window", policy: { public: true, requiresLogin: false } },
 }, root: Secondary });
 function applicationWithToolbar(Root: () => React.ReactNode, manifest = bundle.manifest, routeGraph?: typeof bundle.routes) {
   class MainWindow extends NSEWindowController {
@@ -84,7 +84,7 @@ function applicationWithToolbar(Root: () => React.ReactNode, manifest = bundle.m
   return createSynWareDefinitionFromApplicationClass(App, manifest);
 }
 const menuBundle = applicationWithToolbar(Application);
-const privateBundle = applicationWithToolbar(Application, { ...bundle.manifest, runtime: { presentation: "windowedView" } });
+const privateBundle = applicationWithToolbar(Application, { ...bundle.manifest, runtime: { presentation: "window" } });
 async function openApplicationMenu(target: HTMLElement) {
   const trigger = within(target).getByRole("button", { name: "Application Menu" }) as HTMLButtonElement;
   expect(trigger.disabled).toBe(false);
@@ -187,7 +187,7 @@ describe("application-only browser host", () => {
     expect(anonymous).not.toContain("file.write");
   });
   it("opens a primary that is not marked public when sign-in is disabled", async () => {
-    const privateBundle = createSynWare({ manifest: { ...bundle.manifest, runtime: { presentation: "windowedView" } }, root: Application });
+    const privateBundle = createSynWare({ manifest: { ...bundle.manifest, runtime: { presentation: "window" } }, root: Application });
     const { element: target, runtime } = await mount(element(), { bundles: [privateBundle] });
     expect(target.querySelector('[data-testid="application"]')).not.toBeNull();
     expect(runtime.lifecycle.getState(id)).toBe("active");
@@ -197,7 +197,7 @@ describe("application-only browser host", () => {
     expect(vi.mocked(createSynCloudOS).mock.calls.at(-1)![0].applicationDocuments).toMatchObject({ defaultAdapters: expect.any(Object) });
   });
   it("rejects a primary that requires sign-in on a host that disables it", async () => {
-    const gated = createSynWare({ manifest: { ...bundle.manifest, runtime: { presentation: "windowedView", policy: { requiresLogin: true } } }, root: Application });
+    const gated = createSynWare({ manifest: { ...bundle.manifest, runtime: { presentation: "window", policy: { requiresLogin: true } } }, root: Application });
     await expect(mountSynCloudOS(applicationOptions(element(), { bundles: [gated] }))).rejects.toThrow(/requiresLogin.*authentication "disabled"/);
   });
   it("keeps a single application host's own policy profile", async () => {
@@ -222,7 +222,7 @@ describe("application-only browser host", () => {
     expect(WebspringController).not.toHaveBeenCalled();
     expect(window.location.pathname).toBe("/");
     expect(runtime.lifecycle.getState(id)).toBe("active");
-    expect(runtime.apps.getApp(id)?.presentation).toBe("appView");
+    expect(runtime.apps.getApp(id)?.presentation).toBe("stage");
     expect(runtime.windows.list({ applicationId: id })).toHaveLength(1);
     expect(sessions.at(-1)?.app.bundleIdentifier).toBe(id);
     expect(runtime.focus.getActiveAnchors().applicationResponderId).toBe(`application:${id}`);
@@ -248,7 +248,7 @@ describe("application-only browser host", () => {
     }] });
     expect(load).toHaveBeenCalledTimes(1);
     expect(target.querySelector('[data-testid="application"]')).not.toBeNull();
-    expect(runtime.apps.getApp(id)?.presentation).toBe("appView");
+    expect(runtime.apps.getApp(id)?.presentation).toBe("stage");
     expect(runtime.windows.list({ applicationId: id })).toHaveLength(1);
     expect(WebspringController).not.toHaveBeenCalled();
   });
@@ -382,7 +382,7 @@ describe("application-only browser host", () => {
     await expect(mountSynCloudOS(applicationOptions(element(), { application: { bundleIdentifier: "com.example.unknown" } }))).rejects.toThrow(/not registered|unknown application/i);
     const fullscreenOther = createSynWare({ manifest: { schemaVersion: 1, bundleIdentifier: "com.example.other", version: "1.0.0", displayName: "Other",
       routes: [{ path: "/other", primary: true }] }, root: () => null });
-    await expect(mountSynCloudOS(applicationOptions(element(), { bundles: [bundle, fullscreenOther] }))).rejects.toThrow(/com\.example\.other.*appView/);
+    await expect(mountSynCloudOS(applicationOptions(element(), { bundles: [bundle, fullscreenOther] }))).rejects.toThrow(/com\.example\.other.*stage/);
     const reserved = createSynWare({ manifest: { ...bundle.manifest, routes: [{ path: "/", primary: true }] }, root: Application });
     await expect(mountSynCloudOS(applicationOptions(element(), { bundles: [reserved] })).then(host => {
       mounts.push(host); return host;
@@ -582,11 +582,11 @@ describe("application-only browser host", () => {
   });
   it("fills the page by default and keeps the declared frame when asked", async () => {
     const fullscreen = await mount();
-    expect(fullscreen.runtime.apps.getApp(id)?.presentation).toBe("appView");
+    expect(fullscreen.runtime.apps.getApp(id)?.presentation).toBe("stage");
     expect(fullscreen.runtime.windows.list({ applicationId: id })[0]?.record.fullScreen).toBe("on");
     await act(async () => { await fullscreen.host.dispose(); });
     const declared = await mount(element(), { application: { bundleIdentifier: id, frame: "declared" } });
-    expect(declared.runtime.apps.getApp(id)?.presentation).toBe("windowedView");
+    expect(declared.runtime.apps.getApp(id)?.presentation).toBe("window");
     expect(declared.runtime.windows.list({ applicationId: id })).toHaveLength(1);
     expect(declared.element.querySelector("[data-syncloudos-application-host]")).toBeNull();
     expect(document.querySelector('[data-testid="application"]')).not.toBeNull();

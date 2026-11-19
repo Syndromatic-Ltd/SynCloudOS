@@ -62,7 +62,7 @@ it("supplies the same managed font catalogue during class launch and in its moun
   const app = createSynWareDefinitionFromApplicationClass(Application, {
     schemaVersion: 1, bundleIdentifier: appId, displayName: "Managed font class", version: "1.0.0",
     routes: [{ path: "/fonts", primary: true }],
-    runtime: { presentation: "windowedView", policy: { public: true, requiresLogin: false } },
+    runtime: { presentation: "window", policy: { public: true, requiresLogin: false } },
   });
   const element = document.createElement("div");
   document.body.append(element);

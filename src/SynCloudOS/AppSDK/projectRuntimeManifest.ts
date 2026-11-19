@@ -71,7 +71,7 @@ export function projectRuntimeManifest(
   const displayName = cleanString(manifest.displayName);
   const defaults = manifest.windowDefaults ?? {};
   const presentation = manifest.runtime?.presentation
-    ?? (defaults.role === "modal" || defaults.role === "sheet" ? "systemSheet" : "appView");
+    ?? (defaults.role === "modal" || defaults.role === "sheet" ? "systemSheet" : "stage");
   const requiredServices = manifest.services?.filter((service) => service.required !== false).map((service) => service.id) ?? [];
   const optionalServices = manifest.services?.filter((service) => service.required === false).map((service) => service.id) ?? [];
   const serviceIds = new Set(requiredServices);

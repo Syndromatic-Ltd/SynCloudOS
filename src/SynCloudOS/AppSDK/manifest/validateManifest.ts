@@ -111,12 +111,31 @@ function inspectPublicBoundary(
   }
 }
 
-function freezeIssues(errors: readonly ErrorObject[] | null | undefined): readonly SynWareManifestIssue[] {
+// Retired values reject like any other, but the message names their replacement.
+const renamedValues: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+  "/runtime/presentation": { appView: "stage", windowedView: "window" },
+};
+
+function valueAt(manifest: unknown, pointer: string): unknown {
+  return pointer.split("/").slice(1).reduce<unknown>((value, segment) => (value !== null && typeof value === "object"
+    ? (value as Record<string, unknown>)[segment.replaceAll("~1", "/").replaceAll("~0", "~")] : undefined), manifest);
+}
+
+function issueMessage(error: ErrorObject, manifest: unknown): string {
+  if (error.keyword !== "enum") return error.message ?? "The manifest is invalid.";
+  const allowed = (error.params as { readonly allowedValues: readonly unknown[] }).allowedValues.map((value) => JSON.stringify(value));
+  const list = allowed.length > 1 ? `${allowed.slice(0, -1).join(", ")} or ${allowed.at(-1)}` : allowed.join("");
+  const value = valueAt(manifest, error.instancePath);
+  const renamed = typeof value === "string" ? renamedValues[error.instancePath]?.[value] : undefined;
+  return `${renamed ? `${JSON.stringify(value)} is now ${JSON.stringify(renamed)}. ` : ""}Must be ${list}.`;
+}
+
+function freezeIssues(errors: readonly ErrorObject[] | null | undefined, manifest: unknown): readonly SynWareManifestIssue[] {
   return Object.freeze((errors ?? [])
     .map((error) => Object.freeze({
       path: issuePath(error),
       code: issueCode(error),
-      message: error.message ?? "The manifest is invalid.",
+      message: issueMessage(error, manifest),
     }))
     .sort((left, right) => left.path.localeCompare(right.path) || left.code.localeCompare(right.code)));
 }
@@ -154,6 +173,6 @@ export function validateSynWareManifest(value: unknown): SynWareManifestValidati
   return Object.freeze({
     ok: false as const,
     value: null,
-    errors: freezeIssues(validate.errors),
+    errors: freezeIssues(validate.errors, manifest),
   });
 }

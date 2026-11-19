@@ -261,7 +261,7 @@
       "properties": {
         "disabled": { "type": "boolean" },
         "disabledReason": { "type": "string" },
-        "presentation": { "enum": ["appView", "windowedView", "systemSheet", "backgroundService"] },
+        "presentation": { "enum": ["stage", "window", "systemSheet", "backgroundService"] },
         "type": { "enum": ["internal", "system", "external"] },
         "policy": {
           "type": "object",

@@ -98,9 +98,9 @@ export function ApplicationStageHost({
       watchdogName={`${app.packageName} presentation`}
       scope="app"
       app={app}
-      presentation={{ id: stage.id, kind: "appView", zIndex: stage.zIndex }}
+      presentation={{ id: stage.id, kind: "stage", zIndex: stage.zIndex }}
       resetKey={`${stage.id}:${app.bundleIdentifier}`}
-      fallback={() => <AppPresentationErrorFallback app={app} presentation={{ id: stage.id, kind: "appView", zIndex: stage.zIndex }} />}
+      fallback={() => <AppPresentationErrorFallback app={app} presentation={{ id: stage.id, kind: "stage", zIndex: stage.zIndex }} />}
     >
         <ApplicationStageView
           windowContentRegistry={windowContentRegistry}

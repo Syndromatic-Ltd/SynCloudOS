@@ -189,7 +189,7 @@ export async function scaffold(input) {
   const nextSteps=[];
   if (kind === "webspring") return {createdPaths,nextSteps:["The Board is the launcher on every presentation. Set static mainViewController on the WSApplication subclass for another, then run the validate tool."]};
   if (input.policy?.public!==true) nextSteps.push('With authentication "disabled", the host opens the primary application publicly. With "optional", set runtime.policy.public to true if it must open before anyone signs in. Do not make private applications public unless that access is intended.');
-  if (input.presentation===undefined) nextSteps.push('For a secondary windowed application, set runtime.presentation to "windowedView"; the default appView is for the primary application.');
+  if (input.presentation===undefined) nextSteps.push('For a secondary windowed application, set runtime.presentation to "window"; the default "stage" is for the primary application.');
   if (testFallback) nextSteps.push(`The project has no ${testFallback.join(", ")}, so Contents/__tests__/app.test.tsx is a smoke test. Install vitest, jsdom and @testing-library/react as dev dependencies to test the application with createSynWareTestHost from @syndromatic/syncloudos/sdk/testing.`);
   nextSteps.push("Review the generated manifest and run the validate tool before registering the bundle.");
   return {createdPaths,nextSteps};

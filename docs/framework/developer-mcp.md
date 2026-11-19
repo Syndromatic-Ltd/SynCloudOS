@@ -93,7 +93,7 @@ Output: `{ ok: boolean, findings: [{ file, line, column?, rule, severity?, messa
 
 Uses the **same static manifest parser, import checks and directory validator as the repository's `validate-synware.mjs`**, compiled against the installed SDK's manifest schema and exports. It does not evaluate `Info.ts`. It then invokes the consumer's installed TypeScript compiler with `--noEmit --pretty false`; missing TypeScript or compiler failure is a finding, never a passing check. Set `typescript: false` only when intentionally requesting manifest/bundle checks without project type checking. Schema/import findings currently identify the containing file at line 1; TypeScript findings preserve the compiler's line and column.
 
-For a directly imported `mountSynCloudOS` call with inline, literal host options, validation also reports `synware.application-menu` on a primary manifest missing `applicationMenu: { trigger: "content" }` when the app fills the page under `"optional"` or `"required"` authentication. This includes the default fullscreen frame and `frame: "declared"` with an `appView` presentation. A declared windowed primary or disabled authentication does not require this trigger.
+For a directly imported `mountSynCloudOS` call with inline, literal host options, validation also reports `synware.application-menu` on a primary manifest missing `applicationMenu: { trigger: "content" }` when the app fills the page under `"optional"` or `"required"` authentication. This includes the default fullscreen frame and `frame: "declared"` with a `stage` presentation. A declared windowed primary or disabled authentication does not require this trigger.
 
 With `authentication: "disabled"` (the default), nobody can sign in, so the host opens the primary application publicly whatever its manifest says. A primary that declares `runtime: { policy: { requiresLogin: true } }` contradicts that and fails to mount; validation reports it as `synware.public-policy` on its `Info.ts`.
 
@@ -153,7 +153,7 @@ Creates a conventional project folder. By default (`authoring: "separate"`), `Na
 
 For example, scaffold a public primary with `{ bundleIdentifier: "org.example.notes", name: "Notes", route: "/notes", policy: { public: true }, applicationMenuToolbar: true }`. The scaffold adds a gear item to its main window toolbar. Apps choose which menu surfaces they expose.
 
-For a secondary windowed inspector, choose `presentation: "windowedView"` and declare only the access policy it actually needs. Omitting presentation also returns that windowed-secondary reminder; it is distinct from the desktop/tablet/mobile device presentations.
+For a secondary windowed inspector, choose `presentation: "window"` and declare only the access policy it actually needs. Omitting presentation also returns that windowed-secondary reminder; it is distinct from the desktop/tablet/mobile device presentations.
 
 Names cannot contain path separators or Windows reserved device names. Targets must stay inside the project, cannot traverse symbolic links, and the entire target bundle must be absent. Existing bundles are never merged or overwritten. Review generated files and call `validate` before registering the app.
 

@@ -40,7 +40,7 @@ import type {
 } from "./appInfoTypes";
 
 const appTypes: SynCloudOSAppType[] = ["internal", "external", "system"];
-const presentations: SynCloudOSAppPresentation[] = ["appView", "windowedView", "systemSheet", "backgroundService"];
+const presentations: SynCloudOSAppPresentation[] = ["stage", "window", "systemSheet", "backgroundService"];
 const defaultPresentationMotion: SynCloudOSPresentationMotionManifest = { presentationMotion: "host" };
 
 type NormalisedSynCloudOSAppManifest = SynCloudOSAppManifest & {
@@ -304,7 +304,7 @@ export function validateAppManifest(manifest: unknown): SynCloudOSAppInfoValidat
     manifest.presentation !== undefined &&
     !presentations.includes(manifest.presentation as SynCloudOSAppPresentation)
   ) {
-    addIssue(issues, "error", "manifest.presentation.invalid", "presentation", "presentation must be appView, windowedView, systemSheet, or backgroundService.");
+    addIssue(issues, "error", "manifest.presentation.invalid", "presentation", "presentation must be stage, window, systemSheet, or backgroundService.");
   }
 
   const motion = getNestedRecord(manifest, "frame")?.presentationMotion;
@@ -392,8 +392,8 @@ function normaliseManifest(manifest: SynCloudOSAppManifest, notes: SynCloudOSApp
   const description = cleanString(manifest.description);
   const componentKey = cleanString(manifest.componentKey);
   const type = manifest.type;
-  const presentation = normalizeSynCloudOSAppPresentation(manifest.presentation, "appView");
-  note(notes, "presentation", manifest.presentation, presentation, "Missing presentation values default to appView.");
+  const presentation = normalizeSynCloudOSAppPresentation(manifest.presentation, "stage");
+  note(notes, "presentation", manifest.presentation, presentation, "Missing presentation values default to stage.");
 
   const requiredServices = normaliseServiceList(manifest.requiredServices, "requiredServices", notes);
   const optionalServices = normaliseServiceList(manifest.optionalServices, "optionalServices", notes);
@@ -466,7 +466,7 @@ export function explainAppInfo(appInfo: SynCloudOSAppInfo): SynCloudOSAppInfoExp
     route: appInfo.route,
     path: appInfo.path,
     type: appInfo.type,
-    presentation: normalizeSynCloudOSAppPresentation(appInfo.presentation, "appView"),
+    presentation: normalizeSynCloudOSAppPresentation(appInfo.presentation, "stage"),
     visibleOnWebspring: appInfo.webspring.visible,
     hasAccessToRequiredServices: appInfo.hasAccessToRequiredServices,
     unavailableServices,

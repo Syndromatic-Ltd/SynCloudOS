@@ -196,7 +196,7 @@ function WindowSurfaceLayer({ contentRegistry, onDiagnostic, binding }: WindowLa
           const { record } = runtime.windows.select(id);
           if (record.role !== "standard" || (record.fullScreen !== "on" && record.fullScreen !== "exiting")) return true;
           const app = record.applicationId ? runtime.apps.getApp(record.applicationId) : null;
-          return app?.presentation !== "appView";
+          return app?.presentation !== "stage";
         }).map((windowControllerId) => (
           <WindowHost
             key={windowControllerId}

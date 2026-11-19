@@ -35,7 +35,7 @@ describe("runtime lifecycle authority", () => {
   it("removes application and window undo owners on app unregistration without replacing a live app owner", async () => {
     const runtime = createTestRuntime();
     const { AppRegistry, AppManagerController, WindowManager } = createRuntimeHarness(runtime);
-    AppRegistry.register(createTestManifest({ bundleIdentifier: "com.example.owned-app", presentation: "windowedView" }));
+    AppRegistry.register(createTestManifest({ bundleIdentifier: "com.example.owned-app", presentation: "window" }));
     const owner = { kind: "application" as const, id: "com.example.owned-app" };
     const original = runtime.undo.get(owner);
     expect(original).not.toBeNull();

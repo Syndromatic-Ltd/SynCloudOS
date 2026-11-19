@@ -78,7 +78,7 @@ export function ApplicationHost({ applicationId, authentication, home }: Applica
   const app = appInfo[normalizeBundleIdentifier(applicationId)];
   const appName = app ? locale.appName(app) : applicationId;
   // A primary declared as windowed (frame: "declared") presents in its window.
-  const fillsPage = app?.presentation === "appView";
+  const fillsPage = app?.presentation === "stage";
   const presented = normalizeBundleIdentifier(activeAppId) === normalizeBundleIdentifier(applicationId) && state === "active";
   const behindAnotherApplication = state === "suspended" && activeAppId !== null && normalizeBundleIdentifier(activeAppId) !== normalizeBundleIdentifier(applicationId);
   const mounted = fillsPage && (state === "active" || state === "suspended");
