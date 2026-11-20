@@ -303,9 +303,8 @@
   --nse-metal-rim-crest: inset 0 1px 0 var(--nse-metal-rim-top);
 }
 
-:scope[data-nse-colour-scheme-resolved="dark"] [data-nse-part="header"]:where(
-  [data-nse-control="window"][data-nse-chrome="metal"]:not([data-nse-control="window"][data-nse-part="background"]:not([data-nse-colour-scheme-resolved]) *)
-),
+/* Metal follows the scheme its window inherits, as NSWindow.appearance = nil does. */
+:scope[data-nse-colour-scheme-resolved="dark"] [data-nse-part="header"]:where([data-nse-control="window"][data-nse-chrome="metal"]),
 :scope[data-nse-colour-scheme-resolved="dark"][data-nse-part="header"]:where([data-nse-control="window"][data-nse-chrome="metal"]) {
   --nse-metal-header-mid: url("./chrome/metal/dark/header-middle.png");
   --nse-metal-header-endcap-l: url("./chrome/metal/dark/header-endcap-left.png");

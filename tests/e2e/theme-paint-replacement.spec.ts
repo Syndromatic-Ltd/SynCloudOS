@@ -198,6 +198,15 @@ test("the popover backdrop blurs through the arrow and stays inside the outline"
   expect(await sample(lhs + 20, arrowY)).toEqual(outsideBefore);
 });
 
+test("a metal titlebar follows the colour scheme its window inherits", async ({ page }) => {
+  const header = page.locator("#stage-metal-titlebar [data-nse-chrome=\"metal\"]" + part("header"));
+  const artwork = () => header.evaluate(element => getComputedStyle(element).getPropertyValue("--nse-metal-header-mid"));
+  await openSpecimen(page, "stage-metal-titlebar", "none", { scheme: "dark" });
+  expect(await artwork()).toContain("/metal/dark/");
+  await openSpecimen(page, "stage-metal-titlebar", "none", { scheme: "light" });
+  expect(await artwork()).not.toContain("/metal/dark/");
+});
+
 test("undrawn states keep base paint", async ({ page }) => {
   for (const [specimen, name] of [["tabs", "cell"], ["segments", "bezel"]]) {
     const selector = "#" + specimen + " " + part(name) + ":not(" + selected + ")";

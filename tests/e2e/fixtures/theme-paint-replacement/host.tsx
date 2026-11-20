@@ -24,6 +24,7 @@ import { NSEToolbarController } from "../../../../src/NSE/Toolbars/NSEToolbarCon
 import { ToolbarView } from "../../../../src/NSE/Toolbars/ToolbarView";
 import type { ToolbarPreferences, ToolbarRuntimePort } from "../../../../src/NSE/Toolbars/toolbarTypes";
 import { StandardWindowView } from "../../../../src/NSE/Windows/StandardWindowView";
+import { WindowTitlebarView } from "../../../../src/NSE/Windows/WindowTitlebarView";
 import type { WindowRecord } from "../../../../src/SynCloudOS/Windows";
 import { WSStageWindowFrame, WSStageWindowSurface } from "../../../../src/Webspring/WSStageWindowHost";
 import { createStaticPresentationPort } from "../../../fixtures/presentationTraits";
@@ -101,6 +102,16 @@ function StageSpecimen() {
     <WSStageWindowFrame zIndex={1} keyWindow>
       <WSStageWindowSurface material="metal" hasTitlebar>
         <p>Application content</p>
+      </WSStageWindowSurface>
+    </WSStageWindowFrame>
+  </div>;
+}
+
+function StageMetalTitlebarSpecimen() {
+  return <div style={{ position: "relative", width: 640, height: 300 }}>
+    <WSStageWindowFrame zIndex={1} keyWindow>
+      <WSStageWindowSurface material="metal" hasTitlebar>
+        <WindowTitlebarView document={{ title: "Software", subtitle: "", documentEdited: false }} isKeyWindow material="metal" />
       </WSStageWindowSurface>
     </WSStageWindowFrame>
   </div>;
@@ -205,6 +216,7 @@ const specimens = {
   "window-standard": () => <WindowSpecimen chrome="standard" />,
   "window-metal": () => <WindowSpecimen chrome="metal" />,
   "stage-window": () => <StageSpecimen />,
+  "stage-metal-titlebar": () => <StageMetalTitlebarSpecimen />,
   toolbar: () => <ToolbarView composition="children" position="inline" style={{ width: 600 }}><NSEButton title="Open" /></ToolbarView>,
   "toolbar-item": () => <ConfiguredToolbar />,
   tabs: () => <Tabs />,
