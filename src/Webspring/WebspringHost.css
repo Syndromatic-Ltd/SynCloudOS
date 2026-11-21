@@ -1115,6 +1115,7 @@
 .webspring-app-view-body-surface-sourcelist[data-full-size-content] > [data-window-titlebar] {
   position: absolute;
   inset: 0 0 auto;
+  z-index: 2;
 }
 
 .webspring-app-view-body-surface-sourcelist .webspring-app-view-fullbleed-content {

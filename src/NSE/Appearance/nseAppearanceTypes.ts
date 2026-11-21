@@ -22,7 +22,7 @@ import type { CSSProperties } from "react";
 import type { NSEAppTheme } from "../Theme/NSEAppTheme";
 import type { NSETheme } from "../Theme/NSETheme";
 
-export type NSEAppearanceName = "aqua" | "darkAqua";
+export type NSEAppearanceName = "light" | "dark";
 
 export type NSEChromeAppearance = "standard" | "metal" | "hud";
 export type NSEColourScheme = "auto" | "light" | "dark";

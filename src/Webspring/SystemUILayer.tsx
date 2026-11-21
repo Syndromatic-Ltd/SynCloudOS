@@ -140,7 +140,7 @@ function ReturnDecisionDialog({
             />
             <NSEButton
               title={keepLabel}
-              appearance={alertAppearance === "dark" ? undefined : "aqua"}
+              appearance={alertAppearance === "dark" ? undefined : "light"}
               isEnabled={!busy}
               className="nse-system-alert-action-button nse-return-keep"
               onClick={runKeep}

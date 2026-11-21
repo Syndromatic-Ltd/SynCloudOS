@@ -120,12 +120,12 @@ it("projects and updates the appearance of an application-modal alert", () => {
 
   try {
     act(() => {
-      session.app.appearance = new NSEAppearance("darkAqua", { theme });
+      session.app.appearance = new NSEAppearance("dark", { theme });
       void center.present({ title: "Owned alert" }, { ownerAppId: appId });
     });
     const dialog = screen.getByRole("alertdialog");
     expect(dialog.closest("[data-nse-app-theme]")?.getAttribute("data-nse-app-theme")).toBe(theme.bundleIdentifier);
-    expect(dialog.getAttribute("data-nse-appearance-name")).toBe("darkAqua");
+    expect(dialog.getAttribute("data-nse-appearance-name")).toBe("dark");
     expect(dialog.closest("[data-nse-system-surface]")).toBeNull();
 
     act(() => { session.app.appearance = null; });

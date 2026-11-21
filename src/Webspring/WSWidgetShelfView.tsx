@@ -199,7 +199,7 @@ export function WSWidgetShelfView(props: WSWidgetShelfViewProps = {}) {
           ? locale.t("widgets.timeout", "This is taking too long to load.")
           : locale.t("widgets.error", "This could not be loaded.")}
       </p>
-      <NSEButton appearance="darkAqua" title={retry} onClick={() => widget.refresh()} />
+      <NSEButton appearance="dark" title={retry} onClick={() => widget.refresh()} />
     </>;
     let body: ReactNode;
     if (state.status === "loading") {

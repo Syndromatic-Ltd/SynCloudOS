@@ -71,7 +71,7 @@ export type NSEImagePosition = "noImage" | "imageOnly" | "imageLeading" | "image
 /** NSControl.StateValue. */
 export type NSEControlStateValue = "on" | "off" | "mixed";
 
-/** NSAppearance.Name: the light (`aqua`) or dark (`darkAqua`) appearance a view draws in. */
+/** NSAppearance.Name: the `light` or `dark` appearance a view draws in. */
 import type { NSEAppearanceName } from "../../Appearance/nseAppearanceTypes";
 
 /**
@@ -142,8 +142,8 @@ export type ButtonTone = "medium" | "light" | "dark" | "affirmative" | "negative
 /** @internal The AppKit properties that draw a button with one of the theme's arts. */
 export function nseButtonToneProps(tone: ButtonTone | undefined): Pick<NSEButtonProps, "appearance" | "keyEquivalent" | "hasDestructiveAction"> {
   switch (tone) {
-    case "light": return { appearance: "aqua" };
-    case "dark": return { appearance: "darkAqua" };
+    case "light": return { appearance: "light" };
+    case "dark": return { appearance: "dark" };
     case "affirmative": return { keyEquivalent: "\r" };
     case "negative": return { hasDestructiveAction: true };
     default: return {};
@@ -162,8 +162,8 @@ const TONE_HAPTICS = {
 function toneFor(props: Pick<NSEButtonProps, "hasDestructiveAction" | "keyEquivalent" | "appearance" | "bezelStyle">): ButtonTone {
   if (props.hasDestructiveAction) return "negative";
   if (props.keyEquivalent === "\r") return "affirmative";
-  if (props.appearance === "aqua") return "light";
-  if (props.appearance === "darkAqua") return "dark";
+  if (props.appearance === "light") return "light";
+  if (props.appearance === "dark") return "dark";
   return props.bezelStyle === "texturedRounded" ? "dark" : "medium";
 }
 

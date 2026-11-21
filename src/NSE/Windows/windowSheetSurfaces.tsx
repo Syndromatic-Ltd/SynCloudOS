@@ -78,7 +78,7 @@ export function WindowAlertContent({ request, scopeId, onChoose }: {
             title={button.label}
             hasDestructiveAction={button.role === "destructive"}
             keyEquivalent={button.role === "default" ? "\r" : undefined}
-            appearance={button.role === "destructive" || button.role === "default" || appearance === "dark" ? undefined : "aqua"}
+            appearance={button.role === "destructive" || button.role === "default" || appearance === "dark" ? undefined : "light"}
             className="nse-system-alert-action-button"
             data-nse-alert-primary={button === primary ? "" : undefined}
             onClick={() => onChoose(button.id)}

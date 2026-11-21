@@ -139,7 +139,7 @@ export function ViewAppearanceBoundary({ appearance, children, projectBoundary =
     if (!hasAppearance) return inherited;
     const appTheme = selected && "kind" in selected ? selected : undefined;
     const systemTheme = selected && !("kind" in selected) ? freezeNSETheme(selected) : undefined;
-    const scheme = name === undefined ? undefined : name === "darkAqua" ? "dark" : "light";
+    const scheme = name;
     return Object.freeze({
       ...inherited,
       theme: systemTheme ?? inherited.theme,

@@ -17,7 +17,7 @@ const outer = freezeNSETheme({ ...atmoTheme, bundleIdentifier: "com.example.oute
 const inner = freezeNSETheme({ ...atmoTheme, bundleIdentifier: "com.example.inner", displayName: "Inner", images: { NSGoBackTemplate: { files: { "1x": "/inner.svg", "2x": "/inner@2x.svg" }, pointSize: { width: 17, height: 19 }, template: true } }, presentation: { ...atmoTheme.presentation, login: "plain" } });
 describe("theme boundaries", () => {
   it("resets every semantic colour inside nested appearances without inheriting the outer palette", () => {
-    render(<NSEAppearanceProvider theme={outer} colourScheme="light"><span data-testid="outer" /><NSEView appearance={new NSEAppearance("darkAqua", { theme: inner })}><span data-testid="inner" /></NSEView></NSEAppearanceProvider>);
+    render(<NSEAppearanceProvider theme={outer} colourScheme="light"><span data-testid="outer" /><NSEView appearance={new NSEAppearance("dark", { theme: inner })}><span data-testid="inner" /></NSEView></NSEAppearanceProvider>);
     const outerBoundary = screen.getByTestId("outer").closest<HTMLElement>("[data-nse-theme]")!;
     const innerBoundary = screen.getByTestId("inner").closest<HTMLElement>("[data-nse-theme]")!;
     expect(innerBoundary.dataset.nseTheme).toBe(inner.bundleIdentifier);
@@ -58,7 +58,7 @@ describe("theme boundaries", () => {
     });
     render(<NSEAppearanceProvider theme={custom} colourScheme="dark">
       <span data-testid="outer-images" />
-      <NSEView appearance={new NSEAppearance("aqua", { theme: atmoTheme })}><span data-testid="inner-images" /></NSEView>
+      <NSEView appearance={new NSEAppearance("light", { theme: atmoTheme })}><span data-testid="inner-images" /></NSEView>
     </NSEAppearanceProvider>);
     const outerBoundary = screen.getByTestId("outer-images").closest<HTMLElement>("[data-nse-theme]")!;
     const innerBoundary = screen.getByTestId("inner-images").closest<HTMLElement>("[data-nse-theme]")!;

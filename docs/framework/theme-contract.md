@@ -63,7 +63,7 @@ Contract version 1: 72 controls, 48 colours.
 - Parts: `alignment-glyph`, `arrow`, `background`, `bezel`, `cancel`, `cell`, `choose`, `colour-chip`, `content`, `effect-colour`, `effect-colour-face`, `effect-glyph`, `field`, `image`, `indicator`, `label`, `path-item`, `tab-icon`, `title`, `title-measurement`
 - States: `enabled=false`, `focused`, `highlighted`, `hovered`, `selected`, `state=mixed`, `state=off`, `state=on`, `tracking=false`, `tracking=true`
 - Variants:
-  - `data-nse-appearance-name`: `aqua`, `darkAqua`
+  - `data-nse-appearance-name`: `dark`, `light`
   - `data-nse-bezel-style`: `disclosure`, `rounded`, `texturedRounded`
   - `data-nse-button-type`: `momentaryPushIn`, `pushOnPushOff`, `switch`, `toggle`
   - `data-nse-chrome`: `hud`
@@ -310,7 +310,7 @@ Contract version 1: 72 controls, 48 colours.
 - Parts: `actions`, `backdrop`, `background`, `content`, `group`, `image`, `label`, `status`, `surface`, `title`, `value`
 - States: `state=off`
 - Variants:
-  - `data-nse-appearance-name`: `aqua`, `darkAqua`
+  - `data-nse-appearance-name`: `dark`, `light`
   - `data-nse-chrome`: `standard`
   - `data-nse-role`: `copyright`, `empty`, `lead-note`, `note`, `notifications`, `preference-body`, `preference-list`, `preference-pane`, `tagline`, `trademark`
   - `data-nse-style`: `about`, `preferences`
@@ -358,7 +358,7 @@ Contract version 1: 72 controls, 48 colours.
 - Parts: `content`, `fill`, `image`, `status`, `track`
 - States: none
 - Variants:
-  - `data-nse-appearance-name`: `aqua`
+  - `data-nse-appearance-name`: `light`
   - `data-nse-background-style`: `emphasised`, `normal`
   - `data-nse-control-size`: `large`, `regular`, `small`
   - `data-nse-indeterminate`: `false`, `true`
@@ -515,7 +515,7 @@ Contract version 1: 72 controls, 48 colours.
 - Parts: `actions`, `backdrop`, `background`, `badge`, `content`, `decoration`, `disclosure`, `image`, `label`, `title`
 - States: none
 - Variants:
-  - `data-nse-appearance-name`: `aqua`
+  - `data-nse-appearance-name`: `light`
   - `data-nse-chrome`: `standard`
   - `data-nse-presentation`: `sheet`
   - `data-nse-role`: `details`

@@ -158,7 +158,7 @@ export function SystemAlert({
     typeof error.context?.mailtoFallback === "string"
       ? `mailto:${error.context.mailtoFallback}`
       : null;
-  const actionAppearance: NSEAppearanceName | undefined = appearance === "dark" ? undefined : "aqua";
+  const actionAppearance: NSEAppearanceName | undefined = appearance === "dark" ? undefined : "light";
   const titleId = useId();
   const messageId = useId();
   const icon = getSystemAlertIcon(error, useHostSiteBranding(), appearance, applicationIcon);

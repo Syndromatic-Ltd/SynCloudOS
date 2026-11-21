@@ -183,7 +183,7 @@ export function DateRangeEntry({ value, defaultValue = null, onValueChange, ...p
           onClick={commitText}
         />
         <NSEButton
-          appearance="aqua"
+          appearance="light"
           title="Cancel"
           isEnabled={!disabled}
           aria-label={`Cancel ${props["aria-label"].toLowerCase()}`}
@@ -196,7 +196,7 @@ export function DateRangeEntry({ value, defaultValue = null, onValueChange, ...p
       title="Apply"
       isEnabled={!(!draft || invalid || disabled || props.readOnly)}
       onClick={applyCalendar}
-    /><NSEButton appearance="aqua" title="Cancel" onClick={cancel} /></div></section></NSEPopover> : null}
+    /><NSEButton appearance="light" title="Cancel" onClick={cancel} /></div></section></NSEPopover> : null}
     {props.name ? <input type="hidden" name={props.name} value={serialise(current)} /> : null}
     {invalid && !open ? <span role="alert" data-nse-part="error">Enter a valid date range.</span> : null}
   </section>;

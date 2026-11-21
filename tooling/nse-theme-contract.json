@@ -196,8 +196,8 @@
       ],
       "variants": {
         "appearance-name": [
-          "aqua",
-          "darkAqua"
+          "dark",
+          "light"
         ],
         "bezel-style": [
           "disclosure",
@@ -1067,8 +1067,8 @@
       ],
       "variants": {
         "appearance-name": [
-          "aqua",
-          "darkAqua"
+          "dark",
+          "light"
         ],
         "chrome": [
           "standard"
@@ -1210,7 +1210,7 @@
       "states": [],
       "variants": {
         "appearance-name": [
-          "aqua"
+          "light"
         ],
         "background-style": [
           "emphasised",
@@ -1661,7 +1661,7 @@
       "states": [],
       "variants": {
         "appearance-name": [
-          "aqua"
+          "light"
         ],
         "chrome": [
           "standard"

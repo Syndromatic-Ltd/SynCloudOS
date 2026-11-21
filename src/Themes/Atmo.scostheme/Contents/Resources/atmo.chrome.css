@@ -553,8 +553,8 @@
   filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.32));
 }
 
-[data-nse-control="system-alert"][data-nse-part="background"][data-nse-appearance-name="aqua"] [data-nse-part="decoration"] > [data-nse-part="badge"],
-:where(:scope):is([data-nse-control="system-alert"][data-nse-part="background"][data-nse-appearance-name="aqua"]) [data-nse-part="decoration"] > [data-nse-part="badge"] {
+[data-nse-control="system-alert"][data-nse-part="background"][data-nse-appearance-name="light"] [data-nse-part="decoration"] > [data-nse-part="badge"],
+:where(:scope):is([data-nse-control="system-alert"][data-nse-part="background"][data-nse-appearance-name="light"]) [data-nse-part="decoration"] > [data-nse-part="badge"] {
   filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.2));
 }
 

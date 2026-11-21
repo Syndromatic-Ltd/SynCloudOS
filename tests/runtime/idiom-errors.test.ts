@@ -26,7 +26,7 @@ const pairs = [
   ["button glyph", "idiom.button-glyph", '<NSEButton title="‹ Sections" />', '<NSEButton title="Sections" image={backImage} />'],
   ["system artwork", "idiom.system-artwork", '<svg aria-label="Back"><path d="M 10 2 L 2 10 L 10 18" /></svg>', '<svg aria-label="Company logo"><path d="M 10 2 L 2 10 L 10 18" /></svg>'],
   ["eyebrow", "idiom.eyebrow", '<header><p>WORKSPACE</p><h1>Field Lab</h1></header>', '<header><p>Workspace</p><h1>Field Lab</h1></header>'],
-  ["appearance", "idiom.appearance", '<NSEButton appearance="aqua" />', '<NSEView appearance={customAppearance}><NSEButton /></NSEView>'],
+  ["appearance", "idiom.appearance", '<NSEButton appearance="light" />', '<NSEView appearance={customAppearance}><NSEButton /></NSEView>'],
 ] as const;
 
 describe("definite authoring errors", () => {
@@ -128,8 +128,8 @@ describe("definite authoring errors", () => {
   });
   it("allows source-list group headers and rejects explicit forced system appearance objects", () => {
     expect(inspectIdiomErrors({file:"view.tsx", text:'<NSEOutlineView><div role="group"><p>FOLDERS</p><h2>Saved</h2></div></NSEOutlineView>'})).toEqual([]);
-    expect(inspectIdiomErrors({file:"view.tsx", text:'<NSEView appearance={new NSEAppearance("darkAqua")} />'}).some(x => x.rule === "idiom.appearance")).toBe(true);
-    expect(inspectIdiomErrors({file:"view.tsx", text:'<NSEView appearance={new NSEAppearance("aqua", {theme: customTheme})} />'})).toEqual([]);
+    expect(inspectIdiomErrors({file:"view.tsx", text:'<NSEView appearance={new NSEAppearance("dark")} />'}).some(x => x.rule === "idiom.appearance")).toBe(true);
+    expect(inspectIdiomErrors({file:"view.tsx", text:'<NSEView appearance={new NSEAppearance("light", {theme: customTheme})} />'})).toEqual([]);
   });
   it("names only actual public symbols at their exact SDK entry", () => {
     const root = fileURLToPath(new URL("../../", import.meta.url));

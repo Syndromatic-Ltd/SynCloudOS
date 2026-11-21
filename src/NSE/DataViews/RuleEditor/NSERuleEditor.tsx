@@ -197,7 +197,7 @@ export function NSERuleEditor({ value, defaultValue = EMPTY_VALUE, onChange, onV
         <NSEPopUpButton label={`Match ${row.id}`} labelHidden value={row.operator} isEnabled={!locked} items={matchOptions} onValueChange={(operator) => publishChildren(replaceAtPath(root.children, path, { ...row, operator: operator as "all" | "any" | "none" }))} />
         <span className="nse-rule-phrase" aria-hidden="true">of the following are true</span>
         <NSEButton
-          appearance="aqua"
+          appearance="light"
           title="−"
           isEnabled={!locked}
           className="nse-rule-remove"
@@ -208,14 +208,14 @@ export function NSERuleEditor({ value, defaultValue = EMPTY_VALUE, onChange, onV
       <div className="nse-rule-rows">{renderRows(row.children, path)}</div>
       <div className="nse-rule-footer">
         <NSEButton
-          appearance="aqua"
+          appearance="light"
           title="Add Rule"
           isEnabled={!(locked || fields.length === 0)}
           aria-label={`Add rule to ${row.id}`}
           onClick={() => addRule(path)}
         />
         <NSEButton
-          appearance="aqua"
+          appearance="light"
           title="Add Group"
           isEnabled={!locked}
           aria-label={`Add group to ${row.id}`}
@@ -227,7 +227,7 @@ export function NSERuleEditor({ value, defaultValue = EMPTY_VALUE, onChange, onV
     if (row.kind === "constant") return <div key={row.id} role="group" aria-label={`Rule ${label}`} tabIndex={-1} data-rule-id={row.id} className="nse-rule-row" data-nse-part="row">
       <NSEPopUpButton label={`Constant ${label}`} labelHidden value={String(row.value)} isEnabled={!locked} items={[{ value: "true", title: "Always true" }, { value: "false", title: "Always false" }]} onValueChange={(next) => publishChildren(replaceAtPath(root.children, path, { ...row, value: next === "true" }))} />
       <NSEButton
-        appearance="aqua"
+        appearance="light"
         title="−"
         isEnabled={!locked}
         className="nse-rule-remove"
@@ -241,7 +241,7 @@ export function NSERuleEditor({ value, defaultValue = EMPTY_VALUE, onChange, onV
     }}>
       <RuleComparisonControls row={row} label={label} fields={fields} operators={operators} templates={templates} locale={locale} readOnly={effectiveReadOnly} disabled={effectiveDisabled} onChange={(next) => publishChildren(replaceAtPath(root.children, path, next))} />
       <NSEButton
-        appearance="aqua"
+        appearance="light"
         title="−"
         isEnabled={!locked}
         className="nse-rule-remove"
@@ -262,18 +262,18 @@ export function NSERuleEditor({ value, defaultValue = EMPTY_VALUE, onChange, onV
       <div role="group" aria-label="Rule rows" className="nse-rule-rows">{renderRows(root.children)}</div>
       <div className="nse-rule-footer">
         <NSEButton
-          appearance="aqua"
+          appearance="light"
           title="Add Rule"
           isEnabled={!(locked || fields.length === 0)}
           aria-label="Add rule"
 
           onClick={() => addRule([])}
         />
-        <NSEButton appearance="aqua" title="Add Group" isEnabled={!locked} aria-label="Add group" onClick={() => addGroup([])} />
+        <NSEButton appearance="light" title="Add Group" isEnabled={!locked} aria-label="Add group" onClick={() => addGroup([])} />
       </div>
     </>}
     {effectiveState.kind !== "ready" && <span role="status">{effectiveState.message}</span>}
-    {(effectiveState.kind === "denied" || effectiveState.kind === "error") && effectiveState.retry && <NSEButton appearance="aqua" title="Retry" onClick={effectiveState.retry} />}
-    {effectiveState.kind === "interrupted" && effectiveState.resume && <NSEButton appearance="aqua" title="Resume" onClick={effectiveState.resume} />}
+    {(effectiveState.kind === "denied" || effectiveState.kind === "error") && effectiveState.retry && <NSEButton appearance="light" title="Retry" onClick={effectiveState.retry} />}
+    {effectiveState.kind === "interrupted" && effectiveState.resume && <NSEButton appearance="light" title="Resume" onClick={effectiveState.resume} />}
   </div>;
 }

@@ -193,7 +193,7 @@ import { NSEStackView, NSEView } from "@syndromatic/syncloudos/nse";
 import { NSEAppearance } from "@syndromatic/syncloudos/nse/appearance";
 import "@syndromatic/syncloudos/nse/styles.css";
 ${themeImport}
-createRoot(document.getElementById("root")!).render(<NSEView appearance={new NSEAppearance("aqua", { theme: appearance })}><NSEStackView aria-label="Theme probe"><span>Theme ${theme}</span></NSEStackView></NSEView>);`);
+createRoot(document.getElementById("root")!).render(<NSEView appearance={new NSEAppearance("light", { theme: appearance })}><NSEStackView aria-label="Theme probe"><span>Theme ${theme}</span></NSEStackView></NSEView>);`);
       runNode([join(root, "node_modules/typescript/bin/tsc"), "-p", "tsconfig.json"], root);
       runNode([join(root, "node_modules/vite/bin/vite.js"), "build"], root, { log: join(root, `theme-${theme}.log`) });
       const ids = JSON.parse(readFileSync(join(root, "resolved-modules.json"), "utf8"));

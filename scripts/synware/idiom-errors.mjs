@@ -223,7 +223,7 @@ export function inspectIdiomErrors({ file, text, regions = rendererOwnedRegions(
       const options = constructor ? unwrap(constructor.arguments?.[1]) : null;
       const customTheme = options && (!ts.isObjectLiteralExpression(options) || options.properties.some(property => ts.isSpreadAssignment(property) || (propertyName(property.name) === "theme" && !(ts.isPropertyAssignment(property) && (property.initializer.kind === ts.SyntaxKind.NullKeyword || property.initializer.getText(source) === "undefined")))));
       const namedAppearance = literal(appearance) ?? (constructor && !customTheme ? literal(constructor.arguments?.[0]) : null);
-      if (/^NSE/u.test(tag) && ["aqua", "darkAqua"].includes(namedAppearance)) at(node, "idiom.appearance", "appearance", "A named system appearance is forced instead of inherited.");
+      if (/^NSE/u.test(tag) && ["light", "dark"].includes(namedAppearance)) at(node, "idiom.appearance", "appearance", "A named system appearance is forced instead of inherited.");
       if (/^NSE/u.test(tag)) for (const property of node.attributes.properties) {
         if (!ts.isJsxAttribute(property)) continue;
         const key = propertyName(property.name), value = literal(attribute(node, key));

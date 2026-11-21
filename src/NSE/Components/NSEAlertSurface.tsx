@@ -67,7 +67,7 @@ export function AlertSurface({
 
   return (
     <div
-      data-nse-control="system-alert" data-nse-part="background" data-nse-appearance-name={appearance === "light" ? "aqua" : "darkAqua"} {...attributes}
+      data-nse-control="system-alert" data-nse-part="background" data-nse-appearance-name={appearance} {...attributes}
       {...getSmoothSurfaceThemeHooks(smoothSurface)}
       ref={alertRef}
       className={`nse-control-alert is-${appearance} ${surfaceProps.className ?? ""}`.trim()}

@@ -609,9 +609,9 @@ describe("closed NSE graphics", () => {
     expect(host().style.getPropertyValue("--nse-shadow-offset-x")).toBe("2px");
     expect(host().style.getPropertyValue("--nse-shadow-blur")).toBe("6px");
     expect(host().dataset.nseShadowSuppressed).toBeUndefined();
-    rerender(<NSEView shadow={shadow} appearance={new NSEAppearance("aqua", { transparency: "reduced" })}><button>Focus</button></NSEView>);
+    rerender(<NSEView shadow={shadow} appearance={new NSEAppearance("light", { transparency: "reduced" })}><button>Focus</button></NSEView>);
     expect(host().dataset.nseShadowSuppressed).toBe("true");
-    rerender(<NSEView shadow={shadow} appearance={new NSEAppearance("aqua", { contrast: "forced" })}><button>Focus</button></NSEView>);
+    rerender(<NSEView shadow={shadow} appearance={new NSEAppearance("light", { contrast: "forced" })}><button>Focus</button></NSEView>);
     expect(host().dataset.nseShadowSuppressed).toBe("true");
     const button = container.querySelector("button")!;
     button.focus();

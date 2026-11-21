@@ -23,6 +23,7 @@ import React from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ViewAppearanceBoundary } from "../../src/NSE/Appearance/NSEAppearanceProvider";
+import { NSEAppearance } from "../../src/NSE/Appearance/NSEAppearance";
 import { WindowTitlebarView } from "../../src/NSE/Windows/WindowTitlebarView";
 import { ApplicationMenuToolbarButton, WindowApplicationMenuContext } from "../../src/NSE/Toolbars/ApplicationMenuToolbarButton";
 import { nseTopBarGlyphs } from "../../src/NSE/Windows/Chrome/topBarAssets";
@@ -34,7 +35,7 @@ describe("Window titlebar document and controls", () => {
     const toggle = vi.fn();
     const open = vi.fn();
     const { container } = render(<WindowApplicationMenuContext.Provider value={{ open: false, activate: open }}>
-      <ViewAppearanceBoundary appearance={{ name: "darkAqua" }}>
+      <ViewAppearanceBoundary appearance={{ name: "dark" }}>
         <WindowTitlebarView material="metal" isKeyWindow
           document={{ title: "My post", subtitle: "Publisher", documentEdited: false, toolbarStyle: "unified" }}
           controls={<button type="button">Return to Webspring</button>}
@@ -65,5 +66,22 @@ describe("Window titlebar document and controls", () => {
       document={{ title: "App", subtitle: "", documentEdited: false }} toolbar={<ApplicationMenuToolbarButton glyph={choice} />} />);
     const glyph = container.querySelector<HTMLElement>(".nse-app-topbar-button-icon")!;
     expect(glyph.style.getPropertyValue("--nse-topbar-glyph")).toBe(`url(${JSON.stringify(mask)})`);
+  });
+
+  it("marks transparent stage titlebars and hides the title when titleVisibility is hidden", () => {
+    const { container } = render(<WindowTitlebarView material="metal" isKeyWindow
+      document={{ title: "Studio", subtitle: "", documentEdited: false, titlebarAppearsTransparent: true, titleVisibility: "hidden", fullSizeContentView: true }} />);
+    const surface = container.querySelector<HTMLElement>("[data-window-titlebar]");
+    expect(surface?.getAttribute("data-nse-transparent")).toBe("true");
+    expect(surface?.getAttribute("data-titlebar-transparent")).toBe("true");
+    const heading = container.querySelector<HTMLElement>("[data-window-title]");
+    expect(heading?.hidden).toBe(true);
+  });
+
+  it("uses light and dark appearance names and rejects removed aqua names", () => {
+    expect(new NSEAppearance("light").name).toBe("light");
+    expect(new NSEAppearance("dark").name).toBe("dark");
+    expect(() => new NSEAppearance("aqua" as never)).toThrow(TypeError);
+    expect(() => new NSEAppearance("darkAqua" as never)).toThrow(TypeError);
   });
 });

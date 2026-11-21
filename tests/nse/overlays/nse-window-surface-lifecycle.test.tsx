@@ -249,7 +249,7 @@ describe("canonical window-surface lifecycle", () => {
         async dismiss() { return { outcome: "closed" }; },
       }), []);
       return <OverlayHarness>
-        <ViewAppearanceBoundary appearance={themed ? new NSEAppearance("darkAqua", { theme }) : new NSEAppearance("aqua")}>
+        <ViewAppearanceBoundary appearance={themed ? new NSEAppearance("dark", { theme }) : new NSEAppearance("light")}>
           <NSEPopover id="themed-popover" open anchor={null} parentWindowControllerId={null} windowBridge={bridge}
             contentSize={{ width: 280, height: 180 }} onOpenChange={() => undefined}>
             <Contents />

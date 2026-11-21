@@ -74,8 +74,8 @@
   box-shadow: 0 28px 42px rgba(0, 0, 0, 0.64), inset 0 1px 0 rgba(255, 255, 255, 0.16);
 }
 
-[data-nse-part="background"]:where([data-nse-control="system-alert"], [data-nse-control="panel"][data-nse-style="about"])[data-nse-appearance-name="aqua"],
-:where(:scope):is([data-nse-part="background"]:where([data-nse-control="system-alert"], [data-nse-control="panel"][data-nse-style="about"])[data-nse-appearance-name="aqua"]) {
+[data-nse-part="background"]:where([data-nse-control="system-alert"], [data-nse-control="panel"][data-nse-style="about"])[data-nse-appearance-name="light"],
+:where(:scope):is([data-nse-part="background"]:where([data-nse-control="system-alert"], [data-nse-control="panel"][data-nse-style="about"])[data-nse-appearance-name="light"]) {
   --nse-alert-body-text: rgba(24, 35, 50, 0.86);
   --nse-alert-link-text: #24497a;
   --nse-alert-details-text: #1d2b3b;
@@ -143,8 +143,8 @@
   --nse-about-icon-shadow: rgba(0, 0, 0, 0.45);
 }
 
-[data-nse-control="panel"]:where([data-nse-part="background"][data-nse-style="about"])[data-nse-appearance-name="aqua"],
-:where(:scope):is([data-nse-control="panel"]:where([data-nse-part="background"][data-nse-style="about"])[data-nse-appearance-name="aqua"]) {
+[data-nse-control="panel"]:where([data-nse-part="background"][data-nse-style="about"])[data-nse-appearance-name="light"],
+:where(:scope):is([data-nse-control="panel"]:where([data-nse-part="background"][data-nse-style="about"])[data-nse-appearance-name="light"]) {
   --nse-about-tagline-text: rgba(24, 35, 50, 0.86);
   --nse-about-version-text: rgba(24, 35, 50, 0.72);
   --nse-about-legal-text: rgba(24, 35, 50, 0.76);
@@ -956,9 +956,9 @@
     0 calc(var(--nse-atmo-alert-px) * 26) calc(var(--nse-atmo-alert-px) * 44) rgba(0, 0, 0, 0.58);
 }
 
-:scope [data-nse-part="background"]:where([data-nse-control="system-alert"] *):where(:not([data-nse-control="system-alert"] [data-nse-control] *))[data-nse-appearance-name="aqua"],
-:scope:is([data-nse-part="background"]:where([data-nse-control="system-alert"] *):where(:not([data-nse-control="system-alert"] [data-nse-control] *))[data-nse-appearance-name="aqua"]),
-:scope[data-nse-part="background"]:where([data-nse-control="system-alert"] *):where(:not([data-nse-control="system-alert"] [data-nse-control] *))[data-nse-appearance-name="aqua"] {
+:scope [data-nse-part="background"]:where([data-nse-control="system-alert"] *):where(:not([data-nse-control="system-alert"] [data-nse-control] *))[data-nse-appearance-name="light"],
+:scope:is([data-nse-part="background"]:where([data-nse-control="system-alert"] *):where(:not([data-nse-control="system-alert"] [data-nse-control] *))[data-nse-appearance-name="light"]),
+:scope[data-nse-part="background"]:where([data-nse-control="system-alert"] *):where(:not([data-nse-control="system-alert"] [data-nse-control] *))[data-nse-appearance-name="light"] {
   --nse-atmo-alert-body: linear-gradient(#b9b9b9 0, #dfdfdf calc(var(--nse-atmo-alert-px) * 10), #dfdfdf 29%, #939393 93%, #909090 100%);
   --nse-atmo-alert-rim: rgba(0, 0, 0, 0.075);
   color: #182332;
@@ -977,9 +977,9 @@
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.72), 0 1px 1px rgba(255, 255, 255, 0.16);
 }
 
-:scope [data-nse-part="background"]:where([data-nse-control="system-alert"] *):where(:not([data-nse-control="system-alert"] [data-nse-control] *))[data-nse-appearance-name="aqua"] [data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-part="actions"]>*):where([data-nse-part="backdrop"] *)[data-nse-appearance-name="aqua"]:where(:not([data-nse-has-destructive-action],[data-nse-role="default"])),
-:scope:is([data-nse-part="background"]:where([data-nse-control="system-alert"] *):where(:not([data-nse-control="system-alert"] [data-nse-control] *))[data-nse-appearance-name="aqua"]) [data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-part="actions"]>*):where([data-nse-part="backdrop"] *)[data-nse-appearance-name="aqua"]:where(:not([data-nse-has-destructive-action],[data-nse-role="default"])),
-:scope[data-nse-part="background"]:where([data-nse-control="system-alert"] *):where(:not([data-nse-control="system-alert"] [data-nse-control] *))[data-nse-appearance-name="aqua"] [data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-part="actions"]>*):where([data-nse-part="backdrop"] *)[data-nse-appearance-name="aqua"]:where(:not([data-nse-has-destructive-action],[data-nse-role="default"])) {
+:scope [data-nse-part="background"]:where([data-nse-control="system-alert"] *):where(:not([data-nse-control="system-alert"] [data-nse-control] *))[data-nse-appearance-name="light"] [data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-part="actions"]>*):where([data-nse-part="backdrop"] *)[data-nse-appearance-name="light"]:where(:not([data-nse-has-destructive-action],[data-nse-role="default"])),
+:scope:is([data-nse-part="background"]:where([data-nse-control="system-alert"] *):where(:not([data-nse-control="system-alert"] [data-nse-control] *))[data-nse-appearance-name="light"]) [data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-part="actions"]>*):where([data-nse-part="backdrop"] *)[data-nse-appearance-name="light"]:where(:not([data-nse-has-destructive-action],[data-nse-role="default"])),
+:scope[data-nse-part="background"]:where([data-nse-control="system-alert"] *):where(:not([data-nse-control="system-alert"] [data-nse-control] *))[data-nse-appearance-name="light"] [data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-part="actions"]>*):where([data-nse-part="backdrop"] *)[data-nse-appearance-name="light"]:where(:not([data-nse-has-destructive-action],[data-nse-role="default"])) {
   color: #332;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.76);
 }
@@ -1006,9 +1006,9 @@
     inset 0 0 calc(var(--nse-atmo-alert-px) * 8) var(--nse-atmo-alert-rim),
     0 calc(var(--nse-atmo-alert-px) * 26) calc(var(--nse-atmo-alert-px) * 44) rgba(0, 0, 0, 0.58);
 }
-:scope [data-nse-control="system-alert"][data-nse-presentation="sheet"] [data-nse-part="background"]:where([data-nse-control="system-alert"] *):where(:not([data-nse-control="system-alert"] [data-nse-control] *))[data-nse-appearance-name="aqua"]::before,
-:scope:is([data-nse-control="system-alert"][data-nse-presentation="sheet"]) [data-nse-part="background"]:where([data-nse-control="system-alert"] *):where(:not([data-nse-control="system-alert"] [data-nse-control] *))[data-nse-appearance-name="aqua"]::before,
-:scope[data-nse-control="system-alert"][data-nse-presentation="sheet"] [data-nse-part="background"]:where([data-nse-control="system-alert"] *):where(:not([data-nse-control="system-alert"] [data-nse-control] *))[data-nse-appearance-name="aqua"]::before {
+:scope [data-nse-control="system-alert"][data-nse-presentation="sheet"] [data-nse-part="background"]:where([data-nse-control="system-alert"] *):where(:not([data-nse-control="system-alert"] [data-nse-control] *))[data-nse-appearance-name="light"]::before,
+:scope:is([data-nse-control="system-alert"][data-nse-presentation="sheet"]) [data-nse-part="background"]:where([data-nse-control="system-alert"] *):where(:not([data-nse-control="system-alert"] [data-nse-control] *))[data-nse-appearance-name="light"]::before,
+:scope[data-nse-control="system-alert"][data-nse-presentation="sheet"] [data-nse-part="background"]:where([data-nse-control="system-alert"] *):where(:not([data-nse-control="system-alert"] [data-nse-control] *))[data-nse-appearance-name="light"]::before {
   box-shadow:
     inset 0 10px 12px -6px rgba(0, 0, 0, 0.5),
     inset 0 1px 0 rgba(0, 0, 0, 0.35),

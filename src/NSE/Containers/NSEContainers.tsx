@@ -182,7 +182,7 @@ export function NSEDrawer({
         actions={(
           <>
             {actions}
-            <NSEButton appearance="aqua" title={closeLabel} className="nse-container-drawer-close" onClick={() => setOpen(false)} />
+            <NSEButton appearance="light" title={closeLabel} className="nse-container-drawer-close" onClick={() => setOpen(false)} />
           </>
         )}
         footer={footer}

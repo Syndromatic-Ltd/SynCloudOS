@@ -20,7 +20,7 @@ import { NSEAppearance } from "@syndromatic/syncloudos/nse/appearance";
 import { atmoTheme } from "@syndromatic/syncloudos/nse/themes/atmo";
 import { NSEButton, NSEView } from "@syndromatic/syncloudos/nse";
 
-const appearance = new NSEAppearance("aqua", { theme: atmoTheme });
+const appearance = new NSEAppearance("light", { theme: atmoTheme });
 
 export function Page() {
   return (
@@ -31,7 +31,7 @@ export function Page() {
 }
 ```
 
-Use `"darkAqua"` for the dark appearance. Views without an appearance take their superview's, as `NSView.effectiveAppearance` does.
+Use `"dark"` for the dark appearance. Views without an appearance take their superview's, as `NSView.effectiveAppearance` does.
 
 ## Axes of appearance
 

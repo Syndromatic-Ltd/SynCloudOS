@@ -344,7 +344,7 @@ export function TimeEntry({
     <GraphicalClock aria-label={label} locale={locale} timeZone={timeZone} date={date ?? { year: 1970, month: 1, day: 1 }} value={current} isEnabled={!(disabled || readOnly)} minuteStep={minuteStep} hourCycle={hourCycle} onValueChange={change} />
   ) : (
     <NSEButton
-      appearance="aqua"
+      appearance="light"
       title="Set time"
       isEnabled={!(disabled || readOnly)}
       aria-label={`Set ${label.toLowerCase()}`}

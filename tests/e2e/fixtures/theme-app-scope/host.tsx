@@ -30,7 +30,7 @@ const redChrome: NSEAppTheme = themes["com.example.red-chrome"];
 const parameters = new URLSearchParams(location.search);
 const appearance = parameters.get("appearance") === "system" ? undefined
   : parameters.get("appearance") === "nameless" ? new NSEAppearance({ theme: redChrome })
-  : new NSEAppearance("aqua", { theme: redChrome });
+  : new NSEAppearance("light", { theme: redChrome });
 const presentation = createStaticPresentationPort({ width: 1040, height: 800, reducedMotion: true });
 const responderId = "app-scope";
 const colourAnchorId = "app-scope-colour";

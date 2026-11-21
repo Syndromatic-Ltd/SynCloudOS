@@ -301,8 +301,8 @@ describe("HapticsFX feedback preservation", () => {
       const onClick = vi.fn();
       const rendered = render(createElement("div", null,
         createElement(NSEButton, { title: "Medium", onClick }),
-        createElement(NSEButton, { title: "Light", appearance: "aqua", onClick }),
-        createElement(NSEButton, { title: "Dark", appearance: "darkAqua", onClick }),
+        createElement(NSEButton, { title: "Light", appearance: "light", onClick }),
+        createElement(NSEButton, { title: "Dark", appearance: "dark", onClick }),
         createElement(NSEButton, { title: "OK", keyEquivalent: "\r", onClick }),
         createElement(NSEButton, { title: "Delete", hasDestructiveAction: true, onClick }),
         createElement(NSEButton, { title: "Silent", hasDestructiveAction: true, haptic: false, onClick }),

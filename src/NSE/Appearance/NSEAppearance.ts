@@ -36,11 +36,11 @@ export interface NSEAppearanceOptions {
 
 /**
  * NSAppearance: how a view and its subviews are drawn. Set one on a view with
- * `<NSEView appearance={new NSEAppearance("darkAqua")}>`; views without one take their superview's,
+ * `<NSEView appearance={new NSEAppearance("dark")}>`; views without one take their superview's,
  * as `NSView.effectiveAppearance` does.
  */
 export class NSEAppearance {
-  /** NSAppearance.name: `aqua` (light) or `darkAqua` (dark). */
+  /** NSAppearance.name: `light` or `dark`. */
   readonly name: NSEAppearanceName | undefined;
   readonly theme: NSETheme | NSEAppTheme | undefined;
   readonly chrome: NSEChromeAppearance | undefined;
@@ -52,7 +52,7 @@ export class NSEAppearance {
   constructor(options: NSEAppearanceOptions);
   constructor(nameOrOptions: NSEAppearanceName | NSEAppearanceOptions, options: NSEAppearanceOptions = {}) {
     const inheritsName = typeof nameOrOptions === "object" && nameOrOptions !== null;
-    if (!inheritsName && nameOrOptions !== "aqua" && nameOrOptions !== "darkAqua") {
+    if (!inheritsName && nameOrOptions !== "light" && nameOrOptions !== "dark") {
       throw new TypeError(`Unknown appearance name "${String(nameOrOptions)}".`);
     }
     const configured = inheritsName ? nameOrOptions : options;

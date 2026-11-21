@@ -93,7 +93,7 @@ export function LoginWindow({ title = "Sign in", branding, methods = [], authent
           <section data-nse-part="bezel" data-nse-role="plate" className="nse-login-window-card nse-login-window-face nse-login-window-face-front" data-login-face="signin"><span data-nse-part="background" className="nse-login-window-texture" aria-hidden="true" /><span data-nse-part="decoration" className="nse-login-window-texture-turn" aria-hidden="true" /><div data-nse-part="content" className="nse-login-window-content">
             <img data-nse-part="image" className="nse-login-window-logo" src={logoUrl ?? loginWindowAssets.logo} alt={logoUrl ? branding?.logoAlt : ""} aria-hidden={logoUrl ? undefined : "true"} draggable={false} /><h1 data-nse-part="title" id="nse-login-window-title">{title}</h1>
             <div data-nse-part="content" className="nse-login-form" aria-live="polite"><p id="nse-login-window-error" data-nse-part="error" className="nse-login-error" role="alert">{activeError ?? (authenticationStatus === "checking" ? "Checking your session…" : "\u00a0")}</p><div data-nse-part="actions" className="nse-login-action">{methods.map((method) => <NSEButton
-              appearance="aqua"
+              appearance="light"
               title={method.label}
               image={<>{authenticationStatus === "authenticating" ? <Spinner size="small" tone="dark" label="Loading" /> : null}{method.iconUrl ? <img data-nse-part="image" data-nse-role="sign-in" className="nse-login-provider-icon" src={method.iconUrl} alt="" aria-hidden={true} draggable={false} /> : null}</>}
               isEnabled={!(pending || Boolean(configurationError) || authenticationStatus === "authenticating")}
@@ -101,7 +101,7 @@ export function LoginWindow({ title = "Sign in", branding, methods = [], authent
               key={method.id}
               type="button"
               onClick={() => { void Promise.resolve(onMethodSignIn?.(method.id)).catch(() => undefined); }}
-            />)}{onCancel ? <NSEButton appearance="aqua" title={cancelLabel} isEnabled={!pending} type="button" onClick={onCancel} /> : null}</div></div>
+            />)}{onCancel ? <NSEButton appearance="light" title={cancelLabel} isEnabled={!pending} type="button" onClick={onCancel} /> : null}</div></div>
           </div></section>
         </div></div></div>
       </div>

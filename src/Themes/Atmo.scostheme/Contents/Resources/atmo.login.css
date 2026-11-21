@@ -272,13 +272,13 @@
     drop-shadow(0 1.25px 0.25px rgba(255, 255, 255, 0.8));
 }
 
-[data-nse-control="login-window"][data-nse-part="background"] [data-nse-part="actions"]>[data-nse-control="button"][data-nse-appearance-name="aqua"] {
+[data-nse-control="login-window"][data-nse-part="background"] [data-nse-part="actions"]>[data-nse-control="button"][data-nse-appearance-name="light"] {
   --nse-atmo-btn-bevel: #f9f9f9;
   --nse-atmo-btn-fill-a: #b2b2b2;
   --nse-atmo-btn-fill-b: #e9e9e9;
 }
 
-[data-nse-control="login-window"][data-nse-part="background"] [data-nse-part="actions"] [data-nse-control="progress-indicator"][data-nse-style="spinning"][data-nse-appearance-name="aqua"] {
+[data-nse-control="login-window"][data-nse-part="background"] [data-nse-part="actions"] [data-nse-control="progress-indicator"][data-nse-style="spinning"][data-nse-appearance-name="light"] {
   filter: none;
 }
 

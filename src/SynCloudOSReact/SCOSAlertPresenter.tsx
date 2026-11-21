@@ -62,7 +62,7 @@ function QueuedAlert({ center, current, presentation, fallbackMode, followsAppea
             title={button.label}
             hasDestructiveAction={button.role === "destructive"}
             keyEquivalent={button.role === "default" ? "\r" : undefined}
-            appearance={button.role === "destructive" || button.role === "default" || appearance === "dark" ? undefined : "aqua"}
+            appearance={button.role === "destructive" || button.role === "default" || appearance === "dark" ? undefined : "light"}
             key={button.id}
             className="nse-system-alert-action-button"
             data-scos-alert-primary={button === primary ? "" : undefined}

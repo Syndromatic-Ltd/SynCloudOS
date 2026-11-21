@@ -40,7 +40,7 @@ import { NSEButton, NSESwitch } from "@syndromatic/syncloudos/nse";
 | `isHighlighted` | `boolean` | `false` | `isHighlighted` | Draws the button pressed, as a pop-up button does while its menu shows. |
 | `keyEquivalent`, `keyEquivalentModifierMask` | `string`, modifiers | none | `keyEquivalent` | The key that clicks the button while its window has focus. `"\r"` (Return) makes it the window's default button, which the theme draws as such; `"\u{1b}"` (Escape) suits a Cancel button. |
 | `hasDestructiveAction` | `boolean` | `false` | `hasDestructiveAction` | The button deletes or discards, and the theme draws it as such. |
-| `appearance` | `"aqua" \| "darkAqua"` | the window's | `NSView.appearance` | Draws the button in the light or dark appearance, whatever its window's. |
+| `appearance` | `"light" \| "dark"` | the window's | `NSView.appearance` | Draws the button in the light or dark appearance, whatever its window's. |
 | `controlSize` | `"small" \| "regular" \| "large"` | `"regular"` | `controlSize` | Capsule bezels draw from one band height: small is 24px and large 28px. |
 | `toolTip` | `string` | none | `NSView.toolTip` | The tooltip. |
 | `binding` | `NSEBinding<boolean \| "mixed">` | none | Cocoa Bindings `value` | Binds a `switch` button's state: on for true, off for false, mixed for a selection whose values differ. |

@@ -140,7 +140,7 @@ export interface ChronosphereTravelImpulse {
 
 export interface ChronospherePushButtonProps {
   title?: ReactNode;
-  appearance?: "darkAqua";
+  appearance?: "dark";
   isEnabled?: boolean;
   className?: string;
   onClick?: (event: ReactMouseEvent<HTMLButtonElement>) => void;
@@ -615,12 +615,12 @@ export function ChronosphereStage<TDetail = unknown>({
             active={stage === "open"} settledKey={reflectionReady && !travel.travelling ? `${activeEntry?.id}:${viewport?.width}:${viewport?.height}` : null}
             style={{ position: "absolute", inset: 0, height: "100%" }} />
         </div>
-        <PushButtonComponent appearance="darkAqua" title={twoPane ? labels.done : labels.exit} className="chronosphere-floor-action chronosphere-floor-exit" data-nse-position="leading" data-nse-role="archive-action" onClick={requestExit} />
+        <PushButtonComponent appearance="dark" title={twoPane ? labels.done : labels.exit} className="chronosphere-floor-action chronosphere-floor-exit" data-nse-position="leading" data-nse-role="archive-action" onClick={requestExit} />
         <button className="chronosphere-floor-date" data-nse-part="button" data-nse-role="archive" type="button" onClick={() => goTo(0)} aria-label={labels.jumpToPresent}>
           <strong>{activeEntry?.dateLabel ?? labels.now}</strong>
           <span data-nse-part="subtitle">{travel.travelling ? `${shownIndex + 1} / ${browsed.length}` : activeEntry?.displayLabel ?? activeEntry?.title ?? ""}</span>
         </button>
-        {onRestore ? <PushButtonComponent appearance="darkAqua" title={labels.restore} className="chronosphere-floor-action chronosphere-floor-restore" data-nse-position="trailing" data-nse-role="archive-action"
+        {onRestore ? <PushButtonComponent appearance="dark" title={labels.restore} className="chronosphere-floor-action chronosphere-floor-restore" data-nse-position="trailing" data-nse-role="archive-action"
           isEnabled={!(!activeEntry || activeEntry.isCurrent || travel.travelling)}
           onClick={() => {
             if (!activeEntry || activeEntry.isCurrent || travel.travelling || stage !== "open") return;
@@ -628,7 +628,7 @@ export function ChronosphereStage<TDetail = unknown>({
             setRestoredId(activeEntry.id);
             requestExit();
           }} />
-          : <PushButtonComponent appearance="darkAqua" title={labels.details} className="chronosphere-floor-action chronosphere-floor-restore" data-nse-position="trailing" data-nse-role="archive-action" onClick={() => setDetailOpen(open => !open)} />}
+          : <PushButtonComponent appearance="dark" title={labels.details} className="chronosphere-floor-action chronosphere-floor-restore" data-nse-position="trailing" data-nse-role="archive-action" onClick={() => setDetailOpen(open => !open)} />}
       </div>
 
       {/* The complete launching foreground recedes down and into the galaxy,

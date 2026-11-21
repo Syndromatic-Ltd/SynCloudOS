@@ -175,7 +175,7 @@ function WSBoardView({ board }: { readonly board: WSBoardViewController }) {
           selection={{ mode: "momentary", selectedIds: new Set() }}
           onSelectionChange={({ selectedIds }) => { if (selectedIds.has("done")) board.finishEditing(true); else if (selectedIds.has("reset")) board.resetOrder(); }}
         /> : <NSEButton
-          appearance="darkAqua"
+          appearance="dark"
           title="Reorder applications"
           onClick={() => board.beginEditing(null)}
           aria-describedby="webspring-board-keyboard-help"
