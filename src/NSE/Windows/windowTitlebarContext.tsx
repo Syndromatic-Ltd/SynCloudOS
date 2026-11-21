@@ -16,6 +16,8 @@ export interface WindowTitlebarDocument {
   readonly titleVisibility?: "visible" | "hidden";
   readonly titlebarAppearsTransparent?: boolean;
   readonly hasToolbar?: boolean;
+  /** Whether the toolbar has visible items besides spacers and the application menu (which moves to the title row). */
+  readonly toolbarHasRowItems?: boolean;
   /** The toolbar's display mode; labelled items need a row of their own under a unified title. */
   readonly toolbarDisplayMode?: import("../Toolbars/NSEToolbar").NSEToolbarDisplayMode;
   readonly frameViewClass?: import("../Application/NSEWindowFrameView").NSEWindowFrameViewClass | null;

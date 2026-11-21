@@ -78,6 +78,12 @@ describe("Window titlebar document and controls", () => {
     expect(heading?.hidden).toBe(true);
   });
 
+  it("omits the separate toolbar row when an expanded toolbar has no row items", () => {
+    const { container } = render(<WindowTitlebarView material="metal" isKeyWindow
+      document={{ title: "Buttons", subtitle: "", documentEdited: false, toolbarStyle: "expanded", hasToolbar: true, toolbarHasRowItems: false }} />);
+    expect(container.querySelector("[data-window-titlebar-toolbar-row]")).toBeNull();
+  });
+
   it("uses light and dark appearance names and rejects removed aqua names", () => {
     expect(new NSEAppearance("light").name).toBe("light");
     expect(new NSEAppearance("dark").name).toBe("dark");

@@ -65,6 +65,10 @@ export function useNSEWindowTitlebarDocument(controller: NSEAnyWindowController,
   const titlebarAppearsTransparent = window?.titlebarAppearsTransparent;
   const toolbar = useObserve(window?.toolbar);
   const hasToolbar = toolbar?.isVisible ?? false;
+  const toolbarHasRowItems = hasToolbar && (
+    (toolbar?.[nseToolbarTabViews]?.length ?? 0) > 0
+    || (toolbar?.items.some(item => item.id !== "applicationMenu" && item.kind !== "space" && item.kind !== "flexible-space") ?? false)
+  );
   const toolbarDisplayMode = toolbar?.displayMode;
   const frameViewClass = window?.frameViewClass;
   const titled = window?.styleMask.includes("titled") ?? true;
@@ -84,9 +88,9 @@ export function useNSEWindowTitlebarDocument(controller: NSEAnyWindowController,
   const sidebarWidth = measuredSidebarWidth > 0 ? measuredSidebarWidth : undefined;
   useLayoutEffect(() => {
     if (!host || !claims) return undefined;
-    host.setDocument(Object.freeze({ titled, title, subtitle, documentEdited, toolbarStyle, titleVisibility, titlebarPresentation, titlebarAppearsTransparent, hasToolbar, toolbarDisplayMode, frameViewClass, texturedBackground, sidebarWidth, fullSizeContentView, backgroundColour, appearance, isOpaque, cornerRadius }));
+    host.setDocument(Object.freeze({ titled, title, subtitle, documentEdited, toolbarStyle, titleVisibility, titlebarPresentation, titlebarAppearsTransparent, hasToolbar, toolbarHasRowItems, toolbarDisplayMode, frameViewClass, texturedBackground, sidebarWidth, fullSizeContentView, backgroundColour, appearance, isOpaque, cornerRadius }));
     return undefined;
-  }, [appearance, backgroundColour, claims, cornerRadius, titled, documentEdited, frameViewClass, fullSizeContentView, hasToolbar, toolbarDisplayMode, host, isOpaque, sidebarWidth, subtitle, texturedBackground, title, titlebarAppearsTransparent, titlebarPresentation, titleVisibility, toolbarStyle]);
+  }, [appearance, backgroundColour, claims, cornerRadius, titled, documentEdited, frameViewClass, fullSizeContentView, hasToolbar, toolbarHasRowItems, toolbarDisplayMode, host, isOpaque, sidebarWidth, subtitle, texturedBackground, title, titlebarAppearsTransparent, titlebarPresentation, titleVisibility, toolbarStyle]);
   useLayoutEffect(() => {
     if (!host || !claims) return undefined;
     return () => { host.setDocument(null); };

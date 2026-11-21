@@ -84,9 +84,10 @@ export function WindowTitlebarView({ document, isKeyWindow, titleId, material = 
   const toolbarStyle = document.toolbarStyle ?? "automatic";
   const resolvedStyle = toolbarStyle === "automatic" ? "unified" : toolbarStyle;
   const hasToolbar = document.hasToolbar === true || toolbar != null;
+  const toolbarHasRowItems = document.toolbarHasRowItems ?? true;
   // As in OS X's unified title and toolbar, labelled items grow the bar by a toolbar row instead of squeezing into the title row.
   const labelledToolbar = hasToolbar && document.toolbarDisplayMode !== undefined && document.toolbarDisplayMode !== "iconOnly";
-  const separateToolbar = resolvedStyle === "expanded" || resolvedStyle === "preference" || (resolvedStyle === "unified" && labelledToolbar);
+  const separateToolbar = toolbarHasRowItems && (resolvedStyle === "expanded" || resolvedStyle === "preference" || (resolvedStyle === "unified" && labelledToolbar));
   const presentation = material === "cumulus" ? document.titlebarPresentation ?? "attached" : "attached";
   useLayoutEffect(() => {
     const node = header.current;
@@ -112,7 +113,7 @@ export function WindowTitlebarView({ document, isKeyWindow, titleId, material = 
   }, [presentation]);
   const { className: moveClassName, style: moveStyle, onPointerDown, onDoubleClick, ...handleProps } = moveHandleProps ?? {};
   // Metal is one piece: a labelled unified toolbar takes a second row inside the bar, under the same gradient and grain.
-  const stackedToolbarFor = (metal: boolean) => metal && hasToolbar && resolvedStyle === "unified" && labelledToolbar;
+  const stackedToolbarFor = (metal: boolean) => toolbarHasRowItems && metal && hasToolbar && resolvedStyle === "unified" && labelledToolbar;
   // The application menu belongs to the title row, as the window's own controls do; a toolbar with a row of its own leaves it there.
   const toolbarOwnRow = hasToolbar && (separateToolbar || stackedToolbarFor(material === "metal"));
   const applicationMenuSlot = toolbarOwnRow
