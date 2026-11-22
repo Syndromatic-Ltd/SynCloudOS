@@ -853,10 +853,51 @@
   border-bottom-right-radius: var(--nse-chrome-bottom-corner-radius, 0px);
 }
 
-.nse-window-content-border[data-nse-content-border="large"]>.nse-window-content-border-grain,
-:where(:scope):is(.nse-window-content-border[data-nse-content-border="large"])>.nse-window-content-border-grain {
+.nse-window-content-border[data-nse-content-border="large"][data-has-rail="true"],
+:where(:scope):is(.nse-window-content-border[data-nse-content-border="large"][data-has-rail="true"]) {
+  display: grid;
+  grid-template-columns: var(--nse-topbar-rail, 264px) minmax(0, 1fr);
+}
+
+.nse-window-content-border-rail,
+:where(:scope):is(.nse-window-content-border-rail) {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  height: 100%;
+  border-bottom-left-radius: var(--nse-chrome-bottom-corner-radius, 0px);
+}
+
+.nse-window-content-border-main,
+:where(:scope):is(.nse-window-content-border-main) {
+  position: relative;
+  z-index: 2;
+  min-width: 0;
+  height: 100%;
+  border-bottom-right-radius: var(--nse-chrome-bottom-corner-radius, 0px);
+}
+
+.nse-window-content-border[data-nse-content-border="large"] .nse-window-content-border-grain,
+:where(:scope):is(.nse-window-content-border[data-nse-content-border="large"]) .nse-window-content-border-grain {
   position: absolute;
   inset: 0;
+}
+
+@media (max-width: 767px) {
+  .nse-window-content-border[data-nse-content-border="large"][data-has-rail="true"],
+  :where(:scope):is(.nse-window-content-border[data-nse-content-border="large"][data-has-rail="true"]) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .nse-window-content-border[data-nse-content-border="large"][data-has-rail="true"] > .nse-window-content-border-rail,
+  :where(:scope):is(.nse-window-content-border[data-nse-content-border="large"][data-has-rail="true"]) > .nse-window-content-border-rail {
+    display: none;
+  }
+
+  .nse-window-content-border[data-nse-content-border="large"][data-has-rail="true"] > .nse-window-content-border-main,
+  :where(:scope):is(.nse-window-content-border[data-nse-content-border="large"][data-has-rail="true"]) > .nse-window-content-border-main {
+    border-bottom-left-radius: var(--nse-chrome-bottom-corner-radius, 0px);
+  }
 }
 
 .nse-window-content-border-edge[data-nse-content-border="large"],

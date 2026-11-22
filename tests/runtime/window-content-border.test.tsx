@@ -41,6 +41,19 @@ describe("a window's bottom content border", () => {
     expect(view.container.querySelector<HTMLElement>('[data-nse-part="content-border"]')!.dataset.nseContentBorder).toBe("small");
   });
 
+  it("splits a large content border into rail and body plates when a sidebar width is present", () => {
+    const view = render(<WindowContentBorder thickness={56} sidebarWidth={208} />);
+    const band = view.container.querySelector<HTMLElement>('[data-nse-part="content-border"]')!;
+    expect(band.dataset.hasRail).toBe("true");
+    expect(band.style.getPropertyValue("--nse-topbar-rail")).toBe("208px");
+    expect(band.querySelector('[data-nse-part="sidebar"] > [data-nse-part="decoration"]')).not.toBeNull();
+    expect(band.querySelector('[data-nse-part="body"] > [data-nse-part="decoration"]')).not.toBeNull();
+    view.rerender(<WindowContentBorder thickness={24} sidebarWidth={208} />);
+    const small = view.container.querySelector<HTMLElement>('[data-nse-part="content-border"]')!;
+    expect(small.dataset.hasRail).toBeUndefined();
+    expect(small.querySelector('[data-nse-part="sidebar"]')).toBeNull();
+  });
+
   it("draws labels on it raised (NSCell.backgroundStyle)", () => {
     const view = render(<>
       <NSETextField isEditable={false} backgroundStyle="raised">33 words</NSETextField>

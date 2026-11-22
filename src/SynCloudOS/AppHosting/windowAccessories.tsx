@@ -50,6 +50,19 @@ export type { WindowTitlebarDocument, WindowTitlebarHost } from "../../NSE/appli
 import { WindowTitlebarHostContext, type WindowTitlebarHost } from "../../NSE/applicationHostInterop";
 import { nseWindowPresentedTitle } from "../../NSE/applicationHostInterop";
 
+/** Measures the live sidebar thickness of a window's root split view when it presents a split rail. */
+export function useNSEWindowSidebarWidth(controller: NSEAnyWindowController, presentedSidebarWidth?: number): number | undefined {
+  useObserve(controller);
+  const root = controller.contentViewController;
+  const split = root instanceof NSESplitViewController ? root : null;
+  const splitSnapshot = useSyncExternalStore(split?.subscribe ?? noSubscription, split?.getSnapshot ?? noSplit, noSplit);
+  const pane = splitSnapshot?.items[0];
+  const measuredSidebarWidth = presentedSidebarWidth ?? (splitSnapshot?.isVertical && splitSnapshot.presentation === "split"
+    && split?.splitViewItems[0]?.behavior === "sidebar" && pane && !pane.isCollapsed && pane.thickness > 0
+    ? pane.thickness : 0);
+  return measuredSidebarWidth > 0 ? measuredSidebarWidth : undefined;
+}
+
 /** Publishes the window's title, subtitle and edited state to the stage's title bar. */
 export function useNSEWindowTitlebarDocument(controller: NSEAnyWindowController, host: WindowTitlebarHost | null, presentedSidebarWidth?: number): NSEAppearance | null {
   useObserve(controller);
@@ -78,14 +91,7 @@ export function useNSEWindowTitlebarDocument(controller: NSEAnyWindowController,
   const isOpaque = window?.isOpaque;
   const cornerRadius = window?.cornerRadius;
   const claims = Boolean(window);
-  const root = controller.contentViewController;
-  const split = root instanceof NSESplitViewController ? root : null;
-  const splitSnapshot = useSyncExternalStore(split?.subscribe ?? noSubscription, split?.getSnapshot ?? noSplit, noSplit);
-  const pane = splitSnapshot?.items[0];
-  const measuredSidebarWidth = presentedSidebarWidth ?? (splitSnapshot?.isVertical && splitSnapshot.presentation === "split"
-    && split?.splitViewItems[0]?.behavior === "sidebar" && pane && !pane.isCollapsed && pane.thickness > 0
-    ? pane.thickness : 0);
-  const sidebarWidth = measuredSidebarWidth > 0 ? measuredSidebarWidth : undefined;
+  const sidebarWidth = useNSEWindowSidebarWidth(controller, presentedSidebarWidth);
   useLayoutEffect(() => {
     if (!host || !claims) return undefined;
     host.setDocument(Object.freeze({ titled, title, subtitle, documentEdited, toolbarStyle, titleVisibility, titlebarPresentation, titlebarAppearsTransparent, hasToolbar, toolbarHasRowItems, toolbarDisplayMode, frameViewClass, texturedBackground, sidebarWidth, fullSizeContentView, backgroundColour, appearance, isOpaque, cornerRadius }));
@@ -156,14 +162,25 @@ export function nseContentBorderSize(thickness: number): "large" | "small" {
  * It lies behind the content, so the content's own controls sit over it; only its edge, which casts a
  * shadow up onto the content, is drawn above.
  */
-export function WindowContentBorder({ thickness }: { readonly thickness: number }) {
+export function WindowContentBorder({ thickness, sidebarWidth }: { readonly thickness: number; readonly sidebarWidth?: number }) {
   useNSEWindowChromeObstruction("bottom", thickness, false);
   const mode = useAccessoryColourScheme();
-  const style = { "--nse-window-content-border-thickness": `${thickness}px` } as CSSProperties;
   const size = nseContentBorderSize(thickness);
+  const hasRail = size === "large" && sidebarWidth !== undefined && sidebarWidth > 0;
+  const style = {
+    "--nse-window-content-border-thickness": `${thickness}px`,
+    ...(hasRail ? { "--nse-topbar-rail": `${sidebarWidth}px` } : {}),
+  } as CSSProperties;
   return <>
-    <div className="nse-window-content-border" data-nse-part="content-border" data-nse-content-border={size} data-nse-edge="minY" data-nse-colour-scheme-resolved={mode} style={style} aria-hidden="true">
-      <span className="nse-window-content-border-grain" data-nse-part="decoration" />
+    <div className="nse-window-content-border" data-nse-part="content-border" data-nse-content-border={size} data-nse-edge="minY" data-has-rail={hasRail ? "true" : undefined} data-nse-colour-scheme-resolved={mode} style={style} aria-hidden="true">
+      {hasRail ? <>
+        <div className="nse-window-content-border-rail" data-nse-part="sidebar">
+          <span className="nse-window-content-border-grain" data-nse-part="decoration" />
+        </div>
+        <div className="nse-window-content-border-main" data-nse-part="body">
+          <span className="nse-window-content-border-grain" data-nse-part="decoration" />
+        </div>
+      </> : <span className="nse-window-content-border-grain" data-nse-part="decoration" />}
     </div>
     <div className="nse-window-content-border-edge" data-nse-part="border" data-nse-content-border={size} data-nse-edge="minY" data-nse-colour-scheme-resolved={mode} style={style} aria-hidden="true" />
   </>;

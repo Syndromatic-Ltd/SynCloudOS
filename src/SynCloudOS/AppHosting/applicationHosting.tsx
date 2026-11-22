@@ -62,7 +62,7 @@ import { isNSEHTMLElement } from "../../NSE/applicationHostInterop";
 import type { SynWareContextValue } from "../AppSDK/appContextTypes";
 import { bindActionResponder, hasActions } from "../AppSDK/actions";
 import { trackLiveApplicationObject } from "./applicationHotReload";
-import { WindowContentBorder, WindowSheetFrame, WindowSheetHostContext, WindowTitlebarAccessories, nseContentBorderSize, WindowTitlebarHostContext, useNSEWindowSheetHost, WindowToolbar, useNSEWindowTitlebarDocument } from "./windowAccessories";
+import { WindowContentBorder, WindowSheetFrame, WindowSheetHostContext, WindowTitlebarAccessories, nseContentBorderSize, WindowTitlebarHostContext, useNSEWindowSheetHost, WindowToolbar, useNSEWindowSidebarWidth, useNSEWindowTitlebarDocument } from "./windowAccessories";
 import { ViewAppearanceBoundary, useInPlaceAppearanceProjection } from "../../NSE/applicationHostInterop";
 import { MountedWindowContext } from "../../NSE/applicationHostInterop";
 import { WindowApplicationMenu } from "./windowApplicationMenu";
@@ -482,6 +482,7 @@ export function WindowControllerView({ controller }: WindowControllerViewProps) 
   const stageTitlebar = titlebarHost;
   const accessoryHost = titlebarHost;
   const appearance = useNSEWindowTitlebarDocument(controller, loaded ? stageTitlebar : null, sidebarWidth);
+  const effectiveSidebarWidth = useNSEWindowSidebarWidth(controller, sidebarWidth);
   const localAppearance = titlebarHost ? null : appearance;
   const standardControls = titlebarHost?.standardControls ?? null;
   useLayoutEffect(() => {
@@ -567,10 +568,10 @@ export function WindowControllerView({ controller }: WindowControllerViewProps) 
               : null}
             <WindowTitlebarAccessories accessories={accessories} renderController={renderAccessory} host={accessoryHost} placement="row" />
             {titleSlot ? createPortal(ownTitle, titleSlot) : ownTitle}
-            <div data-nse-part="content-view" data-nse-content-border={bottomBorder > 0 ? nseContentBorderSize(bottomBorder) : undefined} className="nse-window-chrome-content" data-content-border={bottomBorder > 0 ? nseContentBorderSize(bottomBorder) : undefined}>
+            <div data-nse-part="content-view" data-nse-content-border={bottomBorder > 0 ? nseContentBorderSize(bottomBorder) : undefined} className="nse-window-chrome-content" data-content-border={bottomBorder > 0 ? nseContentBorderSize(bottomBorder) : undefined} style={effectiveSidebarWidth !== undefined ? { "--nse-topbar-rail": `${effectiveSidebarWidth}px` } as CSSProperties : undefined}>
               <div className="nse-window-content-above-bottom-bar" style={{ bottom: hasBottomAccessory ? bottomBorder : 0 }}>{content}</div>
               {hasBottomAccessory ? <div className="nse-window-bottom-bar-accessory" data-nse-part="bottom-bar-accessory" style={{ height: bottomBorder }}>{bottomBarAccessory}</div> : null}
-              {bottomBorder > 0 ? <WindowContentBorder thickness={bottomBorder} /> : null}
+              {bottomBorder > 0 ? <WindowContentBorder thickness={bottomBorder} sidebarWidth={effectiveSidebarWidth} /> : null}
               {sheetLayer}
             </div>
           </WindowControllerFrame>

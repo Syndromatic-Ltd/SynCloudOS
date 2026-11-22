@@ -486,23 +486,56 @@
 [data-nse-part="content-border"][data-nse-content-border="large"],
 :where(:scope):is([data-nse-part="content-border"][data-nse-content-border="large"]) {
   --nse-metal-header-mid: url("./chrome/metal/light/header-middle.png");
+  --nse-metal-header-endcap-l: url("./chrome/metal/light/header-endcap-left.png");
+  --nse-metal-header-endcap-r: url("./chrome/metal/light/header-endcap-right.png");
+  --nse-metal-content-shadow: rgba(0, 0, 0, 0.22);
+  --nse-metal-grain-opacity: 0.9;
+  --nse-metal-grain-blend: overlay;
   background: var(--nse-metal-header-mid) left bottom / auto 100% repeat-x;
 }
 
 [data-nse-part="content-border"][data-nse-content-border="large"][data-nse-colour-scheme-resolved="dark"],
-:where(:scope):is([data-nse-part="content-border"][data-nse-content-border="large"][data-nse-colour-scheme-resolved="dark"]) {
+:where(:scope):is([data-nse-part="content-border"][data-nse-content-border="large"][data-nse-colour-scheme-resolved="dark"]),
+:scope[data-nse-colour-scheme-resolved="dark"] [data-nse-part="content-border"][data-nse-content-border="large"],
+:scope[data-nse-colour-scheme-resolved="dark"][data-nse-part="content-border"][data-nse-content-border="large"] {
   --nse-metal-header-mid: url("./chrome/metal/dark/header-middle.png");
+  --nse-metal-header-endcap-l: url("./chrome/metal/dark/header-endcap-left.png");
+  --nse-metal-header-endcap-r: url("./chrome/metal/dark/header-endcap-right.png");
+  --nse-metal-content-shadow: rgba(0, 0, 0, 0.42);
+  --nse-metal-grain-opacity: 0.95;
 }
 
-[data-nse-part="content-border"][data-nse-content-border="large"] > [data-nse-part="decoration"] {
+[data-nse-part="content-border"][data-nse-content-border="large"]:has(> [data-nse-part="sidebar"]),
+:where(:scope):is([data-nse-part="content-border"][data-nse-content-border="large"]:has(> [data-nse-part="sidebar"])) {
+  background: none;
+}
+
+:where([data-nse-part="content-border"][data-nse-content-border="large"]) > [data-nse-part="sidebar"] {
+  background:
+    var(--nse-metal-header-endcap-r) right bottom / auto 100% no-repeat,
+    var(--nse-metal-header-mid) left bottom / auto 100% repeat-x;
+  box-shadow: inset -14px 0 18px -10px var(--nse-metal-content-shadow);
+}
+
+:where([data-nse-part="content-border"][data-nse-content-border="large"]) > [data-nse-part="body"] {
+  background:
+    var(--nse-metal-header-endcap-l) left bottom / auto 100% no-repeat,
+    var(--nse-metal-header-mid) left bottom / auto 100% repeat-x;
+  box-shadow: -10px 0 18px -6px var(--nse-metal-content-shadow);
+}
+
+@media (max-width:767px) {
+  [data-nse-part="content-border"][data-nse-content-border="large"]:has(> [data-nse-part="sidebar"]) > [data-nse-part="body"] {
+    box-shadow: none;
+    background: var(--nse-metal-header-mid) left bottom / auto 100% repeat-x;
+  }
+}
+
+:where([data-nse-part="content-border"][data-nse-content-border="large"], [data-nse-part="content-border"][data-nse-content-border="large"] > :is([data-nse-part="sidebar"], [data-nse-part="body"])) > [data-nse-part="decoration"] {
   background: var(--nse-metal-grain) repeat;
   background-size: var(--nse-metal-grain-tile);
-  opacity: 0.9;
-  mix-blend-mode: overlay;
-}
-
-[data-nse-part="content-border"][data-nse-content-border="large"][data-nse-colour-scheme-resolved="dark"] > [data-nse-part="decoration"] {
-  opacity: 0.95;
+  opacity: var(--nse-metal-grain-opacity);
+  mix-blend-mode: var(--nse-metal-grain-blend);
 }
 
 [data-nse-part="border"][data-nse-content-border="large"]:where([data-nse-edge="minY"]),
@@ -511,7 +544,8 @@
 }
 
 [data-nse-part="border"][data-nse-content-border="large"]:where([data-nse-edge="minY"])[data-nse-colour-scheme-resolved="dark"],
-:where(:scope):is([data-nse-part="border"][data-nse-content-border="large"]:where([data-nse-edge="minY"])[data-nse-colour-scheme-resolved="dark"]) {
+:where(:scope):is([data-nse-part="border"][data-nse-content-border="large"]:where([data-nse-edge="minY"])[data-nse-colour-scheme-resolved="dark"]),
+:scope[data-nse-colour-scheme-resolved="dark"] [data-nse-part="border"][data-nse-content-border="large"]:where([data-nse-edge="minY"]) {
   box-shadow: 0 -6px 11px -5px rgba(0, 0, 0, 0.52);
 }
 

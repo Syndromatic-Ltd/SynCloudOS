@@ -126,7 +126,11 @@
 
 .nse-outline-group-label,
 :where(:scope):is(.nse-outline-group-label) {
-  flex: 0 0 auto;
+  flex: 0 1 auto;
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   margin-inline-end: 9px;
   font-size: 11px;
   font-weight: 700;
@@ -140,7 +144,7 @@
 :where(:scope):is(.nse-outline-group-line) {
   align-self: center;
   block-size: var(--nse-atmo-divider-arrow-line);
-  min-inline-size: 10px;
+  min-inline-size: 4px;
 }
 
 /* The line takes all the room between label and arrow; a short fixed tail pins the arrow near the edge. */

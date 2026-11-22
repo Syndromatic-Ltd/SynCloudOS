@@ -584,9 +584,18 @@
 
 [data-nse-part="group-row"]:where([data-nse-control="outline-view"][data-nse-part="background"][data-nse-selection-highlight-style="sourceList"] *)::after,
 :where(:scope):is([data-nse-part="group-row"]:where([data-nse-control="outline-view"][data-nse-part="background"][data-nse-selection-highlight-style="sourceList"] *))::after,
-[data-nse-part="separator"]:where([data-nse-part="group-row"]:where([data-nse-control="outline-view"][data-nse-part="background"][data-nse-selection-highlight-style="sourceList"] *) > *),
-:where(:scope):is([data-nse-part="separator"]:where([data-nse-part="group-row"]:where([data-nse-control="outline-view"][data-nse-part="background"][data-nse-selection-highlight-style="sourceList"] *) > *)) {
+[data-nse-part="separator"]:not([data-nse-role="disclosure"]):where([data-nse-part="group-row"]:where([data-nse-control="outline-view"][data-nse-part="background"][data-nse-selection-highlight-style="sourceList"] *) > *),
+:where(:scope):is([data-nse-part="separator"]:not([data-nse-role="disclosure"]):where([data-nse-part="group-row"]:where([data-nse-control="outline-view"][data-nse-part="background"][data-nse-selection-highlight-style="sourceList"] *) > *)) {
   background: var(--nse-atmo-divider) left center / auto var(--nse-atmo-divider-arrow-line) repeat-x;
+}
+
+[data-nse-part="separator"][data-nse-control="box"][data-nse-style="arrow"][data-nse-role="disclosure"]:where([data-nse-part="group-row"] > *),
+:where(:scope):is([data-nse-part="separator"][data-nse-control="box"][data-nse-style="arrow"][data-nse-role="disclosure"]:where([data-nse-part="group-row"] > *)) {
+  width: var(--nse-atmo-divider-arrow-width);
+  min-width: var(--nse-atmo-divider-arrow-width);
+  height: var(--nse-atmo-divider-arrow-size);
+  min-height: var(--nse-atmo-divider-arrow-size);
+  margin: 0;
 }
 
 [data-nse-part="secondary-text"]:where([data-nse-control="table-cell-view"][data-nse-part="row"][data-nse-style="list"]:where([data-nse-control="outline-view"][data-nse-part="background"][data-nse-selection-highlight-style="sourceList"] *) *),
