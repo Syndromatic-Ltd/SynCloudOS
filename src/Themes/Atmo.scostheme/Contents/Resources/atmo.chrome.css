@@ -95,7 +95,23 @@
   background: linear-gradient(180deg, rgb(255 255 255 / 12%), rgb(255 255 255 / 2%) 80%, rgb(255 255 255 / 0%));
 }
 
-:where([data-nse-part="header"][data-nse-control="window"]:is([data-nse-material="cumulus"], [data-nse-chrome="metal"])) [data-nse-part="leading"] [data-nse-role="back"]:where([data-nse-control="button"]) > [data-nse-part="image"] {
+[data-nse-part="header"][data-nse-control="window"]:is([data-nse-material="cumulus"], [data-nse-chrome="metal"]) [data-nse-part="leading"] [data-nse-control="button"][data-nse-role="back"],
+:where(:scope):is([data-nse-part="header"][data-nse-control="window"]:is([data-nse-material="cumulus"], [data-nse-chrome="metal"])) [data-nse-part="leading"] [data-nse-control="button"][data-nse-role="back"] {
+  --nse-atmo-bar-h: 50px;
+  --nse-control-minimum-inline-size: 50px;
+  min-width: revert-layer;
+  height: revert-layer;
+  min-height: revert-layer;
+  padding: revert-layer;
+  overflow: revert-layer;
+}
+
+[data-nse-part="header"][data-nse-control="window"]:is([data-nse-material="cumulus"], [data-nse-chrome="metal"]) [data-nse-part="leading"] [data-nse-control="button"][data-nse-role="back"] > [data-nse-part="image"],
+:where(:scope):is([data-nse-part="header"][data-nse-control="window"]:is([data-nse-material="cumulus"], [data-nse-chrome="metal"])) [data-nse-part="leading"] [data-nse-control="button"][data-nse-role="back"] > [data-nse-part="image"] {
+  width: revert-layer;
+  height: revert-layer;
+  margin: revert-layer;
+  display: revert-layer;
   color: #f4f6f8;
   filter: drop-shadow(0 -1px 0 rgb(0 0 0 / 55%));
 }

@@ -355,6 +355,8 @@
 
 [data-nse-control="panel"][data-nse-style="preferences"] [data-nse-control="window"][data-nse-part="header"][data-nse-toolbar-style="preference"] [data-nse-control="button"][data-nse-role="back"],
 :where(:scope):is([data-nse-control="panel"][data-nse-style="preferences"]) [data-nse-control="window"][data-nse-part="header"][data-nse-toolbar-style="preference"] [data-nse-control="button"][data-nse-role="back"] {
+  --nse-atmo-bar-h: 50px;
+  --nse-control-minimum-inline-size: 50px;
   min-width: revert-layer;
   height: revert-layer;
   min-height: revert-layer;
