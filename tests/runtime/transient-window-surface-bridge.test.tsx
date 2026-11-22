@@ -188,6 +188,47 @@ describe("window-hosted transient surface bridge", () => {
     } finally { view.unmount(); bridge.dispose(); root.remove(); await runtime.dispose("test"); }
   });
 
+  it("suppresses the toggle click on a transient popover's anchor button after pointerdown dismisses it", async () => {
+    const runtime = createTestRuntime();
+    const renderers = new WindowContentRendererRegistry();
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "toggle-anchor", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
+    const anchor = document.createElement("button");
+    anchor.textContent = "Advanced Options";
+    const onAnchorClick = vi.fn();
+    anchor.addEventListener("click", onAnchorClick);
+    const root = document.createElement("div");
+    root.dataset.syncloudosRuntimeOwner = runtime.runtimeId;
+    document.body.append(root);
+    root.append(anchor);
+    vi.spyOn(anchor, "getBoundingClientRect").mockReturnValue(DOMRect.fromRect({ x: 300, y: 200, width: 40, height: 24 }));
+    await bridge.present({
+      id: "advanced",
+      role: "popover",
+      title: "Advanced Options",
+      parentWindowControllerId: null,
+      anchor,
+      behavior: "transient",
+      drawsBackground: true,
+      bounds: { x: 0, y: 0, width: 240, height: 160 },
+    }, <button>Done</button>);
+    const view = render(<SynCloudOSProvider runtime={runtime}><WindowLayer contentRegistry={renderers} /></SynCloudOSProvider>, { container: root.appendChild(document.createElement("div")) });
+    try {
+      await screen.findByRole("dialog", { name: "Advanced Options" });
+      fireEvent.pointerDown(anchor);
+      // Let React flush the generation-driven WindowLayer effect between
+      // pointerdown and pointerup/click, as happens in a real browser.
+      await waitFor(() => expect(runtime.windows.list({ role: "popover" })).toHaveLength(0));
+      fireEvent.pointerUp(anchor);
+      fireEvent.click(anchor);
+      expect(onAnchorClick).not.toHaveBeenCalled();
+      // The next click after dismissal reaches the button normally so it can re-open.
+      fireEvent.pointerDown(anchor);
+      fireEvent.pointerUp(anchor);
+      fireEvent.click(anchor);
+      expect(onAnchorClick).toHaveBeenCalledTimes(1);
+    } finally { view.unmount(); bridge.dispose(); root.remove(); await runtime.dispose("test"); }
+  });
+
   it.each(["modal", "sheet"] as const)("restores a user-positioned normal %s after book changes and removes geometry work", async role => {
     const geometry = geometryEnvironment();
     geometry.layout.set({ width: 900, height: 700 }); geometry.visual.set({ width: 900, height: 700, offsetLeft: 0, offsetTop: 0, scale: 1 });

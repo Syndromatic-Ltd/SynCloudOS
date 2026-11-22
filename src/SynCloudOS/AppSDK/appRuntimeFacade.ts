@@ -2558,6 +2558,8 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
     const safeHostCommandResponders = new Map<string, string>([
       ["application.showAbout", "runtime"],
       ["application.quit", "runtime"],
+      ["edit.undo", "runtime"],
+      ["edit.redo", "runtime"],
       ["session.requestSignIn", "runtime"],
       ["system.showPreferences", "runtime"],
       // The shared Font and Colours panels are the system's (Webspring's

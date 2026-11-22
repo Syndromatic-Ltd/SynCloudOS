@@ -88,6 +88,8 @@ function WindowSurfaceLayer({ contentRegistry, onDiagnostic, binding }: WindowLa
   const runtime = useKernelSynCloudOS();
   const sharedPresentation = useWindowPresentationContent();
   const layerRef = useRef<HTMLDivElement>(null);
+  const clearSuppressedAnchorClickRef = useRef<(() => void) | null>(null);
+  useEffect(() => () => { clearSuppressedAnchorClickRef.current?.(); }, []);
   const managerSnapshot = useSyncExternalStore(
     runtime.windows.subscribe,
     runtime.windows.snapshot,
@@ -137,12 +139,58 @@ function WindowSurfaceLayer({ contentRegistry, onDiagnostic, binding }: WindowLa
       }
     };
     const dismissOutside = (event: PointerEvent) => {
+      clearSuppressedAnchorClickRef.current?.();
       const ElementPort = documentPort.defaultView?.Element;
       const target = ElementPort && event.target instanceof ElementPort ? event.target : null;
       if (target?.closest<HTMLElement>("[data-syncloudos-runtime-owner]")?.dataset.syncloudosRuntimeOwner !== runtime.runtimeId) return;
       const host = target?.closest<HTMLElement>("[data-window-host]") ?? null;
       const except = host?.dataset.windowHost;
+      // Clicking the anchor button that opened a transient popover dismisses it
+      // on pointerdown; suppress the matching click from the same press so the
+      // button does not immediately re-open the popover it just dismissed.
+      const dismissedAnchors: Element[] = [];
+      if (target) {
+        const popoverSheets = runtime.windows.list({ role: "sheet" }).filter(controller => {
+          const state = controller.contentState;
+          return state.status === "loaded" && contentRegistry.surface(state.mountKey)?.request.drawsBackground !== undefined;
+        });
+        for (const controller of [...runtime.windows.list({ role: "popover" }), ...popoverSheets]) {
+          if (controller.record.pinned || controller.record.id === except || runtime.windows.presentingSurface(controller.record.id) !== binding) continue;
+          const state = controller.contentState;
+          const request = state.status === "loaded" ? contentRegistry.surface(state.mountKey)?.request : null;
+          if (request?.behavior && request.behavior !== "transient") continue;
+          const anchor = request?.anchor
+            ?? (controller.record.anchor ? ownerRoot.querySelector(`[data-window-anchor="${CSS.escape(controller.record.anchor.id)}"]`) : null);
+          if (anchor && anchor.contains(target)) dismissedAnchors.push(anchor);
+        }
+      }
       dismissTransients("outside-pointer", except);
+      if (dismissedAnchors.length > 0) {
+        let cleanupTimer: ReturnType<typeof setTimeout> | null = null;
+        const cleanup = () => {
+          if (cleanupTimer !== null) { clearTimeout(cleanupTimer); cleanupTimer = null; }
+          documentPort.removeEventListener("click", suppressAnchorClick, true);
+          documentPort.removeEventListener("pointerup", scheduleCleanup, true);
+          documentPort.removeEventListener("pointercancel", cleanup, true);
+          if (clearSuppressedAnchorClickRef.current === cleanup) clearSuppressedAnchorClickRef.current = null;
+        };
+        const suppressAnchorClick = (clickEvent: MouseEvent) => {
+          const clickTarget = ElementPort && clickEvent.target instanceof ElementPort ? clickEvent.target : null;
+          if (clickTarget && dismissedAnchors.some((anchor) => anchor.contains(clickTarget))) {
+            clickEvent.preventDefault();
+            clickEvent.stopImmediatePropagation();
+          }
+          cleanup();
+        };
+        const scheduleCleanup = () => {
+          if (cleanupTimer !== null) clearTimeout(cleanupTimer);
+          cleanupTimer = setTimeout(cleanup, 0);
+        };
+        clearSuppressedAnchorClickRef.current = cleanup;
+        documentPort.addEventListener("click", suppressAnchorClick, true);
+        documentPort.addEventListener("pointerup", scheduleCleanup, true);
+        documentPort.addEventListener("pointercancel", cleanup, true);
+      }
     };
     ownerRoot.addEventListener("pointerdown", dismissOutside, true);
     const MutationObserverPort = documentPort.defaultView?.MutationObserver;
