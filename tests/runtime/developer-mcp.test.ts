@@ -46,7 +46,7 @@ describe("developer MCP tools", () => {
     expect(result.shell.enabled).toBe(false);
   });
   it("resolves explicit Info.ts consistently with the plugin and validator", async () => {
-    put("applications/NSEControlGallery.app/Contents/index.tsx", "export default function Gallery() { return null; }");
+    put("applications/NSEControlGallery.app/Contents/index.tsx", '// syncloudos-allow idiom.application-menu: test fixture\nexport default function Gallery() { return null; }');
     put("applications/NSEControlGallery.app/Contents/Info.ts", 'export default { bundleIdentifier: "com.example.NSEControlGallery", displayName: "NSE Control Gallery", version: "1.0.0" };');
     const inspected = await inspectProject({ projectRoot: project });
     expect(inspected.bundles[0].resolvedManifest).toMatchObject({ bundleIdentifier: "com.example.NSEControlGallery", displayName: "NSE Control Gallery", version: "1.0.0", schemaVersion: 1 });
@@ -210,7 +210,7 @@ describe("developer MCP tools", () => {
   it("allows static tables and overflow warnings but fails a renderer's raw HUD control", async () => {
     put("package.json", JSON.stringify({ name:"consumer", dependencies:{ "@syndromatic/syncloudos":"1.0.0-beta.2", three:"^0.181.2" } }));
     put("applications/Lab.app/Contents/Info.ts", 'export default { bundleIdentifier: "org.example.lab", displayName: "Lab", version: "1.0.0" };');
-    const application = 'import { NSEApplication } from "@syndromatic/syncloudos"; export default class Lab extends NSEApplication {}\n';
+    const application = 'import { NSEApplication } from "@syndromatic/syncloudos"; export default class Lab extends NSEApplication { mainMenu = null; }\n';
     put("applications/Lab.app/Contents/index.tsx", application + 'const view = <pre style={{overflow:"auto"}}><table><tbody><tr><td>42</td></tr></tbody></table></pre>;');
     put("samples.css", 'pre { overflow: auto; }');
     const content = await validateProject({projectRoot:project, typescript:false, launch:false});
@@ -496,4 +496,64 @@ describe("developer MCP tools", () => {
     expect(manifest.dependencies["@modelcontextprotocol/sdk"]).toBeTruthy();
     expect(readFileSync(resolve(companion,"scripts/synware/validation-core.mjs"),"utf8")).toContain("createSynWareValidator");
   });
+  it.each(["Circular slider", "angle dial", "knob", "NSSlider.SliderType.circular"])("lookup_sdk resolves %s to NSESlider with circular usage and gallery example", async query => {
+    put("node_modules/@syndromatic/syncloudos/nse.d.ts", [
+      '/** Linear or circular slider control. */',
+      'export declare function NSESlider(props: { sliderType?: "linear" | "circular"; value?: number }): unknown;',
+      'export declare function NSEColourWell(props: { value?: string }): unknown;',
+      'export declare function NSEPopUpButton(props: { items?: string[] }): unknown;',
+      'export declare class NSEUndoManager {}',
+    ].join("\n"));
+    cpSync(resolve(repository, "docs/framework/appkit-counterparts.json"), resolve(project, "node_modules/@syndromatic/syncloudos/docs/framework/appkit-counterparts.json"));
+    put("node_modules/@syndromatic/syncloudos/docs/framework/values-and-progress.md", '# Values and Progress\n\n## NSESlider\n\nUse `NSESlider` with `sliderType="circular"` for an angle dial or rotary knob.\n');
+    const result = await lookupSdk({ projectRoot: project, query });
+    expect(result.symbols[0]).toMatchObject({
+      name: "NSESlider",
+      usage: 'NSESlider sliderType="circular"',
+      galleryExample: "Wrapping angle dial",
+    });
+    expect(result.concept).toMatchObject({
+      usage: 'NSESlider sliderType="circular"',
+      galleryExample: "Wrapping angle dial",
+    });
+    expect(result.docs[0].file).toBe("docs/framework/values-and-progress.md");
+  });
+  it("lookup_sdk reverse-indexes AppKit class names from appkit-counterparts.json", async () => {
+    put("node_modules/@syndromatic/syncloudos/nse.d.ts", [
+      'export declare function NSEColourWell(props: { value?: string }): unknown;',
+      'export declare function NSEPopUpButton(props: { items?: string[] }): unknown;',
+      'export declare class NSEUndoManager {}',
+    ].join("\n"));
+    cpSync(resolve(repository, "docs/framework/appkit-counterparts.json"), resolve(project, "node_modules/@syndromatic/syncloudos/docs/framework/appkit-counterparts.json"));
+    expect((await lookupSdk({ projectRoot: project, query: "NSUndoManager" })).symbols[0].name).toBe("NSEUndoManager");
+    expect((await lookupSdk({ projectRoot: project, query: "NSColorWell" })).symbols[0].name).toBe("NSEColourWell");
+    expect((await lookupSdk({ projectRoot: project, query: "NSPopUpButton" })).symbols[0].name).toBe("NSEPopUpButton");
+  });
+  it("detects rendered duplicate titlebars, toolbars, QuickSwitch toggles and window actions during launch check", async () => {
+    rmSync(resolve(project, "vite.config.ts"), { force: true });
+    for (const name of ["vite", "jsdom"]) symlinkSync(resolve(repository, "node_modules", name), resolve(project, "node_modules", name), "junction");
+    put("index.html", '<!doctype html><div id="root"></div><script type="module" src="/src/main.ts"></script>\n');
+    put("src/main.ts", [
+      'document.getElementById("root")!.innerHTML = `',
+      '  <div data-nse-control="window">',
+      '    <header data-nse-part="header" data-nse-chrome="true">System Title</header>',
+      '    <header class="app-titlebar">App Title</header>',
+      '    <div role="toolbar" data-nse-control="toolbar">Bar 1</div>',
+      '    <div role="toolbar">Bar 2</div>',
+      '    <button data-nse-quickswitch-trigger="true">Notes</button>',
+      '    <button aria-label="QuickSwitch">Notes 2</button>',
+      '    <button data-nse-toolbar-command="workspace.returnToWebspring">Home</button>',
+      '    <button aria-label="Return to Webspring">Home 2</button>',
+      '    <button data-nse-toolbar-item-id="applicationMenu">Menu 1</button>',
+      '    <button data-nse-role="application-menu">Menu 2</button>',
+      '  </div>`;',
+    ].join("\n"));
+    const report = await runLaunchCheck(project);
+    expect(report.ran).toBe(true);
+    expect(report.findings).toContainEqual(expect.objectContaining({ rule: "idiom.duplicate-chrome", severity: "error", message: expect.stringContaining("title bars") }));
+    expect(report.findings).toContainEqual(expect.objectContaining({ rule: "idiom.duplicate-chrome", severity: "error", message: expect.stringContaining("toolbars") }));
+    expect(report.findings).toContainEqual(expect.objectContaining({ rule: "idiom.duplicate-quickswitch", severity: "error" }));
+    expect(report.findings).toContainEqual(expect.objectContaining({ rule: "idiom.duplicate-window-action", severity: "warning", message: expect.stringContaining("Return to Webspring") }));
+    expect(report.findings).toContainEqual(expect.objectContaining({ rule: "idiom.duplicate-window-action", severity: "warning", message: expect.stringContaining("application-menu") }));
+  }, 120000);
 });

@@ -92,16 +92,21 @@ ${entitlements.length ? `  entitlements: ${JSON.stringify(entitlements)},\n` : "
 } satisfies SynWareInfo;
 `],
     ["Contents/index.tsx", `${selected.length ? 'import { useState } from "react";\n' : ""}import { SCOS${hooks.length ? `, ${hooks.join(", ")}` : ""} } from "@syndromatic/syncloudos";
+import { useApplicationMenuTrigger } from "@syndromatic/syncloudos/sdk";
 import { NSEStackItem, NSEStackView } from "@syndromatic/syncloudos/nse";
-${selected.length ? 'import { NSEButton } from "@syndromatic/syncloudos/nse/controls";\n' : ""}\
+import { NSEButton } from "@syndromatic/syncloudos/nse/controls";
 ${recipeImports}
 export default function SynWareRoot() {
+  const applicationMenu = useApplicationMenuTrigger();
 ${selected.length ? `  const [status, setStatus] = useState("Ready");\n${selected.filter(name => fxRecipes[name].hook).map(name => `  const ${name} = ${fxRecipes[name].hook}();`).join("\n")}\n  async function run(operation: () => string | Promise<string>) {\n    setStatus("Working");\n    try { setStatus(await operation()); }\n    catch (error) { setStatus(error instanceof Error ? error.message : String(error)); }\n  }\n` : ""}\
   return (
     <NSEStackView aria-label="${title} actions" orientation="vertical" spacing={12}>
       <NSEStackItem id="status" visibilityPriority={100}>
         <p>{SCOS.app.displayName} is running as {SCOS.app.bundleIdentifier}.</p>
       </NSEStackItem>
+      {applicationMenu ? <NSEStackItem id="application-menu" visibilityPriority={95}>
+        <NSEButton title={applicationMenu.label} onClick={(event) => applicationMenu.activate(event.currentTarget)} />
+      </NSEStackItem> : null}
 ${selected.map(name => `      <NSEStackItem id="${name}" visibilityPriority={90}>\n        <NSEButton title="${fxRecipes[name].label ?? `Run ${name} example`}" onClick={() => run(() => ${functionName(name)}(${fxRecipes[name].hook ? name : ""}))} />\n      </NSEStackItem>`).join("\n")}
 ${selected.length ? '      <NSEStackItem id="result" visibilityPriority={100}><p role="status">{status}</p></NSEStackItem>\n' : ""}\
     </NSEStackView>
@@ -127,8 +132,8 @@ function scaffoldClassFiles(bundleIdentifier, title, authoring, applicationMenuT
     <NSESearchField aria-label="Search" binding={controller.queryBinding} />
     <NSEButton title="Clear search" action={controller.clearSearchAction} />
   </section>;`;
-  files.set("Contents/index.tsx", `import { NSEApplication, NSEViewController, observable, bind, action, actionRef, type NSEBinding${applicationMenuToolbar ? ", NSEWindowController" : ""} } from "@syndromatic/syncloudos";
-${applicationMenuToolbar ? 'import { NSEToolbar, NSEToolbarItem } from "@syndromatic/syncloudos/nse";\n' : ""}${separate ? 'import { SearchView } from "./Views/SearchView";' : 'import { NSESearchField, NSEButton } from "@syndromatic/syncloudos/nse/controls";'}
+  files.set("Contents/index.tsx", `import { NSEApplication, NSEViewController, observable, bind, action, actionRef, type NSEBinding${applicationMenuToolbar ? ", NSEWindowController" : ", SCOS"} } from "@syndromatic/syncloudos";
+${applicationMenuToolbar ? 'import { NSEToolbar, NSEToolbarItem } from "@syndromatic/syncloudos/nse";\n' : 'import { NSEMenu } from "@syndromatic/syncloudos/nse";\n'}${separate ? 'import { SearchView } from "./Views/SearchView";' : 'import { NSESearchField, NSEButton } from "@syndromatic/syncloudos/nse/controls";'}
 export class SearchViewController extends NSEViewController {
   @observable accessor query = "";
   readonly queryBinding: NSEBinding<string> = bind<SearchViewController, "query">(this, "query");
@@ -147,7 +152,10 @@ ${applicationMenuToolbar ? `class MainWindow extends NSEWindowController {
     this.window.toolbar = new NSEToolbar({ identifier: "main-toolbar", items: [menu], defaultItemIdentifiers: [menu.id] });
   }
 }\n\n` : ""}export default class SynWareApplication extends NSEApplication {
-${applicationMenuToolbar ? "  static override mainWindow = MainWindow;" : "  static override mainViewController = SearchViewController;"}
+${applicationMenuToolbar ? "  static override mainWindow = MainWindow;" : `  static override mainViewController = SearchViewController;
+  override applicationDidFinishLaunching() {
+    this.mainMenu = new NSEMenu({ owner: this, runtime: SCOS.menus.runtime, title: ${JSON.stringify(title)}, items: [] });
+  }`}
 }
 `);
   if (separate) files.set("Contents/Views/SearchView.tsx", `import { NSESearchField, NSEButton } from "@syndromatic/syncloudos/nse/controls";

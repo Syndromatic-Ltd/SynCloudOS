@@ -83,7 +83,7 @@ Use entry names such as `sdk`, `nse` or `fx/animation`. An entry without a query
 
 Every NSE symbol carries `appkitCounterpart`, from the installed `docs/framework/appkit-counterparts.json`: the AppKit, Foundation or Core framework name it follows (`"NSPopUpButton"`, `"NSAppearance.Name"`), or `{ none, replacement? }` saying why it has none and what replaces it. A type such as `NSEButtonProps` takes its class's counterpart. Write NSE code the way the counterpart is written in AppKit, and prefer the replacement of an entry with none.
 
-Broad `application menu`, `settings`, `preferences` and `account` queries prioritise `NSEToolbarItem`, `NSEApplication` and `NSEMenuBar`. Exact exported names retain priority.
+`lookup_sdk` also resolves AppKit/Foundation names (such as `NSSlider.SliderType.circular` or `NSPopUpButton`) and plain-English descriptions (such as `"Circular slider"`, `"angle dial"`, `"knob"`, `"status bar"`, `"source list"`, or `"application menu"`), returning the matching NSE symbol, its `usage` hint (for example `NSESlider sliderType="circular"`), and its Control Gallery example name (such as `"Wrapping angle dial"`) when applicable. Exact exported names retain priority.
 
 ### `validate`
 
@@ -93,7 +93,7 @@ Output: `{ ok: boolean, findings: [{ file, line, column?, rule, severity?, messa
 
 Uses the **same static manifest parser, import checks and directory validator as the repository's `validate-synware.mjs`**, compiled against the installed SDK's manifest schema and exports. It does not evaluate `Info.ts`. It then invokes the consumer's installed TypeScript compiler with `--noEmit --pretty false`; missing TypeScript or compiler failure is a finding, never a passing check. Set `typescript: false` only when intentionally requesting manifest/bundle checks without project type checking. Schema/import findings currently identify the containing file at line 1; TypeScript findings preserve the compiler's line and column.
 
-For a directly imported `mountSynCloudOS` call with inline, literal host options, validation also reports `synware.application-menu` on a primary manifest missing `applicationMenu: { trigger: "content" }` when the app fills the page under `"optional"` or `"required"` authentication. This includes the default fullscreen frame and `frame: "declared"` with a `stage` presentation. A declared windowed primary or disabled authentication does not require this trigger.
+An application must expose `NSEApplication.mainMenu`, `NSEToolbarItem.applicationMenu("gear")`, or an app-drawn `useApplicationMenuTrigger` button unless it declares a reasoned `// syncloudos-allow idiom.application-menu: <reason>` exception (or runs as a headless `backgroundService`). Validation reports missing application menus as `idiom.application-menu`, duplicate window title bars or toolbars as `idiom.duplicate-chrome`, duplicate visible QuickSwitch title toggles as `idiom.duplicate-quickswitch`, hand-drawn controls that duplicate existing NSE controls (such as an angle/rotation dial instead of `NSESlider sliderType="circular"`) as `idiom.hand-drawn-control`, and duplicate Return to Webspring or application-menu buttons in a window as a warning (`idiom.duplicate-window-action`).
 
 With `authentication: "disabled"` (the default), nobody can sign in, so the host opens the primary application publicly whatever its manifest says. A primary that declares `runtime: { policy: { requiresLogin: true } }` contradicts that and fails to mount; validation reports it as `synware.public-policy` on its `Info.ts`.
 

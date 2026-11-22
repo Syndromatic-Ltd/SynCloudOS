@@ -134,7 +134,7 @@ export async function validateTheme({ projectRoot, path } = {}) {
     const key = JSON.stringify(entry); if (!seen.has(key)) { seen.add(key); errors.push(entry); }
   };
   let bundle = null;
-  try { bundle = readThemeBundle(target, { contract }); }
+  try { bundle = readThemeBundle(target, { contract, atmoKeyframesStylesheet: resolve(context.sdkRoot, "themes/Atmo.scostheme/Contents/Resources/atmo-structure.controls.css") }); }
   catch (failure) {
     const match = /^(.*?): ([a-z-]+): ([\s\S]*)$/u.exec(failure.message);
     if (match) error(match[1], `theme.${match[2]}`, match[3]); else error(target, "theme.bundle", failure.message);

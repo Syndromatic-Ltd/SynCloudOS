@@ -319,9 +319,10 @@ function validateTransitionTiming(declaration, tokens, file) {
     }
   });
 }
-export function validateThemeCSS(source, { file, root, contract, kind = "system", onImport = () => undefined, siblings: bundleSiblings } = {}) {
+export function validateThemeCSS(source, { file, root, contract, kind = "system", onImport = () => undefined, siblings: bundleSiblings, atmoKeyframesStylesheet } = {}) {
   const app = kind === "app";
-  const allowsKeyframes = !app && file && resolve(file) === ATMO_KEYFRAMES_STYLESHEET;
+  const resolvedFile = file ? resolve(file) : null;
+  const allowsKeyframes = !app && Boolean(resolvedFile) && (resolvedFile === ATMO_KEYFRAMES_STYLESHEET || (Boolean(atmoKeyframesStylesheet) && resolvedFile === resolve(atmoKeyframesStylesheet)));
   const motionRoles = contract.motion?.roles ?? [];
   const motionTokens = new Set(motionRoles.flatMap(role => ["duration", "easing"].map(kind => `--nse-motion-${role.replace(/[A-Z]/gu, letter => "-" + letter.toLowerCase())}-${kind}`)));
   if (app && !Array.isArray(contract.appThemeControls)) fail(file, "css-control", "The theme contract does not define appThemeControls.");
@@ -435,7 +436,7 @@ export function readThemeBundle(bundlePath, options = {}) {
   const siblings = files.filter(file => extname(file).toLowerCase() === ".css").flatMap(file => themeRuleSummaries(readFileSync(file, "utf8")));
   for (const file of files.filter(file => extname(file).toLowerCase() === ".css")) {
     const dependencies = []; imports.set(file, dependencies);
-    stylesheets.set(file, validateThemeCSS(readFileSync(file, "utf8"), { file, root, contract, kind, siblings, onImport: path => dependencies.push(path) }));
+    stylesheets.set(file, validateThemeCSS(readFileSync(file, "utf8"), { file, root, contract, kind, siblings, atmoKeyframesStylesheet: options.atmoKeyframesStylesheet, onImport: path => dependencies.push(path) }));
   }
   const stylesheetPath = resolve(contents, "Resources/theme.css"), visited = new Set(), visiting = new Set();
   const visit = file => { if (visiting.has(file)) fail(file, "cyclic-import", "Cyclic theme CSS imports."); if (visited.has(file)) return; if (!stylesheets.has(file)) fail(file, "stylesheet", "Missing theme stylesheet."); visiting.add(file); for (const child of imports.get(file)) visit(child); visiting.delete(file); visited.add(file); };

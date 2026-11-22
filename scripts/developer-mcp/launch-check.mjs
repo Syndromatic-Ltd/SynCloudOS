@@ -57,6 +57,9 @@ export async function runLaunchCheck(root) {
     findings.splice(0, findings.length, ...findings.filter(finding => finding.rule !== "launch.error"));
     findings.push({ file, line: 1, rule: "launch.stopped", message: `The application showed a system alert during launch: "${report.text}"${logged.length ? ` Errors logged: ${logged.join(" ; ")}` : ""}` });
   }
+  for (const finding of report.chromeFindings ?? []) {
+    findings.push({ file, line: 1, rule: finding.rule, ...(finding.severity ? { severity: finding.severity } : {}), message: finding.message });
+  }
   return { ran: true, entry, limits: LIMITS, findings };
 }
 
@@ -141,9 +144,82 @@ async function child(root, entry) {
     text = `${copy}${details ? `" Technical details: "${details}` : ""}`;
   }
   const stopped = Boolean(alert);
-  write(MARKER + JSON.stringify({ problems, stopped, text: text.slice(0, 600) }) + "\n");
+  const chromeFindings = stopped ? [] : inspectRenderedChrome(page.document);
+  write(MARKER + JSON.stringify({ problems, stopped, text: text.slice(0, 600), chromeFindings }) + "\n");
   try { await server?.close(); } catch {}
   process.exit(0);
+}
+
+/** Inspect rendered DOM chrome per window after launch settles. */
+function inspectRenderedChrome(document) {
+  const findings = [];
+  const isVisible = (element) => {
+    if (!element || element.hidden) return false;
+    if (element.getAttribute("aria-hidden") === "true") return false;
+    if (element.closest("[hidden], [aria-hidden='true'], [inert]")) return false;
+    for (let current = element; current && current.nodeType === 1; current = current.parentElement) {
+      const style = current.style;
+      if (style?.display === "none" || style?.visibility === "hidden") return false;
+    }
+    return true;
+  };
+  const windowRoots = [...document.querySelectorAll('[data-nse-control="window"]')].filter(isVisible);
+  const scopes = windowRoots.length > 0 ? windowRoots : [document.body];
+  const ownedInScope = (scope, selector) => [...scope.querySelectorAll(selector)].filter((element) => {
+    if (!isVisible(element)) return false;
+    if (scope !== document.body) {
+      const nearestWindow = element.closest('[data-nse-control="window"]');
+      if (nearestWindow && nearestWindow !== scope) return false;
+    }
+    return true;
+  });
+  for (const scope of scopes) {
+    const titlebars = ownedInScope(scope, '[data-nse-part="header"][data-nse-chrome], [data-nse-control="window"] > [data-nse-part="header"], header[class*="titlebar" i], header[class*="title-bar" i], header[class*="topbar" i]');
+    if (titlebars.length > 1) {
+      findings.push({
+        rule: "idiom.duplicate-chrome",
+        severity: "error",
+        message: `A rendered window shows ${titlebars.length} visible title bars. Drop "titled" from styleMask when drawing custom window chrome, or use NSEWindowController's system title bar.`,
+      });
+    }
+    const toolbars = ownedInScope(scope, '[role="toolbar"], [data-nse-control="toolbar"]').filter((element) => {
+      if (element.getAttribute("data-nse-type") === "tool-button-group") return false;
+      const parentToolbar = element.parentElement?.closest('[role="toolbar"], [data-nse-control="toolbar"]');
+      return !parentToolbar || parentToolbar === element;
+    });
+    if (toolbars.length > 1) {
+      findings.push({
+        rule: "idiom.duplicate-chrome",
+        severity: "error",
+        message: `A rendered window shows ${toolbars.length} visible toolbars. Keep one toolbar per window.`,
+      });
+    }
+    const quickSwitches = ownedInScope(scope, '[data-nse-quickswitch-trigger], button[aria-label*="QuickSwitch" i]');
+    if (quickSwitches.length > 1) {
+      findings.push({
+        rule: "idiom.duplicate-quickswitch",
+        severity: "error",
+        message: `A rendered window shows ${quickSwitches.length} visible QuickSwitch toggle titles. Keep at most one visible QuickSwitch toggle per window.`,
+      });
+    }
+    const returnButtons = ownedInScope(scope, '[data-nse-toolbar-command="workspace.returnToWebspring"], [data-nse-role="return-to-webspring"], button[aria-label*="Return to Webspring" i]');
+    if (returnButtons.length > 1) {
+      findings.push({
+        rule: "idiom.duplicate-window-action",
+        severity: "warning",
+        message: `A rendered window shows ${returnButtons.length} visible Return to Webspring buttons. Keep one Return to Webspring button per window.`,
+      });
+    }
+    const appMenuButtons = ownedInScope(scope, '[data-nse-toolbar-item-id^="applicationMenu"], [data-nse-role="application-menu"], button[aria-label*="Application Menu" i]');
+    if (appMenuButtons.length > 1) {
+      findings.push({
+        rule: "idiom.duplicate-window-action",
+        severity: "warning",
+        message: `A rendered window shows ${appMenuButtons.length} visible application-menu buttons. Keep one application-menu button per window.`,
+      });
+    }
+  }
+  return findings;
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) await child(resolve(process.argv[2]), process.argv[3]);

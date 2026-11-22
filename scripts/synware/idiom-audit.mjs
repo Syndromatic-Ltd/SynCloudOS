@@ -116,9 +116,33 @@ function isStructuredType(node) {
   return false;
 }
 
+const CUSTOM_TITLEBAR_CLASS = /(?:^|[\s_-])(?:(?:window|custom|app)[-_ ]?(?:titlebar|title-bar|topbar|top-bar)|titlebar|title-bar)(?:$|[\s_-])/iu;
+
+function stringLiteralAttr(node, name) {
+  const found = node.attributes?.properties?.find(property => ts.isJsxAttribute(property) && property.name.getText() === name);
+  if (!found?.initializer) return "";
+  const expr = ts.isJsxExpression(found.initializer) ? unwrap(found.initializer.expression) : found.initializer;
+  return expr && ts.isStringLiteralLike(expr) ? expr.text : "";
+}
+
 /** Facts about one source file that the idiom rules read. */
 function inspectSource(file, text, regions = []) {
-  const facts = { nseApplication: false, functionDefaultExport: false, stateHooks: 0, rawControls: new Map(), unmanaged: [], preferenceWrites: [], legacyTheme: [] };
+  const facts = {
+    nseApplication: false,
+    functionDefaultExport: false,
+    stateHooks: 0,
+    rawControls: new Map(),
+    unmanaged: [],
+    preferenceWrites: [],
+    legacyTheme: [],
+    hasMainMenu: false,
+    hasToolbarApplicationMenu: false,
+    hasContentApplicationMenu: false,
+    hasWindowToolbar: false,
+    dropsTitledStyleMask: false,
+    customTitlebarLines: [],
+    customToolbarLines: [],
+  };
   const source = parse(file, text);
   const locals = new Map();
   const collect = node => {
@@ -126,19 +150,50 @@ function inspectSource(file, text, regions = []) {
     ts.forEachChild(node, collect);
   };
   collect(source);
-  const visit = (node, inEffect) => {
+  const styleMaskDropsTitled = node => {
+    const expr = unwrap(node);
+    if (!expr || !ts.isArrayLiteralExpression(expr)) return false;
+    const values = expr.elements.map(item => unwrap(item)).filter(item => item && ts.isStringLiteralLike(item)).map(item => item.text);
+    return values.length > 0 && !values.includes("titled");
+  };
+  const visit = (node, inEffect, inConditional) => {
     if (withinRendererRegion(node, source, regions)) return;
     if (ts.isClassLike(node)) {
       for (const clause of node.heritageClauses ?? []) for (const type of clause.types) if (/(^|\.)NSEApplication$/u.test(type.expression.getText(source))) facts.nseApplication = true;
     }
+    if (ts.isPropertyDeclaration(node) || ts.isGetAccessorDeclaration(node)) {
+      const name = node.name?.getText(source);
+      if (name === "mainMenu") facts.hasMainMenu = true;
+      if (name === "styleMask" && ts.isPropertyDeclaration(node) && styleMaskDropsTitled(node.initializer)) facts.dropsTitledStyleMask = true;
+    }
+    if (ts.isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.EqualsToken && ts.isPropertyAccessExpression(node.left)) {
+      const prop = node.left.name.text;
+      if (prop === "mainMenu" && unwrap(node.right)?.kind !== ts.SyntaxKind.NullKeyword) facts.hasMainMenu = true;
+      if (prop === "toolbar" && unwrap(node.right)?.kind !== ts.SyntaxKind.NullKeyword) facts.hasWindowToolbar = true;
+      if (prop === "styleMask" && styleMaskDropsTitled(node.right)) facts.dropsTitledStyleMask = true;
+    }
+    if (ts.isPropertyAssignment(node) && node.name.getText(source) === "styleMask" && styleMaskDropsTitled(node.initializer)) {
+      facts.dropsTitledStyleMask = true;
+    }
     if (ts.isFunctionDeclaration(node) && node.modifiers?.some(modifier => modifier.kind === ts.SyntaxKind.DefaultKeyword)) facts.functionDefaultExport = true;
     if (ts.isExportAssignment(node) && !node.isExportEquals && (ts.isArrowFunction(node.expression) || ts.isFunctionExpression(node.expression))) facts.functionDefaultExport = true;
-    if ((ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) && ts.isIdentifier(node.tagName) && RAW_CONTROLS.has(node.tagName.text)) {
+    if ((ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) && ts.isIdentifier(node.tagName)) {
       const tag = node.tagName.text;
-      const hidden = tag === "input" && node.attributes.properties.some(property => ts.isJsxAttribute(property) && property.name.getText(source) === "type" && property.initializer && ts.isStringLiteral(property.initializer) && ["hidden", "file"].includes(property.initializer.text));
-      if (!hidden && (tag !== "table" || interactiveTable(node))) {
-        const entry = facts.rawControls.get(tag) ?? { count: 0, line: source.getLineAndCharacterOfPosition(node.getStart(source)).line + 1 };
-        entry.count++; facts.rawControls.set(tag, entry);
+      if (tag === "NSEMenuBar") facts.hasMainMenu = true;
+      if (RAW_CONTROLS.has(tag)) {
+        const hidden = tag === "input" && node.attributes.properties.some(property => ts.isJsxAttribute(property) && property.name.getText(source) === "type" && property.initializer && ts.isStringLiteral(property.initializer) && ["hidden", "file"].includes(property.initializer.text));
+        if (!hidden && (tag !== "table" || interactiveTable(node))) {
+          const entry = facts.rawControls.get(tag) ?? { count: 0, line: source.getLineAndCharacterOfPosition(node.getStart(source)).line + 1 };
+          entry.count++; facts.rawControls.set(tag, entry);
+        }
+      }
+      if (!/^NSE/u.test(tag)) {
+        const className = stringLiteralAttr(node, "className");
+        const role = stringLiteralAttr(node, "role");
+        const part = stringLiteralAttr(node, "data-nse-part");
+        const line = source.getLineAndCharacterOfPosition(node.getStart(source)).line + 1;
+        if (!inConditional && (CUSTOM_TITLEBAR_CLASS.test(className) || part === "header")) facts.customTitlebarLines.push(line);
+        if (!inConditional && role === "toolbar") facts.customToolbarLines.push(line);
       }
     }
     let effect = inEffect;
@@ -146,6 +201,10 @@ function inspectSource(file, text, regions = []) {
       const name = calleeName(node);
       if (name === "useState" || name === "useReducer") facts.stateHooks++;
       if (name === "useEffect" || name === "useLayoutEffect") effect = true;
+      if (name === "useApplicationMenuTrigger") facts.hasContentApplicationMenu = true;
+      if (ts.isPropertyAccessExpression(node.expression) && node.expression.name.text === "applicationMenu" && /(?:^|\.)NSEToolbarItem$/u.test(node.expression.expression.getText(source))) {
+        facts.hasToolbarApplicationMenu = true;
+      }
       if (inEffect && name === "requestAnimationFrame") facts.unmanaged.push({ api: "requestAnimationFrame", line: source.getLineAndCharacterOfPosition(node.getStart(source)).line + 1 });
       const onPreferences = ts.isPropertyAccessExpression(node.expression) && /(^|\.)preferences$/u.test(node.expression.expression.getText(source));
       if (onPreferences && node.arguments.length >= 2 && (name === "setJSON" || (name === "set" && isStructuredValue(node.arguments[1], locals))))
@@ -155,9 +214,10 @@ function inspectSource(file, text, regions = []) {
       facts.preferenceWrites.push(source.getLineAndCharacterOfPosition(node.getStart(source)).line + 1);
     if (inEffect && ts.isNewExpression(node) && ts.isIdentifier(node.expression) && ["ResizeObserver", "Worker", "IntersectionObserver"].includes(node.expression.text))
       facts.unmanaged.push({ api: `new ${node.expression.text}`, line: source.getLineAndCharacterOfPosition(node.getStart(source)).line + 1 });
-    ts.forEachChild(node, child => visit(child, effect));
+    const nextConditional = inConditional || ts.isConditionalExpression(node) || (ts.isBinaryExpression(node) && (node.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken || node.operatorToken.kind === ts.SyntaxKind.BarBarToken));
+    ts.forEachChild(node, child => visit(child, effect, nextConditional));
   };
-  visit(source, false);
+  visit(source, false, false);
   return facts;
 }
 
@@ -297,6 +357,9 @@ export function auditSynWareIdioms({ root, applications, sdkRoot, entries = [] }
     const files = collectLocalModuleGraph(entry, root);
     const report = { bundleIdentifier: application.bundleIdentifier, filesScanned: files.length, classAuthoring: false, stateHooks: 0, rawControls: 0, unmanagedLifecycle: 0, preferenceDocumentWrites: 0 };
     let functionRoot = false;
+    let hasMainMenu = false, hasToolbarApplicationMenu = false, hasContentApplicationMenu = false;
+    let hasWindowToolbar = false, dropsTitledStyleMask = false;
+    const customTitlebars = [], customToolbars = [];
     for (const file of files) {
       const text = read(file);
       if (!STYLE.includes(extname(file))) {
@@ -306,11 +369,42 @@ export function auditSynWareIdioms({ root, applications, sdkRoot, entries = [] }
         report.rawControls += [...facts.rawControls.values()].reduce((sum, item) => sum + item.count, 0);
         report.unmanagedLifecycle += facts.unmanaged.length;
         report.preferenceDocumentWrites += facts.preferenceWrites.length;
+        hasMainMenu ||= facts.hasMainMenu;
+        hasToolbarApplicationMenu ||= facts.hasToolbarApplicationMenu;
+        hasContentApplicationMenu ||= facts.hasContentApplicationMenu;
+        hasWindowToolbar ||= facts.hasWindowToolbar;
+        dropsTitledStyleMask ||= facts.dropsTitledStyleMask;
+        for (const line of facts.customTitlebarLines) customTitlebars.push({ file, line });
+        for (const line of facts.customToolbarLines) customToolbars.push({ file, line });
         if (file === entry && facts.functionDefaultExport) functionRoot = true;
       }
       inspectFile(file);
     }
     if (!report.classAuthoring) at(entry, 1, "idiom.cocoa-class-authoring", `${functionRoot ? "The application default-exports a function component" : "The application has no NSEApplication subclass"}${report.stateHooks ? `, with ${report.stateHooks} useState/useReducer hooks` : ""}. Prefer NSEApplication from @syndromatic/syncloudos and NSEViewController from @syndromatic/syncloudos/nse with observable state, bindings and actions; see docs/framework/cocoa-authoring.md.`);
+    const isBackgroundService = application.manifest?.runtime?.presentation === "backgroundService";
+    if (!isBackgroundService && !hasMainMenu && !hasToolbarApplicationMenu && !hasContentApplicationMenu) {
+      const appMenuDirective = directives.get(entry)?.find(item => item.valid && item.rule === "idiom.application-menu");
+      if (appMenuDirective) {
+        appMenuDirective.suppressed++;
+        const recorded = optOuts.find(item => item.file === slash(relative(root, entry)) && item.line === appMenuDirective.line && item.rule === "idiom.application-menu");
+        if (recorded) recorded.suppressed++;
+      } else {
+        at(entry, 1, "idiom.application-menu", 'This application has neither mainMenu nor an application-menu trigger (NSEToolbarItem.applicationMenu("gear") or useApplicationMenuTrigger). Expose one so people can reach About, System Preferences and Quit, or declare a reasoned // syncloudos-allow idiom.application-menu: <reason> exception.', "error");
+      }
+    }
+    if (hasToolbarApplicationMenu && hasContentApplicationMenu) {
+      at(entry, 1, "idiom.duplicate-window-action", 'This application declares both NSEToolbarItem.applicationMenu and useApplicationMenuTrigger. Keep one application-menu button per window.', "warning");
+    }
+    if (!dropsTitledStyleMask) {
+      for (const hit of customTitlebars) {
+        at(hit.file, hit.line, "idiom.duplicate-chrome", 'This titled window draws its own title bar alongside the system bar. Drop "titled" from styleMask when drawing custom window chrome, or use NSEWindowController\'s titlebar.', "error");
+      }
+    }
+    if (hasWindowToolbar) {
+      for (const hit of customToolbars) {
+        at(hit.file, hit.line, "idiom.duplicate-chrome", 'This window sets window.toolbar and also draws a separate role="toolbar". Use one NSEToolbar per window instead of duplicating toolbars.', "error");
+      }
+    }
     summary.push(report);
   }
   for (const entry of entries) if (existsSync(entry)) for (const file of collectLocalModuleGraph(entry, root)) inspectFile(file);
