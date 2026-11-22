@@ -1,6 +1,6 @@
 # Boxes, shadows and corners
 
-An `NSEBox` is an `NSBox`. A shadow is an `NSEShadow` value assigned to a view's `shadow`, as in `NSView.shadow`. Applications describe the box; the selected theme draws it. There are no public rounded-box, shadow-view or smooth-surface components.
+This page covers drawing boxes, shadows and rounded corners. Use an `NSEBox` for a well, frame or floating plate, and give any view a shadow by assigning an `NSEShadow` to its `shadow` property. You describe the box and the active theme draws it. There are no separate public rounded-box, shadow-view or smooth-surface components.
 
 ```tsx
 import { NSEBox, NSEShadow, NSEView } from "@syndromatic/syncloudos/nse";
@@ -16,26 +16,26 @@ import { NSEBox, NSEShadow, NSEView } from "@syndromatic/syncloudos/nse";
 
 ## Atmo's property mapping
 
-The framework sets `data-box-kind`, `data-border-style`, `data-nse-shadow`, `data-transparent`, `data-custom-fill`, `data-custom-border` and `data-corner-curve`. It does not choose an Atmo variant in JavaScript; the Atmo rules live in `src/Themes/Atmo.scostheme/Contents/Resources/atmo.boxes.css` and `atmo-structure.boxes.css`.
+The framework sets `data-box-kind`, `data-border-style`, `data-nse-shadow`, `data-transparent`, `data-custom-fill`, `data-custom-border` and `data-corner-curve` on the box, and never picks an Atmo variant in JavaScript. Atmo's rules are in `src/Themes/Atmo.scostheme/Contents/Resources/atmo.boxes.css` and `atmo-structure.boxes.css`.
 
 | Properties | Atmo look |
 | --- | --- |
-| `boxType="custom"`, `borderType="bezelBorder"` (default), no shadow | Well: the inset rounded rim, with the existing 14-slice artwork. |
-| `boxType="custom"`, `borderType="lineBorder"` or `"grooveBorder"`, no shadow | Frame: the existing raised frame artwork, 18-slice. |
-| `boxType="custom"`, non-null `shadow` | Floating plate: the 18-slice plate artwork plus the requested shadow. Takes precedence over the border recipe. |
-| `boxType="custom"`, `borderType="noBorder"` | Plain interior; the border is omitted, including on a shadowed plate. |
-| Explicit `fillColour`, `borderColour`, `borderWidth`, `cornerRadius` or `cornerCurve` | Property values win: the fixed artwork is replaced with a scalable CSS fill and border. An assigned shadow still draws the floating treatment. |
-| `isTransparent={true}` | No interior fill or opaque sprite centre. The border and assigned shadow remain. |
-| `contentViewMargins={{ width, height }}` | Exact horizontal and vertical content insets, including zero. The default custom-box inset is 12 px. |
-| `title` and `titlePosition` | The existing NSBox title positions and fieldset/legend grouping are preserved. |
-| Reduced transparency, forced-colour appearance or the corresponding media query | Decorative shadows and shadow-bearing sprite artwork are suppressed; focus is not clipped. |
+| `boxType="custom"`, `borderType="bezelBorder"` (the default), no shadow | Well: an inset rounded rim, drawn from 14-slice artwork. |
+| `boxType="custom"`, `borderType="lineBorder"` or `"grooveBorder"`, no shadow | Frame: raised frame artwork, 18-slice. |
+| `boxType="custom"` with a `shadow` | Floating plate: 18-slice plate artwork plus your shadow. This wins over the border type. |
+| `boxType="custom"`, `borderType="noBorder"` | A plain interior with no border, even on a plate with a shadow. |
+| `fillColour`, `borderColour`, `borderWidth`, `cornerRadius` or `cornerCurve` set | Your values win: the fixed artwork gives way to a scalable CSS fill and border. A shadow still gives the floating look. |
+| `isTransparent={true}` | No interior fill and no opaque artwork centre. The border and any shadow remain. |
+| `contentViewMargins={{ width, height }}` | Exact horizontal and vertical content insets, zero included. Without them, the content sits at the standard content margin and list rows run edge to edge. |
+| `title` and `titlePosition` | The title positions (`titlePosition` defaults to `atTop` with a title and `noTitle` without), drawn as a fieldset and legend. |
+| Reduced transparency, forced colours or the matching media query | Decorative shadows and artwork that includes a shadow are dropped; focus rings are never clipped. |
 
-`fillColour` follows the existing NSEBox CSS background convention, including gradients. `borderColour` and `shadowColour` are CSS colour values; a shadow also accepts a `GFXColour`. `borderWidth`, `cornerRadius` and shadow blur are finite non-negative pixels. SynCloudOS uses British spelling for these AppKit-shaped properties.
+`fillColour` takes one CSS background value, gradients included. `borderColour` and `shadowColour` are CSS colours, and a shadow also accepts a `GFXColour`. `borderWidth`, `cornerRadius` and the shadow's blur are finite, non-negative pixel values. Property names use British spelling (`fillColour`, `shadowColour`).
 
 ## NSEShadow
 
-`new NSEShadow({ shadowColour?, shadowOffset?, shadowBlurRadius? })` copies and freezes its value. The default is one-third-opacity black, zero offset and zero blur. `shadowOffset` is an `NSSize` (`width`, `height`), with positive height upwards; NSE reverses its vertical sign for CSS. A view also accepts the same property record directly, or `null` to remove the shadow. There is no GraphicsFX-only spread field.
+`new NSEShadow({ shadowColour?, shadowOffset?, shadowBlurRadius? })` copies its options and freezes the result. By default it's black at one-third opacity, with no offset and no blur. `shadowOffset` is `{ width, height }`, where a positive height moves the shadow up; NSE flips the sign for CSS. A view's `shadow` also accepts a plain options object, or `null` to remove the shadow. There's no spread setting.
 
 ## Layer corners
 
-`NSEView`, `NSEBox` and `AFXLayer` accept `cornerRadius` and `cornerCurve: "circular" | "continuous"`. AFX also retains `maskedCorners`. Continuous corners use a squircle. Browser projection uses `corner-shape`; SVG alpha masks and portable AFX composition use the same superellipse geometry. Circular is the default, and browsers without CSS corner-shape retain a circular radius fallback for live CSS surfaces. Existing framework smooth geometry remains internal, so host windows, app views, menus, popovers and toolbars keep their existing corner shapes. NSE's shadow property does not clip the view or add an extra view around it.
+`NSEView`, `NSEBox` and `AFXLayer` accept `cornerRadius` and `cornerCurve: "circular" | "continuous"`, and `AFXLayer` also has `maskedCorners`. `circular` is the default. Continuous corners are a superellipse (a squircle): in the browser they use CSS `corner-shape`, and SVG alpha masks and AnimationFX composition draw the same curve. A browser without `corner-shape` falls back to a circular radius. The framework's own smooth corners for windows, menus, popovers and toolbars are internal and unaffected. A shadow never clips the view or wraps it in an extra element.

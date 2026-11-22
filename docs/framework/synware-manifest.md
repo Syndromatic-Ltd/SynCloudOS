@@ -1,6 +1,6 @@
 # SynWare manifest
 
-Every application requires `Contents/Info.ts`, its Info.plist-style declaration typed as `SynWareInfo`. Write `bundleIdentifier`, `displayName` and `version` explicitly. Discovery fills only `schemaVersion`, the icon and locale resources before validating the complete manifest. The plugin, static validator and Developer MCP resolve the same declaration. See [Project structure](project-structure.md).
+Every application has a `Contents/Info.ts` that declares what it is and what it needs, typed as `SynWareInfo`. This page lists every field. Write `bundleIdentifier`, `displayName` and `version` yourself; discovery fills in only `schemaVersion`, the icon and the locale resources, then validates the complete manifest. The plugin, the static validator and the Developer MCP all resolve the same declaration. See [Project structure](project-structure.md).
 
 ```ts
 export default {
@@ -18,9 +18,9 @@ export default {
 } as const;
 ```
 
-Write the manifest as a single `export default` object literal. The `as const` assertion keeps the types narrow, and the validation tooling reads the literal statically, so it accepts only plain values: no function calls, spreads or computed keys.
+Write the manifest as a single `export default` object literal. `as const` (or `satisfies SynWareInfo`) keeps the types narrow. The validation tooling reads the literal statically, so use plain values only: no function calls, spreads or computed keys.
 
-The schema rejects unknown keys. A typo in a field name surfaces as a validation issue with the path and a code (`required`, `type`, `unknown-key`, `format` or `conflict`) instead of being ignored.
+The schema rejects unknown keys, so a misspelt field name shows up as a validation issue with its path and a code (`required`, `type`, `unknown-key`, `format` or `conflict`) instead of being ignored.
 
 ## Identity
 
@@ -33,7 +33,7 @@ The schema rejects unknown keys. A typo in a field name surfaces as a validation
 | `availability` | `"development"` | Optional. Excludes the application from production builds. |
 | `migrationVersion` | integer | Optional. Marks the data schema revision your `migrations` handle. |
 
-Identifiers retain their declared case in manifests and public displays. Registry lookups, `SCOS.open`, duplicate detection and storage keys compare case-insensitively: `com.example.Notes` and `COM.EXAMPLE.notes` are the same identity and cannot be registered twice. The `.app` folder supplies the bundle name, not its identity.
+Manifests and public displays keep the identifier's declared case. Registry lookups, `SCOS.open`, duplicate detection and storage keys ignore case, so `com.example.Notes` and `COM.EXAMPLE.notes` are the same identity and can't both be registered. The `.app` folder gives the bundle its name, not its identity.
 
 ### Migration from the previous identity fields
 
@@ -51,7 +51,7 @@ Identifiers retain their declared case in manifests and public displays. Registr
 | `SCOS.open("notes")` | `SCOS.open("com.example.notes")` or `SCOS.open("/notes")` |
 | Old app persistence keys and Webspring layout v4 | Reset app storage under the new identity; Webspring layout v5 (`webspring.layout.v5`) |
 
-This is a clean cutover: saved data is reset rather than migrated, and there are no old-ID aliases or compatibility shims. Window, document, command, folder, pane and widget IDs and window/command titles are unchanged.
+This is a clean cutover. Saved data is reset, not migrated, and the old IDs have no aliases or compatibility shims. Window, document, command, folder, pane and widget IDs, and window and command titles, don't change.
 
 ## Routes and presentations
 
@@ -74,58 +74,60 @@ This is a clean cutover: saved data is reset rather than migrated, and there are
 | `role` | enum | `"standard"`, `"panel"`, `"modal"`, `"sheet"` or `"hud"`. |
 | `smoothSurface` | `"off"`, `false`, a number, or an object | Corner shape. A number sets the radius. The object form accepts `radius`, `curve` (`"arc"`, `"squircle"`, `"superellipse"` or `"clothoid"`), `smoothing`, per-corner radii and `overflow`. |
 
-`frame` describes how the application presents inside the application stage.
-
-`frame.presentationMotion` selects `host` or `content` launch and return choreography. Window chrome and menus are assigned on the window and application controllers.
+`frame` describes how the application presents inside the application stage. `frame.presentationMotion` chooses whether the host (`"host"`) or your content (`"content"`) animates launch and return. Window chrome and menus are set on the window and application controllers, not in the manifest.
 
 ## Documents
 
 | Field | Notes |
 | --- | --- |
-| `documentTypes` | Each entry has an `id` and optionally `extensions` (letters and digits only) and `displayName`. Declare a type here before you open documents of that type. |
+| `documentTypes` | Each entry has an `id` and optionally `extensions` (letters and digits only), `mimeTypes` and `displayName`. Declare a type here before you open documents of that type. |
 
 ## Entitlements, privacy and services
 
-`entitlements` lists device and service capabilities declared by the application, such as `location.read`, `location.request`, `video.capture.camera` or `file.write`. The runtime validates and captures this immutable declaration before launch. A mounted client cannot add entitlements by changing an author's array later. Each [FX guide](fx/README.md) gives its exact declaration names.
+`entitlements` lists the device and service capabilities the application uses, such as `location.read`, `location.request`, `video.capture.camera` or `file.write`. The runtime validates and captures this list before launch, and it can't change afterwards: a mounted client can't add entitlements by modifying the array later. Each [FX guide](fx/README.md) gives its exact entitlement names.
 
-Declaration, user consent and the signed-in person's role are separate:
+Declaring a capability, the user's consent and the signed-in person's role are three separate checks:
 
 | Check | Owner | Example |
 | --- | --- | --- |
 | The app declares the capability | `entitlements` in `Info.ts`, captured for launch | `file.open` permits the declared open-panel operation; add `file.write` for saving through `SCOS.filePanels`. |
 | The app meets mandatory launch declarations | `runtime.policy.requiredEntitlements` | An absent required entitlement denies launch before application code runs. |
-| This app may use a privacy service | The per-user, per-app privacy store and the browser's permission | Location, camera, microphone, Bluetooth, NFC, speech, contacts and XR expose their own status/request methods. PassKit has no privacy-status API; payment presentation retains the shared entitlement, policy, denial and lifetime gates. |
+| This app may use a privacy service | The per-user, per-app privacy store and the browser's permission | Location, camera, microphone, Bluetooth, NFC, speech, contacts and XR have their own status and request methods. PassFX has no privacy status; payment presentation still goes through the entitlement, policy, denial and lifetime checks. |
 | This person may perform a role-governed operation | The host's configuration profile | DocumentStore capabilities include `documentStore.drafts.read`, `documentStore.draft.write`, `documentStore.publish` and `documentStore.revision.create`. |
 
-Declaring an entitlement does not prompt, grant browser access or generally grant the person a role capability. A role grant cannot manufacture a missing device declaration. A passive `getAuthorizationStatus()` reports facts without granting app consent; requests and active sessions use the shared privacy gate. Webspring presents the current user's choices in **System Preferences → Privacy & Security**. See [Authorisation, entitlements and privacy](authorization.md).
+Declaring an entitlement doesn't prompt the user, grant browser access or give the person a role capability, and a role grant can't stand in for a missing entitlement. `getAuthorizationStatus()` only reports; it never grants consent. Requests and active sessions go through the shared privacy check. Webspring presents the current user's choices in **System Preferences → Privacy & Security**. See [Authorisation, entitlements and privacy](authorization.md).
 
-A host grants role capabilities with the `configurationProfile` option of `mountSynCloudOS`. Its runtime evaluator is `runtime.configurationProfiles`; the application's manifest key remains `runtime.policy`.
+A host grants role capabilities with the `configurationProfile` option of `mountSynCloudOS`, which the runtime evaluates as `runtime.configurationProfiles`. The application's own requirements go in the manifest's `runtime.policy`.
 
-A single application without sign-in (`application` with `authentication: "disabled"`, the default) needs no site policy setup. The host opens its primary application publicly without `runtime.policy.public`; a primary that declares `runtime.policy.requiresLogin` contradicts that host and fails to mount. Its convenience profile grants the anonymous role the declared `documentStore.*` capabilities. Other declared capabilities are not granted this way, and an explicit `configurationProfile` keeps its own rules.
+A single application without sign-in (`application` with `authentication: "disabled"`, the default) needs no site policy. The host opens its primary application publicly even without `runtime.policy.public`, and a primary that declares `runtime.policy.requiresLogin` contradicts that host and fails to mount. In this mode the built-in profile grants the anonymous role the `documentStore.*` capabilities the app declares, and no others. An explicit `configurationProfile` replaces this with its own rules.
 
-The [test host](testing-synware.md) uses fixture subject grants and denial-first adapter controls. Test grants do not establish that a browser, user or production site would allow the operation.
+The [test host](testing-synware.md) uses fixture grants and adapters that deny by default. A test grant doesn't show that a browser, a user or a production site would allow the operation.
 
-`services` declares host dependencies. Each entry has an `id`, and optionally `required` and `minimumVersion`.
+`services` declares the host services the app depends on. Each entry has an `id`, and optionally `required` and `minimumVersion`.
+
+## Installation
+
+`webApp`, `urlTypes`, `linkCapture`, `shortcutItems` and `shareTarget` describe how the app behaves when the site is installed as a web app. [Installed applications](installed-applications.md) documents each field.
 
 ## Localisation and appearance
 
 | Field | Notes |
 | --- | --- |
-| Localised files | Every `Resources/Localised/<locale>.locale/*.strings` file is discovered. `localeResources` is no longer a manifest field. |
+| Localised files | Discovery finds every `Resources/Localised/<locale>.locale/*.strings` file. There is no `localeResources` manifest field. |
 | `appearances` | Declares the appearances the application supports: `{ id, variant }` where `variant` is `"system"` or `"neutral"`. |
 
 ## Lifecycle and background work
 
 | Field | Notes |
 | --- | --- |
-| `lifecycle` | `preload` opts into speculative module preloading (default `false`); it does not govern whether the application can launch. `suspend`, `resume` and `terminate` retain their lifecycle declarations. |
-| `background` | `enabled` and a list of task identifiers. Pair it with `createBackgroundHandler` in the definition. |
+| `lifecycle` | `preload` opts into speculative module preloading (default `false`); it doesn't control whether the application can launch. `suspend`, `resume` and `terminate` are optional booleans for those lifecycle phases. |
+| `background` | `enabled` and a list of task identifiers in `tasks`. Handle them with `handleBackgroundTask` on the application class, or a `createBackgroundHandler` export. |
 
 ## Runtime policy
 
-The optional `runtime` block carries intent that differs from the defaults.
+The optional `runtime` block records where the application differs from the defaults.
 
-Use `runtime.disabled: true` to keep an application registered while blocking route opening, runtime launch and preloading. A visible Webspring icon stays dimmed and exposes `runtime.disabledReason`. Required-service recovery cannot enable an application disabled by its declaration. `lifecycle.launch` is rejected; use `lifecycle.preload` for the preload boolean. Lifecycle launch hooks and methods keep their names.
+Set `runtime.disabled: true` to keep an application registered but stop its routes opening, its launch and its preloading. A visible Webspring icon is dimmed and shows `runtime.disabledReason`. An application disabled this way stays disabled even when its required services recover. The old `lifecycle.launch` field is rejected; use `lifecycle.preload` instead.
 
 | Field | Notes |
 | --- | --- |
@@ -133,7 +135,7 @@ Use `runtime.disabled: true` to keep an application registered while blocking ro
 | `disabledReason` | Optional explanation shown for a disabled application. It does not itself disable the application. |
 | `presentation` | `"stage"`, `"window"`, `"systemSheet"` or `"backgroundService"`. |
 | `type` | `"internal"`, `"system"` or `"external"`. |
-| `policy` | `public`, `requiresLogin`, `requiredRoles`, `requiredCapabilities`, `requiredEntitlements` and `requiredAccessClasses` (`"team"` or `"external"`). These are app access requirements applied by the site configuration profile. |
+| `policy` | `public`, `requiresLogin`, `requiredRoles`, `requiredCapabilities`, `requiredEntitlements` and `requiredAccessClasses` (`"team"` or `"external"`). The site's configuration profile applies these access requirements. |
 | `notifications` | An initial `badgeCount`. |
 
 ## Launcher presence
@@ -148,11 +150,11 @@ The `webspring` block controls how the application appears in the launcher.
 | `featured` | Highlight the application. |
 | `defaultSelected` | Select the application when the launcher first appears. |
 
-A shell declares its identity in a `WSInfo` instead (see [Webspring](webspring.md#define-a-shell)). Its optional `folders` block, `{ editable, initial: [{ id, title, order, apps }] }`, groups launcher applications into folders: each `id` matches `folder.<name>`, `title` is localised text, `order` is a whole number placed among the applications' `webspring.order` values, and `apps` lists at least one application ID without repeats. See [Webspring](webspring.md#folders).
+A shell declares its identity in a `WSInfo` instead (see [Webspring](webspring.md#define-a-shell)). Its optional `folders` block, `{ editable, initial: [{ id, title, order, apps }] }`, groups launcher applications into folders. Each `id` has the form `folder.<name>`, `title` is localised text, `order` is a whole number that sorts among the applications' `webspring.order` values, and `apps` lists one or more application IDs without repeats. See [Webspring](webspring.md#folders).
 
 ## Validate a manifest
 
-`validateSynWareManifest` checks a complete manifest against the schema and returns either the frozen manifest or a list of issues. Folder tooling resolves `SynWareInfo` first; the runtime rejects invalid complete manifests with `SynWareManifestValidationError`.
+`validateSynWareManifest` checks a complete manifest against the schema. It returns `{ ok: true, value }` with the frozen manifest, or `{ ok: false, errors }`. Folder tooling resolves `SynWareInfo` into a complete manifest first, and the runtime rejects an invalid one with `SynWareManifestValidationError`.
 
 ```ts
 import { validateSynWareManifest } from "@syndromatic/syncloudos/sdk";
@@ -171,4 +173,4 @@ if (!result.ok) {
 }
 ```
 
-The `synware:validate` tooling command runs the same schema check on a bundle directory. See [Tooling](synware-sdk.md#tooling).
+`npm run synware:validate` runs the same schema check on a bundle directory. See [Tooling](synware-sdk.md#tooling).

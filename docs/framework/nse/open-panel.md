@@ -1,8 +1,10 @@
 # Open panels, folders and application storage
 
-`NSEOpenPanel` is an object, after `NSOpenPanel`. AppKit defines the architecture; Atmo draws its source list, search capsule, collection and grey plate, presenting a sheet on desktop and a compact Sources drill-in on narrow viewports.
+`NSEOpenPanel` lets the user choose files, folders or media to bring into your application. It's an object you configure and present. Atmo draws its source list, search field, collection and grey plate, as a sheet on desktop and as a compact Sources list you drill into on narrow screens. This page also covers your application's own storage directory.
 
 ```ts
+import { NSEModalResponse, NSEOpenPanel } from "@syndromatic/syncloudos/nse";
+
 const panel = new NSEOpenPanel();
 panel.canChooseFiles = true;
 panel.canChooseDirectories = false;
@@ -22,33 +24,35 @@ if (await panel.beginSheetModal(this.view.window!) === NSEModalResponse.OK) {
 panel.dispose();
 ```
 
-Configure `canChooseFiles` (default true), `canChooseDirectories` (false), `allowsMultipleSelection` (false), `allowedContentTypes` (empty means all), `directoryURL`, `prompt` and `message` before presenting. `beginSheetModal(window, completionHandler?)` attaches below that window's title bar and toolbar, blocks the parent's controls and resolves when it closes. `begin(completionHandler?)` and `runModal()` are application-modal. Each returns a promise for `NSEModalResponse.OK` or `.cancel`; JavaScript does not run a blocking native modal loop. `cancel()` ends the session. `urls` and `url` contain the accepted selection; `result` preserves cancellation and typed errors.
+Set `canChooseFiles` (default `true`), `canChooseDirectories` (`false`), `allowsMultipleSelection` (`false`), `allowedContentTypes` (empty allows everything), `directoryURL`, `prompt` (`"Open"`) and `message` before you present the panel. `beginSheetModal(window, completionHandler?)` attaches the panel below that window's title bar and toolbar, blocks the window's controls and resolves when the panel closes. `begin(completionHandler?)` and `runModal()` are modal to the whole application. Each returns a promise for `NSEModalResponse.OK` or `NSEModalResponse.cancel`; nothing blocks the JavaScript thread while the panel is open. `cancel()` closes it. `urls` and `url` hold what the user accepted, and `result` tells you whether they cancelled or what typed error occurred.
 
-`allowedContentTypes` accepts MIME types, MIME families, dotted extensions, and the Foundation identifiers `public.item`, `public.data`, `public.image`, `public.movie`, `public.audio` and `public.text`. Filtering is based on file metadata and name. Applications must inspect imported bytes before trusting their format. Folders remain visible so a filtered collection can still be traversed. `directoryURL` is a browser directory handle, including one returned by the application-support lookup below.
+`allowedContentTypes` accepts MIME types, MIME families such as `image/*`, extensions with a leading dot, and the type identifiers `public.item`, `public.data`, `public.image`, `public.movie`, `public.audio` and `public.text`. The filter only looks at a file's metadata and name, so check the bytes you import before trusting their format. Folders stay visible so the user can still move through a filtered collection. `directoryURL` is a browser directory handle, such as the one the application-support lookup below returns.
 
-The web platform does not reveal durable OS file URLs. `NSEOpenPanelURL` is consequently a browser `FilePanelReference` or a provider's `MediaPanelItem`, preserving the source's real identity. A directory selection has `kind: "directory-handle"`; a file can be read through its reference. It is never turned into a fabricated path. Release file references after importing them. A panel retains accepted provider resources until its next presentation or `dispose()`; import or copy provider content before then.
+Browsers don't reveal lasting OS file paths, so each `NSEOpenPanelURL` is either a browser file reference or an item from a media provider, and it keeps the identity its source gave it rather than a made-up path. A file reference (`kind` `"ephemeral-file"` or `"file-handle"`) has `read(signal?)`, and a chosen folder has `kind: "directory-handle"`. Release file references once you've imported them. The panel keeps provider items alive until it's presented again or disposed, so import or copy their content before then.
 
 ## Sources
 
-Folders lists actual directory handles granted with Add Folder…. The browser platform port persists them by structured clone in IndexedDB, scoped to the application bundle. These are the web analogue of security-scoped bookmarks, rather than a grant of permanent permission: opening a panel calls `queryPermission`; ungranted or revoked bookmarks remain visible with a lock. Choosing a locked row calls `requestPermission` directly from that user action. Neither restoring a bookmark nor background enumeration prompts for permission. Browsing uses `values()`, retains path history, sorts folders first and searches the current directory.
+Folders lists the directories the user has granted with Add Folder…. The browser keeps their handles in IndexedDB, separately for each application bundle. A saved folder isn't a permanent permission: opening the panel calls `queryPermission`, and a folder that isn't granted, or has been revoked, appears with a lock. Choosing a locked folder calls `requestPermission` straight from that click. Restoring saved folders and listing their contents never prompt. Browsing keeps a history of the path, lists folders first and searches the current folder.
 
-Media lists `panel.mediaSources`, using the providers formerly supplied to the separate media panel. There is one panel and one result contract. Each provider supplies `id`, `label` and `query(query, signal)`, and may supply `release(items)` and `requiresUserActivation`. A provider query returns `{ items, nextCursor }`; each item carries `id`, `providerId`, `kind` (`image`, `video`, `audio`), `name`, `mimeType` and optional `source`, `thumbnailUrl` or `fileReference`. Ordinary sources are searchable and paginated. Activation-only sources are queried by an explicit source action, never by a mount effect.
+Media lists the providers in `panel.mediaSources`, and their items come back through the same results as files. Each provider supplies `id`, `label` and `query(query, signal)`, and may add `release(items)` and `requiresUserActivation`. A query returns `{ items, nextCursor }`, and each item has `id`, `providerId`, `kind` (`image`, `video` or `audio`), `name`, `mimeType` and optionally `source`, `thumbnailUrl` or `fileReference`. Ordinary sources can be searched and paged. A source that needs user activation is only queried when the user acts on it, never when the panel mounts.
 
-App Storage opens the current bundle's origin-private application-support directory. It is labelled Application Support; an application can create its own Scratch Disk or Media subdirectory there.
+App Storage opens your application's private Application Support directory, where you can create folders of your own, such as Scratch Disk or Media.
 
-System Chooser… invokes the existing browser file chooser directly from its button. Cancelling that chooser returns to the drawn panel. Unsupported or insecure drawn-panel environments take the system path at `begin` time. With no current activation that path returns a typed denial immediately; it never waits for a later click.
+System Chooser… opens the browser's own file chooser straight from its button, and cancelling it returns to the panel. Where the drawn panel isn't supported, or the page isn't a secure context, presenting goes straight to the browser chooser. If there's no user activation at that moment, it fails at once with a typed denial instead of waiting for a later click.
 
 ## Explicit system-only presentation
 
 ```ts
+import { NSEOpenPanel } from "@syndromatic/syncloudos/nse";
+
 const panel = new NSEOpenPanel();
 panel.usesSystemFileChooser = true;
 const response = await panel.runModal(); // call directly from the click/key handler
 ```
 
-`usesSystemFileChooser` is a deliberate SynCloudOS extension, default false. AppKit has no reason to distinguish a browser's chooser from its own. A `uses…` Boolean fits its property vocabulary and names the developer's explicit choice. A presentation-style enum would mix this acquisition decision with sheet versus application modality, which the existing begin methods already express.
+`usesSystemFileChooser` (default `false`) skips the drawn panel and uses the browser's file chooser. It's a separate Boolean because choosing where files come from is independent of whether the panel is a sheet or application-modal, which the `begin` methods already decide.
 
-The native browser chooser can select files or one directory; it cannot return a mixed selection or multiple directories. Use the drawn collection for those combinations. Without `showDirectoryPicker`, Folders is hidden (including Safari and Firefox); without OPFS, App Storage is hidden. Media can remain available in either case. Native permission and picker UI still require manual browser acceptance testing.
+The browser chooser can pick files or a single folder, but not a mix of both or several folders; use the drawn panel for those. In browsers without `showDirectoryPicker`, such as Firefox, Folders is hidden, and without the origin private file system (OPFS), App Storage is hidden. Media can still be available either way. The browser's own permission and chooser dialogs still need testing by hand.
 
 ## Application-support access
 
@@ -65,15 +69,15 @@ if (support) {
 }
 ```
 
-This is the minimal `FileManager.urls(for:in:)` analogue. The only supported directory/domain pair is `applicationSupportDirectory` / `userDomainMask`. It returns an empty collection when OPFS is unavailable; an ended application mount rejects the lookup. The runtime creates `SynCloudOS-Application-Support/<encoded bundle identifier>` under `navigator.storage.getDirectory()`. Separate apps get separate directory handles, stable across reloads and application sessions. Browser origin quota, persistence and clearing rules apply; the API does not promise unlimited space or an OS-visible directory. Same-origin application code is mutually trusted; bundle scoping is not an additional browser security sandbox.
+`SCOS.fileManager.urls` supports one directory and domain pair, `applicationSupportDirectory` and `userDomainMask`. It returns an empty array when OPFS isn't available, and rejects once your application's mount has ended. The runtime creates `SynCloudOS-Application-Support/<encoded bundle identifier>` under `navigator.storage.getDirectory()`, so each application gets its own directory, which stays the same across reloads and sessions. The browser's quota, persistence and clearing rules for the site still apply: the space isn't unlimited and the folder isn't visible in the OS. Applications on the same origin trust one another, so the per-bundle folder isn't a security boundary.
 
-The new capability serves editors, document importers and media applications that need a persistent working directory. `SCOS.filePanels.open` can only acquire user-picked references, and preference persistence stores JSON; neither provides this directory. The implementation uses the injected runtime platform/storage port, with raw IndexedDB, picker and OPFS access confined to the browser adapter. No storage root, host identity or temporary gallery helper is public.
+Use it when an editor, importer or media application needs a lasting working directory. `SCOS.filePanels.open` only gives you files the user picked, and preferences only store JSON, so neither can do this. Direct IndexedDB, picker and OPFS access stays inside the runtime's browser adapter, and no storage root or host identity is exposed.
 
 ## Reading and exporting bytes
 
-Accepted selections keep their file/provider identity. Ephemeral selections retain their native `File` in `reference.file`; browser `getFile()` results also remain `File`. Reading a file reference returns `Promise<NSEData>`, with MIME type on `reference.mediaType`. A file-handle reference exposes permission-checked operations without exposing its native handle.
+An accepted selection keeps its file or provider identity. An `"ephemeral-file"` reference keeps the browser's `File` in `reference.file`. Reading any file reference returns `Promise<NSEData>`, and the MIME type is in `reference.mediaType`. A `"file-handle"` reference offers permission-checked operations without exposing the browser's handle.
 
-`FilePanelExportPayload` is `{ fileName, mediaType, data: NSEDataConvertible }`. Writable file destinations accept `NSEDataConvertible | string`. The browser boundary alone converts these values to native buffers or download Blobs; directory traversal and structured-cloned bookmarks retain the original native authority privately.
+An export payload is `{ fileName, mediaType, data: NSEDataConvertible }`, and a writable file destination accepts `NSEDataConvertible | string`. Only the browser adapter turns these into buffers or download `Blob`s, and the browser handles behind folders and saved folders stay private to it.
 
 ```ts
 await target.sink.write({ fileName: "drawing.pdf", mediaType: "application/pdf", data: pdfData }, signal);

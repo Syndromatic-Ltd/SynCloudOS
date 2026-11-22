@@ -1,16 +1,16 @@
 # VideoFX
 
-Encoded byte inputs accept `NSEDataConvertible` from `@syndromatic/syncloudos/foundation`; delivered encoded bytes are immutable `NSEData`. Use `.bytes` at a native typed-buffer boundary and `.blob(mimeType)` for a browser Blob. Numeric pixel, index and PCM planes retain their typed arrays; writable copy destinations remain mutable.
-
-VideoFX (`VFX`) is the web-native analogue of Video Toolbox and the video half of AVFoundation. It decodes and encodes video, holds decoded frames with exact MediaFX timing, processes frames with graphics and image filters, reads and writes container files, captures from cameras and displays, and presents frames on a shared clock.
+VideoFX (`VFX`) handles video: use it to play, edit, transcode or record. It decodes and encodes video, holds decoded frames with exact MediaFX timing, processes frames with graphics and image filters, reads and writes container files, captures from cameras and displays, and presents frames on a shared clock.
 
 The framework is built around three ideas.
 
 - **Frames have owners.** A `VFXFrame` is a decoded picture that you own and must close. Closing releases its memory or its GPU surface. `clone()` gives you another owner and `transfer()` hands ownership to someone else.
-- **Every stage is bounded.** Decoders, encoders, queues and containers have limits on pending work and memory. Going over a limit fails with `QuotaExceededError`, and an unbounded pipeline is a bug the framework refuses to let you build.
+- **Every stage is bounded.** Decoders, encoders, queues and containers have limits on pending work and memory. Going over a limit fails with `QuotaExceededError`, so a pipeline cannot grow without bound.
 - **Ask before you commit.** Codec support varies by browser and device, so you query the exact configuration first and receive either an accepted, normalised configuration or a reason it is not supported.
 
 Compression and container code plug in through backends. The framework's own classes (`VFXDecoder`, `VFXEncoder`, `VFXContainerReader`, `VFXContainerWriter`) hold the state machines, limits and ownership rules, and a backend does the codec or format work. In an application, the session supplies WebCodecs-based backends, so you write code against the session's decoder and encoder sessions. The portable classes work with any backend you supply, including a fake in a test.
+
+Encoded byte inputs accept any `NSEDataConvertible` from `@syndromatic/syncloudos/foundation`, and encoded bytes VideoFX hands back are immutable `NSEData`. Use `.bytes` for a typed array and `.blob(mimeType)` for a browser `Blob`. Pixel planes stay as typed arrays, and destinations you copy into remain writable. If you have used Video Toolbox and AVFoundation, the decoder, encoder and capture concepts will be familiar.
 
 ```ts
 import { VFXVideoFormat, VFXPixelBuffer } from "@syndromatic/syncloudos/fx/video";
@@ -22,9 +22,8 @@ import { VFXVideoFormat, VFXPixelBuffer } from "@syndromatic/syncloudos/fx/video
 | --- | --- |
 | Prefix | `VFX` |
 | Entries | `@syndromatic/syncloudos/fx/video` and `@syndromatic/syncloudos/fx/video/webm` |
-| Hooks | `useVideo` for capture, and `useSCOS().video` for decoding, encoding, processing and presentation |
-| Permissions | `video.capture.camera` and `video.capture.display` for capture. Decoding, encoding and processing need none. |
-| Analogue | Video Toolbox (`VTDecompressionSession`, `VTCompressionSession`), AVFoundation capture and asset writing, Core Video (`CVPixelBuffer`, `CVPixelBufferPool`) |
+| Hooks | `useVideo` for capture, `useVideoPresentation` for picture-in-picture and playback routes, and `useSCOS().video` for decoding, encoding, processing and presentation |
+| Permissions | `video.capture.camera` and `video.capture.display` for capture, `video.capture.element` for content filters, `video.pictureInPicture` and `video.route` for presentation. Decoding, encoding and processing need none. |
 
 ## What the entries export
 
@@ -654,13 +653,13 @@ Camera and display capture show the browser's consent prompt and indicator. Stop
 
 `useVideoPresentation()` exposes component-scoped VideoFX presentation authority. Declare `video.pictureInPicture` for PiP or `video.route` for remote playback in the app manifest. The client creates a `VFXPictureInPictureController` or `VFXRouteDetector` for an app-provided `HTMLVideoElement`. Construction is passive. Each controller exposes capabilities plus `authorizationStatus()` and `requestAuthorization()`; these check host authority and API support without fabricating a browser permission prompt.
 
-Call `startPictureInPicture()` or the route detector's `prompt()` directly from a genuine user gesture. Browser activation and media requirements still apply. PiP controllers expose `isPictureInPictureActive`, `stopPictureInPicture()`, `subscribe()`, and `dispose()`. Only the controller owning a PiP target may close it; late completion after abort cleans up that target without exiting another controller's presentation.
+Call `startPictureInPicture()` or the route detector's `prompt()` directly from a user gesture. Browser activation and media requirements still apply. PiP controllers expose `isPictureInPictureActive`, `stopPictureInPicture()`, `subscribe()`, and `dispose()`. Only the controller owning a PiP target may close it; late completion after abort cleans up that target without exiting another controller's presentation.
 
 Route detectors expose `startDiscovery()`, `stopDiscovery()`, `areRoutesAvailable`, `connectionState`, `subscribe()`, and `dispose()`. Availability is `null` until the browser invokes its discovery callback. Remote Playback support is not a promise of AirPlay: Chromium may expose a different transport or no routes. Browser availability watching can itself reject for browser policy. Cancellation also cancels watch IDs that arrive after disposal. Mount abort, caller abort and hook cleanup end all ownership.
 
-`VFXContentFilter(element, "restrict" | "crop")` follows ScreenCaptureKit's content-filter concept. After the user grants a display capture, call the optional capture-session `setContentFilter(filter)` method; pass `null` to clear. This additionally requires `video.capture.element` and existing `video.capture.display` authority. The browser must support RestrictionTarget/restrictTo or CropTarget/cropTo. Camera sessions, inactive captures, and arbitrary external tracks are rejected; the host applies filters only to its private stream. Cancellation or revoked authority during a filter update interrupts capture rather than retaining an uncertain filtering result. Capture tracks are never returned to the app.
+`VFXContentFilter(element, "restrict" | "crop")` limits a display capture to one element of your page. After the user grants a display capture, call the optional capture-session `setContentFilter(filter)` method; pass `null` to clear. This additionally requires `video.capture.element` and existing `video.capture.display` authority. The browser must support RestrictionTarget/restrictTo or CropTarget/cropTo. Camera sessions, inactive captures, and arbitrary external tracks are rejected; the host applies filters only to its private stream. Cancellation or revoked authority during a filter update interrupts capture rather than retaining an uncertain filtering result. Capture tracks are never returned to the app.
 
 The host injects its document and element-target constructors into `BrowserVideoPresentationAdapter`, and passes that adapter into `BrowserVideoCaptureAdapter`. Unsupported hosts report capabilities explicitly. These APIs do not create document Picture-in-Picture windows or infer screen-cast devices.
 
 
-Element-capture support is reported by `session.capabilities.elementRestriction` and `elementCrop`. Before a display stream is granted these flags report target-factory availability only. After capture starts they additionally require the corresponding methods on that session's private live display track; browser surface restrictions can still reject an operation. A camera session or disposed/unavailable host reports false. The display chooser is the browser authorization step; applying a filter does not invent a second native permission prompt. The host-only `elementCaptureCapabilities(track?)` query uses injected factories and never exposes the track to apps.
+Element-capture support is reported by `session.capabilities.elementRestriction` and `elementCrop`. Before a display stream is granted these flags report target-factory availability only. After capture starts they additionally require the corresponding methods on that session's private live display track; browser surface restrictions can still reject an operation. A camera session or disposed/unavailable host reports false. The display chooser is the browser authorisation step; applying a filter does not invent a second native permission prompt. The host-only `elementCaptureCapabilities(track?)` query uses injected factories and never exposes the track to apps.

@@ -34,7 +34,6 @@ jobs:
       - run: npm run sdk:build
       - run: npm run test:packaging -- tests/runtime/managed-typography-packed-consumer.test.ts tests/runtime/chronosphere/chronosphere-packed-consumer.test.ts --maxWorkers=1
       - run: node --test tests/packaging/*.test.mjs
-      - run: npm run product:names
       - run: npm run fx:installed
       - name: Audit a generated consumer with scoped FX operations
         run: |

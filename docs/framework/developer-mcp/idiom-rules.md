@@ -1,8 +1,8 @@
-# Authoring rules and the Opus friction reconciliation
+# Idiom rules
 
-The Developer MCP checks application source for departures from the public authoring APIs. Structural validity, idiomatic source, successful launch and a visually correct application are separate results. A static finding is evidence to act on; no findings is not visual or interaction acceptance.
+The Developer MCP's `validate` tool checks application source for places where it bypasses the public authoring APIs. This page lists every rule it reports, what triggers it and what to use instead. A valid structure, idiomatic source, a successful launch and an application that looks right are four separate results: a finding is something to act on, but having no findings doesn't mean the application looks or behaves correctly.
 
-The rules use the installed SDK. Appearance-neutral NSE controls obtain their appearance from the active appearance definition. Atmo is one implementation; applications are not required to select it. The SDK has no `NSEColor` class. UI colour guidance uses the actual semantic values of `NSEAppearanceDefinition` and `defineNSEAppearance` from `@syndromatic/syncloudos/nse/appearance`; it must never invent an `NSEColor` import.
+The rules read the installed SDK. NSE controls take their look from the active theme. Atmo is the default, and you can use your own. There's no `NSEColor` class: interface colours come from the `--nse-colour-*` semantic tokens (see [Appearance](../appearance.md)) and a `.scostheme` theme can redefine them, so no rule ever suggests an `NSEColor` import.
 
 ## Errors
 
@@ -27,10 +27,14 @@ The rules use the installed SDK. Appearance-neutral NSE controls obtain their ap
 
 ## Warnings
 
-Warnings describe potential misuse or a missing higher-level counterpart. They do not make a structurally valid application invalid. The original general idiom checks (class authoring, managed lifetimes, document state, undefined NSE tokens) also remain relevant.
+Warnings point to possible misuse, or a higher-level API you may have missed. They never make a structurally valid application fail validation.
 
 | Rule | Evidence needed | Direction and deliberate limits |
 | --- | --- | --- |
+| `idiom.cocoa-class-authoring` | The application default-exports a function component, or has no `NSEApplication` subclass | Prefer an `NSEApplication` subclass from `@syndromatic/syncloudos` with `NSEViewController`s holding the state. Function components remain supported; the message counts their `useState`/`useReducer` hooks. |
+| `idiom.managed-lifecycle` | `requestAnimationFrame`, `new ResizeObserver`, `new Worker` or similar inside a React effect | Bind the resource to the view's lifetime: `NSEViewController.fx.animation.manageDisplayLink` (or `manageRenderer`), `drawableSizeDidChange`, `managedTask` or view controller outlets. |
+| `idiom.document-state` | A preference write that stores a structured list or record | Keep the user's work in documents through `SCOS.documents.workspaceDocuments`, and use `NSEUserDefaults` from `@syndromatic/syncloudos/foundation` only for small settings. |
+| `idiom.nse-token` | A `var(--nse-...)` name the installed SDK doesn't define | Use the `--nse-colour-*` semantic tokens, or define the value in your own theme. An undefined name never follows the theme. |
 | `idiom.duplicate-window-action` | More than one visible Return to Webspring button, or more than one application-menu button (`NSEToolbarItem.applicationMenu` + `useApplicationMenuTrigger`), in a window | Keep one Return to Webspring button and one application-menu button per window. Checked both statically and in the rendered launch DOM. |
 | `idiom.scroll-view` | Explicit auto/scroll overflow in CSS or inline styles | Review whether `NSEScrollView` should own the region. Code samples and content inside a scroll view's document view can legitimately scroll; these warnings never make validation fail. |
 | `idiom.resampled-animation` | Generated `AFXKeyframeAnimation.values` that call a recognisable timing/curve sampler | Prefer `AFXBasicAnimation`/`AFXSpringAnimation`, or authored keyframes with `keyTimes` and `timingFunctions`, from `@syndromatic/syncloudos/fx/animation`. Ordinary data maps are accepted. This does not establish compositor eligibility or detect every helper that generates values. |
@@ -42,28 +46,28 @@ Warnings describe potential misuse or a missing higher-level counterpart. They d
 | `idiom.unused-resource` | A supported image/font/media/PDF asset with no static reference in scanned source, manifest or reachable artwork | Review before removing. Comments do not retain assets. Extensionless names and recognisable dynamic resource families do. This is not a whole-program resource reachability proof; localisations are managed by the framework. |
 | `idiom.foundation-import` | Known Foundation symbols imported through obsolete root/NSE entries | `import { NSEUserDefaults, NSENumberFormatter, NSEData } from "@syndromatic/syncloudos/foundation"`; `NSEDataConvertible` is a type import. Old `NumberFormatter` becomes `NSENumberFormatter`. Namespace access and arbitrary wrappers remain for TypeScript/manual migration review. |
 | `idiom.layout-guide` | In app or host CSS (never a theme): a raw `env(safe-area-inset-*)`, or a `position: fixed`/`sticky` element offset by a known system bar height | Use `--nse-safe-area-inset-*`, `useNSESafeArea` or `NSEScrollView`'s automatic content insets, so content follows the bars the framework actually shows. A coincidental offset of the same size can be suppressed with a reason. |
-| `idiom.video` | Raw JSX `<video>` | `VFXVideoClient`, `VFXVideoPresentationClient` and `VFXRouteDetector` are lower-level public types in `@syndromatic/syncloudos/fx/video`. They are not a complete `AVPlayerView` analogue and do not provide a standard player UI. The rule must not recommend an invented `AVKPlayerView`. |
+| `idiom.video` | Raw JSX `<video>` | `VFXVideoClient`, `VFXVideoPresentationClient` and `VFXRouteDetector` in `@syndromatic/syncloudos/fx/video` are lower-level types; there's no complete player view with standard controls, and the rule never recommends one that doesn't exist. |
 
-`NSEData` has `count` and `bytes`; it is not a `Blob` with `.size` and `.text()`. File-panel export payloads carry `data: NSEDataConvertible`, not `blob`. The import warning supplies migration context; TypeScript establishes whether a particular byte consumer has been migrated correctly.
+`NSEData` has `count` and `bytes`; it isn't a `Blob` with `.size` and `.text()`. File-panel export payloads carry `data: NSEDataConvertible`, not `blob`. The import warning tells you what changed, and TypeScript tells you whether code that uses the bytes was updated correctly.
 
 ## Explicit exceptions
 
-An author can explain a deliberate exception with a real source comment on the finding's line or immediately before it:
+To keep a deliberate exception, explain it in a source comment on the finding's line or the line before:
 
 ```ts
 // syncloudos-allow idiom.reduced-motion: this essential instrument indication has an independently reviewed static mode
 new AFXAnimation({ duration: 1, reducedMotion: "never" });
 ```
 
-CSS can use `/* // syncloudos-allow idiom.rule-id: nonblank reason */` immediately before a finding. The reason must be nonblank. Directives are local, not file-wide; strings that merely contain a directive are not comments. `idiomAudit.optOuts` records valid, invalid and unused directives with `file`, `line`, `rule`, `reason`, `valid` and `suppressed`; malformed directives produce `idiom.opt-out` errors. An exception records a choice and does not establish that it was visually verified.
+In CSS, write `/* // syncloudos-allow idiom.rule-id: reason */` just before the finding. The reason can't be blank. A directive covers one place, not the whole file, and a string that happens to contain a directive isn't a comment. `idiomAudit.optOuts` records valid, invalid and unused directives with `file`, `line`, `rule`, `reason`, `valid` and `suppressed`, and a malformed directive is an `idiom.opt-out` error. An exception records a decision; it doesn't show that anyone checked the result visually.
 
-Only renderer-owned canvas/Canvas/Stage subtrees and renderer calls are exempt. `idiomAudit.rendererExemptions` lists regions as `{ file, start, end, line, endLine, kind }`, with zero-based UTF-16 offsets and one-based lines; `kind` is `surface` or `call`. A raw HUD button or other ordinary UI beside the surface in the same file is still checked. Mere imports, comments and renderer-sounding filenames do not exempt a file.
+Only canvas, `Canvas` and `Stage` subtrees owned by a renderer, and renderer calls, are exempt. `idiomAudit.rendererExemptions` lists them as `{ file, start, end, line, endLine, kind }`, with zero-based UTF-16 offsets, one-based lines and `kind` set to `surface` or `call`. A raw HUD button or other ordinary interface in the same file is still checked, and imports, comments or a renderer-like filename don't exempt a file.
 
 ## Complete reconciliation of `FRICTION-OPUS.md`
 
-This is a reconciliation of the external Fusion log recorded on 5–7 November 2026 against framework source inspected on 9 November 2026, starting at `fbb473a`. It does not modify Fusion or claim its pinned SDK has adopted these changes. Repeated observations are retained so every recorded bullet has a disposition.
+This section is a historical record for framework maintainers. It matches each item in an external friction log, recorded on 5 to 7 November 2026 while building the Fusion site, against framework source as of 9 November 2026 (from `fbb473a`). It doesn't change Fusion or claim Fusion's pinned SDK has these changes. Repeated observations are kept so that every item in the log has a disposition.
 
-Classes: **a** is a static rule (named below); **b** is an implemented framework contract with source/commit evidence; **c** needs runtime/visual evidence, is a product/API decision, or belongs outside application-source validation. Class c is not a claim that a reported gap is fixed. For compound bullets, separate rows distinguish the atomic concerns.
+Classes: **a** is a static rule (named in the row); **b** is something the framework now implements, with source or commit evidence; **c** needs runtime or visual evidence, is a product or API decision, or falls outside source validation. Class c doesn't mean the gap is fixed. Items with several concerns have a row for each.
 
 | Log item | Class | Current disposition / evidence |
 | --- | --- | --- |
@@ -82,7 +86,7 @@ Classes: **a** is a static rule (named below); **b** is an implemented framework
 | O9: installers guess archive by modification time | b | `scripts/synware/build-sdk.mjs` writes exact SDK/companion archive paths in `build-manifest.json`; install that pair. |
 | O10: split view content and forced nested desktop mode | b | Child `NSESplitViewItem.viewController` and trait-owned outer collapse; `e12638f`, `3a53599`, `splitViewControllerView.tsx`. |
 | O11: unspecified stack item fixed to 60 px | b | Fitting-size measurements, `d5497db`, `src/NSE/Layout/NSEStackView.tsx`. |
-| O11: fill distribution versus fitting size / hugging | c | AppKit layout parity needs a solver/API decision and measured layout cases; current fitting-size code is not proof of hugging-priority parity. |
+| O11: fill distribution versus fitting size / hugging | c | Hugging-priority layout needs a solver/API decision and measured layout cases; current fitting-size code is not proof of hugging-priority parity. |
 | O12: menu text loaded as image / size overwritten | b | Unified button/menu migration; `44c2cc5`, current `src/NSE/Menus/NSEPopUpButton.tsx`. Fetch and size behaviour remains runtime-verifiable. |
 | O13: arbitrary toolbar height versus control size | b | `NSEButton.controlSize`, including large; `src/NSE/Controls/Buttons`. |
 | O14: segment sends unwanted payload | b | Current action/payload path in `src/NSE/Controls/Values/NSESegmentedControl.tsx`; the runtime command signature is also enforced. |
@@ -111,12 +115,12 @@ Classes: **a** is a static rule (named below); **b** is an implemented framework
 | View-menu actions, first bullet: accessory chain misses content | c | Responder ancestry/focus is runtime state; lint cannot infer which responder is key from an action name. |
 | View-menu actions, second bullet: route from first responder | c | Verify menu/toolbar routing against actual focused content; static idiom checks do not assert complete routing parity. |
 | Click-to-rename, first bullet: standard title is text | c | Document-title interaction is a framework feature decision; absent click handlers are not inherently wrong. |
-| Click-to-rename, second bullet: title menu / NSDocument proposal | c | Needs a document-title API and interaction acceptance; no invented API is recommended. |
+| Click-to-rename, second bullet: title menu / document-class proposal | c | Needs a document-title API and interaction acceptance; no invented API is recommended. |
 | `TopBar` drops data attributes | c | Internal component DOM behaviour requires a focused component regression; it is no longer public app chrome. |
 | FieldLab design note: off-state toolbar ink | c | Appearance design decision and rendered contrast evidence. |
 | FieldLab design note: compact document title hidden | c | Responsive composition and owner decision. |
 | FieldLab design note: title/edited gap | c | Measured visual spacing, not a semantic source error. |
-| Stage 4 status bar, first bullet: wrong AppKit name | b | Window content-border API replaces public status bar; `src/NSE/Application/NSEWindowController.ts`. |
+| Stage 4 status bar, first bullet: wrong counterpart name | b | Window content-border API replaces public status bar; `src/NSE/Application/NSEWindowController.ts`. |
 | Stage 4 status bar, second bullet: content border and embossed label | b | `setContentBorderThickness`, `contentBorderThickness`, text-field background style; `NSEWindowController.ts`, text-field implementation. |
 | Stage 4 status bar, third bullet: source-list footer remains internal | c | Source-list/window composition needs migration and rendered verification; an internal status bar is not a consumer violation. |
 | Opaque roots, first bullet: paint hides content border | c | Layer coverage/occlusion needs layout and screenshot evidence; a background colour alone is not proof. |
@@ -131,7 +135,7 @@ Classes: **a** is a static rule (named below); **b** is an implemented framework
 | App menu, second bullet: DOM versus React portal ancestry | c | Responder ancestry reconciliation requires runtime evidence. |
 | Sheet scheme, first bullet: fixed dark plate | b | Sheet host receives resolved appearance; `src/NSE/Windows/windowSheetSurfaces.tsx`. |
 | Sheet focus, second bullet: controller roots responder / scope id | b | Presented controller/responder and focus scope ownership in `NSEViewController.ts`, sheet renderer. |
-| Sheet focus, third bullet: test host lacks input boundary | b | Stale: `createSynWareTestHost.tsx` now mounts `RuntimeInputBoundary` (around lines 457–469 at audit). |
+| Sheet focus, third bullet: test host lacks input boundary | b | Stale: `createSynWareTestHost.tsx` now mounts `RuntimeInputBoundary` (around lines 457 to 469 at audit). |
 | Menu choice, first bullet: flash/fade / touch cancellation | b | `0ea5f73` and current `src/NSE/Menus` presentation lifecycle; timing/appearance acceptance remains visual. |
 | Menu choice, second bullet: active row / React pointer propagation | c | Native listener workaround is not proof the host propagation cause is resolved; exercise non-first rows by pointer/touch. |
 | Menu choice, third bullet: anchor outside-dismiss closes/reopens | b | Current overlay anchor exclusion in `src/NSE/Overlays` and `NSEPopUpButton.tsx`; runtime regression needed when changing portal focus. |
@@ -196,8 +200,8 @@ Classes: **a** is a static rule (named below); **b** is an implemented framework
 | Fusion adoption: old NSEUserDefaults import | a | `idiom.foundation-import` supplies the exact Foundation import. |
 | Fusion adoption: old NumberFormatter import/name | a | `idiom.foundation-import` supplies `NSENumberFormatter` from Foundation. |
 | Fusion adoption: report every breaking import with replacement | a | `idiom.foundation-import` covers the listed named imports; general installed TypeScript checking remains required. |
-| Missing AVKit player view: raw video surface | a | `idiom.video` warns with real lower-level VideoFX types and says a full player view is absent. |
-| Missing AVKit player view: new player API / controls / PiP / route UI | c | A higher-level AVKit-shaped view remains a framework design task; the validator must not fabricate its prefix or claim lower-level VideoFX supplies its UI. |
+| Missing player view: raw video surface | a | `idiom.video` warns with real lower-level VideoFX types and says a full player view is absent. |
+| Missing player view: new player API / controls / PiP / route UI | c | A higher-level player view remains a framework design task; the validator must not fabricate its prefix or claim lower-level VideoFX supplies its UI. |
 
 ## Verification scope
 

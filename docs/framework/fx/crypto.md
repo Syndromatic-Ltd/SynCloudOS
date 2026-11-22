@@ -1,6 +1,8 @@
 # CryptoFX
 
-CryptoFX (`@syndromatic/syncloudos/fx/crypto`) follows the CryptoKit types and members below. Public byte arguments are immutable Foundation `NSEData`. Each public type has its own source file; `public.ts` only re-exports types. Browser cryptographic handles, algorithm strings and adapters are private.
+CryptoFX gives you hashing, message authentication, key derivation, authenticated encryption, signing and key agreement over immutable Foundation `NSEData`. Use it whenever you need to protect or verify bytes in an app or a worker. Its type layout follows CryptoKit, so Swift code ports across with few surprises.
+
+Import from `@syndromatic/syncloudos/fx/crypto`. Browser key handles, algorithm strings and adapters stay private.
 
 ```ts
 import { NSEData } from "@syndromatic/syncloudos/foundation";
@@ -26,89 +28,109 @@ const signature = await signing.signature(data);
 const verified = await signing.publicKey.isValidSignature(signature, data);
 ```
 
-## Types and byte access
+CryptoFX needs no permission. It has no mounted session, authorisation status, capabilities object or permission request, because it only processes the bytes you pass in. A missing secure context, an unavailable algorithm or blocked WebAssembly is reported as a failed operation. It runs in workers without the DOM.
 
-- `CRFXSHA256`, `CRFXSHA384`, and `CRFXSHA512` have `byteCount`, `blockByteCount`, their typed `Digest`, `hash(data)`, `update(data)` and `finalize()`. Digests expose their static `byteCount`, hex `description`, byte iteration and `withUnsafeBytes(body)`. Updates accumulate immutable copies because the browser has no incremental hash operation. Finalisation computes a snapshot; later updates do not alter that digest.
-- `CRFXHMAC(Hash)` and `CRFXHKDF(Hash)` select a CryptoKit hash type. The result is the specialised class, corresponding to Swift `HMAC<Hash>` and `HKDF<Hash>`. HMAC has static `authenticationCode` and `isValidAuthenticationCode`, plus constructor-based `update`/`finalize`. Codes are `CRFXHashedAuthenticationCode`, with `byteCount`, `description`, iteration and `withUnsafeBytes`.
-- HKDF has `extract`, `expand`, and `deriveKey`. `extract` returns a typed authentication code. Supply `null` to omit salt or info in the full `deriveKey(key, salt, info, count)` overload; `deriveKey(key, count)` omits both. Output is limited to 255 digest blocks.
-- `new CRFXSymmetricKey(data)` imports bytes; `new CRFXSymmetricKey(size)` generates secure random bytes. `CRFXSymmetricKeySize` provides `bits128`, `bits192`, `bits256`, `new CRFXSymmetricKeySize(bitCount)` and `bitCount`. Keys expose `bitCount`, `bytes` and `withUnsafeBytes`; they have no invented `generate` or `rawRepresentation` member.
-- `CRFXDigest`, `CRFXHashFunction` and `CRFXMessageAuthenticationCode` are the corresponding protocols. The former string-union `CRFXHashFunction` has been deleted; its name now denotes Apple's actual protocol, never an algorithm string.
+## Hashes, MACs and key derivation
 
-Swift `static func ==` is represented literally as:
+`CRFXSHA256`, `CRFXSHA384` and `CRFXSHA512` each have `byteCount`, `blockByteCount`, a typed `Digest`, a static `hash(data)`, and instance `update(data)` and `finalize()`. Because the browser cannot hash incrementally, `update` keeps immutable copies and `finalize` hashes a snapshot; later updates do not change a digest you already have. Digests have a static `byteCount`, a hex `description`, byte iteration and `withUnsafeBytes(body)`.
+
+`CRFXHMAC(Hash)` and `CRFXHKDF(Hash)` take a hash type and return a class specialised for it. The HMAC class has static `authenticationCode` and `isValidAuthenticationCode`, and you can also construct it with a key and call `update` and `finalize`. Codes are `CRFXHashedAuthenticationCode` values with `byteCount`, `description`, iteration and `withUnsafeBytes`.
+
+The HKDF class has `extract`, `expand` and `deriveKey`. `extract` returns a typed authentication code. In `deriveKey(key, salt, info, count)`, pass `null` to leave out the salt or info; `deriveKey(key, count)` leaves out both. Output is capped at 255 digest blocks, and a larger count throws `incorrectParameterSize`.
+
+`CRFXDigest`, `CRFXHashFunction` and `CRFXMessageAuthenticationCode` are the interfaces these types implement. `CRFXHashFunction` is an interface, not a string of algorithm names.
+
+## Symmetric keys
+
+`new CRFXSymmetricKey(data)` imports bytes, and `new CRFXSymmetricKey(size)` generates secure random bytes. `CRFXSymmetricKeySize` offers `bits128`, `bits192` and `bits256`, or `new CRFXSymmetricKeySize(bitCount)`. Keys expose `bitCount`, `bytes` and `withUnsafeBytes`. There is no `generate` or `rawRepresentation`.
+
+## Comparing values
+
+Equality is a static method named `==`:
 
 ```ts
 Type["=="](lhs, rhs)
 ```
 
-JavaScript's `==` operator is not overloaded, and there is no `isEqual` alias on CryptoKit values. Digest, authentication-code, symmetric-key and shared-secret comparisons use an internal WebAssembly XOR/OR reduction whose loop count and addresses depend only on the public length. There is no data-dependent early exit; comparison storage is zeroed after use. If the host blocks this primitive, comparisons fail with `CRFXError.underlyingCoreCryptoError`. This does not claim immunity to host or hardware side channels.
+JavaScript's `==` operator cannot be overloaded, and there is no `isEqual` alias. Digests, authentication codes, symmetric keys and shared secrets compare through an internal WebAssembly XOR/OR reduction whose loop count and memory addresses depend only on the public length. It never exits early on a mismatch, and it zeroes its working storage afterwards. If the host blocks WebAssembly, comparisons throw `CRFXError` with code `underlyingCoreCryptoError`. This guards against timing leaks in the comparison itself, not against every host or hardware side channel.
 
-`withUnsafeBytes` passes a defensive `NSEData` value rather than a native pointer. `bytes` similarly maps Apple's `RawSpan` to Foundation bytes. No mutable view into private key storage is exposed. JavaScript/native-provider memory cannot provide Swift's secure-memory lifetime or guaranteed erasure of all copies.
+## Byte access and mutation
 
-Apple's mutation contracts remain explicit, but immutable Foundation bytes cannot fulfil them. Each member below throws or rejects with `CRFXError.underlyingCoreCryptoError` before invoking a callback or changing data:
+`withUnsafeBytes` hands your callback a defensive `NSEData` copy, not a pointer, and `bytes` likewise returns Foundation bytes. Nothing exposes a mutable view into private key storage. JavaScript and browser-provider memory cannot promise secure-memory lifetimes or erase every copy of a secret.
 
-| Apple contract | CryptoFX member | Result |
-| --- | --- | --- |
-| `SymmetricKey.init(copyingWithZeroing:)` | `new CRFXSymmetricKey({ copyingWithZeroing: data })` | Synchronous error; no source-zeroing guarantee |
-| `SymmetricKey.init(size:initializingWith:)` | `new CRFXSymmetricKey(size, initializingWith)` | Synchronous error; `(output: NSEData) => void` callback is never invoked |
-| AES.GCM / ChaChaPoly `seal(inPlace:using:nonce:authenticating:tag:)` | `Cipher.sealInPlace(message, key, nonce, authenticating, tag)` | Rejected `Promise<void>`; no in-place message or tag mutation |
-| AES.GCM / ChaChaPoly `open(inPlace:using:nonce:authenticating:tag:)` | `Cipher.openInPlace(message, key, nonce, authenticating, tag)` | Rejected `Promise<void>`; no in-place message mutation |
-| HKDF `deriveKey(inputKeyMaterial:salt:info:output:)` | `HKDF.deriveKey(key, salt, info, output)` with `NSEData` output | Rejected `Promise<void>` |
-| HKDF `expand(pseudoRandomKey:info:into:)` | `HKDF.expand(prk, info, into)` with `NSEData` output | Rejected `Promise<void>` |
+A few members take an output buffer to fill or a buffer to change in place. Immutable `NSEData` cannot support that, so each of these fails with `underlyingCoreCryptoError` before calling your callback or touching any data:
 
-Pass `null` for omitted authentication data, salt or info in these positional signatures. The `inPlace` label distinguishes mutation from sealed-box operations; HKDF overloads distinguish the output byte count from the Foundation output value. No replacement output value or mutable-byte contract is invented.
+| Member | Result |
+| --- | --- |
+| `new CRFXSymmetricKey({ copyingWithZeroing: data })` | Throws synchronously. The source is not zeroed. |
+| `new CRFXSymmetricKey(size, initializingWith)` | Throws synchronously. The `(output: NSEData) => void` callback never runs. |
+| `CRFXAES.GCM.sealInPlace(message, key, nonce, authenticating, tag)`, and the `CRFXChaChaPoly` equivalent | Rejects. The message and tag are not changed. |
+| `CRFXAES.GCM.openInPlace(message, key, nonce, authenticating, tag)`, and the `CRFXChaChaPoly` equivalent | Rejects. The message is not changed. |
+| `HKDF.deriveKey(key, salt, info, output)` with an `NSEData` output | Rejects. |
+| `HKDF.expand(prk, info, into)` with an `NSEData` output | Rejects. |
+
+Pass `null` for authentication data, salt or info you want to leave out. The HKDF overloads are told apart by whether the last argument is a byte count or an `NSEData`.
 
 ## Authenticated encryption
 
-`CRFXAES.GCM.seal(data, key, nonce?, authenticating?)` and `open(box, key, authenticating?)` use 128-, 192- or 256-bit keys and a 16-byte tag. `CRFXAESGCMNonce` supports random construction or `new CRFXAESGCMNonce(data)` with at least 12 bytes. Never reuse a nonce with the same key.
+`CRFXAES.GCM.seal(data, key, nonce?, authenticating?)` and `CRFXAES.GCM.open(box, key, authenticating?)` accept 128-, 192- or 256-bit keys and use a 16-byte tag. Build a nonce with `new CRFXAES.GCM.Nonce()` for a random one, or `new CRFXAESGCMNonce(data)` with at least 12 bytes. Never reuse a nonce with the same key; a wrong tag fails with `authenticationFailure`.
 
-`CRFXAESGCMSealedBox` has `constructor(combined)` and `constructor(nonce, ciphertext, tag)`. Its `nonce` is typed, and its `ciphertext` and `tag` are `NSEData`. `combined` is nonce–ciphertext–tag only for a 12-byte nonce; it is `null` for other nonce lengths, matching CryptoKit. Nonstandard nonce lengths may also be rejected by an individual native provider.
+`CRFXAESGCMSealedBox` (also `CRFXAES.GCM.SealedBox`) can be constructed from `combined` bytes or from `nonce, ciphertext, tag`. Its `nonce` is typed, and `ciphertext` and `tag` are `NSEData`. `combined` is nonce, ciphertext and tag concatenated, but only for a 12-byte nonce; for any other length it is `null`. Some browser providers also reject non-standard nonce lengths.
 
-`CRFXChaChaPoly` and its `Nonce`/`SealedBox` types exist. Value construction and parsing work; `seal` and `open` fail with `CRFXError.underlyingCoreCryptoError` because the browser provider does not expose ChaCha20-Poly1305.
+`CRFXChaChaPoly`, with its `Nonce` and `SealedBox` types, can build and parse values, but `seal` and `open` fail with `underlyingCoreCryptoError` because browsers do not provide ChaCha20-Poly1305.
 
-## Signing, key agreement and representations
+## Signing and key agreement
 
-`CRFXP256`, `CRFXP384`, `CRFXP521` and `CRFXCurve25519` expose their actual `Signing` and `KeyAgreement` namespaces, with separate `PrivateKey` and `PublicKey` classes. Private constructors generate keys. NIST private constructors also take `compactRepresentable` (default true); `false` disables the compact-point restriction. Representation initialisers use their Swift argument label, for example `new CRFXP256.Signing.PrivateKey({ rawRepresentation: data })`.
+`CRFXP256`, `CRFXP384`, `CRFXP521` and `CRFXCurve25519` each have `Signing` and `KeyAgreement` namespaces containing separate `PrivateKey` and `PublicKey` classes. Constructing a private key with no argument generates one. The NIST private-key constructors also accept a boolean, `compactRepresentable`, which defaults to `true`; pass `false` to lift the compact-point restriction. To import, pass an object naming the representation, for example `new CRFXP256.Signing.PrivateKey({ rawRepresentation: data })`.
 
-| Key | Representation properties and initialisers |
+| Key | Representations |
 | --- | --- |
 | P256/P384/P521 public | `rawRepresentation` (x‖y), `x963Representation` (0x04‖x‖y), `compressedRepresentation`, `compactRepresentation`, `derRepresentation` (SPKI), `pemRepresentation` |
-| P256/P384/P521 private | `rawRepresentation` (scalar), `x963Representation` (0x04‖x‖y‖scalar), `derRepresentation` (PKCS8), `pemRepresentation`; imports also accept SEC1 DER / EC PRIVATE KEY PEM |
-| Curve25519 public/private | `rawRepresentation` only, as CryptoKit provides |
+| P256/P384/P521 private | `rawRepresentation` (the scalar), `x963Representation` (0x04‖x‖y‖scalar), `derRepresentation` (PKCS #8), `pemRepresentation`. Imports also accept SEC1 DER and `EC PRIVATE KEY` PEM. |
+| Curve25519 public and private | `rawRepresentation` only |
 
-NIST DER and PEM imports validate complete canonical SPKI, PKCS8 and nested SEC1 encodings before native import. Trailing bytes, noncanonical lengths or integers, and unexpected fields fail with `CRFXError.invalidParameter`, including private-key payloads embedded inside PKCS8.
+Coordinates and scalars are 32, 48 or 66 bytes wide for P256, P384 and P521, and exports keep that width even when the browser drops leading zero bytes. The compact public representation is the x coordinate when y ≤ p − y, and `null` otherwise. Compressed points are decoded using public-only arithmetic.
 
-NIST private imports validate `0 < scalar < curve order` before native import for raw, X9.63, SEC1/PKCS8 and PEM representations. Supplied X9.63 public points are retained in the native encoding. Any supplied private-key public point, including one inside DER or PEM, must agree with the scalar: a fresh internal CSPRNG challenge is signed and verified through native ECDSA operations. Agreement keys retain their ECDH handle and usages; their consistency check uses a temporary native signing handle. Mismatched, negated or malformed supplied points fail with `CRFXError.invalidParameter`. No private elliptic-curve arithmetic or public-point recovery is performed.
+### Import validation
 
-NIST private scalar and coordinate exports preserve their fixed 32-, 48- or 66-byte widths even when the native provider omits leading zero bytes. If native JWK export fails, `rawRepresentation` extracts the scalar from a validated native PKCS8/SEC1 export. This is a format conversion; Curve25519 octet strings are not numerically padded. In the tested Firefox provider, scalar-only imports can export that private scalar but lack native public-point information: private `x963Representation` and the derived public key's representations then fail with `CRFXError.underlyingCoreCryptoError`. A native key imported with its public point can provide those representations. No private elliptic-curve arithmetic is used to recover missing public points.
+NIST DER and PEM imports check the complete SPKI, PKCS #8 and nested SEC1 encodings before handing them to the browser. Trailing bytes, non-canonical lengths or integers, and unexpected fields fail with `invalidParameter`, including inside a PKCS #8 private-key payload.
 
-The NIST coordinate widths are 32, 48 and 66 bytes. Compact public representation is the x coordinate when y ≤ p−y; otherwise it is `null`. Compressed public points are decoded with public-only arithmetic. Private scalar import is passed to the native provider inside a standards-based PKCS8 envelope; no private-key arithmetic is implemented in JavaScript. A host unable to import that encoding fails with `CRFXError`.
+Private-key imports check that 0 < scalar < curve order for raw, X9.63, SEC1, PKCS #8 and PEM input. The scalar reaches the browser wrapped in a standard PKCS #8 envelope; a host that cannot import that encoding fails with `CRFXError`. CryptoFX performs no private-key arithmetic in JavaScript.
 
-NIST signing returns a curve-specific `ECDSASignature`, with `constructor({ rawRepresentation })`, `constructor({ derRepresentation })` and both representation properties. Raw signatures are fixed-width r‖s; DER encoding is canonical ASN.1. `signature(data)` and `publicKey.isValidSignature(signature, data)` use SHA-256, SHA-384 or SHA-512 for the corresponding curve. Their digest overloads exist but fail with `CRFXError.underlyingCoreCryptoError`: the browser provider cannot sign or verify an already-computed digest without hashing it again. Curve25519 signatures are `NSEData` (Ed25519).
+When you supply a public point alongside a private key (including inside DER or PEM), CryptoFX checks that the two belong together by signing and verifying a fresh random challenge with the browser's ECDSA. Key-agreement keys keep their ECDH handle and use a temporary signing handle for this check. Mismatched, negated or malformed points fail with `invalidParameter`. Supplied X9.63 public points are kept in their native encoding.
 
-Key agreement returns `CRFXSharedSecret`, which has `description`, `withUnsafeBytes`, literal `==`, `hkdfDerivedSymmetricKey(Hash, salt, sharedInfo, count)` and `x963DerivedSymmetricKey(Hash, sharedInfo, count)`. It has no public byte constructor or invented `rawRepresentation`. Curve25519 agreement uses X25519. Individual hosts may lack Ed25519/X25519; the exposed methods then fail with `CRFXError`.
+If the browser cannot export a private key as JWK, `rawRepresentation` extracts the scalar from a validated PKCS #8 or SEC1 export. Curve25519 octet strings are not padded. Firefox can export the scalar of a scalar-only import but has no public point for it, so the private `x963Representation` and the derived public key's representations fail with `underlyingCoreCryptoError`. Import the key with its public point to get those representations.
 
-`CRFXInsecure.SHA1` is available for compatibility. `CRFXInsecure.MD5` and its digest type exist; hashing/finalisation fail with `CRFXError.underlyingCoreCryptoError` because the browser provider has no MD5.
+### Signatures
 
-## Asynchronous members and errors
+NIST signing returns a curve-specific `ECDSASignature`, for example `CRFXP256.Signing.ECDSASignature`. Construct one with `{ rawRepresentation }` or `{ derRepresentation }`, and read either property back. Raw signatures are fixed-width r‖s, and DER is canonical ASN.1. `signature(data)` and `publicKey.isValidSignature(signature, data)` hash with SHA-256, SHA-384 or SHA-512 to match the curve. An invalid signature returns `false`. The overloads that take a precomputed digest exist but fail with `underlyingCoreCryptoError`, because the browser cannot sign or verify a digest without hashing it again. Curve25519 signatures (Ed25519) are plain `NSEData`.
 
-The browser-forced asynchronous members are annotated in every type's source:
+### Shared secrets
 
-| Apple member | CryptoFX asynchronous result |
+`sharedSecretFromKeyAgreement` returns a `CRFXSharedSecret` with `description`, `withUnsafeBytes`, a static `==`, `hkdfDerivedSymmetricKey(Hash, salt, sharedInfo, count)` and `x963DerivedSymmetricKey(Hash, sharedInfo, count)`. You cannot construct one from bytes, and it has no `rawRepresentation`. Curve25519 key agreement uses X25519. Some hosts lack Ed25519 or X25519, in which case those methods fail with `CRFXError`.
+
+## Legacy hashes
+
+`CRFXInsecure.SHA1` works, for compatibility with older formats. `CRFXInsecure.MD5` and its digest type exist, but hashing fails with `underlyingCoreCryptoError` because browsers do not implement MD5.
+
+## Asynchronous members
+
+Browser cryptography is asynchronous, so these members return promises:
+
+| Member | Returns |
 | --- | --- |
-| SHA hash / finalize | `Promise<typed Digest>` |
-| HMAC authenticationCode / isValidAuthenticationCode / finalize | `Promise<HashedAuthenticationCode>` / `Promise<boolean>` |
-| HKDF deriveKey / extract / expand | `Promise<SymmetricKey>` / `Promise<HashedAuthenticationCode>` |
-| AES.GCM seal / open; ChaChaPoly backend boundary | `Promise<SealedBox>` / `Promise<NSEData>` |
-| Key representation properties | `Promise<NSEData>`, `Promise<NSEData | null>` or `Promise<string>` |
-| Private-key signature; public-key isValidSignature | `Promise<typed signature or NSEData>` / `Promise<boolean>` |
-| Private-key sharedSecretFromKeyAgreement | `Promise<SharedSecret>` |
-| SharedSecret HKDF / X9.63 derivation | `Promise<SymmetricKey>` |
-| AES.GCM / ChaChaPoly in-place seal/open; HKDF output-span overloads | `Promise<void>` rejected with `CRFXError.underlyingCoreCryptoError` |
+| SHA `hash`, `finalize` | `Promise` of the typed digest |
+| HMAC `authenticationCode`, `finalize`; `isValidAuthenticationCode` | `Promise<CRFXHashedAuthenticationCode>`; `Promise<boolean>` |
+| HKDF `deriveKey`, `expand`; `extract` | `Promise<CRFXSymmetricKey>`; `Promise<CRFXHashedAuthenticationCode>` |
+| AES-GCM `seal`; `open` (and ChaCha-Poly, which always rejects) | `Promise` of the sealed box; `Promise<NSEData>` |
+| Key representation properties | `Promise<NSEData>`, `Promise<NSEData \| null>` or `Promise<string>` |
+| Private-key `signature`; public-key `isValidSignature` | `Promise` of the typed signature or `NSEData`; `Promise<boolean>` |
+| `sharedSecretFromKeyAgreement` | `Promise<CRFXSharedSecret>` |
+| Shared-secret HKDF and X9.63 derivation | `Promise<CRFXSymmetricKey>` |
+| In-place seal and open; HKDF output-buffer overloads | `Promise<void>`, always rejected with `underlyingCoreCryptoError` |
 
-Constructors are real constructors. They start native generation/import internally; the first awaited representation or operation observes any asynchronous failure. The `publicKey` property is a typed key object immediately. No `generate`, `fromRawRepresentation`, `fromCombined` or client factory remains.
+Constructors are ordinary constructors. They start key generation or import in the background, and the first representation or operation you await reports any failure. `publicKey` is available as a typed object straight away. There are no `generate`, `fromRawRepresentation` or `fromCombined` factories.
 
-`CRFXError` uses CryptoKitError's `incorrectKeySize`, `invalidParameter`, `incorrectParameterSize`, `underlyingCoreCryptoError`, `authenticationFailure`, `wrapFailure`, and `unwrapFailure` cases. Backend failures retain their cause and use an underlying error value of −1; that is a backend failure marker, not a claim to a native corecrypto status. Malformed parameters are rejected with the corresponding CryptoKit case; a bad AES tag is `authenticationFailure`. Invalid signatures return `false` as Apple's verification method does.
+## Errors
 
-CryptoFX is a direct, permission-free library. It has no mounted session, authorisation enum, capabilities object or permission request. Session privacy revocation and browser permission denial therefore do not apply: these algorithms process caller-supplied bytes without device access. Missing secure context, unavailable algorithms or blocked WebAssembly are operation failures, not authorisation states. It runs in workers without the DOM.
-
-Sources: [CryptoKit](https://developer.apple.com/documentation/cryptokit), [HashFunction](https://developer.apple.com/documentation/cryptokit/hashfunction), [HMAC](https://developer.apple.com/documentation/cryptokit/hmac), [HKDF](https://developer.apple.com/documentation/cryptokit/hkdf), [AES.GCM](https://developer.apple.com/documentation/cryptokit/aes/gcm), [P256](https://developer.apple.com/documentation/cryptokit/p256), [CryptoKitError](https://developer.apple.com/documentation/cryptokit/cryptokiterror), and Apple's [swift-crypto EC implementation](https://github.com/apple/swift-crypto/blob/main/Sources/Crypto/Keys/EC/BoringSSL/NISTCurvesKeys_boring.swift).
+`CRFXError` has a `code` of `incorrectKeySize`, `invalidParameter`, `incorrectParameterSize`, `underlyingCoreCryptoError`, `authenticationFailure`, `wrapFailure` or `unwrapFailure`; each is also available as a static string such as `CRFXError.invalidParameter`. Malformed parameters use the matching code, and a bad AES tag is `authenticationFailure`. Failures inside the browser provider keep the original error as `cause` and set the numeric `error` field to −1, which simply marks a backend failure.

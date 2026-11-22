@@ -1,18 +1,18 @@
 # Errors and outcomes
 
-Choose handling by the outcome's type and stable code, not its message. Error prose explains the failure and can change between releases. The installed SDK includes this guide and the version-matched `tooling/error-catalogue.json`; the [Developer MCP](developer-mcp.md) can explain a code offline.
+This page explains how SynCloudOS reports failures: which outcomes throw and which return a result, the lifecycle error class, what an error report contains, and every stable error code. Decide how to handle an error from its type and code, never its message, because message wording can change between releases. The installed SDK includes this guide and the matching `tooling/error-catalogue.json`, and the [Developer MCP](developer-mcp.md) can explain a code offline.
 
 ## Outcome rules
 
 | Situation | Contract | Application handling |
 | --- | --- | --- |
-| Programming error, including use after disposal | Throw an error; lifetime violations use `SynCloudOSLifecycleError` where listed below | Correct the owner or call sequence. Do not retry with the same disposed object. |
+| Programming error, including use after disposal | Throw an error; lifetime violations use `SynCloudOSLifecycleError` where listed below | Fix the owner or the order of calls. Don't retry with the same disposed object. |
 | Unavailable optional capability | Return the API's structured availability or denial result | Inspect the result and offer a supported alternative. Required-capability acquisition may throw as its API documents. |
 | Stale UI event after its resource ended | Ignore the event and warn in development | NSE data views retain their last snapshot, become inert and warn once per view. Direct controller calls still throw. See [controller lifetime](data-views.md#controller-lifetime). |
 | Cancellation | Reject or throw `DOMException` named `AbortError`, or propagate the supplied signal's reason | End the operation without presenting cancellation as a crash. An explicit abort reason need not be a `DOMException`. |
-| Security or ownership violation | Throw the documented security, access or ownership error | Fix the permission or resource owner; never silently fall back across an ownership boundary. |
+| Security or ownership violation | Throw the documented security, access or ownership error | Fix the permission or resource owner; never quietly fall back to something another owner holds. |
 
-These rules do not replace an API's documented result type. Expected refusals, limits and unsupported features retain their specific contracts.
+Where an API documents its own result type, that takes precedence. Expected refusals, limits and unsupported features keep their own contracts.
 
 ## Lifecycle errors
 
@@ -44,15 +44,15 @@ try {
 | `creationStack?: string` | Development-only resource creation stack. |
 | `ownerStack?: string` | Development-only React owner stack, when React can supply one. |
 
-The message is one short factual sentence, such as `Cannot set AFXLayer.hidden after disposal.` or `Cannot call NSEArrayController.select() after disposal.` A resource that does not record how the operation was reached says `Cannot use …`. The code, resource identity, disposal reason and stacks are fields, not message text, and the remedy is the code's catalogue hint. Built-in disposal reasons are `explicit`, `owner-unmounted`, `owner-signal-aborted` and `application-closed`; some resources supply a more specific reason. Creation, disposal and React owner stacks are not captured in production.
+The message is one short sentence, such as `Cannot set AFXLayer.hidden after disposal.` or `Cannot call NSEArrayController.select() after disposal.` A resource that doesn't record how the operation was reached says `Cannot use …`. The code, resource identity, disposal reason and stacks are fields, not part of the message, and the fix is in the code's catalogue hint. The built-in disposal reasons are `explicit`, `owner-unmounted`, `owner-signal-aborted` and `application-closed`, and some resources give a more specific one. Creation, disposal and React owner stacks aren't captured in production.
 
-The first disposal wins, including when an owner signal aborts before a later explicit `dispose()`. A closed application needs a new resource when it opens again. Component-owned resources must not outlive their component. For NSE controllers use the managed hooks rather than `useMemo` plus effect cleanup: React StrictMode replays effect cleanup without unmounting the component. See [controller lifetimes](controllers.md#controller-lifetimes).
+The first disposal is the one recorded, even when an owner signal aborts before a later explicit `dispose()`. An application that closes needs new resources when it opens again, and a resource a component owns must not outlive it. For NSE controllers, use the managed hooks instead of `useMemo` with effect cleanup, because React StrictMode runs effect cleanup again without unmounting the component. See [controller lifetimes](controllers.md#controller-lifetimes).
 
 ## Error reports
 
-An error alert has two layers. What everyone sees is plain language: a title and one sentence, such as "SynCloudOS stopped unexpectedly." with "An unexpected error has prevented SynCloudOS from working properly." for the root watchdog, or "Notes stopped unexpectedly." with "An unexpected error has prevented this application from working properly." for an application. Titles name an application by its display name. Codes, class names and thrown messages never appear in this layer.
+An error alert has two layers. The part everyone sees is plain language, a title and one sentence, such as "SynCloudOS stopped unexpectedly." with "An unexpected error has prevented SynCloudOS from working properly." for the root watchdog, or "Notes stopped unexpectedly." with "An unexpected error has prevented this application from working properly." for an application. Titles use the application's display name. Codes, class names and thrown messages never appear here.
 
-Everything developer-facing is inside the single Technical details disclosure. It opens with the error's identity:
+Everything meant for developers is inside the Technical details disclosure, which opens with the error's identity:
 
 ```text
 Exception: SynCloudOSLifecycleError
@@ -64,46 +64,46 @@ Caught by: SynCloudOS.RootWatchdog
 - Exception: the thrown value's class name, such as `SynCloudOSLifecycleError` or `TypeError`. A thrown non-`Error` value reads `Non-Error value (string)` or similar.
 - Code: the error's one authoritative code (see below).
 - Message: the thrown error's own message.
-- Caught by: the boundary that caught the error. Where it originated is the stack further down.
+- Caught by: the boundary that caught the error. The stack further down shows where it started.
 
-A condition the framework reports itself, such as a connection error or an unknown route, has no Exception or Message line, and says Reported by instead of Caught by.
+A condition the framework reports itself, such as a connection error or an unknown route, has no Exception or Message line, and says Reported by in place of Caught by.
 
-The rest of the technical details follows, and only what is known: the condition's detail line, the lifecycle resource identity and disposal reason, the problem, the source location, the application, window and route, severity and recoverability, the catalogue hint and docs, and the stack. The thrown error's cause, the development-only disposal stack and the React component stack come last. Unknown fields are omitted rather than printed as `none`, and no text appears twice. The copyable report (`toTechnicalReport`, also in the Inspector's error report) is the title, the message, the technical details and the capture time.
+The rest of the details follow, leaving out anything unknown: the condition's detail line, the lifecycle resource identity and disposal reason, the problem, the source location, the application, window and route, severity and whether it's recoverable, the catalogue hint and docs, and the stack. The thrown error's cause, the development-only disposal stack and the React component stack come last. Unknown fields are left out instead of printed as `none`, and nothing appears twice. The report you can copy (`toTechnicalReport`, also shown in the Inspector) holds the title, the message, the technical details and the time of capture.
 
-The Hint and Docs lines come from the code's catalogue entry. A generic boundary code such as `APP_CONTENT_FAILED` covers any error without a code of its own, so its entry also lists known failures by message, in `diagnoses`. When the thrown message, or a message in its cause chain, matches one, the report shows that failure's own hint and docs instead of the generic ones. For example, `NSEMenuBar requires an NSEOverlayProvider.` points to where overlay controls must render, not just to the component stack. Diagnoses choose the hint only; the code is the same either way.
+The Hint and Docs lines come from the code's catalogue entry. A generic boundary code such as `APP_CONTENT_FAILED` covers any error that has no code of its own, so its entry also lists known failures by message, in `diagnoses`. When the thrown message, or one in its cause chain, matches, the report shows that failure's own hint and docs. For example, `NSEMenuBar requires an NSEOverlayProvider.` points you to where overlay controls must render. A diagnosis changes only the hint; the code stays the same.
 
-When you capture through `runtime.errors.capture`, supply a plain `title` and `message` for the person, and pass the thrown value as `error`; its identity goes into the technical details.
+Inside an application, report a failure you caught with `SCOS.errors.capture(error, { operation, code?, timeoutMs?, retry? })`; [Webspring's recovery alerts](webspring.md#recovery-alerts) describe the codes and `retry`. Host code that captures through the runtime's error manager supplies a plain `title` and `message` for the user and passes the thrown value as `error`, whose identity goes into the technical details.
 
 ### Code identity
 
 One error has one code:
 
-- A thrown value that carries a catalogue code keeps it. Every `SynCloudOSLifecycleError` does, as does any error whose `code` property is a catalogue code.
-- The capturing boundary's generic code applies only when the thrown value has no catalogue code. Examples are `UNKNOWN_RUNTIME_ERROR` at the root watchdog, `APP_CONTENT_FAILED` at an application watchdog, `APP_LAUNCH_FAILED`, `GLOBAL_SCRIPT_ERROR` and `UNHANDLED_PROMISE_REJECTION`.
+- A thrown value with a catalogue code keeps it. Every `SynCloudOSLifecycleError` has one, as does any error whose `code` property is a catalogue code.
+- The catching boundary's generic code applies only when the thrown value has no catalogue code. Examples are `UNKNOWN_RUNTIME_ERROR` at the root watchdog, `APP_CONTENT_FAILED` at an application watchdog, `APP_LAUNCH_FAILED`, `GLOBAL_SCRIPT_ERROR` and `UNHANDLED_PROMISE_REJECTION`.
 
 Branch on `captured.code` and `captured.exception`, never on message text.
 
 ## Contracts kept unchanged
 
-The lifecycle migration intentionally preserves typed cancellation and invalid-state contracts. In particular:
+Some resources kept their existing cancellation and invalid-state errors when the lifecycle errors were introduced, and still throw these instead of `SynCloudOSLifecycleError`:
 
 | Resource or area | Preserved type | Reason |
 | --- | --- | --- |
 | Animation runtime, ImageFX operations, LuminaFX, MIDIFX, LocationFX, MediaFX clocks/timebases, VideoFX frame processing | `DOMException` named `AbortError` | These operations already expose cancellation, including disposal, through the web-platform cancellation contract. |
-| Data-view drag operations and shaped text layout adapters | `DOMException` named `AbortError` | Ending an owner cancels in-flight work rather than reporting a new programming-error type. |
-| `AFXRenderer`, TextFX layout cache, VideoFX decoders, encoders and pixel-buffer pools | `DOMException` named `InvalidStateError` | Their documented state-machine contract remains distinguishable from other errors. |
-| PDF resources | `GFXPDFError` with code `"disposed"` | PDF clients rely on the existing domain error union. |
-| Other existing `DOMException` sites | Existing `name` and abort reason | Security, quota, access, state and cancellation types are not converted by this migration. |
+| Data-view drag operations and shaped text layout adapters | `DOMException` named `AbortError` | Ending an owner cancels work in progress, which isn't a programming error. |
+| `AFXRenderer`, TextFX layout cache, VideoFX decoders, encoders and pixel-buffer pools | `DOMException` named `InvalidStateError` | Their documented states stay distinguishable from other errors. |
+| PDF resources | `GFXPDFError` with code `"disposed"` | PDF code already handles this error union. |
+| Other existing `DOMException` sites | Existing `name` and abort reason | Security, quota, access, state and cancellation errors keep their types. |
 
-DocumentStore and internal host services are outside this lifecycle cutover. Their existing domain errors and result types remain unchanged. Ordinary validation errors, graph-rendering errors and registration invalidated by a haptic reset also retain their existing types.
+The document store and internal host services also keep their own errors and result types, as do ordinary validation errors, graph rendering errors and registrations invalidated by a haptic reset.
 
 ## Source maps
 
-The SDK ships separate `.js.map` files alongside its reviewed JavaScript entries, chunks and workers. Maps embed original source text (`sourcesContent`) so browser developer tools can resolve framework stack frames without a framework checkout. Production lifecycle provenance stacks remain disabled; source maps help inspect the normal thrown-error stack, not recover stacks that were never captured. Package fingerprints include map bytes. Source-map metadata must not contain build-machine absolute paths.
+The SDK ships `.js.map` files beside its JavaScript entries, chunks and workers. The maps embed the original source (`sourcesContent`), so browser developer tools can show framework stack frames without a framework checkout. They help with the ordinary stack of a thrown error, but can't recover the lifecycle stacks that production builds never capture. Package fingerprints include the map files, and the maps contain no absolute paths from the build machine.
 
 ## Code catalogue
 
-This table lists every stable uppercase diagnostic code in the offline catalogue. Lowercase domain codes (for example PDF `"disposed"` or route result `"route-not-found"`) belong to their own API unions, not this global namespace. The catalogue coverage test scans source property literals, conditional branches and lifecycle code literals, and checks this table matches the catalogue exactly.
+This table lists every stable uppercase code in the offline catalogue. Lowercase codes (for example PDF `"disposed"` or the route result `"route-not-found"`) belong to their own APIs, not to this list. A test checks that this table matches the catalogue exactly.
 
 | Code | Meaning |
 | --- | --- |

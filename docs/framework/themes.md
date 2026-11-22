@@ -1,12 +1,12 @@
 # Themes
 
-A theme supplies the fills, borders, shadows, artwork, colours and typography of NSE controls and SynCloudOS chrome. The framework owns control semantics and interaction; a theme times its transitions through the framework's motion roles.
+A theme supplies the fills, borders, shadows, artwork, colours and typography of NSE controls and SynCloudOS chrome. This guide shows you how to write one. The framework keeps control of what controls mean and how they behave, and a theme times its transitions through the framework's motion roles.
 
-Atmo is the built-in theme. It is itself a theme bundle, `Atmo.scostheme`, drawn through the same contract as any theme you write.
+Atmo, the built-in theme, is itself a theme bundle, `Atmo.scostheme`, drawn through the same contract as any theme you write.
 
 ## What a theme is
 
-A system theme is a `.scostheme` bundle of static files with an identity, a definition and stylesheets. It contains no code that runs. It can:
+A system theme is a `.scostheme` bundle of static files: an identity, a definition and stylesheets. Nothing in it runs as code. It can:
 
 - paint every control part the [theme contract](theme-contract.md) publishes, in every state and variant it lists;
 - set the 48 semantic colours, in light and dark, and optionally for high contrast;
@@ -43,7 +43,7 @@ src/Themes/
 
 The Vite plugin discovers system themes in `src/Themes`. Set `themesDirectory` in `synCloudOS({ … })` to look elsewhere, or `false` to disable system theme discovery.
 
-`Info.ts` is the theme's identity. It is read statically, never executed:
+`Info.ts` is the theme's identity. The build reads it as data and never runs it:
 
 ```ts
 export default { bundleIdentifier: "com.example.dusk", displayName: "Dusk", version: "1.0.0", themeContractVersion: 1 };
@@ -164,8 +164,8 @@ Declare custom fonts with `@font-face`. Each `src` must resolve to a WOFF2 file 
 
 The framework names six motion roles: `standard`, `control`, `selection`, `presentation`, `dismissal` and `scrollBoundary`. In `Theme.json`, give a role either a spring or a timing curve:
 
-- `{ "duration": 0.3, "bounce": 0.15 }` is a spring in Core Animation's perceptual terms. `duration` runs from 0.07 to 10 seconds, and `bounce` lies between -1 and 1: 0 is critically damped, positive bounces, negative is overdamped.
-- `{ "duration": 0.2, "timingFunction": [x1, y1, x2, y2] }` is a duration in seconds with `CAMediaTimingFunction` control points.
+- `{ "duration": 0.3, "bounce": 0.15 }` is a spring described by its perceived duration and bounce. `duration` runs from 0.07 to 10 seconds, and `bounce` lies strictly between -1 and 1: 0 is critically damped, a positive value bounces and a negative one is overdamped.
+- `{ "duration": 0.2, "timingFunction": [x1, y1, x2, y2] }` is a duration in seconds (above 0, up to 10) with cubic Bézier control points, as in CSS `cubic-bezier()`.
 
 Each role becomes `--nse-motion-<role>-duration` and `--nse-motion-<role>-easing` on the theme's boundary, in kebab case such as `--nse-motion-scroll-boundary-duration`. A spring runs for its settling time along a `linear()` curve sampled from the spring. Time every transition with these properties and nothing else; reduced motion sets every duration to zero.
 

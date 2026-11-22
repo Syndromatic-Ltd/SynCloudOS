@@ -1,28 +1,28 @@
 # Applications
 
-The [class authoring guide](cocoa-authoring.md) covers inline and separate views, automatic root construction, typed action connections, bindings and managed lifetimes.
+This page covers the classes that make up a class-based application: the application itself, its window controllers and view controllers, and the actions and observable state that connect them to controls. The [class authoring guide](cocoa-authoring.md) covers inline and separate views, automatic root construction, typed action connections, bindings and managed lifetimes.
 
-Class-based apps export an `NSEApplication` subclass as the module's default. The framework creates
-one instance per launch (never call `new` on it), opens `static mainWindow` when present, and awaits each lifecycle hook in turn:
+A class-based app default-exports an `NSEApplication` subclass. The framework creates
+one instance per launch (never call `new` on it yourself), opens `static mainWindow` if you set one, and awaits each lifecycle hook in turn:
 `applicationWillFinishLaunching`, `applicationDidFinishLaunching`, `applicationDidBecomeActive`,
 `applicationWillResignActive` (when the app is suspended), `applicationShouldTerminate`, then
 `applicationWillTerminate`. Return `false` (or a promise of it) from `applicationShouldTerminate` to
-veto quitting; an app can present its own confirmation first. The decision is bound by the close
+stop the app quitting; you can present your own confirmation first. The decision must arrive within the close
 operation's timeout (`lifecycleHookTimeoutMs`, 5 seconds unless the host raises it). `static routes` and
-`static migrations` declare what `createSynWare` took before, and a `handleBackgroundTask(taskId, { signal })`
+`static migrations` declare the app's route graph and data migrations, and a `handleBackgroundTask(taskId, { signal })`
 method handles background tasks.
 
-`SCOS` is running before the launch callbacks, including `applicationWillFinishLaunching`.
-Preferences, services, routes and secondary-window creation do not depend on a React view mounting.
+`SCOS` is already running when the launch callbacks start, including `applicationWillFinishLaunching`.
+Preferences, services, routes and secondary-window creation don't wait for a React view to mount.
 
-The two launch hooks sit on either side of the main window, as in Cocoa:
+The two launch hooks sit on either side of the main window opening:
 
 | Hook | When | Use it for |
 | --- | --- | --- |
 | `applicationWillFinishLaunching` | Before the main window opens. The window waits for it, including its promise. | Asynchronous setup the windows read: opening the primary document or session, loading content, restoring state. |
 | `applicationDidFinishLaunching` | After the launch commits. The main window is open and may already have rendered. | Work that needs the window to exist, or that the window does not depend on. A failure here is reported but does not undo the launch. |
 
-A view that reads state assigned in `applicationDidFinishLaunching` can render before the assignment and fail.
+A view that reads state assigned in `applicationDidFinishLaunching` can render before the assignment happens, and fail.
 
 ```tsx
 import { NSEApplication, NSEWindowController, useObserve } from "@syndromatic/syncloudos";
@@ -53,8 +53,8 @@ export default class NotesApp extends NSEApplication {
 
 ## Window controllers
 
-An `NSEWindowController` represents one window. Its `static view` is a React component receiving
-`{ controller }`; alternatively set `contentViewController` to an `NSEViewController`. The window
+An `NSEWindowController` represents one window. Its `static view` is a React component that receives
+`{ controller }`; or set `contentViewController` to an `NSEViewController` instead. The window
 controller exposes its application as `app` and its mounted window as `window`.
 
 ```ts
@@ -75,24 +75,24 @@ class NotesWindow extends NSEWindowController<NotesApp> {
 }
 ```
 
-`window.title` can be assigned before or after mounting. `window.id`, `window.isKey`,
+You can assign `window.title` before or after the window mounts. `window.id`, `window.isKey`,
 `window.isMinimised` and `window.frame` read the managed window. `window.minimise()`, `window.zoom()`,
 `window.focus()` and `window.close()` operate on it after it mounts; before it mounts or after it
 closes they throw `NSE_VIEW_NOT_LOADED`. `window.close()` resolves with `"closed"`, `"cancelled"` or
 `"refused"` (when `windowShouldClose` said no). `windowDidLoad` runs once the window mounts, before any
-view loads. `windowShouldClose` may return a promise; returning `false` keeps that window open. During an
-application quit it is skipped: `applicationShouldTerminate` decides whether the app closes.
+view loads. `windowShouldClose` may return a promise; returning `false` keeps that window open. It isn't consulted
+when the application quits, because `applicationShouldTerminate` decides that.
 `windowWillClose` runs when the close can no longer be stopped; `windowDidBecomeKey` and
 `windowDidResignKey` report key-window changes. A window controller opened for a document has `document`.
 
 `openWindow(Controller, options)` also accepts `documentId`, `restorationKey`, `mobilePolicy` and
-`preferredBounds`. Bounds are either `{ x, y, width, height }`, `"centred"` or `"cascaded"`; named
-placement uses `width`/`height` (or the app defaults) within the current work area. A document ID
-opens a secondary window for a live document owned by the app, with the usual document admission checks.
-The constructor receives the options, and `openingOptions` retains them.
+`preferredBounds`. Bounds are `{ x, y, width, height }`, `"centred"` or `"cascaded"`; the named
+placements use `width` and `height` (or the app defaults) within the current work area. A document ID
+opens a secondary window for a live document the app owns, with the usual document admission checks.
+The constructor receives the options, and `openingOptions` keeps them.
 
-Name restorable secondary controllers on the application so a fresh launch can recreate the
-correct class, not another instance of the main controller:
+Name restorable secondary controllers on the application, so that a fresh launch recreates the
+right class instead of another main window:
 
 ```ts
 class NotesApp extends NSEApplication {
@@ -110,18 +110,20 @@ class NotesApp extends NSEApplication {
 ## View controllers
 
 `NSEViewController` manages a React view and owns child view controllers. `static view` receives
-`{ controller }`; use `addChild(ControllerClass)` to create a child under its parent, then place
-its view in yours as AppKit adds a subview: `<controller.sidebar.view className="…" />` renders the child's
-`view` (`NSViewController.view`). `viewDidLoad` runs on first mount, followed by the appear
+`{ controller }`. Use `addChild(ControllerClass)` to create a child, then place
+its view inside yours: `<controller.sidebar.view className="…" />` renders the child's
+`view`. `viewDidLoad` runs on first mount, followed by the appear
 hooks; the disappear hooks run when the view leaves. Reading `view.layer` or `view.element` before
-mounting or after unmounting throws `NSE_VIEW_NOT_LOADED`. `fx` gives the controller the FX services
-of the mounted application (`motion`, `location`, `haptics`, `midi`, `media`, `video`, `lumina`)
-without a hook; each is created on first read and released with the controller. `removeFromParent()`
-disposes a child.
+mounting or after unmounting throws `NSE_VIEW_NOT_LOADED`. `removeFromParent()` disposes a child.
 
-`view.layer` backs the existing managed outlet without replacing its CSS position or dimensions.
-Its bounds follow the outlet's untransformed layout size. Add AFX sublayers in `viewDidLoad`;
-opacity and transforms remain animation-owned, and unmounting releases the backing layer.
+`fx` gives the controller the mounted application's FX services without a hook: `motion`, `location`,
+`haptics`, `midi`, `media`, `video` and `lumina`, plus `animation.manageRenderer(outlet)` and
+`animation.manageDisplayLink(outlet)` for a canvas whose drawing you own. Each is created the first time you
+read it and released with the controller.
+
+`view.layer` backs the view's managed outlet without changing its CSS position or dimensions.
+Its bounds follow the outlet's untransformed layout size. Add AnimationFX sublayers in `viewDidLoad`.
+The animation system owns opacity and transforms, and unmounting releases the backing layer.
 
 ```tsx
 import { NSEViewController } from "@syndromatic/syncloudos";
@@ -146,27 +148,27 @@ function WorkspaceView({ controller }: { readonly controller: WorkspaceControlle
 }
 ```
 
-The optional `className` styles the existing managed outlet, without another wrapper.
-Child outlets impose no inline display mode, width or height: the parent can lay them out
+The optional `className` styles the managed outlet itself; no extra wrapper is added.
+Child outlets set no inline display mode, width or height, so the parent can lay them out
 as flex or grid items, or leave their height intrinsic inside a scroll area. For example,
 `.workspace-sidebar-region { display: flex; flex-direction: column; min-height: 0; }`
-lets the parent own the region's layout. Root window frames retain their fill layout.
+lets the parent own the region's layout. Root window frames keep their fill layout.
 
-The presented key stage selects its managed root view as the initial responder, unless content
-declares a `data-nse-initial-focus` target. An existing editor or portalled focus is preserved.
-Content arriving after the empty stage receives focus inherits that handoff without a timer.
+When a stage becomes key, its managed root view becomes the initial responder, unless the content
+marks a `data-nse-initial-focus` target. Focus already inside an editor or a portal is left alone.
+Content that arrives after the empty stage took focus inherits that focus directly, without a timer.
 
 `viewWillLayout()` and `viewDidLayout()` run after the view's DOM commits and when its frame resizes.
-Read `this.view.element` in these callbacks rather than calling controller layout methods from a React effect.
+Read `this.view.element` in these callbacks instead of calling controller layout methods from a React effect.
 
 `traitCollection.reducedMotion` comes from the NSE animation environment, including inherited overrides.
 `traitCollection.presentation` is the content-bound `SynCloudOSPresentationTraits` snapshot, or `null`
-outside an application. Override `traitCollectionDidChange(previous)` to react; controller observers
-are notified too. For example, stop a decorative animation when `this.traitCollection.reducedMotion` is true.
+outside an application. Override `traitCollectionDidChange(previous)` to react; the controller's observers
+are notified as well. For example, stop a decorative animation when `this.traitCollection.reducedMotion` is true.
 
 ## Controller services
 
-Controllers use the same services as thin views, without passing clients back from hooks:
+Controllers reach the same services that views use through hooks, without a view passing clients back to them:
 
 ```ts
 const page = SCOS.routes.state(routes, "catalogue");
@@ -177,30 +179,30 @@ const fonts = SCOS.fonts.manager;
 this.window.toolbar = new NSEToolbar({ identifier: "notes.toolbar", items, defaultItemIdentifiers, autosavesConfiguration: true });
 ```
 
-`SCOS.routes.subscribe(listener)` observes committed routing changes. Query clients retain the
-route graph's inferred query types and use the same canonical navigation transaction as `useRouteState`.
-Keep subscription disposers on the owning controller and release them when it disappears or is disposed.
+`SCOS.routes.subscribe(listener)` observes committed routing changes. Query clients keep the
+route graph's inferred query types and navigate through the same transaction as `useRouteState`.
+Keep subscription disposers on the owning controller and call them when it disappears or is disposed.
 
 ## Ownership
 
-Controllers created while the framework constructs an application, window controller or an
-`addChild(ControllerClass)` child adopt that construction scope and are disposed with it. Child view controllers
-are owned by their parent. When an object is disposed, its child view controllers go first, then the
+A controller created while the framework is constructing an application, a window controller or an
+`addChild(ControllerClass)` child belongs to that object and is disposed with it. Child view controllers
+belong to their parent. When an object is disposed, its child view controllers go first, then the
 object itself, then the controllers it owns. Quitting an application therefore disposes the deepest
 view controllers first, then the window controllers, then the application, each followed by what it owns.
 
-A raw nested `new RootController()` inside a window constructor does not establish a new
-ambient construction scope for Root's own resource fields. Give those fields `owner: this`
-(for example, `rows = new NSEArrayController({ ..., owner: this })`) so replacing Root disposes
-them immediately. Passing an owner only to Root's constructor does not retarget its fields.
-Use `addChild(ControllerClass)` for framework-constructed children. The framework cannot infer
-where an arbitrary derived JavaScript constructor returns.
+Calling `new RootController()` yourself inside a window constructor doesn't give Root's own
+fields a new owner. Give those fields `owner: this`
+(for example, `rows = new NSEArrayController({ ..., owner: this })`) so that replacing Root disposes
+them straight away; passing an owner only to Root's constructor doesn't reach its fields.
+Use `addChild(ControllerClass)` when you want the framework to construct the child. It can't tell
+where an arbitrary JavaScript constructor returns.
 
-Disposed owners reject new controllers, including during teardown. A window root cannot also
-be another window's root or a view-controller child; rejected content assignments preserve the
-previous content. Framework-controlled construction failures release their acquired resources
-and preserve the original error. Disposed controllers revoke their actions and notify managed
-views so those views unmount.
+A disposed owner rejects new controllers, including during teardown. A window's root view controller can't also
+be another window's root or a child view controller; if such an assignment is rejected, the
+previous content stays. If construction fails while the framework controls it, the resources acquired so far are released
+and you see the original error. A disposed controller revokes its actions and tells its managed
+views, which unmount.
 
 The disposal reason says what triggered it, and every object in the tree records the same one:
 `application-closed` when the application quits, `window-closed` when a window closes while the
@@ -208,14 +210,14 @@ application keeps running, `removed-from-parent` for a view controller removed w
 `removeFromParent()` or replaced as a window's `contentViewController`, and `explicit` when you call
 `dispose()`. Read it from `disposalReason`, or from the argument of `onDispose(listener)`.
 
-Creating a controller later (in a method, callback or after an `await`) has no ambient owner while a
-class-based application is running (the check covers the whole page, not just the owning app). Pass
+A controller you create later (in a method, in a callback or after an `await`) has no automatic owner while a
+class-based application is running, and the check applies to the whole page, not only the owning app. Pass
 `owner: this` to tie it to the current application, window controller or view controller. Use
-`ownerSignal` when an abort signal defines its lifetime, or `owner: nseUnowned` (from
-`@syndromatic/syncloudos/nse`) only for a controller that the caller will dispose itself. Otherwise
-construction throws `NSE_CONTROLLER_UNOWNED`. The same rule covers view controllers, and the
-split, tab-bar and navigation-stack controllers, which are view controllers too.
-`useNSEArrayController` and related hooks remain available to function component apps.
+`ownerSignal` when an abort signal defines its lifetime, and `owner: nseUnowned` (from
+`@syndromatic/syncloudos/nse`) only for a controller you will dispose yourself. Without one of these,
+construction throws `NSE_CONTROLLER_UNOWNED`. The same rule covers view controllers, including the
+split, tab-bar and navigation-stack controllers.
+Function-component apps can keep using `useNSEArrayController` and the related hooks.
 
 ```ts
 import { NSEArrayController } from "@syndromatic/syncloudos/nse";
@@ -230,22 +232,22 @@ class NotesApp extends NSEApplication {
 ## AnimationFX layers
 
 `new AFXLayer()` (and the layer subclasses) creates a detached layer. Add it to an attached
-`view.layer` with `addSublayer`; it adopts the view's surface and scheduler at that point. A layer
-added to a detached parent stays detached until the parent joins an attached tree. Writes made
+`view.layer` with `addSublayer` and it takes on the view's surface and scheduler. A layer
+added to a detached parent stays detached until the parent joins an attached tree. Property writes made
 before attachment are kept and applied when it attaches. Hosts building their own rendering surface
 use `createAFXLayer(surface, scheduler)` from `@syndromatic/syncloudos/sdk/animation-host`.
 
 ## Function-component shortcut
 
-An app that does not need application or window classes can keep a default-exported function
-component. The framework wraps it in a single-window application whose window renders that component, and existing function-component
-hooks such as `useCommands`, `useStrings()` and `useNSEArrayController` remain available. Such an app is not
-class-based, so controllers it builds with hooks keep the ownership their hooks give them. Class apps
-can still use function components for their window and view-controller views.
+An app that doesn't need application or window classes can default-export a function
+component. The framework wraps it in a single-window application that renders the component, and
+hooks such as `useCommands`, `useStrings()` and `useNSEArrayController` work as before. Because the app isn't
+class-based, controllers it builds with hooks keep the ownership their hooks give them. Class apps
+can still use function components as the views of their windows and view controllers.
 
 ## Actions and validation
 
-`@action` on a method registers a command on the object that owns it, so the object becomes a responder. The command ID is the method name, scoped to the application. `@action("document.save")` answers a standard command instead. A method named `validate<Name>` supplies the command's validation, and may return a boolean or a validation object.
+`@action` on a method registers a command on the object that owns it, which makes the object a responder. The command ID is the method name, scoped to the application. `@action("document.save")` answers a standard command instead. A method named `validate<Name>` validates the command and returns a boolean or a validation object.
 
 ```ts
 class NotesWindowController extends NSEWindowController<NotesApp> {
@@ -259,11 +261,11 @@ class NotesWindowController extends NSEWindowController<NotesApp> {
 }
 ```
 
-Controls and menus send the action by name; the responder chain does the rest: the focused view controller answers first, then its window controller, then the application.
+Controls and menus send the action by name and the responder chain finds the handler: the focused view controller first, then its window controller, then the application.
 
-Application actions are available from the main surface and every owned secondary window without
-authored controller or responder IDs. Closing a secondary window removes that window's action
-bindings, not the application actions available in the remaining windows; reopening creates a new
+Application actions are available from the main surface and from every secondary window the app owns, without
+you writing controller or responder IDs. Closing a secondary window removes that window's action
+bindings but leaves the application actions in the other windows; reopening it creates a new
 window controller.
 
 ```tsx
@@ -273,26 +275,26 @@ window controller.
 
 A menu item is `{ kind: "command", id: "new", action: "newNote" }`. Every control and menu item that names the action follows its validation, so one `validateNewNote()` disables them all. [Commands, responders and undo](commands-responders-undo.md#actions-on-class-based-applications) lists the rules: payloads, validation results, standard command IDs and how names resolve.
 
-Actions use the ordinary command payload boundary; an action callback does not bypass it.
-Portable payloads are primitives or immutable values constructed by the mounted application's
-`SCOS.commands.createPayload("key", value, ...)` and `createPayloadArray(value, ...)`.
-Write known fields explicitly, and build nested records and arrays with the same mounted scope.
-Raw objects are supported only where the host supplies a native `isProxy` probe that proves their
-identity; without it, arbitrary objects fail closed before their properties are inspected.
-Builders reject duplicate or non-string keys, unpaired fields and raw nested objects. Keys must
-be bounded identifiers beginning with a letter. Do not serialise, clone, spread or enumerate an
-unknown object to try to make it an accepted command payload.
+Action payloads go through the same checks as any command payload; an action callback doesn't skip them.
+A portable payload is a primitive, or an immutable value built with the mounted application's
+`SCOS.commands.createPayload("key", value, ...)` and `SCOS.commands.createPayloadArray(value, ...)`.
+Write known fields explicitly, and build nested records and arrays with the same builders.
+Raw objects are accepted only where the host supplies a native `isProxy` probe that proves their
+identity; without one, an arbitrary object is rejected before any of its properties are read.
+The builders reject duplicate or non-string keys, unpaired fields and raw nested objects. Keys must
+be short identifiers that start with a letter. Don't serialise, clone, spread or enumerate an
+unknown object to get it accepted as a payload.
 
 `@action({ menuCategory: "edit", keyBindings: [{ key: "f", modifiers: ["primary"], scope: "application" }], allowReservedBrowserShortcut: true })`
-uses the same menu and keyboard rules as a command definition. `keyBindings` is a list of the usual
-key-binding declarations; browser-reserved shortcuts require the explicit opt-in.
+follows the same menu and keyboard rules as a command definition. `keyBindings` is a list of ordinary
+key-binding declarations, and shortcuts the browser reserves need the explicit opt-in.
 
-When Webspring presents a key application stage, keyboard focus moves from that runtime's launcher or previous stage into the application. A focused control already inside the application, including its registered portals, keeps focus. Staged or non-key views do not claim focus, and another runtime's focus is left alone.
+When Webspring presents an application stage as key, keyboard focus moves into the application from that runtime's launcher or previous stage. A control that already has focus inside the application (or one of its registered portals) keeps it. Views that aren't key don't take focus, and another runtime's focus is left alone.
 
 `NSEActionOptions<Payload>.title` also accepts the command title resolver:
 `({ payload, runtime }) => ({ key, fallback, values? })`. The payload has the action's declared
-type. Use `runtime.locale.t(...)` for a translated fallback; the command pipeline evaluates the
-resolver for each payload, and `validate<Name>()` can still override the presented title.
+type. Use `runtime.locale.t(...)` for a translated fallback. The resolver runs for each payload,
+and `validate<Name>()` can still override the title that is shown.
 
 ```ts
 const headingAction: NSEActionOptions<{ readonly level: number }> = {
@@ -301,7 +303,7 @@ const headingAction: NSEActionOptions<{ readonly level: number }> = {
 ```
 
 `useAction(name, payload?)` returns `{ perform, enabled, state }`, where `state` is `"off"`, `"on"` or
-`"mixed"`. Use it for custom links or artwork; it validates and dispatches through the responder chain:
+`"mixed"`. Use it for custom links or artwork. It validates and dispatches through the responder chain:
 
 ```tsx
 const activation = useAction("openNote", SCOS.commands.createPayload("id", note.id));
@@ -311,16 +313,16 @@ return <a href={note.url} aria-disabled={!activation.enabled} onClick={event => 
 }}>{note.title}</a>;
 ```
 
-`perform(payload?: unknown)` returns a promise of the canonical dispatch result, or `null` when
-preparation is rejected or cancelled. `perform()` uses the payload bound by `useAction`; supplying
-an argument overrides it, including `perform(undefined)`. Each supplied payload is parsed and
-validated afresh against the focused responder chain before execution. Pending preparation is
-rejected if command or responder authority changes, the application is disposed, or the hook unmounts.
+`perform(payload?: unknown)` returns a promise of the dispatch result, or `null` when
+preparation is rejected or cancelled. `perform()` uses the payload bound by `useAction`; passing
+an argument, even `perform(undefined)`, overrides it. Each payload you pass is parsed and
+validated again against the focused responder chain before it runs. A pending preparation is
+rejected if the command or responder changes, the application is disposed or the hook unmounts.
 
-`enabled` and `state` always describe the bound payload, not a future event's value. For a selection,
-search or drop callback, call `perform(eventPayload)` directly: an unavailable bound `undefined`
-does not prevent a valid event payload from being prepared. The event payload must still pass the
-action's payload schema and `validate<Name>()`; it does not inherit the bound payload's acceptance.
+`enabled` and `state` always describe the bound payload, not the value a future event will carry. For a selection,
+search or drop callback, call `perform(eventPayload)` directly. A disabled bound `undefined`
+doesn't stop a valid event payload from running, but the event payload must still pass the
+action's payload schema and `validate<Name>()` on its own.
 
 ```tsx
 const selection = useAction("selectNote");
@@ -329,9 +331,9 @@ return <NoteList onSelectionChange={id => {
 }} />;
 ```
 
-`NSEButton`, `NSESegmentedControl`, `NSEPopUpButton`, `NSEPathControl` and `NSEMenu` items also accept `action` and `actionPayload`, with the same validation as push buttons, so they do not call action methods directly. Without `actionPayload`, segmented controls send the activated segment's ID, path controls send the clicked item, and a pop-up button trigger sends its menu model's ID or item value. Candidate choices are validated individually, and an explicitly supplied payload (including `undefined`) overrides these defaults. Cover Flow (`NSECollectionView` with `createCoverFlowCollectionLayout`) uses `onSelectionChange` and `onActivate`.
+`NSEButton`, `NSESegmentedControl`, `NSEPopUpButton`, `NSEPathControl` and `NSEMenu` items accept `action` and `actionPayload`, with the same validation as push buttons, so nothing needs to call action methods directly. Without `actionPayload`, segmented controls send the activated segment's ID, path controls send the clicked item, and a pop-up button trigger sends its menu model's ID or item value. Each candidate choice is validated on its own, and an explicit `actionPayload` (even `undefined`) overrides these defaults. Cover Flow (`NSECollectionView` with `createCoverFlowCollectionLayout`) uses `onSelectionChange` and `onActivate`.
 
-Prefer a primitive ID when that is all the action needs. For richer, known data, build each level:
+Send a primitive ID when that's all the action needs. For richer data, build each level:
 
 ```tsx
 const notes = SCOS.commands.createPayloadArray(
@@ -341,28 +343,28 @@ const notes = SCOS.commands.createPayloadArray(
 const activation = useAction("openNotes", SCOS.commands.createPayload("notes", notes));
 ```
 
-DOM nodes, `File` objects or `File[]`, and transformation functions are not command payloads.
-Keep those arguments in outlets or domain callbacks, or send a primitive descriptor that the
-owning controller resolves. Event-time `perform(...)` arguments follow the same rules as bound
-payloads and control `actionPayload` values.
+DOM nodes, `File` objects or `File[]`, and functions can't be command payloads.
+Keep them in outlets or domain callbacks, or send a primitive descriptor that the
+owning controller resolves. Arguments to `perform(...)` follow the same rules as bound
+payloads and `actionPayload` values.
 
-Omit `parentResponderId` on an `NSEPopup` rendered by a class controller. It inherits that
-controller's responder ancestry through its portal, so focused editor actions can fall back to the
-parent controller's actions while the popup keeps its modal focus scope. Use an explicit parent
-only when you intend to change the popup's focus parent.
+Leave out `parentResponderId` on an `NSEPopup` that a class controller renders. The popup inherits the
+controller's responder chain through its portal, so actions in a focused editor fall back to the
+parent controller's actions while the popup keeps its modal focus scope. Pass an explicit parent
+only when you want to change the popup's focus parent.
 
-A sheet, popover or modal window's focus scope also inherits the nearest mounted controller as its logical focus parent.
-A native input or action button inside a child controller's modal therefore resolves that
-child's actions before its ancestors. An explicit `parentResponderId` takes precedence;
-it still passes through the application's ordinary focus authority and cannot admit
-another application's responder. Closing the scope restores the prior live, enabled logical
-focus, falling back to its live, enabled owning parent if the prior responder was removed or disabled.
+A sheet, popover or modal window also takes the nearest mounted controller as its focus parent.
+An input or button inside a child controller's modal therefore reaches that
+child's actions before its ancestors'. An explicit `parentResponderId` takes precedence, but
+it still goes through the application's normal focus rules and can't point at
+another application's responder. Closing the scope returns focus to the previous responder if it is still live and enabled,
+or else to its owning parent.
 
 `useCommands` stays the way to declare commands in a function-component application.
 
 ## Observable properties
 
-`@observable accessor` on any `NSEApplication`, window controller, view controller or `NSEObject` publishes a change on that object when the property is set to a different value. Values are compared with `Object.is`, so setting a property to the value it already has does nothing.
+`@observable accessor` on an `NSEApplication`, window controller, view controller or `NSEObject` publishes a change on that object whenever the property is set to a different value. Values are compared with `Object.is`, so setting a property to the value it already has does nothing.
 
 ```ts
 import { NSEObject, observable } from "@syndromatic/syncloudos";
@@ -372,9 +374,9 @@ class Note extends NSEObject {
 }
 ```
 
-Notification is per object, not per property: nothing tracks which property a view read, and there are no proxies. Keep collections immutable (replace the array, do not push into it) or use an `NSEArrayController`. For a change that is not an accessor write, call `this.notifyObservers()`.
+Notification is per object, not per property. Nothing tracks which property a view read, and there are no proxies. Keep collections immutable (replace the array rather than pushing into it) or use an `NSEArrayController`. For a change that isn't an accessor write, call `this.notifyObservers()`.
 
-A view hosted as a controller's `static view` re-renders when its own controller changes. To read another object, call `useObserve(object)`, which re-renders the view on that object's changes and returns the object. It works for `NSEObject`s and for every `NSEController`, and accepts `null` or `undefined` to observe nothing.
+A view hosted as a controller's `static view` re-renders when its own controller changes. To read another object, call `useObserve(object)`: it re-renders the view when that object changes and returns the object. It works for any `NSEObject` and every NSE controller, and accepts `null` or `undefined` to observe nothing.
 
 ```tsx
 function NotesView({ controller }: { controller: NotesWindowController }) {
@@ -388,20 +390,20 @@ Setting a property to a different value publishes one change, and React batches 
 
 ## Decorators toolchain
 
-Decorators are standard (TC39) decorators. TypeScript compiles them without a flag because the project does not set `experimentalDecorators`. Three tools in the chain need a setting, and the `synCloudOS()` Vite plugin supplies it:
+SynCloudOS uses standard (TC39) decorators. TypeScript compiles them without a flag as long as the project doesn't set `experimentalDecorators`. Three tools in the build chain need a setting (esbuild, the React plugin's Babel pass and Vitest), and the `synCloudOS()` Vite plugin supplies it:
 
-- esbuild leaves decorators in the output for `esnext` targets, which no browser or Node release parses yet, so the plugin marks the feature unsupported and esbuild lowers it for every target. The dev server, the application build and Vitest (which reads the project's Vite configuration) all go through this.
+- esbuild leaves decorators in the output for `esnext` targets, which no browser or Node release parses yet. The plugin marks the feature unsupported, so esbuild lowers it for every target. The dev server, the application build and Vitest (which reads the project's Vite configuration) all go through this.
 - `@vitejs/plugin-react` runs a Babel pass over `.tsx` files in the dev server for Fast Refresh. The plugin adds the `decorators` and `decoratorAutoAccessors` parser plugins to that pass, so a decorated class in a `.tsx` file parses.
 
-An application that uses a different Vite setup calls the same helpers from `scripts/synware/decorators.mjs` (`decoratorEsbuildOptions` for the `esbuild` option, `addDecoratorParserPlugins` for `api.reactBabel`).
+If your application uses a different Vite setup, apply the same helpers from `scripts/synware/decorators.mjs`: `decoratorEsbuildOptions` for the `esbuild` option and `addDecoratorParserPlugins` for `api.reactBabel`.
 
 ## Hot reload
 
-In the dev server, an application module that default-exports an `NSEApplication` is a hot-reload boundary: editing it never restarts the host. The plugin compares each class in the module with its previous version, by a signature of what a method swap cannot repair: field declarations and their initialisers (instance and static, with decorators), the constructor, the `extends` clause and class decorators. Methods are not part of the signature.
+In the dev server, an application module that default-exports an `NSEApplication` is a hot-reload boundary, so editing it never restarts the host. The plugin compares each class in the module with its previous version using a signature of the parts a method swap can't repair: field declarations and their initialisers (instance and static, with decorators), the constructor, the `extends` clause and class decorators. Methods aren't part of the signature.
 
-- Methods changed, fields the same: live instances of the changed classes (the application, its window controllers and view controllers) are given the new class's prototype. Methods, actions and validation update immediately, state is kept, and observers are told. Views re-render through React Fast Refresh.
-- A field added, removed or given another initialiser: that application, and only that application, relaunches with a "Reloaded Notes" notice. The framework does not try to migrate field values, and the rest of the OS keeps running.
+- Methods changed, fields the same: live instances of the changed classes (the application, its window controllers and view controllers) get the new class's prototype. Methods, actions and validation update immediately, state is kept, and observers are notified. Views re-render through React Fast Refresh.
+- A field added, removed or given a different initialiser: that application, and only that one, relaunches with a "Reloaded Notes" notice. The framework doesn't try to migrate field values, and the rest of the system keeps running.
 - Private members (`#field`, `#method`) or a static block: a private member's brand belongs to the class that declared it, so these classes sign their whole source and any edit relaunches the application.
-- Shell or framework changes: today's whole-host restart is the fallback.
+- Shell or framework changes: the whole host restarts.
 
-A module whose default export is a function component, or whose update also touches a module that is not an application, takes the dev server's ordinary update path.
+A module whose default export is a function component, or an update that also touches a module that isn't an application, takes the dev server's ordinary update path.

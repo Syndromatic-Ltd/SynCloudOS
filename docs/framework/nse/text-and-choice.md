@@ -1,6 +1,6 @@
 # Text fields and choice controls
 
-This page covers the controls people type into: text fields and labels, secure, search, combo box and token fields, and the boxes that group a form. They are native `<input>`, `<fieldset>` and `<label>` elements underneath, so labels, autofill, validation and form submission work as they do on any page. Checkboxes are `NSEButton`s with `buttonType="switch"` (see [Buttons](buttons.md)), and a one-of-many choice is an `NSESegmentedControl` (see [Values and progress](values-and-progress.md#nsesegmentedcontrol)).
+This page covers the controls people type into (text fields and labels, and secure, search, combo box and token fields) and the boxes that group a form. Underneath, they're native `<input>`, `<fieldset>` and `<label>` elements, so labels, autofill, validation and form submission work as they do on any page. Checkboxes are `NSEButton`s with `buttonType="switch"` (see [Buttons](buttons.md)), and a one-of-many choice is an `NSESegmentedControl` (see [Values and progress](values-and-progress.md#nsesegmentedcontrol)).
 
 ```tsx
 import { NSEBox, NSESearchField, NSETextField } from "@syndromatic/syncloudos/nse";
@@ -8,20 +8,20 @@ import { NSEBox, NSESearchField, NSETextField } from "@syndromatic/syncloudos/ns
 
 ## At a glance
 
-| Component | AppKit | Purpose | Needs an overlay host |
-| --- | --- | --- | --- |
-| `NSETextField` | `NSTextField` | Single line text with prefix, suffix, validation, formatting and commands; with `isEditable={false}`, a label | No |
-| `NSESecureTextField` | `NSSecureTextField` | A concealed field with a reveal control and a Caps Lock notice | No |
-| `NSESearchField` | `NSSearchField` | A search box with incremental queries and recent searches | Only for recent searches |
-| `NSEComboBox` | `NSComboBox` | An editable field with asynchronous completions | Yes |
-| `NSETokenField` | `NSTokenField` | Tokens such as tags or recipients, with paste, reorder and completion | For completion and token menus |
-| `NSEBox` | `NSBox` | Titled boxes and separators | No |
+| Component | Purpose | Needs an overlay host |
+| --- | --- | --- |
+| `NSETextField` | Single-line text with prefix, suffix, validation, formatting and commands; with `isEditable={false}`, a label | No |
+| `NSESecureTextField` | A concealed field with a reveal control and a Caps Lock notice | No |
+| `NSESearchField` | A search box with incremental queries and recent searches | Only for recent searches |
+| `NSEComboBox` | An editable field with asynchronous completions | Yes |
+| `NSETokenField` | Tokens such as tags or recipients, with paste, reorder and completion | For completion and token menus |
+| `NSEBox` | Titled boxes and separators | No |
 
-Controls marked "Yes" open a floating list, so they need an *overlay host*. A mounted SynWare receives one from the runtime, so use these controls inside an application's views. A control that needs a host and finds none throws an `Error` when it renders.
+Controls that open a floating list need an *overlay host*. A mounted SynWare gets one from the runtime, so use these controls inside an application's views. A control that needs a host and finds none throws an `Error` when it renders.
 
 ## Shared behaviour
 
-Values and phases: a value control reports its changes with a phase:
+**Values and phases.** A value control reports each change with a phase:
 
 | Phase | When |
 | --- | --- |
@@ -31,15 +31,15 @@ Values and phases: a value control reports its changes with a phase:
 
 Use `"preview"` for a live readout, and `"commit"` for anything that should be saved or recorded as an undo step.
 
-Controlled and uncontrolled: give `value` and the control shows that value and calls back when the user edits; give only `defaultValue` and the control keeps its own state. A native form reset returns an uncontrolled control to its default.
+**Controlled and uncontrolled.** Give `value`, and the control shows that value and calls back when the user edits. Give only `defaultValue`, and the control keeps its own state. A native form reset returns an uncontrolled control to its default.
 
-Validation: `validation` is `{ kind: "valid" }` or `{ kind: "invalid", code, message }`, and it is yours to compute. An invalid result sets `aria-invalid`, links the message to the field through `aria-describedby` and shows it as an alert. Command availability is separate (see below).
+**Validation.** `validation` is `{ kind: "valid" }` or `{ kind: "invalid", code, message }`, and you compute it. An invalid result sets `aria-invalid`, links the message to the field through `aria-describedby` and shows it as an alert. Whether a command is available is a separate matter (see below).
 
-Commands: fields and search accept a `command` binding, `{ id, payload }` with an optional `responderId` for diagnostics. The control validates the command through the responder chain, disables itself while the command is unavailable, and dispatches it before it commits the value. When the command does not execute, the value does not commit. Bindings resolve through the host's command system and never through a registry of the control's own. See [Commands, responders and undo](../commands-responders-undo.md).
+**Commands.** Text and search fields accept a `command` binding, `{ id, payload }`, with an optional `responderId` for diagnostics. The control validates the command through the responder chain, disables itself while the command is unavailable, and dispatches it before committing the value; if the command doesn't run, the value isn't committed. Bindings always go through the host's command system. See [Commands, responders and undo](../commands-responders-undo.md).
 
-Control size: `controlSize` is `"regular"` (the default), `"small"` or `"mini"`. The theme sizes the frame, the text and the affixes together.
+**Control size.** `controlSize` is `"regular"` (the default), `"small"` or `"mini"`. The theme sizes the frame, the text and the affixes together.
 
-Labels: a control with no visible text needs an `aria-label`. The types require it where a label cannot be inferred.
+**Labels.** A control with no visible text needs an `aria-label`, and the types require one where a label can't be inferred.
 
 ## NSETextField
 
@@ -60,26 +60,26 @@ Labels: a control with no visible text needs an `aria-label`. The types require 
 | `validation` | `NSEControlValidation` | none | Your validation result. |
 | `invalid` | `boolean` | `false` | A shortcut for an invalid state with the message "This value needs attention." |
 | `command` | binding | none | See Shared behaviour. |
-| `isEnabled`, `readOnly`, `required`, `name`, `id` | `boolean`, … | `true` for `isEnabled` | `isEnabled` is `NSControl.isEnabled`; the others are as on `<input>`. `required` and other native constraints report through `onInvalid` and show the browser's message. |
+| `isEnabled`, `readOnly`, `required`, `name`, `id` | `boolean`, … | `true` for `isEnabled` | `isEnabled={false}` disables the field; the others work as on `<input>`. `required` and other native constraints report through `onInvalid` and show the browser's message. |
 
 Every other `<input>` attribute passes through, except `prefix`, which the frame uses.
 
-Editing model: typing calls `onValueChange(text, "preview")`, Enter or leaving the field commits, and Escape restores the last committed text, calls `onValueChange(value, "cancel")`, and skips the commit that leaving the field would have made. Escape claims the key only when there was something to revert, so a clean field still lets it close the panel that contains it. Composition input, such as an input method for Japanese, reports nothing until the composition ends.
+**Editing.** Typing calls `onValueChange(text, "preview")`, and Enter or leaving the field commits. Escape restores the last committed text, calls `onValueChange(value, "cancel")` and skips the commit that leaving the field would have made. Escape only claims the key when there's something to revert, so in an unchanged field it can still close the panel around it. Input-method composition, such as typing Japanese, reports nothing until the composition ends.
 
-Formatters: a `formatter` makes the field edit values of type `T` rather than strings. It is any object with four methods:
+**Formatters.** A `formatter` makes the field edit values of type `T` instead of strings. It's any object with four methods:
 
 | Method | Purpose |
 | --- | --- |
-| `string(value, context)` | The display text for a value. The interface requires it for your own use, and the field itself edits with `editingString`. |
+| `string(value, context)` | The display text for a value. It's there for your own use; the field itself uses `editingString`. |
 | `editingString(value, context)` | The text the field shows, both at rest and while editing. |
 | `getObjectValue(text, context)` | `{ ok: true, value }` or `{ ok: false, error: { code, message, input } }`. |
-| `isPartialStringValid(text, context)` | `{ valid, replacement?, error? }`. Called on every keystroke so the field can reject or rewrite input the moment it goes wrong. |
+| `isPartialStringValid(text, context)` | `{ valid, replacement?, error? }`. Called on every keystroke, so the field can reject or rewrite input as soon as it goes wrong. |
 
-The field previews a parsed value as the user types, shows a formatter's error as an alert while the text cannot parse, and on commit replaces the text with `editingString` of the parsed value.
+As the user types, the field previews the parsed value and shows the formatter's error as an alert while the text can't be parsed. On commit, it replaces the text with the `editingString` of the parsed value.
 
 ### Labels
 
-A text field that is not editable is a label: AppKit's `NSTextField(labelWithString:)`, drawn without a bezel or background. Its children are its string value. Use it for readouts, captions and notes beside controls instead of hand-sizing paragraphs.
+A text field that isn't editable is a label, drawn without a bezel or background, and its children are its text. Use labels for readouts, captions and notes beside controls instead of sizing paragraphs by hand.
 
 ```tsx
 <NSETextField isEditable={false} font="footnote" textColour="secondaryLabelColour" monospacedDigits role="status">
@@ -87,19 +87,20 @@ A text field that is not editable is a label: AppKit's `NSTextField(labelWithStr
 </NSETextField>
 ```
 
-| Prop | Type | Default | AppKit | Description |
-| --- | --- | --- | --- | --- |
-| `isEditable` | `false` | | `isEditable` | Makes the field a label. |
-| `font` | `"body" \| "callout" \| "footnote" \| "caption" \| "headline" \| "label"` | `"body"` | `font` (`NSFont.TextStyle`) | The text style, sized by the SDK's text tokens so every theme agrees. |
-| `textColour` | `"labelColour" \| "secondaryLabelColour"` | `"labelColour"` | `textColour` | The quieter `secondaryLabelColour` suits hints and metadata. |
-| `monospacedDigits` | `boolean` | `false` | the monospaced-digit system font | Tabular figures, so changing numbers do not jitter. |
-| `lineBreakMode` | `"byWordWrapping" \| "byCharWrapping"` | `"byWordWrapping"` | `lineBreakMode` | `byCharWrapping` lets long unbroken strings (paths, URLs, hex values) wrap anywhere. |
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `isEditable` | `false` | | Makes the field a label. |
+| `font` | `"body" \| "callout" \| "footnote" \| "caption" \| "headline" \| "label"` | `"body"` | The text style, sized by the SDK's text tokens so every theme agrees. |
+| `textColour` | `"labelColour" \| "secondaryLabelColour"` | `"labelColour"` | The quieter `secondaryLabelColour` suits hints and metadata. |
+| `monospacedDigits` | `boolean` | `false` | Tabular figures, so changing numbers don't jitter. |
+| `lineBreakMode` | `"byWordWrapping" \| "byCharWrapping"` | `"byWordWrapping"` | `byCharWrapping` lets long unbroken strings (paths, URLs, hex values) wrap anywhere. |
+| `backgroundStyle` | `"normal" \| "emphasised" \| "raised" \| "lowered"` | `"normal"` | What the label is drawn on. Use `raised` for a label on a raised surface such as a window's status line, so the theme embosses it. |
 
 A label accepts the attributes of a `<span>`, so give a live readout `role="status"`.
 
 ## NSESecureTextField
 
-A password field with a built-in reveal control. It requires an `aria-label`.
+A password field with a built-in reveal control. It needs an `aria-label`.
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -109,11 +110,11 @@ A password field with a built-in reveal control. It requires an `aria-label`.
 | `label`, `prefix`, `suffix` | `ReactNode` | none | Visible label and affixes. |
 | `autoComplete`, `required`, `pattern`, `minLength`, `maxLength`, `name` | | | Native attributes. |
 
-The text conceals again when the control loses focus, when the user presses Escape, and when the page becomes hidden. A "Caps Lock is on." notice appears while the key is engaged. A form reset clears an uncontrolled field.
+The text is hidden again when the field loses focus, when the user presses Escape and when the page is hidden. A "Caps Lock is on." notice appears while Caps Lock is on. A form reset clears an uncontrolled field.
 
 ## NSESearchField
 
-A search box for incremental and submitted searches, with an affordance that clears the text, and a menu of recent searches.
+A search box for incremental and submitted searches, with a button that clears the text and a menu of recent searches.
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -124,19 +125,19 @@ A search box for incremental and submitted searches, with an affordance that cle
 | `onSearch` | `(value) => void` | none | The user submitted, with Enter. |
 | `onClear`, `onCancel` | `() => void` | none | The user cleared the text. |
 | `command` | `{ id, payload }` | none | Dispatched on submit with the payload `{ query }`. The search is remembered and reported only when the command executes. |
-| `recentSearches` | `readonly string[]` | the field's own | `NSSearchField.recentSearches`: the searches the recents menu offers, most recent first. |
-| `maximumRecents` | `number` | `20` | `NSSearchField.maximumRecents`, from 1 to 100. |
+| `recentSearches` | `readonly string[]` | the field's own | The searches the recents menu offers, most recent first. |
+| `maximumRecents` | `number` | `20` | How many recent searches to keep, from 1 to 100. |
 | `onRecentSearchesChange` | `(recents) => void` | none | Called with the new list after a search is remembered. |
 | `showsAffordance` | `boolean` | `true` | Show the trailing clear button. Hide it for fully incremental surfaces. |
 | `showsSearchIcon` | `boolean` | `false` | Show a magnifying glass before the text. |
 | `clearLabel` | `string` | `"Clear search"` | The clear button's accessible name. |
 | `controlSize`, `height`, `width` | | `"regular"` | `"small"` is the inspector and panel size. |
 | `parentResponderId` | `string` | none | The responder that owns the recents list. |
-| `isEnabled`, `readOnly`, `name`, `id`, `className` | | `true` for `isEnabled` | `isEnabled` is `NSControl.isEnabled`; the others are standard. |
+| `isEnabled`, `readOnly`, `name`, `id`, `className` | | `true` for `isEnabled` | `isEnabled={false}` disables the field; the others are standard. |
 
 Enter submits and Escape clears the text, or closes the recents menu when the field is already empty. Recent searches appear when the empty field takes focus, and need an overlay host. Choosing one fills the field and submits it. While an input method is composing, the field neither queries nor submits.
 
-Keeping recent searches: without `recentSearches`, the field keeps its own list for as long as it is shown. AppKit keeps the list between launches with `recentsAutosaveName`; in NSE, bind `recentSearches` to a `@preference` property and store the list `onRecentSearchesChange` passes you. Searches are trimmed, and an empty search or one longer than 256 characters is not remembered.
+**Keeping recent searches.** Without `recentSearches`, the field keeps its own list only while it's shown. To keep the list between launches, bind `recentSearches` to a `@preference` property and store the list that `onRecentSearchesChange` passes you. Searches are trimmed, and an empty search or one longer than 256 characters isn't remembered.
 
 ## NSEComboBox
 
@@ -153,7 +154,7 @@ An editable field that suggests values from an asynchronous data source. It has 
 | `allowsFreeform` | `boolean` | Let Enter accept text that is not in the list. |
 | `disabled`, `readOnly`, `id`, `name`, `direction`, `parentResponderId` | | `name` adds a hidden input holding the chosen item's id, or the text for a free entry. |
 
-Each edit queries the data source with an `AbortSignal` that aborts when the text changes again. Arrow Down and Arrow Up move through the suggestions. Enter chooses the highlighted suggestion, or the first one when none is highlighted. Escape closes the list and restores `inputValue`. Query failures leave the list empty. Composition input queries when the composition ends.
+Each edit queries the data source with an `AbortSignal` that aborts when the text changes again. Arrow Down and Arrow Up move through the suggestions, and Enter chooses the highlighted one, or the first if none is highlighted. Escape closes the list and restores `inputValue`. A failed query leaves the list empty, and input-method composition queries only when the composition ends.
 
 ## NSETokenField
 
@@ -172,21 +173,21 @@ A field whose values are tokens, such as tags or recipients.
 | `onRequestReorder` | `(id, beforeId \| null) => void` | Called with a keyboard reorder, before `onValuesChange`. |
 | `disabled`, `readOnly`, `id`, `name`, `parentResponderId` | | `name` adds a hidden input with the token ids joined by commas. |
 
-Enter or a separator turns the typed text into a token, and a token whose id is already present is skipped. Backspace in an empty input removes the last token. A focused token removes itself with Delete or Backspace, edits with Enter or a double click (it becomes text in the input), and moves with Alt and Arrow Left or Arrow Right, and Arrow keys move focus between tokens. Pasted text splits on the separators. Tokens copy and cut as text and drag out as text and as a `application/x-syncloudos-token` representation. Completions and token menus need an overlay host.
+Enter or a separator turns the typed text into a token, skipping any token whose id is already there. Backspace in an empty input removes the last token. Arrow keys move focus between tokens. A focused token is removed with Delete or Backspace, edited with Enter or a double click (it turns back into text in the input), and moved with Alt and Arrow Left or Arrow Right. Pasted text is split on the separators. Tokens copy and cut as text, and drag out as text and as an `application/x-syncloudos-token` representation. Completions and token menus need an overlay host.
 
 ## NSEBox
 
-`NSEBox` is AppKit's `NSBox`: a `<fieldset>` with a `<legend>`, or a separator.
+`NSEBox` is a `<fieldset>` with a `<legend>`, or a separator. For wells, frames, plates, shadows and custom fills and borders (`borderColour`, `borderWidth`, `isTransparent`, `cornerRadius`), see [Boxes, shadows and corners](boxes-and-shadows.md).
 
-| Prop | Type | Default | AppKit | Description |
-| --- | --- | --- | --- | --- |
-| `title` | `ReactNode` | none | `title` | The legend. |
-| `titlePosition` | `"noTitle" \| "aboveTop" \| "atTop" \| "belowTop" \| "aboveBottom" \| "atBottom" \| "belowBottom"` | `"atTop"` with a title, otherwise `"noTitle"` | `titlePosition` | Where the title sits. `"noTitle"` keeps it for assistive technology and hides it. |
-| `boxType` | `"primary" \| "secondary" \| "separator" \| "custom"` | `"primary"` | `boxType` | `"separator"` draws a rule (`role="separator"`) and takes no children. |
-| `borderType` | `"noBorder" \| "lineBorder" \| "bezelBorder" \| "grooveBorder"` | `"bezelBorder"` | `borderType` | The edge treatment. |
-| `contentViewMargins` | `{ width, height }` | standard | `contentViewMargins` | The horizontal and vertical distance from the border to the content, each 0 to 4,096 points. Without them the content sits at the standard content margin, and rows run edge to edge as in a grouped table. |
-| `fillColour` | `string` | theme | `fillColour` | One CSS background value, at most 512 characters, with no `;`, `{` or `}`. |
-| `contentLayout` | `"stack" \| "flow"` | `"stack"` | | `stack` lays the content out as a leading-aligned column at standard spacing; `flow` leaves it in plain block flow. |
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `title` | `ReactNode` | none | The legend. |
+| `titlePosition` | `"noTitle" \| "aboveTop" \| "atTop" \| "belowTop" \| "aboveBottom" \| "atBottom" \| "belowBottom"` | `"atTop"` with a title, otherwise `"noTitle"` | Where the title sits. `"noTitle"` keeps it for assistive technology and hides it. |
+| `boxType` | `"primary" \| "secondary" \| "separator" \| "custom"` | `"primary"` | `"separator"` draws a rule (`role="separator"`) and takes no children. |
+| `borderType` | `"noBorder" \| "lineBorder" \| "bezelBorder" \| "grooveBorder"` | `"bezelBorder"` | The edge treatment. |
+| `contentViewMargins` | `{ width, height }` | standard | The horizontal and vertical distance from the border to the content, each 0 to 4,096 points. Without them the content sits at the standard content margin, and rows run edge to edge as in a grouped table. |
+| `fillColour` | `string` | theme | One CSS background value, at most 512 characters, with no `;`, `{` or `}`. |
+| `contentLayout` | `"stack" \| "flow"` | `"stack"` | `stack` lays the content out as a leading-aligned column at standard spacing; `flow` leaves it in plain block flow. |
 
 A separator with a `title` draws the theme's captioned separator: the title, then the rule to the edge.
 
@@ -268,7 +269,7 @@ export function ExportOptions() {
 | `NSEBox` `contentViewMargins` outside 0 to 4,096 or not numbers | `RangeError` or `TypeError` |
 | `NSEBox` `fillColour` unsafe or unsupported | `TypeError` |
 | `NSEBox` with `boxType="separator"` and children, in development | `TypeError` |
-| A command that is unavailable or fails | The control stays uncommitted. It reports nothing to the user by itself, so present the command's own state |
+| A command that is unavailable or fails | The value isn't committed. The control doesn't tell the user, so show the command's own state |
 
 ## Related
 

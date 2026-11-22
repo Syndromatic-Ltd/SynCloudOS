@@ -1,9 +1,14 @@
 # BluetoothFX
 
-BluetoothFX maps CoreBluetooth classes and delegates to the `BTFX` prefix. Import from `@syndromatic/syncloudos/fx/bluetooth` inside a plugin-compiled `.app`. Declare `bluetooth.access` in `Info.ts`. The application-specific classes pin the exact mounted session when constructed; constructing an unbound base class gives the application-bundle error. `useBluetooth(delegate?, queue?, options?)` returns a real component-owned `BTFXCentralManager` and ends it on actual unmount.
+BluetoothFX lets your app find a nearby Bluetooth Low Energy peripheral, connect to it, and read, write or subscribe to its GATT characteristics. In a browser it runs on Web Bluetooth, so the user picks each device from the browser's chooser. If you have written CoreBluetooth code, the central/peripheral/delegate shape will be familiar.
+
+Import from `@syndromatic/syncloudos/fx/bluetooth` inside a plugin-compiled `.app`, and declare `bluetooth.access` in `Info.ts`. The plugin's per-app classes bind to the mounted session when you construct them; constructing the unbound base class throws an error explaining that the class must come from an application bundle.
+
+In a component, `useBluetooth(delegate?, queue?, options?)` from `@syndromatic/syncloudos/sdk` returns a `BTFXCentralManager` owned by that component and shuts it down when the component unmounts.
 
 ```ts
 import { BTFXCentralManager, BTFXUUID } from "@syndromatic/syncloudos/fx/bluetooth";
+
 const central = new BTFXCentralManager({
   centralManagerDidUpdateState(sender) { console.log(sender.state); },
   centralManagerDidDiscoverPeripheral(sender, peripheral, advertisementData, rssi) {
@@ -23,28 +28,43 @@ const central = new BTFXCentralManager({
   },
   centralManagerDidConnectPeripheral(_sender, peripheral) { peripheral.discoverServices(null); },
 }, null, null);
-// In a user-gesture action, after state becomes poweredOn:
+
+// In a user-gesture action, once state is poweredOn:
 central.scanForPeripherals([new BTFXUUID("180F")], null);
 ```
 
-The constructor order is delegate, Dispatch queue, options. Null/omitted queue selects the pinned application's main queue. Every delegate has its sender first and runs as synchronous queue work. Reads/writes/discovery return `void`; outcomes update object properties and their exact delegate methods. `writeValue(data, characteristic, type)` requires `withResponse` or `withoutResponse`; `writeValue(data, descriptor)` is the separate descriptor overload. Writes without response have no successful write delegate, matching Apple. All data snapshots are immutable `NSEData`.
+## How calls and callbacks work
 
-| Apple member | Browser behaviour |
+The constructor takes a delegate, a Dispatch queue and an options dictionary, in that order. A `null` or omitted queue means the app's main queue. Every delegate method receives the sender first and runs as synchronous work on that queue.
+
+Reads, writes and discovery calls return `void`. Results arrive by updating object properties and then calling the matching delegate method. `writeValue(data, characteristic, type)` takes `withResponse` or `withoutResponse`; `writeValue(data, descriptor)` is the descriptor overload. A write without response never triggers a "did write" delegate call. Every value you receive is an immutable `NSEData` snapshot.
+
+`BTFXManager.authorization` (static) reports `notDetermined`, `restricted`, `denied` or `allowedAlways`. A manager's `state` is one of `unknown`, `resetting`, `unsupported`, `unauthorized`, `poweredOff` or `poweredOn`.
+
+## What the browser supports
+
+| Area | Behaviour |
 | --- | --- |
-| `CBManager.state` / static `authorization` | Apple cases only. Browser availability gives poweredOn/poweredOff; missing API gives unsupported; unknown radio availability stays unknown. App privacy supplies notDetermined/denied/allowedAlways; missing entitlement or host policy gives restricted. Hardware availability never grants consent. |
-| `CBCentralManager.scanForPeripherals` / `stopScan` | One user-chosen peripheral per scan, using the browser chooser. Stop invalidates pending and queued discovery; the browser may leave its chooser visible. Cancelled/rejected choosers produce no discovery. CoreBluetooth has no scan-error delegate; native denial revokes access. Unsupported state/options throw `BTFXError(operationNotSupported)` before a chooser. |
-| Discovery advertisement dictionary / RSSI | Empty dictionary; no packet fields are inferred from names, filters or services. RSSI is Apple's reserved unavailable value 127, never a measured signal. Apple-authored `CBCentralManager.h` (macOS 11.3 SDK, lines 275–277) explicitly defines this for didDiscover; the header is [mirrored here](https://raw.githubusercontent.com/phracker/MacOSX-SDKs/master/MacOSX11.3.sdk/System/Library/Frameworks/CoreBluetooth.framework/Versions/A/Headers/CBCentralManager.h). |
-| Connect / cancel connection | Asynchronous delegates, including native spontaneous disconnect. Cancel suppresses pending GATT results and releases late connections. Native browser GATT ownership is serialised per shared device so an old result cannot disconnect its replacement. |
-| `retrievePeripherals(identifiers)` | Synchronous retrieval of this central's previously discovered, app-authorised peripherals. It does not enumerate origin grants or other applications. Identifiers are genuine `NSEUUID`, privately mapped from opaque browser IDs and stable for that browser Bluetooth object in the current process. No persisted or cross-process identity guarantee. |
-| `retrieveConnectedPeripherals(withServices)` | Throws `operationNotSupported`; the browser cannot enumerate system-wide connections. |
-| Services / characteristics / descriptors | Real class instances, UUIDs and parent relationships; results arrive through delegates and nullable collections. Service access is limited to chooser-granted services. Scanning with several UUIDs uses alternatives (Apple's any-service match). A null service scan does not add invented service grants. |
-| `discoverIncludedServices` | Delegate receives `operationNotSupported`; browser included-service discovery is unavailable. |
-| Read / write characteristic and descriptor | Native read/write failure is converted to `BTFXError` after shared privacy has recorded any current SecurityError/NotAllowedError. Standard descriptor values use string (2901), number (2900/2902/2903), or `NSEData`; other values remain opaque bytes. |
-| Notifications | `setNotifyValue` reports state through its delegate; updates use `characteristic.value` plus `peripheralDidUpdateValueForCharacteristic`. Disabling, disconnect, consent loss and teardown remove listeners and invalidate queued values. |
-| `readRSSI` | Delegate receives unavailable RSSI 127 and `operationNotSupported`; no RSSI query is fabricated. |
-| `maximumWriteValueLength(type)` | Throws `operationNotSupported`; Web Bluetooth exposes no negotiated maximum length. No MTU constant is guessed. |
-| Native manager/scan/connect options | Null or empty dictionaries accepted. Nonempty dictionaries throw `operationNotSupported`; restoration, duplicates, solicited services and native alert/background behaviour are not silently ignored. |
+| `state`, `authorization` | Browser availability gives `poweredOn` or `poweredOff`; a missing Web Bluetooth API gives `unsupported`; unknown radio availability stays `unknown`. App privacy supplies `notDetermined`, `denied` or `allowedAlways`, and a missing entitlement or host policy gives `restricted`. Hardware availability never counts as consent. |
+| `scanForPeripherals`, `stopScan` | Each scan opens the browser chooser and yields at most one user-chosen peripheral. `stopScan` drops pending and queued discoveries, though the browser may leave its chooser on screen. A cancelled or rejected chooser produces no discovery and no error callback; a native denial revokes access. Scanning when the state is not `poweredOn`, or with options, throws `BTFXError("operationNotSupported")` before any chooser opens. |
+| Advertisement data and RSSI | The advertisement dictionary is always empty: nothing is inferred from names, filters or services. RSSI is 127, the reserved "unavailable" value, never a measured signal. |
+| `connect`, `cancelPeripheralConnection` | Delegate callbacks arrive asynchronously, including for disconnects the device starts. Cancelling suppresses pending GATT results and releases late connections. GATT ownership is serialised per device, so a stale result cannot disconnect a newer connection. |
+| `retrievePeripherals(identifiers)` | Returns, synchronously, peripherals this central has already discovered and the app is allowed to use. It does not list other origins' grants or other apps' devices. Identifiers are `NSEUUID` values mapped privately from the browser's opaque IDs; they stay stable for that browser device object within the current process, with no promise beyond it. |
+| `retrieveConnectedPeripherals(serviceUUIDs)` | Throws `operationNotSupported`: a browser cannot list system-wide connections. |
+| Services, characteristics, descriptors | Real class instances with UUIDs and parent links. Results arrive through delegates and nullable collections. You can only reach services the user granted in the chooser. Scanning for several UUIDs matches any of them; a `null` service list adds no service grants. |
+| `discoverIncludedServices` | The delegate receives `operationNotSupported`. |
+| Reads and writes | Native failures become `BTFXError` after the shared privacy layer records any `SecurityError` or `NotAllowedError`. Standard descriptors decode as a string (0x2901), a number (0x2900, 0x2902, 0x2903) or `NSEData`; other descriptor values stay as raw bytes. |
+| Notifications | `setNotifyValue` reports its state through the delegate. Each update sets `characteristic.value` and calls `peripheralDidUpdateValueForCharacteristic`. Disabling, disconnecting, losing consent or tearing down removes the listener and discards queued values. |
+| `readRSSI` | The delegate receives RSSI 127 with `operationNotSupported`. |
+| `maximumWriteValueLength(type)` | Throws `operationNotSupported`. Web Bluetooth does not expose the negotiated MTU, and BluetoothFX does not guess one. |
+| Manager, scan and connect options | `null` or an empty dictionary is fine. Any non-empty dictionary throws `operationNotSupported`, so restoration, duplicate filtering, solicited services and background alerts are never silently dropped. |
 
-`BTFXUUID` supports 16/32/128-bit Bluetooth UUID strings, `NSEData` and `NSEUUID` initialisers. `uuidString`, `data` and `isEqual` preserve the Bluetooth base-UUID equivalence. `NSEUUID` adds Foundation's immutable UUID value with string/16-byte initialisation, uppercase `uuidString`, `getBytes`, `isEqual` and `copy`; malformed inputs throw rather than producing invalid identifiers.
+## UUIDs
 
-All native and queued boundaries retain the selected session and captured permission generation. Revocation is terminal for existing managers/peripherals, even after consent is restored. Native denial remains authoritative after saved consent; stale denial cannot revoke a replacement. Entitlements are rechecked for retained attributes. Registry removal and app abort immediately release native resources, delegate references and subscriptions. Peripherals and attributes have no public native port, client or factory. No physical Bluetooth acceptance is claimed by deterministic tests.
+`BTFXUUID` accepts 16-, 32- and 128-bit Bluetooth UUID strings, `NSEData` or an `NSEUUID`. `uuidString`, `data` and `isEqual` respect the Bluetooth base UUID, so a 16-bit UUID equals its 128-bit expansion. `NSEUUID` (from Foundation) is an immutable UUID built from a string or 16 bytes, with an uppercase `uuidString`, `getBytes`, `isEqual` and `copy`. Malformed input throws.
+
+## Access and lifetime
+
+Every native call and queued delivery keeps the session and permission generation captured at construction. Revoking access ends existing managers and peripherals for good, even if the user restores consent later. A native denial stays in force after saved consent, but a stale denial cannot revoke a replacement manager. Entitlements are rechecked for retained attributes. Removing the app from the registry, or aborting it, releases native resources, delegate references and subscriptions straight away. Peripherals and attributes expose no public native port, client or factory.
+
+The deterministic tests do not exercise physical Bluetooth hardware.

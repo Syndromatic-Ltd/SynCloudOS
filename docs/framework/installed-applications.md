@@ -1,6 +1,6 @@
 # Installed applications, declarations and system services
 
-SynCloudOS owns one service worker for a deployment. Applications do not register workers. The Vite plugin reads the site's Webspring `Contents/Info.ts` and the selected apps' `Info.ts` files. Omission of `webApp` leaves that bundle uninstalled. Authentication remains an independent, optional host decision.
+This page covers what lets a SynCloudOS site or application be installed from the browser, and the system services that come with installation: file and link handling, sharing, background tasks, push notifications and badges. SynCloudOS runs one service worker per deployment, and applications never register their own. The Vite plugin reads the site's Webspring `Contents/Info.ts` and each selected application's `Info.ts`; a bundle without `webApp` isn't installable. Installation doesn't depend on authentication.
 
 ## Installation
 
@@ -18,15 +18,15 @@ webApp: {
 }
 ```
 
-For a chosen app or an application-only host, use its declared route for `scope` and `startURL`, for example `/notes/`. Scope is explicit and is not inferred from the hosting mode. Deployment prefixes are applied by the plugin. Browser manifest scopes are URL prefixes, not security boundaries; use a trailing slash for a directory boundary. A site may expose several app manifests; the current route selects the most specific one.
+For a single application, or a host that runs only one application, use its route for `scope` and `startURL`, for example `/notes/`. You always set the scope yourself; it isn't worked out from the hosting mode. The plugin adds any deployment prefix. A manifest scope is a URL prefix, not a security boundary, so end it with a slash to stop at a directory. A site can offer several application manifests, and the current route picks the most specific.
 
-The plugin serves `syncloudos-<bundleIdentifier>.webmanifest` and `syncloudos-sw.js`. Production builds precache the public HTML shell and emitted assets. The cache version incorporates the installed SDK receipt and the application build. A replacement worker waits for its predecessor's clients to close; it never forces an active document through an SDK replacement. The install command is `webspring.install`, also reached through Preferences > Capabilities. Browsers decide whether to offer a prompt. Installed hosts request storage persistence, which the browser can refuse.
+The plugin serves `syncloudos-<bundleIdentifier>.webmanifest` and `syncloudos-sw.js`. Production builds precache the public HTML shell and the built assets, and the cache version combines the SDK receipt with the application build. A new worker waits until the old one's pages close, so an open page is never switched to a different SDK underneath it. The install command is `webspring.install`, also available in System Preferences > Capabilities, but the browser decides whether to offer installation. Installed sites request persistent storage, which the browser can refuse.
 
-Development also retains fetched Vite modules for offline inspection. Reload online after the worker first activates, so the worker sees those requests. A production build precaches its emitted bundles instead. API responses, authentication endpoints, document writes and foreign-origin responses are outside this shell cache. Server data and a fresh server sign-in still need a connection. Offline shell availability does not grant access to protected applications.
+In development, the worker also keeps the Vite modules it fetches so you can test offline; reload once while online after the worker first activates, so it sees those requests. A production build precaches its bundles instead. API responses, authentication endpoints, document writes and responses from other origins are never cached, so server data and a new sign-in still need a connection. Having the shell offline doesn't give access to protected applications.
 
 ## Info.ts declarations and delivery
 
-`documentTypes` accepts `mimeTypes` alongside its existing `id`, `extensions` and `displayName`. A type needs both MIME types and extensions to generate a file handler. The installed file handler launches the app before calling the document controller's `openDocument({ withContentsOf: file, typeId, applicationId })`. Register `DocumentType.readFromData(data, context)` to decode bytes; `data` is Foundation's `NSEData`. The result is an unsaved document. File-system write access is never inferred from an incoming file.
+`documentTypes` entries accept `mimeTypes` as well as `id`, `extensions` and `displayName`, and a type needs both MIME types and extensions to become a file handler. When the user opens a file with the installed application, it launches and then calls the document controller's `openDocument({ withContentsOf: file, typeId, applicationId })`. Implement `DocumentType.readFromData(data, context)` to decode the bytes, which arrive as an `NSEData`. The result is an unsaved document; opening a file never grants permission to write back to it.
 
 ```ts
 urlTypes: [{ name: "Notes", schemes: ["web+note"] }],
@@ -38,17 +38,17 @@ shareTarget: {
 },
 ```
 
-Declare an application route for each shortcut URL and share action; use `match: "prefix"` only where that application owns a route subtree. System launch-envelope fields are consumed before typed route-query validation, while the original URL is retained for the delegate.
+Declare an application route for each shortcut URL and share action, and use `match: "prefix"` only where the application owns everything under that path. The system removes its own launch parameters before route query validation, and the delegate still receives the original URL.
 
-These declarations project to `protocol_handlers`, `launch_handler`, `shortcuts` and `share_target`. Protocol registration is limited to browser-supported schemes (`web+…`, `mailto`, `tel`). Browser/OS link-capture and file-association policies remain authoritative. Shortcut entries also appear in the application's Webspring menu, beside the menu returned by `NSEApplicationDelegate.applicationDockMenu(application)`.
+These declarations become the manifest's `protocol_handlers`, `launch_handler`, `shortcuts` and `share_target`. Only schemes the browser allows can be registered (`web+…`, `mailto` and `tel`), and the browser and operating system still decide how links and file types are handled. Shortcuts also appear in the application's Webspring menu, next to the menu returned by `NSEApplicationDelegate.applicationDockMenu(application)`.
 
-Assign `NSEApplication.delegate` and implement `applicationOpen(application, urls, context)`. `context.shortcutItemType` identifies a shortcut. `context.sharedItems` carries shared title, text, URL and files. GET sharing uses URL parameters. POST sharing is retained in the system worker's IndexedDB until delivery is acknowledged. Incoming shared files are limited to 32 MiB. The receiver decides whether to turn an attachment into a document. Delivery is serialised and aborted when the runtime closes.
+To receive these, assign `NSEApplication.delegate` and implement `applicationOpen(application, urls, context)`. `context.shortcutItemType` identifies a shortcut, and `context.sharedItems` carries a shared title, text, URL and files. GET shares arrive as URL parameters. POST shares wait in the service worker's IndexedDB until the application acknowledges them, and shared files can total at most 32 MiB. Your application decides whether an attachment becomes a document. Deliveries arrive one at a time and stop when the runtime closes.
 
-A web app manifest has one share target. When several apps receive shares, declare the chosen target on Webspring's `Info.ts`, or install the receiving apps independently. The build rejects an ambiguous desktop target.
+A web app manifest has only one share target. If several applications accept shares, declare the target on Webspring's `Info.ts`, or make the receiving applications installable on their own. The build rejects a site with more than one candidate.
 
 ## BackgroundTasks
 
-Declare `background: { enabled: true, tasks: ["com.example.notes.refresh"] }`. Use `application.backgroundTaskScheduler`:
+Declare `background: { enabled: true, tasks: ["com.example.notes.refresh"] }` in `Info.ts`, then use `application.backgroundTaskScheduler`:
 
 ```ts
 await application.backgroundTaskScheduler.submit({
@@ -59,13 +59,13 @@ await application.backgroundTaskScheduler.submit({
 });
 ```
 
-`capabilities()` reports Background Sync and Background Fetch separately. `getPendingTaskRequests()` and `cancel(identifier)` manage pending sync requests. Requests are stored durably before sync registration. The worker retries unsuccessful responses and deletes a request only after a successful response. Requests must stay on the site's origin and deployment path, and task identifiers must be declared. The server must authenticate each request, enforce authorisation and deduplicate `X-SynCloudOS-Task`; browser retries do not provide exactly-once execution. A task does not execute an application class, React or NSE inside the worker.
+`capabilities()` reports Background Sync and Background Fetch support separately. `getPendingTaskRequests()` and `cancel(identifier)` manage pending sync requests. A request is saved before sync is registered, retried while responses fail, and deleted only after a successful response. Requests must stay on the site's origin and deployment path, and their task identifiers must be declared. Your server must authenticate each request, check authorisation and deduplicate on the `X-SynCloudOS-Task` header, because browser retries can deliver a request more than once. The worker only sends the request; no application class, React or NSE code runs there.
 
-`submitDownload({ identifier, urls, title, downloadTotal? })` uses Background Fetch and returns its browser download identifier and `abort()`. Completed responses are retained in the system download cache. `downloadedData(identifier, url)` reads a completed response as `NSEData` with its MIME type, or returns `null` while it is unavailable. Background scheduling is best effort: browsers may delay work indefinitely, and unsupported hosts reject with `NotSupportedError`.
+`submitDownload({ identifier, urls, title, downloadTotal? })` uses Background Fetch and returns the browser's download identifier and `abort()`. Finished responses are kept in the system download cache, and `downloadedData(identifier, url)` reads one as `NSEData` with its MIME type, or returns `null` if it isn't available. Background work is best effort: a browser can delay it indefinitely, and one without support rejects with `NotSupportedError`.
 
 ## UserNotifications and push server contract
 
-The notification centre's existing local posting and browser delivery remain available. `application.userNotificationCenter` supplies `getNotificationSettings()`, `requestAuthorization()` and `setNotificationCategories(categories)`. Declare the `notifications.post` entitlement. Authorisation uses the runtime's existing notification permission and per-app privacy services. Request it from a user action. `application.registerForRemoteNotifications()` registers the origin's Web Push subscription with the site's server; `unregisterForRemoteNotifications()` removes only that application's server association, because installed apps share the origin subscription.
+Local notifications work as before. `application.userNotificationCenter` provides `getNotificationSettings()`, `requestAuthorization()` and `setNotificationCategories(categories)`, and needs the `notifications.post` entitlement. Authorisation goes through the browser's notification permission and the per-application [privacy](privacy.md) store, so request it from a user action. `application.registerForRemoteNotifications()` registers the site's Web Push subscription with your server. `unregisterForRemoteNotifications()` removes only that application's link to it, because every installed application on the site shares one subscription.
 
 Pass public configuration to `mountSynCloudOS`:
 
@@ -76,24 +76,24 @@ push: {
 },
 ```
 
-Omit `push` when no push server is configured. The key must be the owner's VAPID public P-256 key. No example private key, generated substitute or committed secret is supplied. Private VAPID keys and the contact subject belong only in the application server's secret configuration.
+Leave out `push` if you have no push server. The key must be your VAPID public P-256 key; the framework supplies no example or generated key. Keep the private VAPID key and the contact subject in your server's secret configuration.
 
 The server contract is:
 
-- `POST subscriptionURL`: JSON `{ version: 1, appId, subscription }`, where `subscription` is the browser's `PushSubscriptionJSON`. Return a 2xx response after storing the authenticated user's app association.
-- `DELETE subscriptionURL`: JSON `{ version: 1, appId, endpoint }`. Remove that app association and return 2xx. Apply session authorisation, CSRF protection, endpoint validation, rate limits and expiry on the server.
-- Send encrypted Web Push to the saved endpoint using the owner's VAPID private key. Remove expired endpoints on HTTP 404/410; resubscribe from the client when required. Do not treat a subscription endpoint as proof of identity or app access.
-- Standard payload: `{ version: 1, appId, identifier, title, body, url, categoryIdentifier?, badge? }`. URLs must remain within an installed scope. Categories are configured by the application; the portable worker supports up to two actions. Notification clicks route into the app delegate with `scos-notification` and optional `scos-action` URL parameters.
-- Declarative payload: `{ web_push: 8030, notification: { title, body, navigate, app_badge? } }`. This is the declarative Web Push alert envelope; Chromium uses the worker's equivalent delivery path. This client does not claim native declarative delivery where the browser requires the worker fallback.
+- `POST subscriptionURL`: JSON `{ version: 1, appId, subscription }`, where `subscription` is the browser's `PushSubscriptionJSON`. Store the link between the signed-in user, the application and the subscription, then return a 2xx response.
+- `DELETE subscriptionURL`: JSON `{ version: 1, appId, endpoint }`. Remove that link and return 2xx. Apply session checks, CSRF protection, endpoint validation, rate limits and expiry on the server.
+- Send encrypted Web Push to the saved endpoint with your VAPID private key. Remove endpoints that return HTTP 404 or 410, and let the client subscribe again when it needs to. A subscription endpoint is never proof of identity or access.
+- Standard payload: `{ version: 1, appId, identifier, title, body, url, categoryIdentifier?, badge? }`. URLs must stay within an installed scope. The application configures categories, and the worker supports up to two actions. Clicking a notification opens the application through its delegate, with a `scos-notification` URL parameter and, for an action, `scos-action`.
+- Declarative payload: `{ web_push: 8030, notification: { title, body, navigate, app_badge? } }`, the declarative Web Push format. Chromium delivers it through the worker instead, with the same result.
 
-The worker mirrors received pushes into the open runtime's NotificationCenter and never sends a duplicate browser notification from that mirror. No live push transport can be accepted until the owner configures a public key, the matching private key and server endpoints. Revocation, per-app mute and account changes must also remove or suspend server associations; a closed page cannot run page-level access policy.
+The worker copies received pushes into the open runtime's notification centre without showing a second browser notification. Push only works once you've configured the public key, the matching private key and the server endpoints. When a user revokes access, mutes an application or changes account, your server must also remove or pause the matching links, because a closed page can't apply access rules.
 
 ## Badges and shell
 
-`application.dockTile.badgeLabel` is `NSDockTile.badgeLabel`: set text or a number as a string; set `""` to reveal the notification count again. Webspring uses the existing Atmo Badge renderer. The browser's installed-app badge combines NotificationCenter's badge snapshot with app labels. Numeric labels supply a count; textual labels contribute one attention mark. The OS may choose to display only an attention mark. Labels are bounded to 64 characters and stop accepting updates after the application closes.
+Set `application.dockTile.badgeLabel` to text or a number written as a string, or to `""` to show the notification count again. Webspring draws it with Atmo's badge. The installed application's browser badge combines the notification centre's badge count with application labels: a numeric label adds to the count, and a text label adds a single attention mark. The operating system may show only an attention mark. Labels can be up to 64 characters, and stop updating once the application closes.
 
-The browser adapter detects Window Controls Overlay and reads the title area from the browser. The operating system owns its native buttons. Live installed-window titlebar placement awaits device verification.
+The browser adapter detects Window Controls Overlay and reads the title bar area from the browser; the operating system draws its own window buttons. Title bar placement in installed windows hasn't yet been checked on real devices.
 
-`NSEViewController.transition(from, to, crossfade, completion)` can use native View Transitions. The native backend uses the animation context's duration and completion lifetime; unsupported hosts, reduced motion and other effects retain AFX. The temporary snapshot styling is owned and removed by the transition.
+`NSEViewController.transition(from, to, options, completionHandler)` swaps two child view controllers. With `NSEViewControllerTransitionOptions.crossfade`, it uses the browser's View Transitions where available, timed by the current animation context. Other effects, browsers without View Transitions, and reduced motion use AnimationFX. The transition removes its temporary snapshot styles when it finishes.
 
-Preferences > Capabilities reports installation, worker and storage status, browser platform support and available passive FX capability queries. Opening it does not request device access. A supported API is not evidence of an authorisation grant or successful device operation.
+System Preferences > Capabilities reports installation, worker and storage status, what the browser supports, and the results of FX capability checks. Opening it never requests device access, and an API being supported doesn't mean access was granted or that a device works.

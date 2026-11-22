@@ -1,6 +1,6 @@
 # Text geometry
 
-Logical DOM measurement and shaped geometry are separate capabilities. Browser logical layout reports `kind: "logical-dom"`, CSS-pixel units, no shaped carets and no exclusion support. `NSEShapedTextLayoutAdapter` projects caller-resolved attributed text through the existing TextFX shaper and framesetter. Its provider reports `kind: "shaped"`. A renderer consumes the same retained frames for drawing, caret, selection and position queries.
+This page is for applications that draw their own text and need to know where carets, selections and characters are. There are two kinds of geometry. Browser layout reports `kind: "logical-dom"`, measures in CSS pixels, and has no shaped carets or exclusions. `NSEShapedTextLayoutAdapter` lays out attributed text with the TextFX shaper and framesetter, using fonts you resolve, and its provider reports `kind: "shaped"`. Your renderer uses the same frames for drawing and for caret, selection and position queries.
 
 Import these contracts from `@syndromatic/syncloudos/nse/text`:
 
@@ -25,9 +25,9 @@ interface NSETextGeometryProvider {
 }
 ```
 
-Every query carries `flowId` and the complete `revision` object. Positions add UTF-16 `offset` and `affinity: "upstream" | "downstream"`. Ranges add `location` and `length`. Points add `x`, `y`, named `space`, `transformRevision` and optional `outside: "reject" | "nearest"`. Provider snapshots also report `kind`, `complete`, `current`, `textLength` and semantic `units`. Carets return their container ID, primary rectangle and optional secondary bidi rectangle. Selection returns one or more spatial rectangles per shaped run/fragment.
+Every query carries the `flowId` and the whole `revision` object. A position adds a UTF-16 `offset` and `affinity: "upstream" | "downstream"`. A range adds `location` and `length`. A point adds `x`, `y`, a named `space`, a `transformRevision` and an optional `outside: "reject" | "nearest"`. Provider snapshots also report `kind`, `complete`, `current`, `textLength` and `units`. A caret query returns the container ID, a primary rectangle and, at a bidirectional boundary, a secondary rectangle. A selection query returns one or more rectangles for each shaped run or fragment.
 
-For example, query an existing current provider:
+For example, to query a current provider:
 
 ```ts
 const geometry = result.provider.snapshot();
@@ -41,9 +41,9 @@ const rectangles = result.provider.selection({
 });
 ```
 
-Null/empty answers are deliberate for a wrong flow, stale generation, disposed provider, invalid boundary or unmapped point. Default hit testing rejects points outside shaped fragments, including an exclusion gap. Request `outside: "nearest"` explicitly for an application gesture that should snap. Text offsets remain UTF-16; do not infer them from glyph count, raster size or byte length. Bidi carets, combining clusters and ligatures use existing TextFX caret data.
+A query returns `null` or an empty list if the flow is wrong, a generation is stale, the provider is disposed, the boundary is invalid or the point can't be mapped. By default, hit testing rejects points outside the shaped fragments, including points in an exclusion gap. Pass `outside: "nearest"` when a gesture should snap to the nearest position. Text offsets are always UTF-16; don't work them out from glyph counts, image sizes or byte lengths. Bidirectional carets, combining clusters and ligatures use TextFX's caret data.
 
-Containers use independently named local spaces such as `container:0`. Shaped local rectangles/points have `transformRevision: 0`. A renderer places each container and constructs a current presentation transform. When using a local result in that transform, tag it with the transform's current revision; never retag an already-transformed stale client point as current.
+Each container has its own named local space, such as `container:0`, and local rectangles and points from shaping have `transformRevision: 0`. Your renderer places each container and builds a presentation transform for where it is now. When you project a local result through that transform, tag it with the transform's current revision. Never re-tag a client point that was projected through an older transform as current.
 
 ```ts
 const presentation = createNSETextPresentationTransforms({
@@ -58,13 +58,13 @@ const clientCaret = projectNSETextGeometryRect(
 );
 ```
 
-The presentation factory returns `client` in `css-client`/CSS pixels, `screen` in CSS pixels and `canvas` in device pixels. Point-valued layout scales by 96/72 before zoom; CSS-valued layout scales by zoom. Scroll is an unzoomed CSS-pixel displacement subtracted directly, offsets are viewport CSS pixels, and DPR applies only to the canvas result. If `getBoundingClientRect()` already includes scrolling, pass zero scroll to avoid subtracting it twice. Zoom, scroll and DPR do not change semantic font size, text offsets or canonical revision.
+The factory returns `client` (the `css-client` space, in CSS pixels), `screen` (CSS pixels) and `canvas` (device pixels). Layout in points is scaled by 96/72 and then by zoom; layout in CSS pixels is scaled by zoom alone. Scroll is an unzoomed displacement in CSS pixels that is subtracted as given, offsets are in viewport CSS pixels, and the device pixel ratio applies only to `canvas`. If your `getBoundingClientRect()` result already includes scrolling, pass a zero scroll so it isn't subtracted twice. Zoom, scroll and pixel ratio never change the font size, text offsets or model revision.
 
-`createNSETextGeometryTransform({ from, to, revision, matrix })`, `invertNSETextGeometryTransform(transform)`, `projectNSETextGeometryPoint(point, transform)` and `projectNSETextGeometryRect(rect, transform)` use GraphicsFX affine operations. Projection checks source space and transform revision; inversion rejects a singular matrix. Rectangle projection transforms all four corners to an axis-aligned bound. Keep the presentation generation current for scrolling, resize, zoom, surface movement and DPR changes.
+`createNSETextGeometryTransform({ from, to, revision, matrix })`, `invertNSETextGeometryTransform(transform)`, `projectNSETextGeometryPoint(point, transform)` and `projectNSETextGeometryRect(rect, transform)` use GraphicsFX affine transforms. Projection checks the source space and the transform revision, and inversion rejects a singular matrix. Projecting a rectangle transforms all four corners and returns their axis-aligned bounds. Increase the presentation generation whenever the surface scrolls, resizes, zooms, moves or changes pixel ratio.
 
-The example measures each SVG box's current client bounds, increments the presentation generation on scroll/resize/zoom, inverts that box's transform for pointer hit testing and focuses its stable native host. Input-client transforms map the selected caret container. Queries that cannot map through that supplied transform remain pending; do not substitute a rectangle from a different container. Browser-provided screen offsets in the example are provisional window offsets, not measured OS IME placement.
+A typical surface that draws each container as an SVG box measures the box's current client bounds, increases the presentation generation on scroll, resize and zoom, inverts the box's transform to hit-test the pointer, and keeps focus on its stable native input host. The input client's transform maps the container that holds the caret. A query that can't be mapped through that transform stays pending; don't substitute a rectangle from another container. Screen offsets that come from the browser are provisional window offsets, not the measured position of the operating system's input-method window.
 
-Projection API:
+The projection API:
 
 ```ts
 declare function projectNSEAttributedContentToTFX(
@@ -85,10 +85,10 @@ declare class NSEShapedTextLayoutAdapter {
 // paths, fromCharacter, signal (optional).
 ```
 
-Resolve font sizes in the selected semantic units. Projection preserves font cascades/features/vertical/ruby attributes supplied by the resolver; paragraph distances convert from v1 CSS pixels when units are points. Attachment metrics/images come from the caller's resource authority. Semantic paint attributes remain in the source; the geometry adapter is not a complete style renderer.
+Resolve font sizes in the units you chose. Projection keeps the font cascades, features, vertical text and ruby attributes your resolver supplies, and converts paragraph distances from CSS pixels when the units are points. Attachment metrics and images come from your own resources. Paint attributes such as colour stay in the source content, because the geometry adapter doesn't render styles.
 
-Long flows use whole-paragraph windows around the TextFX 65536-unit per-input bound. CRLF, CR, LF and paragraph separators preserve paragraph context; a single oversized paragraph is rejected explicitly. App-supplied boxes are consumed in flow order; results include frames, immutable provider, consumed/overflow ranges, completeness and per-container consumed/no-progress/empty outcomes. Insets, exclusions, paths and empty terminal caret lines use the existing frame primitive. A suffix request is incomplete as a whole-flow provider. No paginator, page-master, document anchor or wrap-policy API is introduced.
+TextFX shapes at most 65,536 UTF-16 units at a time, so long flows are split into windows of whole paragraphs. CRLF, CR, LF and paragraph separators all keep paragraph context, and a single paragraph longer than the limit is rejected. The boxes you supply are filled in flow order. The result includes the frames, an immutable provider, the consumed and overflow ranges, whether layout is complete, and for each container whether it was filled, made no progress or stayed empty. Insets, exclusions, paths and an empty last caret line all come from the TextFX frame. A request that starts part-way through the flow (`fromCharacter`) never gives a complete whole-flow provider. There's no pagination, page template, document anchor or wrap-policy API.
 
-Readiness notifications invalidate result/type-setter caches, revoke current providers and require new font/resource generations. Cancellation, superseded requests and disposal fence asynchronous publication. `isCurrent` must reflect the app's actual owner and resource lifetimes. The adapter disposes its providers and caches; it does not dispose caller-owned fonts/assets. Identical current requests can reuse one result. Work yields after bounded rows, but row counts alone do not guarantee an eight-millisecond slice.
+When a font or resource readiness notification arrives, the adapter clears its result and typesetter caches, retires its current providers, and needs new font and resource generations. A cancelled, superseded or disposed request never publishes a late result. Make `isCurrent` reflect the real lifetimes of your text owner and resources. The adapter disposes its own providers and caches, but never your fonts or assets. Identical requests for the current revision can share one result. Layout yields to the host after `maximumRowsPerSlice` rows (2 by default), but a row count alone can't guarantee an eight-millisecond slice.
 
-Benchmark shaping with the actual fonts, paragraph lengths and supplied containers used by your application. Unsupported v1 cases include oversized individual paragraphs, baseline shifts, non-unit line-height multiples, negative indents, shaped truncation and more than 64 exclusions per frame. Tests establish deterministic primitive behaviour; they do not establish DOM/PDF equality, OS IME/screen-reader acceptance, physical-device performance or complete-document pagination performance.
+Benchmark shaping with your application's own fonts, paragraph lengths and containers. Version 1 doesn't support paragraphs over the size limit, baseline shifts, line-height multiples other than 1, negative indents, shaped truncation or more than 64 exclusions per frame. The framework's tests check that the building blocks behave deterministically. They don't show that DOM and PDF output match, that operating system input methods and screen readers work, or how fast layout is on real devices or across whole paginated documents.

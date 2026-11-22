@@ -1,27 +1,48 @@
 # SynCloudOS
 
-SynCloudOS is a TypeScript and React 19 application framework shaped after AppKit and NeXTSTEP. It gives a browser application the platform layer you expect on a desktop: a formal runtime lifecycle, a responder chain with typed command dispatch, per-document undo and conflict states, window ordering and restoration, an application kit of controls and controllers, twenty-two FX frameworks, and an application bundle format.
+SynCloudOS is a web application framework for TypeScript and React 19. Its design follows Apple's AppKit and Cocoa, and if you remember Cappuccino, you'll recognise what it's after: real desktop-class applications running in a browser tab. You get a runtime with a proper lifecycle, a responder chain with typed commands, undo for each document, a real windowing system, a kit of controls and controllers, twenty-two FX frameworks and a bundle format to ship it all in.
 
 > [!NOTE]
-> SynCloudOS 1.0 Public Beta (`v1.0.0-beta.2`, unpublished development candidate). The architecture and public entry points are in place and covered by tests, though the API may still change before 1.0. Please [open an issue](https://github.com/Syndromatic-Ltd/SynCloudOS/issues) if you hit a problem.
+> SynCloudOS 1.0 Public Beta (`v1.0.0-beta.2`). The architecture and public entry points are in place and covered by tests, but the API may change before 1.0. If something breaks, please [open an issue](https://github.com/Syndromatic-Ltd/SynCloudOS/issues).
 
 ## Why it exists
 
-Browser frameworks handle DOM rendering well, then leave application structure to ad-hoc code. Keyboard shortcuts scatter across `useEffect` listeners without a responder chain, menus and toolbars drift out of sync with what the active view can actually perform, undo gets rebuilt per feature, virtualised lists know nothing about selection or edits, and browser device APIs arrive with separate imperative lifetimes.
+Picture this. You're in your room, probably underpaid and overworked, on your fifth coffee. You (or your AI) have spent three days on something that sounded simple: version history for a document. Your keyboard shortcuts live in a dozen `useEffect` listeners. The toolbar's Save button stays lit when there's nothing to save. Your virtualised list forgets the selection every time it scrolls. Your `package.json` has more dependencies than your app has features.
 
-NeXTSTEP and AppKit solved those problems at the platform layer through responder chains, typed commands, document controllers, and shared undo managers. SynCloudOS brings that architecture to TypeScript and React so your application code declares intent, state, and structure while the host enforces policy and manages lifetimes.
+Congratulations, you've found the dark side of maintaining a standard React app. Why does anything sophisticated need three hundred bazillion npm packages?
+
+Mac developers haven't had this problem for decades. AppKit gives every app a responder chain, typed commands, document controllers and a shared undo manager, so nobody builds them from scratch. SynCloudOS brings that toolkit to the web and gives your next banger app or website desktop-class superpowers. You bring the idea. We handle the rest.
+
+## What's in the box
+
+- **AppKit-style MVC.** Subclass `NSEApplication` and `NSEViewController`, mark state `@observable` and bind controls to it. When a value changes, every bound control follows, without a tangle of `useState` plumbing.
+- **One command system.** Menus, shortcuts and toolbars all send the same typed commands through a responder chain. A Save button greys itself out when the focused view has nothing to save, because it asks first.
+- **Documents and undo.** Each document keeps its own undo history and autosaves against known versions. When two edits conflict, you resolve the conflict yourself and nobody's work gets overwritten.
+- **Windows.** Ordering, key and main state, popovers and sheets, and restoration when your user comes back.
+- **Layouts that adapt.** Shrink the window to phone width and split views settle on a single pane, tab bars gather overflow into a More list, and each window follows its mobile policy. On foldables such as the iPhone Duo, the runtime reports the fold's posture and segments, so split views and overlays keep your content off the hinge.
+- **Controls with taste.** NSE handles focus, keyboard navigation and accessibility. The Atmo theme draws glossy buttons, brushed metal and soft depth in vector CSS and SVG, in light and dark.
+- **Twenty-two FX frameworks.** Animation, graphics, audio, haptics, video, MIDI, Bluetooth, speech, crypto and more. Device access shuts itself down when your app closes, so you stop leaking listeners.
+- **Bundles.** You ship each app as a `.app` folder with a checked manifest. The host validates it, applies its access rules and loads it on demand.
+
+Everything is TypeScript, and every subsystem ships with contract, accessibility and performance tests.
 
 ## Getting SynCloudOS
 
 Use a patched Node.js release (`22.23.4+`, `24.22.1+`, or `26.12.1+` on its release line) and npm; CI runs Node.js `24.22.1`. The framework pins TypeScript `6.0.3` because its tooling uses the JavaScript compiler API, and expects React 19 (`^19.1.1`) as a peer dependency.
 
-The beta is distributed as release tarballs rather than through the npm registry. Install the published `v1.0.0-beta.1` archive into a React and TypeScript Vite project with:
+The beta is published to npm under the `@syndromatic` organisation. Install `@syndromatic/syncloudos` into a React 19 and TypeScript Vite project with:
 
 ```bash
-npm install https://github.com/Syndromatic-Ltd/SynCloudOS/releases/download/v1.0.0-beta.1/syndromatic-syncloudos-1.0.0-beta.1.tgz
+npm install @syndromatic/syncloudos@beta
 ```
 
-To build and test the unpublished `v1.0.0-beta.2` candidate from a checkout:
+To add the offline [Developer MCP companion](docs/framework/developer-mcp.md) for AI coding agents, install the matching version as a dev dependency:
+
+```bash
+npm install --save-dev @syndromatic/syncloudos-developer-mcp@beta
+```
+
+Release tarballs are also attached to [GitHub Releases](https://github.com/Syndromatic-Ltd/SynCloudOS/releases). To build local `.tgz` archives from a framework checkout instead:
 
 ```bash
 git clone https://github.com/Syndromatic-Ltd/SynCloudOS.git
@@ -30,7 +51,7 @@ npm ci --ignore-scripts
 npm run sdk:build
 ```
 
-That produces `.artifacts/synapp-sdk/archives/syndromatic-syncloudos-1.0.0-beta.2-<sha256>.tgz`, which you can install into a consumer project with `npm install /path/to/that.tgz`.
+That writes `.artifacts/synapp-sdk/archives/syndromatic-syncloudos-1.0.0-beta.2-<sha256>.tgz`, which you can install into a consumer project with `npm install /path/to/that.tgz`.
 
 ## A first application
 
@@ -114,8 +135,8 @@ Bundle identifiers use reverse-DNS syntax with at least two dots; lookups and st
 │  NSE application kit          controls, controllers, data views,     │
 │                               text views, windows, menus, Atmo theme │
 ├──────────────────────────────────────────────────────────────────────┤
-│  FX frameworks                22 TypeScript analogues of Apple Core  │
-│                               and system frameworks                  │
+│  FX frameworks                22 frameworks for graphics, media,     │
+│                               devices, networking and concurrency    │
 ├──────────────────────────────────────────────────────────────────────┤
 │  SynCloudOS runtime           statechart, commands, responders,      │
 │                               undo, documents, windows, authorisation│
@@ -124,15 +145,15 @@ Bundle identifiers use reverse-DNS syntax with at least two dots; lookups and st
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
-[Foundation](docs/framework/foundation.md) provides immutable data, ranges, collections, predicates, sort descriptors, formatters, and user defaults with no React or DOM dependency so it runs in web workers as well as UI threads.
+[Foundation](docs/framework/foundation.md) gives you immutable data, ranges, collections, predicates, sort descriptors, formatters and user defaults. It has no React or DOM dependency, so it runs in a web worker as happily as on the main thread.
 
-[The runtime](docs/framework/runtime.md) is created per host via `createSynCloudOS`, which reads no ambient globals so multiple runtimes can coexist on one page. An explicit statechart coordinates boot, the shell, and each application's lifecycle, while the responder chain, typed command validation, per-document undo, autosave, and window restoration handle user intent and state. Configuration profiles govern application access, `SCAuthorization` checks named administrative rights, and a central privacy store records per-application device consent; these are cooperative browser-page checks, so remote servers still enforce their own access rules. See [authorisation](docs/framework/authorization.md) and [privacy](docs/framework/privacy.md).
+[The runtime](docs/framework/runtime.md) comes from `createSynCloudOS`, one per host. It reads no globals, so several runtimes can share a page. A statechart drives boot, the shell and each application's lifecycle. The responder chain, command validation, document undo, autosave and window restoration handle what the user does and what the app remembers. Configuration profiles decide which applications a user can open, `SCAuthorization` checks named administrative rights, and a privacy store records which apps may use which devices. All of these run in the browser page, so your servers still need to enforce their own access rules. See [authorisation](docs/framework/authorization.md) and [privacy](docs/framework/privacy.md).
 
-[The FX frameworks](docs/framework/fx/README.md) implement twenty-two TypeScript libraries shaped after Apple frameworks (`AnimationFX`, `GraphicsFX`, `ImageFX`, `TextFX`, `AudioFX`, `HapticsFX`, `MotionFX`, `MediaFX`, `VideoFX`, `MIDIFX`, `BluetoothFX`, `NFCFX`, `SpeechFX`, `ContactsFX`, `PassFX`, `XRFX`, `LocationFX`, `LuminaFX`, `CompressionFX`, `NetworkFX`, `CryptoFX`, and `DispatchFX`). Value types and pure computations import directly and run anywhere, while device, sensor, and surface capabilities come from the mounted session and release automatically when the application closes.
+[The FX frameworks](docs/framework/fx/README.md) are twenty-two TypeScript libraries (`AnimationFX`, `GraphicsFX`, `ImageFX`, `TextFX`, `AudioFX`, `HapticsFX`, `MotionFX`, `MediaFX`, `VideoFX`, `MIDIFX`, `BluetoothFX`, `NFCFX`, `SpeechFX`, `ContactsFX`, `PassFX`, `XRFX`, `LocationFX`, `LuminaFX`, `CompressionFX`, `NetworkFX`, `CryptoFX`, and `DispatchFX`). You can import value types and pure computations anywhere. Devices, sensors and drawing surfaces come from the mounted session, which releases them when the application closes.
 
-[NSE](docs/framework/nse-controls.md) plays the role of AppKit (`NSEButton` for `NSButton`, `NSEViewController` for `NSViewController`, `NSEArrayController` for `NSArrayController`). Controls implement behaviour, focus, keyboard navigation, and accessibility while reading their appearance from a theme, with [Atmo](docs/framework/appearance.md) providing light and dark CSS and SVG materials out of the box. See [controllers](docs/framework/controllers.md) and [data views](docs/framework/data-views.md).
+[NSE](docs/framework/nse-controls.md) is the application kit: buttons, fields, menus, toolbars, controllers such as `NSEArrayController`, and view controllers. Each control handles its own behaviour, focus, keyboard navigation and accessibility, and takes its look from a theme. [Atmo](docs/framework/appearance.md) ships as the default, with light and dark CSS and SVG materials. See [controllers](docs/framework/controllers.md) and [data views](docs/framework/data-views.md).
 
-[Webspring](docs/framework/webspring.md) provides the optional desktop and mobile shell: the paged Board launcher, application stage, quick switcher, notifications, preferences, and sign-in gate. Projects without a shell mount a single application directly through `@syndromatic/syncloudos/browser`.
+[Webspring](docs/framework/webspring.md) is the optional desktop and mobile shell: the paged Board launcher, the application stage, a quick switcher, notifications, preferences and a sign-in gate. If you don't want a shell, mount a single application through `@syndromatic/syncloudos/browser`.
 
 [SynWare bundles](docs/framework/synware-sdk.md) package an application in a `.app` folder with a validated `Contents/Info.ts` manifest. Mounted applications never touch the runtime or its registries directly because `SCOS` inside an app folder (and `useSCOS()` in shared components) exposes narrow capability clients, while hooks such as `useCommands`, `useDocument`, `useAppearance`, and `useService` subscribe to reactive snapshots and return explicit denial values when a capability is unavailable.
 
@@ -190,7 +211,7 @@ npm run test:packaging             # packed-SDK consumer tests (after npm run sd
 npm run test:e2e                   # Playwright acceptance tests (Chromium, Firefox, WebKit)
 ```
 
-`npm test` runs on Vitest 5.1 in two sequential groups: CPU-heavy source scanners, counterpart checks, and timing budgets run first with bounded parallelism, and the remaining unit, NSE, integration, and decoupling tests run afterwards. Tests that install the packed `.tgz` archive into a temporary consumer run separately with `npm run test:packaging` after `npm run sdk:build` because they read and validate the built package output. See [tests/README.md](tests/README.md) and `.github/workflows/framework-boundaries.yml` for the full CI order.
+`npm test` runs in two groups. The CPU-heavy source scanners, counterpart checks and timing budgets go first with limited parallelism, then the unit, NSE, integration and decoupling tests follow. The packaging tests install the packed `.tgz` into a throwaway consumer project, so they need a fresh `npm run sdk:build` and run on their own with `npm run test:packaging`. See [tests/README.md](tests/README.md) and `.github/workflows/framework-boundaries.yml` for the full CI order.
 
 ```text
 src/
@@ -210,7 +231,7 @@ tests/              unit, runtime, integration, packaging, performance, and brow
 
 ## Public beta status
 
-The beta is suitable for building and evaluating applications, though public APIs may still change before 1.0 (breaking changes are documented in release notes). Device-facing capabilities such as GPU effects, Web Bluetooth, Web NFC, haptics, motion sensors, and MIDI hardware are verified through capability queries, fakes, and browser test harnesses where supported, so physical devices and different browser engines can still surface edge cases. Bug reports and focused pull requests are welcome on GitHub.
+You can build and evaluate real applications on the beta. Public APIs may still change before 1.0, and the release notes list every breaking change. We test device features (GPU effects, Web Bluetooth, Web NFC, haptics, motion sensors and MIDI hardware) with capability queries, fakes and browser harnesses, so a physical device or a less common browser engine may still turn up an edge case. When it does, we'd love a bug report or a focused pull request on GitHub.
 
 ## Licensing
 
@@ -225,7 +246,7 @@ Authored source carries the licence notice for its boundary, while vendored and 
 
 ## Influences
 
-SynCloudOS draws on NeXTSTEP and AppKit for its responder chain, command dispatch, controllers and document lifecycle, and on iOS Springboard for its launcher. The framework is implemented in TypeScript.
+SynCloudOS takes its responder chain, command dispatch, controllers and document lifecycle from AppKit and Cocoa, its ambition from Cappuccino, and its launcher from the iOS Springboard.
 
 ## About
 

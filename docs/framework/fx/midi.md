@@ -1,8 +1,6 @@
 # MIDIFX
 
-Encoded byte inputs accept `NSEDataConvertible` from `@syndromatic/syncloudos/foundation`; delivered encoded bytes are immutable `NSEData`. Use `.bytes` at a native typed-buffer boundary and `.blob(mimeType)` for a browser Blob. Numeric pixel, index and PCM planes retain their typed arrays; writable copy destinations remain mutable.
-
-MIDIFX (`MIFX`) is the web-native analogue of Core MIDI. It connects an application to MIDI hardware and software instruments, turns raw bytes into typed messages and back, speaks the Universal MIDI Packet (UMP) format of MIDI 2.0, converts MIDI 2.0 messages down to MIDI 1.0 without hiding what that costs, and sends events at precise times against a shared clock.
+MIDIFX (`MIFX`) lets your app talk to MIDI keyboards, controllers and software instruments. It connects an application to MIDI hardware and software instruments, turns raw bytes into typed messages and back, speaks the Universal MIDI Packet (UMP) format of MIDI 2.0, converts MIDI 2.0 messages down to MIDI 1.0 without hiding what that costs, and sends events at precise times against a shared clock.
 
 The framework separates three concerns.
 
@@ -24,7 +22,6 @@ import { MIFXEncoder, MIFXParser } from "@syndromatic/syncloudos/fx/midi";
 | Entry | `@syndromatic/syncloudos/fx/midi` |
 | Hook | `useMIDI`, from `@syndromatic/syncloudos/sdk` |
 | Permissions | `midi.access` for devices, and `midi.sysex` in addition for system exclusive access |
-| Analogue | Core MIDI (`MIDIClientRef`, `MIDIEndpointRef`, `MIDIEventList`, UMP conversion) |
 
 ## What the entry exports
 

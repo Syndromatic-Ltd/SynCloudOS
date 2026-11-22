@@ -1,10 +1,10 @@
 # Document assets
 
-Applications serialise stable references in their native model and acquire temporary descriptors when presenting images. A stable `DocumentAssetReference` contains authorisation and document scope, semantic asset ID, SHA-256 hash, MIME type, byte length and optional intrinsic metrics. It contains no object URL, live lease, runtime generation or store. Equal bytes can share storage within an authorisation scope while retaining distinct semantic identities.
+Document assets let a document store images and other binary resources alongside its model. Your model saves a stable `DocumentAssetReference`, and you get a temporary descriptor from it whenever you need to show the image. A reference holds the authorisation and document scope, the asset's ID, its SHA-256 hash, MIME type, length in bytes and, optionally, its intrinsic size. It never holds an object URL, a live lease, a runtime generation or a store. Identical bytes can share storage within one authorisation scope and still be separate assets.
 
 ## Host configuration
 
-The browser entry exports in-memory and IndexedDB store factories. An application receives the existing scoped `documentResources` client; raw stores remain host capabilities. Configure `applicationDocuments.assetBacking` with either a supplied `store` or a `createStore` factory, `scopeForDocument`, and an optional native manifest policy:
+`@syndromatic/syncloudos/browser` exports two store factories, `createInMemoryDocumentAssetStore` and `createIndexedDBDocumentAssetStore`. Stores belong to the host; an application only gets its scoped `SCOS.documents.documentResources` client. Configure `applicationDocuments.assetBacking` with either a `store` or a `createStore` factory, a `scopeForDocument` function, and optionally a `manifest` policy:
 
 ```ts
 const assetBacking = {
@@ -20,28 +20,28 @@ const assetBacking = {
 };
 ```
 
-Reference enumeration belongs to the application's native type/codec policy. The framework does not walk arbitrary native models or impose a page/object grammar. Scope mappings must preserve the same authorised native document identity across runtime recreation; a temporary runtime ID is unsuitable. Assert native durability only when the configured native provider actually provides it.
+Finding the references in a model is your codec's job; the framework never walks your model or imposes a structure on it. A scope mapping must give the same document the same scope every time the runtime is created, so don't base it on a temporary runtime ID. Set `nativeDurability: "durable"` only if your document provider really stores records durably.
 
-A supplied store is host owned. A factory creates one runtime-owned store; runtime teardown releases live roots/leases before disposing it. Durable saved-version and recovery roots survive the live runtime. Without backing, existing asset-free document workflows remain valid and persistent asset operations report unsupported capability.
+A store you pass in stays yours. A `createStore` factory creates one store that the runtime owns; when the runtime shuts down, it releases live retention and leases and then disposes the store. Retention for saved versions and recovery outlives the runtime. Without any backing, documents without assets work as before, and persistent asset operations report that they're unsupported.
 
 ## Guarantees and limits
 
 | Capability | Meaning |
 | --- | --- |
-| Memory store | Immutable verified bytes and retention during that store's lifetime |
-| IndexedDB store | Persistent verified bytes and roots, including fresh store/runtime reopen |
-| Native asset save | Required bytes verified/pinned before a conditional native record plus manifest is published |
-| Cross-store atomicity | Explicitly false when native records and bytes use separate stores; staging can conservatively leave orphan pins |
-| Live image acquisition | Existing supported image MIME types and 8 MiB limit; independent of larger native storage quotas |
-| Native/asset durability | Separate receipt fields; durable bytes do not make a memory native provider durable |
+| Memory store | Immutable, verified bytes, retained for the store's lifetime |
+| IndexedDB store | Persistent, verified bytes and retention, surviving a new store and runtime |
+| Saving a document with assets | The bytes it needs are verified and pinned before the conditional record and its asset manifest are published |
+| Atomicity across stores | Not provided when records and bytes are in separate stores; staging may leave orphaned pins, never missing bytes |
+| Showing an image | The supported image MIME types, up to 8 MiB, whatever the storage quota |
+| Durability | Reported separately for the record and the assets; durable bytes don't make an in-memory document provider durable |
 
-The store copies bytes on admission and read, validates hash/length and bounded metadata, and reports typed missing/corrupt/quota/unavailable/unsupported errors. Its quotas bound asset bytes, total bytes and persistent roots. The current IndexedDB backing snapshots bounded store state inside its transactions; it is suitable for these declared limits, without claiming an unbounded media library.
+The store copies bytes when it receives and returns them, checks hashes, lengths and metadata limits, and reports typed errors for missing, corrupt, over-quota, unavailable and unsupported cases. Its quotas limit the size of each asset, the total size and the number of persistent retention roots. The IndexedDB store reads its state inside each transaction, which suits these limits but isn't designed for an unlimited media library.
 
 ## Scoped application use
 
-`documentResources.persist` converts an admitted live resource into a stable reference. `acquireAsset` verifies and reacquires that reference as a new live descriptor; copying a descriptor's data does not grant its lease authority. Release presentation leases when the view ends. A persistent reference alone is not a committed model or history retention root.
+`documentResources.persist` turns a live resource into a stable reference, and `acquireAsset` verifies a reference and gives you a new live descriptor for it. Copying a descriptor's data doesn't copy its lease. Release descriptors when the view that shows them goes away. A reference on its own keeps nothing alive; the bytes are retained only once a committed model or undo history refers to them.
 
-Prepare asset-bearing changes asynchronously, then publish one canonical document transaction against the prepared revision:
+To change a document's assets, prepare the edit asynchronously, then commit one document transaction against the prepared revision:
 
 ```ts
 const before = documents.getDocument<MyNativeModel>(documentId);
@@ -60,36 +60,37 @@ try {
 }
 ```
 
-Preflight pins exact before/after dependencies and refuses a changed base. An admitted history entry owns its retention until actual truncation/eviction; abandoning preflight releases only the unused reservation. The mount/document lifetime fences both the preparation and its synchronous commitment. New asset-bearing synchronous edits without completed admission are refused before publication.
+`prepareEdit` pins exactly the assets the before and after models need, and refuses if the document has changed since. Once the edit is in the undo history, the history keeps those assets until the entry is dropped; `release()` frees only what went unused. Both the preparation and the commit stop if the application or document closes. A synchronous edit that adds assets without a completed preparation is refused.
 
 ## Retention and native lifecycle
 
-Committed content, transaction staging, undo history, saved versions, recovery and output retain separate roots. Removing an image from current content cannot collect bytes still reachable through undo, a saved version or recovery. Canonical model adoption switches committed ownership before previous roots are released. Failed or stale adoption abandons staged resources and preserves current content.
+Current content, staged transactions, undo history, saved versions, recovery and output each retain assets separately, so removing an image from the current content can't delete bytes that undo, a saved version or recovery still needs. When a new model is adopted, the new retention is taken before the old is released. If adoption fails or is out of date, the staged resources are dropped and the current content stays.
 
-Native Save verifies the captured reference set before provider publication. An edit made during upload remains dirty after the earlier receipt returns. Conditional conflict or proven precommit failure preserves the previous valid record. An unknown sent-write outcome keeps staged pins until provider reconciliation establishes the actual result; cancellation cannot pretend a provider write did not happen.
+Saving verifies every referenced asset before the provider writes the record. An edit made while a save is uploading leaves the document edited after that save returns. A conflict, or a failure known to happen before the write, keeps the previous record. If a write was sent but its outcome is unknown, the staged pins stay until the provider confirms what happened; cancelling can't pretend the write never took place.
 
-Saved-version roots use verified provider identity. Repeated idempotent writes must not create a growing set of roots for one version. Release a version root only after provider listings, current-record state and a direct historical read establish that the version was evicted. Deleting a current record does not imply historical versions were deleted. Providers own pruning policy.
+Retention for a saved version is keyed on the provider's verified version identity, so writing the same version again doesn't add more. Release it only once the provider's listing, the current record and a direct read of the old version all show the version is gone. Deleting the current record doesn't mean its old versions were deleted. Providers decide when to prune versions.
 
-Recovery stores a committed native model with its manifest and exact retention root. Replacing or removing recovery releases the previous record's own root. Restore, remote adoption and version reads validate required dependencies before canonical adoption. Duplicate/Save As need application-native reference remapping into the destination's authorised scope; sharing immutable bytes is permitted only when that authority allows it. Moving providers can return unsupported transfer rather than copy a source live lease.
+Recovery stores a committed model with its asset manifest and retention. Replacing or removing a recovery record releases that record's retention. Restoring, adopting a remote change and reading a version all check that the needed assets exist before the model is used. Duplicate and Save As need your codec to map references into the destination's scope, and bytes are shared only where that scope allows. Moving a document to another provider can report that transfer is unsupported instead of copying a live lease.
 
 ## Output and diagnostics
 
-Output preparation retains resources for its captured native revision independently from views/history. The application engine declares dependency retention and drawing; the framework manages the preparation's lifetime. A synchronous output/history release callback can schedule durable cleanup, but its owner must observe the resulting promise and report later failures. An already-issued immutable terminal receipt cannot report a future asynchronous cleanup error.
+Output preparation (printing and export) retains the assets of the revision it captured, separately from views and history. Your engine declares what to retain and how to draw, and the framework manages how long the preparation lives. A synchronous release callback can schedule cleanup, but whoever owns it must watch the resulting promise and report a later failure, because a receipt that's already been issued can't change.
 
-Browser tests save through a real runtime, provider and store, reload the page, create fresh instances, reacquire a new lease and decode the retained image bytes, and also exercise concurrent quota and deliberate corruption. They establish browser persistence behaviour; they do not imply remote-provider durability or platform-native parity.
+The framework's browser tests save through a real runtime, provider and store, reload the page, create new instances, acquire a new lease and decode the retained image, and also test concurrent quota use and deliberate corruption. They show that persistence works in the browser, not that a remote provider is durable.
 
 ## Foundation byte values
 
-Asset `put` inputs accept `NSEDataConvertible`; `read` delivers `Promise<NSEData>`. Injected hash callbacks receive `NSEData`, so bridge with `data.bytes.buffer` when invoking Web Crypto. Resource acquisition keeps metadata separate from bytes:
+A store's `put` accepts `NSEDataConvertible`, and `read` returns `Promise<NSEData>`. A hash callback you inject receives `NSEData`, so pass `data.bytes.buffer` to Web Crypto. When acquiring a resource, the metadata stays separate from the bytes:
 
 ```ts
 import { NSEData } from "@syndromatic/syncloudos/foundation";
 
 const data = await NSEData.read(file);
-const descriptor = await SCOS.documentResources.acquire(documentId, {
+const resources = SCOS.documents.documentResources;
+const descriptor = await resources.acquire(documentId, {
   type: file.type, size: data.count, data: async () => data,
 });
-const live = SCOS.documentResources.resolve(documentId, descriptor); // NSEData | null
+const live = resources.resolve(documentId, descriptor); // NSEData | null
 ```
 
-Byte values are copied at admission and are immutable. Native IndexedDB backing still stores web buffers privately; it never structured-clones an NSEData class instance.
+Bytes are copied when the store receives them and are immutable from then on. The IndexedDB store keeps plain buffers internally and never stores an `NSEData` instance.

@@ -1,8 +1,10 @@
 # PassFX
 
-PassFX follows PassKit's payment request, summary, authorization controller, delegate, payment/token and contact objects. Import from `@syndromatic/syncloudos/fx/pass` inside a plugin-compiled `.app`. `PKFXPaymentAuthorizationController` is an attributed application class: binding/import is passive, construction pins the selected mounted application, and ended instances never rebind.
+PassFX describes a payment (what is being bought, for how much, from which merchant) and runs the authorisation sheet that collects it. You build a `PKFXPaymentRequest`, hand it to a `PKFXPaymentAuthorizationController`, and verify the resulting token with your payment processor.
 
-The production browser transport currently reports `canMakePayments()` as false and throws `PKFXError("unknownError", ...)` for presentation. Apple's web payment flow requires merchant validation and a merchant session; neither can be inferred from the approved `PKPaymentRequest` and two-method delegate subset. Generic PaymentRequest gateways, merchant configuration and card-network support are not fabricated. Automated capable-port tests prove the controller flow without making a financial transaction. This is not production Apple Pay support.
+Import from `@syndromatic/syncloudos/fx/pass` inside a plugin-compiled `.app`. `PKFXPaymentAuthorizationController` is attributed to your application: importing it does nothing, constructing it binds it to the mounted app, and an ended controller never binds again.
+
+> **No production payments yet.** The browser transport reports `canMakePayments()` as `false`, and `present` throws `PKFXError("unknownError", …)`. Apple Pay on the web needs merchant validation and a merchant session, and neither can be derived from the request and two-method delegate that PassFX supports. PassFX does not fake a generic PaymentRequest gateway, merchant configuration or card-network support. Automated tests run the full controller flow through a capable test port without making a financial transaction.
 
 ```ts
 import { NSEDecimalNumber } from "@syndromatic/syncloudos/foundation";
@@ -24,46 +26,53 @@ request.paymentSummaryItems = [
 const controller = new PKFXPaymentAuthorizationController(request);
 controller.delegate = {
   paymentAuthorizationControllerDidAuthorizePayment(sender, payment, handler) {
-    // The merchant verifies payment.token with its payment processor.
-    // Supply success only after real verification; this example refuses payment.
+    // Verify payment.token with your payment processor, and report success
+    // only after it confirms. This example refuses the payment.
     handler(new PKFXPaymentAuthorizationResult("failure"));
   },
   paymentAuthorizationControllerDidFinish(sender) {
-    sender.dismiss(() => { /* Sheet has closed. */ });
+    sender.dismiss(() => { /* The sheet has closed. */ });
   },
 };
-// In a supported host, directly from a user action:
+// On a supported host, directly from a user action:
 if (PKFXPaymentAuthorizationController.canMakePayments()) {
-  controller.present(presented => { /* Native presentation result. */ });
+  controller.present(presented => { /* Whether the sheet appeared. */ });
 }
 ```
 
-`usePayment(request)` returns a real component-owned controller. Keep the request identity stable, for example with React `useMemo`. The hook survives StrictMode's effect replay; true unmount, request replacement or app teardown ends the owned controller and fails any unfinished native response. It supplies no client or factory.
+In a component, `usePayment(request)` from `@syndromatic/syncloudos/sdk` returns a controller owned by that component. Keep the request object stable, for example with `useMemo`. The hook survives React StrictMode's effect replay. Unmounting, passing a different request or tearing down the app ends the controller and fails any unanswered native response. The hook does not provide a client or factory.
 
-## Values and supported members
+## Requests, results and values
 
-- `PKFXPaymentRequest()` has mutable `merchantIdentifier`, `countryCode`, `currencyCode`, `supportedNetworks`, `merchantCapabilities`, `paymentSummaryItems`, `requiredBillingContactFields`, `requiredShippingContactFields`, `shippingMethods` and `applicationData: NSEData | null`.
-- `PKFXPaymentSummaryItem(label, amount, type?)` uses `NSEDecimalNumber` and `final`/`pending`; the final item is the nonnegative merchant total. Controller construction copies the request. Decimal values remain exact, including amounts beyond IEEE-754 integer precision. `PKFXShippingMethod` adds `identifier` and `detail`.
-- `PKFXPayment` exposes its `token`, `billingContact`, `shippingContact` and `shippingMethod`. `PKFXPaymentToken` exposes `paymentMethod`, `transactionIdentifier` and immutable `paymentData: NSEData`. `PKFXPaymentMethod` exposes `displayName`, `network`, `type` and `billingAddress`. Native Wallet pass objects are outside this subset.
-- `PKFXContact` uses `NSEPersonNameComponents`, `CNFXPhoneNumber` and `CNFXPostalAddress`, plus `emailAddress` and `supplementarySubLocality`. Unknown fields are null. Foundation person-name components are supplied individually and copied by value; no name parser or formatter is introduced.
-- `PKFXPaymentAuthorizationResult(status, errors?)` preserves Apple's status cases and error array. The delegate handler replaces browser response completion methods. A handler is single-use.
+- `new PKFXPaymentRequest()` has mutable `merchantIdentifier`, `countryCode`, `currencyCode`, `supportedNetworks`, `merchantCapabilities`, `paymentSummaryItems`, `requiredBillingContactFields`, `requiredShippingContactFields`, `shippingMethods` and `applicationData` (`NSEData | null`). The controller copies the request when you construct it.
+- `new PKFXPaymentSummaryItem(label, amount, type?)` takes an `NSEDecimalNumber` amount and a type of `final` (the default) or `pending`. The last item is the merchant total and must not be negative. Amounts stay exact, even beyond the range a JavaScript number can hold precisely. `PKFXShippingMethod` is a summary item with an `identifier` and `detail`.
+- `PKFXMerchantCapability` is a set of bit flags: `threeDSecure`, `emv`, `credit`, `debit` and `instantFundsOut`.
+- `PKFXPayment` holds the `token`, `billingContact`, `shippingContact` and `shippingMethod`. `PKFXPaymentToken` holds `paymentMethod`, `transactionIdentifier` and immutable `paymentData` (`NSEData`). `PKFXPaymentMethod` holds `displayName`, `network`, `type` and `billingAddress`.
+- `PKFXContact` holds `name` (`NSEPersonNameComponents`), `phoneNumber` (`CNFXPhoneNumber`), `postalAddress` (`CNFXPostalAddress`), `emailAddress` and `supplementarySubLocality`. Unknown fields are `null`. Name components are supplied individually and copied by value; PassFX does not parse or format names.
+- `new PKFXPaymentAuthorizationResult(status, errors?)` reports the outcome to the sheet. `status` is one of `success`, `failure`, `invalidBillingPostalAddress`, `invalidShippingPostalAddress`, `invalidShippingContact`, `pinRequired`, `pinIncorrect` or `pinLockout`. Each delegate `handler` can be called once.
 
-## Callbacks, availability and authority
+## Presentation and callbacks
 
-`canMakePayments()` and `canMakePayments(usingNetworks)` are synchronous, passive boolean checks. They never grant consent or imply an unsupported network is usable. `present(completion)` opens the private native port synchronously while the existing host gate permits it; no dispatch hop precedes native presentation. Native presentation and authorisation are asynchronous. Its completion, authorisation delegate, merchant handler work, finish delegate and dismissal completion all run on the already-selected application's DispatchFX main queue, rechecking the captured lifetime and access generation at delivery. `dismiss(completion)` is terminal and asynchronous.
+`canMakePayments()` and `canMakePayments(usingNetworks)` are synchronous checks. They never grant consent and never suggest an unsupported network will work.
 
-PassKit has no authorisation enum or privacy API. Declare `payment.request` in `Info.ts`; launch entitlements, host policy and the existing shared native-denial/resource gate remain mandatory. Missing launch authorisation reports `PKFXError` with `notEntitledError`; invalid request values report `invalidDataError`; unsupported transport, native denial and ended sessions use `unknownError` with an explanatory message. The error domain is `PKPassKitErrorDomain`. Insecure browser contexts preserve their native `SecurityError` classification in the shared gate before conversion; native `NotAllowedError` likewise overrides saved consent.
+`present(completion)` opens the native sheet synchronously when the host allows it, with no Dispatch hop first, so the user's activation is still valid. Presentation and authorisation then proceed asynchronously. The presentation completion, the authorisation delegate call, your handler's work, the finish delegate call and the dismissal completion all run on the app's main Dispatch queue, and each rechecks the app's lifetime and access before running. `dismiss(completion)` is asynchronous and final.
 
-Revocation, policy/entitlement loss, session removal, app teardown, component unmount and dismissal prevent every queued or awaited delivery. Regrant and replacement operations cannot revive an old generation. An outstanding or late native response is failed exactly once and its old sheet is dismissed without touching a replacement. Session/access observers are released when the controller ends. No browser response, gateway option, public adapter or legacy SCOS/context client is exposed.
+## Entitlements and errors
 
-`PKFXPaymentButton`, `PKFXPaymentButtonType` and `PKFXPaymentButtonStyle` are excluded pending artwork approval. No NSE payment control or artwork is shipped. Wallet passes, disbursements, recurring payments, shipping-update delegates and merchant-session updates are outside this approved subset.
+There is no payment authorisation status or privacy prompt. Declare `payment.request` in `Info.ts`; the launch entitlement, host policy and the shared native-denial gate all apply.
 
-## Apple sources
+`PKFXError` has the domain `PKPassKitErrorDomain` and a `code`:
 
-- [PKPaymentAuthorizationController](https://developer.apple.com/documentation/passkit/pkpaymentauthorizationcontroller)
-- [PKPaymentAuthorizationControllerDelegate](https://developer.apple.com/documentation/passkit/pkpaymentauthorizationcontrollerdelegate)
-- [PKPaymentRequest](https://developer.apple.com/documentation/passkit/pkpaymentrequest)
-- [PKPaymentToken](https://developer.apple.com/documentation/passkit/pkpaymenttoken) and [PKContact](https://developer.apple.com/documentation/passkit/pkcontact)
-- [PKPassKitError.Code](https://developer.apple.com/documentation/passkit/pkpasskiterror/code)
-- [NSPersonNameComponents](https://developer.apple.com/documentation/foundation/nspersonnamecomponents)
-- [Apple Pay merchant validation](https://developer.apple.com/documentation/applepayontheweb/providing-merchant-validation)
+| Code | When |
+|---|---|
+| `notEntitledError` | The launch entitlement or host authorisation is missing. |
+| `invalidDataError` | A request value is invalid. |
+| `unknownError` | The transport is unsupported, the native side refused, or the session ended. The message says which. |
+
+An insecure browser context keeps its `SecurityError` classification in the shared gate before conversion, and a native `NotAllowedError` overrides saved consent.
+
+Revocation, losing the policy or entitlement, removing the session, tearing down the app, unmounting the component or dismissing the sheet each stop every queued or awaited delivery. Granting access again, or starting a replacement, cannot revive an old generation. An outstanding or late native response fails exactly once, and its old sheet is dismissed without touching a replacement. Session and access observers are released when the controller ends. PassFX exposes no browser response object, gateway option, public adapter, or legacy `SCOS` or context client.
+
+## Not included
+
+There is no payment button: `PKFXPaymentButton`, `PKFXPaymentButtonType` and `PKFXPaymentButtonStyle` are held back until their artwork is approved, and no NSE payment control ships. Wallet passes, disbursements, recurring payments, shipping-update delegates and merchant-session updates are also out of scope.

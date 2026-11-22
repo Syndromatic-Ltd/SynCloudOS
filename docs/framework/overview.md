@@ -1,6 +1,6 @@
 # Overview
 
-SynCloudOS is an application framework for the web, shaped after Cocoa. It gives a browser the platform layer a desktop environment provides: a runtime with a formal lifecycle, a kit of controls and controllers, twenty-two FX frameworks, a windowing system, and an application bundle format. You write TypeScript and React while the framework supplies the platform.
+SynCloudOS is an application framework for the web. It gives the browser the layer a desktop operating system normally provides: a runtime with a formal lifecycle, a kit of controls and controllers, twenty-two FX frameworks, a windowing system and an application bundle format. You write TypeScript and React on top of it.
 
 ## The layers
 
@@ -13,8 +13,8 @@ SynCloudOS is an application framework for the web, shaped after Cocoa. It gives
 │  NSE application kit          controls, controllers, data views,     │
 │                               text views, windows, menus, Atmo theme │
 ├──────────────────────────────────────────────────────────────────────┤
-│  FX frameworks                22 TypeScript analogues of Apple Core  │
-│                               and system frameworks                  │
+│  FX frameworks                22 frameworks for graphics, media,     │
+│                               devices, networking and concurrency    │
 ├──────────────────────────────────────────────────────────────────────┤
 │  SynCloudOS runtime           statechart, commands, responders,      │
 │                               undo, documents, windows, authorisation│
@@ -23,41 +23,41 @@ SynCloudOS is an application framework for the web, shaped after Cocoa. It gives
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
-[Foundation](foundation.md) supplies immutable data and collection values shared by NSE, FX and the runtime. It has no React, view or runtime dependency so it runs in web workers as well as UI threads, and shares the `NSE` prefix with NSE just as Foundation and AppKit share `NS` in Cocoa.
+[Foundation](foundation.md) supplies the immutable data and collection values that NSE, FX and the runtime share. It has no React, view or runtime dependency, so it runs in web workers as well as on the main thread. Its types share the `NSE` prefix with the application kit.
 
-The runtime is the kernel. Each runtime owns its store, services and queues, so several runtimes can share one page. It tracks the application lifecycle in a statechart, routes key events through a responder chain, dispatches typed commands, keeps undo history, persists documents and manages windows. Its [authorisation services](authorization.md) keep bundle entitlements, site configuration profiles, named administrative rights and per-app privacy choices separate, while device consent belongs to each FX framework backed by one runtime privacy store.
+The runtime is the kernel. Each runtime owns its store, services and queues, so several runtimes can share one page. It tracks the application lifecycle in a statechart, routes key events through a responder chain, dispatches typed commands, keeps undo history, persists documents and manages windows. Its [authorisation services](authorization.md) keep bundle entitlements, site configuration profiles, named administrative rights and per-app privacy choices separate. Device consent belongs to each FX framework, backed by one runtime privacy store.
 
-FX is a set of twenty-two TypeScript frameworks shaped after Apple's Core and system frameworks: AnimationFX (Core Animation), GraphicsFX (Quartz 2D), ImageFX (Core Image), TextFX (Core Text), AudioFX (AVAudioEngine), HapticsFX (Core Haptics), MotionFX (Core Motion), MediaFX (Core Media), VideoFX (Video Toolbox and AVFoundation), MIDIFX (Core MIDI), BluetoothFX (Core Bluetooth), NFCFX (Core NFC), SpeechFX (Speech), ContactsFX (Contacts), PassFX (PassKit), XRFX (ARKit sessions), LocationFX (Core Location), LuminaFX (Core Spotlight), CompressionFX (Compression), NetworkFX (Network), CryptoFX (CryptoKit) and DispatchFX (Dispatch). See the [FX frameworks](fx/README.md).
+FX is a set of twenty-two TypeScript frameworks for work below the view layer: layer animation (AnimationFX), 2D drawing and PDF (GraphicsFX), image processing (ImageFX), text layout (TextFX), audio (AudioFX), haptics (HapticsFX), device motion (MotionFX), media timing (MediaFX), video decoding and playback (VideoFX), MIDI (MIDIFX), Bluetooth (BluetoothFX), NFC (NFCFX), speech (SpeechFX), contacts (ContactsFX), passes (PassFX), XR sessions (XRFX), location (LocationFX), search indexing (LuminaFX), compression (CompressionFX), network path monitoring (NetworkFX), cryptography (CryptoFX) and work queues (DispatchFX). See the [FX frameworks](fx/README.md).
 
-NSE is the application kit and plays the role of AppKit: you write `NSEButton` where a Mac developer writes `NSButton`. NSE draws its appearance from a theme, with [Atmo](appearance.md) as the default material theme.
+NSE is the application kit: controls, controllers, data views, text views, windows and menus. If you have written AppKit code the names will look familiar (`NSEButton`, `NSEViewController`). NSE draws its appearance from a theme, with [Atmo](appearance.md) as the default.
 
-Webspring is the shell. It presents the Board launcher (a paged icon grid inspired by iOS Springboard), hosts the application stage, provides the app switcher and notifications, and runs the sign-in gate.
+Webspring is the shell. It presents the Board launcher (a paged grid of application icons), hosts the application stage, provides the app switcher and notifications, and runs the sign-in gate.
 
-SynWare is the application model. A SynWare is a `.app` bundle that declares itself with a manifest and receives a scoped session from the host, so everything it needs from the platform arrives through that session.
+SynWare is the application model. A SynWare is a `.app` bundle that declares itself with a manifest and receives a scoped session from the host. Everything it needs from the platform arrives through that session.
 
 ## Conventions
 
-The same handful of rules holds across every layer, so learning one area teaches you the others.
+A few rules hold across every layer. Once you know them in one area, you know them everywhere.
 
-The host owns the runtime. Your application never holds the runtime, a store or a registry, because it receives small client objects that expose one capability each, such as commands, documents, windows or audio. That keeps applications portable between hosts and lets the host enforce policy.
+The host owns the runtime. Your application never holds the runtime, a store or a registry. It receives small client objects that each expose one capability, such as commands, documents, windows or audio. This keeps applications portable between hosts and lets the host enforce policy.
 
-Missing capabilities are values. When you look up a service through `useService`, an absent or denied service comes back as `{ available: false, client: null, denial }` so you can check `available` and render the matching state.
+Missing capabilities are values. When you look up a service through `useService`, an absent or denied service comes back as `{ available: false, client: null, denial }`. Check `available` and render the matching state.
 
-Work is cancellable. Long operations accept an `AbortSignal`, and the mounted session carries a signal that aborts when the application closes so passing `app.signal` to your own async work releases it cleanly.
+Work is cancellable. Long operations accept an `AbortSignal`, and the session carries a signal that aborts when the application closes. Pass `useSCOS().signal` (or `SCOS.signal`) to your own asynchronous work and it stops with the application.
 
-Everything you acquire, you release. Registrations return handles with `dispose()`, hooks release their resources on unmount, and runtimes, audio engines, decoders and layers follow the same rule, verified by leak tests.
+What you acquire, you release. Registrations return handles with `dispose()`, and hooks release their resources on unmount. Runtimes, audio engines, decoders and layers follow the same rule, and leak tests check it.
 
-Values are immutable. Snapshots, geometry, colours and controller state are frozen, so you change state by asking the owner and reading the next snapshot.
+Values are immutable. Snapshots, geometry, colours and controller state are frozen. To change state, ask its owner and read the next snapshot.
 
-Naming carries meaning. Each FX framework uses a short prefix on its public types (`AFX`, `GFX`, `IFX`, `TFX`, `AUFX`, `HFX`, `MFX`, `MEFX`, `VFX`, `MIFX`, `BTFX`, `NFX`, `SPFX`, `CNFX`, `PKFX`, `XRFX`, `LFX`, `LUFX`, `CPFX`, `NWFX`, `CRFX` and `DFX`), NSE types start with `NSE`, and SDK hooks use capability names such as `useStrings` and `useAppearance`.
+Names tell you where a type lives. Each FX framework uses a short prefix on its public types (`AFX`, `GFX`, `IFX`, `TFX`, `AUFX`, `HFX`, `MFX`, `MEFX`, `VFX`, `MIFX`, `BTFX`, `NFX`, `SPFX`, `CNFX`, `PKFX`, `XRFX`, `LFX`, `LUFX`, `CPFX`, `NWFX`, `CRFX` and `DFX`), NSE types start with `NSE`, and SDK hooks use capability names such as `useStrings` and `useAppearance`.
 
-Presentation adapts to the host. Every SynWare declares which presentations it supports (`desktop`, `tablet` or `mobile`), the host chooses the active presentation, and your application reads the traits of its current surface (size class, safe areas, pointer type and reduced motion) through `useSCOS().presentation`.
+Presentation adapts to the host. Every SynWare declares which presentations it supports (`desktop`, `tablet` or `mobile`) and the host chooses the active one. Your application reads the traits of its current surface (size class, safe areas, pointer type and reduced motion) through `useSCOS().presentation`.
 
-Accessibility is part of the contract. Every pointer interaction has a keyboard path and a touch path, while controls expose labels, roles and focus behaviour and follow reduced motion, reduced transparency and forced colours settings.
+Accessibility is part of the contract. Every pointer interaction has a keyboard path and a touch path. Controls expose labels, roles and focus behaviour, and respect the reduced motion, reduced transparency and forced colours settings.
 
 ## The package
 
-Everything ships in one package, `@syndromatic/syncloudos`, with explicit subpath entries so deep imports are rejected.
+Everything ships in one package, `@syndromatic/syncloudos`. Import from the subpath entries below; the package rejects deep imports.
 
 ### Application development
 

@@ -1,6 +1,6 @@
 # Stacks and grids
 
-Two views lay out other views: `NSEStackView` puts them in a row or a column, and `NSEGridView` puts them in rows and columns. Both are AppKit's, and both come from `@syndromatic/syncloudos/nse`.
+Two views lay out other views: `NSEStackView` puts them in a row or a column, and `NSEGridView` puts them in rows and columns. Both come from `@syndromatic/syncloudos/nse`.
 
 ```tsx
 import { NSEGridRow, NSEGridView, NSEStackItem, NSEStackView } from "@syndromatic/syncloudos/nse";
@@ -8,7 +8,7 @@ import { NSEGridRow, NSEGridView, NSEStackItem, NSEStackView } from "@syndromati
 
 ## NSEStackView
 
-`NSEStackView` is `NSStackView`: its children are its arranged views, laid out along `orientation`.
+The children of an `NSEStackView` are its arranged views, laid out along its `orientation`.
 
 ```tsx
 <NSEStackView orientation="vertical" alignment="leading" spacing="standard">
@@ -24,20 +24,20 @@ import { NSEGridRow, NSEGridView, NSEStackItem, NSEStackView } from "@syndromati
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | `NSUserInterfaceLayoutOrientation`. |
+| `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | A row or a column. |
 | `alignment` | `"fill" \| "leading" \| "centre" \| "trailing" \| "first-baseline" \| "last-baseline"` | `"centre"` in a row, `"fill"` in a column | How views sit across the stack. A `leading` column is a content stack: fields, sliders and lists fill it, while buttons, switches and checkboxes keep their natural size. |
-| `distribution` | `"fill" \| "fill-equally" \| "fill-proportionally" \| "equal-spacing" \| "equal-centring" \| "gravity-areas"` | `"fill"` | `NSStackView.Distribution`. |
+| `distribution` | `"fill" \| "fill-equally" \| "fill-proportionally" \| "equal-spacing" \| "equal-centring" \| "gravity-areas"` | `"fill"` | How the views share the space along the stack. |
 | `spacing` | a spacing name, pixels or a CSS length | `"inline"` in a row, `"standard"` in a column | The theme's spacing names are `none`, `tight`, `standard`, `inline`, `related` and `group`. |
-| `edgeInsets` | `{ inlineStart?, inlineEnd?, blockStart?, blockEnd? }` | none | `NSStackView.edgeInsets`, in pixels. |
+| `edgeInsets` | `{ inlineStart?, inlineEnd?, blockStart?, blockEnd? }` | none | Padding inside the stack, in pixels. |
 | `overflowPolicy` | `"menu" \| "preserve" \| "wrap"` | `"menu"` | What happens when the views do not fit: `menu` detaches views below `mustHold` priority into an overflow menu, `preserve` keeps them all, and `wrap` continues a row on the next line, for narrow windows. |
 
-An `NSEStackItem` around a view gives it the per-view settings of `NSStackView`: `visibilityPriority` (`NSEStackVisibilityPriority.mustHold`, 1000, by default; lower priorities detach first when space runs out), `minimumSize`, `preferredSize`, `maximumSize`, `weight`, `gravity`, `spacingAfter` (`setCustomSpacing(_:after:)`), and `hidden` with `detachedWhenHidden`. A hidden view keeps its state but takes no space.
+Wrap a view in an `NSEStackItem` to give it its own settings: `visibilityPriority` (by default `NSEStackVisibilityPriority.mustHold`, 1000; lower priorities such as `detachOnlyIfNecessary`, 900, detach first when space runs out), `minimumSize`, `preferredSize`, `maximumSize`, `weight`, `gravity`, `spacingAfter` (custom spacing after this view), and `hidden` with `detachedWhenHidden`. A hidden view keeps its state but takes no space.
 
-A stack whose views need none of the per-view sizes, gravity or priorities is laid out by the browser's flexbox; the others are measured. Both give the same frames.
+When no view needs per-view sizes, gravity or priorities, the browser lays the stack out with flexbox; otherwise NSE measures it. The frames come out the same either way.
 
 ## NSEGridView
 
-`NSEGridView` is `NSGridView`. Each `NSEGridRow` is an `NSGridRow`, and each child of a row is one cell: a string is a label, any other node is a view, and a fragment is one cell holding several views.
+An `NSEGridView` contains `NSEGridRow`s, and each child of a row is one cell: a string is a label, any other node is a view, and a fragment is one cell holding several views.
 
 ```tsx
 <NSEGridView columns={[{ xPlacement: "trailing" }, { xPlacement: "fill" }]}>
@@ -57,12 +57,12 @@ A stack whose views need none of the per-view sizes, gravity or priorities is la
 
 | Prop | Type | Description |
 | --- | --- | --- |
-| `columns` | `{ xPlacement?, width? }[]` | `NSGridColumn`: where cells sit across each column (`leading`, the default, `centre`, `trailing` or `fill`) and an optional fixed width in pixels. |
-| `columnSpacing`, `rowSpacing` | a spacing name, pixels or a CSS length | `NSGridView.columnSpacing` and `rowSpacing`. They default to the theme's form spacing. |
+| `columns` | `{ xPlacement?, width? }[]` | Where cells sit across each column (`leading`, the default, `centre`, `trailing` or `fill`) and an optional fixed width in pixels. |
+| `columnSpacing`, `rowSpacing` | a spacing name, pixels or a CSS length | The gaps between columns and rows. They default to the theme's form spacing. |
 
 | `NSEGridRow` prop | Type | Description |
 | --- | --- | --- |
 | `yPlacement` | `"firstBaseline" \| "top" \| "centre"` | How a label meets the row's views. `firstBaseline`, the default, centres it on their first line, so a label sits level with a field, a checkbox or a slider alike. |
-| `mergesCells` | `boolean` | `mergeCells(in:)`: the row's one cell spans every column. |
+| `mergesCells` | `boolean` | The row's single cell spans every column. |
 
-A grid with a trailing (or leading) label column and a fill column is a Mac form: each view cell is a content stack, the row's views are a group named by its label, and below 420px each label moves above its view, as on iOS.
+A grid with a trailing (or leading) label column and a fill column is a form. Each view cell is a content stack, each row's views form a group named by its label, and below 420 px each label moves above its view.

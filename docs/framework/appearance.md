@@ -1,6 +1,6 @@
 # Appearance and Atmo
 
-NSE separates what a control does from how it looks. A control declares its role, its state and its accessibility. A theme decides the visual treatment. Atmo is the default theme, a tactile material language of glossy buttons, brushed surfaces and soft depth that plays the part Aqua played on Mac OS X.
+NSE keeps what a control does separate from how it looks. A control declares its role, state and accessibility, and the theme decides how it's drawn. Atmo, the default theme, is a tactile material language of glossy buttons, brushed surfaces and soft depth.
 
 You choose a theme once, at the root of your site, and every control below it follows. To write your own, see [Themes](themes.md).
 
@@ -13,7 +13,7 @@ What you import depends on whether the page runs the SynCloudOS host.
 | A site or single application on `mountSynCloudOS` | `@syndromatic/syncloudos/nse/styles.css` and `@syndromatic/syncloudos/browser/styles.css`, once, in the host entry | The host installs Atmo for the shell and every SynWare it hosts. Don't import the Atmo theme stylesheet or set an appearance on the root view. |
 | A standalone React page without the host | `@syndromatic/syncloudos/nse/styles.css` and `@syndromatic/syncloudos/nse/themes/atmo/styles.css` | Set an `NSEAppearance` on the page's root `NSEView`, as below. |
 
-A SynWare never imports these stylesheets itself; the page that hosts it does. A standalone React page sets the appearance on its root view, as `NSView.appearance` does:
+A SynWare never imports these stylesheets itself; the page that hosts it does. A standalone React page sets the appearance on its root view:
 
 ```tsx
 import { NSEAppearance } from "@syndromatic/syncloudos/nse/appearance";
@@ -31,11 +31,11 @@ export function Page() {
 }
 ```
 
-Use `"dark"` for the dark appearance. Views without an appearance take their superview's, as `NSView.effectiveAppearance` does.
+Use `"dark"` for the dark appearance. A view without an appearance of its own uses its superview's.
 
 ## Axes of appearance
 
-Appearance combines several independent settings. Each one can change without disturbing the others.
+Appearance combines several independent settings, and each one can change without affecting the others.
 
 | Axis | Values | Meaning |
 | --- | --- | --- |
@@ -47,17 +47,17 @@ Appearance combines several independent settings. Each one can change without di
 
 Theme and colour scheme are separate choices. Atmo ships in both light and dark, and switching one leaves the other alone.
 
-Atmo is the one theme SynCloudOS ships. It is drawn as vectors, and it styles both NSE controls and the window and application chrome around them. Dark mode is Atmo's `"dark"` colour scheme, not a different theme: request it with `colourScheme`, or leave `"auto"` to follow the system.
+Atmo is the only theme SynCloudOS ships. It's drawn as vectors, and it styles both NSE controls and the window and application chrome around them. Dark mode is Atmo's `"dark"` colour scheme, so you request it with `colourScheme` (or leave `"auto"` to follow the system) instead of switching theme.
 
-Atmo-Heritage and Atmo-Onyx are obsolete raster themes from earlier releases. Don't use them, don't mistake either for a dark mode, and don't copy their colours into your own stylesheet. You can build your own theme as a `.scostheme` bundle ([Themes](themes.md)); a custom theme replaces Atmo's look, it doesn't sit beside a hand-written palette.
+Atmo-Heritage and Atmo-Onyx are obsolete raster themes from earlier releases. Don't use them, don't mistake either for a dark mode, and don't copy their colours into your own stylesheet. To change the look, build your own theme as a `.scostheme` bundle ([Themes](themes.md)), which replaces Atmo's look everywhere; a hand-written palette in one application can't do that.
 
-Hard-coded colours work against this. An application stylesheet with its own hex palette doesn't follow the colour scheme, contrast or transparency settings, and the Developer MCP `validate` tool reports it as an `idiom.atmo-appearance` warning. Use NSE controls for controls, the tokens below for your own surfaces, and `[data-mode="dark"]` only where your own content needs a different treatment.
+Hard-coded colours work against all of this. An application stylesheet with its own hex palette ignores the colour scheme, contrast and transparency settings, and the Developer MCP `validate` tool reports it as `idiom.ui-colour`. Use NSE controls for controls, the tokens below for your own surfaces, and `[data-mode="dark"]` only where your own content needs a different treatment.
 
 ## Tokens for your own content
 
-These custom properties are the public vocabulary for content you draw yourself: your own panels, captions, dividers and highlights. NSE controls and chrome are already styled by the theme; these are for everything else.
+Use these custom properties for content you draw yourself, such as your own panels, captions, dividers and highlights. The theme already styles NSE controls and chrome.
 
-Each colour has a light and a dark value and follows the resolved colour scheme. SynCloudOS defines theme-neutral defaults, and the active theme redefines them: under Atmo they come from Atmo's own inks and materials. A custom theme sets the same names to restyle every application's content.
+Each colour has a light and a dark value and follows the resolved colour scheme. SynCloudOS defines neutral defaults and the active theme redefines them, so under Atmo they come from Atmo's own inks and materials. A custom theme sets the same names to restyle every application's content.
 
 | Colour token | Use it for |
 | --- | --- |
@@ -86,9 +86,9 @@ The text colours keep at least 4.5:1 contrast against `--nse-colour-window-backg
 | Type | `--nse-text-body-size`, `--nse-text-body-line`, `--nse-text-callout-size`, `--nse-text-caption-size`, `--nse-text-footnote-size`, `--nse-text-headline-size`, `--nse-text-headline-weight`, `--nse-text-label-size`, `--nse-text-label-weight` and `--nse-text-secondary-opacity`. |
 | Spacing | `--nse-space-1` to `--nse-space-8` (4 to 40 px), `--nse-spacing-tight`, `--nse-spacing-standard`, `--nse-spacing-inline`, `--nse-spacing-related`, `--nse-spacing-group`, `--nse-content-margin` and `--nse-content-spacing`. |
 
-For a tint the set does not name, mix from a token rather than inventing a colour, so it still follows the scheme and theme: `color-mix(in srgb, var(--nse-colour-control-accent) 12%, transparent)`.
+For a tint the set doesn't name, mix one from a token so it still follows the scheme and theme: `color-mix(in srgb, var(--nse-colour-control-accent) 12%, transparent)`.
 
-Other `--nse-*` properties belong to individual controls and themes and may change between releases. A name that isn't defined at all, such as `--nse-label-primary`, resolves to its `var()` fallback or the property's initial value, so it never follows Atmo; `validate` reports it as `idiom.nse-token`.
+Other `--nse-*` properties belong to individual controls and themes, and can change between releases. A name that isn't defined at all, such as `--nse-label-primary`, resolves to its `var()` fallback or the property's initial value, so it never follows Atmo; `validate` reports it as `idiom.nse-token`.
 
 ## Read the appearance
 
@@ -103,11 +103,11 @@ export function SchemeLabel() {
 }
 ```
 
-Inside a SynWare, `useAppearance()` returns the requested appearance and the resolved mode, and it re-renders when either changes. The projection adds `data-nse-*` attributes on the boundary element (`data-mode` holds `light` or `dark`), so your own CSS can respond to the scheme with a plain selector:
+Inside a SynWare, `useAppearance()` returns the requested appearance and the resolved mode, and re-renders when either changes. Each element where an appearance applies, including the application's root, also carries `data-nse-*` attributes, with `data-mode` set to `light` or `dark`, so your own CSS can respond to the scheme with a plain selector:
 
 ```css
 [data-mode="dark"] .note-surface {
-  background: #1d1f24;
+  background: color-mix(in srgb, var(--nse-colour-control-accent) 8%, var(--nse-colour-window-background));
 }
 ```
 
@@ -117,15 +117,15 @@ A theme is a `.scostheme` bundle: an identity, a `Theme.json` with colours, navi
 
 ## Materials and lighting
 
-Material lighting and the smooth geometry renderer are theme internals. Windows, app views, menus, popovers and toolbars retain their existing smooth-corner rendering. Application views and AFX layers use `cornerRadius` with `cornerCurve: "continuous"` (`CALayer.cornerCurve`); the default curve is `"circular"`. Atmo draws a continuous corner as a squircle through CSS `corner-shape`; browsers without that property retain the circular radius fallback. The internal manifest-driven geometry remains available for existing host surfaces.
+Material lighting and the smooth-corner renderer belong to the theme; windows, menus, popovers and toolbars already use them. For your own views and AnimationFX layers, set `cornerRadius` with `cornerCurve: "continuous"` (the default is `"circular"`). Atmo draws a continuous corner as a squircle with CSS `corner-shape`, and browsers without that property fall back to a circular radius.
 
-Custom `NSEBox` properties select Atmo's well, frame or floating plate. `NSEShadow` is an `NSShadow`-shaped value assigned to `NSEView.shadow` or `NSEBox.shadow`. Properties are projected as data attributes and CSS variables; Atmo owns the look and suppresses decorative shadows under reduced transparency or forced colours. Explicit box fill, border, radius and transparency values take precedence over sprite artwork. See the [property-to-look table](nse/boxes-and-shadows.md).
+`NSEBox` properties choose between Atmo's well, frame and floating plate. An `NSEShadow` value (colour, offset and blur) goes on `NSEView.shadow` or `NSEBox.shadow`. These properties become data attributes and CSS variables, and Atmo decides the look, dropping decorative shadows under reduced transparency or forced colours. A fill, border, radius or transparency you set explicitly on a box overrides the theme's artwork. See the [property-to-look table](nse/boxes-and-shadows.md).
 
 ## Accessibility
 
-Appearance follows the user's settings and keeps semantics intact:
+Appearance follows the user's settings without changing what controls mean:
 
 - Forced colours mode replaces decorative fills with system colours and draws visible outlines around controls and focus.
 - Reduced transparency swaps translucent materials for opaque ones.
 - Reduced motion removes transform travel from transitions and keeps ordering, focus and completion.
-- Disabled, invalid and focus states stay legible in light, dark and high contrast, and they remain native attributes when artwork is absent.
+- Disabled, invalid and focus states stay legible in light, dark and high contrast, and remain native attributes when there's no artwork.

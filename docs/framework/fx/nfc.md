@@ -1,6 +1,8 @@
 # NFCFX
 
-NFCFX uses CoreNFC classes and protocols: `NFXReaderSession`, `NFXNDEFReaderSession`, `NFXNDEFReaderSessionDelegate`, `NFXNDEFTag`, `NFXNDEFMessage`, `NFXNDEFPayload`, `NFXNDEFStatus`, `NFXTypeNameFormat`, and `NFXReaderError`. Import from `@syndromatic/syncloudos/fx/nfc` inside a plugin-compiled `.app`. The compiler attributes the actual class to that application; constructing an unbound imported reader outside an application bundle fails with the application-bundle diagnostic. Binding/import is passive. Construction pins one exact live application session. Ended objects never bind to replacements.
+NFCFX reads NFC Data Exchange Format (NDEF) messages from tags and, on hosts that support it, writes and locks them. In a browser it runs on Web NFC, which limits you to reading the messages of whichever tag the user taps; the tag-level API is there for capable hosts.
+
+The public types are `NFXReaderSession`, `NFXNDEFReaderSession`, `NFXNDEFReaderSessionDelegate`, `NFXNDEFTag`, `NFXNDEFMessage`, `NFXNDEFPayload`, `NFXNDEFStatus`, `NFXTypeNameFormat` and `NFXReaderError`. Import them from `@syndromatic/syncloudos/fx/nfc` inside a plugin-compiled `.app`. The compiler attributes each class to your app, and constructing the unbound class outside an application bundle throws an error that says so. Importing does nothing on its own. Constructing a session binds it to one live app session, and an ended session never binds to a replacement.
 
 ```ts
 import { NFXNDEFReaderSession } from "@syndromatic/syncloudos/fx/nfc";
@@ -19,36 +21,65 @@ session.begin();
 session.invalidate();
 ```
 
-The constructor takes delegate, queue, then invalidateAfterFirstRead. As in Apple's initializer, a null/omitted queue makes the session create its own serial Dispatch queue in the already-pinned application. Explicit `DFXQueue` is retained as `sessionQueue`. Delegate callbacks and completion handlers run as synchronous queue work, with authority checked again at delivery. Default invalidateAfterFirstRead is true. It delivers a message and then `readerSessionInvalidationErrorFirstNDEFTagRead`; false allows continued reads. `readerSessionDidInvalidateWithError` is required. The optional tag delegate takes priority over the message delegate, matching the read/write session style.
+## Sessions
 
-Declare `nfc.read` in `Info.ts` for discovery/read/connect/status and add `nfc.write` for write/lock. NFC has no public authorisation API. Private per-app privacy, immutable launch entitlements, host policy and native denial all apply; saved consent cannot override native refusal. Every open/read/write/lock/connect/restart/finalisation boundary classifies raw native denial before converting it to `NFXReaderError`. Revocation, exact session unregister or app teardown ends resources, drops queued deliveries, and rejects reuse even after regrant. Late native handles are closed without touching replacement sessions. Browser reads also require secure-context Web NFC, foreground visibility, user activation and suitable hardware.
+The constructor takes a delegate, a queue and `invalidateAfterFirstRead`, in that order. With a `null` or omitted queue, the session creates its own serial Dispatch queue inside your app; an explicit `DFXQueue` is kept as `sessionQueue`. Delegate callbacks and completion handlers run as synchronous work on that queue, and the app's authority is checked again at delivery.
 
-`NFXNDEFReaderSession.readingAvailable` is a passive availability check within the attributed app. `begin()` starts asynchronously and `readerSessionDidBecomeActive` reports readiness. `isReady` becomes false when invalidated. `invalidate()` is terminal. Web NFC has no native NFC alert UI: setting `alertMessage` throws `readerErrorUnsupportedFeature`; its getter is the initial empty string. `invalidate(errorMessage)` still ends scanning but delivers `readerErrorUnsupportedFeature` because that native text cannot be shown. No browser page UI is invented.
+`readerSessionDidInvalidateWithError` is required; leaving it out throws `readerErrorInvalidParameter`. `readerSessionDidDetectNDEFs`, `readerSessionDidDetectTags` and `readerSessionDidBecomeActive` are optional. If you implement the tag callback, it takes priority over the message callback.
 
-For a capable private transport, implement `readerSessionDidDetectTags(session, tags)`, call `session.connect(tag, completionHandler)`, then use the protocol's completion handlers:
+`invalidateAfterFirstRead` defaults to `true`: the session delivers one message and then invalidates with `readerSessionInvalidationErrorFirstNDEFTagRead`. Pass `false` to keep reading.
 
-- `queryNDEFStatus((status, capacity, error) => {})` returns `notSupported`, `readWrite` or `readOnly` and capacity in bytes.
-- `readNDEF((message, error) => {})` obtains a live read; errors carry a null message.
-- `writeNDEF(message, error => {})` writes an NDEF message; `writeLock(error => {})` permanently locks a writable tag.
-- `restartPolling()` retires previously detected tags. Old tag references are unavailable and cannot be reused.
+`NFXReaderSession.readingAvailable` (static) is a passive check for NFC reading support in your app. `begin()` starts asynchronously, and `readerSessionDidBecomeActive` tells you when the session is ready; calling `begin()` a second time throws `readerSessionInvalidationErrorSystemIsBusy`. `isReady` is `true` while the session is active. `invalidate()` is final and reports `readerSessionInvalidationErrorUserCanceled`.
 
-Web NFC cannot connect to a particular detected tag, query its capacity/current availability, or guarantee that write/makeReadOnly affects that same tag. Its selected-tag objects therefore have `isAvailable === false`; connect fails with `readerErrorUnsupportedFeature`. Status/read/write/lock before connection report `readerTransceiveErrorTagNotConnected`; the underlying browser transport reports unsupported addressed operations. NFCFX never calls Web NFC's next-presented-tag write/makeReadOnly as a substitute. Use message-delegate reads in browsers. A scan event snapshot is never returned as a claimed fresh `readNDEF()` result.
+Web NFC has no system alert sheet, so NFCFX does not invent one. `alertMessage` always reads as an empty string, and setting it throws `readerErrorUnsupportedFeature`. `invalidate(errorMessage)` still ends scanning, but reports `readerErrorUnsupportedFeature` because the message cannot be shown.
 
-`NFXNDEFPayload(format, type, identifier, payload)` takes `NSEData` for all three byte fields and `NFXTypeNameFormat` for format. Fields follow Apple's mutable value surface; constructors and asynchronous boundaries copy bytes/records. `NFXNDEFMessage(records).length` is the unchunked encoded NDEF size including record headers. URI helpers accept `URL` or string, encode real NFC URI prefix codes, and decode to `URL | null`. Text helpers use `Intl.Locale` (there is no Foundation locale class here), write UTF-8 with NDEF status and ASCII language bytes, and decode UTF-8 or UTF-16 to `[string | null, Intl.Locale | null]`. A nonmatching well-known type returns null values; malformed matching payloads throw `NFXReaderError`. No browser recordType, descriptor, serial number, AbortSignal or Promise API is public.
+In a component, `useNFC(delegate, queue?, invalidateAfterFirstRead?)` from `@syndromatic/syncloudos/sdk` returns an attributed session and releases it when the component unmounts. Keep the delegate object stable (for example with `useMemo`) so the same session survives re-renders. StrictMode's effect replay does not invalidate it. No client or adapter factory is exposed on `SCOS`, the app context, or the public browser and test runtimes.
 
-Browser-read record mapping is deliberately restricted to recoverable NDEF fields:
+## Entitlements and access
 
-| Web NFC record | NDEF representation | Guarantee / limitation |
+Declare `nfc.read` in `Info.ts` for discovery, reading, connecting and status queries. Add `nfc.write` for writing and locking. NFC has no public authorisation API: per-app privacy, launch entitlements, host policy and native denial all apply, and saved consent cannot override a native refusal.
+
+At every open, read, write, lock, connect, restart and finalisation step, a raw native denial is classified before it becomes an `NFXReaderError`. Revocation, unregistering the session or tearing down the app ends its resources, drops queued deliveries and blocks reuse, even if access is granted again. Native handles that arrive late are closed without touching any replacement session.
+
+In a browser, reading also needs a secure context with Web NFC, a visible page, user activation and suitable hardware.
+
+## Working with tags
+
+On a host whose transport can address individual tags, implement `readerSessionDidDetectTags(session, tags)`, call `session.connect(tag, completionHandler)`, then use the tag's completion-handler methods:
+
+- `queryNDEFStatus((status, capacity, error) => {})` reports `notSupported`, `readWrite` or `readOnly`, and the capacity in bytes.
+- `readNDEF((message, error) => {})` performs a fresh read. On error the message is `null`.
+- `writeNDEF(message, error => {})` writes a message. `writeLock(error => {})` permanently locks a writable tag.
+- `restartPolling()` retires every tag detected so far. Old tag references stop working.
+
+Web NFC cannot connect to a particular tag, read its capacity or availability, or promise that a write or lock reaches the same tag. In a browser, tag objects therefore report `isAvailable === false`, and `connect` fails with `readerErrorUnsupportedFeature`. Status, read, write and lock calls made before a successful connect report `readerTransceiveErrorTagNotConnected`. NFCFX never substitutes Web NFC's "write to the next tag presented" behaviour, and never returns a scan snapshot as if it were a fresh `readNDEF()` result. In browsers, read through the message callback.
+
+## Messages and payloads
+
+`new NFXNDEFPayload(format, type, identifier, payload)` takes an `NFXTypeNameFormat` and three `NSEData` byte fields. The fields are mutable; constructors and asynchronous boundaries copy bytes and records. `new NFXNDEFMessage(records).length` is the encoded size of the message, including record headers, without chunking.
+
+Helpers build and decode well-known records:
+
+- `NFXNDEFPayload.wellKnownTypeURIPayload(url)` accepts a `URL` or string and encodes the standard NFC URI prefix codes. The instance method of the same name decodes to `URL | null`.
+- `NFXNDEFPayload.wellKnownTypeTextPayload(string, locale)` takes an `Intl.Locale` and writes UTF-8 text with the NDEF status byte and an ASCII language code. The instance method decodes UTF-8 or UTF-16 to `[string | null, Intl.Locale | null]`.
+
+Decoding a record of a different well-known type returns `null` values; a malformed record of the right type throws `NFXReaderError`. The public API has no browser `recordType`, descriptor, serial number, `AbortSignal` or `Promise` members.
+
+### How browser records map to NDEF
+
+NFCFX converts a Web NFC record only when it can recover the original NDEF fields exactly:
+
+| Web NFC record | NDEF representation | Notes |
 |---|---|---|
-| text | TNF 1, type byte `T`; status + native ASCII language + unchanged native text bytes | Reconstructs compliant text records (reserved status bit 6 is zero), preserves native language casing and UTF-16 BOM/body. The decoder validates content without re-encoding it. The spec UTF-16 label (`utf-16be`) and Chromium label (`utf-16`) preserve the same original encoding bit and body. Unsupported/missing encoding or malformed metadata fails. |
-| mime | TNF 2; UTF-8 media type, opaque payload | Preserves the exposed type string byte-for-byte when ASCII and payload range exactly. |
-| smart-poster | TNF 1, type bytes `Sp`; opaque payload | Preserves container bytes; does not parse/re-serialise nested records. |
-| external | TNF 4; exposed ASCII external type, opaque payload | Preserves exposed valid type and payload; unsupported names fail. |
-| unknown / empty | TNF 5 / 0 | Opaque payload / empty fields, validated against format. |
-| url / absolute-url | Unsupported | Browser expansion/normalisation loses original prefix/type bytes; fails instead of inventing canonical bytes. Author-created URI payload helpers remain fully supported. |
+| text | TNF 1, type `T`; status byte, ASCII language, original text bytes | Rebuilds compliant text records (reserved status bit 6 clear), keeping the language's case and any UTF-16 byte-order mark. The decoder validates the text without re-encoding it. Both `utf-16be` (the spec label) and `utf-16` (Chromium's label) keep the same encoding bit and body. A missing or unsupported encoding, or malformed metadata, fails. |
+| mime | TNF 2; UTF-8 media type, opaque payload | Keeps an ASCII type string and the payload byte for byte. |
+| smart-poster | TNF 1, type `Sp`; opaque payload | Keeps the container bytes without parsing nested records. |
+| external | TNF 4; ASCII external type, opaque payload | Keeps a valid type and payload; unsupported names fail. |
+| unknown / empty | TNF 5 / TNF 0 | Opaque payload or empty fields, validated against the format. |
+| url / absolute-url | Not supported | The browser expands and normalises URLs, losing the original prefix byte, so NFCFX fails rather than guess. The URI helpers above still work for records you create. |
 
-Identifiers are accepted only when their exposed string round-trips losslessly through UTF-8 and contains no replacement characters; opaque non-UTF-8 identifiers fail explicitly. Web NFC joins chunks into logical records; original physical chunk framing is unavailable and is not exposed. A malformed/unrepresentable record invalidates the read session with an NFC error. Native readingerror maps to `readerTransceiveErrorTagResponseError`.
+Record identifiers are accepted only if they round-trip through UTF-8 without loss or replacement characters; other identifiers fail. Web NFC joins chunked records, so the original chunk boundaries are not available. A record that is malformed or cannot be represented invalidates the session with an NFC error, and a browser `readingerror` becomes `readerTransceiveErrorTagResponseError`.
 
-`useNFC(delegate, queue?, invalidateAfterFirstRead?)` returns the real attributed session and releases it on actual component unmount. Keep the delegate identity stable (for example, useMemo) to retain the same session across renders. StrictMode effect replay does not invalidate it. Neither SCOS, application context nor public browser/test runtime environments expose a client or adapter factory.
+## Testing
 
-Automated capable-port tests prove the full tag flow, denial/revocation/late-result rules and immutable installed plugin entry. Physical NFC hardware, real permission UI and browser/device interoperability remain unverified.
+Automated tests drive a capable port through the full tag flow, the denial, revocation and late-result rules, and the installed plugin entry. Physical NFC hardware, real permission prompts and cross-browser behaviour have not been verified.

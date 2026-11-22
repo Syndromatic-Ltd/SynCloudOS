@@ -1,6 +1,6 @@
 # AnimationFX layers
 
-This page covers the layer tree of AnimationFX: `AFXLayer` and its geometry, appearance and contents, the delegate, `AFXTransform3D`, and the three layers that draw their own content, `AFXShapeLayer`, `AFXGradientLayer` and `AFXTextLayer`. The animation values that drive layers are on the [AnimationFX page](../animation.md). Replication, particles, tiles and the renderer are on [Effects and rendering](effects.md).
+Layers are what AnimationFX draws and animates. This page covers the layer tree: `AFXLayer` and its geometry, appearance and contents, the delegate, `AFXTransform3D`, and the three layers that draw their own content, `AFXShapeLayer`, `AFXGradientLayer` and `AFXTextLayer`. The animation values that drive layers are on the [AnimationFX page](../animation.md). Replication, particles, tiles and the renderer are on [Effects and rendering](effects.md).
 
 ```ts
 import { AFXLayer, AFXShapeLayer, AFXTransform3D } from "@syndromatic/syncloudos/fx/animation";
@@ -10,7 +10,6 @@ import { AFXLayer, AFXShapeLayer, AFXTransform3D } from "@syndromatic/syncloudos
 
 | | |
 | --- | --- |
-| Analogue | `CALayer`, `CAShapeLayer`, `CAGradientLayer`, `CATextLayer`, `CATransform3D`, `CALayerDelegate` |
 | Obtained from | `NSEViewController.view.layer`, `new AFXLayer()` added to an attached layer, or the session's `bind*` methods |
 | Model and presentation | `layer.model` holds what you set, `layer.presentation` holds what is on screen now |
 | Limits | 256 layers in one composition, 64 live layers and renderers per session |
@@ -99,8 +98,8 @@ Assigning a value of the wrong type throws `TypeError`, and a value outside its 
 | `shadowOffset` | `GFXPoint` | `(0, -3)` | Offset in layer coordinates. |
 | `allowsEdgeAntialiasing` | `boolean` | `false` | Antialiases the layer's edges when it is transformed. |
 | `edgeAntialiasingMask` | `number` | 15 | Which edges antialias, a combination of the `AFXEdgeAntialiasingMask` flags. An integer from 0 to 15. |
-| `minificationFilter` | `AFXLayerContentsFilter` | `"linear"` | How contents are sampled when drawn smaller than their pixels, after `CALayer.minificationFilter`: `"linear"`, `"nearest"` or `"trilinear"`. Trilinear samples a mipmapped copy, so fine detail drawn at a fraction of its size stays steady as the layer moves. |
-| `magnificationFilter` | `"linear" \| "nearest"` | `"linear"` | How contents are sampled when drawn larger than their pixels, after `CALayer.magnificationFilter`. |
+| `minificationFilter` | `AFXLayerContentsFilter` | `"linear"` | How contents are sampled when drawn smaller than their pixels: `"linear"`, `"nearest"` or `"trilinear"`. Trilinear samples a mipmapped copy, so fine detail drawn at a fraction of its size stays steady as the layer moves. |
+| `magnificationFilter` | `"linear" \| "nearest"` | `"linear"` | How contents are sampled when drawn larger than their pixels. |
 
 `AFXEdgeAntialiasingMask` is a frozen object of the four flags: `layerLeftEdge` (1), `layerRightEdge` (2), `layerBottomEdge` (4) and `layerTopEdge` (8). Combine them with `|`. Every colour must be a `GFXColour` or `null` (see [GraphicsFX](../graphics.md)), and anything else throws `TypeError`.
 
@@ -220,9 +219,9 @@ new AFXTransform3D(values?: readonly number[])        // 16 finite numbers, defa
 
 ## Depth and AFXTransformLayer
 
-As in Core Animation, an ordinary layer flattens its sublayers. They draw in `zPosition` order (sublayer order breaks ties), later over earlier, and never cut into one another, however they are turned in 3D. `zPosition` still moves a layer along z, so it can both order and place.
+An ordinary layer flattens its sublayers. They draw in `zPosition` order (sublayer order breaks ties), later over earlier, and never cut into one another, however they are turned in 3D. `zPosition` still moves a layer along z, so it can both order and place.
 
-`AFXTransformLayer`, after `CATransformLayer`, keeps depth instead. Its sublayers share one three-dimensional space: a nearer opaque one hides a farther one whatever their order, and two that cross intersect where they cross. Nested transform layers extend the same space. A transform layer draws no contents of its own. An `AFXReplicatorLayer` whose `projectionMode` is `"projective"` preserves depth the same way (its `preservesDepth` is `true`). Create one with `renderer.makeTransformLayer(parent?)`, or `new AFXTransformLayer()` on a view's layer tree.
+`AFXTransformLayer` keeps depth instead. Its sublayers share one three-dimensional space: a nearer opaque one hides a farther one whatever their order, and two that cross intersect where they cross. Nested transform layers extend the same space. A transform layer draws no contents of its own. An `AFXReplicatorLayer` whose `projectionMode` is `"projective"` preserves depth the same way (its `preservesDepth` is `true`). Create one with `renderer.makeTransformLayer(parent?)`, or `new AFXTransformLayer()` on a view's layer tree.
 
 Use a transform layer for a scene whose parts must hide one another by where they are, such as a camera rig. Use ordinary layers when the drawing order is the design, as in Cover Flow, where the item nearer the centre always draws over its neighbours.
 
@@ -244,11 +243,11 @@ A layer that draws a `GFXPath`. Everything on `AFXLayer` applies, and the shape 
 | `lineDashPhase` | `number` | 0 | Where in the pattern the stroke begins. |
 | `strokeStart`, `strokeEnd` | `number` | 0 and 1 | The part of the path to stroke, as fractions of its length. Values from 0 to 1. Animate `strokeEnd` from 0 to 1 to draw a line. |
 
-Note that `strokeStart` and `strokeEnd` are static properties. To animate them, drive them from your own timeline, as they are not key paths.
+`strokeStart` and `strokeEnd` are not key paths, so they cannot be animated directly. To animate them, set them from your own timeline.
 
 ## AFXGradientLayer
 
-A layer that draws a `GFXGradient`. It offers the gradient directly, and the Core Animation style pieces for the common linear case.
+A layer that draws a `GFXGradient`. You can set the gradient directly, or use the separate colour, location and start/end point properties for the common linear case.
 
 | Member | Type | Description |
 | --- | --- | --- |

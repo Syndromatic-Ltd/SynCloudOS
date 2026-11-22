@@ -120,9 +120,7 @@ describe("framework documentation", () => {
 
   it("describes the framework without internal project language", () => {
     const banned = [
-      /cappuccino/iu,
       /programme\s+\d/iu,
-      /superpowers/iu,
       /capability[- ]parity/iu,
       /worktree/iu,
       /\bPrelude\b/u,

@@ -1,10 +1,10 @@
 # Testing a SynWare
 
-`@syndromatic/syncloudos/sdk/testing` provides a deterministic host for unit and integration tests. The host mounts your application exactly as production does, on an isolated runtime with a controllable clock, in-memory storage and fakes for the browser capabilities your code may call. Tests that use it run without a browser, a network or a real device.
+`@syndromatic/syncloudos/sdk/testing` gives you a deterministic host for unit and integration tests. It mounts your application the same way production does, on an isolated runtime with a clock you control, in-memory storage and fakes for the browser capabilities your code calls. Tests that use it need no browser, network or real device.
 
 ## Prerequisites
 
-The examples run under Vitest 5.1 with a DOM. Install the test tools as dev dependencies because the SDK does not bundle them:
+The examples run under Vitest 5.1 with a DOM. The SDK doesn't bundle test tools, so install them as dev dependencies:
 
 ```sh
 npm install --save-dev vitest jsdom @testing-library/react
@@ -12,7 +12,7 @@ npm install --save-dev vitest jsdom @testing-library/react
 
 Mark DOM tests with `// @vitest-environment jsdom` (or set `environment: "jsdom"` in the Vitest config) and pass that environment's `document` to the host.
 
-In a framework checkout, `npm test` runs the unit suite on Vitest 5.1 in about 3 minutes in two sequential groups: CPU-heavy source scanners, counterpart checks and timing budgets first, followed by everything else. Tests that install the packed SDK archive into a temporary consumer run separately with `npm run test:packaging` after `npm run sdk:build`.
+In a framework checkout, `npm test` runs the suite in two Vitest projects, one after the other: `heavy` (CPU-heavy source scanners, counterpart checks and timing budgets) and then `unit` (everything else). Tests that install the packed SDK archive into a temporary project run separately: `npm run sdk:build`, then `npm run test:packaging`.
 
 ## A first test
 
@@ -44,52 +44,41 @@ export async function renderNotes(document: Document) {
 }
 ```
 
-Pass the `document` your test environment provides, such as the one from jsdom or happy-dom. The kit never reads an ambient global.
+Pass the `document` your test environment provides, such as the one from jsdom or happy-dom. The test host never reads a global `document`.
 
 ## What the host controls
 
 | Member | Use |
 | --- | --- |
+| `application` | The launched `NSEApplication` for a class application, or `null`. |
 | `clock` | `now()`, `set(date)`, `advance(ms)` and `runAll()` drive every timer the application schedules. |
-| `mediaClock` | Advances media time for MediaFX and AudioFX tests. |
-| `persistence` | Reads and writes the application's preferences, and lists what it stored. |
-| `lifecycle` | `launch()`, `activate()`, `suspend()` and `close()` move the application through its lifecycle. |
+| `mediaClock` | `nowSeconds()` and `advanceSeconds(seconds)` drive media time for MediaFX and AudioFX tests. |
+| `persistence` | `getPreference` and `setPreference` read and write the application's preferences. |
+| `lifecycle` | `launch()`, `activate()`, `suspend()` and `close()` move the application through its lifecycle, and `state()` reports where it is. |
 | `commands`, `documents` | Inspect the commands registered and the documents open. |
 | `resources` | Lists live resources so a test can assert that teardown released them. |
 | `navigation` | Opens a route the way the shell would. |
 | `settlement` | `settled({ timeoutMs })` waits until pending work such as loaders, transitions and tracked promises has finished. |
+| `mediaQueries` | `setMatches(query, matches)` sets what a media query reports. See [Media queries and controller traits](#media-queries-and-controller-traits). |
+| `diagnostics` | `replace(provider)` and `revoke()` change the trusted diagnostics client. See [Trusted diagnostics provision](#trusted-diagnostics-provision). |
 | `appContext` | The low-level mounted context behind the facade returned by `useSCOS()`. |
 | `adapters` | Fakes for storage, clipboard, drag, windows, location, MIDI, video and the other host capabilities. |
 
-`createSynWareTestHost` accepts `app` (or `application` and `manifest`), `document`, `container`, `now`, `entitlements`, `locale`, `timeZone`, `branding`, `strictMode`, `services`, `diagnostics`, `applicationDocuments`, `loadGate` and `surface` (`"stage"` or `"window"`). Set `strictMode: true` to render under React StrictMode and catch effects that fail to clean up. Supply native `DocumentType` codecs through `applicationDocuments.initialTypes` because an application's manifest declares the types it may use without installing their codecs.
+`createSynWareTestHost` accepts `app` (or `application` and `manifest`), `document`, `container`, `now`, `entitlements`, `locale`, `timeZone`, `branding`, `strictMode`, `services`, `diagnostics`, `applicationDocuments`, `loadGate` and `surface` (`"stage"` or `"window"`). Set `strictMode: true` to render under React StrictMode and catch effects that don't clean up. Supply your `DocumentType` codecs through `applicationDocuments.initialTypes`: a manifest declares which types an application uses, but doesn't install their codecs.
 
-For a class application pass `{ application: NotesApp, manifest }` instead of `app`. After
-`await host.render()`, `host.application` is the live `NSEApplication` and `.windows` contains its
-real window controllers. It is `null` before launch, after close, and for function-component apps.
-`host.persistence` shares the app's own namespaced preference store, including values written
-before launch; it is not a separate test map.
+For a class application, pass `{ application: NotesApp, manifest }` instead of `app`. After `await host.render()`, `host.application` is the live `NSEApplication`, and its `.windows` holds the real window controllers. It's `null` before launch, after close, and for function-component applications. `host.persistence` uses the application's own preference store, including values written before launch, not a separate test map.
 
-Both surfaces mount the production `RuntimeInputBoundary`. Focus an element in the rendered app
-and dispatch a bubbling, cancellable native `KeyboardEvent` to exercise declared key bindings and
-class actions through normal routing. Disposing the host removes that routing; no private key
-driver is needed.
+Both surfaces use the production keyboard routing. To test key bindings and class actions, focus an element in the rendered application and dispatch a bubbling, cancellable `KeyboardEvent`; you don't need a special key driver. Disposing the host removes the routing.
 
-Supply typed service clients with `services: [[notesToken, notesClient]]`. These are registered
-through the ordinary app-service boundary, so the manifest must still declare the service and
-token version/contract checks still apply. Allow the service, permission and policy test adapters
-with `host.adapters.services.allow()`, `host.adapters.permissions.allow()` and
-`host.adapters.policy.allow()` before a controller calls `SCOS.services.require(notesToken)`.
-Sensitive storage remains denied to the app until the test allows storage and credentials, even
-though the trusted host can seed preferences. A class launch callback failure rejects `host.render()`.
+Supply typed service clients with `services: [[notesToken, notesClient]]`. They're registered the ordinary way, so the manifest must still declare the service, and token version and contract checks still apply. Call `host.adapters.services.allow()`, `host.adapters.permissions.allow()` and `host.adapters.policy.allow()` before a controller calls `SCOS.services.require(notesToken)`.
+
+Sensitive storage stays denied to the application until the test allows storage and credentials, even though the host itself can seed preferences. If a class application's launch callback throws, `host.render()` rejects.
 
 ## Trusted document provision
 
-`applicationDocuments` is a `SynWareTestApplicationDocumentsConfiguration`, extending production
-`ApplicationDocumentRuntimeConfiguration`: `initialTypes`, `initialAdapters`, `recoveryStore` and
-`assetBacking` configure the real runtime. It also accepts `trustedDocumentKinds` and an optional
-`install` callback. There is no top-level test-host `documentTypes` option.
+`applicationDocuments` is a `SynWareTestApplicationDocumentsConfiguration`. Its `initialTypes`, `initialAdapters`, `recoveryStore` and `assetBacking` configure the real document runtime, and it adds `trustedDocumentKinds` and an optional `install` callback for seeding documents. There's no top-level `documentTypes` option on the test host.
 
-Use the app's real codec and class, rather than injecting a document client into its constructor:
+Use the application's real codec and class instead of injecting a document client into its constructor:
 
 ```tsx
 import { createSynWareTestHost, type SynWareTestApplicationDocumentsConfiguration } from "@syndromatic/syncloudos/sdk/testing";
@@ -146,41 +135,23 @@ export async function renderSeededNotes(document: Document) {
 }
 ```
 
-Here `noteDocumentType` encodes `{ title, body }`. The application opens
-`{ kind: "document-store", documentId: "notes:first" }` through its normal
-`SCOS.documents.workspaceDocuments` client. The registered adapter and `seed` use the same private
-runtime store; no raw runtime or app client is exposed.
-Allow the isolated backing storage before rendering when the test needs durable drafts
-or conditional saves. The host supplies real exclusive locking for that private store;
-denied storage does not become durable merely because a host seed returned a record.
-`DocumentStoreDocumentAdapter` envelopes use system ownership; their codec's
-application-owner declarations control application admission. Do not stamp an
-application ID on these internal envelopes. Application-specific kinds such as
-published notes retain their own declared application ownership.
+Here `noteDocumentType` encodes `{ title, body }`. The application opens `{ kind: "document-store", documentId: "notes:first" }` through its normal `SCOS.documents.workspaceDocuments` client. The registered adapter and `seed` write to the same private store, and neither exposes the runtime or an application client.
 
-`SynWareTestDocumentInstallContext` contains only the production contribution-bound `documents`,
-`seed`, `environment` and `signal` ports. Installation finishes before application launch or render.
-Seed authority covers only explicitly listed `trustedDocumentKinds`, scoped to the app bundle and
-legitimate `initialTypes[].creatingApplicationId` owners; list `application.document` explicitly for
-adapter envelopes. This does not grant service authority or bypass manifest document-type admission,
-codec validation or app policy.
-The default draft policy still requires `documentStore.drafts.read` and
-`documentStore.draft.write` for application reads and saves. A successful host seed does
-not grant those application capabilities.
+If the test needs durable drafts or conditional saves, allow the backing storage before rendering. The host provides real exclusive locking for that store. If storage is denied, a record that `seed` returned still isn't durable.
 
-An installer may return a synchronous or asynchronous cleanup. Disposal or failed creation aborts
-its signal, runs returned cleanup and revokes the context, including its adapter registrations and
-seed authority. Retaining a port does not extend its lifetime.
+Documents saved through a document store adapter are owned by the system, and the codec's declared owners decide which applications can open them, so don't put an application ID on them. Kinds specific to one application, such as published notes, keep their own declared owner.
+
+The `install` callback receives a `SynWareTestDocumentInstallContext` with `documents`, `seed`, `environment` and `signal`, and finishes before the application launches or renders. `seed` can write only the kinds listed in `trustedDocumentKinds`, for the application's own bundle and for the owners named by `initialTypes[].creatingApplicationId`. List `application.document` explicitly to seed adapter documents.
+
+Seeding doesn't grant service access or skip the manifest's document types, codec validation or application policy. The default draft policy still needs `documentStore.drafts.read` and `documentStore.draft.write` before the application can read or save drafts, whatever the seed wrote.
+
+`install` can return a cleanup function, synchronous or asynchronous. Disposing the host, or a failure while creating it, aborts the signal, runs the cleanup and revokes the context, including its adapter registrations and seeding rights. Keeping a reference to a port doesn't keep it alive.
 
 ## Portable action payloads
 
-Exercise class actions with normal control clicks or `useAction(...).perform(eventPayload)`,
-not by calling the action method directly. The test host keeps the production command boundary:
-an event callback does not make arbitrary objects safe. Without a host-native `isProxy` identity
-probe, raw records and arrays fail closed without evaluating their getters or proxy traps.
-Do not inject a proxy probe to make a portable test pass.
+Test class actions by clicking controls or calling `useAction(...).perform(payload)`, not by calling the action method directly. The test host checks payloads exactly as production does. Plain records and arrays are rejected, without running their getters or proxy traps, because the host can't prove they aren't proxies. Don't work around this in a test.
 
-Use primitives or construct immutable values through the running app's commands client:
+Send primitives, or build immutable payloads through the running application's command client:
 
 ```tsx
 import { act, fireEvent, waitFor } from "@testing-library/react";
@@ -220,19 +191,11 @@ export async function selectNote(document: Document) {
 }
 ```
 
-The view uses `useSCOS()` so the example also works outside an app folder. For nested data,
-build each record with `commands.createPayload("id", id)` and each array with
-`commands.createPayloadArray(...)`,
-using the same mounted scope throughout. Builders reject duplicate/non-string keys, missing
-values and raw nested objects. Keep `File[]`, DOM nodes and transformation functions in outlets
-or domain callbacks, or send primitive descriptors instead. Serialising, cloning, spreading or
-enumerating unknown objects is not a supported payload conversion.
+The view calls `useSCOS()` so the example also works outside an application folder. For nested data, build each record with `commands.createPayload("id", id)` and each array with `commands.createPayloadArray(...)`, all from the same mounted application. The builders reject duplicate or non-string keys, missing values and plain nested objects. Pass `File[]`, DOM nodes and functions through outlets or your own callbacks, or send primitive descriptors instead. Serialising, cloning, spreading or enumerating an arbitrary object won't turn it into a valid payload.
 
 ## Trusted diagnostics provision
 
-Use the diagnostics-specific host option to test a real class application that reads
-`SCOS.trusted.diagnostics`. Do not pass a diagnostics client into its constructor:
-the application must use its normal trusted-client boundary.
+To test a class application that reads `SCOS.trusted.diagnostics`, use the host's `diagnostics` option. Don't pass a diagnostics client into its constructor; the application should reach it the normal way.
 
 ```tsx
 const host = createSynWareTestHost({
@@ -261,36 +224,22 @@ host.diagnostics.replace(nextDiagnosticsProvider);
 await host.dispose();
 ```
 
-`diagnostics` accepts an `AppTrustedDiagnosticsClient`: its operations are
-`refreshConformanceSnapshot({ signal? }?) => Promise<unknown>` and
-`exportConformanceSnapshot(snapshot) => unknown`. The host mints diagnostics-only
-provenance; the canonical application manifest must still declare `diagnostics.view`.
-Without either a live provider or that declaration, `SCOS.trusted.diagnostics` is absent.
-An initially unconfigured host may provide a client later with `host.diagnostics.replace(provider)`.
-Neither the provider setter nor the host object is available to the application.
+`diagnostics` takes an `AppTrustedDiagnosticsClient`, with `refreshConformanceSnapshot({ signal? }?) => Promise<unknown>` and `exportConformanceSnapshot(snapshot) => unknown`. The manifest must still declare `diagnostics.view`; without both a provider and that entitlement, `SCOS.trusted.diagnostics` is absent. A host created without a provider can add one later with `host.diagnostics.replace(provider)`. The application can't reach `host.diagnostics` or the host itself.
 
-Replacement and revocation abort the previous provider's in-flight work. The signal
-passed to a provider also observes caller cancellation and the application's lifetime.
-A non-cooperative provider cannot publish a late result after its authority expires.
-Retained clients from an earlier provision reject further refreshes and exports, even
-after another provider is installed. Revocation never falls back to the runtime inspector.
-The framework revalidates action presentation on host replacement or revocation, so a
-`validateRefreshSnapshot()` that reads `SCOS.trusted.diagnostics` updates `useAction`
-availability without an application hook bridge. In React tests, make host changes
-inside `act()` before asserting the updated controls.
+Replacing or revoking a provider aborts the previous provider's work in progress. The signal a provider receives is also aborted when the caller cancels or the application ends, and a provider that ignores it still can't deliver a late result. A client the application kept from an earlier provider rejects further calls, even after a new provider is installed, and revoking never falls back to another source.
+
+Replacing or revoking also revalidates actions, so a `validateRefreshSnapshot()` that reads `SCOS.trusted.diagnostics` updates `useAction` availability on its own. In React tests, make these changes inside `act()` before asserting on the controls.
 
 ## Media queries and controller traits
 
-Set host-owned media matches before rendering to choose the initial environment:
+To choose the starting environment, set media query matches before rendering:
 
 ```tsx
 host.mediaQueries.setMatches("(prefers-reduced-motion: reduce)", true);
 await host.render();
 ```
 
-Rendering starts the ordinary responsive observer, so the initial match applies
-without advancing the clock. After rendering, change the query and advance the
-host's deterministic clock by one frame inside `act()`:
+The initial match applies as soon as the application renders, without advancing the clock. After rendering, change the match and advance the host clock by one frame inside `act()`:
 
 ```tsx
 await act(async () => {
@@ -300,19 +249,13 @@ await act(async () => {
 await waitFor(() => expect(panel.traitCollection.reducedMotion).toBe(false));
 ```
 
-Matching runtime media-query subscriptions receive changes immediately, while
-the responsive observer publishes them on the next animation frame. `waitFor()`
-alone does not advance the host clock. The normal presentation bridge updates a
-mounted view controller's observable `traitCollection.reducedMotion`. Its view
-re-renders and `traitCollectionDidChange(previous)` receives the prior traits;
-tests need no internal controller symbols or manual trait injection. Setting an
-unchanged match does not emit another change.
+Media query subscriptions receive the change immediately, but trait collections update on the next animation frame, and `waitFor()` on its own doesn't advance the host clock. Once the frame runs, a mounted view controller's `traitCollection.reducedMotion` changes, its view re-renders and `traitCollectionDidChange(previous)` receives the old traits, with no need to inject traits by hand. Setting a match to the value it already has does nothing.
 
 ## Fakes
 
-Each adapter is a port with four modes. `allow()` lets operations succeed, `deny(reason)` refuses them, `fail(error)` makes them throw and `interrupt(reason)` aborts them mid-flight. Every port records its calls, so a test can assert what the application asked for.
+Each adapter is a port with four modes: `allow()` lets operations succeed, `deny(reason)` refuses them, `fail(error)` makes them throw and `interrupt(reason)` aborts them part-way. Every port records its calls, so a test can assert what the application asked for.
 
-Fakes for sensitive capabilities, including the clipboard, storage and device access, start denied. A test opts in explicitly:
+Fakes for sensitive capabilities, including the clipboard, storage and device access, start denied, and a test opts in explicitly:
 
 ```tsx
 import type { SynWareTestHost } from "@syndromatic/syncloudos/sdk/testing";
@@ -328,11 +271,11 @@ export function clipboardCalls(host: SynWareTestHost) {
 }
 ```
 
-Testing the denied path matters as much as the allowed one. Leave a fake denied and assert that your interface explains the situation.
+Test the denied path as well as the allowed one: leave a fake denied and check that your interface explains what happened.
 
 ## Waiting for work
 
-Applications load routes, fetch data and animate transitions. `createSynWareTesting` wraps a host with a driver that waits for all of it:
+Applications load routes, fetch data and animate transitions. `createSynWareTesting` wraps a host in a driver that waits for all of it:
 
 ```tsx
 import { createSynWareTesting, type SynWareTestHost } from "@syndromatic/syncloudos/sdk/testing";
@@ -348,15 +291,15 @@ export async function openNotes(host: SynWareTestHost) {
 
 ## Disposal
 
-Call `host.dispose()` at the end of every test. It resolves to a report with `runtimeDisposed`, `remaining` and `leaked`. A non-empty `leaked` list names resources the application acquired and forgot to release, which usually means a missing `dispose()` on a handle or an effect without a cleanup function.
+Call `host.dispose()` at the end of every test. It resolves to a report with `runtimeDisposed`, `remaining` and `leaked`. A non-empty `leaked` list names resources the application acquired and never released, which usually means a handle that was never disposed or an effect without a cleanup function.
 
 ## Standalone fakes
 
-The entry also exports the building blocks for tests that do not need a full host: `createDeterministicScheduler`, `createDeterministicRuntimeEnvironment`, `createFakeCapabilityPort`, `createFakeClipboardAdapter`, `createFakeStorageAdapter`, `createFakeWindowClient` and `createDeniedFakeServiceClient`. The last one is convenient for asserting how a component renders when a host service is unavailable.
+For tests that don't need a full host, the entry also exports the building blocks: `createDeterministicScheduler`, `createDeterministicRuntimeEnvironment`, `createFakeCapabilityPort`, `createFakeClipboardAdapter`, `createFakeStorageAdapter`, `createFakeWindowClient` and `createDeniedFakeServiceClient`. Use the last one to check how a component renders when a host service is unavailable.
 
 ## Guidelines
 
-- Query by role and accessible name. That mirrors how users and assistive technology find controls.
+- Query by role and accessible name, the way users and assistive technology find controls.
 - Exercise the compact layout by changing the presentation traits, and the reduced motion path by injecting the setting, instead of editing global browser state.
 - Cover the lifecycle: launch, suspend, resume and close each deserve an assertion when your application keeps state.
 - Run each test that registers commands, observers or handles once under `strictMode: true`.

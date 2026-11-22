@@ -1,10 +1,10 @@
 # LuminaFX
 
-LuminaFX (`LUFX`) is the web-native analogue of Core Spotlight. It builds a searchable index of your application's content on the device and answers queries with ranked results, using tokenisation and text folding that respect the user's language. Every item carries a durable route identity, so choosing a result takes the user back to the place it came from.
+LuminaFX (`LUFX`) adds on-device search to your app. It builds a searchable index of your application's content on the device and answers queries with ranked results, using tokenisation and text folding that respect the user's language. Every item carries a durable route identity, so choosing a result takes the user back to the place it came from.
 
-The framework has two halves. The value types (`LUFXSearchableItem`, `LUFXQuery`, the tokenizer, the ranker version constants) validate their input strictly and run anywhere JavaScript runs, so you can build and test items and queries in a unit test without a host. The index itself belongs to the mounted session: `useLumina()` returns a client whose `createIndex()` hands your component a private, durable index owned by your application. The host captures the application identity when it mounts your SynWare, so no API takes an owner or application ID, and one application can never read another's index.
+The framework has two halves. The value types (`LUFXSearchableItem`, `LUFXQuery`, the tokeniser, the ranker version constants) validate their input strictly and run anywhere JavaScript runs, so you can build and test items and queries in a unit test without a host. The index itself belongs to the mounted session: `useLumina()` returns a client whose `createIndex()` hands your component a private, durable index owned by your application. The host captures the application identity when it mounts your SynWare, so no API takes an owner or application ID, and one application can never read another's index.
 
-Everything stays on the device. Nothing in the framework sends item text to a network service.
+Everything stays on the device. Nothing in the framework sends item text to a network service. The item, index and query model will be familiar if you know Core Spotlight.
 
 ```ts
 import { LUFXQuery, LUFXSearchableItem } from "@syndromatic/syncloudos/fx/lumina";
@@ -18,7 +18,6 @@ import { LUFXQuery, LUFXSearchableItem } from "@syndromatic/syncloudos/fx/lumina
 | Entry | `@syndromatic/syncloudos/fx/lumina` |
 | Hook | `useLumina`, from `@syndromatic/syncloudos/sdk` |
 | Permissions | `lumina.index` to write items, `lumina.query` to read, query and suggest |
-| Analogue | Core Spotlight (`CSSearchableItem`, `CSSearchableIndex`, `CSSearchQuery`) |
 
 ## What the entry exports
 
@@ -318,7 +317,7 @@ What a write returns.
 | `results` | `readonly LUFXQueryResultEntry[]` | The entries on this page, best first. |
 | `nextCursor` | `string \| undefined` | Present when more results exist. Pass it back as `cursor` to fetch the next page. |
 | `checkpoint` | `LUFXIndexCheckpoint` | The index state the page came from. |
-| `tokenizerVersion` | `"lufx-tokenizer-v1"` | The tokenizer that produced the terms. |
+| `tokenizerVersion` | `"lufx-tokenizer-v1"` | The tokeniser that produced the terms. |
 | `rankerVersion` | `"lufx-lexical-v2"` | The ranker that produced the scores. |
 
 The two version fields let you notice, and invalidate anything you cached, when the text processing changes.
@@ -436,7 +435,7 @@ Results with equal scores order by title, then domain, then ID, so the order is 
 
 ## Text processing
 
-The tokenizer functions are exported so that your own search UI can match the index exactly, for example to highlight terms in text the index did not return.
+The tokeniser functions are exported so that your own search UI can match the index exactly, for example to highlight terms in text the index did not return.
 
 ### `canonicalLUFXLocale`
 

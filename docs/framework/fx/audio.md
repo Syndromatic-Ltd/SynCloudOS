@@ -1,21 +1,6 @@
 # AudioFX
 
-Audio categories expose `AUFXAudioSession.authorizationStatus` and
-`requestAuthorization()` for the `audio.session` entitlement. This is separate
-from microphone access through `audio.record` and `requestRecordAuthorization()`.
-The browser has no category permission prompt; an unsupported Audio Session API
-reports `unavailable`. `useAudio().createSession()` owns the category until disposal.
-
-`useSpeechSynthesizer()` from the SDK supplies a component-owned
-`AUFXSpeechSynthesizer` under the `audio.speech` entitlement. Construction is
-passive. Call `requestAuthorization()` or inspect `authorizationStatus`, then
-`speak(new AUFXSpeechUtterance(text))` from an action. Browser speech voices can
-arrive asynchronously; subscribe for `voiceschanged` updates. Successful API
-dispatch does not guarantee audible output or an installed voice.
-
-Encoded byte inputs accept `NSEDataConvertible` from `@syndromatic/syncloudos/foundation`; delivered encoded bytes are immutable `NSEData`. Use `.bytes` at a native typed-buffer boundary and `.blob(mimeType)` for a browser Blob. Numeric pixel, index and PCM planes retain their typed arrays; writable copy destinations remain mutable.
-
-AudioFX (`AUFX`) is the web-native analogue of AVAudioEngine. It models sound as a graph of nodes joined by connections. Players and live inputs produce audio, effects and mixers process it, and an engine renders the result to the speakers or to a buffer. Everything that touches a device sits behind the mounted session, and everything else is deterministic, portable code that runs in tests and workers.
+AudioFX (`AUFX`) plays, records, processes and analyses sound, and speaks text aloud. Reach for it for anything from a click sound to a multitrack mixer or a voice memo recorder. It models sound as a graph of nodes joined by connections, in the style of AVAudioEngine. Players and live inputs produce audio, effects and mixers process it, and an engine renders the result to the speakers or to a buffer. Everything that touches a device sits behind the mounted session, and everything else is deterministic, portable code that runs in tests and workers.
 
 Three ideas organise the framework.
 
@@ -23,7 +8,7 @@ Three ideas organise the framework.
 - **One renderer for live and offline.** Live output runs the graph in an AudioWorklet, and offline rendering runs the same processing code on the main thread in blocks of 128 frames. A graph sounds the same when you play it and when you render it to a file.
 - **Explicit ownership.** Engines, sessions, files, recorders and taps all have a `dispose()`. The session releases whatever a component forgets when it unmounts.
 
-Times in the public API are seconds and positions are frames. Sample data is 32-bit floating point in the range -1 to 1.
+Times in the public API are seconds and positions are frames. Sample data is 32-bit floating point in the range -1 to 1. Encoded byte inputs accept any `NSEDataConvertible` from `@syndromatic/syncloudos/foundation`, and encoded bytes AudioFX hands back are immutable `NSEData`; use `.bytes` for a typed array and `.blob(mimeType)` for a browser `Blob`. PCM planes stay as typed arrays.
 
 ```ts
 import { AUFXAudioFormat, AUFXAudioPCMBuffer } from "@syndromatic/syncloudos/fx/audio";
@@ -37,7 +22,6 @@ import { AUFXAudioFormat, AUFXAudioPCMBuffer } from "@syndromatic/syncloudos/fx/
 | Entry | `@syndromatic/syncloudos/fx/audio` |
 | Hook | `useAudio`, from `@syndromatic/syncloudos/sdk` |
 | Permissions | `audio.play` to make sound, `audio.record` to capture from a microphone |
-| Analogue | AVAudioEngine (`AVAudioEngine`, `AVAudioNode`, `AVAudioPlayerNode`, `AVAudioFile`, `AVAudioSession`, `AVAudioConverter`) |
 
 ## What the entry exports
 
@@ -167,7 +151,7 @@ Construct an engine yourself for offline rendering, which needs no permission. F
 | `detach(node)` | `void` | Removes a node and its connections. The main mixer cannot be detached. |
 | `connect(source, destination, options?)` | `AUFXAudioConnection` | Joins two attached nodes. Options are `sourceBus`, `destinationBus` and `channelMap`. Throws on a duplicate edge or a cycle. |
 | `disconnect(connection)` or `disconnect(source, destination?)` | `void` | Removes one connection, or every connection from `source` (to `destination` when given). |
-| `installTap(node, callback)` | `AUFXAudioTap` | Calls `callback` with each rendered block from a node, for meters and visualisers. An engine allows 32 taps. Dispose the returned tap to remove it. |
+| `installTap(node, callback)` | `AUFXAudioTap` | Calls `callback` with each rendered block from a node, for level meters and visualisers. An engine allows 32 taps. Dispose the returned tap to remove it. |
 | `start(signal?)` | `Promise<void>` | Starts live output. Needs a user gesture in most browsers. Throws if the engine has no output or is already running. |
 | `stop()` | `void` | Stops live output. |
 | `renderOffline(frames, signal?)` | `Promise<AUFXAudioPCMBuffer>` | Renders `frames` frames of the graph into one buffer. |
@@ -753,13 +737,21 @@ export function Beep() {
 
 ## Speech synthesis and audio session categories
 
-`AUFXSpeechUtterance` is an immutable speech value with text, rate (0.1-10), pitch (0-2), volume (0-1), optional language and voice identifier. Use the mounted `speechSynthesis` client (or `useSpeechSynthesizer()`) to create a synthesizer, list voices and call `speak(utterance)`. The application must declare `audio.speech` in its `entitlements`. This is manifest authority, not a browser permission prompt; capabilities report `nativePermissionPrompt: false`. Speech may require a user gesture and voices depend on the browser and operating system.
+### Speaking text
 
-Each synthesizer owns up to 32 pending/active utterances. The host serialises the shared browser queue across owners. Stopping a queued owner does not cancel a sibling's active native utterance; cancelling an active owner settles its work and hands the queue to the next owner. Disposal, caller cancellation and mount teardown reject outstanding speech with `AbortError`, release listeners and return mounted resource slots. Saved late callbacks cannot settle subsequent speech. Manifest authority is checked before admission, at native dispatch and at completion; a revoked active completion rejects with `SecurityError`. Manifest changes cannot be detected instantly without a subsequent operation or callback.
+In a component, `useSpeechSynthesizer()` from `@syndromatic/syncloudos/sdk` returns an `AUFXSpeechSynthesizer` owned by that component, under the `audio.speech` entitlement. Creating it does nothing on its own. Check `authorizationStatus` or call `requestAuthorization()`, then call `speak(new AUFXSpeechUtterance(text))` from a user action. Browser voices can arrive late, so subscribe for `voiceschanged` updates. A successful `speak` call does not guarantee audible output or an installed voice.
 
-`AUFXAudioSession.setCategory(category)` requires the separate `audio.session` capability. It does not request the microphone and remains available with `navigator.audioSession` even when capture or `MediaRecorder` is absent. `session.capabilities.sessionType` distinguishes support; unsupported operations reject with `NotSupportedError`. Capture and device operations still require `audio.record`.
+`AUFXSpeechUtterance` is an immutable value holding the text (up to 32,768 characters), rate (0.1 to 10), pitch (0 to 2), volume (0 to 1), and an optional language and voice identifier. You can also reach the synthesiser through the mounted `speechSynthesis` client to list voices and speak. The `audio.speech` entitlement is checked against the manifest, not through a browser prompt, so capabilities report `nativePermissionPrompt: false`. Speech may require a user gesture and voices depend on the browser and operating system.
 
-Categories map to browser types: ambient to ambient, soloAmbient to transient-solo, playback to playback, and record/playAndRecord to play-and-record. These are browser hints, not guarantees of native AVAudioSession mixing, interruption, background execution or route policy. Arbitration is shared by native audio-session object: the most recently configured live owner wins; removing it restores the preceding owner, and removing the final owner restores the original native type. Removing an older owner leaves the current owner untouched. Teardown respects a different type installed externally after the framework's last write.
+Each synthesiser can hold up to 32 pending or active utterances; the next `speak` rejects with `QuotaExceededError`. The host serialises the shared browser queue across owners. Stopping a queued owner does not cancel a sibling's active native utterance; cancelling an active owner settles its work and hands the queue to the next owner. Disposal, caller cancellation and mount teardown reject outstanding speech with `AbortError`, release listeners and return mounted resource slots. Saved late callbacks cannot settle subsequent speech. Manifest authority is checked before admission, at native dispatch and at completion; a revoked active completion rejects with `SecurityError`. Manifest changes cannot be detected instantly without a subsequent operation or callback.
+
+### Session categories
+
+`AUFXAudioSession.setCategory(category)` requires the separate `audio.session` entitlement. `authorizationStatus` and `requestAuthorization()` report that entitlement as `granted`, `denied` or `unavailable`; the browser has no prompt for it, and a host without the Audio Session API reports `unavailable`. Microphone access is separate, through `audio.record` and `requestRecordAuthorization()`. A session from `useAudio().createSession()` owns the category until you dispose of it.
+
+`setCategory` does not request the microphone, and works wherever `navigator.audioSession` exists, even without capture or `MediaRecorder`. Check `session.capabilities.sessionType` for support; unsupported operations reject with `NotSupportedError`. Capture and device operations still require `audio.record`.
+
+Categories map to browser types: ambient to ambient, soloAmbient to transient-solo, playback to playback, and record/playAndRecord to play-and-record. These are hints to the browser. They do not guarantee native mixing, interruption, background execution or routing behaviour. Arbitration is shared by native audio-session object: the most recently configured live owner wins; removing it restores the preceding owner, and removing the final owner restores the original native type. Removing an older owner leaves the current owner untouched. Teardown respects a different type installed externally after the framework's last write.
 
 ## Related
 

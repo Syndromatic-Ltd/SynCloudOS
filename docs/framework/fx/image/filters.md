@@ -21,7 +21,7 @@ export function soften(source: IFXImage) {
 - **colour** is a four-number tuple `[r, g, b, a]` with each value from 0 to 1. **point** is `{ x, y }`, and **rect** is `{ x, y, width, height }`, all in the graph's coordinate space. Angles are in radians.
 - Filters that spread pixels, such as blurs, enlarge a finite extent. Call `clampedToExtent()` first to avoid transparent edges, and `cropped()` afterwards to restore the original size.
 - Filters that name a second image (a mask, a texture, a palette) read it as the input after the first.
-- Some parameters reproduce Core Image's contract and have no documented default there, so the ImageFX version marks them as required.
+- Some parameters have no sensible default, so ImageFX marks them as required.
 
 ```ts
 import { GFXImage } from "@syndromatic/syncloudos/fx/graphics";
@@ -108,8 +108,8 @@ Category `colourEffect`. 31 filters.
 | `invert` | 1 | none | Inverts the colour channels. |
 | `labDeltaE` | 2 | none | The CIELAB colour difference between two images. |
 | `maskToAlpha` | 1 | none | Turns a grayscale mask into alpha. |
-| `maximumComponent` | 1 | none | Sets each pixel to gray at its largest colour component. |
-| `minimumComponent` | 1 | none | Sets each pixel to gray at its smallest colour component. |
+| `maximumComponent` | 1 | none | Sets each pixel to grey at its largest colour component. |
+| `minimumComponent` | 1 | none | Sets each pixel to grey at its smallest colour component. |
 | `monochrome` | 1 | `colour?` (colour); `intensity?` (number, 0 to 1, default 1) | Tints a grayscale rendering with one colour. |
 | `paletteCentroid` | 2 | `perceptual` (boolean) | Finds the mean colour of a palette image, given a second image of the palette. |
 | `palettize` | 2 | `perceptual` (boolean) | Replaces each colour with the nearest colour in a palette image, the second input. |
@@ -174,7 +174,7 @@ Category `distortion`. 14 filters.
 | `glassLozenge` | 1 | `point0` (point); `point1` (point); `radius` (number, 0 to 100000); `refraction` (number, 0.05 to 8) | A lozenge-shaped glass lens between two points. |
 | `holeDistortion` | 1 | `center?` (point); `radius?` (number, 0 to 100000, default 150) | Pulls a circular hole into the image. |
 | `lightTunnel` | 1 | `center` (point); `radius` (number, 0 to 100000); `rotation` (number, -402.1239 to 402.1239) | A rotating tunnel of light. |
-| `pinchDistortion` | 1 | `center?` (point); `radius?` (number, 0 to 100000, default 300); `scale?` (number, -1 to 1, default 0.5) | Pinches pixels toward a centre. |
+| `pinchDistortion` | 1 | `center?` (point); `radius?` (number, 0 to 100000, default 300); `scale?` (number, -1 to 1, default 0.5) | Pinches pixels towards a centre. |
 | `torusLensDistortion` | 1 | `center` (point); `radius` (number, 0 to 100000); `width` (number, 0 to 100000); `refraction` (number, 0.05 to 8) | A ring-shaped lens. |
 | `twirl` | 1 | `center?` (point); `radius?` (number, 0.001 to 100000, default 300); `angle?` (number, -12.5664 to 12.5664, default 3.1416) | Rotates pixels around a centre by an angle that fades with distance. |
 | `vortexDistortion` | 1 | `center?` (point); `radius?` (number, 0 to 100000, default 300); `angle?` (number, -402.1239 to 402.1239, default 56.55) | A strong swirl that rotates pixels within a radius. |
@@ -281,7 +281,7 @@ Category `stylize`. 24 filters.
 | `bloom` | 1 | `intensity` (number, 0 to 4); `radius` (number, 0 to 1000) | Softens and glows the bright areas. |
 | `cannyEdgeDetector` | 1 | `gaussianSigma?` (number, 0 to 10, default 1.6); `perceptual?` (boolean, default false); `thresholdLow?` (number, 0 to 0.05, default 0.02); `thresholdHigh?` (number, 0.02 to 1, default 0.05); `hysteresisPasses?` (number, 0 to 20, default 1) | Detects thin edges with hysteresis thresholds. |
 | `comicEffect` | 1 | none | A comic-book look with outlines. |
-| `coreMLModel` | 1 | `model` (IFXModelAsset); `headIndex` (number); `softmaxNormalization` (boolean) | Runs a portable model asset over the image. It does not accept Apple Core ML files. |
+| `coreMLModel` | 1 | `model` (IFXModelAsset); `headIndex` (number); `softmaxNormalization` (boolean) | Runs a portable model asset over the image. Core ML model files are not accepted. |
 | `crystallize` | 1 | `center` (point); `radius` (number, 0 to 10000); `seed` (number, -2147483647 to 2147483647) | Turns the image into polygonal crystals. Needs an explicit `seed`. |
 | `depthOfField` | 1 | `point0` (point); `point1` (point); `radius` (number, 0 to 1000); `saturation` (number, 0 to 4); `unsharpMaskIntensity` (number, 0 to 4); `unsharpMaskRadius` (number, 0 to 1000) | Blurs outside a focus band between two points. |
 | `edgeWork` | 1 | `radius` (number, 0 to 1000) | A woodcut look of thick edges. |

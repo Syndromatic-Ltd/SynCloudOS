@@ -1,8 +1,14 @@
 # Path controls and workspace icons
 
-`NSEPathControl` corresponds to AppKit's `NSPathControl`. It draws the standard path style using Atmo's path bezel. Supply `url` (a URL or absolute URL string), or supply `pathItems` when browsing handles that do not have OS paths. Each `NSEPathControlItem` has a `title`, optional image source and optional URL. The explicit items take precedence over URL-derived components.
+`NSEPathControl` shows where the user is in a hierarchy as a row of clickable components, and `NSEWorkspace` supplies the standard file and folder icons to go with it. Both are exported from `@syndromatic/syncloudos/nse` and `@syndromatic/syncloudos/nse/controls`.
+
+## Path control
+
+`NSEPathControl` draws the standard path style with Atmo's path bezel. Give it a `url` (a `URL` or an absolute URL string), or give it `pathItems` when you're browsing something that has no OS path, such as file-system handles. Each `NSEPathControlItem` has a `title`, an optional `image` source and an optional `url`. When you supply items, they replace the components derived from the URL.
 
 ```tsx
+import { NSEPathControl, NSEPathControlItem, NSEWorkspace } from "@syndromatic/syncloudos/nse/controls";
+
 const projects = new NSEPathControlItem({
   title: "Projects",
   image: NSEWorkspace.shared.icon("public.folder", 24),
@@ -11,10 +17,12 @@ const projects = new NSEPathControlItem({
   onAction={sender => navigateTo(sender.clickedPathItem)} />
 ```
 
-A React ref exposes `url`, `pathItems` and `clickedPathItem` through `NSEPathControlHandle`. `clickedPathItem` is set before `onAction` runs. Standard NSE `action`/`actionPayload` connections are also supported: by default the action payload is the clicked item. Native NSEButton keyboard and command validation semantics apply to each component. `isEnabled={false}` disables the path.
+The control's ref is an `NSEPathControlHandle` with `url`, `pathItems` and `clickedPathItem`, and `onAction` receives the same handle. `clickedPathItem` is set before `onAction` runs. You can also connect the control with the usual NSE `action` and `actionPayload` props; if you don't give a payload, it's the clicked item. Each component behaves like an `NSEButton` for keyboard use and command validation, and `isEnabled={false}` disables the whole path.
 
-`NSEWorkspace.shared` corresponds to `NSWorkspace.shared`. `icon(contentType, size?, scale?)` is the `icon(for: UTType)` lookup, accepting a uniform type identifier or MIME type. `iconForFile(file, size?, scale?)` is the `icon(forFile:)` lookup. Supply a path string (ending in a slash for a directory) or `{ name, kind }` from a file-system handle. It performs no file-system access and fabricates no browser file URLs. Both return image-source strings directly accepted by `NSEImageView`. Size is 24, 48 or 96 points; scale is 1 or 2 (defaults: 48 points, scale 2).
+## Workspace icons
 
-Atmo owns the workspace artwork under `src/Themes/Atmo.scostheme/Contents/Resources/workspace/`. Documents, Downloads, Music and Application Support use those PNG assets, while `folder-ordinary-*` (ordinary folders) and `document-generic-*` (file content types without a thumbnail) provide the generic slots at 24, 48 and 96 points at 1x and 2x scale.
+`NSEWorkspace.shared` looks up file and folder icons. `icon(contentType, size?, scale?)` takes a uniform type identifier or MIME type and returns the folder icon for `public.folder`, `public.directory` and `inode/directory`, and the generic document icon for anything else. `iconForFile(file, size?, scale?)` takes a path string (ending in a slash for a directory) or `{ name, kind, type? }` from a file-system handle. Folders named Documents, Downloads or Music get their own icons, Application Support and App Storage use the Documents icon, and other folders get the ordinary folder icon. Neither method touches the file system or makes up browser file URLs. Both return an image source that `NSEImageView` accepts directly. The size is 24, 48 or 96 points and the scale is 1 or 2, with defaults of 48 points at scale 2.
 
-The Open panel uses these APIs in its source list, path and collection. Visible image cells use the mounted ImageFX client to decode real file bytes or provider thumbnails. Their generic icon remains until decode succeeds; cells release image resources on replacement and unmount. Browsing/searching does not request permission, and a failed thumbnail does not prevent opening the file.
+The artwork belongs to Atmo, under `src/Themes/Atmo.scostheme/Contents/Resources/workspace/`, as `folder-documents`, `folder-downloads`, `folder-music`, `folder-ordinary` and `document-generic` at each size and at 1x and 2x.
+
+The open panel uses these APIs in its source list, path and collection. Its visible image cells decode the real file bytes, or a provider's thumbnail, through the mounted ImageFX client, and show the generic icon until decoding succeeds. Cells release their image resources when they're replaced or unmounted. Browsing and searching never ask for permission, and a failed thumbnail doesn't stop the user opening the file.

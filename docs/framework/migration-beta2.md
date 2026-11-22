@@ -1,12 +1,12 @@
 # Migrating to 1.0.0-beta.2
 
-Beta.2 is a breaking application-authoring release. It introduces folder discovery, the app-bound `SCOS` facade and AppKit-style application, window and view controllers. Function-component apps remain supported. There are no aliases for the removed identity fields, hooks or content-source API.
+This guide takes an application written for beta.1 through the breaking changes in beta.2: folder discovery, the app-bound `SCOS` facade, and class-based application, window and view controllers. Function-component applications are still supported. The removed identity fields, hooks and content-source API have no aliases, so every step below needs doing.
 
-This checkout builds the beta.2 candidate; it is not a claim that beta.2 has been published. Install the SDK archive and matching Developer MCP archive from the same build. Their receipts identify the commit and source fingerprint. See [Getting started](getting-started.md) for installation.
+A framework checkout builds a beta.2 candidate, which doesn't mean beta.2 has been published. Install the SDK archive and the Developer MCP archive from the same build; their receipts record the commit and source fingerprint. See [Getting started](getting-started.md) for installation.
 
 ## 1. Give every application one explicit identity
 
-`Name.app/Contents/Info.ts` is required. The folder names the package, not its runtime identity. Declare `bundleIdentifier`, `displayName` and `version`; none is inferred from the host's package version.
+Every application needs `Name.app/Contents/Info.ts`. The folder name doesn't set the application's identity, so declare `bundleIdentifier`, `displayName` and `version`. None of them comes from the host's package version.
 
 Before:
 
@@ -33,7 +33,7 @@ export default {
 } as const satisfies SynWareInfo;
 ```
 
-Reverse-DNS identifiers allow mixed case. Public metadata preserves the authored spelling; lookup, ownership comparisons and storage partitions are case-insensitive. Case-equivalent identifiers cannot identify two different apps. `Notes.app` may therefore declare `com.Example.Notes` without renaming its folder.
+Reverse-DNS identifiers can use mixed case. Public metadata keeps the spelling you wrote, but lookups, ownership checks and storage partitions ignore case, so two applications can't have identifiers that differ only in case. `Notes.app` can declare `com.Example.Notes` without renaming its folder.
 
 | Before | After |
 | --- | --- |
@@ -46,17 +46,17 @@ Reverse-DNS identifiers allow mixed case. Public metadata preserves the authored
 | App version inherited from the project package | Explicit application `version` |
 | `localeResources` in `Info.ts` | Discovered `Resources/Localised/<locale>.locale/*.strings` |
 
-Do not rename unrelated document IDs, route names, collection IDs or window titles. Update app-scoped command IDs and persisted ownership references that actually contain the old application identity. See the [manifest reference](synware-manifest.md).
+Leave unrelated document IDs, route names, collection IDs and window titles alone. Update only the command IDs and saved ownership references that contain the old application identity. See the [manifest reference](synware-manifest.md).
 
 ### Saved data is reset, not migrated
 
-Use a fresh persistence namespace for the cutover. Old identity-owned documents must not be imported as new-owner documents or granted wider seed authority. Webspring uses layout version 5 (`webspring.layout.v5`); the old layout is not migrated. Do not retain old-ID aliases or fallbacks.
+Start from a fresh persistence namespace. Don't import documents owned by the old identity as if the new identity owned them, and don't widen seeding rights to reach them. Webspring now stores its layout as version 5 (`webspring.layout.v5`) and doesn't migrate the old layout. Don't keep aliases or fallbacks for old IDs.
 
 ## 2. Let the plugin discover the project
 
-Conventional locations are `src/SynWare/Name.app/Contents/`, `src/Preferences/Name.prefPane/`, `src/Widgets/Name.widget/` and `src/Integrations/Name.integration.ts`. Configure different roots through the Vite plugin when necessary.
+The plugin looks in `src/SynWare/Name.app/Contents/`, `src/Preferences/Name.prefPane/`, `src/Widgets/Name.widget/` and `src/Integrations/Name.integration.ts`. You can configure other roots in the Vite plugin.
 
-A function application no longer wraps its root in public `createSynWare`:
+A function application no longer wraps its root in `createSynWare`:
 
 ```tsx
 // Before
@@ -69,9 +69,9 @@ export const routes = notesRoutes;
 export default NotesView;
 ```
 
-An application class instead declares `static routes = notesRoutes`. Do not also export named `routes` from that module, because class and named-module declarations of the same lifecycle field are rejected rather than merged.
+An application class declares `static routes = notesRoutes` instead. Don't also export `routes` from that module: declaring the same field on the class and as a named export is an error, and the two are never merged.
 
-`mountSynCloudOS` consumes `virtual:syncloudos/project` when no explicit composition is supplied. Remove duplicate hand-written app, preference, widget, integration and shell registries. The generated module exports the shell as `webspring`, a `WSDefinition` built from `src/Webspring/Contents/`, and `shellResources`, the shell's resource URLs and localised strings:
+`mountSynCloudOS` reads `virtual:syncloudos/project` when you don't pass a composition, so remove any hand-written application, preference, widget, integration and shell registries. The generated module exports the shell as `webspring`, a `WSDefinition` built from `src/Webspring/Contents/`, and `shellResources`, the shell's resource URLs and localised strings:
 
 ```tsx
 import { mountSynCloudOS } from "@syndromatic/syncloudos/browser";
@@ -81,11 +81,11 @@ if (!element) throw new Error("Missing application root.");
 await mountSynCloudOS({ element });
 ```
 
-Do not replace that resource map with a whitelist of branding images: doing so also removes resources used by widgets and preferences. Custom host composition remains available for hosts without discovery. See [Project structure](project-structure.md).
+Don't replace that resource map with a list of branding images, because widgets and preferences use it too. Hosts that don't use discovery can still pass their own composition. See [Project structure](project-structure.md).
 
 ## 3. Replace the old hooks and imports
 
-Application authoring has a root entry, `@syndromatic/syncloudos`. NSE and FX keep their own entries; importing the root does not turn `SCOS` into a namespace for every framework.
+Application code imports from the root entry, `@syndromatic/syncloudos`. NSE and FX keep their own entries, and `SCOS` doesn't become a namespace for every framework.
 
 | Before | After |
 | --- | --- |
@@ -95,13 +95,13 @@ Application authoring has a root entry, `@syndromatic/syncloudos`. NSE and FX ke
 | Other `useSynWare…` hooks | Their unprefixed public names, such as `useCommands`, `useRouter`, and `useAnimations` |
 | An invented `/testing` package entry | The public `@syndromatic/syncloudos/sdk/testing` entry |
 
-`SCOS` imports inside an app folder are bound by the plugin and remain valid after `await` and in callbacks while the app is live. Shared components use `useSCOS()` to choose their nearest mounted provider. Merely reading `SCOS` does not subscribe a React component; use reactive hooks or observable controller state for values that change.
+Inside an application folder, the plugin binds `SCOS` to that application, so it stays valid after `await` and in callbacks for as long as the application runs. Shared components call `useSCOS()` to get the nearest mounted application. Reading `SCOS` doesn't subscribe a React component to changes; use the reactive hooks or observable controller state for values that change.
 
-Controller code uses `SCOS.routes.state(graph, name)`, `SCOS.routes.isActive(...)`, `SCOS.fonts.manager` and `SCOS.menus.runtime` instead of React bridge components. View-controller presentation and reduced-motion changes arrive through `traitCollection` and `traitCollectionDidChange`. See the [SDK reference](synware-sdk.md).
+Controller code uses `SCOS.routes.state(graph, name)`, `SCOS.routes.isActive(...)`, `SCOS.fonts.manager` and `SCOS.menus.runtime` instead of React bridge components. View controllers learn about presentation and reduced-motion changes through `traitCollection` and `traitCollectionDidChange`. See the [SDK reference](synware-sdk.md).
 
 ## 4. Move responsibilities into real application classes
 
-A class app default-exports an `NSEApplication` subclass, with `static mainWindow`. Its window controller can render `static view`, or own a `contentViewController`. View controllers own their child controllers and publish state through `@observable` accessors. React components remain the views; renaming a large function component without moving its state, actions and lifecycle is not this migration.
+A class application default-exports an `NSEApplication` subclass with `static mainWindow`. Its window controller renders `static view` or owns a `contentViewController`. View controllers own their child controllers and publish state through `@observable` accessors. React components are still the views. Wrapping a large function component in a class without moving its state, actions and lifecycle into the controller doesn't complete this step.
 
 | Responsibility | Class API |
 | --- | --- |
@@ -113,41 +113,41 @@ A class app default-exports an `NSEApplication` subclass, with `static mainWindo
 | Read another model/controller in a view | `useObserve(object)` |
 | User intent and availability | `@action` and `validate<Name>` |
 
-Controller views already observe their own controller. If action validation depends on changing external model state, subscribe during the controller's lifecycle and publish its actual model snapshot as observable state; a view-only subscription does not invalidate the controller's action presentations.
+A controller's view already observes its controller. If action validation depends on model state that changes elsewhere, subscribe in the controller's lifecycle and publish the model snapshot as observable state. A subscription in the view alone won't revalidate the controller's actions.
 
-Controllers created in class field initialisers or constructors inherit ownership. Controllers created later, including after `await`, need an explicit `owner: this`. Dispose subscriptions in the corresponding disappearance/disposal lifecycle; do not reintroduce React bridges or hand-dispose a controller that the class already owns. Text editing's content authority is now `textOwner`; `owner` means lifetime ownership.
+Controllers created in class field initialisers or constructors are owned automatically. Controllers created later, including after `await`, need an explicit `owner: this`. Dispose subscriptions in the matching disappearance or disposal method. Don't bring back React bridges, and don't dispose by hand a controller the class already owns. For text editing, the content owner is now `textOwner`, and `owner` means the lifetime owner.
 
-Child view-controller frames no longer impose `width: 100%; height: 100%`, because the parent owns layout. Pass `className` to `<child.view />` to style its existing managed outlet, for example a flex-growing canvas beside fixed-width sidebars. Keep that real frame for layer bounds and lifecycle, and remove internal-attribute selectors and `display: contents` workarounds. See [Applications](applications.md) for complete layout examples.
+A child view controller's frame no longer forces `width: 100%; height: 100%`, because the parent controls layout. Pass `className` to `<child.view />` to style that frame, for example a canvas that grows between fixed-width sidebars. Keep the frame, since layer bounds and lifecycle depend on it, and remove selectors on internal attributes and `display: contents` workarounds. See [Applications](applications.md) for complete layout examples.
 
 ### Actions retain command security
 
-Bind NSE controls with `action` / `actionPayload`. Custom views use `useAction(name, boundPayload?)`, then `.perform(eventPayload)` for an event-time value. Validation and execution still follow the canonical responder chain, including modal scopes.
+Bind NSE controls with `action` and `actionPayload`. Custom views call `useAction(name, boundPayload?)`, then `.perform(eventPayload)` with a value from the event. Validation and execution still go through the responder chain, including modal scopes.
 
 ```tsx
 const openNote = useAction("openNote");
 return <button onClick={() => { void openNote.perform(note.id); }}>Open note</button>;
 ```
 
-Use a primitive ID where possible. Multi-field payloads must be explicitly built from known fields with the mounted scope's `SCOS.commands.createPayload("id", note.id, "title", title)`; nested records/arrays use the same scope's builders. Browser hosts cannot safely accept arbitrary objects without a native proxy-identity probe. Do not spread, enumerate or serialise unknown objects to bypass that boundary.
+Use a primitive ID where you can. Build a payload with several fields from known values with `SCOS.commands.createPayload("id", note.id, "title", title)`, and nested records and arrays with the same application's builders. A browser host can't tell whether an arbitrary object is a proxy, so it won't accept one. Don't spread, enumerate or serialise unknown objects to get around this.
 
-Files, DOM elements, functions, abort signals and controller instances are not action payloads. Resolve owned models by ID inside the controller; keep DOM elements as outlets and file imports as domain-method inputs. `@action` title resolvers, key bindings, menu categories and validator overrides retain ordinary command semantics.
+Files, DOM elements, functions, abort signals and controller instances can't be action payloads. Look up models by ID inside the controller, keep DOM elements as outlets, and pass imported files to your own methods. Title resolvers, key bindings, menu categories and validator overrides on `@action` behave as they do for any command.
 
 ### Secondary windows must be real windows
 
-Use `app.openWindow(DetachedWindow, { documentId, restorationKey, ... })` and declare `static windowControllers = { detachedNote: DetachedWindow }` for cold restoration. Do not keep an old React window registry beside the class registry. Verify rendered content, focus, closing and restoration; an entry in the window list alone does not prove a visible window.
+Open secondary windows with `app.openWindow(DetachedWindow, { documentId, restorationKey, ... })`, and declare `static windowControllers = { detachedNote: DetachedWindow }` so they can be restored after a reload. Remove any old React window registry. Check the rendered content, focus, closing and restoration, because an entry in the window list doesn't prove the window is visible.
 
-The registry makes saved windows reconstructible; it does not enable persistence by itself. The host must explicitly save and restore its workspace. Do not add automatic browser-reload restoration while migrating an app whose host did not previously request it.
+The registry lets saved windows be rebuilt, but doesn't save anything by itself; the host has to save and restore its workspace. If the host didn't restore windows on reload before, don't add that while migrating.
 
 ## 5. Preserve effects through the FX APIs
 
-A new `AFXLayer()` is detached. Add it to an attached controller `view.layer` with `addSublayer`; the parent supplies its surface and scheduler. Writes before attachment are retained. Reading `view.layer` before the view loads, or after it unmounts, throws `NSE_VIEW_NOT_LOADED`.
+A new `AFXLayer()` starts detached. Add it to a loaded controller's `view.layer` with `addSublayer`, and it takes its surface and scheduler from the parent. Properties you set before attaching it are kept. Reading `view.layer` before the view loads, or after it unmounts, throws `NSE_VIEW_NOT_LOADED`.
 
 ```ts
 const highlight = new AFXLayer();
 this.view.layer.addSublayer(highlight);
 ```
 
-Hosts that genuinely build rendering surfaces use `createAFXLayer(surface, scheduler)` from `@syndromatic/syncloudos/sdk/animation-host`, not the former public surface/scheduler constructor. Retain existing AFX/GFX particle fields, paths, imagery and reduced-motion behaviour when moving app lifecycle code. CSS replacements are not required by the class API. See [AnimationFX](fx/animation.md) and [GraphicsFX](fx/graphics.md).
+Only hosts that build their own rendering surfaces use `createAFXLayer(surface, scheduler)` from `@syndromatic/syncloudos/sdk/animation-host`, which replaces the old public constructor that took a surface and scheduler. When you move lifecycle code into classes, keep your AnimationFX and GraphicsFX particle fields, paths, imagery and reduced-motion behaviour; the class API doesn't require you to replace them with CSS. See [AnimationFX](fx/animation.md) and [GraphicsFX](fx/graphics.md).
 
 ## 6. Replace implicit shell styling and content sources
 
@@ -162,9 +162,9 @@ Hosts that genuinely build rendering surfaces use `createAFXLayer(surface, sched
 | A generic "Preferences" system entry | "System Preferences…", distinct from an app's own preferences |
 | Private preference-pane registration | `NSEPreferencePane` subclasses and discovered `.prefPane` folders |
 
-A widget owns its feed and React view; the generic shelf supplies loading, empty, error, timeout and retry handling. Use its supplied `navigate(route)` for normal in-shell navigation, retaining an anchor's `href` for modified clicks. Resource paths such as a widget's `icon` resolve through the shell's generated Resources map. Site-specific News titles, fonts, artwork and layout belong to the site, not the framework.
+A widget owns its feed and React view, and the shelf handles loading, empty, error, timeout and retry states. Use the `navigate(route)` it's given for navigation inside the shell, and keep an anchor's `href` for modified clicks. Resource paths such as a widget's `icon` resolve through the shell's generated resource map. Site-specific titles, fonts, artwork and layout belong to the site, not the framework.
 
-Integrations declare their actual application owners. Owner matching is case-insensitive; selected applications constrain installation and seed authority. Use `applicationDocuments(environment)` when construction needs the host clock, timers or recovery-store environment. Do not replace persistent recovery with an in-memory workaround. See [Webspring](webspring.md).
+Integrations declare the applications that own them. Owner matching ignores case, and only the selected applications get installation and seeding rights. Use `applicationDocuments(environment)` when setup needs the host clock, timers or recovery store. Don't replace persistent recovery with something in memory. See [Webspring](webspring.md).
 
 ## 7. Move the shell to `WSApplication`
 
@@ -188,11 +188,11 @@ The shell is a `WSInfo` in `src/Webspring/Contents/Info.ts` and a `WSApplication
 | `WebspringFolderAppearanceOptions`, `WebspringFolderPresentationComponent`, `WebspringFolderPresentationProps`, `WebspringIconEffectComponent`, `WebspringIconEffectProps`, `WebspringQuickSwitchOptions`, `WebspringLaunchZoom` | `WSFolderAppearanceOptions`, `WSFolderPresentationComponent`, `WSFolderPresentationProps`, `WSIconEffectComponent`, `WSIconEffectProps`, `WSQuickSwitchOptions`, `WSLaunchZoom` |
 | A composition's `shell` field | `webspring` |
 
-`create-synware src/Webspring` and the Developer MCP `scaffold` tool (`kind: "webspring"`) write both files. The `validate` tool and the folder validator name the replacement when a source still uses a removed helper, and `lookup_sdk` answers a removed name with the classes that replace it. See [Webspring](webspring.md).
+`create-synware src/Webspring` and the Developer MCP `scaffold` tool (`kind: "webspring"`) write both files. If your source still uses a removed helper, the `validate` tool and the folder validator name its replacement, and `lookup_sdk` answers a removed name with the classes that replace it. See [Webspring](webspring.md).
 
 ## 8. Move to themes and the theme contract
 
-Appearance definitions, slots and recipes are replaced by `.scostheme` theme bundles drawn through a public contract ([Themes](themes.md), [contract reference](theme-contract.md)). None of the removed names has an alias.
+`.scostheme` theme bundles, drawn through a public contract, replace appearance definitions, slots and recipes ([Themes](themes.md), [contract reference](theme-contract.md)). None of the removed names has an alias.
 
 ### Theme selection
 
@@ -204,14 +204,14 @@ Appearance definitions, slots and recipes are replaced by `.scostheme` theme bun
 | `data-nse-appearance` | `data-nse-theme`, holding the bundle identifier |
 | `defineNSEAppearance`, `NSEAppearanceDefinition`, `NSEAppearanceDefinitionInput`, `NSEAppearanceRecipeDefinition` | a `.scostheme` bundle: `Info.ts`, `Theme.json` and stylesheets |
 | `useNSEAppearanceSlot`, `resolveNSEAppearanceSlot`, `nseAppearanceSlot`, `projectNSEAppearanceSlot`, `NSEAppearanceSlotDescriptor`, `NSEAppearanceSlotProjection`, `NSEAppearanceSlotResolution`, `NSEChromeSlot`, `NSEChromePrimitiveProps.slot` | contract hooks: `[data-nse-control]`, `[data-nse-part]` and their state and variant attributes |
-| `NSEWindowAppearanceRecipeId`, `NSE_WINDOW_APPEARANCE_RECIPE_IDS`, `NSEWindowFrameProps.appearanceRecipe` and `shadowRecipe`, `NSEWindowTitleBarProps.appearanceRecipe` | `NSEWindowFrameProps.hasShadow` (`NSWindow.hasShadow`) |
-| `atmoMotion` | `NSEAnimationContext.current`; motion is framework-owned |
+| `NSEWindowAppearanceRecipeId`, `NSE_WINDOW_APPEARANCE_RECIPE_IDS`, `NSEWindowFrameProps.appearanceRecipe` and `shadowRecipe`, `NSEWindowTitleBarProps.appearanceRecipe` | the window frame's `hasShadow` |
+| `atmoMotion` | `NSEAnimationContext.current`; the framework owns motion |
 
-The `@syndromatic/syncloudos/nse/themes/atmo` entry now exports only `atmoTheme`, and its `styles.css` loads control structure and the whole Atmo bundle.
+The `@syndromatic/syncloudos/nse/themes/atmo` entry now exports only `atmoTheme`, and its `styles.css` loads the control structure and the whole Atmo bundle.
 
 ### Colours
 
-The `--nse-app-*` properties become semantic colours: `--nse-app-background` → `--nse-colour-window-background`, `--nse-app-foreground` → `--nse-colour-label`, `--nse-app-foreground-secondary` → `--nse-colour-secondary-label`, `--nse-app-surface` → `--nse-colour-control-background`, `--nse-app-surface-border` → `--nse-colour-grid`, `--nse-app-separator` → `--nse-colour-separator`, `--nse-app-accent` → `--nse-colour-control-accent`, `--nse-app-accent-foreground` → `--nse-colour-selected-control-text`, `--nse-app-selection` → `--nse-colour-selected-content-background` and `--nse-app-critical` → `--nse-colour-system-red`. The British spellings replace `textColor`, `labelColor`, `secondaryLabelColor` and `emphasized`: use `textColour`, `labelColour`, `secondaryLabelColour` and `emphasised`. The separator's `gray` variant is `grey`.
+The `--nse-app-*` properties become semantic colours: `--nse-app-background` → `--nse-colour-window-background`, `--nse-app-foreground` → `--nse-colour-label`, `--nse-app-foreground-secondary` → `--nse-colour-secondary-label`, `--nse-app-surface` → `--nse-colour-control-background`, `--nse-app-surface-border` → `--nse-colour-grid`, `--nse-app-separator` → `--nse-colour-separator`, `--nse-app-accent` → `--nse-colour-control-accent`, `--nse-app-accent-foreground` → `--nse-colour-selected-control-text`, `--nse-app-selection` → `--nse-colour-selected-content-background` and `--nse-app-critical` → `--nse-colour-system-red`. British spellings replace `textColor`, `labelColor`, `secondaryLabelColor` and `emphasized`: use `textColour`, `labelColour`, `secondaryLabelColour` and `emphasised`. The separator's `gray` variant is `grey`.
 
 ### Layout
 
@@ -219,22 +219,22 @@ The `--nse-app-*` properties become semantic colours: `--nse-app-background` →
 
 ### Control identities
 
-Theme and application CSS that selected the old identities uses their replacements: `calendar`, `time-picker`, `date-time-picker` and `date-range-picker` are `date-picker` with its `date-picker-elements` and `date-picker-mode` variants; `circular-slider` and `slider-field` are `slider` with `slider-type`; `ruler` is `ruler-view`; `route-picker` is `route-picker-view`; `file-panel` is `save-panel`; `scroll-view-frame` is `scroll-view`; `toolbar-configuration-sheet` is `toolbar-customisation-palette`; and the toolbar's `root` part is `background`.
+Theme and application CSS that selected the old control identities must use their replacements: `calendar`, `time-picker`, `date-time-picker` and `date-range-picker` are `date-picker` with its `date-picker-elements` and `date-picker-mode` variants; `circular-slider` and `slider-field` are `slider` with `slider-type`; `ruler` is `ruler-view`; `route-picker` is `route-picker-view`; `file-panel` is `save-panel`; `scroll-view-frame` is `scroll-view`; `toolbar-configuration-sheet` is `toolbar-customisation-palette`; and the toolbar's `root` part is `background`.
 
 ### Drawing controls
 
-Only a theme draws NSE controls. Application CSS that selects private `.nse-*` classes, or contract hooks such as `[data-nse-control]` and `[data-nse-part]`, is reported by the Developer MCP as `idiom.control-internals`. Draw your own content with the semantic colours, and leave NSE controls to the theme.
+Only a theme draws NSE controls. The Developer MCP reports application CSS that selects private `.nse-*` classes, or contract hooks such as `[data-nse-control]` and `[data-nse-part]`, as `idiom.control-internals`. Draw your own content with the semantic colours and leave NSE controls to the theme.
 
 ## 9. Verify the installed consumer, not only the source tree
 
-Use `createSynWareTestHost({ application: AppClass, manifest })` from `/sdk/testing` for actual class instances, windows, routes, commands and preferences. `host.application` is the live instance after rendering. Supply trusted host fixtures through the documented test-host configuration, not app-constructor clients. Native keyboard events use the production input boundary.
+Test with `createSynWareTestHost({ application: AppClass, manifest })` from `@syndromatic/syncloudos/sdk/testing`, which gives you real class instances, windows, routes, commands and preferences. `host.application` is the live instance after rendering. Supply host fixtures through the test host's options, not through the application's constructor. Native keyboard events go through the production keyboard routing. See [Testing a SynWare](testing-synware.md).
 
 Before shipping the migration:
 
 1. Typecheck, validate and build against the packed SDK and matching MCP archives.
-2. Launch the actual application module; class-only tests do not catch duplicate named lifecycle exports.
-3. Exercise controls, shortcuts and modal responder transitions, including disabled/checked state after external model changes.
+2. Launch the real application module; tests of the class alone won't catch a duplicate named export such as `routes`.
+3. Try controls, shortcuts and modal responder changes, including disabled and checked states after the model changes elsewhere.
 4. Open a secondary window and inspect its visible content, not just its registration. Close it, restore it and exercise the application's termination decision.
 5. Verify existing FX, reduced motion, appearance, glyph contrast and responsive layouts in the browser.
-6. Check a fresh persistence namespace, selected integration owners and document/recovery boundaries. Do not preserve old identity data through aliases.
-7. Retain exact receipts and report missing authentication/backend prerequisites rather than claiming an unexercised successful sign-in.
+6. Check the fresh persistence namespace, the selected integration owners, and which documents and recovery data each application can reach. Don't carry old identity data over through aliases.
+7. Keep the build receipts. If authentication or a backend wasn't available, say so instead of reporting a sign-in you didn't test.

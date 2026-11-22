@@ -1,6 +1,6 @@
 # SynCloudOS framework guide
 
-SynCloudOS is an application framework for the web, in the tradition of Cocoa. These guides take you from a first site to the details of every layer.
+SynCloudOS is an application framework for building desktop-class applications on the web. Start with your first site, then go as deep into each layer as you need.
 
 ## Start here
 
@@ -37,8 +37,8 @@ SynCloudOS is an application framework for the web, in the tradition of Cocoa. T
 | Guide | Read it to |
 | --- | --- |
 | [NSE controls](nse-controls.md) | Find the control for a job |
-| [Scroll and image view access](view-access.md) | Observe NSClipView bounds and animate a layer-backed NSImageView |
-| [Named template images](named-images.md) | Look up NSImage navigation templates and inherit the control’s colour |
+| [Scroll and image view access](view-access.md) | Observe a scroll view's visible bounds and animate a layer-backed image view |
+| [Named template images](named-images.md) | Look up named navigation templates that take the control's colour |
 | [Paths and workspace](path-control-and-workspace.md) | Present file locations and workspace artwork |
 | [Source-list chrome](nse/source-list-chrome.md) | Compose a source-list body inside system-owned application chrome |
 | [Controllers](controllers.md) | Manage collections, trees and preferences |
@@ -57,9 +57,9 @@ The [FX overview](fx/README.md) introduces the frameworks and how they reach a S
 
 [BluetoothFX](fx/bluetooth.md) · [NFCFX](fx/nfc.md) · [SpeechFX](fx/speech.md) · [ContactsFX](fx/contacts.md) · [PassFX](fx/pass.md) · [XRFX](fx/xr.md)
 
-[NetworkFX](fx/network.md) monitors browser path hints. [CryptoFX](fx/crypto.md)
-provides worker-safe CryptoKit-shaped WebCrypto operations. [Route picker](nse/route-picker.md)
-documents the Atmo control for VideoFX remote playback.
+[NetworkFX](fx/network.md) · [CryptoFX](fx/crypto.md) · [DispatchFX](fx/dispatch.md)
+
+The [route picker](nse/route-picker.md) is the control that chooses a remote playback device for VideoFX.
 
 ## Hosting
 
