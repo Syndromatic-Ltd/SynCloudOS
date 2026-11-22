@@ -86,4 +86,71 @@ describe("browser child window host", () => {
       else delete (window as unknown as Record<string, unknown>).documentPictureInPicture;
     }
   });
+
+  it("opens popups at the in-page window's screen position and reports resize/move bounds back", async () => {
+    const frame = document.createElement("iframe");
+    document.body.append(frame);
+    const popup = frame.contentWindow!;
+    const close = vi.spyOn(popup, "close").mockImplementation(() => undefined);
+    const open = vi.spyOn(window, "open").mockReturnValue(popup);
+    const saved = {
+      screenX: Object.getOwnPropertyDescriptor(window, "screenX"),
+      screenY: Object.getOwnPropertyDescriptor(window, "screenY"),
+      outerWidth: Object.getOwnPropertyDescriptor(window, "outerWidth"),
+      innerWidth: Object.getOwnPropertyDescriptor(window, "innerWidth"),
+      outerHeight: Object.getOwnPropertyDescriptor(window, "outerHeight"),
+      innerHeight: Object.getOwnPropertyDescriptor(window, "innerHeight"),
+    };
+    Object.defineProperties(window, {
+      screenX: { value: 100, configurable: true },
+      screenY: { value: 50, configurable: true },
+      outerWidth: { value: 1300, configurable: true },
+      innerWidth: { value: 1280, configurable: true },
+      outerHeight: { value: 900, configurable: true },
+      innerHeight: { value: 800, configurable: true },
+    });
+    Object.defineProperties(popup, {
+      screenX: { value: 580, configurable: true, writable: true },
+      screenY: { value: 340, configurable: true, writable: true },
+      innerWidth: { value: 340, configurable: true, writable: true },
+      innerHeight: { value: 420, configurable: true, writable: true },
+    });
+    const host = createBrowserWindowHost(window, () => null);
+    const events: unknown[] = [];
+    const unsubscribe = host.subscribe(event => events.push(event));
+    try {
+      const binding = await host.bind!("note", {
+        generation: 3,
+        title: "Detached note",
+        bounds: { x: 470, y: 190, width: 340, height: 420 },
+      });
+      // Opener viewport origin is (100 + (1300 - 1280)/2, 50 + (900 - 800)) = (110, 150)
+      expect(open).toHaveBeenCalledWith("about:blank", "_blank", "popup,left=580,top=340,width=340,height=420");
+      expect(binding?.readBounds?.()).toEqual({ x: 470, y: 190, width: 340, height: 420 });
+
+      Object.defineProperties(popup, {
+        screenX: { value: 640, configurable: true, writable: true },
+        screenY: { value: 380, configurable: true, writable: true },
+        innerWidth: { value: 520, configurable: true, writable: true },
+        innerHeight: { value: 600, configurable: true, writable: true },
+      });
+      popup.dispatchEvent(new popup.Event("resize"));
+      expect(events).toContainEqual({
+        kind: "boundsChanged",
+        windowId: "note",
+        generation: 3,
+        bounds: { x: 530, y: 230, width: 520, height: 600 },
+      });
+      expect(binding?.readBounds?.()).toEqual({ x: 530, y: 230, width: 520, height: 600 });
+      await host.unbind!("note", 3);
+    } finally {
+      unsubscribe();
+      frame.remove();
+      open.mockRestore();
+      close.mockRestore();
+      for (const [key, desc] of Object.entries(saved)) {
+        if (desc) Object.defineProperty(window, key, desc);
+      }
+    }
+  });
 });

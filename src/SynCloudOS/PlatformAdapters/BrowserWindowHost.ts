@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
-import { createStageWindowHost, type WindowHostCapabilities, type WindowHostEnvironment, type WindowHostEvent, type WindowSurfaceBinding } from "../SynCloudOS";
+import { createStageWindowHost, type WindowBounds, type WindowHostCapabilities, type WindowHostEnvironment, type WindowHostEvent, type WindowSurfaceBinding } from "../SynCloudOS";
 
 const stylesheet = "style, link[rel~=stylesheet]";
 
@@ -91,10 +91,24 @@ export function createBrowserWindowHost(
       if (bindings.has(windowId)) return null;
       const width = Math.max(120, Math.round(bounds.width));
       const height = Math.max(120, Math.round(bounds.height));
+      const openerOrigin = () => {
+        const screenX = Number.isFinite(browser.screenX) ? browser.screenX : 0;
+        const screenY = Number.isFinite(browser.screenY) ? browser.screenY : 0;
+        const chromeLeft = Number.isFinite(browser.outerWidth) && Number.isFinite(browser.innerWidth)
+          ? Math.max(0, Math.round((browser.outerWidth - browser.innerWidth) / 2))
+          : 0;
+        const chromeTop = Number.isFinite(browser.outerHeight) && Number.isFinite(browser.innerHeight)
+          ? Math.max(0, Math.round(browser.outerHeight - browser.innerHeight))
+          : 0;
+        return { x: screenX + chromeLeft, y: screenY + chromeTop };
+      };
+      const originAtOpen = openerOrigin();
+      const left = Math.round(originAtOpen.x + bounds.x);
+      const top = Math.round(originAtOpen.y + bounds.y);
       // Browser popups always own the OS frame (titlebar + working minimise/maximise/close),
       // so we open a standard popup synchronously while user activation is live and mark it
       // nativeChrome: true so SynCloudOS never draws a duplicate titlebar underneath it.
-      const popup = browser.open("about:blank", "_blank", `popup,width=${width},height=${height}`);
+      const popup = browser.open("about:blank", "_blank", `popup,left=${left},top=${top},width=${width},height=${height}`);
       const nativeChrome = true;
       if (!popup || popup.closed) return null;
       let element: HTMLElement;
@@ -121,8 +135,28 @@ export function createBrowserWindowHost(
         popup.close();
         throw error;
       }
-      const surface = Object.freeze({ windowId, generation, element, nativeChrome });
+      const readBounds = (): WindowBounds | null => {
+        if (popup.closed) return null;
+        const w = Math.round(popup.innerWidth);
+        const h = Math.round(popup.innerHeight);
+        if (!Number.isFinite(w) || !Number.isFinite(h) || w < 120 || h < 120) return null;
+        const origin = openerOrigin();
+        const x = Number.isFinite(popup.screenX) ? Math.round(popup.screenX - origin.x) : Math.round(bounds.x);
+        const y = Number.isFinite(popup.screenY) ? Math.round(popup.screenY - origin.y) : Math.round(bounds.y);
+        return { x, y, width: w, height: h };
+      };
+      let lastBounds = readBounds();
+      const boundsDiffer = (a: WindowBounds | null, b: WindowBounds) =>
+        !a || a.x !== b.x || a.y !== b.y || a.width !== b.width || a.height !== b.height;
+      const surface = Object.freeze({ windowId, generation, element, nativeChrome, readBounds });
       const current = () => bindings.get(windowId)?.surface === surface;
+      const syncBounds = () => {
+        if (!current()) return;
+        const next = readBounds();
+        if (!next || !boundsDiffer(lastBounds, next)) return;
+        lastBounds = next;
+        publish({ kind: "boundsChanged", windowId, generation, bounds: next });
+      };
       const activate = () => { if (current()) publish({ kind: "activated", windowId, generation }); };
       const deactivate = () => { if (current()) publish({ kind: "deactivated", windowId, generation }); };
       const lost = () => {
@@ -133,6 +167,7 @@ export function createBrowserWindowHost(
       };
       const check = browser.setInterval(() => {
         if (popup.closed || !element.isConnected) lost();
+        else syncBounds();
       }, 250);
       let releaseObserver: MutationObserver | undefined;
       let released!: () => void;
@@ -145,6 +180,7 @@ export function createBrowserWindowHost(
         releaseObserver?.disconnect();
         popup.removeEventListener("focus", activate);
         popup.removeEventListener("blur", deactivate);
+        popup.removeEventListener("resize", syncBounds);
         popup.removeEventListener("pagehide", lost);
         browser.removeEventListener("pagehide", openerLost);
         if (close && !popup.closed) popup.close();
@@ -167,6 +203,7 @@ export function createBrowserWindowHost(
       bindings.set(windowId, { surface, release, unbind });
       popup.addEventListener("focus", activate);
       popup.addEventListener("blur", deactivate);
+      popup.addEventListener("resize", syncBounds);
       // Browsers cannot await a veto when the user closes their native caption.
       // Treat disposal of that document as loss of presentation, never loss of data.
       popup.addEventListener("pagehide", lost);

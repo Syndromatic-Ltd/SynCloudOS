@@ -1078,9 +1078,32 @@ export class WindowManager {
   }
 
   async reattach(windowId: string): Promise<void> {
+    const activeTransfer = this.#surfaceTransfers.get(windowId);
+    const syncedBounds = activeTransfer?.binding?.readBounds?.();
+    if (syncedBounds) this.#applyDetachedBounds(windowId, syncedBounds, false);
     const transfer = this.#retireSurface(windowId);
     if (transfer?.binding) this.#publish(false);
     if (transfer) await this.#unbindSurface(windowId, transfer.generation);
+  }
+
+  #applyDetachedBounds(windowId: string, requested: WindowBounds, publish: boolean): void {
+    const controller = this.#controllers.get(windowId);
+    if (!controller || controller.record.state !== "open") return;
+    const screen = this.dependencies.screen.getCurrentSnapshot();
+    const maxWidth = screen.geometryState === "unavailable" ? requested.width : Math.max(controller.record.minimumSize.width, screen.workArea.width);
+    const maxHeight = screen.geometryState === "unavailable" ? requested.height : Math.max(controller.record.minimumSize.height, screen.workArea.height);
+    const next = this.#constrainBounds(controller, {
+      x: requested.x,
+      y: requested.y,
+      width: Math.min(requested.width, maxWidth),
+      height: Math.min(requested.height, maxHeight),
+    });
+    if (next === controller.record.bounds) return;
+    controller.replaceGeometry(
+      { ...controller.record, bounds: next },
+      { ...controller.geometryState, normalBounds: next, zoomed: false },
+    );
+    if (publish) this.#publish(false);
   }
 
   #retireSurface(windowId: string) {
@@ -1151,6 +1174,10 @@ export class WindowManager {
         return;
       }
       if (!transfer.binding || this.#closeReservations.has(event.windowId)) return;
+      if (event.kind === "boundsChanged") {
+        this.#applyDetachedBounds(event.windowId, event.bounds, true);
+        return;
+      }
       if (event.kind === "activated" || event.kind === "deactivated") {
         const windows = this.#orderedControllers().filter(({ id, record }) =>
           record.state === "open" && this.presentingSurface(id) === transfer.binding);

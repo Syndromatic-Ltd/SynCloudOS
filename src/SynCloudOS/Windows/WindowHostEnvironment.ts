@@ -30,6 +30,7 @@ export interface WindowHostCapabilities {
 export type WindowHostEvent =
   | { readonly kind: "activated" | "deactivated" | "closeRequested"; readonly windowId: string; readonly generation?: number }
   | { readonly kind: "surfaceLost"; readonly windowId: string; readonly generation: number }
+  | { readonly kind: "boundsChanged"; readonly windowId: string; readonly generation: number; readonly bounds: WindowBounds }
   | { readonly kind: "fullScreenChanged"; readonly windowId: string; readonly state: WindowFullScreenState | "refused" }
   | { readonly kind: "titlebarAreaChanged"; readonly windowId: string; readonly rect: DOMRectReadOnly | null };
 
@@ -45,6 +46,8 @@ export interface WindowSurfaceBinding {
   readonly element: HTMLElement;
   /** True when the host surface already supplies native OS window chrome (titlebar + window buttons). */
   readonly nativeChrome?: boolean;
+  /** Reads the host surface's current bounds in opener-viewport coordinates, if available. */
+  readonly readBounds?: () => WindowBounds | null;
 }
 
 export interface WindowHostEnvironment {
