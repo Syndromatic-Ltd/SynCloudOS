@@ -15,6 +15,7 @@ reference/
 .env.local
 .env.*.local
 docs/superpowers/
+plans/
 tests/atmo-lab/
 *.tsbuildinfo
 npm-debug.log*
