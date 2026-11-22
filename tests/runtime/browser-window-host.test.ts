@@ -48,13 +48,13 @@ describe("browser child window host", () => {
     }
   });
 
-  it("prefers Document Picture-in-Picture when available and marks it chromeless", async () => {
+  it("always opens a native-chrome popup so browser windows keep OS minimise/maximise without duplicate titlebars", async () => {
     const frame = document.createElement("iframe");
     document.body.append(frame);
-    const pipWindow = frame.contentWindow!;
-    const close = vi.spyOn(pipWindow, "close").mockImplementation(() => undefined);
-    const requestWindow = vi.fn().mockResolvedValue(pipWindow);
-    const open = vi.spyOn(window, "open");
+    const popup = frame.contentWindow!;
+    const close = vi.spyOn(popup, "close").mockImplementation(() => undefined);
+    const requestWindow = vi.fn();
+    const open = vi.spyOn(window, "open").mockReturnValue(popup);
     const previousSecure = Object.getOwnPropertyDescriptor(window, "isSecureContext");
     const previousPip = Object.getOwnPropertyDescriptor(window, "documentPictureInPicture");
     Object.defineProperty(window, "isSecureContext", { value: true, configurable: true });
@@ -69,10 +69,11 @@ describe("browser child window host", () => {
         title: "Detached note",
         bounds: { x: 0, y: 0, width: 340, height: 420 },
       });
-      expect(requestWindow).toHaveBeenCalledWith({ width: 340, height: 420, disallowReturnToOpener: true });
-      expect(open).not.toHaveBeenCalled();
-      expect(binding?.nativeChrome).toBe(false);
-      expect(pipWindow.document.title).toBe("Detached note");
+      expect(requestWindow).not.toHaveBeenCalled();
+      expect(open).toHaveBeenCalledOnce();
+      expect(binding?.nativeChrome).toBe(true);
+      expect(popup.document.compatMode).toBe("CSS1Compat");
+      expect(popup.document.title).toBe("Detached note");
       await host.unbind!("note", 1);
       expect(close).toHaveBeenCalledOnce();
     } finally {

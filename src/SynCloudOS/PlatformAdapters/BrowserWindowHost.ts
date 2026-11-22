@@ -61,15 +61,6 @@ interface BrowserBinding {
   readonly unbind: () => Promise<void>;
 }
 
-interface DocumentPictureInPictureApi {
-  readonly window: Window | null;
-  requestWindow(options?: {
-    readonly width?: number;
-    readonly height?: number;
-    readonly disallowReturnToOpener?: boolean;
-  }): Promise<Window>;
-}
-
 /** Browser popups are opened with an inherited origin and share one runtime. */
 export function createBrowserWindowHost(
   browser: Window | null,
@@ -100,31 +91,12 @@ export function createBrowserWindowHost(
       if (bindings.has(windowId)) return null;
       const width = Math.max(120, Math.round(bounds.width));
       const height = Math.max(120, Math.round(bounds.height));
-      // Prefer Document Picture-in-Picture when available and idle so the detached
-      // window is a chromeless OS surface with no redundant browser URL bar or titlebar.
-      const pip = browser.isSecureContext
-        ? (browser as Window & { readonly documentPictureInPicture?: DocumentPictureInPictureApi }).documentPictureInPicture
-        : undefined;
-      let popup: Window | null = null;
-      let nativeChrome = true;
-      if (pip && typeof pip.requestWindow === "function" && !pip.window) {
-        try {
-          popup = await pip.requestWindow({ width, height, disallowReturnToOpener: true });
-          nativeChrome = false;
-        } catch {
-          popup = null;
-        }
-      }
-      if (!popup || popup.closed) {
-        // Runs before any await when PiP is unavailable so browser user activation stays live.
-        popup = browser.open("about:blank", "_blank", `popup,width=${width},height=${height}`);
-        nativeChrome = true;
-      }
+      // Browser popups always own the OS frame (titlebar + working minimise/maximise/close),
+      // so we open a standard popup synchronously while user activation is live and mark it
+      // nativeChrome: true so SynCloudOS never draws a duplicate titlebar underneath it.
+      const popup = browser.open("about:blank", "_blank", `popup,width=${width},height=${height}`);
+      const nativeChrome = true;
       if (!popup || popup.closed) return null;
-      if (bindings.has(windowId)) {
-        popup.close();
-        return null;
-      }
       let element: HTMLElement;
       let releaseStyles: () => void;
       try {
