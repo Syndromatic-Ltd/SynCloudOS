@@ -18,7 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, type ReactNode } from "react";
+import { useContext, useEffect, type ReactNode } from "react";
+import { isNSEHTMLElement } from "../Focus/domRealm";
+import { PresentingDocumentContext } from "../Overlays/presentingDocument";
 import { rubberBandOffset } from "./index";
 
 export interface RubberBandProviderProps {
@@ -83,8 +85,11 @@ export function RubberBandProvider({
   coeff = 0.55,
   settleDelay = 90
 }: RubberBandProviderProps) {
+  const presentingDocument = useContext(PresentingDocumentContext);
   useEffect(() => {
-    if (!enabled || typeof document === "undefined") return;
+    const doc = presentingDocument ?? (typeof document !== "undefined" ? document : null);
+    if (!enabled || !doc) return;
+    const view = doc.defaultView ?? window;
     const states = new WeakMap<HTMLElement, BounceState>();
     // A WeakMap isn't iterable, so track live bounce states separately purely so
     // pending timers/frames and inline transforms can be cleaned on unmount.
@@ -101,8 +106,8 @@ export function RubberBandProvider({
     const inFlowChildren = (element: HTMLElement): HTMLElement[] | null => {
       const kids: HTMLElement[] = [];
       const collect = (child: Element): boolean => {
-        if (!(child instanceof HTMLElement)) return true;
-        const style = getComputedStyle(child);
+        if (!isNSEHTMLElement(child)) return true;
+        const style = view.getComputedStyle(child);
         if (style.position === "absolute" || style.position === "fixed") return true;
         if (style.transform !== "none") return false;
         if (style.display === "contents") {
@@ -121,11 +126,11 @@ export function RubberBandProvider({
     };
 
     const findScrollable = (start: EventTarget | null): HTMLElement | null => {
-      let element = start instanceof HTMLElement ? start : null;
-      while (element && element !== document.body && element !== document.documentElement) {
+      let element = isNSEHTMLElement(start) ? start : null;
+      while (element && element !== doc.body && element !== doc.documentElement) {
         const mark = element.dataset.nseRubberband;
         if (mark === "off" || mark === "managed") return null;
-        const style = getComputedStyle(element);
+        const style = view.getComputedStyle(element);
         const overflowY = style.overflowY;
         const scrollable = overflowY === "auto" || overflowY === "scroll" || overflowY === "overlay";
         if (scrollable && element.scrollHeight > element.clientHeight + 1) {
@@ -143,7 +148,7 @@ export function RubberBandProvider({
 
     const stopBounceLoop = (state: BounceState) => {
       if (state.frame !== 0) {
-        cancelAnimationFrame(state.frame);
+        view.cancelAnimationFrame(state.frame);
         state.frame = 0;
       }
     };
@@ -161,7 +166,7 @@ export function RubberBandProvider({
       state.raw = 0;
       state.offset = 0;
       stopBounceLoop(state);
-      window.clearTimeout(state.timer);
+      view.clearTimeout(state.timer);
       state.element.style.removeProperty("--nse-rubber-band-offset-y");
       for (const kid of state.kids) {
         kid.style.transition = "";
@@ -171,7 +176,7 @@ export function RubberBandProvider({
     };
 
     const settle = (state: BounceState) => {
-      window.clearTimeout(state.timer);
+      view.clearTimeout(state.timer);
       const startOffset = state.offset;
       state.raw = 0;
       stopBounceLoop(state);
@@ -191,9 +196,9 @@ export function RubberBandProvider({
           return;
         }
         paint(state, nextOffset);
-        state.frame = window.requestAnimationFrame(tick);
+        state.frame = view.requestAnimationFrame(tick);
       };
-      state.frame = window.requestAnimationFrame(tick);
+      state.frame = view.requestAnimationFrame(tick);
     };
 
     // Rubber-band step for one element. `delta` is positive when scrolling toward the bottom.
@@ -236,7 +241,7 @@ export function RubberBandProvider({
       if (!state) return false;
 
       state.raw = raw;
-      window.clearTimeout(state.timer);
+      view.clearTimeout(state.timer);
       active.add(state);
       paint(state, rubberBandOffset(raw, size, coeff));
       return true;
@@ -245,9 +250,9 @@ export function RubberBandProvider({
     const scheduleSettle = (element: HTMLElement) => {
       const state = states.get(element);
       if (!state) return;
-      window.clearTimeout(state.timer);
+      view.clearTimeout(state.timer);
       active.add(state);
-      state.timer = window.setTimeout(() => settle(state), settleDelay);
+      state.timer = view.setTimeout(() => settle(state), settleDelay);
     };
 
     const handleWheel = (event: WheelEvent) => {
@@ -282,21 +287,21 @@ export function RubberBandProvider({
 
     const opts = { passive: false, capture: true } as AddEventListenerOptions;
     const passiveOpts = { passive: true, capture: true } as AddEventListenerOptions;
-    document.addEventListener("wheel", handleWheel, opts);
-    document.addEventListener("touchstart", handleTouchStart, passiveOpts);
-    document.addEventListener("touchmove", handleTouchMove, opts);
-    document.addEventListener("touchend", endTouch, passiveOpts);
-    document.addEventListener("touchcancel", endTouch, passiveOpts);
+    doc.addEventListener("wheel", handleWheel, opts);
+    doc.addEventListener("touchstart", handleTouchStart, passiveOpts);
+    doc.addEventListener("touchmove", handleTouchMove, opts);
+    doc.addEventListener("touchend", endTouch, passiveOpts);
+    doc.addEventListener("touchcancel", endTouch, passiveOpts);
     return () => {
-      document.removeEventListener("wheel", handleWheel, { capture: true } as EventListenerOptions);
-      document.removeEventListener("touchstart", handleTouchStart, { capture: true } as EventListenerOptions);
-      document.removeEventListener("touchmove", handleTouchMove, { capture: true } as EventListenerOptions);
-      document.removeEventListener("touchend", endTouch, { capture: true } as EventListenerOptions);
-      document.removeEventListener("touchcancel", endTouch, { capture: true } as EventListenerOptions);
+      doc.removeEventListener("wheel", handleWheel, { capture: true } as EventListenerOptions);
+      doc.removeEventListener("touchstart", handleTouchStart, { capture: true } as EventListenerOptions);
+      doc.removeEventListener("touchmove", handleTouchMove, { capture: true } as EventListenerOptions);
+      doc.removeEventListener("touchend", endTouch, { capture: true } as EventListenerOptions);
+      doc.removeEventListener("touchcancel", endTouch, { capture: true } as EventListenerOptions);
       for (const state of active) clearBounce(state);
       active.clear();
     };
-  }, [enabled, coeff, settleDelay]);
+  }, [enabled, coeff, settleDelay, presentingDocument]);
 
   return children as ReactNode;
 }

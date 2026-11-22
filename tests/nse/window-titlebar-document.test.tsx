@@ -25,6 +25,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { ViewAppearanceBoundary } from "../../src/NSE/Appearance/NSEAppearanceProvider";
 import { NSEAppearance } from "../../src/NSE/Appearance/NSEAppearance";
 import { WindowTitlebarView } from "../../src/NSE/Windows/WindowTitlebarView";
+import { WindowTitlebarControls } from "../../src/NSE/Windows/WindowTitlebarControls";
+import { WindowTitlebarDocumentContext } from "../../src/NSE/Windows/windowTitlebarContext";
 import { ApplicationMenuToolbarButton, WindowApplicationMenuContext } from "../../src/NSE/Toolbars/ApplicationMenuToolbarButton";
 import { nseTopBarGlyphs } from "../../src/NSE/Windows/Chrome/topBarAssets";
 
@@ -89,5 +91,44 @@ describe("Window titlebar document and controls", () => {
     expect(new NSEAppearance("dark").name).toBe("dark");
     expect(() => new NSEAppearance("aqua" as never)).toThrow(TypeError);
     expect(() => new NSEAppearance("darkAqua" as never)).toThrow(TypeError);
+  });
+
+  it("omits duplicate titlebar chrome on native-chrome browser popups while keeping reattach and toolbars", () => {
+    const record = {
+      id: "win-1",
+      title: "Detached Note",
+      role: "standard",
+      state: "open",
+      isKey: true,
+      isMain: true,
+      level: 0,
+      zIndex: 1,
+      style: ["titled", "closable", "minimisable", "resizable"],
+      bounds: { x: 0, y: 0, width: 340, height: 420 },
+      fullScreen: "off",
+      collectionBehavior: "default",
+      workspaceId: "ws-1",
+      content: { rendererId: "application", mountKey: "m-1" },
+    } as never;
+    const transfer = <button type="button" aria-label="Reattach to Webspring">↙</button>;
+    const plain = render(
+      <WindowTitlebarDocumentContext.Provider value={{ title: "Detached Note", subtitle: "", documentEdited: false, hasToolbar: false }}>
+        <WindowTitlebarControls record={record} dirty={false} nativeChrome dispatchCommand={vi.fn()} presentationControl={transfer} />
+      </WindowTitlebarDocumentContext.Provider>,
+    );
+    expect(plain.container.querySelector("[data-window-titlebar]")).toBeNull();
+    expect(plain.container.querySelector("[data-window-control]")).toBeNull();
+    expect(screen.getByRole("button", { name: "Reattach to Webspring" })).toBeTruthy();
+    plain.unmount();
+
+    const withToolbar = render(
+      <WindowTitlebarDocumentContext.Provider value={{ title: "Detached Note", subtitle: "", documentEdited: false, hasToolbar: true }}>
+        <WindowTitlebarControls record={record} dirty={false} nativeChrome dispatchCommand={vi.fn()} presentationControl={transfer} />
+      </WindowTitlebarDocumentContext.Provider>,
+    );
+    expect(withToolbar.container.querySelector("[data-window-titlebar]")).not.toBeNull();
+    expect(withToolbar.container.querySelector("[data-window-control]")).toBeNull();
+    expect(withToolbar.container.querySelector<HTMLElement>("[data-window-title]")?.hidden).toBe(true);
+    expect(screen.getByRole("button", { name: "Reattach to Webspring" })).toBeTruthy();
   });
 });

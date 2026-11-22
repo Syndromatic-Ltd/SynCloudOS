@@ -43,6 +43,8 @@ export interface WindowViewProps {
   ) => Promise<unknown>;
   readonly moveHandleProps?: React.HTMLAttributes<HTMLElement>;
   readonly presentationControl?: React.ReactNode;
+  readonly detached?: boolean;
+  readonly nativeChrome?: boolean;
   readonly resizeHandleProps?: Readonly<Partial<Record<WindowResizeEdge, React.HTMLAttributes<HTMLElement>>>>;
   readonly children: React.ReactNode;
 }

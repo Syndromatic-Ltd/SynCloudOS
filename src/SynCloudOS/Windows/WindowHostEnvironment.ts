@@ -43,6 +43,8 @@ export interface WindowSurfaceBinding {
   readonly windowId: string;
   readonly generation: number;
   readonly element: HTMLElement;
+  /** True when the host surface already supplies native OS window chrome (titlebar + window buttons). */
+  readonly nativeChrome?: boolean;
 }
 
 export interface WindowHostEnvironment {

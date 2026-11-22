@@ -17,6 +17,7 @@ describe("browser child window host", () => {
     try {
       const binding = await host.bind!("editor", setup);
       expect(binding?.element.isConnected).toBe(true);
+      expect(binding?.nativeChrome).toBe(true);
       expect(popup.document.compatMode).toBe("CSS1Compat");
       expect(popup.document.doctype?.name).toBe("html");
       expect(popup.document.title).toBe("Native editor");
@@ -44,6 +45,44 @@ describe("browser child window host", () => {
       initialStyle.remove();
       open.mockRestore();
       close.mockRestore();
+    }
+  });
+
+  it("prefers Document Picture-in-Picture when available and marks it chromeless", async () => {
+    const frame = document.createElement("iframe");
+    document.body.append(frame);
+    const pipWindow = frame.contentWindow!;
+    const close = vi.spyOn(pipWindow, "close").mockImplementation(() => undefined);
+    const requestWindow = vi.fn().mockResolvedValue(pipWindow);
+    const open = vi.spyOn(window, "open");
+    const previousSecure = Object.getOwnPropertyDescriptor(window, "isSecureContext");
+    const previousPip = Object.getOwnPropertyDescriptor(window, "documentPictureInPicture");
+    Object.defineProperty(window, "isSecureContext", { value: true, configurable: true });
+    Object.defineProperty(window, "documentPictureInPicture", {
+      value: { window: null, requestWindow },
+      configurable: true,
+    });
+    const host = createBrowserWindowHost(window, () => null);
+    try {
+      const binding = await host.bind!("note", {
+        generation: 1,
+        title: "Detached note",
+        bounds: { x: 0, y: 0, width: 340, height: 420 },
+      });
+      expect(requestWindow).toHaveBeenCalledWith({ width: 340, height: 420, disallowReturnToOpener: true });
+      expect(open).not.toHaveBeenCalled();
+      expect(binding?.nativeChrome).toBe(false);
+      expect(pipWindow.document.title).toBe("Detached note");
+      await host.unbind!("note", 1);
+      expect(close).toHaveBeenCalledOnce();
+    } finally {
+      frame.remove();
+      open.mockRestore();
+      close.mockRestore();
+      if (previousSecure) Object.defineProperty(window, "isSecureContext", previousSecure);
+      else delete (window as unknown as Record<string, unknown>).isSecureContext;
+      if (previousPip) Object.defineProperty(window, "documentPictureInPicture", previousPip);
+      else delete (window as unknown as Record<string, unknown>).documentPictureInPicture;
     }
   });
 });

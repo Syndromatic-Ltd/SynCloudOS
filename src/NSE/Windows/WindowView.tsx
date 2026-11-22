@@ -82,6 +82,8 @@ function WindowFrame({
   zoomed = false,
   blocked,
   dirty,
+  detached = false,
+  nativeChrome = false,
   hasShadow = false,
   className = "",
   titleBar,
@@ -106,7 +108,7 @@ function WindowFrame({
   const appearanceProjection = titlebarDocument?.appearance ? projection : undefined;
   const contentLayoutProperties = useNSEContentLayoutProperties();
   const [surfaceNode, setSurfaceNode] = React.useState<HTMLDivElement | null>(null);
-  const smoothSurfaceRequest = windowSmoothSurfaceRequest(record.smoothSurface ?? null);
+  const smoothSurfaceRequest = detached ? "off" : windowSmoothSurfaceRequest(record.smoothSurface ?? null);
   useSmoothSurface(surfaceNode, smoothSurfaceRequest);
   if (record.state !== "open" || !presentation.visible) return null;
   const modal = record.role === "modal" || record.role === "sheet";
@@ -136,6 +138,8 @@ function WindowFrame({
       data-window-main={record.isMain ? "true" : "false"}
       data-window-dirty={dirty ? "true" : "false"}
       data-window-presentation={presentation.kind}
+      data-window-detached={detached ? "true" : undefined}
+      data-window-native-chrome={nativeChrome ? "true" : undefined}
       data-window-zoomed={zoomed ? "true" : "false"}
       data-window-level={record.level}
       data-window-blocked={blocked ? "true" : "false"}
@@ -157,9 +161,10 @@ function WindowFrame({
         top: 0,
         width: "100%",
         height: "100%",
+        ...(detached ? { borderRadius: 0 } : {}),
       }}
     >
-      {hasShadow ? (
+      {hasShadow && !detached ? (
         <AppearanceNineSlice
           kind="window-shadow"
           className="nse-window__shadow-layer"
@@ -173,7 +178,7 @@ function WindowFrame({
         data-full-size-content={titlebarDocument?.fullSizeContentView ? "" : undefined}
         style={{ ...smoothSurfaceProps.style,
           ...(titlebarDocument?.backgroundColour ? { backgroundColor: titlebarDocument.backgroundColour } : titlebarDocument?.isOpaque === false ? { backgroundColor: "transparent" } : {}),
-          ...(titlebarDocument?.cornerRadius != null ? { borderRadius: titlebarDocument.cornerRadius } : {}) }}
+          ...(detached ? { borderRadius: 0 } : titlebarDocument?.cornerRadius != null ? { borderRadius: titlebarDocument.cornerRadius } : {}) }}
         data-window-surface=""
       >
         <WindowTitlebarDocumentContext.Provider value={titlebarDocument}>{titleBar}</WindowTitlebarDocumentContext.Provider>

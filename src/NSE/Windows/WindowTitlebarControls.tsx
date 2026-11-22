@@ -33,6 +33,7 @@ export interface WindowTitlebarControlsProps {
   readonly dispatchCommand: WindowViewProps["dispatchCommand"];
   readonly moveHandleProps?: HTMLAttributes<HTMLElement>;
   readonly presentationControl?: React.ReactNode;
+  readonly nativeChrome?: boolean;
   readonly controls?: readonly WindowControlKind[];
 
   readonly variant?: "standard" | "panel" | "hud";
@@ -91,26 +92,41 @@ export function WindowTitlebarControls({
   dispatchCommand,
   moveHandleProps,
   presentationControl,
+  nativeChrome = false,
   controls = ["close", "minimise", "zoom", "fullScreen"],
   variant = "standard",
 }: WindowTitlebarControlsProps) {
   const document = React.useContext(WindowTitlebarDocumentContext);
   const host = React.useContext(WindowTitlebarHostContext);
+  // A browser popup already owns the OS titlebar and native close/min/zoom chrome.
+  // Omit the duplicate SynCloudOS titlebar unless the window has toolbar items to host;
+  // when it does, suppress duplicate traffic lights and duplicate title text.
+  if (nativeChrome && !document?.hasToolbar) {
+    return presentationControl
+      ? <div className="nse-window__detached-transfer" data-window-no-drag="">{presentationControl}</div>
+      : null;
+  }
+  const effectiveDocument = nativeChrome
+    ? { ...(document ?? { title: record.title, subtitle: "", documentEdited: dirty }), titleVisibility: "hidden" as const }
+    : (document ?? { title: record.title, subtitle: "", documentEdited: dirty });
+  const drawnControls = nativeChrome ? presentationControl : (
+    <><div data-nse-part="accessory" className="nse-window__controls" data-syncloudos-focus-chrome="">
+      {controls.includes("close") && record.style.includes("closable") ? (
+        <WindowControl hud={variant === "hud"} kind="close" record={record} dirty={dirty} dispatchCommand={dispatchCommand} />
+      ) : null}
+      {controls.includes("minimise") && record.style.includes("minimisable") ? (
+        <WindowControl kind="minimise" record={record} dirty={dirty} dispatchCommand={dispatchCommand} />
+      ) : null}
+      {controls.includes("zoom") && record.collectionBehavior !== "fullScreenPrimary" && record.style.includes("zoomable") ? (
+        <WindowControl kind="zoom" record={record} dirty={dirty} dispatchCommand={dispatchCommand} />
+      ) : null}
+      {controls.includes("fullScreen") && record.collectionBehavior === "fullScreenPrimary" ? <WindowControl kind="fullScreen" record={record} dirty={dirty} dispatchCommand={dispatchCommand} /> : null}
+    </div>{presentationControl}</>
+  );
   return (
-    <WindowTitlebarView document={document ?? { title: record.title, subtitle: "", documentEdited: dirty }}
+    <WindowTitlebarView document={effectiveDocument}
       material={document?.texturedBackground ? "metal" : document?.titlebarPresentation === "floating" ? "cumulus" : "standard"} isKeyWindow={record.isKey} titleId={`${record.id}-title`} variant={variant} moveHandleProps={moveHandleProps}
       onSlotsChange={host?.setSlots}
-      controls={<><div data-nse-part="accessory" className="nse-window__controls" data-syncloudos-focus-chrome="">
-        {controls.includes("close") && record.style.includes("closable") ? (
-          <WindowControl hud={variant === "hud"} kind="close" record={record} dirty={dirty} dispatchCommand={dispatchCommand} />
-        ) : null}
-        {controls.includes("minimise") && record.style.includes("minimisable") ? (
-          <WindowControl kind="minimise" record={record} dirty={dirty} dispatchCommand={dispatchCommand} />
-        ) : null}
-        {controls.includes("zoom") && record.collectionBehavior !== "fullScreenPrimary" && record.style.includes("zoomable") ? (
-          <WindowControl kind="zoom" record={record} dirty={dirty} dispatchCommand={dispatchCommand} />
-        ) : null}
-        {controls.includes("fullScreen") && record.collectionBehavior === "fullScreenPrimary" ? <WindowControl kind="fullScreen" record={record} dirty={dirty} dispatchCommand={dispatchCommand} /> : null}
-      </div>{presentationControl}</>} />
+      controls={drawnControls} />
   );
 }

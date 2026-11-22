@@ -82,8 +82,35 @@
 .nse-window-view[data-window-frame="frameless"],
 :where(:scope):is(.nse-window-view[data-window-frame="frameless"]),
 .nse-window-view[data-window-frame="frameless"] .nse-window__surface,
-:where(:scope):is(.nse-window-view[data-window-frame="frameless"]) .nse-window__surface {
+:where(:scope):is(.nse-window-view[data-window-frame="frameless"]) .nse-window__surface,
+.nse-window-view[data-window-detached="true"],
+:where(:scope):is(.nse-window-view[data-window-detached="true"]),
+.nse-window-view[data-window-detached="true"] > .nse-window__surface,
+:where(:scope):is(.nse-window-view[data-window-detached="true"]) > .nse-window__surface {
   border: 0;
+  border-radius: 0;
+}
+
+.nse-window__detached-transfer,
+:where(:scope):is(.nse-window__detached-transfer) {
+  position: absolute;
+  z-index: 6;
+  inset-block-start: 8px;
+  inset-inline-end: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: color-mix(in srgb, canvas 76%, transparent);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 18%);
+  opacity: 0.72;
+  transition: opacity 140ms ease;
+}
+
+.nse-window__detached-transfer:is(:hover, :focus-within),
+:where(:scope):is(.nse-window__detached-transfer:is(:hover, :focus-within)) {
+  opacity: 1;
 }
 
 .nse-window__titlebar,

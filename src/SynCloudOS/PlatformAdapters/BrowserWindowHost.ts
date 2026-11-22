@@ -61,6 +61,15 @@ interface BrowserBinding {
   readonly unbind: () => Promise<void>;
 }
 
+interface DocumentPictureInPictureApi {
+  readonly window: Window | null;
+  requestWindow(options?: {
+    readonly width?: number;
+    readonly height?: number;
+    readonly disallowReturnToOpener?: boolean;
+  }): Promise<Window>;
+}
+
 /** Browser popups are opened with an inherited origin and share one runtime. */
 export function createBrowserWindowHost(
   browser: Window | null,
@@ -89,9 +98,33 @@ export function createBrowserWindowHost(
     },
     async bind(windowId, { generation, title, bounds }) {
       if (bindings.has(windowId)) return null;
-      // This runs before the first await so browser user activation is live.
-      const popup = browser.open("about:blank", "_blank", `popup,width=${Math.round(bounds.width)},height=${Math.round(bounds.height)}`);
+      const width = Math.max(120, Math.round(bounds.width));
+      const height = Math.max(120, Math.round(bounds.height));
+      // Prefer Document Picture-in-Picture when available and idle so the detached
+      // window is a chromeless OS surface with no redundant browser URL bar or titlebar.
+      const pip = browser.isSecureContext
+        ? (browser as Window & { readonly documentPictureInPicture?: DocumentPictureInPictureApi }).documentPictureInPicture
+        : undefined;
+      let popup: Window | null = null;
+      let nativeChrome = true;
+      if (pip && typeof pip.requestWindow === "function" && !pip.window) {
+        try {
+          popup = await pip.requestWindow({ width, height, disallowReturnToOpener: true });
+          nativeChrome = false;
+        } catch {
+          popup = null;
+        }
+      }
+      if (!popup || popup.closed) {
+        // Runs before any await when PiP is unavailable so browser user activation stays live.
+        popup = browser.open("about:blank", "_blank", `popup,width=${width},height=${height}`);
+        nativeChrome = true;
+      }
       if (!popup || popup.closed) return null;
+      if (bindings.has(windowId)) {
+        popup.close();
+        return null;
+      }
       let element: HTMLElement;
       let releaseStyles: () => void;
       try {
@@ -104,7 +137,10 @@ export function createBrowserWindowHost(
           destination.close();
         }
         destination.title = title;
+        destination.documentElement.style.height = "100%";
+        destination.body.style.height = "100%";
         destination.body.style.margin = "0";
+        destination.body.style.overflow = "hidden";
         element = destination.createElement("div");
         element.dataset.detachedWindow = windowId;
         destination.body.append(element);
@@ -113,7 +149,7 @@ export function createBrowserWindowHost(
         popup.close();
         throw error;
       }
-      const surface = Object.freeze({ windowId, generation, element });
+      const surface = Object.freeze({ windowId, generation, element, nativeChrome });
       const current = () => bindings.get(windowId)?.surface === surface;
       const activate = () => { if (current()) publish({ kind: "activated", windowId, generation }); };
       const deactivate = () => { if (current()) publish({ kind: "deactivated", windowId, generation }); };

@@ -87,20 +87,23 @@ type ScrollObserver = () => void;
 interface HostObservation {
   readonly observers: Set<ScrollObserver>;
   frame: number;
+  frameView: Window | null;
   readonly listener: () => void;
 }
 
 const observations = new WeakMap<HTMLElement, HostObservation>();
 const claims = new WeakMap<HTMLElement, unknown>();
 
-function schedule(callback: FrameRequestCallback): number {
-  if (typeof requestAnimationFrame === "function") return requestAnimationFrame(callback);
-  return window.setTimeout(() => callback(Date.now()), 0);
+function schedule(host: HTMLElement, callback: FrameRequestCallback): { frame: number; view: Window } {
+  const view = host.ownerDocument.defaultView ?? window;
+  if (typeof view.requestAnimationFrame === "function") return { frame: view.requestAnimationFrame(callback), view };
+  return { frame: view.setTimeout(() => callback(Date.now()), 0), view };
 }
 
-function cancel(frame: number) {
-  if (typeof cancelAnimationFrame === "function") cancelAnimationFrame(frame);
-  else window.clearTimeout(frame);
+function cancel(view: Window | null, frame: number) {
+  const target = view ?? window;
+  if (typeof target.cancelAnimationFrame === "function") target.cancelAnimationFrame(frame);
+  else target.clearTimeout(frame);
 }
 
 export class NSEScrollViewController {
@@ -173,15 +176,19 @@ export class NSEScrollViewController {
       observation = {
         observers,
         frame: 0,
+        frameView: null,
         listener: () => {
           const current = observations.get(this.host);
           if (!current || current.frame !== 0) return;
-          current.frame = schedule(() => {
+          const scheduled = schedule(this.host, () => {
             current.frame = 0;
+            current.frameView = null;
             for (const subscriber of [...current.observers]) {
               try { subscriber(); } catch { /* isolate subscriber failure */ }
             }
           });
+          current.frame = scheduled.frame;
+          current.frameView = scheduled.view;
         }
       };
       observations.set(this.host, observation);
@@ -199,7 +206,7 @@ export class NSEScrollViewController {
       current.observers.delete(observer);
       if (current.observers.size > 0) return;
       this.host.removeEventListener("scroll", current.listener);
-      if (current.frame !== 0) cancel(current.frame);
+      if (current.frame !== 0) cancel(current.frameView, current.frame);
       observations.delete(this.host);
     };
     this.#connections.add(disconnect);

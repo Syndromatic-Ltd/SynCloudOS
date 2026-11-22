@@ -22,6 +22,7 @@ import React, { useEffect, useLayoutEffect, useMemo, useReducer, useRef, useSync
 import { createPortal } from "react-dom";
 import { Presence } from "../../NSE/Animation";
 import { useNSEAppearanceProjection } from "../../NSE/Appearance";
+import { RubberBandProvider } from "../../NSE/Scroll";
 import { PresentingDocumentContext } from "../../NSE/hostComposition";
 import type { WindowSurfaceBinding } from "../../SynCloudOS/SynCloudOS";
 import { useKernelSynCloudOS } from "../../SynCloudOSReact";
@@ -72,9 +73,11 @@ export function WindowLayer(props: WindowLayerProps) {
       const binding = runtime.windows.detachedSurface(id);
       return binding ? [createPortal(
         <PresentingDocumentContext.Provider value={binding.element.ownerDocument}>
-          <div {...appearance} data-syncloudos-runtime-owner={runtime.runtimeId}>
-            <WindowSurfaceLayer {...props} binding={binding} />
-          </div>
+          <RubberBandProvider>
+            <div {...appearance} data-syncloudos-runtime-owner={runtime.runtimeId}>
+              <WindowSurfaceLayer {...props} binding={binding} />
+            </div>
+          </RubberBandProvider>
         </PresentingDocumentContext.Provider>, binding.element, String(binding.generation))]
         : [];
     })}
@@ -208,6 +211,7 @@ function WindowSurfaceLayer({ contentRegistry, onDiagnostic, binding }: WindowLa
             renderers={contentRegistry}
             onDiagnostic={onDiagnostic}
             detached={binding !== null && binding.windowId === windowControllerId}
+            nativeChrome={Boolean(binding !== null && binding.windowId === windowControllerId && binding.nativeChrome)}
           />
         ))}
       </Presence>

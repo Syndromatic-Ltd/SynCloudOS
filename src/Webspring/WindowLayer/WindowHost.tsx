@@ -73,6 +73,7 @@ export interface WindowHostProps {
   readonly renderers: WindowContentRendererRegistry;
   readonly onDiagnostic?: (diagnostic: WindowLayerDiagnostic) => void;
   readonly detached?: boolean;
+  readonly nativeChrome?: boolean;
 }
 
 const viewByRole: Readonly<Record<WindowRole, WindowViewRenderer>> = Object.freeze({
@@ -112,6 +113,7 @@ export function WindowHost({
   renderers,
   onDiagnostic,
   detached = false,
+  nativeChrome = false,
 }: WindowHostProps) {
   const runtime = useKernelSynCloudOS();
   const sharedPresentation = useWindowPresentationContent();
@@ -201,7 +203,12 @@ export function WindowHost({
     layout.setLogicalScreenInsets(presentation.safeAreaInsets, detached ? undefined : screen.layoutViewport);
     if (geometryIsValid) layout.setBounds(presentation.bounds);
   }, [detached, layout, screen.layoutViewport, presentation.safeAreaInsets, presentation.bounds, geometryIsValid]);
+  const dirty = managerSnapshot.dirtyWindowControllerIds.includes(record.id);
   useLayoutEffect(() => hostRef.current ? layout.connectRoot(hostRef.current) : undefined, [layout, record.state, contentRendererAvailable]);
+  useEffect(() => {
+    if (!detached || !hostRef.current) return;
+    hostRef.current.ownerDocument.title = dirty ? `• ${record.title}` : record.title;
+  }, [detached, dirty, record.title]);
   // The window surface clips to its rounded outline, and a fixed-position
   // popup does not escape a clip-path. Menus and popovers opened from the
   // window's content mount here, beside the surface, so they can hang past
@@ -307,7 +314,6 @@ export function WindowHost({
 
   const View = viewByRole[record.role];
   const blocked = managerSnapshot.blockedWindowControllerIds.includes(record.id);
-  const dirty = managerSnapshot.dirtyWindowControllerIds.includes(record.id);
   const parentController = record.parentWindowControllerId
     ? manager.select(record.parentWindowControllerId)
     : null;
@@ -359,6 +365,8 @@ export function WindowHost({
       zoomed={controller.geometryState.zoomed}
       blocked={blocked}
       dirty={dirty}
+      detached={detached}
+      nativeChrome={nativeChrome}
       dispatchCommand={(commandId, payload) => commands.dispatch(commandId, payload, { source: "toolbar" })}
       presentationControl={sharedPresentation && record.role === "standard" && record.content.rendererId === "application" &&
         manager.host.capabilities.separateSurfaces && presentation.kind === "desktop-window" &&

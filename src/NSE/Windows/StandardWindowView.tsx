@@ -45,6 +45,7 @@ export function StandardWindowView(props: WindowViewProps) {
     <WindowTitlebarControls
       record={record}
       dirty={dirty}
+      nativeChrome={props.nativeChrome}
       dispatchCommand={dispatchCommand}
       presentationControl={props.presentationControl}
       moveHandleProps={presentation.movable ? moveHandleProps : undefined}
