@@ -94,6 +94,17 @@ export function AppFocusScope({ runtime, runtimeId, options, children }: { reado
     };
     const focusables = () => Array.from(root?.querySelectorAll<HTMLElement>(focusableSelector) ?? [])
       .filter((element) => !element.hasAttribute("disabled") && !element.closest("[inert], [aria-hidden='true']"));
+    const initialTarget = (isPointer: boolean): HTMLElement | null => {
+      const explicit = root?.querySelector<HTMLElement>("[data-nse-initial-focus]:not([disabled])");
+      if (explicit && !explicit.closest("[inert], [aria-hidden='true']")) return explicit;
+      if (isPointer && root) {
+        const dialog = root.matches('[role="dialog"][tabindex="-1"], [role="alertdialog"][tabindex="-1"]')
+          ? root
+          : root.querySelector<HTMLElement>('[role="dialog"][tabindex="-1"], [role="alertdialog"][tabindex="-1"]');
+        if (dialog) return dialog;
+      }
+      return focusables()[0] ?? null;
+    };
     let redirectingFocus = false;
     const onFocus = (event: FocusEvent) => {
       if (runtime.signal.aborted || redirectingFocus || !trapFocus || !root || !isNSEDOMNode(event.target)
@@ -106,14 +117,15 @@ export function AppFocusScope({ runtime, runtimeId, options, children }: { reado
       const targetScopeId = targetScope?.dataset.syncloudosFocusScope;
       if (targetScopeId && targetScope.dataset.syncloudosRuntimeOwner === runtimeId
         && runtime.focus.isScopeWithin(targetScopeId, options.scopeId)) return;
-      const target = focusables()[0];
+      const isPointer = doc?.documentElement?.dataset?.nseInputModality === "pointer";
+      const target = initialTarget(isPointer);
       if (!target || doc?.activeElement === target) return;
       // A rejected programmatic focus can synchronously re-emit focusin for
       // the same outside element. Hold the guard for that transition so an
       // app-owned trap cannot recurse through its own redirect.
       redirectingFocus = true;
       try {
-        target.focus({ preventScroll: true, focusVisible: true } as FocusOptions);
+        target.focus({ preventScroll: true, focusVisible: !isPointer } as FocusOptions);
       } finally {
         queueMicrotask(() => {
           redirectingFocus = false;
@@ -145,7 +157,8 @@ export function AppFocusScope({ runtime, runtimeId, options, children }: { reado
       if (!live || runtime.signal.aborted) return;
       const active = doc?.activeElement;
       if (root && active && (active === doc.body || inWindowDomain(active)) && !isWithinNSEFocusOrigin(root, active)) {
-        focusables()[0]?.focus({ preventScroll: true, focusVisible: true } as FocusOptions);
+        const isPointer = doc?.documentElement?.dataset?.nseInputModality === "pointer";
+        initialTarget(isPointer)?.focus({ preventScroll: true, focusVisible: !isPointer } as FocusOptions);
       }
     });
     return () => {

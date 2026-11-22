@@ -57,6 +57,7 @@
   border-width: inherit;
   border-style: inherit;
   border-radius: inherit;
+  outline: none;
 }
 
 .nse-window__shadow-layer,

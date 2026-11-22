@@ -52,6 +52,18 @@ function focusableTarget(root: HTMLElement, runtimeId: string): HTMLElement | nu
   return candidates.find((target) => !target.closest(focusChromeSelector)) ?? candidates[0] ?? null;
 }
 
+function initialScopeFocusTarget(root: HTMLElement, runtimeId: string, isPointer: boolean): HTMLElement | null {
+  const explicit = root.querySelector<HTMLElement>("[data-nse-initial-focus]:not([disabled])");
+  if (explicit && isAvailableFocusTarget(explicit, runtimeId)) return explicit;
+  if (isPointer) {
+    const dialog = root.matches('[role="dialog"][tabindex="-1"], [role="alertdialog"][tabindex="-1"]')
+      ? root
+      : root.querySelector<HTMLElement>('[role="dialog"][tabindex="-1"], [role="alertdialog"][tabindex="-1"]');
+    if (dialog && belongsToRuntime(dialog, runtimeId)) return dialog;
+  }
+  return focusableTarget(root, runtimeId);
+}
+
 function focusableTargets(root: HTMLElement, runtimeId: string): HTMLElement[] {
   const targets = Array.from(root.querySelectorAll<HTMLElement>(focusableSelector));
   if (root.matches(focusableSelector)) targets.unshift(root);
@@ -178,7 +190,8 @@ function KernelFocusScope({ scopeId, kind, parentScopeId, parentResponderId, mod
         belongsToRuntime(targetScope, runtime.runtimeId) &&
         runtime.focus.isScopeWithin(targetScope.dataset.syncloudosFocusScope!, scopeId)
       ) return;
-      const target = focusableTarget(root, runtime.runtimeId);
+      const isPointer = document?.documentElement?.dataset?.nseInputModality === "pointer";
+      const target = initialScopeFocusTarget(root, runtime.runtimeId, isPointer);
       if (!target || document?.activeElement === target) return;
       // HTMLElement#focus synchronously emits focusin. A browser or host focus
       // delegate can reject that target and immediately re-emit the outside
@@ -186,7 +199,7 @@ function KernelFocusScope({ scopeId, kind, parentScopeId, parentResponderId, mod
       // than recursively redirecting the same transition.
       redirectingFocus = true;
       try {
-        target.focus({ preventScroll: true, focusVisible: true } as FocusOptions);
+        target.focus({ preventScroll: true, focusVisible: !isPointer } as FocusOptions);
       } finally {
         queueMicrotask(() => {
           redirectingFocus = false;
@@ -209,7 +222,10 @@ function KernelFocusScope({ scopeId, kind, parentScopeId, parentResponderId, mod
           belongsToRuntime(element, runtime.runtimeId) &&
           focusableTarget(element, runtime.runtimeId)
         ));
-      if (scopeRoot) focusableTarget(scopeRoot, runtime.runtimeId)?.focus({ preventScroll: true, focusVisible: true } as FocusOptions);
+      if (scopeRoot) {
+        const isPointer = document?.documentElement?.dataset?.nseInputModality === "pointer";
+        initialScopeFocusTarget(scopeRoot, runtime.runtimeId, isPointer)?.focus({ preventScroll: true, focusVisible: !isPointer } as FocusOptions);
+      }
     });
     return () => {
       live = false;

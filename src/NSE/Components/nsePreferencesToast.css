@@ -79,6 +79,7 @@
   border-radius: var(--nse-atmo-window-titlebar-radius, 14px);
   /* Centred, so it grows from its own middle. */
   transform-origin: 50% 50%;
+  outline: none;
 }
 
 /* The two titles cross inside one clipped box.

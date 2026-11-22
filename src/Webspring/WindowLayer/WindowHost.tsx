@@ -247,20 +247,30 @@ export function WindowHost({
     let observer: MutationObserver | null = null;
     const focusInitialControl = () => {
       const active = host.ownerDocument.activeElement;
+      const pointerOpened = host.ownerDocument.documentElement?.dataset.nseInputModality === "pointer";
+      const explicitInitial = host.querySelector<HTMLElement>(`.nse-window__content [data-nse-initial-focus]:not([disabled])`);
       const initialResponder = host.querySelector<HTMLElement>("[data-nse-view-controller][tabindex]") ?? surface;
-      const target = host.querySelector<HTMLElement>(`.nse-window__content [data-nse-initial-focus]:not([disabled])`) ??
+      if (pointerOpened && !explicitInitial) {
+        const container = initialResponder ?? host.querySelector<HTMLElement>("[data-window-surface]") ?? host;
+        if (!container.hasAttribute("tabindex")) container.tabIndex = -1;
+        if (active && host.contains(active)) { observer?.disconnect(); return true; }
+        container.focus({ preventScroll: true, focusVisible: false } as FocusOptions);
+        observer?.disconnect();
+        return true;
+      }
+      const target = explicitInitial ??
         host.querySelector<HTMLElement>(`.nse-window__content :is(${windowFocusableSelector})`) ??
         host.querySelector<HTMLElement>(windowFocusableSelector);
       if (active && host.contains(active) && active !== surface && active !== initialResponder) { observer?.disconnect(); return true; }
       if (target) {
-        target.focus({ preventScroll: true });
+        target.focus({ preventScroll: true, focusVisible: false } as FocusOptions);
         const focused = host.ownerDocument.activeElement === target || target.contains(host.ownerDocument.activeElement);
         if (focused) observer?.disconnect();
         return focused;
       }
       // A presented controller is a valid first responder even while every
       // command button is validating, including inside a modal compact sheet.
-      initialResponder?.focus({ preventScroll: true });
+      initialResponder?.focus({ preventScroll: true, focusVisible: false } as FocusOptions);
       return false;
     };
     if (!focusInitialControl()) {

@@ -47,8 +47,8 @@
   position: absolute;
   overflow: hidden;
 }
-.nse-collection-item[data-focused],
-:where(:scope):is(.nse-collection-item[data-focused]) { outline: 1px solid currentColor; outline-offset: -1px; }
+.nse-collection-view:focus-visible .nse-collection-item[data-nse-focused],
+:where(:scope):is(.nse-collection-view:focus-visible .nse-collection-item[data-nse-focused]) { outline: 1px solid currentColor; outline-offset: -1px; }
 .nse-collection-status,
 :where(:scope):is(.nse-collection-status) { padding: var(--nse-space-2, 8px); }
 

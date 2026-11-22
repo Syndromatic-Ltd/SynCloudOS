@@ -2722,6 +2722,13 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
       }) as Readonly<Record<string, unknown> & { readonly signal?: AbortSignal; readonly acceptance?: SynWareCommandAcceptance }>;
     };
     const undoRegistrationLeaseForResponder = (responderId: string): UndoRegistrationLease => {
+      // Host-owned responders carry no undoOwner of their own; walking
+      // resolveChain(responderId) would append the active key window's document
+      // anchor and reject host commands (such as workspace.returnToWebspring)
+      // whenever a separate document-window mount holds that document's lease.
+      if (responderId === "workspace" || responderId === "runtime" || responderId === "webspring") {
+        return ensureApplicationUndoLease().registrationLease;
+      }
       const owner = runtime.responders.resolveChain(responderId).find((responder) => responder.undoOwner)?.undoOwner;
       if (owner?.kind === "document") {
         const document = runtime.documents.getDocument(owner.id);

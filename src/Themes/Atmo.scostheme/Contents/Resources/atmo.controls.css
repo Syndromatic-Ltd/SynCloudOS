@@ -5333,9 +5333,9 @@
     outline: 2px solid Highlight;
     outline-offset: -2px;
   }
-  :scope [data-nse-control="collection-view"]:where([data-nse-part="background"]):focus-within [data-nse-part="item"]:where([data-nse-control="collection-view"] *)[data-nse-focused],
-:scope:is([data-nse-control="collection-view"]:where([data-nse-part="background"]):focus-within) [data-nse-part="item"]:where([data-nse-control="collection-view"] *)[data-nse-focused],
-:scope[data-nse-control="collection-view"]:where([data-nse-part="background"]):focus-within [data-nse-part="item"]:where([data-nse-control="collection-view"] *)[data-nse-focused] {
+  :scope [data-nse-control="collection-view"]:where([data-nse-part="background"]):focus-visible [data-nse-part="item"]:where([data-nse-control="collection-view"] *)[data-nse-focused],
+:scope:is([data-nse-control="collection-view"]:where([data-nse-part="background"]):focus-visible) [data-nse-part="item"]:where([data-nse-control="collection-view"] *)[data-nse-focused],
+:scope[data-nse-control="collection-view"]:where([data-nse-part="background"]):focus-visible [data-nse-part="item"]:where([data-nse-control="collection-view"] *)[data-nse-focused] {
     outline: 2px solid CanvasText;
     outline-offset: -4px;
   }
