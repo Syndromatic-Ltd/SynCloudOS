@@ -701,3 +701,16 @@
   background: Canvas;
 }
 }
+
+:scope [data-nse-control="table-view"] [data-nse-part="column-resize-handle"] {
+  background: transparent;
+}
+
+:scope [data-nse-control="table-view"] [data-nse-part="sort-glyph"] {
+  color: var(--nse-atmo-table-header-ink, var(--nse-colour-secondary-label));
+  opacity: 0.78;
+}
+
+:scope [data-nse-control="table-view"] [data-nse-part="font-list-label"] {
+  color: inherit;
+}

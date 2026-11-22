@@ -6415,3 +6415,44 @@
   background-repeat: no-repeat;
   background-size: 0 0;
 }
+
+:scope [data-nse-control="save-panel"] [data-nse-part="prompt"] {
+  color: var(--nse-colour-label);
+}
+
+:scope [data-nse-control="save-panel"] [data-nse-part="suggested-name"] {
+  color: var(--nse-colour-label);
+  font-weight: 600;
+}
+
+:scope [data-nse-control="toolbar-customisation-palette"] [data-nse-part="configured-item"] {
+  color: var(--nse-colour-label);
+}
+
+:scope [data-nse-control="toolbar-customisation-palette"] [data-nse-part="drag-handle"] {
+  background: transparent;
+  border: 0;
+  color: var(--nse-colour-secondary-label);
+}
+
+:scope [data-nse-control="button"][data-nse-part="cancel"],
+:scope [data-nse-control="button"][data-nse-part="effect-colour"],
+:scope [data-nse-control="pop-up-button"][data-nse-part="action-menu"] {
+  text-decoration: none;
+}
+
+:scope [data-nse-control="button"] [data-nse-part="effect-glyph"],
+:scope [data-nse-control="button"] [data-nse-part="tab-icon"] {
+  color: currentColor;
+}
+
+:scope [data-nse-control="clip-view"] [data-nse-part="colour-list-name"],
+:scope [data-nse-control="date-picker"] [data-nse-part="value"],
+:scope [data-nse-control="view"] [data-nse-part="paragraph"],
+:scope [data-nse-control="view"] [data-nse-part="value"] {
+  color: inherit;
+}
+
+:scope [data-nse-control="tab-view"] [data-nse-part="swatch"] {
+  background-clip: padding-box;
+}

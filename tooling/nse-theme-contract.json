@@ -290,6 +290,7 @@
       ],
       "states": [
         "selected",
+        "state=entering",
         "state=loading",
         "state=open"
       ],
@@ -2387,6 +2388,16 @@
     "menu",
     "menu-item",
     "popover"
+  ],
+  "structuralParts": [
+    "font-panel.font-file-input",
+    "login-window.effects",
+    "notification-banner.effects",
+    "split-view.split-pane",
+    "split-view.split-pane-slot",
+    "toolbar.flexible-space",
+    "toolbar.space",
+    "window.window-fitting-content"
   ],
   "motion": {
     "roles": [

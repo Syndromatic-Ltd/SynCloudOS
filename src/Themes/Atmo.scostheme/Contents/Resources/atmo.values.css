@@ -975,3 +975,17 @@
 :where(:scope):is([data-nse-part="decoration"]:where([data-nse-material="metal"]))::before,
 [data-nse-part="decoration"]:where([data-nse-material="metal"]) > :is([data-nse-part="highlight"], [data-nse-part="image"], [data-nse-part="border"]),
 :where(:scope):is([data-nse-part="decoration"]:where([data-nse-material="metal"])) > :is([data-nse-part="highlight"], [data-nse-part="image"], [data-nse-part="border"]) { display:none; } }
+
+:scope [data-nse-control="level-indicator"][data-nse-type="rating"] [data-nse-part="segment"] {
+  background: transparent;
+  border: 0;
+  color: var(--nse-colour-tertiary-label);
+}
+
+:scope [data-nse-control="level-indicator"][data-nse-type="rating"] [data-nse-part="segment"][data-nse-selected] {
+  color: var(--nse-colour-control-accent);
+}
+
+:scope [data-nse-control="segmented-control"] [data-nse-part="divider"] {
+  background: transparent;
+}

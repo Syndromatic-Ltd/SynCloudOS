@@ -81,7 +81,7 @@ Contract version 1: 72 controls, 48 colours.
 ### `chronosphere`
 
 - Parts: `accessory`, `actions`, `backdrop`, `background`, `badge`, `bezel`, `body`, `button`, `cell`, `content`, `decoration`, `face`, `footer`, `header`, `indicator`, `label`, `status`, `subtitle`, `surface`, `tick`, `title`, `track`, `viewport`
-- States: `selected`, `state=loading`, `state=open`
+- States: `selected`, `state=entering`, `state=loading`, `state=open`
 - Variants:
   - `data-nse-material`: `paper`
   - `data-nse-position`: `past`, `present`
@@ -730,6 +730,12 @@ Transitions use only `var(--nse-motion-<role>-duration)` and `var(--nse-motion-<
 ## App theme controls
 
 `window`, `toolbar`, `toolbar-item`, `tab-view`, `segmented-control`, `split-view`, `menu`, `menu-item`, `popover`
+
+## Structural parts
+
+Non-paintable layout wrappers, spacers and hidden inputs excluded from theme paint coverage warnings.
+
+`font-panel.font-file-input`, `login-window.effects`, `notification-banner.effects`, `split-view.split-pane`, `split-view.split-pane-slot`, `toolbar.flexible-space`, `toolbar.space`, `window.window-fitting-content`
 
 ## Limits
 

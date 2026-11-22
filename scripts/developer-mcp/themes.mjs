@@ -72,7 +72,8 @@ export function themeCoverage(stylesheets, contract) {
       },
     });
   }
-  const all = Object.entries(contract.controls).flatMap(([control, entry]) => entry.parts.map(part => `${control}.${part}`));
+  const structural = new Set(contract.structuralParts ?? []);
+  const all = Object.entries(contract.controls).flatMap(([control, entry]) => entry.parts.map(part => `${control}.${part}`)).filter(item => !structural.has(item));
   const undrawn = all.filter(item => !drawn.has(item));
   return { drawn: all.length - undrawn.length, total: all.length, undrawn };
 }
@@ -101,7 +102,7 @@ export async function scaffoldTheme({ projectRoot, bundleIdentifier, displayName
     ...Object.entries(contract.controls).flatMap(([control, entry]) => [
       `/* ${control}${entry.states?.length ? ` (states: ${entry.states.join(", ")})` : ""} */`,
       `[data-nse-control="${control}"] {}`,
-      ...entry.parts.map(part => `[data-nse-control="${control}"] [data-nse-part="${part}"] {}`),
+      ...entry.parts.filter(part => !(contract.structuralParts ?? []).includes(`${control}.${part}`)).map(part => `[data-nse-control="${control}"] [data-nse-part="${part}"] {}`),
       "",
     ]),
   ].join("\n");

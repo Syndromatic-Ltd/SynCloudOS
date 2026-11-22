@@ -8,7 +8,8 @@ import { assertReviewedPackageFiles } from "../../scripts/synware/sdk-package-ma
 const repository = resolve(import.meta.dirname, "../..");
 const contract = JSON.parse(readFileSync(resolve(repository, "tooling/nse-theme-contract.json"), "utf8"));
 const atmo = JSON.parse(readFileSync(resolve(repository, "src/Themes/Atmo.scostheme/Contents/Theme.json"), "utf8"));
-const partCount = Object.values(contract.controls as Record<string, { parts: string[] }>).reduce((total, control) => total + control.parts.length, 0);
+const structuralParts = new Set<string>(contract.structuralParts ?? []);
+const partCount = Object.entries(contract.controls as Record<string, { parts: string[] }>).reduce((total, [control, entry]) => total + entry.parts.filter(part => !structuralParts.has(`${control}.${part}`)).length, 0);
 let project: string;
 beforeEach(() => {
   project = mkdtempSync(join(tmpdir(), "syncloudos-theme-test-"));
@@ -41,7 +42,10 @@ describe("developer MCP .scostheme bundles", () => {
     const stylesheet = readFileSync(css(), "utf8");
     for (const [control, entry] of Object.entries(contract.controls as Record<string, { parts: string[] }>)) {
       expect(stylesheet).toContain(`/* ${control}`);
-      for (const part of entry.parts) expect(stylesheet).toContain(`[data-nse-control="${control}"] [data-nse-part="${part}"] {}`);
+      for (const part of entry.parts) {
+        if (structuralParts.has(`${control}.${part}`)) expect(stylesheet).not.toContain(`[data-nse-control="${control}"] [data-nse-part="${part}"] {}`);
+        else expect(stylesheet).toContain(`[data-nse-control="${control}"] [data-nse-part="${part}"] {}`);
+      }
     }
     const validation = await validateTheme({ projectRoot: project, path: "src/Themes/Dusk.scostheme" });
     expect(validation.errors).toEqual([]);
@@ -49,6 +53,7 @@ describe("developer MCP .scostheme bundles", () => {
     expect(validation.coverage).toEqual({ drawn: 0, total: partCount });
     expect(validation.warnings).toHaveLength(partCount);
     expect(validation.warnings).toContainEqual(expect.objectContaining({ rule: "theme.undrawn-part", part: "button.bezel" }));
+    expect(validation.warnings.map(warning => warning.part)).not.toContain("font-panel.font-file-input");
   });
   it("counts typography on a part as a drawing", async () => {
     await scaffold();
