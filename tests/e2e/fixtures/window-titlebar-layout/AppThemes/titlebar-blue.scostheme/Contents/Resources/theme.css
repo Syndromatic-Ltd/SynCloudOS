@@ -1,0 +1,15 @@
+[data-nse-control="window"][data-nse-part="header"] [data-nse-part="title"] {
+  color: rgb(21, 101, 183);
+}
+
+[data-nse-control="window"][data-nse-part="header"][data-nse-chrome="metal"] > [data-nse-part="body"] > [data-nse-part="title"] {
+  text-shadow: 0 1px 0 rgb(255 255 255 / 75%);
+}
+
+[data-nse-control="window"][data-nse-part="header"][data-nse-chrome="metal"][data-nse-colour-scheme-resolved="dark"] > [data-nse-part="body"] > [data-nse-part="title"] {
+  text-shadow: 0 -1px 0 rgb(0 0 0 / 78%), 0 -1px 2px rgb(0 0 0 / 45%), 0 1px 0 rgb(255 255 255 / 5%);
+}
+
+[data-nse-control="window"][data-nse-part="header"][data-nse-material="cumulus"] > [data-nse-part="content"] > [data-nse-part="title"] {
+  text-shadow: 0 -1px 0 rgb(0 0 0 / 92%), 0 1px 0 rgb(255 255 255 / 16%), 0 2px 4px rgb(0 0 0 / 72%);
+}

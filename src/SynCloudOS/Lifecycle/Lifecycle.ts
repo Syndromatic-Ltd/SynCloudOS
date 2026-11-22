@@ -666,7 +666,7 @@ export function createLifecycle(
     if (statechartRecord && to !== "active") {
       const phase = RuntimeStore.getSnapshot().webspring.launchPhase;
       if (phase === "staging" || phase === "launching" || phase === "covered") {
-        if (app?.presentation === "appView" && app.frame.presentationMotion !== "content") runtime.webspringChoreography.beginReturn(appId);
+        if (app?.presentation === "stage" && app.frame.presentationMotion !== "content") runtime.webspringChoreography.beginReturn(appId);
         else runtime.webspring.coverForApp(null);
       }
     }

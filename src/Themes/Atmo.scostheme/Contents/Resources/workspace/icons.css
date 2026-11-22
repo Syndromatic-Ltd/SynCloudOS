@@ -1,0 +1,12 @@
+/* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
+[data-nse-part="shadow"]:where([data-nse-part="image"][data-nse-role="artwork"] > *),
+:where(:scope):is([data-nse-part="shadow"]:where([data-nse-part="image"][data-nse-role="artwork"] > *)) {
+  opacity: 0;
+  filter:
+    brightness(1.42)
+    saturate(0.72)
+    blur(1.15px)
+    drop-shadow(0 0 3px rgba(226, 248, 255, 0.48))
+    drop-shadow(0 0 7px rgba(94, 202, 255, 0.26));
+  mix-blend-mode: screen;
+}

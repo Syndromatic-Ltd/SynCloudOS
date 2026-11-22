@@ -30,6 +30,7 @@ import { createElement } from "../Theme/contract/hookMirrorReact";
 import {
   getSmoothSurfaceClassName,
   getSmoothSurfaceStyle,
+  getSmoothSurfaceThemeHooks,
   normaliseSmoothSurfaceRequest,
   SmoothSurfaceAPI
 } from "./smoothSurface";
@@ -118,6 +119,7 @@ function SmoothSurfaceImpl(
       ref,
       className: mergedClassName,
       style: mergedStyle,
+      ...getSmoothSurfaceThemeHooks(request),
       "data-slot": "nse-smooth-surface",
       "data-state": geometry.ready ? "ready" : "pending"
     },

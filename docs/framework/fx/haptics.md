@@ -1,8 +1,8 @@
 # HapticsFX
 
-HapticsFX (`HFX`) is the web-native analogue of Core Haptics. It describes tactile feedback as data: named presets for common feedback, and patterns of transient taps and continuous vibrations with intensity, sharpness, envelopes and audio. It plays those patterns through an engine that reports what the device can actually do, so an application can adapt instead of guessing.
+HapticsFX (`HFX`) adds tactile feedback to your app. It describes feedback as data: named presets for common feedback, and patterns of transient taps and continuous vibrations with intensity, sharpness, envelopes and audio. It plays those patterns through an engine that reports what the device can actually do, so an application can adapt instead of guessing.
 
-Feedback gets a portable description that designers can author, store and exchange, including the AHAP interchange format that Core Haptics uses. Playback gets a controllable transport with pause, seek, looping, rate and dynamic parameter changes. Applications get an honest capability report, because browsers differ widely: many have no vibration hardware, and where the Vibration API exists it offers timed pulses without amplitude control.
+Feedback gets a portable description that designers can author, store and exchange, including the AHAP interchange format. If you know Core Haptics, the pattern model will feel familiar. Playback gets a controllable transport with pause, seek, looping, rate and dynamic parameter changes. Applications get a capability report they can rely on, because browsers differ widely: many have no vibration hardware, and where the Vibration API exists it offers timed pulses without amplitude control.
 
 HapticsFX runs in two places. The value types (`HFXHapticPattern`, `HFXHapticParameterCurve`, `HFXHapticPatternCodec` and the plain interfaces) are a library that runs anywhere JavaScript runs, including tests and workers. Playback goes through the mounted SynWare session: `useHaptics()` returns an `HFXHapticSession` that the host creates for your component, so the host can enforce permissions, honour the user's feedback settings and release everything when the component unmounts.
 
@@ -17,8 +17,7 @@ import { HFXHapticPattern } from "@syndromatic/syncloudos/fx/haptics";
 | Prefix | `HFX` |
 | Entry | `@syndromatic/syncloudos/fx/haptics` |
 | Hook | `useHaptics`, from `@syndromatic/syncloudos/sdk` |
-| Permission | `haptics.play` in the manifest `permissions` list |
-| Analogue | Core Haptics (`CHHapticEngine`, `CHHapticPattern`, `CHHapticAdvancedPatternPlayer`, AHAP) |
+| Permission | `haptics.play` in the manifest `entitlements` list |
 
 ## What the entry exports
 
@@ -58,12 +57,10 @@ export function SaveButton() {
 }
 ```
 
-Declare the permission in the manifest, or the hook throws when the component mounts.
+Declare the entitlement in the manifest, or the hook throws when the component mounts.
 
-```json
-{
-  "permissions": ["haptics.play"]
-}
+```ts
+entitlements: ["haptics.play"]
 ```
 
 ### `HFXFeedbackPresetName`
@@ -685,13 +682,13 @@ Where haptic hardware is missing, NSE controls that request feedback fall back t
 
 ### Permissions and denial
 
-Declare `haptics.play` in the manifest `permissions` list. The permission is checked when a session is created, which happens after the component mounts. Without it, `createEngine` throws a `DOMException` with name `SecurityError` and the message "SynWare capability haptics.play must be declared." Because `useHaptics()` creates its session in a layout effect, the exception surfaces as a render error at mount, so declare the permission before you ship a component that uses the hook. If the application is closing, session creation rethrows the owner's abort reason instead.
+Declare `haptics.play` in the manifest `entitlements` list. The permission is checked when a session is created, which happens after the component mounts. Without it, `createEngine` throws a `DOMException` with name `SecurityError` and the message "SynWare capability haptics.play must be declared." Because `useHaptics()` creates its session in a layout effect, the exception surfaces as a render error at mount, so declare the entitlement before you ship a component that uses the hook. If the application is closing, session creation rethrows the owner's abort reason instead.
 
 The hook never prompts the user. The user's vibration and button sound switches, and the browser's audio policy, remain in force for every session. A pattern never turns on feedback that the user has turned off.
 
 ## Files: `HFXHapticPatternCodec`
 
-Reads and writes patterns as text so designers can ship them as files. The class holds only static methods and you never construct it. Two formats are available: the native HFX JSON format, which preserves every field, and AHAP 1.0, the Core Haptics interchange format.
+Reads and writes patterns as text so designers can ship them as files. The class holds only static methods and you never construct it. Two formats are available: the native HFX JSON format, which preserves every field, and AHAP 1.0, the Apple Haptic and Audio Pattern interchange format.
 
 | Member | Type or signature | Description |
 | --- | --- | --- |

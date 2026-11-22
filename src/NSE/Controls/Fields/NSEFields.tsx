@@ -175,7 +175,6 @@ function LabelTextField({ isEditable: _isEditable, font = "body", textColour = "
       data-nse-part="title"
       className={classes("nse-control-label-field", className)}
       data-font={font}
-      data-text-colour={textColour === "secondaryLabelColour" ? "secondary" : undefined}
       data-monospaced-digits={monospacedDigits ? "true" : undefined}
       data-line-break-mode={lineBreakMode === "byCharWrapping" ? "char" : undefined}
       data-background-style={backgroundStyle === "normal" ? undefined : backgroundStyle}
@@ -630,7 +629,6 @@ function SwitchControl({
       role="switch"
       title={toolTip}
       aria-checked={isChecked}
-      data-thumb-material={thumbMaterial}
       data-state={isChecked ? "on" : "off"}
       data-dragging={isDragging ? "true" : "false"}
       disabled={disabled}
@@ -668,7 +666,7 @@ function SwitchControl({
         <span data-nse-part="fill" data-nse-position="trailing" className="nse-control-toggle-rail nse-control-toggle-rail-end" />
         <span data-nse-part="title" data-nse-state="on" className="nse-control-toggle-text nse-control-toggle-text-on"><span data-nse-part="label" className="nse-control-toggle-state-label" ref={onTextRef}>{onLabel}</span></span>
         <span data-nse-part="title" data-nse-state="off" className="nse-control-toggle-text nse-control-toggle-text-off"><span data-nse-part="label" className="nse-control-toggle-state-label" ref={offTextRef}>{offLabel}</span></span>
-        <span data-nse-part="knob" className="nse-control-toggle-thumb" ref={thumbRef}>{thumbMaterial === "metal" ? <MetalThumb disabled={disabled} /> : null}</span>
+        <span data-nse-part="knob" data-nse-material={thumbMaterial === "metal" ? "metal" : undefined} className="nse-control-toggle-thumb" ref={thumbRef}>{thumbMaterial === "metal" ? <MetalThumb disabled={disabled} /> : null}</span>
       </span>
     </button>
   );
@@ -1078,6 +1076,7 @@ export function NSEBox({
       data-custom-fill={resolvedFill === undefined ? undefined : "true"}
       data-nse-custom-fill={resolvedFill === undefined ? undefined : "true"}
       data-custom-border={resolvedBorder !== undefined || resolvedWidth !== undefined || cornerRadius !== undefined || cornerCurve !== undefined ? "true" : undefined}
+      data-nse-border-colour={resolvedBorder === undefined ? undefined : "true"}
       data-nse-custom-border={resolvedBorder !== undefined || resolvedWidth !== undefined || cornerRadius !== undefined || cornerCurve !== undefined ? "true" : undefined}
 
       data-nse-layout-margins={resolvedMargins ? undefined : "standard"}
@@ -1086,6 +1085,7 @@ export function NSEBox({
       {title ? (
         <legend
           data-nse-part="title"
+          data-nse-role="legend"
           className={classes(
             "nse-control-group-label",
             "nse-box-title",

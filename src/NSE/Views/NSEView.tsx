@@ -21,7 +21,7 @@
 import { ViewSafeAreaContext, useNSEViewSafeArea } from "../Layout/useNSESafeArea";
 import type { NSEEdgeInsets } from "../Layout/NSEEdgeInsets";
 import { useCallback, useContext, useEffect, useId, useMemo, useRef, useState, type HTMLAttributes, type KeyboardEvent, type MouseEvent, type PointerEvent, type ReactNode, type Ref } from "react";
-import { NSEAppearanceProvider, useNSEAppearance } from "../Appearance/NSEAppearanceProvider";
+import { ViewAppearanceBoundary } from "../Appearance/NSEAppearanceProvider";
 import type { NSEAppearance } from "../Appearance/NSEAppearance";
 import { useOptionalOverlayProvider } from "../Overlays";
 import { ActionResponderContext } from "../Controls/Core/useNSEControlAction";
@@ -76,7 +76,7 @@ export interface NSEViewProps extends HTMLAttributes<HTMLDivElement>, ViewLayerP
 
 /** NSView: a region of a window, with drawing, contextual menu, tooltip and appearance. */
 export function NSEView({ appearance, ...props }: NSEViewProps) {
-  return appearance ? <ViewAppearance appearance={appearance}><ViewContent {...props} /></ViewAppearance> : <ViewContent {...props} />;
+  return appearance ? <ViewAppearanceBoundary appearance={appearance}><ViewContent {...props} /></ViewAppearanceBoundary> : <ViewContent {...props} />;
 }
 
 function ViewContent({ additionalSafeAreaInsets, onSafeAreaInsetsChange, shadow, cornerRadius, cornerCurve, style, draw, layerContentsPlacement = "scaleProportionallyToFit", menu, toolTip, menuOverlay, longPressDelayMs = 600, direction = "ltr", children, ref, ...htmlAttributes }: NSEViewProps) {
@@ -125,24 +125,6 @@ function ViewDrawing({ draw, bounds, identifiers, placement, accessibility }: {
   return <div data-nse-part="image" data-nse-view-drawing-layer="">
     <ViewDisplayList displayList={context.displayList} placement={placement} accessibility={accessibility} />
   </div>;
-}
-
-/** The appearance boundary a view with its own appearance draws its subviews in. */
-function ViewAppearance({ appearance, children }: { readonly appearance: NSEAppearance; readonly children?: ReactNode }) {
-  const inherited = useNSEAppearance();
-  const scheme = appearance.name === "darkAqua" ? "dark" : "light";
-  return (
-    <NSEAppearanceProvider
-      theme={appearance.theme ?? inherited.theme}
-      colourScheme={scheme}
-      resolvedColourScheme={scheme}
-      {...(appearance.chrome ? { chrome: appearance.chrome } : {})}
-      {...(appearance.contrast ? { contrast: appearance.contrast } : {})}
-      {...(appearance.transparency ? { transparency: appearance.transparency } : {})}
-    >
-      {children}
-    </NSEAppearanceProvider>
-  );
 }
 
 function MenuHostView({ menu, toolTip, menuOverlay, longPressDelayMs, direction, children, className, ref, ...htmlAttributes }: NSEViewProps & { readonly menu: NSEMenu }) {

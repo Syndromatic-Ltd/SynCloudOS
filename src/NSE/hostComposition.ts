@@ -33,19 +33,17 @@ export {
   useNSEFeedback,
 } from "./Feedback";
 export { resolveNSEFocusReturnTarget, isWithinNSEFocusOrigin } from "./Focus/focusOrigin";
+export { isNSEDOMNode, isNSEDOMElement, isNSEHTMLElement } from "./Focus/domRealm";
+export { PresentingDocumentContext } from "./Overlays/presentingDocument";
 
 export { AlertSurface } from "./Components/NSEAlertSurface";
-export { SourceListFrameProvider } from "./Navigation/SourceList/sourceListFrameContext";
-export type { SourceListFrameContextValue } from "./Navigation/SourceList/sourceListFrameContext";
 
 export { AlertBackdrop } from "./SystemUI";
-export { nseTopBarHeightCssValue } from "./Windows/Chrome/topBarStyles";
 export { FocusScope } from "./Focus";
 export { NSEPopover } from "./Overlays/NSEPopover";
 export { NSEPopup } from "./Overlays/NSEPopup";
 
 // Window chrome and transient surfaces are drawn by NSE for framework hosts.
-export { TopBar } from "./Windows/Chrome/TopBar";
 export { WindowTitlebarHostContext } from "./Windows/windowTitlebarContext";
 export type { WindowTitlebarDocument, WindowTitlebarHost } from "./Windows/windowTitlebarContext";
 export { PopoverFrame } from "./Overlays/NSEPopoverFrame";
@@ -58,7 +56,7 @@ export { logicalPlacementToFloatingPlacement } from "./Overlays/computeOverlayPo
 export { registerNSEHapticFeedbackEngine } from "./Feedback/NSEHapticFeedbackManager";
 export { ViewDrawingEnvironmentContext } from "./Views/NSEViewDrawingEnvironment";
 // Window layout and safe areas for framework chrome, and the theme hooks system surfaces publish.
-export { WindowLayoutContext, WindowLayoutModel, useNSEContentLayoutProperties } from "./Layout/windowChromeObstructions";
+export { WindowLayoutContext, WindowLayoutModel, useNSEContentLayoutProperties } from "./Layout/windowObstructions";
 export { SafeAreaMeasurementProvider, useNSEViewSafeArea } from "./Layout/useNSESafeArea";
 export { useNSEDeferredDisposal } from "./interactionLifecycle";
 export { createReactOwnedNSEMenu } from "./Menus/NSEMenu";
@@ -66,6 +64,28 @@ export { useMenuLifetime } from "./Menus/useMenuLifetime";
 export { nseStateHooks } from "./Theme/contract/hooks";
 export { useNSEThemeInteraction } from "./Theme/contract/useThemeInteraction";
 export type { NSETheme } from "./Theme/NSETheme";
+// System surfaces and relocated windows carry their appearance through these host-only parts.
+export { RelocatedAppearance, SystemSurfaceAppearance, ViewAppearanceBoundary, useInPlaceAppearanceProjection, useNSEAppearance, useRelocatedAppearance } from "./Appearance/NSEAppearanceProvider";
+export { popoverAppearance, type PopoverAppearanceMetadata } from "./Overlays/popoverAppearanceMetadata";
+export { isSystemWindowSurface } from "./Overlays/systemWindowSurface";
+export { setNSEHook } from "./Theme/contract/hookMirrorDOM";
+export type { NSEAppTheme } from "./Theme/NSEAppTheme";
 export type { ViewDrawingEnvironment } from "./Views/NSEViewDrawingEnvironment";
 
-export { WindowTitleBar } from "./Windows/WindowTitleBar";
+export { WindowTitlebarControls } from "./Windows/WindowTitlebarControls";
+// The application stage draws the shared window titlebar for windowless apps.
+export { WindowTitlebarView } from "./Windows/WindowTitlebarView";
+export { TitlebarGlyphButton } from "./Windows/TitlebarGlyphButton";
+export type { WindowTitlebarSlots } from "./Windows/windowTitlebarContext";
+export { nseTopBarGlyphs } from "./Windows/Chrome/topBarAssets";
+
+// Application lifetime and ownership primitives shared with Webspring's WSApplication host.
+export { ObjectLifetime, assertFrameworkConstructedApplication } from "./Application/objectLifetime";
+export { ownNSEFactory, type Disposable, type SynchronousDisposable } from "./Application/ownedFactory";
+export {
+  OwnershipScope,
+  instantiateInOwnerScope,
+  nseDisposeFor,
+  type NSEOwner,
+  type OwnedObject,
+} from "./Controllers/ownership";

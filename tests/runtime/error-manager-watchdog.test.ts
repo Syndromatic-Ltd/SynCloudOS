@@ -76,7 +76,6 @@ describe("ErrorManager watchdog captures", () => {
     expect(captured.technicalDetails).toContain("MemoJournalApp");
     expect(captured.technicalDetails).toContain("Window: window-memo-journal");
     expect(RuntimeController.getSnapshot().errors.at(-1)?.id).toBe(captured.id);
-    expect(RuntimeController.getSnapshot().webspring.lowerShelfMode).toBe("error");
   });
 
   it("captures root render failures as fatal reloadable alerts", async () => {

@@ -52,15 +52,20 @@ import { nseDisposeFor } from "../../NSE/applicationHostInterop";
 import { ActionResponderContext, ActionScopeProvider } from "../../NSE/applicationHostInterop";
 import { ResponderScope } from "../../SynCloudOSReact";
 import { useResponderHierarchy } from "../../SynCloudOSReact";
+import { getMountedAppEnvironmentClients } from "../AppSDK/mountedEnvironmentClientRegistry";
 import { SynCloudOSRuntimeContext, SynWareRuntimeContext } from "../../SynCloudOSReact";
 import type { SynWareRuntime } from "../../SynCloudOSReact";
 import { useSynWareContext } from "../AppSDK/SynWareContext";
 import { NSEPopover } from "../../NSE/applicationHostInterop";
 import { NSEPopup } from "../../NSE/NSE";
+import { isNSEHTMLElement } from "../../NSE/applicationHostInterop";
 import type { SynWareContextValue } from "../AppSDK/appContextTypes";
 import { bindActionResponder, hasActions } from "../AppSDK/actions";
 import { trackLiveApplicationObject } from "./applicationHotReload";
-import { WindowContentBorder, WindowSheetFrame, WindowSheetHostContext, WindowTitlebarAccessories, nseContentBorderSize, WindowTitlebarHostContext, useNSEWindowSheetHost, WindowToolbar, useNSEWindowTitlebarDocument } from "./windowChrome";
+import { WindowContentBorder, WindowSheetFrame, WindowSheetHostContext, WindowTitlebarAccessories, nseContentBorderSize, WindowTitlebarHostContext, useNSEWindowSheetHost, WindowToolbar, useNSEWindowSidebarWidth, useNSEWindowTitlebarDocument } from "./windowAccessories";
+import { ViewAppearanceBoundary, useInPlaceAppearanceProjection } from "../../NSE/applicationHostInterop";
+import { MountedWindowContext } from "../../NSE/applicationHostInterop";
+import { WindowApplicationMenu } from "./windowApplicationMenu";
 import { applicationSessionFor } from "./applicationSession";
 import { createNSEWindowAlertQueue, WindowAlertSheet, type WindowAlertQueue } from "./windowAlertSheet";
 import { useNSEAnimationEnvironment, useNSEViewActivitySource } from "../../NSE/applicationHostInterop";
@@ -243,7 +248,7 @@ export function ViewControllerView({ controller, className }: ViewControllerView
     // Content can arrive after the key stage has focused its empty frame.
     // Transfer only that existing handoff, never an editor or portalled focus.
     const active = element.ownerDocument.activeElement;
-    if (active instanceof HTMLElement && active.dataset.syncloudosResponderId?.startsWith("application:")
+    if (isNSEHTMLElement(active) && active.dataset.syncloudosResponderId?.startsWith("application:")
       && active.contains(element) && firstContentFrame(active) === element
       && !element.closest("[inert]")) {
       const target = active.querySelector<HTMLElement>("[data-nse-initial-focus]") ?? element;
@@ -401,6 +406,7 @@ function PresentedSheet({ controller }: { readonly controller: NSEViewController
 
 function createWindowMount(appRuntime: SynWareRuntime, alerts: WindowAlertQueue, appAlerts: SynWareContextValue["alerts"] | null): WindowMount {
   const windows = appRuntime.windows;
+  const currentWindow = getMountedAppEnvironmentClients(appRuntime).currentWindow;
   const current = () => {
     const snapshot = windows.getSnapshot();
     return snapshot.surface === "window" ? snapshot.current : null;
@@ -413,10 +419,23 @@ function createWindowMount(appRuntime: SynWareRuntime, alerts: WindowAlertQueue,
   return {
     get windowId() { return current()?.id ?? null; },
     getSnapshot: current,
+    declaredStyle: currentWindow.declaredStyle,
     subscribe: (listener) => windows.subscribe(listener),
     focus: () => { windows.focus(requireId("focus the window")); },
     minimise: () => { windows.minimise(requireId("minimise the window")); },
     zoom: () => { windows.zoom(requireId("zoom the window")); },
+    setStyleMask(style) {
+      if (current()) currentWindow.setStyle(style.flatMap(bit =>
+        bit === "miniaturizable" ? ["minimisable" as const] : bit === "resizable" ? [bit, "zoomable" as const] : [bit]));
+    },
+    setCollectionBehavior(behavior) {
+      if (current()) currentWindow.setCollectionBehavior(behavior);
+    },
+    toggleFullScreen() {
+      if (current()) currentWindow.toggleFullScreen();
+    },
+    isFullScreen: currentWindow.isFullScreen,
+    observeFullScreen: currentWindow.observeFullScreen,
     setTitle: (title) => {
       const id = current()?.id;
       // An untitled window is named after its application in the window record.
@@ -452,44 +471,51 @@ export function WindowControllerView({ controller }: WindowControllerViewProps) 
   const alerts = useMemo(() => createNSEWindowAlertQueue(), []);
   const appAlerts = useSynWareContext()?.alerts ?? null;
   const layout = useContext(WindowLayoutContext);
-  const mount = useMemo(() => {
-    const mount = appRuntime ? createWindowMount(appRuntime, alerts, appAlerts) : null;
-    return mount && layout ? { ...mount, get windowId() { return mount.windowId; }, contentLayoutGuide: layout } : mount;
-  }, [appRuntime, alerts, appAlerts, layout]);
+  const mount = useMemo(() => appRuntime ? createWindowMount(appRuntime, alerts, appAlerts) : null,
+    [appRuntime, alerts, appAlerts]);
   const [loaded, setLoaded] = useState(false);
   const [titleSlot, setTitleSlot] = useState<HTMLDivElement | null>(null);
-  const titleSlotHost = useMemo(() => ({ root: controller.contentViewController, setSlot: setTitleSlot }), [controller, controller.contentViewController]);
+  const [sidebarWidth, setSidebarWidth] = useState<number | undefined>();
+  const titleSlotHost = useMemo(() => ({ root: controller.contentViewController, setSlot: setTitleSlot, setSidebarWidth }), [controller, controller.contentViewController]);
   const titlebarHost = useContext(WindowTitlebarHostContext);
   // Both standalone windows and stage hosts project the same window-owned chrome.
   const stageTitlebar = titlebarHost;
-  const accessoryHost = mount?.windowId === null ? titlebarHost : null;
-  useNSEWindowTitlebarDocument(controller, loaded ? stageTitlebar : null);
+  const accessoryHost = titlebarHost;
+  const appearance = useNSEWindowTitlebarDocument(controller, loaded ? stageTitlebar : null, sidebarWidth);
+  const effectiveSidebarWidth = useNSEWindowSidebarWidth(controller, sidebarWidth);
+  const localAppearance = titlebarHost ? null : appearance;
+  const standardControls = titlebarHost?.standardControls ?? null;
+  useLayoutEffect(() => {
+    const internals = controller[nseWindowInternals];
+    internals.setStandardControls(standardControls);
+    return () => { internals.setStandardControls(null); };
+  }, [controller, standardControls]);
   // While a sheet is attached, the window's close button and Close command are refused (performClose(_:)).
-  const sheetCloseGuard = useRef<(() => void) | null>(null);
+  const sheetAttached = useRef(false);
   const sheets = useNSEWindowSheetHost((attached) => {
-    sheetCloseGuard.current?.();
-    sheetCloseGuard.current = attached && mount
-      ? mount.registerCloseGuard({ shouldClose: (reason) => reason !== "control" && reason !== "command", willClose: () => {} })
-      : null;
+    sheetAttached.current = attached;
   });
-  useEffect(() => () => { sheetCloseGuard.current?.(); sheetCloseGuard.current = null; }, []);
   useLayoutEffect(() => {
     if (!mount || controller.isDisposed) return;
     const internals = controller[nseWindowInternals];
     const detach = internals.attach(mount);
     const reportKey = () => {
       const isKey = mount.getSnapshot()?.isKey ?? mount.windowId === null;
+      nseSetKeyWindowModalPresenter(mount, isKey ? mount.presentModalAlert : null);
       internals.setKey(isKey);
-      if (isKey) nseSetKeyWindowModalPresenter(mount, mount.presentModalAlert);
     };
     reportKey();
-    const unsubscribe = mount.subscribe(reportKey);
+    const unsubscribe = mount.subscribe(() => { reportKey(); internals.notifySnapshotChange(); });
     // A window that closes on its own (not because the application quits) disposes its controller once the view leaves.
     // The window's own mount is revoked with the window, so nothing else would report this close.
     let closedOnItsOwn = false;
     const removeGuard = mount.registerCloseGuard({
       // Quitting the application is `applicationShouldTerminate`'s decision, not each window's.
-      shouldClose: (reason) => (reason === "application-quit" || reason === "runtime-dispose" ? true : internals.shouldClose()),
+      shouldClose: (reason) => {
+        if (reason === "application-quit" || reason === "runtime-dispose") return true;
+        if (sheetAttached.current && (reason === "control" || reason === "command")) return false;
+        return internals.shouldClose();
+      },
       willClose: (reason) => {
         closedOnItsOwn = reason !== "application-quit" && reason !== "runtime-dispose";
         internals.willClose();
@@ -505,6 +531,12 @@ export function WindowControllerView({ controller }: WindowControllerViewProps) 
       if (closedOnItsOwn) controller[nseDisposeFor]("window-closed");
     };
   }, [controller, mount]);
+  useLayoutEffect(() => {
+    if (!layout || !loaded || controller.isDisposed) return;
+    const update = () => controller[nseWindowInternals].updateContentLayout(layout.frame);
+    update();
+    return layout.observe(update);
+  }, [controller, layout, loaded]);
   if (!appRuntime) throw new Error("NSEWindowControllerView must render inside a mounted application.");
   if (controller.isDisposed || !loaded) return null;
   const root = controller.contentViewController;
@@ -518,27 +550,41 @@ export function WindowControllerView({ controller }: WindowControllerViewProps) 
   const bottomBorder = controller.window.contentBorderThickness("minY");
   const { toolbarStyle, subtitle } = controller.window;
   const title = nseWindowPresentedTitle(controller.window);
-  const ownTitle = toolbarStyle === "expanded" ? <WindowTitlebarContent toolbarStyle={toolbarStyle} title={title} subtitle={subtitle} /> : null;
+  const ownTitle = !titlebarHost && toolbarStyle === "expanded" ? <WindowTitlebarContent toolbarStyle={toolbarStyle} title={title} subtitle={subtitle} /> : null;
   // Keep the content host permanent: showing chrome must not remount an editor or its draft.
   const hasBottomAccessory = bottomBorder > 0 && bottomBarAccessory != null;
   return (
+    <ViewAppearanceBoundary appearance={localAppearance} projectBoundary={false}>
+    <MountedWindowContext.Provider value={controller}>
     <WindowTitleSlotContext.Provider value={titleSlotHost}>
     <ActionScopeProvider appId={appRuntime.app.bundleIdentifier}>
       <ControllerResponder target={controller} kind="controller">
+        <WindowApplicationMenu app={controller.app} destination={titlebarHost?.menuBar}>
         {accessories.length ? <WindowTitlebarAccessories accessories={accessories} renderController={renderAccessory} host={accessoryHost} placement="titlebar" /> : null}
-          <div className="nse-window-chrome-frame">
-            {toolbar ? <WindowToolbar controller={controller} toolbar={toolbar} /> : null}
+          <WindowControllerFrame projectAppearance={localAppearance !== null}>
+            {toolbar ? titlebarHost?.toolbar
+              ? createPortal(<WindowToolbar controller={controller} toolbar={toolbar} />, titlebarHost.toolbar)
+              : !titlebarHost ? <WindowToolbar controller={controller} toolbar={toolbar} /> : null
+              : null}
             <WindowTitlebarAccessories accessories={accessories} renderController={renderAccessory} host={accessoryHost} placement="row" />
             {titleSlot ? createPortal(ownTitle, titleSlot) : ownTitle}
-            <div data-nse-part="content-view" data-nse-content-border={bottomBorder > 0 ? nseContentBorderSize(bottomBorder) : undefined} className="nse-window-chrome-content" data-content-border={bottomBorder > 0 ? nseContentBorderSize(bottomBorder) : undefined}>
+            <div data-nse-part="content-view" data-nse-content-border={bottomBorder > 0 ? nseContentBorderSize(bottomBorder) : undefined} className="nse-window-chrome-content" data-content-border={bottomBorder > 0 ? nseContentBorderSize(bottomBorder) : undefined} style={effectiveSidebarWidth !== undefined ? { "--nse-topbar-rail": `${effectiveSidebarWidth}px` } as CSSProperties : undefined}>
               <div className="nse-window-content-above-bottom-bar" style={{ bottom: hasBottomAccessory ? bottomBorder : 0 }}>{content}</div>
               {hasBottomAccessory ? <div className="nse-window-bottom-bar-accessory" data-nse-part="bottom-bar-accessory" style={{ height: bottomBorder }}>{bottomBarAccessory}</div> : null}
-              {bottomBorder > 0 ? <WindowContentBorder thickness={bottomBorder} /> : null}
+              {bottomBorder > 0 ? <WindowContentBorder thickness={bottomBorder} sidebarWidth={effectiveSidebarWidth} /> : null}
               {sheetLayer}
             </div>
-          </div>
+          </WindowControllerFrame>
+        </WindowApplicationMenu>
       </ControllerResponder>
     </ActionScopeProvider>
     </WindowTitleSlotContext.Provider>
+    </MountedWindowContext.Provider>
+    </ViewAppearanceBoundary>
   );
+}
+
+function WindowControllerFrame({ projectAppearance, children }: { readonly projectAppearance: boolean; readonly children: ReactNode }) {
+  const projection = useInPlaceAppearanceProjection();
+  return <div className="nse-window-chrome-frame" {...(projectAppearance ? projection : undefined)}>{children}</div>;
 }

@@ -28,7 +28,7 @@ import { atmoPaintCSS, atmoStructureFile } from "../../fixtures/atmoStylesheets"
 import { NSESearchField, type NSESearchFieldProps } from "../../../src/NSE/Controls/Fields/NSESearchField";
 
 const atmoCss = atmoPaintCSS();
-const appearanceCss = readFileSync("src/NSE/Appearance/nse-appearance.css", "utf8");
+const accessibilityCss = readFileSync("src/Themes/Atmo.scostheme/Contents/Resources/atmo.accessibility.css", "utf8");
 const fieldCss = readFileSync("src/NSE/Controls/Fields/nse-field-extensions.css", "utf8");
 const structureCss = readFileSync(atmoStructureFile, "utf8");
 
@@ -56,7 +56,7 @@ function unscoped(css: string, keep: (rule: cssTree.Rule) => boolean = () => tru
 // without mounting unrelated controls or the theme's large SVG data URLs.
 const isSearchPaint = (rule: cssTree.Rule) => cssTree.generate(rule.prelude).includes("search-field") ||
   rule.block.children.some(child => child.type === "Declaration" && child.property === "--nse-atmo-focus-ring");
-const paint = unscoped(appearanceCss) + fieldCss + unscoped(structureCss, isSearchPaint) + unscoped(atmoCss, isSearchPaint);
+const paint = fieldCss + unscoped(structureCss, isSearchPaint) + unscoped(atmoCss, isSearchPaint) + unscoped(accessibilityCss);
 
 afterEach(cleanup);
 
@@ -80,6 +80,21 @@ function focus(element: HTMLElement, frame: HTMLElement) {
   frame.className = frame.className;
 }
 
+// JSDOM computes no pseudo-elements, so the focus layers resolve from their matching rules in source order.
+function layer(frame: HTMLElement, pseudo: "::before" | "::after") {
+  const declarations: Record<string, string> = {};
+  cssTree.walk(cssTree.parse(paint), { visit: "Rule", enter(rule) {
+    if (this.atrule || rule.prelude.type !== "SelectorList") return;
+    const matched = rule.prelude.children.toArray().some(selector => {
+      const text = cssTree.generate(selector);
+      if (!text.endsWith(pseudo)) return false;
+      try { return frame.matches(text.slice(0, -pseudo.length)); } catch { return false; }
+    });
+    if (matched) rule.block.children.forEach(child => { if (child.type === "Declaration") declarations[child.property] = cssTree.generate(child.value); });
+  } });
+  return declarations;
+}
+
 describe("Atmo search-field focus paint", () => {
   it.each([
     { name: "regular", props: {} },
@@ -88,18 +103,22 @@ describe("Atmo search-field focus paint", () => {
     { name: "read-only", props: { readOnly: true, defaultValue: "Read this" } },
   ])("paints one capsule glow on the $name wrapper, preserving its focus art", ({ props }) => {
     const { input, frame } = mount(props);
-    expect(getComputedStyle(frame).boxShadow).toBe("none");
+    expect(layer(frame, "::before").opacity).toBe("0");
+    expect(layer(frame, "::after").opacity).toBe("0");
     focus(input, frame);
     expect(document.activeElement).toBe(input);
     expect(frame.matches(":focus-within")).toBe(true);
-    const focused = getComputedStyle(frame);
-    expect(focused.boxShadow).toBe("var(--nse-atmo-focus-ring)");
-    expect(focused.borderRadius).toBe("999px");
-    expect(focused.borderImage).toContain("var(--nse-atmo-svg-si-only-focus)");
+    const ring = layer(frame, "::before");
+    const art = layer(frame, "::after");
+    expect(ring).toMatchObject({ opacity: "1", "box-shadow": "var(--nse-atmo-focus-ring)", "border-radius": "999px" });
+    expect(art.opacity).toBe("1");
+    expect(art["border-image"]).toContain("var(--nse-atmo-svg-si-only-focus)");
+    expect(getComputedStyle(frame).boxShadow).toBe("none");
     expect(getComputedStyle(input).outline).toMatch(/^(none|0(?:px)?)$/);
     expect(getComputedStyle(input).boxShadow).toBe("none");
     focus(screen.getByRole("button", { name: "Outside" }), frame);
-    expect(getComputedStyle(frame).boxShadow).toBe("none");
+    expect(layer(frame, "::before").opacity).toBe("0");
+    expect(layer(frame, "::after").opacity).toBe("0");
   });
 
   it("does not paint a disabled field even if another descendant receives focus", () => {
@@ -110,6 +129,7 @@ describe("Atmo search-field focus paint", () => {
     focus(frame, frame);
     expect(frame.matches(":focus-within")).toBe(true);
     expect(getComputedStyle(frame).boxShadow).toBe("none");
+    expect(layer(frame, "::before").opacity).toBe("0");
   });
 
   it.each([
@@ -122,6 +142,7 @@ describe("Atmo search-field focus paint", () => {
     expect(focused.borderRadius).toBe("999px");
     expect(focused.outline).toBe(`${width} solid ${colour}`);
     expect(focused.boxShadow).toBe("none");
+    expect(layer(frame, "::before")["box-shadow"]).toBe("none");
     expect(getComputedStyle(input).outline).toMatch(/^(none|0(?:px)?)$/);
     expect(getComputedStyle(input).boxShadow).toBe("none");
   });

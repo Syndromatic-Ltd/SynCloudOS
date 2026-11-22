@@ -20,6 +20,6 @@ export function OpenPanelSources({ id, groups, selectedId, onSelect }: { id: str
       didActivate: (id, item) => { if (!item.group) onSelect(id); },
       renderItem: ({ item }) => item.group ? item.name.toLocaleUpperCase() : <span className="nse-open-source-label" onClick={event => { event.stopPropagation(); onSelect(item.id); }}>
         <NSEImageView className="nse-open-source-icon" src={NSEWorkspace.shared.iconForFile({ name: item.name, kind: "directory" }, 24)} controls={false} wheelZoom={false} pannable={false} alt="" />
-        <span>{item.name}</span>{item.locked ? <span className="nse-open-source-lock" role="img" aria-label="Needs permission" title="Needs permission">Access required</span> : null}</span>,
+        <span>{item.name}</span>{item.locked ? <span className="nse-open-source-lock" data-nse-part="notice" role="img" aria-label="Needs permission" title="Needs permission">Access required</span> : null}</span>,
     }} />;
 }

@@ -21,35 +21,90 @@
 import { synWareSdkEntries, synWarePackageName } from "./scripts/synware/sdk-entries.mjs";
 import { decoratorEsbuildOptions } from "./scripts/synware/decorators.mjs";
 import { hookMirrorJSX } from "./scripts/synware/hook-mirror-jsx.mjs";
-import { defineConfig } from "vitest/config";
+import { configDefaults, defineConfig } from "vitest/config";
+import { availableParallelism } from "node:os";
 import { resolve } from "node:path";
 
-export default defineConfig({
+/** Tests that install the packed SDK into a consumer; they need `npm run sdk:build` first and run in `npm run test:packaging`. */
+export const packagingTests = [
+  "tests/runtime/**/*-packed.test.ts",
+  "tests/runtime/**/*-packed-consumer.test.ts",
+  "tests/runtime/fx/packed-*.test.ts",
+  "tests/runtime/fx/app-attribution-dev.test.ts",
+  "tests/runtime/fx/dispatch-sendable-e2e.test.ts",
+  "tests/runtime/fx/installed-browser-consumer.test.ts",
+  "tests/runtime/fx/package-boundary.test.ts",
+  "tests/runtime/fx/package-resources.test.ts",
+  "tests/runtime/synapp-sdk-package.test.ts",
+  "tests/runtime/synware-public-api-boundary-guard.test.ts",
+];
+
+/** CPU-bound source scanners, timing budgets and in-test browsers. They run first and alone, on a quarter of the cores, so their deadlines hold. */
+export const heavyTests = [
+  "tests/performance/**/*.test.{ts,tsx}",
+  "tests/runtime/**/*boundar*.test.ts",
+  "tests/runtime/**/*-counterparts.test.ts",
+  "tests/runtime/**/*-guard.test.ts",
+  "tests/runtime/**/*-hygiene.test.ts",
+  "tests/runtime/**/*public-types.test.ts",
+  "tests/nse/**/*.browser.test.ts",
+  "tests/runtime/**/*-browser.test.ts",
+  "tests/runtime/document-output-print.test.ts",
+  "tests/runtime/fx/dispatch-pool-worker.test.ts",
+  "tests/runtime/atmo-theme-bundle.test.ts",
+  "tests/runtime/error-catalogue.test.ts",
+  "tests/runtime/framework-theme-neutrality.test.ts",
+  "tests/runtime/heritage-inspector-source.test.ts",
+  "tests/runtime/idiom-errors.test.ts",
+  "tests/runtime/nse-page-tear.test.ts",
+  "tests/runtime/nse-view-draw-browser.test.ts",
+  "tests/runtime/selector-performance.test.ts",
+  "tests/runtime/theme-bundles.test.ts",
+];
+
+const unitTests = [
+  "tests/nse/**/*.test.{ts,tsx}",
+  "tests/integration/**/*.test.{ts,tsx}",
+  "tests/runtime/**/*.test.{ts,tsx}",
+  "src/FX/DispatchFX/__tests__/**/*.test.ts",
+  "tests/performance/**/*.test.{ts,tsx}",
+  "tests/decoupling/**/*.test.{ts,tsx}",
+];
+
+const shared = {
   // Standard decorators (`@action`, `@observable accessor`) are lowered by esbuild; Node cannot parse them.
   esbuild: { ...decoratorEsbuildOptions },
   // Tests render through the same mirroring JSX runtime the SynWare plugin gives a project.
   plugins: [hookMirrorJSX()],
   resolve: {
     alias: [
-        ...Object.entries(synWareSdkEntries).map(([entry, source]) => ({ find: new RegExp("^" + synWarePackageName + (entry === "index" ? "" : "/" + entry) + "$"), replacement: resolve(import.meta.dirname, source) })),
-        { find: "@syndromatic/syncloudos/nse/styles.css", replacement: resolve(import.meta.dirname, "src/NSE/public/styles.css") },
-      ],
+      ...Object.entries(synWareSdkEntries).map(([entry, source]) => ({ find: new RegExp("^" + synWarePackageName + (entry === "index" ? "" : "/" + entry) + "$"), replacement: resolve(import.meta.dirname, source) })),
+      { find: "@syndromatic/syncloudos/nse/styles.css", replacement: resolve(import.meta.dirname, "src/NSE/public/styles.css") },
+    ],
   },
   define: {
     "import.meta.env.DEV": "true"
   },
-  test: {
-    clearMocks: true,
-    environment: "node",
-    include: [
-      "tests/nse/**/*.test.{ts,tsx}",
-      "tests/integration/**/*.test.{ts,tsx}",
-      "tests/runtime/**/*.test.{ts,tsx}",
-      "src/FX/DispatchFX/__tests__/**/*.test.ts",
-      "tests/performance/**/*.test.{ts,tsx}",
-      "tests/decoupling/**/*.test.{ts,tsx}",
-    ],
-    maxWorkers: 2,
-    setupFiles: ["tests/setup/runtimeEnvironment.ts"]
-  }
-});
+};
+const sharedTest = { clearMocks: true, environment: "node" as const, setupFiles: ["tests/setup/runtimeEnvironment.ts"] };
+
+// Measured on 32 cores: a quarter for the heavy project keeps its deadlines, and three quarters for the rest is past the knee.
+export const heavyWorkers = Math.max(1, Math.min(8, Math.floor(availableParallelism() / 4)));
+export const unitWorkers = Math.max(2, Math.floor(availableParallelism() * 0.75));
+
+export function syncloudosTestConfig(suite: "unit" | "packaging") {
+  if (suite === "packaging") return defineConfig({ ...shared, test: { ...sharedTest, include: packagingTests, maxWorkers: 4 } });
+  // Projects extend the root, so its plugins and aliases load once. Unit tests get 15s because other agents often share the machine.
+  return defineConfig({
+    ...shared,
+    test: {
+      ...sharedTest,
+      projects: [
+        { extends: true, test: { name: "heavy", include: heavyTests, exclude: [...configDefaults.exclude, ...packagingTests], maxWorkers: heavyWorkers, testTimeout: 30_000, sequence: { groupOrder: 0 } } },
+        { extends: true, test: { name: "unit", include: unitTests, exclude: [...configDefaults.exclude, ...packagingTests, ...heavyTests], maxWorkers: unitWorkers, testTimeout: 15_000, sequence: { groupOrder: 1 } } },
+      ],
+    },
+  });
+}
+
+export default syncloudosTestConfig("unit");

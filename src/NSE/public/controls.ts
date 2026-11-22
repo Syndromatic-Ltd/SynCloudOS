@@ -40,9 +40,7 @@ export type { NSEMetalSurfaceProps } from "../Material";
 
 export { NSESplitView } from "../DataViews/Split/NSESplitView";
 export type { NSESplitViewProps } from "../DataViews/Split/NSESplitView";
-// TopBar is the host's drawing of a window's title bar (NSWindow.title, its toolbar and
-// titlebar accessories); it is internal, not an app control.
-export type { NSEChromeScheme } from "../Windows/Chrome";
+export type NSEChromeScheme = "light" | "dark";
 
 export {
   NSEButton,
@@ -56,11 +54,10 @@ export type {
   NSEImagePosition,
 } from "../Controls/Buttons/NSEButton";
 export type { NSEKeyEquivalentModifierMask } from "../Controls/Buttons/useNSEKeyEquivalent";
-export { NSEToolbar } from "../Toolbars";
+export { NSEToolbar, NSEToolbarItem } from "../Toolbars";
 export type {
   NSEToolbarActionItem,
   NSEToolbarDisplayMode,
-  NSEToolbarItem,
   NSEToolbarItemInput,
   NSEToolbarOptions,
   NSEToolbarSizeMode,
@@ -125,3 +122,6 @@ export { NSERoutePickerView } from "../Controls/Media/NSERoutePickerView";
 export type { NSERoutePickerViewProps } from "../Controls/Media/NSERoutePickerView";
 
 export type { NSEAppearanceName } from "../Appearance/nseAppearanceTypes";
+
+export { NSEToolbarItemGroup } from "../Toolbars/NSEToolbarItemGroup";
+export type { NSEToolbarItemGroupOptions, NSEToolbarItemGroupSelectionMode, NSEToolbarItemGroupControlRepresentation, NSEToolbarGroupSubitem } from "../Toolbars/NSEToolbarItemGroup";

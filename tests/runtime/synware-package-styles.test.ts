@@ -73,14 +73,13 @@ describe("installed SDK stylesheet ownership", () => {
   it("keeps app topbar disclosure paint owned by explicit themes", () => {
     const chrome = readFileSync(join(process.cwd(), "src/NSE/Windows/Chrome/nse-chrome.css"), "utf8");
     expect(chrome).not.toContain("/assets/nse/atmo/");
-    expect(chrome).toContain("var(--nse-topbar-title-arrow-image, none)");
+    expect(chrome).not.toContain("--nse-topbar-title-arrow-image");
 
-    for (const stylesheet of [
-      "src/Themes/Atmo.scostheme/Contents/Resources/atmo.controls.css",
-    ]) {
-      expect(readFileSync(join(process.cwd(), stylesheet), "utf8"), stylesheet)
-        .toContain("--nse-topbar-title-arrow-image");
-    }
+    const themeResources = join(process.cwd(), "src/Themes/Atmo.scostheme/Contents/Resources");
+    expect(readFileSync(join(themeResources, "atmo.chrome.css"), "utf8"))
+      .toContain("var(--nse-topbar-title-arrow-image, none)");
+    expect(readFileSync(join(themeResources, "atmo.controls.css"), "utf8"))
+      .toContain("--nse-topbar-title-arrow-image");
   });
 
   it("keeps the root stylesheet neutral and attaches selected theme CSS to its entry", async () => {

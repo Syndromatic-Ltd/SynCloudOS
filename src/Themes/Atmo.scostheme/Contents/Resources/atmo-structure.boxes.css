@@ -239,6 +239,70 @@
   border-image:none;
 }
 
+@media not (forced-colors: active) {
+  /* The stock sliced bezel reserves its frame in padding. This lets paint
+     replacement clear its border image without revealing a solid border. */
+
+  [data-nse-control="box"][data-nse-part="bezel"][data-nse-box-type="primary"][data-nse-border-type="bezelBorder"],
+  :where(:scope):is([data-nse-control="box"][data-nse-part="bezel"][data-nse-box-type="primary"][data-nse-border-type="bezelBorder"]) {
+    border-width: 0;
+    padding: 14px;
+    border-image-width: 14px;
+  }
+
+  [data-nse-control="box"][data-nse-part="bezel"][data-nse-box-type="primary"][data-nse-border-type="bezelBorder"][data-nse-title-position="atTop"]:has(> [data-nse-part="title"]),
+  :where(:scope):is([data-nse-control="box"][data-nse-part="bezel"][data-nse-box-type="primary"][data-nse-border-type="bezelBorder"][data-nse-title-position="atTop"]:has(> [data-nse-part="title"])) {
+    padding-top: 36px;
+    border-image-width: 36px 14px 14px;
+  }
+
+  /* The absolute legend now positions against the outside of the frame.
+     Keep its original inset and maximum width. */
+
+  [data-nse-control="box"][data-nse-part="bezel"][data-nse-box-type="primary"][data-nse-border-type="bezelBorder"] > [data-nse-part="title"],
+  :where(:scope):is([data-nse-control="box"][data-nse-part="bezel"][data-nse-box-type="primary"][data-nse-border-type="bezelBorder"]) > [data-nse-part="title"] {
+    max-width: calc(100% - 4px);
+  }
+
+  [data-nse-control="box"][data-nse-part="bezel"][data-nse-box-type="primary"][data-nse-border-type="bezelBorder"][data-nse-title-position="aboveTop"] > [data-nse-part="title"],
+  :where(:scope):is([data-nse-control="box"][data-nse-part="bezel"][data-nse-box-type="primary"][data-nse-border-type="bezelBorder"][data-nse-title-position="aboveTop"]) > [data-nse-part="title"] {
+    bottom: calc(100% - 10px);
+    left: 2px;
+  }
+
+  [data-nse-control="box"][data-nse-part="bezel"][data-nse-box-type="primary"][data-nse-border-type="bezelBorder"][data-nse-title-position="atTop"] > [data-nse-part="title"],
+  :where(:scope):is([data-nse-control="box"][data-nse-part="bezel"][data-nse-box-type="primary"][data-nse-border-type="bezelBorder"][data-nse-title-position="atTop"]) > [data-nse-part="title"] {
+    top: 4px;
+    right: 2px;
+    left: 2px;
+  }
+
+  [data-nse-control="box"][data-nse-part="bezel"][data-nse-box-type="primary"][data-nse-border-type="bezelBorder"][data-nse-title-position="belowTop"] > [data-nse-part="title"],
+  :where(:scope):is([data-nse-control="box"][data-nse-part="bezel"][data-nse-box-type="primary"][data-nse-border-type="bezelBorder"][data-nse-title-position="belowTop"]) > [data-nse-part="title"] {
+    top: 6px;
+    left: 6px;
+  }
+
+  [data-nse-control="box"][data-nse-part="bezel"][data-nse-box-type="primary"][data-nse-border-type="bezelBorder"][data-nse-title-position="aboveBottom"] > [data-nse-part="title"],
+  :where(:scope):is([data-nse-control="box"][data-nse-part="bezel"][data-nse-box-type="primary"][data-nse-border-type="bezelBorder"][data-nse-title-position="aboveBottom"]) > [data-nse-part="title"] {
+    bottom: 6px;
+    left: 6px;
+  }
+
+  [data-nse-control="box"][data-nse-part="bezel"][data-nse-box-type="primary"][data-nse-border-type="bezelBorder"][data-nse-title-position="atBottom"] > [data-nse-part="title"],
+  :where(:scope):is([data-nse-control="box"][data-nse-part="bezel"][data-nse-box-type="primary"][data-nse-border-type="bezelBorder"][data-nse-title-position="atBottom"]) > [data-nse-part="title"] {
+    right: 2px;
+    bottom: 2px;
+    left: 2px;
+  }
+
+  [data-nse-control="box"][data-nse-part="bezel"][data-nse-box-type="primary"][data-nse-border-type="bezelBorder"][data-nse-title-position="belowBottom"] > [data-nse-part="title"],
+  :where(:scope):is([data-nse-control="box"][data-nse-part="bezel"][data-nse-box-type="primary"][data-nse-border-type="bezelBorder"][data-nse-title-position="belowBottom"]) > [data-nse-part="title"] {
+    top: calc(100% - 10px);
+    left: 2px;
+  }
+}
+
 :where(:scope) [data-nse-control="box"]:where([data-nse-part="bezel"],[data-nse-part="separator"])[data-nse-box-type="secondary"],
 :where(:scope):is([data-nse-control="box"]:where([data-nse-part="bezel"],[data-nse-part="separator"])[data-nse-box-type="secondary"]) {
   opacity:0.94;

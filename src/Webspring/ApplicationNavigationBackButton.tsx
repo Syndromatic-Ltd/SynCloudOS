@@ -29,6 +29,6 @@ export function ApplicationNavigationBackButton({ label, onActivate }: {
 }) {
   return <NSEButton bezelStyle="texturedRounded" title={label}
     image={NSEImage.named(NSEImage.goBackTemplateName)} imagePosition="imageOnly"
-    className="webspring-application-navigation-back" data-nse-application-navigation-back="true"
+    className="webspring-application-navigation-back" data-nse-role="back"
     onClick={onActivate} />;
 }

@@ -240,13 +240,15 @@ it("releases frame state subscriptions on runtime abort before React cleanup", a
   release(); release();
 });
 
-it("releases mounted subscriptions when its React mount ends while the kernel remains live", () => {
+it("releases mounted subscriptions when its React mount ends while the kernel remains live", async () => {
   const { runtime, host, frames, view } = presentation("mounted");
   const changed = vi.fn();
   const release = frames.subscribeState!(changed);
   view.unmount();
   expect(runtime.signal.aborted).toBe(false);
   expect(frames.suspended).toBe(true);
+  expect(changed).not.toHaveBeenCalled();
+  await Promise.resolve();
   expect(changed).toHaveBeenCalledTimes(1);
   expect(host.listeners.size).toBe(0);
   changed.mockClear();

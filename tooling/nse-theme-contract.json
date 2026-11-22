@@ -14,20 +14,15 @@
         "selected"
       ],
       "variants": {
+        "role": [
+          "anchor",
+          "backdrop"
+        ],
         "type": [
           "application",
           "folder"
         ]
       }
-    },
-    "app-view-chrome": {
-      "parts": [
-        "background"
-      ],
-      "states": [
-        "key-window=false"
-      ],
-      "variants": {}
     },
     "badge": {
       "parts": [
@@ -38,13 +33,26 @@
     },
     "board": {
       "parts": [
+        "accessory",
         "background",
+        "button",
         "content",
         "group",
         "header"
       ],
-      "states": [],
-      "variants": {}
+      "states": [
+        "selected",
+        "state=ready"
+      ],
+      "variants": {
+        "presentation": [
+          "idle"
+        ],
+        "role": [
+          "launcher",
+          "page-controls"
+        ]
+      }
     },
     "box": {
       "parts": [
@@ -54,11 +62,16 @@
         "border",
         "content",
         "header",
+        "label",
         "separator",
+        "subtitle",
         "title"
       ],
       "states": [],
       "variants": {
+        "border-colour": [
+          "true"
+        ],
         "border-type": [
           "bezelBorder",
           "grooveBorder"
@@ -79,7 +92,9 @@
           "true"
         ],
         "role": [
-          "disclosure"
+          "disclosure",
+          "legend",
+          "note"
         ],
         "shadow": [
           "true"
@@ -92,6 +107,7 @@
           "arrow",
           "floating",
           "grey",
+          "grouped",
           "inspector",
           "plain",
           "sidebar",
@@ -180,8 +196,8 @@
       ],
       "variants": {
         "appearance-name": [
-          "aqua",
-          "darkAqua"
+          "dark",
+          "light"
         ],
         "bezel-style": [
           "disclosure",
@@ -194,10 +210,19 @@
           "switch",
           "toggle"
         ],
+        "chrome": [
+          "hud"
+        ],
+        "content-tint": [
+          "true"
+        ],
         "control-size": [
           "large",
           "regular",
           "small"
+        ],
+        "custom-bezel": [
+          "true"
         ],
         "expanded": [
           "false",
@@ -216,17 +241,86 @@
           "\r",
           "\u001b"
         ],
+        "position": [
+          "leading",
+          "trailing"
+        ],
         "role": [
+          "archive-action",
+          "back",
           "close",
           "current",
           "default",
           "ground",
           "ink",
           "minimise",
+          "sign-in",
           "zoom"
         ],
         "style": [
           "edited"
+        ]
+      }
+    },
+    "chronosphere": {
+      "parts": [
+        "accessory",
+        "actions",
+        "backdrop",
+        "background",
+        "badge",
+        "bezel",
+        "body",
+        "button",
+        "cell",
+        "content",
+        "decoration",
+        "face",
+        "footer",
+        "header",
+        "indicator",
+        "label",
+        "status",
+        "subtitle",
+        "surface",
+        "tick",
+        "title",
+        "track",
+        "viewport"
+      ],
+      "states": [
+        "selected",
+        "state=entering",
+        "state=loading",
+        "state=open"
+      ],
+      "variants": {
+        "material": [
+          "paper"
+        ],
+        "position": [
+          "past",
+          "present"
+        ],
+        "revealed": [
+          "true"
+        ],
+        "role": [
+          "archive",
+          "caption",
+          "current-version",
+          "details",
+          "grid",
+          "preparation",
+          "signal",
+          "stack",
+          "time-navigation",
+          "timeline"
+        ],
+        "style": [
+          "grid",
+          "preparation",
+          "stack"
         ]
       }
     },
@@ -250,8 +344,12 @@
         "content",
         "image",
         "item",
+        "label",
         "media-item",
+        "primary-text",
         "row",
+        "subtitle",
+        "title",
         "viewport"
       ],
       "states": [
@@ -259,7 +357,11 @@
         "focused",
         "selected"
       ],
-      "variants": {}
+      "variants": {
+        "style": [
+          "cover-flow"
+        ]
+      }
     },
     "colour-panel": {
       "parts": [
@@ -383,6 +485,7 @@
         "previous-month",
         "previous-year",
         "row",
+        "second-hand",
         "segments",
         "separator",
         "title",
@@ -458,18 +561,43 @@
         "title"
       ],
       "states": [],
-      "variants": {}
+      "variants": {
+        "position": [
+          "bottom",
+          "top"
+        ],
+        "presentation": [
+          "closed",
+          "closing",
+          "open"
+        ],
+        "style": [
+          "fade",
+          "split"
+        ]
+      }
     },
     "folder-tile": {
       "parts": [
         "background",
         "bezel",
-        "image"
+        "border",
+        "highlight",
+        "image",
+        "indicator",
+        "shadow"
       ],
-      "states": [],
+      "states": [
+        "highlighted"
+      ],
       "variants": {
         "style": [
+          "circle",
           "roundedRect"
+        ],
+        "type": [
+          "inset",
+          "texture"
         ]
       }
     },
@@ -513,14 +641,21 @@
         "image",
         "shadow"
       ],
-      "states": [],
-      "variants": {}
+      "states": [
+        "selected"
+      ],
+      "variants": {
+        "role": [
+          "artwork"
+        ]
+      }
     },
     "image-view": {
       "parts": [
         "accessory",
         "background",
         "button",
+        "decoration",
         "image"
       ],
       "states": [],
@@ -528,6 +663,13 @@
         "image-scaling": [
           "none",
           "proportionallyUpOrDown"
+        ],
+        "role": [
+          "crop"
+        ],
+        "style": [
+          "editor",
+          "thumbnail"
         ]
       }
     },
@@ -558,25 +700,40 @@
       "parts": [
         "actions",
         "attachment",
+        "backdrop",
         "background",
         "badge",
         "bezel",
+        "button",
         "content",
         "decoration",
         "effects",
         "error",
+        "field",
         "image",
+        "indicator",
         "leading",
         "shadow",
         "suspension",
         "title",
         "trailing"
       ],
-      "states": [],
+      "states": [
+        "enabled=false",
+        "state=off",
+        "state=on"
+      ],
       "variants": {
         "login-presentation": [
           "ornamented",
           "plain"
+        ],
+        "role": [
+          "fastener",
+          "plate"
+        ],
+        "validation": [
+          "invalid"
         ]
       }
     },
@@ -609,6 +766,7 @@
         "bezel",
         "body",
         "content",
+        "decoration",
         "separator",
         "surface",
         "title",
@@ -623,8 +781,17 @@
           "regular",
           "small"
         ],
+        "edge": [
+          "both",
+          "maxY",
+          "minY"
+        ],
         "menu-chosen": [
           ""
+        ],
+        "overlay-state": [
+          "closing",
+          "open"
         ],
         "placement": [
           "block-end-inline-start",
@@ -637,13 +804,15 @@
         ],
         "role": [
           "application-menu",
+          "command-menu",
           "overlay"
         ],
         "style": [
           "application-menu",
           "context-menu",
           "listbox",
-          "menu"
+          "menu",
+          "popup"
         ]
       }
     },
@@ -682,20 +851,44 @@
     "notification-banner": {
       "parts": [
         "accessory",
+        "actions",
         "background",
         "bezel",
         "cancel",
+        "cell",
         "content",
         "effects",
+        "face",
         "image",
         "label",
-        "shadow"
+        "paragraph",
+        "shadow",
+        "title"
       ],
       "states": [],
       "variants": {
+        "has-destructive-action": [
+          "true"
+        ],
+        "level": [
+          "standard",
+          "timeSensitive"
+        ],
         "notification-presentation": [
           "plain",
           "sliced-3d"
+        ],
+        "role": [
+          "action",
+          "application",
+          "dismiss",
+          "screen",
+          "shade",
+          "underside",
+          "void"
+        ],
+        "style": [
+          "primary"
         ]
       }
     },
@@ -704,6 +897,7 @@
         "accessory",
         "actions",
         "background",
+        "button",
         "cancel",
         "cell",
         "content",
@@ -711,28 +905,64 @@
         "group",
         "header",
         "label",
+        "paragraph",
         "row",
-        "title"
+        "status",
+        "title",
+        "value"
       ],
       "states": [
         "selected"
       ],
-      "variants": {}
+      "variants": {
+        "role": [
+          "action",
+          "application",
+          "clear",
+          "clear-all",
+          "close",
+          "groups",
+          "history",
+          "message",
+          "metadata"
+        ],
+        "type": [
+          "displayed"
+        ]
+      }
     },
     "open-panel": {
       "parts": [
-        "background"
+        "actions",
+        "background",
+        "content-message",
+        "footer",
+        "header",
+        "sheet",
+        "sidebar",
+        "status"
       ],
       "states": [],
-      "variants": {}
+      "variants": {
+        "role": [
+          "toolbar"
+        ],
+        "style": [
+          "compact"
+        ]
+      }
     },
     "outline-view": {
       "parts": [
         "background",
         "disclosure",
+        "group",
+        "group-row",
         "label",
         "loading",
-        "row"
+        "row",
+        "separator",
+        "sidebar"
       ],
       "states": [
         "enabled=false",
@@ -742,6 +972,9 @@
         "expanded": [
           "false",
           "true"
+        ],
+        "role": [
+          "children"
         ],
         "selection-highlight-style": [
           "regular",
@@ -754,24 +987,104 @@
     },
     "page-controller": {
       "parts": [
-        "content"
+        "attachment",
+        "backdrop",
+        "border",
+        "button",
+        "content",
+        "decoration",
+        "face",
+        "separator",
+        "shadow",
+        "sheet",
+        "surface"
       ],
-      "states": [],
-      "variants": {}
+      "states": [
+        "state=idle",
+        "tracking="
+      ],
+      "variants": {
+        "edge": [
+          "bottom",
+          "right",
+          "top"
+        ],
+        "flow": [
+          "book"
+        ],
+        "orientation": [
+          "horizontal",
+          "vertical"
+        ],
+        "position": [
+          "back",
+          "front"
+        ],
+        "presentation": [
+          "book"
+        ],
+        "role": [
+          "bookCurl",
+          "bookTurn",
+          "cardFlip",
+          "nseSheet",
+          "page-fold",
+          "page-ghost",
+          "page-leaf",
+          "page-strip",
+          "page-tear",
+          "settingsPeel",
+          "tearAway"
+        ],
+        "style": [
+          "curl",
+          "flip",
+          "fold",
+          "peel",
+          "tear",
+          "turn"
+        ],
+        "type": [
+          "css"
+        ]
+      }
     },
     "panel": {
       "parts": [
         "actions",
+        "backdrop",
         "background",
         "content",
+        "group",
+        "image",
         "label",
+        "status",
+        "surface",
         "title",
         "value"
       ],
-      "states": [],
+      "states": [
+        "state=off"
+      ],
       "variants": {
         "appearance-name": [
-          "aqua"
+          "dark",
+          "light"
+        ],
+        "chrome": [
+          "standard"
+        ],
+        "role": [
+          "copyright",
+          "empty",
+          "lead-note",
+          "note",
+          "notifications",
+          "preference-body",
+          "preference-list",
+          "preference-pane",
+          "tagline",
+          "trademark"
         ],
         "style": [
           "about",
@@ -808,9 +1121,15 @@
         "bezel-style": [
           "rounded"
         ],
+        "content-tint": [
+          "true"
+        ],
         "control-size": [
           "regular",
           "small"
+        ],
+        "custom-bezel": [
+          "true"
         ],
         "height": [
           "24"
@@ -828,6 +1147,7 @@
       "parts": [
         "actions",
         "arrow",
+        "backdrop",
         "calendar-sheet",
         "centre",
         "clock",
@@ -849,6 +1169,10 @@
         "chrome": [
           "standard"
         ],
+        "overlay-state": [
+          "closing",
+          "open"
+        ],
         "placement": [
           "block-end-inline-start",
           "bottom-start"
@@ -861,12 +1185,17 @@
         ],
         "style": [
           "popover"
+        ],
+        "transparent": [
+          "false",
+          "true"
         ]
       }
     },
     "predicate-editor": {
       "parts": [
-        "background"
+        "background",
+        "error"
       ],
       "states": [],
       "variants": {}
@@ -882,9 +1211,10 @@
       "states": [],
       "variants": {
         "appearance-name": [
-          "aqua"
+          "light"
         ],
         "background-style": [
+          "emphasised",
           "normal"
         ],
         "control-size": [
@@ -896,12 +1226,20 @@
           "false",
           "true"
         ],
+        "motion": [
+          "animated",
+          "static"
+        ],
         "role": [
           "status"
         ],
         "style": [
           "bar",
           "spinning"
+        ],
+        "suspended": [
+          "false",
+          "true"
         ]
       }
     },
@@ -944,10 +1282,17 @@
     },
     "rule-editor": {
       "parts": [
-        "background"
+        "background",
+        "error",
+        "group",
+        "row"
       ],
       "states": [],
-      "variants": {}
+      "variants": {
+        "style": [
+          "alternating"
+        ]
+      }
     },
     "ruler-view": {
       "parts": [
@@ -979,6 +1324,9 @@
         "chrome": [
           "standard"
         ],
+        "overlay-state": [
+          "open"
+        ],
         "placement": [
           "block-end-inline-start"
         ],
@@ -1004,6 +1352,8 @@
     },
     "scroller": {
       "parts": [
+        "field",
+        "knob",
         "track"
       ],
       "states": [
@@ -1075,6 +1425,7 @@
         "cell",
         "content",
         "disclosure",
+        "divider",
         "field",
         "overflow",
         "segment",
@@ -1096,6 +1447,9 @@
         "control-size": [
           "regular",
           "small"
+        ],
+        "custom-bezel": [
+          "true"
         ],
         "distribution": [
           "fill-equally"
@@ -1137,6 +1491,9 @@
         "chrome": [
           "standard"
         ],
+        "overlay-state": [
+          "open"
+        ],
         "placement": [
           "block-end-inline-start"
         ],
@@ -1155,10 +1512,14 @@
       "parts": [
         "accessory",
         "bezel",
+        "border",
         "circular-body",
         "content",
+        "decoration",
         "field",
         "fill",
+        "highlight",
+        "image",
         "knob",
         "linear-alternative",
         "title",
@@ -1167,13 +1528,18 @@
       "states": [
         "enabled=false",
         "focused",
-        "tracking=false"
+        "highlighted",
+        "tracking=false",
+        "tracking=true"
       ],
       "variants": {
         "control-size": [
           "mini",
           "regular",
           "small"
+        ],
+        "material": [
+          "metal"
         ],
         "orientation": [
           "horizontal",
@@ -1191,10 +1557,17 @@
         "content",
         "divider",
         "handle",
-        "sidebar"
+        "sidebar",
+        "split-divider",
+        "split-pane",
+        "split-pane-slot"
       ],
       "states": [],
       "variants": {
+        "orientation": [
+          "horizontal",
+          "vertical"
+        ],
         "position": [
           "leading"
         ],
@@ -1205,9 +1578,15 @@
     },
     "stack-view": {
       "parts": [
-        "content"
+        "button",
+        "content",
+        "item",
+        "menu",
+        "overflow"
       ],
-      "states": [],
+      "states": [
+        "enabled=false"
+      ],
       "variants": {
         "alignment": [
           "centre"
@@ -1216,13 +1595,6 @@
           "horizontal"
         ]
       }
-    },
-    "status-bar": {
-      "parts": [
-        "background"
-      ],
-      "states": [],
-      "variants": {}
     },
     "stepper": {
       "parts": [
@@ -1246,7 +1618,11 @@
       "parts": [
         "background",
         "bezel",
+        "border",
+        "decoration",
         "fill",
+        "highlight",
+        "image",
         "knob",
         "label",
         "title",
@@ -1254,11 +1630,16 @@
       ],
       "states": [
         "enabled=false",
+        "highlighted",
         "state=off",
         "state=on",
-        "tracking=false"
+        "tracking=false",
+        "tracking=true"
       ],
       "variants": {
+        "material": [
+          "metal"
+        ],
         "position": [
           "leading",
           "trailing"
@@ -1270,20 +1651,30 @@
         "actions",
         "backdrop",
         "background",
+        "badge",
         "content",
+        "decoration",
+        "disclosure",
+        "image",
         "label",
         "title"
       ],
       "states": [],
       "variants": {
         "appearance-name": [
-          "aqua"
+          "light"
         ],
         "chrome": [
           "standard"
         ],
         "presentation": [
           "sheet"
+        ],
+        "role": [
+          "details"
+        ],
+        "type": [
+          "content-view"
         ]
       }
     },
@@ -1305,6 +1696,7 @@
         "image-mode",
         "image-palette",
         "indicator",
+        "overflow",
         "palettes-mode",
         "sliders-mode",
         "swatch",
@@ -1361,7 +1753,9 @@
         "cell",
         "cell-content",
         "disclosure",
+        "image",
         "leading",
+        "notice",
         "primary-text",
         "row",
         "secondary-text",
@@ -1379,8 +1773,18 @@
           "none",
           "regular"
         ],
+        "position": [
+          "first",
+          "last"
+        ],
+        "role": [
+          "preference-link"
+        ],
         "style": [
           "list"
+        ],
+        "type": [
+          "template"
         ]
       }
     },
@@ -1465,14 +1869,23 @@
     },
     "text-view": {
       "parts": [
+        "attachment",
         "content",
-        "field"
+        "field",
+        "handle",
+        "shadow"
       ],
-      "states": [],
+      "states": [
+        "selected"
+      ],
       "variants": {
         "editable": [
           "false",
           "true"
+        ],
+        "shadow": [
+          "contact",
+          "curved"
         ]
       }
     },
@@ -1513,6 +1926,9 @@
           "inline",
           "top"
         ],
+        "presentation": [
+          "keyboard"
+        ],
         "style": [
           "bevel",
           "gloss",
@@ -1542,6 +1958,9 @@
       "variants": {
         "chrome": [
           "standard"
+        ],
+        "overlay-state": [
+          "open"
         ],
         "placement": [
           "block-end-inline-start"
@@ -1573,9 +1992,15 @@
         "title"
       ],
       "states": [
-        "state=off"
+        "enabled=false",
+        "selected",
+        "state=off",
+        "state=on"
       ],
       "variants": {
+        "background-tint": [
+          "true"
+        ],
         "style": [
           "bevel",
           "borderless",
@@ -1602,6 +2027,9 @@
         "chrome": [
           "standard"
         ],
+        "overlay-state": [
+          "open"
+        ],
         "placement": [
           "bottom-start"
         ],
@@ -1612,13 +2040,44 @@
     },
     "view": {
       "parts": [
-        "content"
+        "background",
+        "content",
+        "decoration",
+        "group",
+        "header",
+        "image",
+        "item",
+        "label",
+        "loading",
+        "paragraph",
+        "preview",
+        "status",
+        "title",
+        "value"
       ],
       "states": [],
       "variants": {
+        "chrome": [
+          "standard"
+        ],
         "corner-curve": [
           "circular",
           "continuous"
+        ],
+        "role": [
+          "capabilities",
+          "description",
+          "drag-proxy",
+          "material",
+          "note",
+          "runtime",
+          "startup",
+          "startup-material",
+          "startup-spinner",
+          "startup-spotlight",
+          "storage",
+          "updates",
+          "widget-shelf"
         ],
         "surface-ink": [
           "light"
@@ -1638,16 +2097,31 @@
     },
     "visual-effect-view": {
       "parts": [
-        "background"
+        "background",
+        "image",
+        "surface"
       ],
       "states": [],
       "variants": {
         "chrome": [
           "standard"
         ],
+        "focus-style": [
+          "inset",
+          "within"
+        ],
         "material": [
           "atmo",
+          "glass",
+          "linen",
           "metal"
+        ],
+        "role": [
+          "vortex"
+        ],
+        "style": [
+          "panel",
+          "vortex"
         ]
       }
     },
@@ -1661,28 +2135,41 @@
     "window": {
       "parts": [
         "accessory",
+        "backdrop",
         "background",
         "bezel",
         "body",
-        "centre",
+        "border",
+        "button",
+        "cell",
         "content",
         "content-border",
         "content-view",
+        "decoration",
         "document",
+        "fill",
+        "floating-titlebar",
         "handle",
         "header",
+        "image",
+        "indicator",
         "leading",
+        "menu",
         "shadow",
         "sheet",
+        "sidebar",
         "subtitle",
+        "surface",
         "title",
         "titlebar-accessories",
         "toolbar",
+        "toolbar-row",
         "trailing",
         "window-fitting-content"
       ],
       "states": [
-        "key-window=false"
+        "key-window=false",
+        "selected"
       ],
       "variants": {
         "alignment": [
@@ -1690,12 +2177,17 @@
           "end",
           "start"
         ],
+        "background-style": [
+          "none",
+          "system"
+        ],
         "chrome": [
           "hud",
           "metal",
           "standard"
         ],
         "content-border": [
+          "large",
           "small"
         ],
         "edge": [
@@ -1706,22 +2198,40 @@
           "block-start-inline-end",
           "block-start-inline-start",
           "inline-end",
-          "inline-start"
+          "inline-start",
+          "minY"
+        ],
+        "focus-style": [
+          "ring"
+        ],
+        "material": [
+          "cumulus",
+          "metal"
+        ],
+        "presentation": [
+          "attached",
+          "floating",
+          "stage"
         ],
         "role": [
           "borderless",
-          "document",
           "hud",
           "modal",
           "panel",
           "popover",
           "sheet",
-          "standard"
+          "standard",
+          "titlebar",
+          "transfer"
         ],
         "style": [
-          "custom",
+          "hud",
           "panel",
-          "standard"
+          "standard",
+          "titlebar"
+        ],
+        "titlebar": [
+          "hidden"
         ],
         "toolbar-style": [
           "automatic",
@@ -1729,6 +2239,13 @@
           "preference",
           "unified",
           "unifiedCompact"
+        ],
+        "transition": [
+          "incoming",
+          "outgoing"
+        ],
+        "transparent": [
+          "true"
         ],
         "type": [
           "custom",
@@ -1788,6 +2305,28 @@
     "systemBrown",
     "systemGrey"
   ],
+  "customProperties": {
+    "--nse-bezel-colour": [
+      "button",
+      "pop-up-button"
+    ],
+    "--nse-content-tint-colour": [
+      "button",
+      "pop-up-button"
+    ],
+    "--nse-background-tint-colour": [
+      "toolbar-item"
+    ],
+    "--nse-selected-segment-bezel-colour": [
+      "segmented-control"
+    ],
+    "--nse-box-fill": [
+      "box"
+    ],
+    "--nse-box-border-colour": [
+      "box"
+    ]
+  },
   "appearance": {
     "colour-scheme-resolved": [
       "light",
@@ -1839,6 +2378,58 @@
       "on"
     ]
   },
+  "appThemeControls": [
+    "window",
+    "toolbar",
+    "toolbar-item",
+    "tab-view",
+    "segmented-control",
+    "split-view",
+    "menu",
+    "menu-item",
+    "popover"
+  ],
+  "structuralParts": [
+    "font-panel.font-file-input",
+    "login-window.effects",
+    "notification-banner.effects",
+    "split-view.split-pane",
+    "split-view.split-pane-slot",
+    "toolbar.flexible-space",
+    "toolbar.space",
+    "window.window-fitting-content"
+  ],
+  "motion": {
+    "roles": [
+      "standard",
+      "control",
+      "selection",
+      "presentation",
+      "dismissal",
+      "scrollBoundary"
+    ],
+    "properties": [
+      "duration",
+      "easing"
+    ],
+    "timing": [
+      "spring",
+      "timingFunction"
+    ]
+  },
+  "typography": {
+    "properties": [
+      "font",
+      "font-*",
+      "line-height",
+      "letter-spacing",
+      "word-spacing",
+      "text-transform"
+    ],
+    "fontFormats": [
+      "woff2"
+    ]
+  },
   "limits": {
     "minimumHitTarget": {
       "regular": 24,
@@ -1852,14 +2443,7 @@
       "content"
     ],
     "forbiddenProperties": [
-      "animation",
-      "transition",
-      "font",
-      "font-family",
-      "font-size",
-      "font-weight",
-      "line-height",
-      "letter-spacing"
+      "animation"
     ]
   },
   "renamedFrom": {
@@ -1874,6 +2458,7 @@
     "date-time-picker": "date-picker[date-picker-elements=yearMonthDay hourMinute]",
     "date-range-picker": "date-picker[date-picker-mode=range]",
     "route-picker": "route-picker-view",
-    "file-panel": "save-panel"
+    "file-panel": "save-panel",
+    "app-view-chrome": "window[presentation=stage]"
   }
 }

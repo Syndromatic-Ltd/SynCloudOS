@@ -1,5 +1,5 @@
 
-@layer nse.atmo {
+@layer nse.structure {
 @scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
@@ -126,26 +126,27 @@
   scrollbar-width: thin;
 }
 
-.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"],
-:where(:scope):is(.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"]) {
-  --nse-tab-chrome-native-height: 72px;
-  --nse-tab-chrome-cap-diameter: 72px;
-  --nse-tab-chrome-cap-radius: 36px;
+[data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"] > [data-nse-part="viewport"] > *)[data-nse-control-size="large"],
+:where(:scope):is([data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"] > [data-nse-part="viewport"] > *)[data-nse-control-size="large"]) {
+  /* The tab bar reads the idiom's tab bar height, as every bar reads its own metric. */
+  --nse-tab-chrome-native-height: var(--nse-bar-height-tab);
+  --nse-tab-chrome-cap-diameter: var(--nse-bar-height-tab);
+  --nse-tab-chrome-cap-radius: calc(var(--nse-bar-height-tab) / 2);
   --nse-tab-bar-height: var(--nse-tab-chrome-native-height);
 }
 
-/* NSETabBar's own chrome variant owns a 72px capsule and vertical content
+/* NSETabBar's own chrome variant owns a bar-height capsule and vertical content
    stack. This selector deliberately excludes ordinary grouped tool buttons:
    their canonical 50px `gt` output remains independent. */
-.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"]>.nse-tab-bar-tab.nse-control-button,
-:where(:scope):is(.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"])>.nse-tab-bar-tab.nse-control-button {
+[data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"] > [data-nse-part="viewport"] > *)[data-nse-control-size="large"]>[data-nse-part="cell"]:where([data-nse-role="tab"]),
+:where(:scope):is([data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"] > [data-nse-part="viewport"] > *)[data-nse-control-size="large"])>[data-nse-part="cell"]:where([data-nse-role="tab"]) {
   align-items: center;
   block-size: var(--nse-tab-chrome-native-height);
   box-sizing: border-box;
   display: flex;
   flex: 1 1 0;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   height: var(--nse-tab-chrome-native-height);
   justify-content: center;
   min-block-size: var(--nse-tab-chrome-native-height);
@@ -162,17 +163,11 @@
 }
 
 .nse-tab-bar-tab,
-:where(:scope):is(.nse-tab-bar-tab),
-.nse-tab-bar-more-option,
-:where(:scope):is(.nse-tab-bar-more-option) {
+:where(:scope):is(.nse-tab-bar-tab) {
   align-items: center;
   appearance: none;
-  background: transparent;
-  border-color: transparent;
   border-radius: 0;
   border-style: solid;
-  box-shadow: none;
-  color: inherit;
   display: inline-flex;
   font: inherit;
   gap: 0.375rem;
@@ -196,15 +191,8 @@
   min-inline-size: 0;
 }
 
-.nse-tab-bar-more-option,
-:where(:scope):is(.nse-tab-bar-more-option) {
-  flex-direction: row;
-}
-
 .nse-tab-bar-content,
-:where(:scope):is(.nse-tab-bar-content),
-.nse-tab-bar-more-option>*,
-:where(:scope):is(.nse-tab-bar-more-option)>* { position: relative; z-index: 1; }
+:where(:scope):is(.nse-tab-bar-content) { position: relative; z-index: 1; }
 
 .nse-tab-bar-content,
 :where(:scope):is(.nse-tab-bar-content) {
@@ -221,8 +209,8 @@
 /* Every inert content stack retains the full dimensions of its equal semantic
    hit target. Middle content centres here; the approved outer optical inset is
    applied independently below without changing button or paint geometry. */
-.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"]>.nse-tab-bar-tab.nse-control-button>.nse-tab-bar-content,
-:where(:scope):is(.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"])>.nse-tab-bar-tab.nse-control-button>.nse-tab-bar-content {
+[data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"] > [data-nse-part="viewport"] > *)[data-nse-control-size="large"]>[data-nse-part="cell"]:where([data-nse-role="tab"])>.nse-tab-bar-content,
+:where(:scope):is([data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"] > [data-nse-part="viewport"] > *)[data-nse-control-size="large"])>[data-nse-part="cell"]:where([data-nse-role="tab"])>.nse-tab-bar-content {
   block-size: 100%;
   inline-size: 100%;
   inset-block: 0;
@@ -233,13 +221,13 @@
 
 /* Pull only the two outer content stacks optically inward. Logical offsets
    mirror the adjustment in RTL without changing paint or hit geometry. */
-.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"]>.nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="first"]>.nse-tab-bar-content,
-:where(:scope):is(.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"])>.nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="first"]>.nse-tab-bar-content {
+[data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"] > [data-nse-part="viewport"] > *)[data-nse-control-size="large"]>[data-nse-part="cell"]:where([data-nse-role="tab"])[data-nse-position="first"]>.nse-tab-bar-content,
+:where(:scope):is([data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"] > [data-nse-part="viewport"] > *)[data-nse-control-size="large"])>[data-nse-part="cell"]:where([data-nse-role="tab"])[data-nse-position="first"]>.nse-tab-bar-content {
   inset-inline-start: 6px;
 }
 
-.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"]>.nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="last"]>.nse-tab-bar-content,
-:where(:scope):is(.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"])>.nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="last"]>.nse-tab-bar-content {
+[data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"] > [data-nse-part="viewport"] > *)[data-nse-control-size="large"]>[data-nse-part="cell"]:where([data-nse-role="tab"])[data-nse-position="last"]>.nse-tab-bar-content,
+:where(:scope):is([data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"] > [data-nse-part="viewport"] > *)[data-nse-control-size="large"])>[data-nse-part="cell"]:where([data-nse-role="tab"])[data-nse-position="last"]>.nse-tab-bar-content {
   inset-inline-start: -6px;
 }
 
@@ -260,21 +248,18 @@
   transition: filter 120ms ease, opacity 120ms ease, transform 120ms ease;
 }
 
-.nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
-:where(:scope):is(.nse-tab-bar-icon[data-nse-tab-icon-ready="true"]) {
-  background: currentColor;
+.nse-tab-bar-icon[data-nse-type="vector"],
+:where(:scope):is(.nse-tab-bar-icon[data-nse-type="vector"]) {
   block-size: 20px;
   flex-basis: 20px;
   inline-size: 20px;
-  -webkit-mask: var(--nse-tab-icon-source) center / contain no-repeat;
-  mask: var(--nse-tab-icon-source) center / contain no-repeat;
 }
 
-.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] .nse-tab-bar-icon,
-:where(:scope):is(.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"]) .nse-tab-bar-icon {
-  block-size: 24px;
-  flex: 0 0 24px;
-  inline-size: 24px;
+[data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"] > [data-nse-part="viewport"] > *)[data-nse-control-size="large"] .nse-tab-bar-icon,
+:where(:scope):is([data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"] > [data-nse-part="viewport"] > *)[data-nse-control-size="large"]) .nse-tab-bar-icon {
+  block-size: 22px;
+  flex: 0 0 22px;
+  inline-size: 22px;
 }
 
 /* The glyph layer is inert unless an appearance paints the icon as a ringed
@@ -295,53 +280,22 @@
   position: absolute;
 }
 
-.nse-tab-bar-icon[data-nse-tab-icon-ready="false"],
-:where(:scope):is(.nse-tab-bar-icon[data-nse-tab-icon-ready="false"]) {
+.nse-tab-bar-icon[data-nse-type="template"],
+:where(:scope):is(.nse-tab-bar-icon[data-nse-type="template"]) {
   align-items: center;
-  border: 1px dashed currentColor;
+  border: 1px dashed transparent;
   display: grid;
   justify-content: center;
-  opacity: 0.72;
 }
 
-.nse-tab-bar-tab[data-nse-tab-visual-state="hover"] .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
-:where(:scope):is(.nse-tab-bar-tab[data-nse-tab-visual-state="hover"]) .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
-.nse-tab-bar-more-option[data-nse-tab-visual-state="hover"] .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
-:where(:scope):is(.nse-tab-bar-more-option[data-nse-tab-visual-state="hover"]) .nse-tab-bar-icon[data-nse-tab-icon-ready="true"] {
-  filter: brightness(1.1);
-}
-
-.nse-tab-bar-tab[data-nse-tab-visual-state="selected"] .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
-:where(:scope):is(.nse-tab-bar-tab[data-nse-tab-visual-state="selected"]) .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
-.nse-tab-bar-tab[data-nse-tab-visual-state="selected-pressed"] .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
-:where(:scope):is(.nse-tab-bar-tab[data-nse-tab-visual-state="selected-pressed"]) .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
-.nse-tab-bar-more-option[data-nse-tab-visual-state="selected"] .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
-:where(:scope):is(.nse-tab-bar-more-option[data-nse-tab-visual-state="selected"]) .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
-.nse-tab-bar-more-option[data-nse-tab-visual-state="selected-pressed"] .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
-:where(:scope):is(.nse-tab-bar-more-option[data-nse-tab-visual-state="selected-pressed"]) .nse-tab-bar-icon[data-nse-tab-icon-ready="true"] {
-  filter: brightness(1.28);
-}
-
-.nse-tab-bar-tab[data-nse-tab-visual-state="pressed"] .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
-:where(:scope):is(.nse-tab-bar-tab[data-nse-tab-visual-state="pressed"]) .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
-.nse-tab-bar-more-option[data-nse-tab-visual-state="pressed"] .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
-:where(:scope):is(.nse-tab-bar-more-option[data-nse-tab-visual-state="pressed"]) .nse-tab-bar-icon[data-nse-tab-icon-ready="true"] {
+:where([data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"] > [data-nse-part="viewport"] > *)) > [data-nse-part="cell"]:where([data-nse-role="tab"])[data-nse-highlighted]:where(:not([data-nse-selected], [data-nse-enabled="false"])) > :where([data-nse-part="content"]) > [data-nse-part="image"][data-nse-type="vector"] {
   transform: translateY(1px);
 }
 
-.nse-tab-bar-tab[data-nse-tab-visual-state="selected-pressed"] .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
-:where(:scope):is(.nse-tab-bar-tab[data-nse-tab-visual-state="selected-pressed"]) .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
-.nse-tab-bar-more-option[data-nse-tab-visual-state="selected-pressed"] .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
-:where(:scope):is(.nse-tab-bar-more-option[data-nse-tab-visual-state="selected-pressed"]) .nse-tab-bar-icon[data-nse-tab-icon-ready="true"] {
+:where([data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"] > [data-nse-part="viewport"] > *)) > [data-nse-part="cell"]:where([data-nse-role="tab"])[data-nse-highlighted][data-nse-selected] > :where([data-nse-part="content"]) > [data-nse-part="image"][data-nse-type="vector"] {
   transform: translateY(1px) scale(0.94);
 }
 
-.nse-tab-bar-tab[data-nse-tab-visual-state="disabled"] .nse-tab-bar-icon,
-:where(:scope):is(.nse-tab-bar-tab[data-nse-tab-visual-state="disabled"]) .nse-tab-bar-icon,
-.nse-tab-bar-more-option[data-nse-tab-visual-state="disabled"] .nse-tab-bar-icon,
-:where(:scope):is(.nse-tab-bar-more-option[data-nse-tab-visual-state="disabled"]) .nse-tab-bar-icon {
-  opacity: 0.42;
-}
 .nse-tab-bar-label,
 :where(:scope):is(.nse-tab-bar-label) {
   font-size: 0.625rem;
@@ -352,10 +306,8 @@
   white-space: nowrap;
 }
 
-.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] .nse-tab-bar-label,
-:where(:scope):is(.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"]) .nse-tab-bar-label {
-  font-size: 0.75rem;
-  line-height: 0.875rem;
+[data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"] > [data-nse-part="viewport"] > *)[data-nse-control-size="large"] .nse-tab-bar-label,
+:where(:scope):is([data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"] > [data-nse-part="viewport"] > *)[data-nse-control-size="large"]) .nse-tab-bar-label {
   max-inline-size: 100%;
 }
 .nse-tab-bar-badge,
@@ -367,7 +319,6 @@
    in the existing shared vector stage rather than adding a local raster skin. */
 .nse-tab-bar-overflow-page,
 :where(:scope):is(.nse-tab-bar-overflow-page) {
-  background: transparent;
   border: 0;
   display: flex;
   flex: 1 1 auto;
@@ -418,7 +369,7 @@
 }
 
 .nse-tab-bar-overflow-option:focus-visible,
-:where(:scope):is(.nse-tab-bar-overflow-option:focus-visible) { outline: 2px solid currentColor; outline-offset: -2px; }
+:where(:scope):is(.nse-tab-bar-overflow-option:focus-visible) {  outline-offset: -2px; }
 
 .nse-tab-bar-panel[hidden],
 :where(:scope):is(.nse-tab-bar-panel[hidden]) {
@@ -511,25 +462,9 @@
 }
 
 @media (forced-colors: active) {
-  .nse-tab-bar::before,
-:where(:scope):is(.nse-tab-bar)::before {
-    -webkit-backdrop-filter: none !important;
-    backdrop-filter: none !important;
-    box-shadow: none !important;
-  }
 
   .nse-tab-bar-tab:focus-visible,
-:where(:scope):is(.nse-tab-bar-tab:focus-visible),
-.nse-tab-bar-more-option:focus-visible,
-:where(:scope):is(.nse-tab-bar-more-option:focus-visible) { outline: 2px solid Highlight; outline-offset: -2px; }
-}
-
-@media (prefers-reduced-transparency: reduce) {
-  .nse-tab-bar::before,
-:where(:scope):is(.nse-tab-bar)::before {
-    -webkit-backdrop-filter: none !important;
-    backdrop-filter: none !important;
-  }
+:where(:scope):is(.nse-tab-bar-tab:focus-visible) {  outline-offset: -2px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -560,8 +495,6 @@
   padding: 3px 4px;
   border: 0;
   border-radius: 6px;
-  background: none;
-  color: inherit;
   font: inherit;
   cursor: default;
 }
@@ -587,12 +520,7 @@
   white-space: nowrap;
 }
 
-.nse-icon-tab:disabled,
-:where(:scope):is(.nse-icon-tab:disabled) {
-  opacity: 0.45;
-}
-
-/* A rail changes only tab orientation. Targets keep the tall tab's 72px
+/* A rail changes only tab orientation. Targets keep the tall tab's bar
    height and independent end caps; content is beside it, never underneath. */
 .nse-tab-bar-safe-area[data-orientation="vertical"],
 :where(:scope):is(.nse-tab-bar-safe-area[data-orientation="vertical"]) {
@@ -623,8 +551,8 @@
   max-inline-size: 100%;
   gap: 6px;
 }
-.nse-tab-bar-safe-area[data-orientation="vertical"] .nse-tab-bar>.nse-tab-bar-tab,
-:where(:scope):is(.nse-tab-bar-safe-area[data-orientation="vertical"]) .nse-tab-bar>.nse-tab-bar-tab {
+.nse-tab-bar-safe-area[data-orientation="vertical"] .nse-tab-bar[data-nse-control-size="regular"]>.nse-tab-bar-tab,
+:where(:scope):is(.nse-tab-bar-safe-area[data-orientation="vertical"]) .nse-tab-bar[data-nse-control-size="regular"]>.nse-tab-bar-tab {
   flex: 0 0 72px;
   block-size: 72px;
   min-block-size: 72px;

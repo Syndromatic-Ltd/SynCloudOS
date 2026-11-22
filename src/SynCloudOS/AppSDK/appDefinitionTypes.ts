@@ -29,47 +29,6 @@ export type AppWindowCloseResult =
   | Readonly<{ outcome: "cancelled"; windowId: string }>
   | Readonly<{ outcome: "refused"; windowId: string; reason: "not-closable" | "blocked" | "delegate-refused" }>;
 
-export interface AppWindowChromeSnapshot {
-  readonly title: string;
-  readonly isKey: boolean;
-  readonly dirty: boolean;
-  readonly movable: boolean;
-  readonly resizable: boolean;
-  readonly closable: boolean;
-  readonly minimisable: boolean;
-  readonly zoomable: boolean;
-  readonly chromeMode: "system" | "custom" | "frameless";
-}
-
-export interface AppWindowChromeActions {
-  close(): Promise<AppWindowCloseResult>;
-  minimise(): void;
-  zoom(): void;
-}
-
-export interface AppWindowChromePointerDownEvent {
-  readonly button: number;
-  readonly isPrimary: boolean;
-  readonly pointerId: number;
-  readonly clientX: number;
-  readonly clientY: number;
-  readonly target: Element;
-  readonly currentTarget: HTMLElement;
-}
-
-export interface AppWindowChromeProps extends AppWindowChromeActions {
-  readonly title: string;
-  readonly titleId: string;
-  readonly isKey: boolean;
-  readonly dirty: boolean;
-  readonly movable: boolean;
-  readonly resizable: boolean;
-  readonly closable: boolean;
-  readonly minimisable: boolean;
-  readonly zoomable: boolean;
-  createMoveRegionProps(): { onPointerDown(event: AppWindowChromePointerDownEvent): void };
-}
-
 export interface SynWareRestorationServiceResolution<TClient> {
   readonly available: boolean;
   readonly client: TClient | null;
@@ -130,9 +89,6 @@ export interface SynWareDefinition<
   readonly root: ComponentType;
   readonly routes?: SynWareRouteGraph<TRoutes>;
   readonly migrations?: readonly SynWareMigration[];
-  /** Optional custom floating-window titlebar. Rendered for windows created
-   * with `windowDefaults.chrome: "custom"` through the same mounted session. */
-  readonly windowChrome?: ComponentType<AppWindowChromeProps>;
   readonly createBackgroundHandler?: () => SynWareBackgroundHandler;
   /**
    * Optional boot-time document rematerialiser for window restoration. When

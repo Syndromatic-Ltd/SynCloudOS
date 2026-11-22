@@ -298,7 +298,11 @@ function writePackage({ directory, name, exports, dependencies = undefined }) {
   for (const file of ["LICENSE", "NOTICE", "package.json"]) {
     cpSync(resolve(repositoryRoot, "src/SynCloudOS/AppSDK", file), resolve(directory, "sdk", file));
   }
-  writeFileSync(resolve(directory, "README.md"), `# SynCloudOS\n\nSynCloudOS 1.0 Public Beta, the web application framework for TypeScript and React 19.\n\nInstall ${name}; import SCOS, useSCOS, reactive hooks and folder declarations from ${name}, and NSE from ${name}/nse or its focused entries. An application folder default-exports an NSEApplication subclass (class authoring is the default; a function component is an explicit opt-in). AGENTS.md is the authoring contract: NSE controls, neutral appearance values with Atmo as default or a custom theme in light and dark, documents for primary state, managed tasks and display links. Info.ts is required and declares bundleIdentifier, displayName and version; schemaVersion defaults to 1, and icon and locale files are discovered. The synCloudOS() Vite plugin discovers applications, preference panes, widgets, integrations and the optional Webspring shell, then supplies the project to mountSynCloudOS automatically. See docs/framework/project-structure.md and docs/framework/getting-started.md.\n\nImport ${name}/nse/styles.css once for portable NSE controls, and ${name}/browser/styles.css for browser hosting. Use mountSynCloudOS({ element, application: { bundleIdentifier, frame } }) with synCloudOS({ webspringEntry: false }) for an application-only host; omit application to use the discovered shell. An explicit composition supports hosts without the discovery plugin; importing browser does not require a virtual module. Application and shell modes are mutually exclusive. The primary fills the page (frame \"fullscreen\", the default) or keeps its manifest presentation (frame \"declared\"); secondary apps present in windows. Authenticated fullscreen primaries declare applicationMenu.trigger: \"content\" and render a useApplicationMenuTrigger() button so users can reach Preferences and Account. Private applications stay private unless their manifest explicitly requests public access. Webspring hosts additionally import ${name}/webspring/styles.css. All entries share one module graph, including React contexts.\n\nFramework-owned resources remain module-relative when a consumer bundles them. Concrete NSE themes are explicit imports. SDK testing helpers, including createSynWare, live at ${name}/sdk/testing, not the production authoring entry.\n`, "utf8");
+  const packageReadme = readFileSync(resolve(repositoryRoot, "README.md"), "utf8").replace(
+    /\]\((?!https?:\/\/|#|mailto:)([^)]+)\)/gu,
+    (_match, target) => `](https://github.com/Syndromatic-Ltd/SynCloudOS/blob/master/${target.replace(/^\.\//u, "")})`,
+  );
+  writeFileSync(resolve(directory, "README.md"), packageReadme, "utf8");
   const files = packageFiles(directory);
   assertReviewedPackageFiles(files);
   const repositoryManifest = JSON.parse(readFileSync(resolve(repositoryRoot, "package.json"), "utf8"));
@@ -404,7 +408,7 @@ async function main() {
     .replace("../../../src/FX/DispatchFX/internal/workerSafeEntries.json", "./dispatch-worker-safe-entries.json"));
   cpSync(resolve(repositoryRoot, "scripts/synware/dispatch/workerGlobals.mjs"), resolve(directory, "dispatch-worker-globals.mjs"));
   cpSync(resolve(repositoryRoot, "src/FX/DispatchFX/internal/workerSafeEntries.json"), resolve(directory, "dispatch-worker-safe-entries.json"));
-  for (const file of ["theme-bundles.mjs","theme-loading.mjs","selector-performance.mjs","hook-mirror-jsx.mjs","built-in-theme-css.mjs","bundle-paths.mjs","project-derivation.mjs","manifest-source.mjs","application-toolchain.mjs","decorators.mjs","hot-applications.mjs","pwa-plugin.mjs"]) {
+  for (const file of ["theme-bundles.mjs","theme-loading.mjs","paint-properties.mjs","selector-performance.mjs","hook-mirror-jsx.mjs","built-in-theme-css.mjs","bundle-paths.mjs","project-derivation.mjs","manifest-source.mjs","application-toolchain.mjs","decorators.mjs","hot-applications.mjs","pwa-plugin.mjs"]) {
     writeFileSync(resolve(directory, file), readFileSync(resolve(repositoryRoot, "scripts/synware", file), "utf8")
       .replace("../../src/SynCloudOS/Identity/bundleIdentifier.mjs", "./bundleIdentifier.mjs")
       .replaceAll("../../src/NSE/Theme/contract/hookMirror", "./hookMirror")
@@ -425,8 +429,6 @@ async function main() {
     .replace('const entryName = "public.ts"', 'const entryName = "public.d.ts"'));
   cpSync(resolve(repositoryRoot, "src/SynCloudOS/AppSDK/manifest/synappManifestValidator.generated.mjs"), resolve(directory, "manifest-validator.mjs"));
   cpSync(resolve(repositoryRoot, "scripts/synware/virtual-themes.d.ts"), resolve(typesDirectory, "virtual-themes.d.ts"));
-  // Atmo.scostheme as source: the reference theme the developer MCP scaffolds new themes from and validates against.
-  cpSync(resolve(repositoryRoot, "src/Themes/Atmo.scostheme"), resolve(directory, "themes/Atmo.scostheme"), { recursive: true });
   // Atmo.scostheme as source: the reference theme the developer MCP scaffolds new themes from and validates against.
   cpSync(resolve(repositoryRoot, "src/Themes/Atmo.scostheme"), resolve(directory, "themes/Atmo.scostheme"), { recursive: true });
   cpSync(resolve(repositoryRoot, "scripts/synware/vite-plugin.d.mts"), resolve(typesDirectory, "vite.d.mts"));

@@ -57,11 +57,16 @@ it("publishes only mapped Apple types and keeps private storage out of declarati
   const source = program.getSourceFile(path)!;
   const exports = checker.getExportsOfModule(checker.getSymbolAtLocation(source)!);
   expect(exports.map(symbol => symbol.name).sort()).toEqual(Object.keys(all).sort());
-  expect(ts.getPreEmitDiagnostics(program).map(d => ts.flattenDiagnosticMessageText(d.messageText, "\n"))).toEqual([]);
-  const result = program.emit(undefined, (path, text) => {
-    if (path.includes("/DispatchFX/") && !path.includes("/internal/")) declarations.push(text);
-  });
-  expect(result.emitSkipped).toBe(false);
+  // Only Dispatch's own files are checked and emitted; `npm run typecheck` covers the rest of the program.
+  const dispatchFiles = program.getSourceFiles().filter(file => !file.isDeclarationFile && file.fileName.includes("/FX/DispatchFX/"));
+  expect(dispatchFiles.length).toBeGreaterThan(1);
+  expect(dispatchFiles.flatMap(file => ts.getPreEmitDiagnostics(program, file)).map(d => ts.flattenDiagnosticMessageText(d.messageText, "\n"))).toEqual([]);
+  for (const file of dispatchFiles) {
+    const result = program.emit(file, (path, text) => {
+      if (path.includes("/DispatchFX/") && !path.includes("/internal/")) declarations.push(text);
+    });
+    expect(result.emitSkipped).toBe(false);
+  }
   const text = declarations.join("\n");
   expect(text).not.toMatch(/(?:initialiseInterval|safeDistance|maximumNanoseconds|clientError|ScheduledJob|BrowserYieldHost|postTask|executionStack|queueState)/);
   const privateImports = [...text.matchAll(/from\s+["']([^"']*internal\/[^"']+)["']/g)].map(match => match[1]);

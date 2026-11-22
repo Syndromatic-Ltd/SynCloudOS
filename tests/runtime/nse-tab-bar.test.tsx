@@ -449,21 +449,20 @@ describe("NSETabBar", () => {
     expect(tabList.getAttribute("data-nse-tab-layout")).toBe("floating-bottom");
     expect(tabList.className).toContain("nse-control-toolbar");
     expect(tabList.getAttribute("data-grouped")).toBe("true");
-    expect(tabList.getAttribute("data-nse-tab-chrome-active")).toBe("true");
-    expect(tabList.getAttribute("data-nse-tab-chrome-family")).toBe("grouped-toolbutton");
-    expect(tabList.getAttribute("data-nse-tab-chrome-variant")).toBe("tall");
-    expect(tabList.getAttribute("data-nse-tab-chrome-size")).toBe("tall");
+    expect(tabList.getAttribute("data-nse-part")).toBe("header");
+    expect(tabList.closest("[data-nse-control=tab-view]")?.getAttribute("data-nse-style")).toBe("navigation");
+    expect(tabList.getAttribute("data-nse-control-size")).toBe("large");
     expect(tabList.hasAttribute("data-nse-tab-vector-generator")).toBe(false);
 
     expect(home.getAttribute("data-nse-theme-authority")).toBeNull();
     expect(home.getAttribute("data-nse-tab-chrome-source-path")).toBeNull();
 
-    expect(home.getAttribute("data-nse-tab-chrome-segment")).toBe("first");
-    expect(home.getAttribute("data-nse-tab-chrome-state")).toBe("sel");
+    expect(home.getAttribute("data-nse-position")).toBe("first");
+    expect(home.hasAttribute("data-nse-selected")).toBe(true);
 
 
     expect(home.querySelector(".nse-tab-bar-icon")?.getAttribute("data-nse-tab-icon-source")).toBe("template:home");
-    expect(home.querySelector(".nse-tab-bar-icon")?.getAttribute("data-nse-tab-icon-ready")).toBe("false");
+    expect(home.querySelector(".nse-tab-bar-icon")?.getAttribute("data-nse-type")).toBe("template");
     expect(home.querySelectorAll(".nse-control-chrome-primitive")).toHaveLength(0);
     const tabControls = screen.getAllByRole("tab");
     expect(tabControls).toHaveLength(5);
@@ -481,8 +480,8 @@ describe("NSETabBar", () => {
     const navigationCss = withoutScopeTwins(readFileSync(resolve(process.cwd(), "src/NSE/Navigation/nse-navigation.css"), "utf8"));
     expect(navigationCss).toContain(".nse-tab-bar-content");
     expect(navigationCss).toContain("pointer-events: none");
-    expect(navigationCss).toMatch(/\[data-nse-tab-chrome-segment="first"\]\s*>\s*\.nse-tab-bar-content \{\s*inset-inline-start: 6px;/u);
-    expect(navigationCss).toMatch(/\[data-nse-tab-chrome-segment="last"\]\s*>\s*\.nse-tab-bar-content \{\s*inset-inline-start: -6px;/u);
+    expect(navigationCss).toMatch(/\[data-nse-position="first"\]\s*>\s*\.nse-tab-bar-content \{\s*inset-inline-start: 6px;/u);
+    expect(navigationCss).toMatch(/\[data-nse-position="last"\]\s*>\s*\.nse-tab-bar-content \{\s*inset-inline-start: -6px;/u);
 
     fireEvent.pointerEnter(library);
 
@@ -497,7 +496,8 @@ describe("NSETabBar", () => {
 
     fireEvent.pointerDown(home);
     expect(home.getAttribute("data-nse-tab-presentation-state")).toBe("pressed");
-    expect(home.getAttribute("data-nse-tab-visual-state")).toBe("selected-pressed");
+    expect(home.hasAttribute("data-nse-selected")).toBe(true);
+    expect(home.hasAttribute("data-nse-highlighted")).toBe(true);
     fireEvent.pointerUp(home, { pointerType: "mouse" });
 
     expect(controller.getSnapshot().selectedDestinationId).toBe("home");
@@ -520,13 +520,15 @@ describe("NSETabBar", () => {
     const navigationCss = withoutScopeTwins(readFileSync(resolve(process.cwd(), "src/NSE/Navigation/nse-navigation.css"), "utf8"));
 
     expect(homeIcon?.getAttribute("data-nse-tab-icon-source")).toBe("vector:/fixture/home.svg");
-    expect(homeIcon?.getAttribute("data-nse-tab-icon-ready")).toBe("true");
+    expect(homeIcon?.getAttribute("data-nse-type")).toBe("vector");
     expect(homeIcon?.style.getPropertyValue("--nse-tab-icon-source")).toBe('url("/fixture/home.svg")');
     // The stylesheet owns the mask, so an appearance can replace it.
     expect(homeIcon?.style.maskImage).toBe('');
-    expect(navigationCss).toContain('mask: var(--nse-tab-icon-source) center / contain no-repeat;');
-    expect(templateIcon?.getAttribute("data-nse-tab-icon-ready")).toBe("false");
-    expect(navigationCss).toContain('.nse-tab-bar-icon[data-nse-tab-icon-ready="true"]');
+    const themeCss = readFileSync(resolve(process.cwd(), "src/Themes/Atmo.scostheme/Contents/Resources/atmo.controls.css"), "utf8");
+    expect(navigationCss).not.toContain("mask: var(--nse-tab-icon-source)");
+    expect(themeCss).toContain("mask: var(--nse-tab-icon-source) center / contain no-repeat;");
+    expect(templateIcon?.getAttribute("data-nse-type")).toBe("template");
+    expect(themeCss).toContain('[data-nse-part="image"][data-nse-type="vector"]');
     expect(navigationCss).not.toContain('.nse-tab-bar-icon[data-nse-theme-authority="unresolved"] { display: none; }');
 
     unmount();

@@ -147,7 +147,7 @@ function insideFolderArea(
  * entries around it, and the arbiter times the rests that reorder, merge and
  * spring a folder open.
  */
-export function createWebspringDragArbiter({
+export function createWSDragArbiter({
   itemId,
   kind,
   canMerge = kind === "app",

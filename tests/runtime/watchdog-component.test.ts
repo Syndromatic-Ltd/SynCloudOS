@@ -37,7 +37,7 @@ const app = {
 
 const appPresentation = {
   id: "window-memo-journal",
-  kind: "appView",
+  kind: "stage",
   zIndex: 112
 } as never;
 
@@ -80,7 +80,6 @@ describe("SynCloudOSWatchdog component", () => {
     runtime = createTestRuntime();
     runtime.store.mutate((draft) => {
       draft.errors = [];
-      draft.webspring.lowerShelfMode = "news";
     });
     vi.spyOn(console, "error").mockImplementation(() => undefined);
   });
@@ -150,7 +149,7 @@ describe("SynCloudOSWatchdog component", () => {
       exception: "Error",
       source: "SynCloudOS.AppWatchdog",
       context: {
-        presentation: "appView",
+        presentation: "stage",
         watchdog: "MemoJournal.app presentation",
       }
     });

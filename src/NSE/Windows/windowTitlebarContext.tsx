@@ -1,22 +1,59 @@
 /* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
 
 import { createContext, type ReactNode } from "react";
+import type { NSEAppearance } from "../Appearance/NSEAppearance";
 import type { NSEWindowToolbarStyle } from "../Application/NSEWindowController";
 import type { NSEViewController } from "../Application/NSEViewController";
 
 /** @internal A window's presentation in its host's title bar. */
 export interface WindowTitlebarDocument {
+  /** The window's style mask has `titled`; an untitled window draws no system title bar. */
+  readonly titled?: boolean;
   readonly title: string;
   readonly subtitle: string;
   readonly documentEdited: boolean;
   readonly toolbarStyle?: NSEWindowToolbarStyle;
+  readonly titleVisibility?: "visible" | "hidden";
+  readonly titlebarAppearsTransparent?: boolean;
+  readonly hasToolbar?: boolean;
+  /** Whether the toolbar has visible items besides spacers and the application menu (which moves to the title row). */
+  readonly toolbarHasRowItems?: boolean;
+  /** The toolbar's display mode; labelled items need a row of their own under a unified title. */
+  readonly toolbarDisplayMode?: import("../Toolbars/NSEToolbar").NSEToolbarDisplayMode;
+  readonly frameViewClass?: import("../Application/NSEWindowFrameView").NSEWindowFrameViewClass | null;
+  readonly texturedBackground?: boolean;
+  readonly sidebarWidth?: number;
+  readonly fullSizeContentView?: boolean;
+  readonly backgroundColour?: string | null;
+  readonly appearance?: NSEAppearance | null;
+  readonly isOpaque?: boolean;
+  readonly cornerRadius?: number | null;
+  readonly titlebarPresentation?: "attached" | "floating";
+}
+
+/** @internal Portal targets keep toolbar and accessory ownership in the application. */
+export interface WindowTitlebarSlots {
+  readonly standardControls: HTMLElement | null;
+  readonly leadingAccessories: HTMLElement | null;
+  readonly trailingAccessories: HTMLElement | null;
+  readonly toolbar: HTMLElement | null;
+  readonly bottomAccessories: HTMLElement | null;
+  readonly menuBar: HTMLElement | null;
+  /** Where the window draws its application menu when the toolbar has a row of its own; null otherwise. */
+  readonly applicationMenu?: HTMLElement | null;
 }
 
 /** @internal Accessory portals retain the application's context and responder chain. */
 export interface WindowTitlebarHost {
   setDocument(document: WindowTitlebarDocument | null): void;
+  readonly standardControls?: HTMLElement | null;
   readonly leadingAccessories: HTMLElement | null;
   readonly trailingAccessories: HTMLElement | null;
+  readonly toolbar?: HTMLElement | null;
+  readonly bottomAccessories?: HTMLElement | null;
+  readonly menuBar?: HTMLElement | null;
+  readonly applicationMenu?: HTMLElement | null;
+  setSlots?(slots: WindowTitlebarSlots): void;
 }
 
 export const WindowTitlebarDocumentContext = createContext<WindowTitlebarDocument | null>(null);
@@ -27,6 +64,7 @@ export const WindowTitlebarHostContext = createContext<WindowTitlebarHost | null
 export const WindowTitleSlotContext = createContext<{
   readonly root: NSEViewController<unknown> | null;
   readonly setSlot: (element: HTMLDivElement | null) => void;
+  readonly setSidebarWidth?: (width: number | undefined) => void;
 } | null>(null);
 
 /** @internal Title-bar drawing shared by expanded windows and preference panels. */

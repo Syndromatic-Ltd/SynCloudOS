@@ -1,13 +1,20 @@
-/** Host-trusted, static .scostheme bundles. Ported from PR #1 without fonts or motion. */
+/** Host-trusted, static .scostheme bundles. */
 import { existsSync, lstatSync, readdirSync, readFileSync, realpathSync } from "node:fs";
 import { dirname, extname, isAbsolute, relative, resolve } from "node:path";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import * as cssTree from "css-tree";
 import { SaxesParser } from "saxes";
 import ts from "typescript";
 import { parseManifest } from "./manifest-source.mjs";
+// Atmo's spinners and menu animations stay keyframes; transitions use motion tokens like any theme's.
+const ATMO_KEYFRAMES_STYLESHEET = fileURLToPath(new URL("../../src/Themes/Atmo.scostheme/Contents/Resources/atmo-structure.controls.css", import.meta.url));
 const identifier = /^[a-z][a-z0-9-]*(?:\.[a-z][a-z0-9-]*)+$/u;
-const resourceExtensions = new Set([".css", ".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg", ".avif", ".txt", ".md", ".json", ".strings"]);
+// A retired hook stays rejected; the error names what replaced it.
+const renamedTo = (contract, name, part = false) => {
+  const entry = Object.entries(contract.renamedFrom ?? {}).find(([from]) => part ? from.endsWith("." + name) : from === name);
+  return entry ? ` Renamed to ${entry[1]}.` : "";
+};
+const resourceExtensions = new Set([".css", ".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg", ".avif", ".woff2", ".txt", ".md", ".json", ".strings"]);
 const inside = (root, path) => { const rel = relative(root, path); return !isAbsolute(rel) && rel !== ".." && !rel.startsWith("../") && !rel.startsWith("..\\"); };
 function walk(root) {
   const files=[]; let bytes=0;
@@ -120,6 +127,32 @@ export function assertThemeFileNames(names) {
 const freeze = value => { if (value && typeof value === "object") { for (const child of Object.values(value)) freeze(child); Object.freeze(value); } return value; };
 const fail = (file, rule, message) => { throw new TypeError(`${file}: ${rule}: ${message}`); };
 const record = (value, allowed, file) => { try { keys(value, allowed, file); } catch (error) { fail(file, "unknown-key", error.message); } };
+
+function validateFontFace(rule, root, file) {
+  const descriptors = rule.block?.children.toArray();
+  if (rule.prelude || !descriptors || descriptors.some(node => node.type !== "Declaration")) {
+    fail(file, "css-font-face", "Declare font descriptors inside @font-face.");
+  }
+  const resources = resolve(root, "Contents/Resources");
+  const sources = descriptors.filter(node => cssTree.ident.decode(node.property).toLowerCase() === "src");
+  if (!sources.length) fail(file, "css-font-face", "@font-face requires a package-local WOFF2 src.");
+  for (const source of sources) {
+    let count = 0;
+    try {
+      validateCssValue(cssTree.generate(source.value), url => {
+        const target = localPath(root, file, url);
+        if (!target || extname(target).toLowerCase() !== ".woff2" || !inside(resources, realpathSync(target))) {
+          throw new TypeError("@font-face src must name a WOFF2 file under Resources.");
+        }
+        count++;
+      }, file, true);
+    } catch (error) {
+      fail(file, "css-font-face", error.message);
+    }
+    if (!count) fail(file, "css-font-face", "@font-face requires a package-local WOFF2 src.");
+  }
+}
+
 export function imageDimensions(file) {
   const bytes = readFileSync(file), extension = extname(file).toLowerCase();
   if (extension === ".svg") {
@@ -147,7 +180,21 @@ export function imageDimensions(file) {
   fail(file, "image-dimensions", "Cannot read the image dimensions.");
 }
 function validateDefinition(input, contract, file, root) {
-  record(input, ["colours", "navigation", "presentation", "images"], file);
+  record(input, ["colours", "navigation", "presentation", "images", "motion"], file);
+  if (input.motion !== undefined) {
+    record(input.motion, contract.motion.roles, file);
+    for (const [role, motion] of Object.entries(input.motion)) {
+      const spring = motion && typeof motion === "object" && "bounce" in motion;
+      record(motion, spring ? ["duration", "bounce"] : ["duration", "timingFunction"], file);
+      const finite = value => typeof value === "number" && Number.isFinite(value);
+      if (!finite(motion.duration) || motion.duration > 10 || motion.duration < (spring ? 0.07 : 0) || (!spring && motion.duration === 0)) fail(file, "motion", `motion.${role}.duration must be seconds, ${spring ? "0.07" : "above 0"} to 10.`);
+      if (spring && (!finite(motion.bounce) || motion.bounce <= -1 || motion.bounce >= 1)) fail(file, "motion", `motion.${role}.bounce must be between -1 and 1.`);
+      if (!spring) {
+        const points = motion.timingFunction;
+        if (!Array.isArray(points) || points.length !== 4 || !points.every(finite) || points[0] < 0 || points[0] > 1 || points[2] < 0 || points[2] > 1) fail(file, "motion", `motion.${role}.timingFunction must be four control points with x between 0 and 1.`);
+      }
+    }
+  }
   record(input.colours, ["light", "dark", "highContrastLight", "highContrastDark"], file);
   for (const scheme of ["light", "dark", "highContrastLight", "highContrastDark"]) {
     const values = input.colours[scheme];
@@ -208,10 +255,44 @@ function selectorHasAnchor(selector) {
     if (node.type !== "PseudoClassSelector") return false;
     if (node.name === "scope") return true;
     if (!["is", "where"].includes(node.name) || !node.children) return false;
-    const alternatives = node.children.toArray().flatMap(child => child.type === "SelectorList" ? child.children.toArray() : child.type === "Selector" ? [child] : []);
+    const alternatives = selectorAlternatives(node);
     return alternatives.length > 0 && alternatives.every(selectorHasAnchor);
   });
 }
+function selectorAlternatives(node) {
+  return node.children?.toArray().flatMap(child =>
+    child.type === "SelectorList" ? child.children.toArray() : child.type === "Selector" ? [child] : []
+  ) ?? [];
+}
+
+/** Each matching alternative needs an allowed control on the subject or one of its ancestors. */
+function appSelectorScope(selector) {
+  let anchored = false;
+  let ancestor = false;
+  let subjectHook = false;
+  for (const node of selector.children) {
+    if (node.type === "Combinator") {
+      // A sibling shares the previous element's ancestors, but is outside that element.
+      if (node.name === " " || node.name === ">") ancestor ||= anchored;
+      else if (node.name !== "+" && node.name !== "~") ancestor = false;
+      anchored = false;
+      subjectHook = false;
+    } else if (node.type === "AttributeSelector") {
+      const name = cssTree.ident.decode(cssTree.generate(node.name));
+      anchored ||= name === "data-nse-control";
+      subjectHook ||= name === "data-nse-control" || name === "data-nse-part";
+    } else if (node.type === "PseudoClassSelector" && ["is", "where"].includes(cssTree.ident.decode(node.name).toLowerCase())) {
+      const branches = selectorAlternatives(node).map(appSelectorScope);
+      if (branches.length) {
+        ancestor ||= branches.every(branch => branch.ancestor);
+        anchored ||= branches.every(branch => branch.anchored || branch.ancestor);
+        subjectHook ||= branches.every(branch => branch.subjectHook);
+      }
+    }
+  }
+  return { anchored, ancestor, subjectHook };
+}
+
 /** Shared by bundle validation and the idiom audit. Throws a file-specific rule violation. */
 /** Every rule of a stylesheet as { selector, declarations }, for limits that look across a theme's rules. */
 export function themeRuleSummaries(source) {
@@ -221,7 +302,31 @@ export function themeRuleSummaries(source) {
   } catch { /* Syntax errors are reported by validation. */ }
   return out;
 }
-export function validateThemeCSS(source, { file, root, contract, onImport = () => undefined, siblings: bundleSiblings } = {}) {
+const timingKeywords = new Set(["ease", "ease-in", "ease-out", "ease-in-out", "linear", "step-start", "step-end"]);
+/** Transition timing must come from motion tokens: no literal durations, delays or easings, and no var() fallbacks. */
+function validateTransitionTiming(declaration, tokens, file) {
+  const reject = detail => fail(file, "motion", `Time transitions with motion tokens only (${detail}).`);
+  cssTree.walk(declaration.value, node => {
+    if (node.type === "Dimension") reject(`${node.value}${node.unit}`);
+    if (node.type === "Number" && Number(node.value) !== 0) reject(node.value);
+    if (node.type === "Identifier" && timingKeywords.has(node.name.toLowerCase())) reject(node.name);
+    if (node.type === "Function") {
+      if (node.name.toLowerCase() !== "var") reject(`${node.name}()`);
+      const children = node.children.toArray();
+      const name = children[0]?.type === "Identifier" ? children[0].name : "";
+      if (children.length !== 1 || !tokens.has(name)) reject(`var(${cssTree.generate(node).slice(4, -1)})`);
+      return cssTree.walk.skip;
+    }
+  });
+}
+export function validateThemeCSS(source, { file, root, contract, kind = "system", onImport = () => undefined, siblings: bundleSiblings, atmoKeyframesStylesheet } = {}) {
+  const app = kind === "app";
+  const resolvedFile = file ? resolve(file) : null;
+  const allowsKeyframes = !app && Boolean(resolvedFile) && (resolvedFile === ATMO_KEYFRAMES_STYLESHEET || (Boolean(atmoKeyframesStylesheet) && resolvedFile === resolve(atmoKeyframesStylesheet)));
+  const motionRoles = contract.motion?.roles ?? [];
+  const motionTokens = new Set(motionRoles.flatMap(role => ["duration", "easing"].map(kind => `--nse-motion-${role.replace(/[A-Z]/gu, letter => "-" + letter.toLowerCase())}-${kind}`)));
+  if (app && !Array.isArray(contract.appThemeControls)) fail(file, "css-control", "The theme contract does not define appThemeControls.");
+  const appControls = app ? new Set(contract.appThemeControls) : null;
   const ast = cssTree.parse(source, { parseCustomProperty: true, positions: true, onParseError(error) { fail(file, "css-syntax", error.message); } });
   const attributes = new Set(["control", "part", "state", "highlighted", "enabled", "selected", "hovered", "focused", "key-window", "tracking", "colour-scheme-resolved", "contrast", "transparency", ...Object.values(contract.controls).flatMap(control => Object.keys(control.variants))].map(name => `data-nse-${name}`));
   const valueText = node => cssTree.generate(node.value);
@@ -240,27 +345,48 @@ export function validateThemeCSS(source, { file, root, contract, onImport = () =
       if (node.type === "Raw" && node.value.trim()) fail(file, "css-syntax", "Unparsed CSS is not permitted.");
       if (node.type === "Atrule") {
         const name = cssTree.ident.decode(node.name).toLowerCase();
+        if (allowsKeyframes && name === "keyframes") return cssTree.walk.skip;
         if (name === "import") {
           const match = /^(["'])([^"']+)\1\s*$/u.exec(cssTree.generate(node.prelude));
           if (!match) fail(file, "css-import", "Use a quoted local stylesheet import.");
           const target = localPath(root, file, match[2]); if (!target || extname(target).toLowerCase() !== ".css") fail(file, "css-import", "Import a local CSS file."); onImport(target);
-        } else if (!["media", "supports", "container", "layer"].includes(name)) fail(file, "css-at-rule", `@${name} is not theme data; fonts and motion are framework-owned.`);
+        } else if (name === "font-face") {
+          validateFontFace(node, root, file);
+        } else if (!["media", "supports", "container", "layer"].includes(name)) fail(file, "css-at-rule", `@${name} is not allowed in theme stylesheets.`);
       }
       if (node.type === "Selector") {
-        let anchored = false, semantic = false;
         const selector = cssTree.generate(node);
         cssTree.walk(node, child => {
-          if (["ClassSelector", "IdSelector"].includes(child.type) || child.type === "TypeSelector" && child.name !== "*") fail(file, "css-selector", `Use contract hooks only: ${selector}`);
-          if (child.type === "PseudoClassSelector" && ["root", "host", "host-context"].includes(child.name)) fail(file, "css-selector", `Use contract hooks only: ${selector}`);
-          if (child.type === "PseudoClassSelector" && child.name === "scope") anchored = true;
+          if (["ClassSelector", "IdSelector"].includes(child.type)
+            || child.type === "TypeSelector" && child.name !== "*") {
+            fail(file, "css-selector", `Use contract hooks only: ${selector}`);
+          }
+          if (child.type === "PseudoClassSelector" && ["root", "host", "host-context"].includes(app ? cssTree.ident.decode(child.name).toLowerCase() : child.name)) fail(file, "css-selector", `Use contract hooks only: ${selector}`);
           if (child.type !== "AttributeSelector") return;
           const name = cssTree.ident.decode(cssTree.generate(child.name));
           if (!attributes.has(name)) fail(file, "css-selector", `Unknown contract attribute ${name}.`);
           const value = child.value?.value ?? child.value?.name;
-          if (name === "data-nse-control") { anchored = true; if (value && !contract.controls[value]) fail(file, "css-control", `Unknown control ${value}.`); }
-          if (name === "data-nse-part") { anchored = true; if (value && !Object.values(contract.controls).some(control => control.parts.includes(value))) fail(file, "css-part", `Unknown part ${value}.`); if (semanticParts.has(value)) semantic = true; }
+          if (name === "data-nse-control") {
+            const control = app && child.value?.type === "Identifier" ? cssTree.ident.decode(value) : value;
+            if (appControls && (child.matcher !== "=" || !control || child.flags && child.flags.toLowerCase() !== "s")) {
+              fail(file, "css-control", `Use an exact match for an allowed control: ${cssTree.generate(child)}. Allowed controls: ${contract.appThemeControls.join(", ")}.`);
+            }
+            if (appControls && !appControls.has(control)) {
+              fail(file, "css-control", `App themes cannot draw ${control}. Allowed controls: ${contract.appThemeControls.join(", ")}.`);
+            }
+            if (control && !contract.controls[control]) fail(file, "css-control", `Unknown control ${control}.${renamedTo(contract, control)}`);
+          }
+          if (name === "data-nse-part" && value && !Object.values(contract.controls).some(control => control.parts.includes(value))) {
+            fail(file, "css-part", `Unknown part ${value}.${renamedTo(contract, value, true)}`);
+          }
         });
-        if (!selectorHasAnchor(node)) fail(file, "css-selector", `A selector needs a control, part or :scope hook: ${selector}`);
+        if (app) {
+          const scope = appSelectorScope(node);
+          if (!scope.anchored && !scope.ancestor) fail(file, "css-selector", `Each selector branch needs an allowed control: ${selector}`);
+          if (!scope.subjectHook) fail(file, "css-selector", `App selectors must target a control or part hook: ${selector}`);
+        } else if (!selectorHasAnchor(node)) {
+          fail(file, "css-selector", `A selector needs a control, part or :scope hook: ${selector}`);
+        }
         return cssTree.walk.skip;
       }
       if (node.type === "Rule") {
@@ -270,8 +396,9 @@ export function validateThemeCSS(source, { file, root, contract, onImport = () =
       }
       if (node.type === "Declaration") {
         const property = cssTree.ident.decode(node.property).toLowerCase();
-        if (/^(?:animation|transition)(?:-|$)/u.test(property)) fail(file, "motion", "Themes cannot define motion.");
-        if (/^(?:font(?:-|$)|line-height$|letter-spacing$|word-spacing$|text-transform$)/u.test(property)) fail(file, "typography", "Themes cannot define typography.");
+        if (!allowsKeyframes && /^animation(?:-|$)/u.test(property)) fail(file, "motion", "Themes cannot define animations; time transitions with motion tokens.");
+        if (property.startsWith("--nse-motion-")) fail(file, "motion", "Motion tokens come from Theme.json.");
+        if (/^transition(?:-|$)/u.test(property)) validateTransitionTiming(node, motionTokens, file);
         if (["behavior", "-moz-binding"].includes(property)) fail(file, "css-code", "Executable CSS is forbidden.");
         validateCssValue(valueText(node), url => localPath(root, file, url), file);
       }
@@ -280,13 +407,18 @@ export function validateThemeCSS(source, { file, root, contract, onImport = () =
   return ast;
 }
 export function readThemeBundle(bundlePath, options = {}) {
+  const { kind = "system" } = options;
+  const app = kind === "app";
   const root = resolve(bundlePath), files = walk(root), contents = resolve(root, "Contents");
   assertThemeFileNames(files.map(file => relative(root, file)));
   for (const file of files) {
     const name = relative(contents, file).replaceAll("\\", "/");
+    if (app && name.toLowerCase() === "theme.json") {
+      fail(file, "app-theme-definition", "App themes cannot include Theme.json. Colours, navigation, presentation and named images are system decisions.");
+    }
     if (["Info.ts", "Theme.json"].includes(name)) continue;
     if (name.startsWith("Licences/") && (/\.(?:txt|md)$/iu.test(name) || /\/(?:LICENSE|LICENCE|NOTICE|COPYING)$/u.test(name))) continue;
-    if (!name.startsWith("Resources/") || !resourceExtensions.has(extname(file).toLowerCase())) fail(file, "static-resources", "Themes contain static data and resources only; no code, fonts or motion.");
+    if (!name.startsWith("Resources/") || !resourceExtensions.has(extname(file).toLowerCase())) fail(file, "static-resources", "Themes contain static resources only. WOFF2 is the supported font format.");
   }
   const infoPath = resolve(contents, "Info.ts"), definitionPath = resolve(contents, "Theme.json");
   let info;
@@ -294,19 +426,23 @@ export function readThemeBundle(bundlePath, options = {}) {
   record(info, ["bundleIdentifier", "displayName", "version", "themeContractVersion"], infoPath);
   if (!identifier.test(info.bundleIdentifier ?? "") || typeof info.displayName !== "string" || !info.displayName.trim() || typeof info.version !== "string" || !/^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-[\da-z-]+(?:\.[\da-z-]+)*)?(?:\+[\da-z-]+(?:\.[\da-z-]+)*)?$/iu.test(info.version) || info.themeContractVersion !== 1) fail(infoPath, "metadata", "Invalid bundle identifier, display name, semver or themeContractVersion.");
   const contract = options.contract ?? JSON.parse(readFileSync(new URL("../../tooling/nse-theme-contract.json", import.meta.url), "utf8"));
-  let input; try { input = JSON.parse(readFileSync(definitionPath, "utf8")); } catch (error) { fail(definitionPath, "json", error.message); }
-  validateDefinition(input, contract, definitionPath, root);
+  let input;
+  if (!app) {
+    try { input = JSON.parse(readFileSync(definitionPath, "utf8")); } catch (error) { fail(definitionPath, "json", error.message); }
+    validateDefinition(input, contract, definitionPath, root);
+  }
   for (const file of files.filter(file => extname(file).toLowerCase() === ".svg")) validateSvg(readFileSync(file, "utf8"), file);
   const imports = new Map(), stylesheets = new Map();
   const siblings = files.filter(file => extname(file).toLowerCase() === ".css").flatMap(file => themeRuleSummaries(readFileSync(file, "utf8")));
   for (const file of files.filter(file => extname(file).toLowerCase() === ".css")) {
     const dependencies = []; imports.set(file, dependencies);
-    stylesheets.set(file, validateThemeCSS(readFileSync(file, "utf8"), { file, root, contract, siblings, onImport: path => dependencies.push(path) }));
+    stylesheets.set(file, validateThemeCSS(readFileSync(file, "utf8"), { file, root, contract, kind, siblings, atmoKeyframesStylesheet: options.atmoKeyframesStylesheet, onImport: path => dependencies.push(path) }));
   }
   const stylesheetPath = resolve(contents, "Resources/theme.css"), visited = new Set(), visiting = new Set();
   const visit = file => { if (visiting.has(file)) fail(file, "cyclic-import", "Cyclic theme CSS imports."); if (visited.has(file)) return; if (!stylesheets.has(file)) fail(file, "stylesheet", "Missing theme stylesheet."); visiting.add(file); for (const child of imports.get(file)) visit(child); visiting.delete(file); visited.add(file); };
   visit(stylesheetPath);
-  const theme = freeze({ bundleIdentifier: info.bundleIdentifier, displayName: info.displayName, version: info.version, ...input });
+  const identity = { bundleIdentifier: info.bundleIdentifier, displayName: info.displayName, version: info.version };
+  const theme = app ? Object.freeze({ kind: "app", ...identity }) : freeze({ ...identity, ...input });
   return Object.freeze({ bundlePath: root, infoPath, stylesheetPath, theme, files: Object.freeze(files), stylesheets: Object.freeze([...visited]), contract });
 }
 export function discoverThemeBundles(directory, options) {

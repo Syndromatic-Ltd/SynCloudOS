@@ -210,7 +210,7 @@ describe("runtime lifecycle operation ordering", () => {
       application: { activeAppId: null, currentAppId: null, routePath: "/" },
       statechart: { currentState: "active.webspring" },
     });
-    expect(runtime.windows.list()).toEqual([]);
+    expect(runtime.windows.list().map(({ record }) => record.fullScreen)).toEqual(stage === "close" ? [] : ["on"]);
   });
 
   it("runs memory-warning effects before did hooks and reports did failures post-commit", async () => {

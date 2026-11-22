@@ -28,7 +28,7 @@ type WatchdogScope = "root" | "app";
 
 export interface AppPresentationWatchdogContext {
   readonly id: string;
-  readonly kind: "appView" | "window";
+  readonly kind: "stage" | "window";
   readonly zIndex: number;
 }
 
@@ -165,6 +165,7 @@ export function AppPresentationErrorFallback({
 
   return (
     <div
+      data-nse-control="view" data-nse-part="background" data-nse-role="watchdog" data-nse-presentation={presentation.kind}
       className={`${isWindowed ? "webspring-windowed-app-frame" : "webspring-app-view-frame"} webspring-app-watchdog-frame`}
       style={{ zIndex: isWindowed ? presentation.zIndex : presentation.zIndex + 70 }}
       aria-hidden="true"

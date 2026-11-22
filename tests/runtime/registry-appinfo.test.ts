@@ -21,7 +21,7 @@
 import { describe, expect, it } from "vitest";
 import { createSynWare, createSynWareBundle } from "../../src/SynCloudOS/AppSDK/createSynWare";
 import { projectRuntimeManifest, validateSynWareManifest } from "../../src/SynCloudOS/AppSDK";
-import { createTestRuntime, createTestManifest, createRuntimeHarness } from "./helpers";
+import { createTestBundle, createTestRuntime, createTestManifest, createRuntimeHarness } from "./helpers";
 
 describe("AppRegistry and AppInfo registration preflight", () => {
   it("rejects fatal route collisions using normalized route keys without capturing runtime errors", async () => {
@@ -94,14 +94,13 @@ describe("AppRegistry and AppInfo registration preflight", () => {
       route: "/com.example.hello-world",
       path: "HelloWorld.app/",
       componentKey: "HelloWorld",
-      presentation: "appView",
+      presentation: "stage",
       webspring: {
         visible: true,
         order: 1000,
       },
       window: {
         title: "Hello World",
-        chrome: "system",
         resizable: true,
       },
       lifecycle: { preload: false },
@@ -124,7 +123,7 @@ describe("AppRegistry and AppInfo registration preflight", () => {
       routes: [{ path: "/renamed-publisher", primary: true }],
       services: [{ id: "notifications", required: true }],
       runtime: {
-        presentation: "windowedView",
+        presentation: "window",
         policy: { requiresLogin: true, requiredCapabilities: ["journal.publisher.open"] },
         notifications: { badgeCount: 2 },
       },
@@ -137,7 +136,7 @@ describe("AppRegistry and AppInfo registration preflight", () => {
 
     expect(manifest).toMatchObject({
       bundleIdentifier: "com.example.renamed-publisher",
-      presentation: "windowedView",
+      presentation: "window",
       policy: { requiresLogin: true, requiredCapabilities: ["journal.publisher.open"] },
       notifications: { showsNotifications: true, badgeCount: 2 },
     });
@@ -240,157 +239,10 @@ describe("AppRegistry and AppInfo registration preflight", () => {
   });
 
 
-  it("normalises app-view frame composition separately from presentation", async () => {
-    const { AppRegistry } = createRuntimeHarness(createTestRuntime());
-
-    const standard = AppRegistry.register(createTestManifest({ bundleIdentifier: "com.example.standard-frame" }));
-    const appOwned = AppRegistry.register(createTestManifest({
-      bundleIdentifier: "com.example.app-owned-frame",
-      frame: {
-        material: "metal",
-        topBar: "custom"
-      }
-    }));
-
-    expect(standard).toMatchObject({
-      presentation: "appView",
-      frame: {
-        material: "standard",
-        topBar: "standard",
-        rightSlot: "auto",
-        background: "system",
-        smoothSurface: {
-          radius: 31,
-          curve: "squircle",
-          smoothing: 0.6,
-          physicality: "default",
-          overflow: "hidden"
-        }
-      }
-    });
-    expect(appOwned).toMatchObject({
-      presentation: "appView",
-      frame: {
-        material: "metal",
-        topBar: "custom",
-        rightSlot: "auto",
-        background: "system",
-        smoothSurface: {
-          radius: 31,
-          curve: "squircle",
-          smoothing: 0.6,
-          physicality: "default",
-          overflow: "hidden"
-        }
-      }
-    });
-  });
-
-  it("normalises app-view smooth surface defaults, opt-outs, and radius shorthand", async () => {
-    const { AppRegistry } = createRuntimeHarness(createTestRuntime());
-
-    const defaulted = AppRegistry.register(createTestManifest({ bundleIdentifier: "com.example.smooth-default" }));
-    const disabled = AppRegistry.register(createTestManifest({
-      bundleIdentifier: "com.example.smooth-disabled",
-      frame: { smoothSurface: "off" }
-    }));
-    const custom = AppRegistry.register(createTestManifest({
-      bundleIdentifier: "com.example.smooth-custom",
-      frame: { smoothSurface: 68 }
-    }));
-
-    expect(defaulted?.frame.smoothSurface).toMatchObject({ radius: 31, curve: "squircle" });
-    expect(disabled?.frame.smoothSurface).toBe("off");
-    expect(custom?.frame.smoothSurface).toBe(68);
-  });
-
-  it("normalises the source-list rail with defaults, clamping, and railLabel passthrough", async () => {
-    const { AppRegistry } = createRuntimeHarness(createTestRuntime());
-
-    const defaulted = AppRegistry.register(createTestManifest({
-      bundleIdentifier: "com.example.sourcelist-default",
-      frame: { material: "metal", topBar: "standard", sourceList: {} }
-    }));
-    const custom = AppRegistry.register(createTestManifest({
-      bundleIdentifier: "com.example.sourcelist-custom",
-      frame: {
-        material: "metal",
-        topBar: "standard",
-        sourceList: { railLabel: "  Software  ", minWidth: 240, maxWidth: 200, defaultWidth: 999 }
-      }
-    }));
-
-    expect(defaulted?.frame.sourceList).toEqual({ minWidth: 208, maxWidth: 460, defaultWidth: 264 });
-    // maxWidth raised to minWidth, defaultWidth clamped into [min, max], railLabel trimmed.
-    expect(custom?.frame.sourceList).toEqual({ minWidth: 240, maxWidth: 240, defaultWidth: 240, railLabel: "Software" });
-  });
-
-  it("drops the source-list rail unless topBar is standard", async () => {
-    const { AppRegistry } = createRuntimeHarness(createTestRuntime());
-
-    const appOwned = AppRegistry.register(createTestManifest({
-      bundleIdentifier: "com.example.sourcelist-custom-topbar",
-      frame: { material: "metal", topBar: "custom", sourceList: { defaultWidth: 300 } }
-    }));
-
-    expect(appOwned?.frame.sourceList).toBeUndefined();
-    expect(AppRegistry.getRegistrationHistory().at(-1)?.warnings).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ code: "manifest.frame.sourceList.ignored" })
-      ])
-    );
-  });
-
-  it("keeps invalid frame fields as warnings and falls back to the standard frame", async () => {
-    const { AppRegistry } = createRuntimeHarness(createTestRuntime());
-    const registered = AppRegistry.register(createTestManifest({
-      bundleIdentifier: "com.example.invalid-frame",
-      frame: {
-        material: "panel" as never,
-        topBar: "toolbar" as never,
-        presentationMotion: "automatic" as never,
-        rightSlot: "bogus" as never,
-        background: 7 as never
-      }
-    }));
-
-    expect(registered?.frame).toEqual({
-      material: "standard",
-      topBar: "standard",
-      presentationMotion: "host",
-      rightSlot: "auto",
-      background: "system",
-      smoothSurface: {
-        radius: 31,
-        curve: "squircle",
-        smoothing: 0.6,
-        physicality: "default",
-        overflow: "hidden"
-      }
-    });
-    expect(AppRegistry.getRegistrationHistory().at(-1)?.warnings).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ code: "manifest.frame.material.defaulted" }),
-        expect.objectContaining({ code: "manifest.frame.topBar.defaulted" }),
-        expect.objectContaining({ code: "manifest.frame.presentationMotion.defaulted" }),
-        expect.objectContaining({ code: "manifest.frame.rightSlot.defaulted" }),
-        expect.objectContaining({ code: "manifest.frame.background.defaulted" })
-      ])
-    );
-  });
-
-  it("keeps a custom right slot and a background surface, and drops the removed layout field", async () => {
-    const { AppRegistry } = createRuntimeHarness(createTestRuntime());
-    const rightSlot = { icon: "/assets/help.svg", label: { key: "help.label", fallback: "Help" } };
-    const background = { colour: "#223344", texture: "none" as const };
-    const registered = AppRegistry.register(createTestManifest({
-      bundleIdentifier: "com.example.custom-frame",
-      frame: { rightSlot, background, layout: "simple" } as never
-    }));
-
-    expect(registered?.frame.rightSlot).toEqual(rightSlot);
-    expect(registered?.frame.background).toEqual(background);
-    expect(registered?.frame).not.toHaveProperty("layout");
+  it("normalises presentation motion independently from the window kind", () => {
+    const runtime = createTestRuntime();
+    const app = runtime.apps.register(createTestBundle({ bundleIdentifier: "com.example.motion", frame: { presentationMotion: "content" } }));
+    expect(app?.frame.presentationMotion).toBe("content");
   });
 
   it("reports optional services without disabling the app", async () => {

@@ -1,36 +1,69 @@
 # NetworkFX
 
-NetworkFX mirrors Apple's Network path monitoring API at `@syndromatic/syncloudos/fx/network`. Declare `network.read` in Info.ts. Import the classes inside an application bundle compiled with the SynCloudOS plugin. The plugin supplies stable per-app subclasses; constructors retain the selected app session across awaits, timers and callbacks. There is no Network authorization API or permission prompt.
+NetworkFX tells your app whether it has a usable network path and what kind of path it is. Reach for it when you want to pause sync while offline, or back off large downloads on a constrained connection. It lives at `@syndromatic/syncloudos/fx/network`.
+
+Declare `network.read` in Info.ts. Import the classes inside an application bundle compiled with the SynCloudOS plugin: the plugin supplies per-app subclasses, and each monitor keeps hold of its app session across awaits, timers and callbacks. There is no permission prompt.
 
 ```ts
-import { NWFXPathMonitor, NWFXInterfaceType } from "@syndromatic/syncloudos/fx/network";
+import { NWFXPathMonitor } from "@syndromatic/syncloudos/fx/network";
 import { DFXQueue } from "@syndromatic/syncloudos/fx/dispatch";
+
 const monitor = new NWFXPathMonitor();
 monitor.pathUpdateHandler = path => console.log(path.status);
 monitor.start(DFXQueue.main);
-// When the owning operation ends:
+// When you no longer need updates:
 monitor.cancel();
 ```
 
-Constructors also accept a required `NWFXInterfaceType`, or an array of prohibited types. `start(queue)` begins observation once, and readonly `queue` identifies the delivery queue. The queue is required, as in Apple's `start(queue:)`; pass `DFXQueue.main` to deliver on the main queue. Repeated start on a live monitor is idempotent; cancellation is terminal. Handler deliveries are synchronous Dispatch work items, including the initial path. `currentPath` is updated immediately before each handler runs. Until the first queued observation it throws `NWFXError.posix(45)`; no unobserved route is invented. Cancelled/revoked monitors reject further path reads and starts.
+## The monitor
 
-`useNetwork()` returns an actual passive `NWFXPathMonitor`. Set its handler and start it in an effect; the hook cancels on actual component unmount or context replacement. Its insertion lifetime survives React StrictMode's layout-effect cleanup/setup replay. A component that explicitly calls `cancel()` must acquire a new monitor instead of restarting the terminal instance.
+`new NWFXPathMonitor()` watches every interface. Pass one `NWFXInterfaceType` to require that interface, or an array of types to exclude them. An empty array applies no filter. An unknown type throws `NWFXError.posix(22)`.
 
-Both monitor construction and every native/queued delivery enforce the launch entitlement and current app authority. Revocation immediately cancels native subscriptions and advances an access generation; restoring access cannot deliver an older queued path or revive an older instance. App abort and selected-session registry removal are terminal. Up to eight active native observations per mount are admitted. Importing or constructing never starts browser observation. Host ports are private and are not available on SCOS, SynWareContextValue, browser contribution environments or exported testing environments. Native adapters are associated privately with their environment identity; no networkPaths field exposes the adapter or snapshot type.
+`start(queue)` takes a required `DFXQueue`; pass `DFXQueue.main` to receive updates on the main queue. Calling `start` again on a running monitor does nothing. `queue` reports the delivery queue, or `null` before you start. Every update, including the first, runs as a synchronous Dispatch work item, and `currentPath` is set just before your handler runs. Reading `currentPath` before the first delivery throws `NWFXError.posix(45)` rather than guessing a route.
 
-| Apple member | Browser behavior |
+`cancel()` is final. A cancelled monitor rejects path reads and further starts, so create a new one if you need to watch again.
+
+### In a component
+
+`useNetwork()` from `@syndromatic/syncloudos/sdk` returns an idle `NWFXPathMonitor` owned by the component. Set its handler and call `start` in an effect. The hook cancels the monitor when the component unmounts or its app context changes, and the monitor survives React StrictMode's effect replay. If your component calls `cancel()` itself, it needs a fresh monitor afterwards.
+
+## Access and lifetime
+
+Construction and every delivery check the launch entitlement and the app's current authority. Revoking access cancels native subscriptions at once, and restoring it never delivers a path that was queued before the revocation or revives an old monitor. Aborting the app, or removing its session, ends every monitor.
+
+Each mounted app may run up to eight monitors at a time; the ninth `start` throws `NWFXError.posix(24)`. Importing the module or constructing a monitor never starts browser observation on its own. The host adapters are private: nothing on `SCOS`, `SynWareContextValue`, browser contribution environments or testing environments exposes them.
+
+## What a browser can observe
+
+Browsers report much less than a native network stack. NetworkFX returns what it can observe and throws `ENOTSUP` (45) for the rest. It never fabricates a value.
+
+| Property | Browser behaviour |
 |---|---|
-| `NWPath.status` | `navigator.onLine` supplies a coarse satisfied/unsatisfied hint. It does not prove Internet or endpoint reachability. No active probes run. |
-| `NWPath.unsatisfiedReason` | Throws ENOTSUP when the host cannot observe the reason. An excluded observed interface produces unsatisfied/notAvailable. |
-| `NWPath.availableInterfaces`, `NWInterface.type/name/index` | Actual host interface enumeration only. Browsers cannot enumerate names/indices, so availableInterfaces throws ENOTSUP; no interfaces are fabricated. |
-| `NWPath.usesInterfaceType(type)` | Uses explicit observed transport types. Missing transport throws ENOTSUP. Connection speed never establishes transport. |
-| `NWPath.isConstrained` | Browser Save-Data maps to constrained; missing observation throws ENOTSUP. |
-| `NWPath.isExpensive` | Explicit cellular means expensive; otherwise a reliable metered boolean is used. Missing cost throws ENOTSUP. Wi-Fi alone does not establish cost. |
-| `NWPath.supportsIPv4`, `supportsIPv6`, `supportsDNS` | Actual routing/configuration observations only; ordinary browser adapters throw ENOTSUP for each. |
-| Required/prohibited interface constructors | Filtering uses observed transport types; start/update fails with ENOTSUP and cancels if transport cannot be observed. An empty prohibited list imposes no filter. |
+| `status` | `navigator.onLine` gives a coarse satisfied/unsatisfied hint. It does not prove that the Internet or any endpoint is reachable, and no probes run. |
+| `unsatisfiedReason` | Throws `ENOTSUP` when the host cannot observe the reason. An interface excluded by the monitor's filter produces `unsatisfied` with `notAvailable`. |
+| `availableInterfaces`, `NWFXInterface.type`, `name`, `index` | Real host enumeration only. Browsers cannot list interface names or indices, so `availableInterfaces` throws `ENOTSUP`. |
+| `usesInterfaceType(type)` | Uses explicitly observed transport types and throws `ENOTSUP` when the transport is unknown. Connection speed never implies a transport. |
+| `isConstrained` | The browser's Save-Data setting counts as constrained. Throws `ENOTSUP` when that setting is not observable. |
+| `isExpensive` | An explicit cellular transport, or a reliable metered flag, counts as expensive. Wi-Fi alone settles nothing. Throws `ENOTSUP` when cost is unknown. |
+| `supportsIPv4`, `supportsIPv6`, `supportsDNS` | Real routing observations only. Ordinary browser adapters throw `ENOTSUP` for each. |
+| Interface filters | Filtering relies on observed transport types. If the transport cannot be observed, `start` or the next update fails with `ENOTSUP` and cancels the monitor. |
 
-Paths and interfaces are frozen class instances; they are not structured-clone records. `NWFXPathStatus`, `NWFXPathUnsatisfiedReason` and `NWFXInterfaceType` are frozen case objects with same-named TypeScript union types. UnsatisfiedReason includes Apple's current `vpnInactive` case.
+Paths and interfaces are frozen class instances, not structured-clone records. `NWFXPathStatus`, `NWFXPathUnsatisfiedReason` (including `vpnInactive`) and `NWFXInterfaceType` are frozen case objects, each with a TypeScript union type of the same name.
 
-`NWFXError` represents NWError's `posix`, `dns`, `tls` and `wifiAware` associated numeric cases using static case constructors, a `code` discriminant and numeric `error`. Network uses Darwin ENOTSUP (45) for unavailable properties, EACCES (13) for access denial, ECANCELED (89) for terminal monitors, ENXIO (6) for missing sessions, EINVAL (22) for ambiguity/invalid input, EMFILE (24) for the monitor quota, and EIO (5) for other host failures. Public attributed base construction explains that the class must come from a plugin-compiled application bundle.
+## Errors
 
-Primary references: [NWPathMonitor](https://developer.apple.com/documentation/network/nwpathmonitor), [NWPath](https://developer.apple.com/documentation/network/nwpath), [NWInterface](https://developer.apple.com/documentation/network/nwinterface), [NWError](https://developer.apple.com/documentation/network/nwerror). The implementation covers the agreed path-monitor member list, not connection/listener APIs or the newer asynchronous iterator, endpoint, gateway and link-quality additions.
+`NWFXError` has four case constructors, `posix`, `dns`, `tls` and `wifiAware`. Each instance carries a `code` naming the case and a numeric `error`. NetworkFX uses these POSIX numbers:
+
+| `error` | Meaning |
+|---|---|
+| 45 (`ENOTSUP`) | The host cannot observe this property. |
+| 13 (`EACCES`) | Access denied. |
+| 89 (`ECANCELED`) | The monitor or its app session has ended. |
+| 6 (`ENXIO`) | No running app session. |
+| 22 (`EINVAL`) | Invalid input, or more than one matching app session. |
+| 24 (`EMFILE`) | The per-app monitor limit was reached. |
+| 5 (`EIO`) | Any other host failure. |
+
+Constructing the unattributed base class outside a plugin-compiled bundle throws an error explaining that the class must come from such a bundle.
+
+NetworkFX covers path monitoring only. It has no connection or listener API, and no async iterator, endpoint, gateway or link-quality reporting. If you have used `NWPathMonitor` from Apple's Network framework, the model is the same.

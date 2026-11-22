@@ -12,7 +12,7 @@ function put(path: string, text: string) {
   return file;
 }
 function audit(source: string) {
-  put("Example.app/Contents/index.tsx", 'import { NSEApplication } from "@syndromatic/syncloudos";\nexport default class Example extends NSEApplication {}\n' + source);
+  put("Example.app/Contents/index.tsx", 'import { NSEApplication } from "@syndromatic/syncloudos";\nexport default class Example extends NSEApplication { mainMenu = null; }\n' + source);
   return auditSynWareIdioms({ root, applications: [{ directory: join(root, "Example.app"), bundleIdentifier: "test.example" }] });
 }
 beforeEach(() => { root = mkdtempSync(join(tmpdir(), "syncloudos-idiom-audit-")); });
@@ -81,5 +81,34 @@ describe("integrated idiom audit", () => {
     const result = auditSynWareIdioms({ root, applications: [], sdkRoot: join(root, "sdk") });
     expect(result.findings.filter(f => f.rule === "idiom.nse-token")).toEqual([expect.objectContaining({ file: "app.css", line: 3 })]);
     expect(result.idiomAudit.optOuts[0].suppressed).toBe(1);
+  });
+  it("requires mainMenu or an application-menu trigger unless opted out or backgroundService", () => {
+    const bare = (body: string, manifest?: Record<string, unknown>) => {
+      put("Bare.app/Contents/index.tsx", body);
+      return auditSynWareIdioms({ root, applications: [{ directory: join(root, "Bare.app"), bundleIdentifier: "test.bare", ...(manifest ? { manifest } : {}) }] });
+    };
+    const missing = bare('import { NSEApplication } from "@syndromatic/syncloudos";\nexport default class Bare extends NSEApplication {}');
+    expect(missing.findings).toContainEqual(expect.objectContaining({ rule: "idiom.application-menu", severity: "error" }));
+    const withMainMenu = bare('import { NSEApplication } from "@syndromatic/syncloudos";\nexport default class Bare extends NSEApplication { applicationDidFinishLaunching() { this.mainMenu = menu; } }');
+    expect(withMainMenu.findings.filter(f => f.rule === "idiom.application-menu")).toEqual([]);
+    const withToolbarTrigger = bare('import { NSEApplication, NSEToolbarItem } from "@syndromatic/syncloudos";\nexport default class Bare extends NSEApplication { static items = [NSEToolbarItem.applicationMenu("gear")]; }');
+    expect(withToolbarTrigger.findings.filter(f => f.rule === "idiom.application-menu")).toEqual([]);
+    const withContentTrigger = bare('import { NSEApplication, useApplicationMenuTrigger } from "@syndromatic/syncloudos";\nexport default class Bare extends NSEApplication {}\nexport function Trigger() { return useApplicationMenuTrigger(); }');
+    expect(withContentTrigger.findings.filter(f => f.rule === "idiom.application-menu")).toEqual([]);
+    const background = bare('import { NSEApplication } from "@syndromatic/syncloudos";\nexport default class Bare extends NSEApplication {}', { runtime: { presentation: "backgroundService" } });
+    expect(background.findings.filter(f => f.rule === "idiom.application-menu")).toEqual([]);
+    const optedOut = bare('/* License */\nimport { NSEApplication } from "@syndromatic/syncloudos";\n// syncloudos-allow idiom.application-menu: kiosk display with no chrome\nexport default class Bare extends NSEApplication {}');
+    expect(optedOut.findings.filter(f => f.rule === "idiom.application-menu")).toEqual([]);
+    expect(optedOut.idiomAudit.optOuts).toContainEqual(expect.objectContaining({ rule: "idiom.application-menu", suppressed: 1 }));
+  });
+  it("flags duplicate window chrome and duplicate application-menu triggers across an app", () => {
+    const customTitlebar = audit('const view = <header className="custom-titlebar">Title</header>;');
+    expect(customTitlebar.findings).toContainEqual(expect.objectContaining({ rule: "idiom.duplicate-chrome", severity: "error" }));
+    const borderless = audit('const opts = { styleMask: ["closable", "resizable"] }; const view = <header className="custom-titlebar">Title</header>;');
+    expect(borderless.findings.filter(f => f.rule === "idiom.duplicate-chrome")).toEqual([]);
+    const duplicateToolbar = audit('this.window.toolbar = toolbar; const view = <div role="toolbar" />;');
+    expect(duplicateToolbar.findings).toContainEqual(expect.objectContaining({ rule: "idiom.duplicate-chrome", severity: "error" }));
+    const duplicateAppMenu = audit('const a = NSEToolbarItem.applicationMenu("gear"); const b = useApplicationMenuTrigger();');
+    expect(duplicateAppMenu.findings).toContainEqual(expect.objectContaining({ rule: "idiom.duplicate-window-action", severity: "warning" }));
   });
 });

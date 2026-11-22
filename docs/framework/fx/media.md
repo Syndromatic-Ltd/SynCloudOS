@@ -1,10 +1,10 @@
 # MediaFX
 
-Encoded byte inputs accept `NSEDataConvertible` from `@syndromatic/syncloudos/foundation`; delivered encoded bytes are immutable `NSEData`. Use `.bytes` at a native typed-buffer boundary and `.blob(mimeType)` for a browser Blob. Numeric pixel, index and PCM planes retain their typed arrays; writable copy destinations remain mutable.
+MediaFX (`MEFX`) keeps audio, video and animation in step. It supplies the vocabulary they share: exact rational time, clocks and timebases, timed sample buffers and bounded queues to carry them. A frame from a decoder, an audio chunk from a recorder and a haptic cue can all be described with the same time values and moved through the same queue, so they stay in step.
 
-MediaFX (`MEFX`) is the web-native analogue of Core Media. It supplies the vocabulary that audio, video and animation share: exact rational time, clocks and timebases, timed sample buffers and bounded queues to carry them. A frame from a decoder, an audio chunk from a recorder and a haptic cue can all be described with the same time values and moved through the same queue, so they stay in step.
+Floating point seconds drift. Add 1/30 of a second three hundred times and the total is not ten seconds. MediaFX time is a `bigint` numerator over an integer timescale, so arithmetic and comparisons are exact and long timelines lose nothing. You convert to seconds once, at the edge, when you need a number for a timer or a display. If you know Core Media's `CMTime`, this is the same idea.
 
-Floating point seconds drift. Add 1/30 of a second three hundred times and the total is not ten seconds. MediaFX time is a `bigint` numerator over an integer timescale, so arithmetic is exact, comparisons are exact and long timelines lose nothing. Conversion to seconds happens once, at the edge, when you need a number for a timer or a display.
+Encoded byte inputs accept any `NSEDataConvertible` from `@syndromatic/syncloudos/foundation`, and encoded bytes MediaFX hands back are immutable `NSEData`. Use `.bytes` for a typed array and `.blob(mimeType)` for a browser `Blob`.
 
 MediaFX runs in two places. The value types (`MEFXTime`, `MEFXTimeRange`, `MEFXTimeMapping`, `MEFXFormatDescription`, `MEFXSampleTimingInfo`, `MEFXSampleBuffer`, `MEFXBlockBuffer`) are a library that runs anywhere JavaScript runs. `MEFXBufferQueue` and `MEFXTimebase` are also plain classes, so tests can drive them with fake clocks. In an application, the mounted session owns the resources that need a lifetime: `useMedia()` returns a client that creates clocks, timebases, queues and memory blocks and releases all of them when the component unmounts.
 
@@ -22,7 +22,6 @@ import { MEFXTime } from "@syndromatic/syncloudos/fx/media";
 | Entry | `@syndromatic/syncloudos/fx/media` |
 | Hook | `useMedia`, from `@syndromatic/syncloudos/sdk` |
 | Permissions | None |
-| Analogue | Core Media (`CMTime`, `CMTimeRange`, `CMTimebase`, `CMSampleBuffer`, `CMBlockBuffer`, `CMBufferQueue`, `CMFormatDescription`) |
 
 ## What the entry exports
 
@@ -46,7 +45,7 @@ An immutable time value. Construct it through a static factory. The constructor 
 
 A finite time has four parts: a `bigint` `value`, an integer `timescale` (units per second, from 1 to 2,147,483,647), an `epoch` (a `bigint` naming the timeline, default `0n`) and a `rounded` flag that records whether the value has ever been rounded. `MEFXTime.finite(3n, 2)` is three halves of a second. Values and epochs are limited to 256 decimal digits.
 
-Four special values exist: `invalid`, `indefinite`, `positiveInfinity` and `negativeInfinity`. They behave as in Core Media: any arithmetic with `invalid` gives `invalid`, any arithmetic with `indefinite` gives `indefinite`, and infinities order at the ends of the line.
+Four special values exist: `invalid`, `indefinite`, `positiveInfinity` and `negativeInfinity`. They follow the usual rules: any arithmetic with `invalid` gives `invalid`, any arithmetic with `indefinite` gives `indefinite`, and infinities order at the ends of the line.
 
 | Member | Type or signature | Description |
 | --- | --- | --- |

@@ -32,7 +32,8 @@ import {
   type ReactNode,
 } from "react";
 import type { SmoothSurfaceRequest } from "../SmoothSurface";
-import { classes, getControlSmoothSurfaceProps } from "../Controls/Core/nseControlsShared";
+import { getSmoothSurfaceThemeHooks } from "../SmoothSurface/smoothSurface";
+import { classes, getControlSmoothSurfaceProps, type CSSVarStyle } from "../Controls/Core/nseControlsShared";
 import {
   ChromeBevel,
   ChromeCap,
@@ -83,6 +84,8 @@ type ToolbarConfiguredProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | 
   readonly width: number;
   readonly interaction?: ToolbarInteraction;
   readonly direction?: "ltr" | "rtl";
+  /** Item identifiers the window draws in another place, which this row leaves out. */
+  readonly drawnElsewhere?: readonly string[];
   readonly children?: never;
   readonly position?: never;
   readonly grouped?: never;
@@ -106,6 +109,7 @@ function ConfiguredToolbar({
   width,
   interaction: requestedInteraction,
   direction = "ltr",
+  drawnElsewhere,
   className,
   onKeyDown,
   ...htmlAttributes
@@ -130,11 +134,13 @@ function ConfiguredToolbar({
     initialRefreshController.current = controller;
     initialRefreshStarted.current = false;
   }
-  const layout = useMemo(() => allocateToolbarItems(snapshot.items, width, {
+  const items = useMemo(() => drawnElsewhere?.length ? snapshot.items.filter(item => !drawnElsewhere.includes(item.id)) : snapshot.items,
+    [drawnElsewhere, snapshot.items]);
+  const layout = useMemo(() => allocateToolbarItems(items, width, {
     displayMode: snapshot.displayMode,
     sizeMode: snapshot.sizeMode,
     direction,
-  }), [direction, snapshot.displayMode, snapshot.items, snapshot.sizeMode, width]);
+  }), [direction, items, snapshot.displayMode, snapshot.sizeMode, width]);
   // Do not establish a Tab stop from the disabled pre-validation projection.
   // Once command authority has published a generation, the first usable command (or the
   // overflow branch) becomes the initial roving item.
@@ -221,6 +227,7 @@ function ConfiguredToolbar({
       <ChromeBevel  state={toolbarChromeState} />
       <ChromeGloss  state={toolbarChromeState} />
       <ChromeInnerShadow  state={toolbarChromeState} />
+      {snapshot.items.some(item => item.kind === "separator" && item.tracksSidebar) ? <span hidden data-window-sidebar-tracking-item="" /> : null}
       {snapshot.diagnostic === "validation-failed" ? (
         <p
           role="status"
@@ -256,6 +263,12 @@ function ConfiguredToolbar({
             </span>
           );
         }
+        const tint = item.bordered ? item.backgroundTintColour : undefined;
+        // The allocation is the whole slot, including its inline margins.
+        const itemStyle: CSSVarStyle = {
+          inlineSize: `calc(${entry.allocatedWidth}px - 2 * var(--nse-toolbar-item-inline-margin, 0px))`,
+          ...(tint === undefined ? {} : { "--nse-background-tint-colour": tint }),
+        };
         const itemAppearanceState: ChromeVisualState = !item.enabled
           ? "disabled"
           : item.checked === "on" || item.checked === "mixed"
@@ -277,9 +290,7 @@ function ConfiguredToolbar({
             }}
             type="button"
             className="nse-toolbar-item"
-            // The allocation is the item's whole slot: its inline margins come out of it, so a
-            // row of items fills exactly the width the layout gave it.
-            style={{ inlineSize: `calc(${entry.allocatedWidth}px - 2 * var(--nse-toolbar-item-inline-margin, 0px))` }}
+            style={itemStyle}
             data-nse-control="toolbar-item"
             data-nse-state={item.checked} data-nse-enabled={item.enabled ? undefined : "false"} data-nse-selected={item.checked !== "off" ? "" : undefined}
             data-nse-highlighted={pressedItemId === entry.instanceId ? "" : undefined} data-nse-hovered={hoveredItemId === entry.instanceId ? "" : undefined} data-nse-focused={focusedItemId === entry.instanceId ? "" : undefined}
@@ -288,6 +299,7 @@ function ConfiguredToolbar({
             data-nse-toolbar-state={item.checked}
             data-nse-toolbar-bordered={item.bordered ? undefined : "false"} data-nse-style={item.bordered ? undefined : "borderless"}
             data-nse-part="item"
+            data-nse-background-tint={tint === undefined ? undefined : "true"}
             data-state={!item.enabled ? "disabled" : item.checked === "on" || item.checked === "mixed" ? "selected" : "normal"}
 
             aria-label={item.label}
@@ -396,8 +408,10 @@ function ChildrenToolbar({
 
   return (
     <div
-      className={classes("nse-control-toolbar", keyboardUp && "nse-control-toolbar-fade-in", surfaceProps.className)}
+      className={classes("nse-control-toolbar", surfaceProps.className)}
+      {...getSmoothSurfaceThemeHooks(smoothSurface)}
       data-nse-control="toolbar" data-nse-part="background" data-nse-position={position} data-nse-style={grouped ? "grouped" : undefined}
+      data-nse-presentation={keyboardUp ? "keyboard" : undefined}
       data-position={position}
       data-grouped={grouped ? "true" : "false"}
       data-fade-on-keyboard={fadeOnKeyboard ? "true" : undefined}

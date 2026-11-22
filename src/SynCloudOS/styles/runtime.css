@@ -1,4 +1,3 @@
-@layer nse.atmo {
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -19,10 +18,16 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+@layer nse.structure {
+  @scope ([data-nse-theme]) to ([data-nse-theme]) {
+    /* Let menu titles and listbox commands refine the inherited font. */
+    button:where([data-nse-control="menu-item"]:is([data-nse-part="title"], [data-nse-part="cell"][data-kind="action"])) { font: inherit; }
+  }
+}
+
+@layer nse.structure {
 :root {
   font-family: var(--font-ui, system-ui, sans-serif);
-  color: #f8fbff;
-  background: #070b10;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
 }
@@ -53,7 +58,9 @@ body,
 }
 
 @scope ([data-nse-theme]) to ([data-nse-theme]) {
-button, input, textarea { font: inherit; }
+button:not(:where([data-nse-control="menu-item"]:is([data-nse-part="title"], [data-nse-part="cell"][data-kind="action"]))),
+input,
+textarea { font: inherit; }
 }
 
 button {
@@ -76,6 +83,14 @@ button {
     transition-duration: 0.001ms !important;
   }
 }
+[data-nse-control="view"][data-nse-part="background"][data-nse-role="runtime"]::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
 .syncloudos-login-gate {
   position: fixed;
   inset: 0;
@@ -91,10 +106,6 @@ button {
 .syncloudos-login-backdrop {
   position: fixed;
   inset: 0;
-  background:
-    radial-gradient(ellipse at 50% 40%, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.42) 34%, rgba(0,0,0,0.84) 70%, rgba(0,0,0,0.97) 100%);
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
 }
 
 @media (max-width: 760px) {

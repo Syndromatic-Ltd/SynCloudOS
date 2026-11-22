@@ -168,6 +168,17 @@ describe("scroll progress and navigation", () => {
     view.unmount();
   });
   it("keeps an always-visible zero-range scroller disabled", () => { render(<NSEScroller orientation="vertical" policy="always" value={0} maximum={0} onValueChange={() => {}} />); expect(screen.getByRole("slider")).toHaveProperty("disabled", true); });
+  it.each(["horizontal", "vertical"] as const)("exposes a %s scroller knob while retaining the native range", orientation => {
+    const change = vi.fn();
+    render(<NSEScroller orientation={orientation} value={25} maximum={50} knobProportion={0.25} onValueChange={change} />);
+    const input = screen.getByRole("slider", { name: orientation + " scroller" });
+    const track = input.closest<HTMLElement>('[data-nse-control="scroller"][data-nse-part="track"]')!;
+    expect(track.querySelector('[data-nse-part="knob"]')?.getAttribute("aria-hidden")).toBe("true");
+    expect(track.style.getPropertyValue("--nse-scroller-knob-length")).toBe("25%");
+    expect(track.style.getPropertyValue("--nse-scroller-position")).toBe("0.5");
+    fireEvent.change(input, { target: { value: "42" } });
+    expect(change).toHaveBeenCalledWith(42);
+  });
   it("exposes the system chrome spinner's accessible status and visual variant", () => {
     render(<Spinner size="large" tone="dark" label="Loading records" />);
     const spinner = screen.getByRole("status", { name: "Loading records" });
@@ -204,29 +215,30 @@ describe("scroll progress and navigation", () => {
     expect(bar.getAttribute("aria-valuemin")).toBe("10");
     expect(bar.getAttribute("aria-valuemax")).toBe("40");
     expect(bar.getAttribute("aria-valuenow")).toBe("25");
-    expect(bar.getAttribute("data-variant")).toBe("bar");
-    expect(bar.getAttribute("data-state")).toBe("determinate");
+    expect(bar.getAttribute("data-nse-style")).toBe("bar");
+    expect(bar.getAttribute("data-nse-indeterminate")).toBe("false");
     expect(bar.style.getPropertyValue("--nse-control-progress")).toBe("50%");
   });
   it("is indeterminate without a value, or when isIndeterminate says so", () => {
     const { rerender } = render(<NSEProgressIndicator aria-label="Load" />);
-    expect(screen.getByRole("progressbar").getAttribute("data-state")).toBe("indeterminate");
+    expect(screen.getByRole("progressbar").getAttribute("data-nse-indeterminate")).toBe("true");
     expect(screen.getByRole("progressbar").getAttribute("aria-valuenow")).toBeNull();
     rerender(<NSEProgressIndicator aria-label="Load" value={5} isIndeterminate />);
-    expect(screen.getByRole("progressbar").getAttribute("data-state")).toBe("indeterminate");
+    expect(screen.getByRole("progressbar").getAttribute("data-nse-indeterminate")).toBe("true");
   });
   it("sizes a spinning indicator by controlSize, and fills it as a ring when it has a value", () => {
     const { rerender } = render(<NSEProgressIndicator aria-label="Load" style="spinning" controlSize="small" />);
     const spinner = screen.getByRole("progressbar");
-    expect(spinner.getAttribute("data-variant")).toBe("spinner");
+    expect(spinner.getAttribute("data-nse-style")).toBe("spinning");
+    expect(spinner.getAttribute("data-nse-indeterminate")).toBe("true");
     expect(spinner.getAttribute("data-size")).toBe("16");
     rerender(<NSEProgressIndicator aria-label="Load" style="spinning" />);
     expect(screen.getByRole("progressbar").getAttribute("data-size")).toBe("32");
     rerender(<NSEProgressIndicator aria-label="Load" style="spinning" controlSize="large" value={30} />);
-    expect(screen.getByRole("progressbar").getAttribute("data-variant")).toBe("circular");
+    expect(screen.getByRole("progressbar").getAttribute("data-nse-indeterminate")).toBe("false");
     expect(screen.getByRole("progressbar").getAttribute("data-size")).toBe("64");
   });
-  it("uses a static indeterminate fallback under reduced motion", () => { render(<AnimationEnvironmentProvider reducedMotion><NSEProgressIndicator aria-label="Load" /></AnimationEnvironmentProvider>); expect(screen.getByRole("progressbar").getAttribute("data-motion")).toBe("static"); });
+  it("uses a static indeterminate fallback under reduced motion", () => { render(<AnimationEnvironmentProvider reducedMotion><NSEProgressIndicator aria-label="Load" /></AnimationEnvironmentProvider>); expect(screen.getByRole("progressbar").getAttribute("data-nse-motion")).toBe("static"); });
   it("moves tab focus with roving keys and lazily renders content", () => { const change = vi.fn(); render(<NSETabView aria-label="Pages" items={[{ id: "a", label: "A", render: () => "Alpha" }, { id: "b", label: "B", render: () => "Beta" }]} selectedId="a" onSelectedIdChange={change} />); fireEvent.keyDown(screen.getByRole("tab", { name: "A" }), { key: "ArrowRight" }); expect(change).toHaveBeenCalledWith("b", "keyboard"); expect(screen.getByRole("tabpanel").textContent).toBe("Alpha"); });
   it("supports tab Home/End and keep-alive panel lifecycle", () => { const change = vi.fn(); render(<NSETabView aria-label="Pages" keepAlive items={[{ id: "a", label: "A", render: () => "Alpha" }, { id: "off", label: "Off", disabled: true, render: () => "Off" }, { id: "b", label: "B", render: () => "Beta" }]} selectedId="a" onSelectedIdChange={change} />); fireEvent.keyDown(screen.getByRole("tab", { name: "A" }), { key: "End" }); expect(change).toHaveBeenLastCalledWith("b", "keyboard"); expect(screen.getAllByRole("tabpanel", { hidden: true })).toHaveLength(2); });
   it("hosts tab overflow in an overlay and selects an overflow item", () => { const change = vi.fn(); render(<NavigationOverlay><NSETabView aria-label="Pages" maximumVisibleTabs={2} items={[{ id: "a", label: "A", render: () => "Alpha" }, { id: "b", label: "B", render: () => "Beta" }, { id: "c", label: "C", render: () => "Gamma" }]} selectedId="a" onSelectedIdChange={change} /></NavigationOverlay>); fireEvent.click(screen.getByRole("button", { name: "More Pages" })); expect(screen.getByRole("listbox")).not.toBeNull(); fireEvent.click(screen.getByRole("option", { name: "C" })); expect(change).toHaveBeenCalledWith("c", "pointer"); });

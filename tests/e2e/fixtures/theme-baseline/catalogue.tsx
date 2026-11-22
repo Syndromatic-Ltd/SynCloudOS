@@ -15,7 +15,10 @@ import { NSESplitView } from "../../../../src/NSE/DataViews/Split/NSESplitView";
 import { NSEDrawer } from "../../../../src/NSE/Containers/NSEContainers";
 import { NSEScrollView } from "../../../../src/NSE/Scroll/NSEScrollView";
 import { NSEView } from "../../../../src/NSE/Views/NSEView";
-import { TopBar } from "../../../../src/NSE/Windows/Chrome/TopBar";
+import { ViewAppearanceBoundary } from "../../../../src/NSE/Appearance/NSEAppearanceProvider";
+import { WindowTitlebarView } from "../../../../src/NSE/Windows/WindowTitlebarView";
+import { TitlebarGlyphButton } from "../../../../src/NSE/Windows/TitlebarGlyphButton";
+import { nseTopBarGlyphs } from "../../../../src/NSE/Windows/Chrome/topBarAssets";
 import { LoginWindow } from "../../../../src/NSE/SystemUI/LoginWindow";
 import { AboutDialog, NSEConfirmDialog } from "../../../../src/NSE/Components/NSESystemDialogs";
 import { PreferencesToast } from "../../../../src/NSE/Components/NSEPreferencesToast";
@@ -59,10 +62,10 @@ for (const position of ["imageOnly", "imageLeading", "imageTrailing"] as const) 
       { interaction: state === "normal" || state === "disabled" ? undefined : state === "focused" ? "focus" : state });
   }
 }
-for (const special of ["default", "destructive", "aqua", "darkAqua"] as const) {
+for (const special of ["default", "destructive", "light", "dark"] as const) {
   for (const state of ["normal", "press", "disabled", "focused"] as const) {
     add(`button-${special}-${state}`, () => <NSEButton title="Continue" keyEquivalent={special === "default" ? "\r" : undefined}
-      hasDestructiveAction={special === "destructive"} appearance={special === "aqua" || special === "darkAqua" ? special : undefined} isEnabled={state !== "disabled"} />,
+      hasDestructiveAction={special === "destructive"} appearance={special === "light" || special === "dark" ? special : undefined} isEnabled={state !== "disabled"} />,
     { interaction: state === "focused" ? "focus" : state === "press" ? "press" : undefined });
   }
 }
@@ -117,7 +120,7 @@ for (const placement of ["leading", "trailing", "top", "bottom"] as const) add(`
 add("scroll-view", () => <NSEScrollView style={{ height: 240 }} verticalScrollerPolicy="always"><div style={{ height: 600 }}>Scrolling content</div></NSEScrollView>);
 add("view", () => <NSEView><p>Window content</p></NSEView>);
 for (const variant of ["atmoCumulus", "atmoMetal"] as const) for (const scheme of ["light", "dark"] as const) {
-  add(`top-bar-${variant}-${scheme}`, () => <TopBar title="Documents" variant={variant} scheme={scheme} leadingItems={[{ kind: "webspring", label: "Home" }]} trailingItems={[{ kind: "settings", label: "Settings" }]} />);
+  add(`top-bar-${variant}-${scheme}`, () => <ViewAppearanceBoundary appearance={{ name: scheme === "dark" ? "dark" : "light" }}><WindowTitlebarView document={{ title: "Documents", subtitle: "", documentEdited: false }} isKeyWindow material={variant === "atmoMetal" ? "metal" : "cumulus"} controls={<TitlebarGlyphButton label="Home" glyph={nseTopBarGlyphs.webspring} />} trailing={<TitlebarGlyphButton label="Settings" glyph={nseTopBarGlyphs.settings} position="right" />} /></ViewAppearanceBoundary>);
 }
 for (const state of ["normal", "error", "loading"] as const) add(`login-window-${state}`, () => <LoginWindow title="SynCloudOS" methods={[{ id: "example", label: "Continue" }]} authenticationStatus={state === "loading" ? "authenticating" : "signedOut"} error={state === "error" ? "Sign-in failed. Try again." : undefined} />, { fullPage: true });
 add("about", () => <AboutDialog open info={{ name: "SynCloudOS", version: "1.0.0", build: "Beta 2", tagline: "Your workspace", copyright: "© 2026 Syndromatic Ltd.", trademark: "SynCloudOS" }} onDismiss={noop} />, { fullPage: true });

@@ -18,12 +18,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+@layer nse.structure {
 [data-nse-control="panel"]:where([data-nse-style="preferences"]) .audio-mixer-slider,
 [data-nse-control="panel"]:where([data-nse-style="preferences"]) .audio-mixer-slider [data-nse-part="title"]:where([data-nse-control="slider"] > *) {
-  color: inherit;
+
   font: inherit;
   text-transform: none;
-  text-shadow: inherit;
+
 }
 
 .audio-mixer-label {
@@ -31,4 +32,5 @@
   justify-content: space-between;
   align-items: baseline;
   gap: 12px;
+}
 }

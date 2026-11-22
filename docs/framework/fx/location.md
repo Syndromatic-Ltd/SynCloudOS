@@ -1,17 +1,10 @@
 # LocationFX
 
-Speed is carried end to end as `LFXLocation.speedMetresPerSecond`, directly from
-Geolocation's `coords.speed`. Zero means stationary; `null` means the browser
-did not supply speed. Multiply by 3.6 for kilometres per hour. Browsers do not
-provide Core Location's `speedAccuracy`; LocationFX does not estimate it from
-successive fixes. Speed uses the existing `location.read` and `location.request`
-declarations and `useLocation()` lifetime.
-
-LocationFX (`LFX`) is the web-native analogue of Core Location. It answers where the device is, how sure the host is about that answer, and whether the user has allowed the question to be asked. Positions are immutable values, requests take an `AbortSignal`, and every source of updates has an explicit owner that you dispose.
+LocationFX (`LFX`) tells your app where the device is. Use it for maps, nearby results, distance tracking or anything else that depends on position. It answers where the device is, how sure the host is about that answer, and whether the user has allowed the question to be asked. Positions are immutable values, requests take an `AbortSignal`, and every source of updates has an explicit owner that you dispose.
 
 The framework has two halves. The value types (`LFXCoordinate`, `LFXLocation`) are plain library code that you can construct, compare and test anywhere, including in a unit test with no browser. The manager types (`LFXLocationManager`, `LFXLocationWatch`, `LFXLocationClient`) describe a service that the mounted SynWare session provides. You reach the service through `useLocation()`, and the host applies your manifest permissions, its own policy and the browser's Geolocation prompt before any fix reaches you.
 
-LocationFX covers foreground positioning: one-shot fixes and continuous updates while your application is visible and active. It reports the facilities that native Core Location offers and the web does not (background delivery, region monitoring, visits and similar) through `LFXNativeOnlyCapabilities`, so your code can decide what to offer instead of discovering the gap at runtime.
+LocationFX covers foreground positioning: one-shot fixes and continuous updates while your application is visible and active. It reports the facilities a native location service offers and the web does not (background delivery, region monitoring, visits and similar) through `LFXNativeOnlyCapabilities`, so your code can decide what to offer instead of discovering the gap at runtime.
 
 ```ts
 import { LFXCoordinate, LFXLocation } from "@syndromatic/syncloudos/fx/location";
@@ -26,7 +19,6 @@ import { LFXCoordinate, LFXLocation } from "@syndromatic/syncloudos/fx/location"
 | Hook | `useLocation()` from `@syndromatic/syncloudos/sdk`, returning an `LFXLocationManager` |
 | Manifest permissions | `location.read` (create the manager, read authorisation status), `location.request` (request fixes, start watches) |
 | Session client | `LFXLocationClient`, available as `useSCOS().location` |
-| Apple analogue | Core Location (`CLLocationManager`, `CLLocation`, `CLLocationCoordinate2D`) |
 | Runs in | Value types: any JavaScript environment. Manager: the mounted session, on a secure (HTTPS) page |
 
 ## What LocationFX exports
@@ -125,6 +117,8 @@ new LFXLocation(value: LFXLocationDescriptor)
 
 Each optional channel is either a valid number or `null`. LocationFX never substitutes `0` for a channel the source did not report, because `0` metres per second and "speed unknown" mean different things. Check for `null` before you use a channel.
 
+Speed comes straight from the Geolocation API's `coords.speed`: zero means stationary and `null` means the browser did not report it. Multiply by 3.6 for kilometres per hour. Browsers do not report speed accuracy, and LocationFX does not estimate it from successive fixes.
+
 The constructor accepts only plain data. It throws:
 
 - `TypeError` when the argument is not a plain object (a class instance, including another `LFXLocation`, is rejected), has symbol keys, has accessor properties, or does not have exactly the eight descriptor keys.
@@ -205,7 +199,7 @@ export function headingToRadians(degrees: number | null | undefined): number | n
 type LFXAccuracy = "balanced" | "high";
 ```
 
-The accuracy preference of a request. `"balanced"` is the default everywhere. `"high"` asks the host for the most precise source it has, which usually costs more battery and time to first fix. It is a preference: the host may return a coarse fix, and `high` does not unlock any facility listed in [Native-only capabilities](#native-only-capabilities). Any other string is rejected with a `TypeError` by `watch`.
+The accuracy preference of a request. `"balanced"` is the default everywhere. `"high"` asks the host for the most precise source it has, which usually costs more battery and time to first fix. It is a preference: the host may return a coarse fix, and `high` does not enable any facility listed in [Native-only capabilities](#native-only-capabilities). Any other string is rejected with a `TypeError` by `watch`.
 
 ### `LFXAuthorizationStatus`
 
@@ -422,16 +416,14 @@ The hook returns a stable, frozen manager facade for the component. It creates t
 - Before the component mounts, `current()` and `watch()` throw `Error("The component location owner is not mounted.")`, and `getAuthorizationStatus()` resolves `"unavailable"`. After unmount the same applies. Call the manager from effects and event handlers, not during render.
 - The facade does not change between renders, so it is safe in dependency arrays.
 - Mounting never requests a fix.
-- Creating the underlying manager requires `location.read`. When the manifest does not declare it, or host policy refuses it, creation throws a `SecurityError` `DOMException` from the mount effect. Declare the permission before you use the hook.
+- Creating the underlying manager requires `location.read`. When the manifest does not declare it, or host policy refuses it, creation throws a `SecurityError` `DOMException` from the mount effect. Declare the entitlement before you use the hook.
 - One application can hold at most eight managers at a time. A ninth creation throws a `QuotaExceededError` `DOMException`. A component that uses the hook holds one.
 
-```json
-{
-  "permissions": ["location.read", "location.request"]
-}
+```ts
+entitlements: ["location.read", "location.request"]
 ```
 
-See the [SynWare manifest](../synware-manifest.md) for where `permissions` sits in the manifest.
+See the [SynWare manifest](../synware-manifest.md) for where `entitlements` sits in the manifest.
 
 ### `LFXLocationClient`
 
@@ -476,7 +468,7 @@ export function useSharedFix(): LFXLocation | null {
 
 ## Native-only capabilities
 
-Core Location on a native platform offers facilities that a browser page cannot provide. `LFXNativeOnlyCapabilities` lists them, so a feature can check for a capability and choose a fallback in one place instead of scattering user-agent tests.
+A native location service offers facilities that a browser page cannot provide. `LFXNativeOnlyCapabilities` lists them, so a feature can check for a capability and choose a fallback in one place instead of scattering user-agent tests.
 
 ### `LFXNativeOnlyCapabilities`
 
@@ -486,7 +478,7 @@ const LFXNativeOnlyCapabilities: Readonly<Record<LFXNativeOnlyCapability, LFXNat
 
 A deeply frozen record with one entry per `LFXNativeOnlyCapability`. On the portable (web) host every entry has `state: "unavailable-on-portable-host"`. Requesting `"high"` accuracy does not change any entry.
 
-| Key (`LFXNativeOnlyCapability`) | `reason` (`LFXNativeOnlyReason`) | Native counterpart |
+| Key (`LFXNativeOnlyCapability`) | `reason` (`LFXNativeOnlyReason`) | What it means natively |
 | --- | --- | --- |
 | `"precise-accuracy-authorization"` | `"native-precise-accuracy-authorization-unavailable"` | Separate user choice between precise and approximate location. |
 | `"background-updates"` | `"native-background-delivery-unavailable"` | Location delivery while the application is not in the foreground. |

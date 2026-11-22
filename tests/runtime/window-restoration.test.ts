@@ -23,7 +23,7 @@ import type {
   WindowRestorationPersistencePort,
   WindowRestorationSnapshot,
 } from "../../src/SynCloudOS/Windows";
-import { resolveWindowPersistenceNamespace, resolveWindowPresentation } from "../../src/SynCloudOS/Windows";
+import { resolveWindowPersistenceNamespace, resolveWindowPresentation, validateWindowRestorationSnapshot } from "../../src/SynCloudOS/Windows";
 import { createTestRuntimeEnvironment } from "./helpers";
 import {
   createWindowTestDependencies,
@@ -40,6 +40,86 @@ function memoryPersistence(): WindowRestorationPersistencePort & { readonly valu
 }
 
 describe("window workspace restoration", () => {
+  it("migrates schema 1 while dropping legacy decoration and preserving saved geometry", async () => {
+    const source = createWindowTestDependencies();
+    const controller = source.manager.create(standardWindow("legacy-window"));
+    await source.manager.open(controller.id);
+    source.manager.zoom(controller.id);
+    source.manager.minimise(controller.id);
+    const legacy = JSON.parse(JSON.stringify(source.manager.createRestorationSnapshot()));
+    legacy.schemaVersion = 1;
+    delete legacy.windows[0].fullScreen;
+    delete legacy.windows[0].collectionBehavior;
+    const decorationKey = "chrome" + "Mode";
+    legacy.windows[0][decorationKey] = "custom";
+    const original = structuredClone(legacy);
+    const migrated = validateWindowRestorationSnapshot(legacy, {
+      namespace: legacy.namespace, installationId: legacy.installationId, runtimeId: controller.record.runtimeId,
+    });
+    expect(migrated.schemaVersion).toBe(2);
+    const { [decorationKey]: _discarded, ...originalWindow } = original.windows[0];
+    expect(migrated.windows[0]).toEqual({ ...originalWindow, fullScreen: "off", collectionBehavior: "fullScreenNone" });
+    expect(legacy).toEqual(original);
+    const target = createWindowTestDependencies();
+    const restored = await target.manager.restoreWorkspace(legacy);
+    expect(restored.failures).toEqual([]);
+    const restoredController = target.manager.select(controller.id);
+    expect(restoredController.record).toMatchObject({ id: controller.id, state: "minimised", fullScreen: "off" });
+    expect(restoredController.geometryState.normalBounds).toEqual(original.windows[0].normalBounds);
+    expect(restoredController.geometryState.minimisedFrom).toBe("zoomed");
+    await Promise.all([source.cleanup(), target.cleanup()]);
+  });
+
+  it.each(["on", "exiting"] as const)("projects confirmed full screen during %s without rewriting normal geometry", async fullScreen => {
+    const source = createWindowTestDependencies();
+    const controller = source.manager.create(standardWindow("full-screen-projection"));
+    const record = { ...controller.record, fullScreen, collectionBehavior: "fullScreenPrimary" as const };
+    const screen = { ...source.screen.getCurrentSnapshot(), workArea: { x: 20, y: 30, width: 1000, height: 700 } };
+    const projected = resolveWindowPresentation(record, screen, controller.geometryState);
+    expect(projected).toMatchObject({ kind: "full-screen", bounds: screen.workArea, movable: false, resizable: false });
+    expect(controller.geometryState.normalBounds).toEqual(record.bounds);
+    expect(resolveWindowPresentation({ ...record, fullScreen: "entering" }, screen).kind).toBe("desktop-window");
+    expect(resolveWindowPresentation({ ...record, role: "panel" }, screen).kind).toBe("desktop-window");
+    expect(resolveWindowPresentation({ ...record, mobilePolicy: "sheet" }, { ...screen, breakpoint: "compact" }).kind).toBe("mobile-sheet");
+    expect(resolveWindowPresentation(record, { ...screen, geometryState: "unavailable" }).visible).toBe(false);
+    await source.cleanup();
+  });
+
+  it.each([
+    ["off", "off"], ["entering", "off"], ["on", "on"], ["exiting", "on"],
+  ] as const)("persists %s as the last confirmed full-screen state %s", async (fullScreen, stableState) => {
+    const source = createWindowTestDependencies();
+    const controller = source.manager.create(standardWindow("stable-full-screen", { fullScreen, collectionBehavior: "fullScreenPrimary" }));
+    await source.manager.open(controller.id);
+    const saved = source.manager.createRestorationSnapshot();
+    expect(saved).toMatchObject({ schemaVersion: 2, windows: [{ fullScreen: stableState, collectionBehavior: "fullScreenPrimary" }] });
+    const target = createWindowTestDependencies();
+    const restored = await target.manager.restoreWorkspace(saved);
+    expect(restored.failures).toEqual([]);
+    const restoredController = target.manager.select(controller.id);
+    expect(restoredController.record).toMatchObject({ fullScreen: stableState, collectionBehavior: "fullScreenPrimary" });
+    expect(restoredController.geometryState.normalBounds).toEqual(controller.geometryState.normalBounds);
+    expect(resolveWindowPresentation(restoredController.record, target.screen.getCurrentSnapshot()).kind).toBe(stableState === "on" ? "full-screen" : "desktop-window");
+    await Promise.all([source.cleanup(), target.cleanup()]);
+  });
+
+  it.each([
+    ["transition state", { fullScreen: "entering", collectionBehavior: "fullScreenPrimary" }],
+    ["unknown collection behavior", { fullScreen: "off", collectionBehavior: "unsupported" }],
+    ["ineligible fullscreen window", { fullScreen: "on", collectionBehavior: "fullScreenNone" }],
+    ["fullscreen panel", { fullScreen: "on", collectionBehavior: "fullScreenPrimary", role: "panel" }],
+  ])("rejects schema 2 with %s before creating controllers", async (_label, corrupt) => {
+    const source = createWindowTestDependencies();
+    source.manager.create(standardWindow("invalid-full-screen"));
+    const snapshot = JSON.parse(JSON.stringify(source.manager.createRestorationSnapshot()));
+    snapshot.schemaVersion = 2;
+    Object.assign(snapshot.windows[0], corrupt);
+    const target = createWindowTestDependencies();
+    await expect(target.manager.restoreWorkspace(snapshot)).rejects.toThrow();
+    expect(target.manager.diagnostics().controllerCount).toBe(0);
+    await Promise.all([source.cleanup(), target.cleanup()]);
+  });
+
   it.each(["modal", "sheet", "popover"] as const)("projects a %s inside one reported region without changing its normal bounds", async role => {
     const f = createWindowTestDependencies();
     const controller = f.manager.create(standardWindow("book-" + role, { role, anchor: role === "popover" ? { id: "generated-book-origin", rect: { x: 780, y: 40, width: 40, height: 32 }, edge: "block-end", alignment: "center", offset: 0 } : null, bounds: { x: 500, y: 100, width: 500, height: 500 }, restorationKey: null }));
@@ -135,7 +215,7 @@ describe("window workspace restoration", () => {
     const snapshot = harness.manager.createRestorationSnapshot();
 
     expect(snapshot).toMatchObject({
-      schemaVersion: 1,
+      schemaVersion: 2,
       namespace: "tests.windows",
       installationId: "installation-a",
       capturedAtEpochMs: 123_456,

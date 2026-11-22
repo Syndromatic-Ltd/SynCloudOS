@@ -20,7 +20,7 @@
 
 export * from "./windowViewTypes";
 export * from "./windowAppearanceContract";
-export * from "./WindowTitleBar";
+export * from "./WindowTitlebarControls";
 export * from "./WindowView";
 export * from "./StandardWindowView";
 export * from "./PanelView";
@@ -28,5 +28,4 @@ export * from "./HUDWindowView";
 export * from "./ModalWindowView";
 export * from "./SheetView";
 export * from "./PopoverWindowView";
-export * from "./Chrome";
 export * from "./BorderlessWindowView";

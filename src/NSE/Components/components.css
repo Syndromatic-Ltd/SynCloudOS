@@ -1,5 +1,18 @@
 
-@layer nse.atmo {
+@layer nse.structure {
+
+@property --nse-loading-spinner-sprite-y {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --nse-keyboard-toolbar-opacity {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+
 @scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
@@ -32,7 +45,6 @@
   height: 72px;
   place-items: center;
   border-radius: 50%;
-  filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.52));
 }
 
 .nse-icon-well::before,
@@ -42,15 +54,7 @@
   position: absolute;
   inset: -12px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(185, 230, 255, 0.5), transparent 62%);
-  opacity: 0;
   transition: opacity 180ms ease;
-}
-
-.nse-icon-well.is-active::before,
-:where(:scope):is(.nse-icon-well.is-active)::before,
-:where(:scope).nse-icon-well.is-active::before {
-  opacity: 1;
 }
 
 .nse-icon-well>img,
@@ -70,7 +74,6 @@
   display: grid;
   place-items: center;
   background: transparent;
-  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.88));
 }
 
 .nse-icon-well .nse-loading-spinner,
@@ -88,10 +91,6 @@
   flex: 0 0 auto;
   width: var(--nse-loading-spinner-frame-width);
   height: var(--nse-loading-spinner-frame-height);
-  background-image: var(--nse-loading-spinner-sprite-image);
-  background-repeat: no-repeat;
-  background-position: 0 0;
-  background-size: auto;
   animation: nse-loading-sprite-spinner 0.9s steps(12) infinite;
 }
 
@@ -100,8 +99,7 @@
 :where(:scope).nse-loading-spinner--dark {
   --nse-loading-spinner-frame-width: 42px;
   --nse-loading-spinner-frame-height: 42px;
-  --nse-loading-spinner-sprite-image: url("./Resources/spinner.png?no-inline");
-  --nse-loading-spinner-sprite-end: 0 -504px;
+  --nse-loading-spinner-sprite-end: -504px;
 }
 
 .nse-loading-spinner--light,
@@ -109,30 +107,29 @@
 :where(:scope).nse-loading-spinner--light {
   --nse-loading-spinner-frame-width: 35px;
   --nse-loading-spinner-frame-height: 35px;
-  --nse-loading-spinner-sprite-image: url("./Resources/spinner_signin.png?no-inline");
-  --nse-loading-spinner-sprite-end: 0 -420px;
+  --nse-loading-spinner-sprite-end: -420px;
 }
 
 @keyframes nse-loading-sprite-spinner {
-  to { background-position: var(--nse-loading-spinner-sprite-end); }
+  to { --nse-loading-spinner-sprite-y: var(--nse-loading-spinner-sprite-end); }
 }
 
 /* The legacy keyboard-toolbar fade now belongs to the component stylesheet. */
 @keyframes nse-component-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { --nse-keyboard-toolbar-opacity: 0; }
+  to { --nse-keyboard-toolbar-opacity: 1; }
 }
 
-.nse-control-toolbar-fade-in,
-:where(:scope):is(.nse-control-toolbar-fade-in),
-:where(:scope).nse-control-toolbar-fade-in {
+[data-nse-control="toolbar"][data-nse-part="background"][data-nse-presentation="keyboard"],
+:where(:scope):is([data-nse-control="toolbar"][data-nse-part="background"][data-nse-presentation="keyboard"]),
+:where(:scope)[data-nse-control="toolbar"][data-nse-part="background"][data-nse-presentation="keyboard"] {
   animation: nse-component-fade-in 0.18s ease both;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .nse-control-toolbar-fade-in,
-:where(:scope):is(.nse-control-toolbar-fade-in),
-:where(:scope).nse-control-toolbar-fade-in {
+  [data-nse-control="toolbar"][data-nse-part="background"][data-nse-presentation="keyboard"],
+:where(:scope):is([data-nse-control="toolbar"][data-nse-part="background"][data-nse-presentation="keyboard"]),
+:where(:scope)[data-nse-control="toolbar"][data-nse-part="background"][data-nse-presentation="keyboard"] {
     animation: none;
   }
 }
@@ -147,238 +144,9 @@
   height: 24px;
   padding: 0 6px;
   border-radius: 999px;
-  color: #fff;
   font-size: 12px;
   font-weight: 700;
   line-height: 24px;
-  background: linear-gradient(#ff7676, #d72128);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.65);
-}
-
-.nse-window,
-:where(:scope):is(.nse-window),
-:where(:scope).nse-window {
-  position: relative;
-  border-radius: 28px;
-  overflow: hidden;
-  color: #111b28;
-}
-
-.nse-window:focus,
-:where(:scope):is(.nse-window:focus),
-:where(:scope).nse-window:focus {
-  outline: none;
-}
-
-.nse-window-titlebar,
-:where(:scope):is(.nse-window-titlebar),
-:where(:scope).nse-window-titlebar {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  z-index: 4;
-  display: grid;
-  grid-template-columns: 90px minmax(0, 1fr) 90px;
-  align-items: center;
-  height: 52px;
-  padding: 7px;
-  overflow: hidden;
-  border-radius: 26px;
-  color: #f4f7fb;
-  background: transparent;
-  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.34);
-  backdrop-filter: blur(6px) saturate(1.25);
-  text-shadow:
-    0 -1px 0 rgba(0, 0, 0, 0.92),
-    0 1px 0 rgba(255, 255, 255, 0.12),
-    0 2px 4px rgba(0, 0, 0, 0.72);
-}
-
-.nse-window-titlebar::before,
-:where(:scope):is(.nse-window-titlebar)::before,
-:where(:scope).nse-window-titlebar::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 52px;
-  border-radius: inherit;
-  background: url("/assets/nse/atmo/chrome/topbar/TopBar-Middle-NonSelector@2x.png") left top / 8px 58px repeat-x;
-  opacity: 0.92;
-  pointer-events: none;
-}
-
-.nse-window-titlebar h2,
-:where(:scope):is(.nse-window-titlebar) h2 {
-  position: relative;
-  z-index: 1;
-  margin: 0;
-  overflow: hidden;
-  font-family: inherit;
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: 0;
-  text-align: center;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  transform: translateY(2px);
-}
-
-.nse-window-close,
-:where(:scope):is(.nse-window-close),
-:where(:scope).nse-window-close {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  width: 68px;
-  height: 38px;
-  place-items: center;
-  justify-self: start;
-  padding: 0;
-  border: 0;
-  color: #f4f7fb;
-  background: transparent;
-  cursor: pointer;
-  transform: translateY(2px);
-}
-
-.nse-window-close:focus-visible,
-:where(:scope):is(.nse-window-close:focus-visible),
-:where(:scope).nse-window-close:focus-visible {
-  outline: 2px solid rgba(134, 214, 255, 0.9);
-  outline-offset: 2px;
-  border-radius: 999px;
-}
-
-.nse-window-close-slices,
-:where(:scope):is(.nse-window-close-slices),
-:where(:scope).nse-window-close-slices {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  overflow: hidden;
-  border-radius: 999px;
-  pointer-events: none;
-}
-
-.nse-window-close-selected-slices,
-:where(:scope):is(.nse-window-close-selected-slices),
-:where(:scope).nse-window-close-selected-slices {
-  position: absolute;
-  inset: 1px;
-  z-index: 1;
-  display: flex;
-  overflow: hidden;
-  border-radius: 999px;
-  clip-path: inset(0 round 999px);
-  opacity: 0;
-  pointer-events: none;
-}
-
-.nse-window-close-selected-cap,
-:where(:scope):is(.nse-window-close-selected-cap),
-:where(:scope).nse-window-close-selected-cap {
-  width: 18px;
-  min-width: 18px;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
-}
-
-.nse-window-close-selected-cap-left,
-:where(:scope):is(.nse-window-close-selected-cap-left),
-:where(:scope).nse-window-close-selected-cap-left {
-  background-image: url("/assets/nse/atmo/chrome/topbar/TopBar-ButtonSELECTOR-Left-Curve@2x.png");
-}
-
-.nse-window-close-selected-cap-right,
-:where(:scope):is(.nse-window-close-selected-cap-right),
-:where(:scope).nse-window-close-selected-cap-right {
-  background-image: url("/assets/nse/atmo/chrome/topbar/TopBar-ButtonSELECTOR-Right-Curve@2x.png");
-}
-
-.nse-window-close-selected-middle,
-:where(:scope):is(.nse-window-close-selected-middle),
-:where(:scope).nse-window-close-selected-middle {
-  flex: 1;
-  min-width: 0;
-  background: url("/assets/nse/atmo/chrome/topbar/TopBar-ButtonSELECTOR-Left-Middle@2x.png") top left / 8px 100% repeat-x;
-}
-
-.nse-window-close-cap,
-:where(:scope):is(.nse-window-close-cap),
-:where(:scope).nse-window-close-cap {
-  width: 20px;
-  min-width: 20px;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
-}
-
-.nse-window-close-cap-left,
-:where(:scope):is(.nse-window-close-cap-left),
-:where(:scope).nse-window-close-cap-left {
-  background-image: url("/assets/nse/atmo/chrome/topbar/TopBar-LeftCurve-SELECTOR@2x.png");
-}
-
-.nse-window-close-cap-right,
-:where(:scope):is(.nse-window-close-cap-right),
-:where(:scope).nse-window-close-cap-right {
-  background-image: url("/assets/nse/atmo/chrome/topbar/TopBar-RightCurve-SELECTOR@2x.png");
-}
-
-.nse-window-close-middle,
-:where(:scope):is(.nse-window-close-middle),
-:where(:scope).nse-window-close-middle {
-  flex: 1;
-  min-width: 0;
-  background: url("/assets/nse/atmo/chrome/topbar/TopBar-Middle-SELECTOR@2x.png") top left / 8px 100% repeat-x;
-}
-
-.nse-window-close:active .nse-window-close-selected-slices,
-:where(:scope):is(.nse-window-close:active) .nse-window-close-selected-slices {
-  opacity: 1;
-}
-
-.nse-window-close-glyph,
-:where(:scope):is(.nse-window-close-glyph),
-:where(:scope).nse-window-close-glyph {
-  position: relative;
-  z-index: 2;
-  color: #f4f7fb;
-  font-family: inherit;
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 1;
-  text-shadow:
-    0 -1px 0 rgba(0, 0, 0, 0.95),
-    0 1px 0 rgba(255, 255, 255, 0.18),
-    0 2px 4px rgba(0, 0, 0, 0.82);
-  transform: translateY(0);
-}
-
-.nse-window-titlebar-spacer,
-:where(:scope):is(.nse-window-titlebar-spacer),
-:where(:scope).nse-window-titlebar-spacer {
-  position: relative;
-  z-index: 1;
-  width: 68px;
-  height: 38px;
-  justify-self: end;
-}
-
-.nse-window-content,
-:where(:scope):is(.nse-window-content),
-:where(:scope).nse-window-content {
-  max-height: 68vh;
-  padding: 76px 22px 22px;
-  overflow: auto;
-  background:
-    linear-gradient(180deg, rgba(248, 251, 255, 0.92), rgba(221, 228, 236, 0.94)),
-    url("/assets/webspring/Panel.png");
-  background-size: cover;
 }
 
 .nse-control-alert-backdrop,
@@ -387,29 +155,80 @@
   position: fixed;
   inset: 0;
   z-index: 10000;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: minmax(0, 1fr);
   place-items: center;
-  box-sizing: border-box;
-  overflow: hidden;
   padding: max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-top, 0px)) max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-right, 0px)) max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-bottom, 0px)) max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-left, 0px));
-  background: rgba(0, 0, 0, 0.42);
-  -webkit-backdrop-filter: blur(5px) saturate(0.85);
-  backdrop-filter: blur(5px) saturate(0.85);
 }
 
 .nse-control-alert,
 :where(:scope):is(.nse-control-alert),
 :where(:scope).nse-control-alert {
-  /* Secondary text is tokenised so the light plate can redefine it; each
-     value was written for the dark plate. */
-  --nse-alert-body-text: rgba(255,255,255,0.86);
-  --nse-alert-link-text: rgba(220,235,255,0.82);
-  --nse-alert-details-text: #d8ecff;
-  --nse-alert-details-fill: rgba(0,0,0,0.32);
-  --nse-alert-details-rule: rgba(255,255,255,0.16);
-  --nse-alert-details-thumb: rgba(255,255,255,0.28);
+  min-height: 250px;
+  overflow: hidden;
+  text-align: center;
+}
+
+.nse-system-alert-content,
+:where(:scope):is(.nse-system-alert-content),
+:where(:scope).nse-system-alert-content {
+  grid-template-columns: 116px minmax(0, 1fr);
+  gap: 8px;
+}
+
+.nse-alert-actions,
+:where(:scope):is(.nse-alert-actions),
+:where(:scope).nse-alert-actions {
+  width: 100%;
+  margin: 18px -2px 0;
+}
+
+/* The backdrop still covers both halves. Its content box is the selected
+   region; no wrapper/reparenting or second focus trap is introduced. */
+.nse-control-alert-backdrop[data-nse-overlay-region="true"],
+:where(:scope):is(.nse-control-alert-backdrop[data-nse-overlay-region="true"]),
+:where(:scope).nse-control-alert-backdrop[data-nse-overlay-region="true"] {
+  padding-top: calc(var(--nse-overlay-region-top) + max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-top, 0px)));
+  padding-right: calc(var(--nse-overlay-region-right) + max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-right, 0px)));
+  padding-bottom: calc(var(--nse-overlay-region-bottom) + max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-bottom, 0px)));
+  padding-left: calc(var(--nse-overlay-region-left) + max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-left, 0px)));
+}
+
+@media (max-width: 680px) {
+  .nse-alert-actions,
+:where(:scope):is(.nse-alert-actions),
+:where(:scope).nse-alert-actions {
+    margin-right: 0;
+    margin-left: 0;
+  }
+
+  .nse-system-alert-content,
+:where(:scope):is(.nse-system-alert-content),
+:where(:scope).nse-system-alert-content {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-height: 560px) {
+  .nse-system-alert-content,
+:where(:scope):is(.nse-system-alert-content),
+:where(:scope).nse-system-alert-content {
+    grid-template-columns: 84px minmax(0, 1fr);
+    gap: 8px;
+  }
+}
+
+.nse-control-alert-backdrop,
+:where(:scope):is(.nse-control-alert-backdrop),
+:where(:scope).nse-control-alert-backdrop {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.nse-control-alert,
+:where(:scope):is(.nse-control-alert),
+:where(:scope).nse-control-alert {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -418,40 +237,17 @@
   max-height: calc(100vh - 22px);
   max-inline-size: 100%;
   max-block-size: 100%;
-  min-height: 250px;
   padding: 28px;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.34);
+  border-width: 1px;
+  border-style: solid;
   border-radius: 16px;
-  color: #f5f8ff;
-  text-align: center;
-  text-shadow: 0 -1px 0 rgba(0,0,0,0.78), 0 1px 1px rgba(255,255,255,0.12);
-  background: linear-gradient(180deg, rgba(62, 78, 99, 0.98), rgba(16, 24, 36, 0.98));
-  box-shadow: 0 28px 42px rgba(0,0,0,0.64), inset 0 1px 0 rgba(255,255,255,0.16);
-}
-
-.nse-control-alert.is-light,
-:where(:scope):is(.nse-control-alert.is-light),
-:where(:scope).nse-control-alert.is-light {
-  --nse-alert-body-text: rgba(24,35,50,0.86);
-  --nse-alert-link-text: #24497a;
-  --nse-alert-details-text: #1d2b3b;
-  --nse-alert-details-fill: rgba(255,255,255,0.42);
-  --nse-alert-details-rule: rgba(0,0,0,0.14);
-  --nse-alert-details-thumb: rgba(0,0,0,0.28);
-  color: #182332;
-  text-shadow: 0 1px 0 rgba(255,255,255,0.7);
-  border-color: rgba(255, 255, 255, 0.72);
-  background: linear-gradient(180deg, rgba(248, 251, 255, 0.98), rgba(198, 211, 226, 0.98));
 }
 
 .nse-system-alert-content,
 :where(:scope):is(.nse-system-alert-content),
 :where(:scope).nse-system-alert-content {
   display: grid;
-  grid-template-columns: 116px minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
-  gap: 8px;
   align-items: start;
   text-align: left;
   min-width: 0;
@@ -486,7 +282,6 @@
   object-position: center;
   overflow: visible;
   transform: none;
-  filter: drop-shadow(0 5px 8px rgba(0,0,0,0.5));
 }
 
 .nse-system-alert-icon--webspring,
@@ -531,7 +326,6 @@
   margin: 7px 0 9px;
   font-family: inherit;
   font-weight: 500;
-  color: var(--nse-alert-body-text);
   font-size: 15px;
   line-height: 1.42;
   overflow-wrap: anywhere;
@@ -546,7 +340,6 @@
   align-items: center;
   padding: 0;
   border: 0;
-  color: var(--nse-alert-link-text);
   background: transparent;
   font-size: 13px;
   font-weight: 700;
@@ -563,13 +356,12 @@
   margin: 8px 0 0;
   overflow-x: auto;
   overflow-y: auto;
-  background: var(--nse-alert-details-fill);
-  border: 1px solid var(--nse-alert-details-rule);
+  border-width: 1px;
+  border-style: solid;
   border-radius: 7px;
   /* Same thin, transparent, auto-hiding scrollbar as the gallery's main content area — present but
      out of the way (not the chunky default), with rubber-band overscroll on top. */
   scrollbar-width: thin;
-  scrollbar-color: var(--nse-alert-details-thumb) transparent;
 }
 
 /* WebKit/Blink equivalent of the thin overlay scrollbar (transparent track, faint translucent thumb). */
@@ -580,19 +372,11 @@
   height: 8px;
 }
 
-.nse-alert-details::-webkit-scrollbar-track,
-:where(:scope):is(.nse-alert-details)::-webkit-scrollbar-track,
-:where(:scope).nse-alert-details::-webkit-scrollbar-track {
-  background: transparent;
-}
-
 .nse-alert-details::-webkit-scrollbar-thumb,
 :where(:scope):is(.nse-alert-details)::-webkit-scrollbar-thumb,
 :where(:scope).nse-alert-details::-webkit-scrollbar-thumb {
   border: 2px solid transparent;
   border-radius: 8px;
-  background-clip: content-box;
-  background-color: var(--nse-alert-details-thumb);
 }
 
 /* The single child the rubber-band provider translates; carries the text styling + padding (so the
@@ -602,7 +386,6 @@
 :where(:scope).nse-alert-details-text {
   margin: 0;
   padding: 9px;
-  color: var(--nse-alert-details-text);
   text-align: left;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -616,10 +399,8 @@
   grid-template-columns: repeat(auto-fit, minmax(min(184px, 100%), 1fr));
   justify-content: stretch;
   gap: 10px;
-  width: 100%;
   max-width: 100%;
   flex: 0 0 auto;
-  margin: 18px -2px 0;
 }
 
 .nse-alert-actions .nse-system-alert-action-button.nse-control-button,
@@ -650,21 +431,17 @@
     width: min(100%, calc(100vw - 18px));
     max-block-size: 100%;
     border-width: 34px;
-    border-image-width: 34px;
   }
 
   .nse-alert-actions,
 :where(:scope):is(.nse-alert-actions),
 :where(:scope).nse-alert-actions {
     grid-template-columns: minmax(0, 1fr);
-    margin-right: 0;
-    margin-left: 0;
   }
 
   .nse-system-alert-content,
 :where(:scope):is(.nse-system-alert-content),
 :where(:scope).nse-system-alert-content {
-    grid-template-columns: 1fr;
     justify-items: center;
     text-align: center;
     margin: 0;
@@ -684,22 +461,6 @@
     height: 112px;
     padding: 0;
     transform: none;
-  }
-
-  .nse-system-alert-icon--webspring,
-:where(:scope):is(.nse-system-alert-icon--webspring),
-:where(:scope).nse-system-alert-icon--webspring {
-    width: 94px;
-    height: 126px;
-    margin-top: -10px;
-  }
-
-  .nse-system-alert-icon--syncloudos,
-:where(:scope):is(.nse-system-alert-icon--syncloudos),
-:where(:scope).nse-system-alert-icon--syncloudos {
-    width: 82px;
-    height: 108px;
-    margin-top: 0;
   }
 
   .nse-alert-actions .nse-system-alert-action-button.nse-control-button,
@@ -725,14 +486,11 @@
 :where(:scope).nse-control-alert {
     min-height: 0;
     border-width: 26px;
-    border-image-width: 26px;
   }
 
   .nse-system-alert-content,
 :where(:scope):is(.nse-system-alert-content),
 :where(:scope).nse-system-alert-content {
-    grid-template-columns: 84px minmax(0, 1fr);
-    gap: 8px;
     margin: 0;
   }
 
@@ -750,22 +508,6 @@
     height: 88px;
     padding: 0;
     transform: none;
-  }
-
-  .nse-system-alert-icon--webspring,
-:where(:scope):is(.nse-system-alert-icon--webspring),
-:where(:scope).nse-system-alert-icon--webspring {
-    width: 74px;
-    height: 98px;
-    margin-top: -8px;
-  }
-
-  .nse-system-alert-icon--syncloudos,
-:where(:scope):is(.nse-system-alert-icon--syncloudos),
-:where(:scope).nse-system-alert-icon--syncloudos {
-    width: 64px;
-    height: 86px;
-    margin-top: 0;
   }
 
   .nse-system-alert-copy h2,
@@ -793,16 +535,6 @@
   }
 }
 
-/* The backdrop still covers both halves. Its content box is the selected
-   region; no wrapper/reparenting or second focus trap is introduced. */
-.nse-control-alert-backdrop[data-nse-overlay-region="true"],
-:where(:scope):is(.nse-control-alert-backdrop[data-nse-overlay-region="true"]),
-:where(:scope).nse-control-alert-backdrop[data-nse-overlay-region="true"] {
-  padding-top: calc(var(--nse-overlay-region-top) + max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-top, 0px)));
-  padding-right: calc(var(--nse-overlay-region-right) + max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-right, 0px)));
-  padding-bottom: calc(var(--nse-overlay-region-bottom) + max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-bottom, 0px)));
-  padding-left: calc(var(--nse-overlay-region-left) + max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-left, 0px)));
-}
 .nse-control-alert-backdrop[data-nse-overlay-region="true"]>.nse-control-alert,
 :where(:scope):is(.nse-control-alert-backdrop[data-nse-overlay-region="true"])>.nse-control-alert {
   min-block-size: 0;

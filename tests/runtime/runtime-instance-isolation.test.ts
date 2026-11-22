@@ -94,7 +94,7 @@ describe("runtime instance isolation", () => {
   it("owns windows, documents, notifications, locale, Webspring, and state transitions", async () => {
     const first = createTestRuntime({ id: "runtime:controllers:first" });
     const second = createTestRuntime({ id: "runtime:controllers:second" });
-    const bundle = createTestBundle({ bundleIdentifier: "com.example.controller-app", route: "/controller-app", presentation: "windowedView" });
+    const bundle = createTestBundle({ bundleIdentifier: "com.example.controller-app", route: "/controller-app", presentation: "window" });
     first.apps.registerBundle(bundle);
 
     const window = await first.windows.openApplicationWindow("com.example.controller-app");

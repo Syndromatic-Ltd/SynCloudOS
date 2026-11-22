@@ -41,7 +41,7 @@ export function AudioHapticsPane() {
   const rows = mixer.applications.filter((session) => apps[session.appId]);
   const supportsHaptics = feedback?.isSupported && runtime.settings.supportsVibration();
   const volumeSlider = (label: string, volume: number, change: (value: number) => void) => (
-    <NSESlider thumbMaterial="metal" className="audio-mixer-slider" label={<span className="audio-mixer-label"><span>{label}</span><span aria-hidden="true">{Math.round(volume * 100)}%</span></span>} aria-label={label} aria-valuetext={`${Math.round(volume * 100)}%`}
+    <NSESlider thumbMaterial="metal" className="audio-mixer-slider" label={<span data-nse-part="label" data-nse-role="volume" className="audio-mixer-label"><span>{label}</span><span aria-hidden="true">{Math.round(volume * 100)}%</span></span>} aria-label={label} aria-valuetext={`${Math.round(volume * 100)}%`}
       value={Math.round(volume * 100)} minimum={0} maximum={100} step={1} detents={volumeDetents}
       onValueChange={(value) => change(value / 100)} style={{ width: "100%", minWidth: 0 }} />
   );

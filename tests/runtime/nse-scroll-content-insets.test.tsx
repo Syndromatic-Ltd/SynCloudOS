@@ -3,7 +3,7 @@ import React from "react";
 import { act, cleanup, render } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEScrollView } from "../../src/NSE/Scroll/NSEScrollView";
-import { WindowLayoutContext, WindowLayoutModel } from "../../src/NSE/Layout/windowChromeObstructions";
+import { WindowLayoutContext, WindowLayoutModel } from "../../src/NSE/Layout/windowObstructions";
 import { NSEEdgeInsetsMake, NSEEdgeInsetsZero } from "../../src/NSE/Layout/NSEEdgeInsets";
 import type { NSEScrollViewController } from "../../src/NSE/Scroll/scrollTypes";
 

@@ -1,11 +1,11 @@
 import { mountSynCloudOS } from "../../src/SynCloudOSReact/browser";
-import type { WebspringDefinition } from "../../src/Webspring/webspringTypes";
+import type { WSDefinition } from "../../src/Webspring/WSApplication";
 import { IndexedDBDocumentRecoveryStore } from "../../src/SynCloudOS/Documents/IndexedDBDocumentRecoveryStore";
 import { InMemoryDocumentAdapter } from "../../src/SynCloudOS/Documents/Adapters/InMemoryDocumentAdapter";
 import { defineIntegration } from "../../src/Webspring/webspringIntegration";
-import type { ActionResult, WebspringWidgetViewProps } from "../../src/Webspring/webspringTypes";
+import type { WSActionResult, WSWidget } from "../../src/Webspring/public";
 declare const element: Element;
-declare const shell: WebspringDefinition;
+declare const shell: WSDefinition;
 mountSynCloudOS({ element, shell, authentication: "optional" });
 mountSynCloudOS({ element, application: { bundleIdentifier: "com.example.game" } });
 mountSynCloudOS({ element, application: { bundleIdentifier: "com.example.game" }, authentication: "disabled" });
@@ -29,8 +29,8 @@ defineIntegration({
     context.environment.browser.getWindow();
   },
 });
-declare const widget: WebspringWidgetViewProps<readonly string[]>;
-const navigation: Promise<ActionResult> = widget.navigate("/notes/one");
+declare const widget: WSWidget<readonly string[]>;
+const navigation: Promise<WSActionResult> = widget.navigate("/notes/one");
 void navigation;
 // A folder-discovered host may use its generated project without an explicit mode.
 mountSynCloudOS({ element });
@@ -42,5 +42,5 @@ mountSynCloudOS({ element, shell, application: { bundleIdentifier: "com.example.
 mountSynCloudOS({ element, application: { bundleIdentifier: "com.example.game" }, shellResources: {} });
 // @ts-expect-error The application frame is either the full page or the app's declared frame.
 mountSynCloudOS({ element, application: { bundleIdentifier: "com.example.game", frame: "windowed" } });
-// @ts-expect-error Content sources are gone; widgets are declared with defineWebspring.
+// @ts-expect-error Content sources are gone; widgets are declared on the WSApplication subclass.
 mountSynCloudOS({ element, application: { bundleIdentifier: "com.example.game" }, contentSources: {} });

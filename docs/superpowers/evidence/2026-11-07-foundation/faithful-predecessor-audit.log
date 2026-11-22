@@ -1,1 +1,0 @@
-tests\runtime\synware-nse-public-surface.test.ts:75:    for (const internal of ["SelectionModel", "ChangeSet", "ValueTransformer", "createValueTransformer", "sortWithDescriptors", "DateFormatter", "DecimalValue", "NSEUserDefaults", "NSEIndexPath", "NSEFormatter"]) expect(publicExports().names).not.toContain(internal);

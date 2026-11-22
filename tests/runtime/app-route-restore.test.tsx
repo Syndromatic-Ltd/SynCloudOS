@@ -24,20 +24,11 @@ import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
 import { createTestRuntime } from "./helpers";
-import { defineWebspring, type WebspringViewProps } from "../../src/Webspring/public";
+import { createTestLauncher, createTestWebspring } from "./webspringTestShell";
 
-const shell = defineWebspring({
-  manifest: {
-    schemaVersion: 1, bundleIdentifier: "com.example.webspring.route-test", version: "1.0.0", displayName: "Route test",
-    webspringShell: {
-      views: [{ id: "route", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }],
-      defaults: { desktop: "route", tablet: "route", mobile: "route" },
-      homeRoute: "/", branding: { name: { key: "site.name", fallback: "Route test" } },
-    },
-  },
-  components: {
-    route: ({ model }: WebspringViewProps) => <main data-testid="webspring" data-route={model.routePath} />,
-  },
+const shell = createTestWebspring({
+  info: { bundleIdentifier: "com.example.webspring.route-test", displayName: "Route test", branding: { name: { key: "site.name", fallback: "Route test" } } },
+  launcher: createTestLauncher(({ launcher }) => <main data-testid="webspring" data-route={launcher.routePath} />, "persistent"),
 });
 
 vi.mock("../../src/Webspring/SystemUILayer", () => ({
@@ -53,10 +44,10 @@ describe("App root composition", () => {
   afterEach(cleanup);
 
   it("renders provider-owned routes without restoring a persisted previous app", async () => {
-    const { App } = await import("../../src/App");
+    const { WebspringHost } = await import("../../src/Webspring/WebspringHost");
     const runtime = createTestRuntime();
     runtime.store.mutate((draft) => { draft.application.routePath = "/studio"; });
-    const rendered = render(React.createElement(SynCloudOSProvider, { runtime }, React.createElement(App, { shell })));
+    const rendered = render(React.createElement(SynCloudOSProvider, { runtime }, React.createElement(WebspringHost, { shell })));
 
     expect(screen.getByTestId("webspring").getAttribute("data-route")).toBe("/studio");
     expect(screen.getByTestId("system-ui")).toBeTruthy();
@@ -73,7 +64,7 @@ describe("App root composition", () => {
   });
 
   it("releases the startup curtain at the presentable statechart boundary before boot completion", async () => {
-    const { App } = await import("../../src/App");
+    const { WebspringHost } = await import("../../src/Webspring/WebspringHost");
     const runtime = createTestRuntime();
     runtime.store.mutate((draft) => {
       draft.booted = false;
@@ -81,7 +72,7 @@ describe("App root composition", () => {
       draft.application.routePath = "/studio";
     });
 
-    const rendered = render(React.createElement(SynCloudOSProvider, { runtime }, React.createElement(App, { shell })));
+    const rendered = render(React.createElement(SynCloudOSProvider, { runtime }, React.createElement(WebspringHost, { shell })));
 
     expect(runtime.store.getSnapshot().booted).toBe(false);
     expect(runtime.store.getSnapshot().statechart.currentState).toBe("active.application.active");

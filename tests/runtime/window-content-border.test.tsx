@@ -2,7 +2,7 @@
 import React from "react";
 import { cleanup, render } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
-import { WindowContentBorder } from "../../src/SynCloudOS/AppHosting/windowChrome";
+import { WindowContentBorder } from "../../src/SynCloudOS/AppHosting/windowAccessories";
 import { NSETextField } from "../../src/NSE/Controls/Fields/NSEFields";
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
 
@@ -30,15 +30,28 @@ describe("a window's bottom content border", () => {
   });
   it("draws a band behind the content and an edge above it, sized by the thickness", () => {
     const view = render(<WindowContentBorder thickness={56} />);
-    const band = view.container.querySelector<HTMLElement>(".nse-window-content-border")!;
-    const edge = view.container.querySelector<HTMLElement>(".nse-window-content-border-edge")!;
-    expect(band.dataset.edge).toBe("minY");
-    expect(band.dataset.size).toBe("large");
+    const band = view.container.querySelector<HTMLElement>('[data-nse-part="content-border"]')!;
+    const edge = view.container.querySelector<HTMLElement>('[data-nse-part="border"]')!;
+    expect(band.dataset.nseEdge).toBe("minY");
+    expect(band.dataset.nseContentBorder).toBe("large");
     expect(band.getAttribute("aria-hidden")).toBe("true");
     expect(band.style.getPropertyValue("--nse-window-content-border-thickness")).toBe("56px");
-    expect(edge.dataset.size).toBe("large");
+    expect(edge.dataset.nseContentBorder).toBe("large");
     view.rerender(<WindowContentBorder thickness={24} />);
-    expect(view.container.querySelector<HTMLElement>(".nse-window-content-border")!.dataset.size).toBe("small");
+    expect(view.container.querySelector<HTMLElement>('[data-nse-part="content-border"]')!.dataset.nseContentBorder).toBe("small");
+  });
+
+  it("splits a large content border into rail and body plates when a sidebar width is present", () => {
+    const view = render(<WindowContentBorder thickness={56} sidebarWidth={208} />);
+    const band = view.container.querySelector<HTMLElement>('[data-nse-part="content-border"]')!;
+    expect(band.dataset.hasRail).toBe("true");
+    expect(band.style.getPropertyValue("--nse-topbar-rail")).toBe("208px");
+    expect(band.querySelector('[data-nse-part="sidebar"] > [data-nse-part="decoration"]')).not.toBeNull();
+    expect(band.querySelector('[data-nse-part="body"] > [data-nse-part="decoration"]')).not.toBeNull();
+    view.rerender(<WindowContentBorder thickness={24} sidebarWidth={208} />);
+    const small = view.container.querySelector<HTMLElement>('[data-nse-part="content-border"]')!;
+    expect(small.dataset.hasRail).toBeUndefined();
+    expect(small.querySelector('[data-nse-part="sidebar"]')).toBeNull();
   });
 
   it("draws labels on it raised (NSCell.backgroundStyle)", () => {

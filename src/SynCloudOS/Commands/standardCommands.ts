@@ -214,7 +214,8 @@ export function registerStandardCommands(runtime: SynCloudOSRuntime): { dispose(
       // when its application deactivates. Only standalone windows ask.
       const ownedOpenWindows = activeAppId
         ? runtime.windows.list({ applicationId: activeAppId }).filter(({ record }) => (
-          record.state === "open" && (record.role === "standard" || record.role === "borderless")
+          record.state === "open" && record.fullScreen !== "on" && record.fullScreen !== "exiting" &&
+          (record.role === "standard" || record.role === "borderless")
         ))
         : [];
       if (activeAppId && ownedOpenWindows.length > 0) {
@@ -263,6 +264,19 @@ export function registerStandardCommands(runtime: SynCloudOSRuntime): { dispose(
     execute: ({ payload }) => { const controller = resolveWindow(payload); if (controller) runtime.windows.zoom(controller.id); },
   }));
   register(declaration({
+    id: "window.toggleFullScreen", responderId: "runtime",
+    title: { key: "command.window.toggleFullScreen", fallback: "Toggle Full Screen" }, payload: optionalWindowPayload,
+    scope: "window", defaultKeyBindings: [], undo: { kind: "none" },
+    validate: ({ payload }) => {
+      const window = resolveWindow(payload);
+      return { enabled: Boolean(window?.record.collectionBehavior === "fullScreenPrimary" && !isBlocked(window.id)) };
+    },
+    execute: ({ payload }) => {
+      const window = resolveWindow(payload);
+      if (window) runtime.windows.toggleFullScreen(window.id);
+    },
+  }));
+  register(declaration({
     id: "window.move-by", responderId: "runtime", title: { key: "command.window.moveBy", fallback: "Move Window" }, payload: windowDeltaPayload,
     scope: "window", defaultKeyBindings: [], undo: { kind: "none" },
     validate: ({ payload }) => windowValidation(payload),
@@ -309,6 +323,20 @@ export function registerStandardCommands(runtime: SynCloudOSRuntime): { dispose(
     scope: "application", defaultKeyBindings: [], undo: { kind: "none" },
     validate: ({ payload }) => { const appId = payload.appId ?? runtime.store.getSnapshot().application.activeAppId; return { enabled: Boolean(appId && runtime.apps.getApp(appId)), disabledReason: "No application is available for About." }; },
     execute: ({ payload }) => { const appId = payload.appId ?? runtime.store.getSnapshot().application.activeAppId!; runtime.systemUI.about.open(appId); },
+  }));
+  register(declaration({
+    id: "application.quit", responderId: "runtime", title: { key: "command.application.quit", fallback: "Quit" },
+    payload: optionalAppPayload, scope: "application", defaultKeyBindings: [], undo: { kind: "none" },
+    validate: ({ payload }) => ({
+      enabled: runtime.lifecycle.getState(payload.appId ?? runtime.store.getSnapshot().application.activeAppId ?? "") === "active",
+      disabledReason: "The application is not running.",
+    }),
+    execute: ({ payload }) => {
+      const appId = payload.appId ?? runtime.store.getSnapshot().application.activeAppId;
+      if (!appId) return;
+      // Quitting disposes the mounted menu. The runtime carries the accepted close to completion.
+      void runtime.lifecycle.close(appId, { reason: "application-menu-quit" }).result;
+    },
   }));
   register(declaration({
     id: "system.showPreferences", responderId: "runtime", title: { key: "system.preferences", fallback: "System Preferences" }, payload: noPayload,

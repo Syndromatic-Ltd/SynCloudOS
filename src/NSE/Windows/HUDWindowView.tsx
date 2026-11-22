@@ -18,54 +18,20 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useNSEWindowChromeElement } from "../Layout/windowChromeObstructions";
 
-import React, { useState } from "react";
+import React from "react";
+import { WindowTitlebarControls } from "./WindowTitlebarControls";
 import { WindowView } from "./WindowView";
 import { assertNSEWindowViewRole, windowEscapeCloseHandler } from "./windowRoleViewHelpers";
 import type { WindowViewProps } from "./windowViewTypes";
-
-function HUDTitleBar({ record, dispatchCommand, moveHandleProps }: Pick<WindowViewProps, "record" | "dispatchCommand" | "moveHandleProps">) {
-  const header = React.useRef<HTMLElement>(null);
-  useNSEWindowChromeElement(header, "top", true);
-  const [highlighted, setHighlighted] = useState(false);
-  const { className, ...handleProps } = moveHandleProps ?? {};
-  return (
-    <header
-      {...handleProps}
-      ref={header}
-      className={["nse-window__hud-titlebar", className].filter(Boolean).join(" ")}
-      data-nse-part="header" data-window-hud-titlebar=""
-    >
-      {record.style.includes("closable") ? (
-        <button
-          type="button"
-          className="nse-window__control nse-window__control--hud-close"
-          aria-label={`Close ${record.title}`}
-          data-nse-control="button" data-nse-part="cell" data-nse-role="close" data-nse-highlighted={highlighted ? "" : undefined} data-window-control="close"
-          data-window-control-state={highlighted ? "highlighted" : "normal"}
-
-          data-window-no-drag=""
-          data-syncloudos-focus-chrome=""
-          onPointerEnter={() => setHighlighted(true)}
-          onPointerLeave={() => setHighlighted(false)}
-          onPointerDown={() => setHighlighted(true)}
-          onPointerUp={() => setHighlighted(false)}
-          onClick={() => void dispatchCommand("window.close", { windowControllerId: record.id })}
-        >
-          <span data-nse-part="bezel" className="nse-window__control-paint" aria-hidden="true" />
-        </button>
-      ) : null}
-      <h2 id={`${record.id}-title`} data-window-title="" data-nse-part="title" className="nse-window__hud-title">{record.title}</h2>
-    </header>
-  );
-}
 
 export function HUDWindowView(props: WindowViewProps) {
   assertNSEWindowViewRole("NSEHUDWindowView", props.record, "hud");
   if (props.record.level === "normal") throw new TypeError("NSEHUDWindowView requires a floating HUD level.");
   const titleBar = props.presentation.titleBarVisible && props.record.style.includes("titled") ? (
-    <HUDTitleBar
+    <WindowTitlebarControls
+      variant="hud" controls={["close"]}
+      dirty={props.dirty}
       record={props.record}
       dispatchCommand={props.dispatchCommand}
       moveHandleProps={props.presentation.movable ? props.moveHandleProps : undefined}

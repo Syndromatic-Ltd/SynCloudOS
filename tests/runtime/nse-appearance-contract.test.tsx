@@ -29,6 +29,7 @@ import React, { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { NSEAppearanceProvider, useNSEAppearance, type NSEAppearanceServicePort } from "../../src/NSE/Appearance";
+import { NSEAppearance } from "../../src/NSE/Appearance/NSEAppearance";
 import { AboutDialog } from "../../src/NSE/Components/NSESystemDialogs";
 import { PreferencesToast } from "../../src/NSE/Components/NSEPreferencesToast";
 import { RadioGroup, NSETextField } from "../../src/NSE/Controls/Fields/NSEFields";
@@ -38,6 +39,7 @@ import { OverlayProvider, NSEPopup as NSECanonicalPopup } from "../../src/NSE/Ov
 import type { OverlayRuntimePort } from "../../src/NSE/Overlays/overlayTypes";
 import { atmoTheme } from "../../src/NSE/Appearance/atmo";
 import { Tooltip } from "../../src/NSE/Tooltips";
+import { NSEView } from "../../src/NSE/Views/NSEView";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 
 const customAppearance = createTestTheme("com.example.custom-test", "Custom test");
@@ -136,6 +138,31 @@ function CanonicalPortalSpecimens() {
 
 describe("NSE appearance composition", () => {
 
+  it("options-only constructor inherits the name", () => {
+    const chrome = Object.freeze({ kind: "app" as const, bundleIdentifier: "com.example.chrome", displayName: "Chrome", version: "1.0.0" });
+    const appearance = new NSEAppearance({ theme: chrome });
+    expect(appearance.name).toBeUndefined();
+
+    const draw = (scheme: "light" | "dark") => (
+      <NSEAppearanceProvider theme={customAppearance} colourScheme={scheme} contrast="high" transparency="reduced">
+        <NSEView appearance={appearance}>
+          <Probe id="app-chrome" />
+        </NSEView>
+      </NSEAppearanceProvider>
+    );
+    const { rerender } = render(draw("dark"));
+    const boundary = screen.getByTestId("app-chrome").closest("[data-nse-app-theme]");
+    expect(boundary?.getAttribute("data-nse-app-theme")).toBe(chrome.bundleIdentifier);
+    expect(boundary?.getAttribute("data-nse-theme")).toBe(customAppearance.bundleIdentifier);
+    expect(boundary?.getAttribute("data-nse-colour-scheme-resolved")).toBe("dark");
+    expect(boundary?.getAttribute("data-nse-contrast")).toBe("high");
+    expect(boundary?.getAttribute("data-nse-transparency")).toBe("reduced");
+    expect(boundary?.getAttribute("style")).toBeNull();
+
+    rerender(draw("light"));
+    expect(boundary?.getAttribute("data-nse-colour-scheme-resolved")).toBe("light");
+  });
+
   it("selects explicit canonical appearance definitions without legacy aliases", () => {
     expect(atmoTheme.bundleIdentifier).toBe("com.syndromatic.atmo");
 
@@ -151,15 +178,15 @@ describe("NSE appearance composition", () => {
   });
 
   it("defines materially distinct high contrast and raster-free forced-colour paint contracts", () => {
-    const css = readFileSync("src/NSE/Appearance/nse-appearance.css", "utf8");
+    const css = readFileSync("src/Themes/Atmo.scostheme/Contents/Resources/atmo.accessibility.css", "utf8");
     expect(css).toContain('[data-nse-contrast="high"]');
     expect(css).toContain("--nse-contrast-edge: #000");
     expect(css).toContain("--nse-contrast-accent: #004fd7");
     expect(css).toMatch(/data-nse-contrast="forced"[\s\S]*background-image:\s*none\s*!important/u);
     expect(css).toMatch(/forced-colors:\s*active[\s\S]*background-image:\s*none\s*!important/u);
-    expect(css).toContain("[data-window-shadow-layer]");
-    expect(css).toContain(".nse-menu-item:focus-visible");
-    expect(css).toContain('[aria-disabled="true"]');
+    expect(css).toContain('[data-nse-part="shadow"]');
+    expect(css).toMatch(/data-nse-control="menu-item"[^,\n]*:focus-visible/u);
+    expect(css).toContain('[data-nse-enabled="false"]');
   });
 
   it("keeps semantic disabled and invalid state when controls change", async () => {

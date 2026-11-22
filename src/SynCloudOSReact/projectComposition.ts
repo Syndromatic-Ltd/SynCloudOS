@@ -19,11 +19,11 @@
  */
 
 import type { SynCloudOSLocaleBundleResourceInput } from "../SynCloudOS/LocaleServices/localeTypes";
-import type { PreferencePaneDefinition } from "../SynCloudOS/Preferences";
+import type { PreferencePaneDescriptor } from "../SynCloudOS/Preferences";
 import type { SynCloudOSHostContribution } from "./browserHostContributions";
 import type { SynCloudOSAppModule } from "../SynCloudOS/BundleLoader/bundleTypes";
 import type { SynCloudOSShellResources } from "../Webspring/WebspringController";
-import type { WebspringDefinition, WebspringWidget } from "../Webspring/webspringTypes";
+import type { WSDefinition, WSWidgetDescriptor } from "../Webspring/public";
 
 /** One application folder as the project discovered it: its derived manifest,
  * its lazy entry and the file URLs the manifest refers to. */
@@ -43,11 +43,11 @@ export interface SynCloudOSDiscoveredBundleDescriptor {
  */
 export interface SynCloudOSProjectComposition {
   readonly bundles: readonly SynCloudOSDiscoveredBundleDescriptor[];
-  readonly preferences: readonly PreferencePaneDefinition[];
-  readonly widgets: readonly WebspringWidget[];
+  readonly preferences: readonly PreferencePaneDescriptor[];
+  readonly widgets: readonly WSWidgetDescriptor[];
   readonly contributions: readonly SynCloudOSHostContribution[];
   /** The project's shell, already carrying the discovered panes and widgets. */
-  readonly shell: WebspringDefinition | null;
+  readonly webspring: WSDefinition | null;
   readonly shellResources: SynCloudOSShellResources;
 }
 
@@ -59,7 +59,7 @@ export const emptyProjectComposition: SynCloudOSProjectComposition = Object.free
   preferences: Object.freeze([]),
   widgets: Object.freeze([]),
   contributions: Object.freeze([]),
-  shell: null,
+  webspring: null,
   shellResources: Object.freeze({}),
 });
 

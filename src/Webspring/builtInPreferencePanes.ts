@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { PreferencePaneDefinition } from "../SynCloudOS/Preferences";
+import { capturePreferencePaneClass, type PreferencePaneDescriptor } from "../SynCloudOS/Preferences";
 import appearance from "./Preferences/Appearance.prefPane";
 import sounds from "./Preferences/Sounds.prefPane";
 import motion from "./Preferences/Motion.prefPane";
@@ -31,7 +31,7 @@ import privacy from "./Preferences/PrivacySecurity.prefPane";
 import storage from "./Preferences/Storage.prefPane";
 
 /** The panes every host lists, in their default order. */
-export const builtInPreferencePanes: readonly PreferencePaneDefinition[] = Object.freeze([
+export const builtInPreferencePanes: readonly PreferencePaneDescriptor[] = Object.freeze([
   appearance,
   sounds,
   motion,
@@ -41,7 +41,7 @@ export const builtInPreferencePanes: readonly PreferencePaneDefinition[] = Objec
   updates,
   storage,
   capabilities,
-]);
+].map(capturePreferencePaneClass));
 
 /** Sign in and out, for hosts whose authentication is not disabled. */
-export const accountPreferencePane: PreferencePaneDefinition = account;
+export const accountPreferencePane: PreferencePaneDescriptor = capturePreferencePaneClass(account);

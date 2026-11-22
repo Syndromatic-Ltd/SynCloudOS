@@ -118,9 +118,11 @@
 
 :where(:scope) [data-nse-control="switch"],
 :where(:scope):is([data-nse-control="switch"]) {
-  --nse-control-toggle-unit:max(var(--nse-atmo-toggle-height),calc((var(--nse-control-toggle-label-width,0px) + 4px)*1.333333333));
-  width:calc(var(--nse-control-toggle-unit)*2);
-  min-width:calc(var(--nse-control-toggle-unit)*2);
+  /* Height is fixed; a longer label lengthens the track and never grows the thumb. */
+  --nse-control-toggle-unit:var(--nse-atmo-toggle-height);
+  --nse-control-toggle-length:max(calc(var(--nse-control-toggle-unit)*2),calc(var(--nse-control-toggle-label-width,0px) + var(--nse-control-toggle-unit) + 14px));
+  width:var(--nse-control-toggle-length);
+  min-width:var(--nse-control-toggle-length);
   height:var(--nse-control-toggle-unit);
   margin:1px 0;
   padding:0;
@@ -134,6 +136,8 @@
 :where(:scope):is([data-nse-part="track"]:where([data-nse-control="switch"] *)) {
   border-radius:calc(var(--nse-control-toggle-unit)/2);
   background:transparent;
+  /* The well is painted here, so nothing needs clipping and the thumb's shadow can fall past the edge. */
+  overflow:visible;
 }
 
 :where(:scope) [data-nse-part="fill"]:where([data-nse-control="switch"] *),
@@ -176,7 +180,8 @@
 :where(:scope) [data-nse-part="knob"]:where([data-nse-control="switch"] *)::before,
 :where(:scope):is([data-nse-part="knob"]:where([data-nse-control="switch"] *)::before) {
   background-position:0 calc(-1*var(--nse-control-toggle-unit));
-  opacity:calc(1 - var(--nse-control-toggle-ratio,0));
+  /* The off knob stays opaque and the on knob fades in over it, so the knob never turns see-through mid-drag. */
+  opacity:1;
 }
 
 :where(:scope) [data-nse-part="knob"]:where([data-nse-control="switch"] *)::after,
@@ -210,17 +215,26 @@
   min-width:26px;
   color:rgba(255,255,255,0.86);
   transform:translateY(-48%);
+  /* Each label is centred in the length the thumb leaves free on its side. */
+  width:calc(100% - var(--nse-control-toggle-unit));
+  text-align:center;
+  white-space:nowrap;
 }
 
 :where(:scope) [data-nse-part="title"]:where([data-nse-control="switch"] *):where([data-nse-state="on"]),
 :where(:scope):is([data-nse-part="title"]:where([data-nse-control="switch"] *):where([data-nse-state="on"])) {
-  opacity:var(--nse-control-toggle-ratio,0);
+  /* As on iOS 6, a label is cut off by the knob's centre line rather than faded, so On and Off never show together. */
+  clip-path:inset(-12px calc((1 - var(--nse-control-toggle-ratio,0))*100% - var(--nse-control-toggle-unit)/2 + 2px) -12px -12px);
+  left:2px;
+  right:auto;
 }
 
 :where(:scope) [data-nse-part="title"]:where([data-nse-control="switch"] *):where([data-nse-state="off"]),
 :where(:scope):is([data-nse-part="title"]:where([data-nse-control="switch"] *):where([data-nse-state="off"])) {
-  opacity:calc(1 - var(--nse-control-toggle-ratio,0));
+  clip-path:inset(-12px -12px -12px calc(var(--nse-control-toggle-ratio,0)*100% - var(--nse-control-toggle-unit)/2 + 2px));
   color:rgba(245,245,245,0.78);
+  left:auto;
+  right:2px;
 }
 
 :where(:scope) [data-nse-control="switch"][data-nse-state="on"] [data-nse-part="title"]:where([data-nse-control="switch"] *):where([data-nse-state="on"]),
@@ -236,7 +250,7 @@
 
 :where(:scope) [data-nse-control="switch"]:active:not(:disabled) [data-nse-part="knob"]:where([data-nse-control="switch"] *),
 :where(:scope):is([data-nse-control="switch"]:active:not(:disabled)) [data-nse-part="knob"]:where([data-nse-control="switch"] *) {
-  filter:brightness(1.06);
+  filter:brightness(1.06) var(--nse-atmo-toggle-thumb-shadow,drop-shadow(0 0 0 transparent));
 }
 
 :where(:scope) [data-nse-control="slider"]:where([data-nse-slider-type="linear"]),
@@ -433,11 +447,12 @@
 
 :where(:scope) [data-nse-control="stepper"]>[data-nse-part="bezel"]>:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"],[data-nse-part="increment"],[data-nse-part="decrement"])::before,
 :where(:scope):is([data-nse-control="stepper"])>[data-nse-part="bezel"]>:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"],[data-nse-part="increment"],[data-nse-part="decrement"])::before {
-  -webkit-mask:var(--nse-atmo-stepper-glyph) center/8px 5px no-repeat;
-  mask:var(--nse-atmo-stepper-glyph) center/8px 5px no-repeat;
+  -webkit-mask:var(--nse-atmo-stepper-glyph, var(--nse-image-stepper-increment, image-set(url("./controls/stepper-increment.svg") 1x, url("./controls/stepper-increment@2x.svg") 2x))) center/8px 5px no-repeat;
+  mask:var(--nse-atmo-stepper-glyph, var(--nse-image-stepper-increment, image-set(url("./controls/stepper-increment.svg") 1x, url("./controls/stepper-increment@2x.svg") 2x))) center/8px 5px no-repeat;
 }
 
 :where(:scope) [data-nse-control="stepper"]>[data-nse-part="bezel"]>:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"],[data-nse-part="increment"],[data-nse-part="decrement"])[data-nse-part="decrement"]::before,
 :where(:scope):is([data-nse-control="stepper"])>[data-nse-part="bezel"]>:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"],[data-nse-part="increment"],[data-nse-part="decrement"])[data-nse-part="decrement"]::before {
-  transform:scaleY(-1);
+  --nse-atmo-stepper-glyph: var(--nse-image-stepper-decrement, image-set(url("./controls/stepper-decrement.svg#svgView(viewBox(0,0,8,5))") 1x, url("./controls/stepper-decrement@2x.svg#svgView(viewBox(0,0,8,5))") 2x));
+  transform:var(--nse-image-stepper-decrement-transform, scaleY(-1));
 }

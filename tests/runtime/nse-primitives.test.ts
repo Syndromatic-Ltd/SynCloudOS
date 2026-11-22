@@ -23,7 +23,6 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { MenuView } from "../../src/NSE/Menus";
 import { NSESwitch, NSEButton, NSEBox, NSEPopUpButton, NSESegmentedControl, useNSEControlFeedback } from "../../src/NSE/public/controls";
-import { TopBar } from "../../src/NSE/Windows/Chrome";
 import { GroupedRow } from "../../src/NSE/Controls/Selection/GroupedRow";
 import { GlassPanel } from "../../src/NSE/Components/GlassPanel";
 import { BrowserHapticsAdapter, createHFXVibratePattern, normalizeHFXFeedbackInput } from "../../src/SynCloudOS/PlatformAdapters/BrowserHapticsAdapter";
@@ -302,8 +301,8 @@ describe("HapticsFX feedback preservation", () => {
       const onClick = vi.fn();
       const rendered = render(createElement("div", null,
         createElement(NSEButton, { title: "Medium", onClick }),
-        createElement(NSEButton, { title: "Light", appearance: "aqua", onClick }),
-        createElement(NSEButton, { title: "Dark", appearance: "darkAqua", onClick }),
+        createElement(NSEButton, { title: "Light", appearance: "light", onClick }),
+        createElement(NSEButton, { title: "Dark", appearance: "dark", onClick }),
         createElement(NSEButton, { title: "OK", keyEquivalent: "\r", onClick }),
         createElement(NSEButton, { title: "Delete", hasDestructiveAction: true, onClick }),
         createElement(NSEButton, { title: "Silent", hasDestructiveAction: true, haptic: false, onClick }),
@@ -316,11 +315,7 @@ describe("HapticsFX feedback preservation", () => {
           selection: { mode: "select-one", selectedIds: new Set(["a"]), allowsEmpty: false },
           onSelectionChange: vi.fn()
         }),
-        createElement(GroupedRow, { role: "button", onClick: vi.fn() }, "List item"),
-        createElement(TopBar, {
-          title: "Journal",
-          leadingItems: [{ kind: "webspring", label: "Return", onClick: vi.fn() }]
-        })
+        createElement(GroupedRow, { role: "button", onClick: vi.fn() }, "List item")
       ));
 
       fireEvent.click(rendered.getByText("Medium"));
@@ -343,8 +338,6 @@ describe("HapticsFX feedback preservation", () => {
       expect(vibrate).toHaveBeenLastCalledWith(expectedHapticPattern("selection"));
       fireEvent.click(rendered.getByText("List item"));
       expect(vibrate).toHaveBeenLastCalledWith(expectedHapticPattern("selection"));
-      fireEvent.click(rendered.getByLabelText("Return"));
-      expect(vibrate).toHaveBeenLastCalledWith(expectedHapticPattern("rigid"));
     } finally {
       cleanup();
       cleanupDom();
@@ -515,33 +508,6 @@ describe("SmoothSurface", () => {
     expect(groupBoxMarkup).toContain('data-corner-curve="continuous"');
     expect(groupBoxMarkup).toContain("--nse-corner-radius:18px");
 
-    const appTopBarMarkup = renderToStaticMarkup(createElement(TopBar, {
-      title: "Journal",
-      smoothSurface: {
-        radius: "lg",
-        overflow: "hidden",
-        shadow: "hairline"
-      }
-    }));
-
-    expect(appTopBarMarkup).toContain("nse-app-topbar");
-    expect(appTopBarMarkup).toContain("nse-smooth-surface-radius-lg");
-    expect(appTopBarMarkup).toContain("--nse-smooth-surface-shadow:0 0 0 1px rgba(255, 255, 255, 0.18)");
-
-    const appTopBarWithTitleActionMarkup = renderToStaticMarkup(createElement(TopBar, {
-      title: "Journal",
-      titleAction: {
-        label: "Open QuickSwitch",
-        selected: true,
-        onClick: vi.fn()
-      }
-    }));
-
-    expect(appTopBarWithTitleActionMarkup).toContain("nse-app-topbar-title-button");
-    expect(appTopBarWithTitleActionMarkup).toContain("aria-expanded=\"true\"");
-    expect(appTopBarWithTitleActionMarkup).toContain("nse-app-topbar-title-arrow-right");
-    expect(appTopBarWithTitleActionMarkup).toContain("nse-app-topbar-title-arrow-down");
-
     const glassPanelMarkup = renderToStaticMarkup(createElement(
       GlassPanel,
       {
@@ -554,7 +520,10 @@ describe("SmoothSurface", () => {
       }
     ));
 
-    expect(glassPanelMarkup).toContain("nse-material-glass-panel");
+    expect(glassPanelMarkup).toContain('data-nse-control="visual-effect-view"');
+    expect(glassPanelMarkup).toContain('data-nse-material="glass"');
+    expect(glassPanelMarkup).toContain('data-nse-style="panel"');
+    expect(glassPanelMarkup).toContain('data-nse-focus-style="ring"');
     expect(glassPanelMarkup).toContain("nse-smooth-surface-radius-custom");
     expect(glassPanelMarkup).toContain("overflow:clip");
     expect(glassPanelMarkup).toContain("contain:paint");

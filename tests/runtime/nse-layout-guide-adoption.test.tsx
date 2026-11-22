@@ -6,7 +6,7 @@ import { NSEViewController, nseUpdateTraits } from "../../src/NSE/Application/NS
 import { ViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
 import { NSETabViewController, NSETabViewItem } from "../../src/NSE/Navigation/NSETabViewController";
 import { NSEScrollView } from "../../src/NSE/Scroll/NSEScrollView";
-import { WindowLayoutContext, WindowLayoutModel } from "../../src/NSE/Layout/windowChromeObstructions";
+import { WindowLayoutContext, WindowLayoutModel } from "../../src/NSE/Layout/windowObstructions";
 import { createStaticPresentationTraits } from "../fixtures/presentationTraits";
 
 afterEach(() => { cleanup(); vi.restoreAllMocks(); });

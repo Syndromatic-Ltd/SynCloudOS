@@ -1,0 +1,126 @@
+/* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
+
+@media not (forced-colors: active) {
+  :is([data-nse-control="button"], [data-nse-control="pop-up-button"])[data-nse-custom-bezel="true"] {
+    --nse-atmo-instance-bezel-colour: var(--nse-bezel-colour);
+  }
+
+  [data-nse-control="segmented-control"][data-nse-custom-bezel="true"] {
+    --nse-atmo-instance-bezel-colour: var(--nse-selected-segment-bezel-colour);
+  }
+
+  [data-nse-control="toolbar-item"][data-nse-background-tint="true"]:not([data-nse-toolbar-bordered="false"]) {
+    --nse-atmo-instance-bezel-colour: var(--nse-background-tint-colour);
+  }
+
+  [data-nse-part]:is(
+    [data-nse-control="button"][data-nse-custom-bezel="true"],
+    [data-nse-control="pop-up-button"][data-nse-type="native"][data-nse-custom-bezel="true"],
+    [data-nse-control="toolbar-item"][data-nse-background-tint="true"],
+    [data-nse-control="segmented-control"][data-nse-custom-bezel="true"] :is([data-nse-part="bezel"], [data-nse-part="cell"], [data-nse-control="button"])[data-nse-selected]
+  ) {
+    --nse-atmo-instance-bezel-tone: var(--nse-atmo-instance-bezel-colour);
+  }
+
+  [data-nse-part]:is(
+    [data-nse-control="button"][data-nse-custom-bezel="true"],
+    [data-nse-control="pop-up-button"][data-nse-type="native"][data-nse-custom-bezel="true"],
+    [data-nse-control="toolbar-item"][data-nse-background-tint="true"],
+    [data-nse-control="segmented-control"][data-nse-custom-bezel="true"] :is([data-nse-part="bezel"], [data-nse-part="cell"], [data-nse-control="button"])[data-nse-selected]
+  ):is([data-nse-highlighted], :active) {
+    --nse-atmo-instance-bezel-tone: color-mix(in srgb, var(--nse-atmo-instance-bezel-colour), black 26%);
+  }
+
+  [data-nse-part]:is(
+    [data-nse-control="button"][data-nse-custom-bezel="true"],
+    [data-nse-control="pop-up-button"][data-nse-type="native"][data-nse-custom-bezel="true"],
+    [data-nse-control="toolbar-item"][data-nse-background-tint="true"],
+    [data-nse-control="segmented-control"][data-nse-custom-bezel="true"] :is([data-nse-part="bezel"], [data-nse-part="cell"], [data-nse-control="button"])[data-nse-selected]
+  ):is([data-nse-enabled="false"], :has(> [data-nse-part="bezel"]:disabled)) {
+    --nse-atmo-instance-bezel-tone: color-mix(in srgb, var(--nse-atmo-instance-bezel-colour), grey 62%);
+  }
+
+  [data-nse-part]:is(
+    [data-nse-control="button"][data-nse-custom-bezel="true"][data-nse-button-type]:not([data-nse-button-type="switch"], [data-nse-bezel-style="disclosure"]) > [data-nse-part="bezel"],
+    [data-nse-control="button"][data-nse-custom-bezel="true"][data-nse-button-type="switch"] > [data-nse-part="content"] > [data-nse-part="indicator"],
+    [data-nse-control="pop-up-button"][data-nse-type="native"][data-nse-custom-bezel="true"] > [data-nse-part="bezel"],
+    [data-nse-control="toolbar-item"][data-nse-background-tint="true"][data-nse-part="item"]:not([data-nse-toolbar-bordered="false"]),
+    [data-nse-control="segmented-control"][data-nse-custom-bezel="true"] :is([data-nse-part="bezel"], [data-nse-part="cell"])[data-nse-selected],
+    [data-nse-control="segmented-control"][data-nse-custom-bezel="true"] [data-nse-control="button"][data-nse-selected] > [data-nse-part="bezel"]
+  ) {
+    background: linear-gradient(
+      color-mix(in srgb, var(--nse-atmo-instance-bezel-tone), white 18%),
+      var(--nse-atmo-instance-bezel-tone) 50%,
+      color-mix(in srgb, var(--nse-atmo-instance-bezel-tone), black 12%)
+    ) !important;
+    border-image: none !important;
+    border-color: transparent !important;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--nse-atmo-instance-bezel-tone), black 30%) !important;
+  }
+
+  [data-nse-part]:is(
+    [data-nse-control="button"][data-nse-custom-bezel="true"]:not([data-nse-button-type="switch"], [data-nse-bezel-style="disclosure"]) > [data-nse-part="bezel"],
+    [data-nse-control="segmented-control"][data-nse-custom-bezel="true"] [data-nse-control="button"][data-nse-selected] > [data-nse-part="bezel"]
+  ) {
+    border-radius: inherit;
+  }
+
+  [data-nse-part]:is(
+    [data-nse-control="toolbar-item"][data-nse-background-tint="true"],
+    [data-nse-control="button"][data-nse-custom-bezel="true"]:not([data-nse-button-type="switch"], [data-nse-bezel-style="disclosure"]),
+    [data-nse-control="button"][data-nse-custom-bezel="true"]:not([data-nse-button-type="switch"], [data-nse-bezel-style="disclosure"]) > [data-nse-part="bezel"],
+    [data-nse-control="segmented-control"][data-nse-custom-bezel="true"] :is([data-nse-part="bezel"], [data-nse-part="cell"], [data-nse-control="button"])[data-nse-selected],
+    [data-nse-control="segmented-control"][data-nse-custom-bezel="true"] [data-nse-control="button"][data-nse-selected] > [data-nse-part="bezel"]
+  )::before,
+  [data-nse-part]:is(
+    [data-nse-control="toolbar-item"][data-nse-background-tint="true"],
+    [data-nse-control="button"][data-nse-custom-bezel="true"]:not([data-nse-button-type="switch"], [data-nse-bezel-style="disclosure"]),
+    [data-nse-control="button"][data-nse-custom-bezel="true"]:not([data-nse-button-type="switch"], [data-nse-bezel-style="disclosure"]) > [data-nse-part="bezel"],
+    [data-nse-control="segmented-control"][data-nse-custom-bezel="true"] :is([data-nse-part="bezel"], [data-nse-part="cell"], [data-nse-control="button"])[data-nse-selected],
+    [data-nse-control="segmented-control"][data-nse-custom-bezel="true"] [data-nse-control="button"][data-nse-selected] > [data-nse-part="bezel"]
+  )::after {
+    background: none !important;
+    border-image: none !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+  }
+
+  [data-nse-control="toolbar-item"][data-nse-background-tint="true"][data-nse-part="item"] >
+    :is([data-nse-part="background"], [data-nse-part="border"], [data-nse-part="highlight"], [data-nse-part="shadow"], [data-nse-part="separator"]) {
+    opacity: 0 !important;
+  }
+
+  [data-nse-part]:is(
+    [data-nse-control="button"][data-nse-custom-bezel="true"],
+    [data-nse-control="toolbar-item"][data-nse-background-tint="true"],
+    [data-nse-control="segmented-control"][data-nse-custom-bezel="true"] :is([data-nse-part="bezel"], [data-nse-part="cell"], [data-nse-control="button"])[data-nse-selected]
+  ):is(:focus-visible, :has(> [data-nse-part="field"]:focus-visible)) {
+    outline: 2px solid var(--nse-colour-keyboard-focus-indicator) !important;
+    outline-offset: 2px;
+  }
+
+  [data-nse-control="button"][data-nse-content-tint="true"] > :is([data-nse-part="title"], [data-nse-part="image"]),
+  [data-nse-control="button"][data-nse-content-tint="true"] > [data-nse-part="title"] [data-nse-part="title"],
+  [data-nse-control="pop-up-button"][data-nse-type="native"][data-nse-content-tint="true"] > [data-nse-part="bezel"] {
+    color: var(--nse-content-tint-colour) !important;
+  }
+
+  [data-nse-control="box"][data-nse-part="bezel"][data-nse-custom-fill="true"]:not([data-nse-transparent="true"]),
+  [data-nse-control="box"][data-nse-part="bezel"][data-nse-custom-fill="true"]:not([data-nse-transparent="true"]) > [data-nse-part="title"] {
+    background: var(--nse-box-fill) !important;
+    border-image: none !important;
+  }
+
+  [data-nse-control="box"][data-nse-part="bezel"][data-nse-custom-fill="true"]:not([data-nse-transparent="true"]) > [data-nse-part="content"] {
+    background: none !important;
+  }
+
+  [data-nse-control="box"][data-nse-part="bezel"][data-nse-border-colour="true"]:not([data-nse-border-type="noBorder"]) {
+    border-image: none !important;
+    border-color: var(--nse-box-border-colour) !important;
+  }
+
+  [data-nse-control="box"][data-nse-part="bezel"][data-nse-border-colour="true"][data-nse-border-type="bezelBorder"]:not([data-nse-box-type="custom"]) {
+    box-shadow: inset 0 0 0 var(--nse-box-border-width, 1px) var(--nse-box-border-colour) !important;
+  }
+}

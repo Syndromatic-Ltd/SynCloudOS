@@ -37,6 +37,7 @@ export {
   getOptionalSmoothSurfaceProps,
   normaliseSmoothSurfaceOptions,
   normaliseSmoothSurfaceRequest,
+  nseAppCornerRadius,
   nseAppSmoothSurfaceDefaultOptions,
   nseSmoothSurfaceClassNames,
   nseSmoothSurfaceDefaultOptions,

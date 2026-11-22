@@ -81,7 +81,7 @@ for (const [engine, launcher] of Object.entries({ chromium, firefox, webkit })) 
       await surface.waitFor({ state: "visible" });
       assert(await surface.evaluate(node => node.getAnimations().every(animation => animation.effect.getKeyframes().every(frame => !frame.transform))));
       await page.evaluate(() => window.popoverFixture.set({ mounted: false }));
-      await page.locator('.nse-popover[data-state="closing"][inert][aria-hidden="true"]').waitFor();
+      await page.locator('.nse-popover[data-nse-overlay-state="closing"][inert][aria-hidden="true"]').waitFor();
       await page.locator(".nse-popover").waitFor({ state: "detached" });
       assert.deepEqual(errors, []);
       report.push({ engine, dpr, light, dark, flipped, constrained, opening, scales, reduced, errors });

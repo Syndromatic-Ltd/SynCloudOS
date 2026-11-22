@@ -29,6 +29,23 @@ export const IDIOM_REPLACEMENTS = Object.freeze({
   SpeechRecognition: { symbol: "SPFXSpeechRecognizer constructed inside the plugin-compiled application bundle", entry: "fx/speech" },
   appearance: { symbol: "NSEAppearance inherited from the window, or a deliberate custom NSEAppearance with a documented opt-out", entry: "nse/appearance" },
   eyebrow: { symbol: "NSETextField with the title as its label, using the inherited appearance", entry: "nse" },
+  applicationMenu: { symbol: 'NSEApplication.mainMenu, NSEToolbarItem.applicationMenu("gear") or useApplicationMenuTrigger', entry: "nse" },
+  duplicateChrome: { symbol: 'NSEWindowController (drop "titled" from styleMask when drawing custom chrome instead of duplicating the system title bar or toolbar)', entry: "nse" },
+  duplicateQuickSwitch: { symbol: "a single visible QuickSwitch title toggle per window via useQuickSwitchTrigger", entry: "sdk" },
+  duplicateWindowAction: { symbol: 'a single Return to Webspring button and a single application-menu trigger (NSEToolbarItem.applicationMenu or useApplicationMenuTrigger) per window', entry: "nse" },
+  circularSlider: { symbol: 'NSESlider with sliderType="circular" (Control Gallery: "Wrapping angle dial")', entry: "nse" },
+  handDrawnSlider: { symbol: "NSESlider", entry: "nse" },
+  handDrawnSwitch: { symbol: 'NSESwitch or NSEButton with buttonType="switch"', entry: "nse" },
+  handDrawnCheckbox: { symbol: 'NSEButton with buttonType="switch"', entry: "nse" },
+  handDrawnRadio: { symbol: "NSESegmentedControl or NSEPopUpButton", entry: "nse" },
+  handDrawnTabs: { symbol: "NSETabView or NSESegmentedControl", entry: "nse" },
+  handDrawnProgress: { symbol: "NSEProgressIndicator", entry: "nse" },
+  handDrawnMeter: { symbol: "NSELevelIndicator", entry: "nse" },
+  handDrawnStepper: { symbol: "NSEStepper", entry: "nse" },
+  handDrawnComboBox: { symbol: "NSEComboBox or NSEPopUpButton", entry: "nse" },
+  handDrawnListBox: { symbol: "NSEPopUpButton or NSETableView", entry: "nse" },
+  handDrawnMenu: { symbol: "NSEMenu or NSEMenuBar", entry: "nse" },
+  handDrawnColourWell: { symbol: "NSEColourWell", entry: "nse" },
 });
 
 export function replacementMessage(key) {

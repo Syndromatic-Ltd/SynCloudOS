@@ -23,7 +23,7 @@ import React from "react";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, expect, it } from "vitest";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
-import { defineWebspring, WebspringBoardView } from "../../src/Webspring/public";
+import { createTestWebspring, type TestWebspringOptions } from "./webspringTestShell";
 import { WebspringHost } from "../../src/Webspring/WebspringHost";
 import { createTestBundle, createTestRuntime } from "./helpers";
 
@@ -33,18 +33,13 @@ afterEach(async () => {
   for (const runtime of runtimes.splice(0)) await runtime.dispose("webspring-folders-host-test");
 });
 
-function defineFoldersShell(extra: Record<string, unknown> = {}) {
-  return defineWebspring({
-    manifest: {
-      schemaVersion: 1, bundleIdentifier: "com.example.fixture.folders-shell", version: "1.0.0", displayName: "Fixture",
-      webspringShell: {
-        views: [{ id: "board", presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
-        defaults: { desktop: "board", tablet: "board", mobile: "board" }, homeRoute: "/",
-        branding: { name: { key: "host.name", fallback: "Fixture" } },
-        folders: { editable: true, initial: [{ id: "folder.tools", title: { key: "folders.tools", fallback: "Tools" }, order: 0, apps: ["com.example.beta", "com.example.gamma"] }] },
-      },
+function defineFoldersShell(extra: Omit<TestWebspringOptions, "info"> = {}) {
+  return createTestWebspring({
+    info: {
+      bundleIdentifier: "com.example.fixture.folders-shell", displayName: "Fixture",
+      branding: { name: { key: "host.name", fallback: "Fixture" } },
+      folders: { editable: true, initial: [{ id: "folder.tools", title: { key: "folders.tools", fallback: "Tools" }, order: 0, apps: ["com.example.beta", "com.example.gamma"] }] },
     },
-    components: { board: WebspringBoardView },
     ...extra,
   });
 }
@@ -62,8 +57,8 @@ it("draws the Board's folder icons in the definition's folder appearance", async
   render(<SynCloudOSProvider runtime={runtime}><WebspringHost shell={shell} startupPhase="complete" /></SynCloudOSProvider>);
 
   const tile = (await screen.findByRole("button", { name: "Open folder Tools" })).querySelector<HTMLElement>(".webspring-folder-tile")!;
-  expect(tile.dataset.shape).toBe("circle");
-  expect(tile.dataset.fill).toBe("texture");
+  expect(tile.dataset.nseStyle).toBe("circle");
+  expect(tile.dataset.nseType).toBe("texture");
   expect(tile.style.getPropertyValue("--webspring-folder-tile-texture")).toBe('url("/cotton.jpg")');
   expect(tile.style.getPropertyValue("--webspring-folder-tile-texture-size")).toBe("96px");
 });

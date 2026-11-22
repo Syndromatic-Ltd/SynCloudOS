@@ -20,14 +20,14 @@
 import type { SynWareWebAppManifest, SynWareURLTypeManifest, SynWareLinkCaptureManifest, SynWareShortcutItemManifest, SynWareShareTargetManifest } from "./installedApplicationTypes";
 export type * from "./installedApplicationTypes";
 
-export type SynCloudOSAppFrameSmoothSurfaceCurve = "arc" | "squircle" | "superellipse" | "clothoid";
-export type SynCloudOSAppFrameSmoothSurfacePhysicality = "default" | "off" | {
+export type WindowSmoothSurfaceCurve = "arc" | "squircle" | "superellipse" | "clothoid";
+export type WindowSmoothSurfacePhysicality = "default" | "off" | {
   top?: { offsetX?: number; offsetY: number; blur?: number; spread?: number; color: string; opacity: number };
   bottom?: { offsetX?: number; offsetY: number; blur?: number; spread?: number; color: string; opacity: number };
 };
-export type SynCloudOSAppFrameSmoothSurfaceManifest = "off" | false | number | {
+export type WindowSmoothSurfaceConfiguration = "off" | false | number | {
   radius?: number;
-  curve?: SynCloudOSAppFrameSmoothSurfaceCurve;
+  curve?: WindowSmoothSurfaceCurve;
   smoothing?: number;
   exponent?: number;
   preserveSmoothing?: boolean;
@@ -36,7 +36,7 @@ export type SynCloudOSAppFrameSmoothSurfaceManifest = "off" | false | number | {
   bottomRight?: number;
   bottomLeft?: number;
   overflow?: "hidden" | "clip" | "visible";
-  physicality?: SynCloudOSAppFrameSmoothSurfacePhysicality;
+  physicality?: WindowSmoothSurfacePhysicality;
 };
 
 /** Host-owned bundle-location identity used when projecting one captured V1
@@ -73,18 +73,16 @@ export interface SynWareWindowDefaultsManifest {
   readonly height?: number;
   readonly minimumWidth?: number;
   readonly minimumHeight?: number;
-  /** Window chrome anatomy for windows this app creates. Defaults to "system". */
-  readonly chrome?: "system" | "custom" | "frameless";
   /** Full SmoothSurface manifest shape (radius, curve, smoothing, exponent,
    * per-corner overrides, overflow, physicality), "off"/false, or a bare
    * radius number. */
-  readonly smoothSurface?: SynCloudOSAppFrameSmoothSurfaceManifest;
+  readonly smoothSurface?: WindowSmoothSurfaceConfiguration;
   readonly resizable?: boolean;
   readonly role?: "standard" | "panel" | "modal" | "sheet" | "hud";
 }
 
 /** A painted area for an app's background: colour, texture, tint, spotlight and an overlay, drawn in that order.
- *  Image values are URLs. The same shape as the Webspring Board's `WebspringSurface`. */
+ *  Image values are URLs. The same shape as the Webspring Board's `WSSurface`. */
 export interface SynWareSurfaceManifest {
   /** The base colour, beneath the texture. */
   readonly colour?: string;
@@ -110,37 +108,9 @@ export interface SynWareSurfaceManifest {
   };
 }
 
-/** What fills the app's body behind its content. `"system"` is the light or dark app background,
- *  `"none"` leaves the body unpainted for the app to paint, and a surface paints that. */
-export type SynWareFrameBackgroundManifest = "system" | "none" | SynWareSurfaceManifest;
-
-/** The control in the standard top bar's right slot. `"auto"` is a gear; `"userInfo"` a person; `"none"` draws nothing. */
-export type SynWareFrameRightSlotManifest = "auto" | "userInfo" | "none" | {
-  readonly icon: SynWareResourceReference;
-  readonly label: SynWareLocalisedText;
-};
-
 export interface SynWareFrameManifest {
-  readonly material?: "standard" | "metal";
-  readonly topBar?: "standard" | "custom" | "none";
-  /** Defaults to host motion. Content owns its launch and return choreography. */
+  /** Launch and return choreography. Host motion is the default. */
   readonly presentationMotion?: "host" | "content";
-  /** Defaults to `"auto"`. */
-  readonly rightSlot?: SynWareFrameRightSlotManifest;
-  /** Defaults to `"system"`. */
-  readonly background?: SynWareFrameBackgroundManifest;
-  readonly smoothSurface?: "off" | { readonly radius?: number };
-  readonly sourceList?: {
-    readonly railLabel?: string;
-    readonly minWidth?: number;
-    readonly maxWidth?: number;
-    readonly defaultWidth?: number;
-  };
-}
-
-export interface SynWareApplicationMenuManifest {
-  readonly trigger?: "content";
-  readonly preferences?: { readonly commandId: string; readonly label?: string };
 }
 
 export interface SynWareDocumentTypeManifest {
@@ -148,19 +118,6 @@ export interface SynWareDocumentTypeManifest {
   readonly extensions?: readonly string[];
   readonly mimeTypes?: readonly string[];
   readonly displayName?: string;
-}
-
-export interface SynWareCommandManifest {
-  readonly id: string;
-  readonly title: string;
-  readonly menu?: string;
-  readonly shortcut?: string;
-}
-
-export interface SynWareMenuManifest {
-  readonly id: string;
-  readonly title: string;
-  readonly commandIds?: readonly string[];
 }
 
 export interface SynWareServiceManifest {
@@ -210,7 +167,7 @@ export interface SynWareRuntimeManifest {
   /** Keep the app registered while blocking launch and module preloading. */
   readonly disabled?: boolean;
   readonly disabledReason?: string;
-  readonly presentation?: "appView" | "windowedView" | "systemSheet" | "backgroundService";
+  readonly presentation?: "stage" | "window" | "systemSheet" | "backgroundService";
   readonly type?: "internal" | "system" | "external";
   readonly policy?: {
     readonly public?: boolean;
@@ -241,12 +198,6 @@ export interface SynWareResourceReference {
   readonly alternativeText: SynWareLocalisedText;
 }
 
-export interface SynWareWebspringViewManifest {
-  readonly id: string;
-  readonly presentations: readonly SynWarePresentation[];
-  readonly mode: "launcher" | "persistent";
-}
-
 /** A folder the Webspring shell seeds on first run. */
 export interface SynWareWebspringFolderManifest {
   /** `folder.` followed by a lowercase slug; unique, and never an app ID. */
@@ -266,8 +217,6 @@ export interface SynWareWebspringFoldersManifest {
 }
 
 export interface SynWareWebspringShellManifest {
-  readonly views: readonly SynWareWebspringViewManifest[];
-  readonly defaults: Readonly<Record<SynWarePresentation, string>>;
   readonly homeRoute: string;
   readonly branding: {
     readonly name: SynWareLocalisedText;
@@ -298,9 +247,6 @@ export interface SynWareManifestV1 {
   readonly linkCapture?: SynWareLinkCaptureManifest;
   readonly shortcutItems?: readonly SynWareShortcutItemManifest[];
   readonly shareTarget?: SynWareShareTargetManifest;
-  readonly commands?: readonly SynWareCommandManifest[];
-  readonly menus?: readonly SynWareMenuManifest[];
-  readonly applicationMenu?: SynWareApplicationMenuManifest;
   readonly services?: readonly SynWareServiceManifest[];
   /** Device and service capabilities captured by the runtime at application launch. */
   readonly entitlements?: readonly string[];

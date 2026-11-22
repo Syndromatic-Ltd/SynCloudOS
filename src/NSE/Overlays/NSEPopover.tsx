@@ -19,11 +19,13 @@
  */
 
 import { useCallback, useContext, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useRelocatedAppearance } from "../Appearance/NSEAppearanceProvider";
 import { ActionResponderContext } from "../Controls/Core/useNSEControlAction";
 import { NSEPopup, type PopupPresentation } from "./NSEPopup";
 import { useNSEOverlayProvider } from "./OverlayProvider";
 import type { OverlayDismissReason } from "./overlayTypes";
-import { useOptionalNSEWindowSurfaceBridge, type WindowSurfaceBridge, type PopoverPreferredEdge, type NSEPopoverBehavior } from "./NSEWindowSurfaceBridge";
+import { useOptionalNSEWindowSurfaceBridge, type WindowSurfaceBridge, type WindowSurfaceRequest, type PopoverPreferredEdge, type NSEPopoverBehavior } from "./NSEWindowSurfaceBridge";
+import { popoverAppearance, type PopoverAppearanceMetadata } from "./popoverAppearanceMetadata";
 import { nsePopoverEdgePlacement } from "./popoverPosition";
 import { reportNSEWindowSurfaceError, useNSEWindowSurfaceLifecycle } from "./useNSEWindowSurfaceLifecycle";
 import { useNSEPresentedContent } from "./useNSEPresentedContent";
@@ -129,6 +131,7 @@ export function NSEPopover({
   const resolvedPresentation = useMemo(() => ({ ...automaticPresentation,
     placement: preferredEdge ? nsePopoverEdgePlacement[preferredEdge] : automaticPresentation.placement,
   }), [automaticPresentation, preferredEdge]);
+  const appearance = useRelocatedAppearance();
   const hostedBridge = useOptionalNSEWindowSurfaceBridge();
   const nearestResponder = useContext(ActionResponderContext);
   const { defaultParentResponderId } = useNSEOverlayProvider();
@@ -158,8 +161,9 @@ export function NSEPopover({
     windowBridge.open?.(windowRequest);
     return () => windowBridge.close?.(windowRequest);
   }, [canonicalBridge, open, windowBridge, windowRequest]);
-  const canonicalRequest = useMemo(() => ({
+  const canonicalRequest = useMemo<WindowSurfaceRequest & PopoverAppearanceMetadata>(() => ({
     id,
+    ...(appearance && { [popoverAppearance]: appearance }),
     role: "popover" as const,
     title: title ?? (labelledBy ? anchor?.ownerDocument.getElementById(labelledBy)?.textContent?.trim() : undefined) ?? id,
     parentWindowControllerId,
@@ -182,7 +186,7 @@ export function NSEPopover({
       height: contentSize?.height ?? fitting?.height ?? (resolvedPresentation.mode === "sheet" ? 420 : 280),
     },
     onDidClose: handleDidClose,
-  }), [anchor, relativeTo, preferredEdge, behavior, drawsBackground, describedBy, contentSize?.height, contentSize?.width, fitting?.height, fitting?.width, handleDidClose, id, labelledBy, parentWindowControllerId, resolvedParentResponderId, resolvedPresentation.mode, resolvedPresentation.placement, resolvedPresentation.collisionPadding, title]);
+  }), [anchor, appearance, relativeTo, preferredEdge, behavior, drawsBackground, describedBy, contentSize?.height, contentSize?.width, fitting?.height, fitting?.width, handleDidClose, id, labelledBy, parentWindowControllerId, resolvedParentResponderId, resolvedPresentation.mode, resolvedPresentation.placement, resolvedPresentation.collisionPadding, title]);
   const presentedContent = useNSEPresentedContent(contentSize
     ? children
     : <WindowFittingContent onFittingSize={onFittingSize}>{children}</WindowFittingContent>);

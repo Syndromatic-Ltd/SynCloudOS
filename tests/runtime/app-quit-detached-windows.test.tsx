@@ -309,4 +309,27 @@ describe("application quit with detached windows", () => {
     expect(fixture.runtime.systemUI.getSnapshot().returnDecision).toBeNull();
     expect(fixture.runtime.store.getSnapshot().application.activeAppId).toBeNull();
   });
+
+  it("allows a mounted stage facade to dispatch workspace.returnToWebspring while another mount holds the key document lease", async () => {
+    const fixture = createWindowedAppFixture("runtime:app-quit-separate-mount");
+    fixture.runtime.documents.registerCloseReviewer(discardCloseReviewer);
+    const opened = await openDetachedWindow(fixture);
+    const stageMount = mountTestSynWareRuntime(
+      fixture.runtime,
+      "com.example.window-owner",
+      "stage:com.example.window-owner",
+    );
+    fixture.runtime.store.mutate((draft: { application: { activeAppId: string | null } }) => {
+      draft.application.activeAppId = "com.example.window-owner";
+    });
+
+    try {
+      await expect(stageMount.runtime.commands.dispatch("workspace.returnToWebspring", undefined, { source: "journal" }))
+        .resolves.toMatchObject({ status: "cancelled" });
+      expect(fixture.runtime.systemUI.getSnapshot().returnDecision).toEqual({ appId: "com.example.window-owner" });
+      expect(fixture.runtime.windows.select(opened.id).record.state).toBe("open");
+    } finally {
+      stageMount.dispose("test-complete");
+    }
+  });
 });

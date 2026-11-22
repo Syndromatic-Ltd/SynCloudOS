@@ -60,7 +60,7 @@ it("flashes the chosen row, then chooses it and fades the list out (desktop)", a
   // The list stays mounted while it fades, marked chosen, then goes.
   const popup = document.querySelector(".nse-overlay-popup--listbox") as HTMLElement;
   expect(popup.hasAttribute("data-nse-menu-chosen")).toBe(true);
-  expect(popup.dataset.state).toBe("closing");
+  expect(popup.dataset.nseOverlayState).toBe("closing");
   await waitFor(() => expect(document.querySelector(".nse-overlay-popup--listbox")).toBeNull());
 });
 
@@ -95,10 +95,10 @@ it("moves the highlight with the pointer, off the previously chosen row", async 
   fireEvent.click(screen.getByRole("button", { name: "Page Journal Paper" }));
   const chosen = await screen.findByRole("option", { name: "Journal Paper" });
   const other = screen.getByRole("option", { name: "White Page" });
-  await waitFor(() => expect(chosen.dataset.highlighted).toBe("true"));
+  await waitFor(() => expect(chosen.hasAttribute("data-nse-highlighted")).toBe(true));
   fireEvent.mouseMove(other);
-  expect(other.dataset.highlighted).toBe("true");
-  expect(chosen.dataset.highlighted).toBeUndefined();
+  expect(other.hasAttribute("data-nse-highlighted")).toBe(true);
+  expect(chosen.hasAttribute("data-nse-highlighted")).toBe(false);
   // The chosen row keeps its check (aria-selected), just not the highlight.
   expect(chosen.getAttribute("aria-selected")).toBe("true");
 });

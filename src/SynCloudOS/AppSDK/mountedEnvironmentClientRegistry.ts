@@ -50,10 +50,21 @@ import type {
   AppWorkAreaClient,
 } from "./appEnvironmentClientTypes";
 import type { AppTrustedClient } from "./appTrustedClientTypes";
+import type { FocusScopeHandle, FocusScopeRegistration } from "../SynCloudOS";
 
 /** This host-private association prevents the public context from retaining a
  * façade object. The context receives only already-projected client values. */
 export interface MountedAppEnvironmentClients {
+  readonly currentWindow: {
+    /** The window style the application's manifest declares, which the stage has no window record to carry. */
+    readonly declaredStyle: readonly import("../SynCloudOS").WindowStyle[];
+    setStyle(style: readonly import("../SynCloudOS").WindowStyle[]): void;
+    setCollectionBehavior(behavior: import("../SynCloudOS").WindowCollectionBehavior): void;
+    toggleFullScreen(): void;
+    isFullScreen(): boolean;
+    observeFullScreen(listener: (event: import("../SynCloudOS").WindowFullScreenNotification) => void): () => void;
+    openSheetFocusScope(scope: FocusScopeRegistration): FocusScopeHandle;
+  };
   readonly persistence: AppPersistenceClient;
   readonly scheduler: AppSchedulerClient;
   readonly mediaQueries: AppMediaQueryClient;

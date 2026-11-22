@@ -54,7 +54,6 @@ function serialisableWindowRecord(runtimeId: WindowRecord["runtimeId"], override
     isKey: false,
     isMain: false,
     zIndex: 0,
-    chromeMode: "system",
     mobilePolicy: "fullscreen",
     restorationKey: "notes.primary",
     ...overrides,

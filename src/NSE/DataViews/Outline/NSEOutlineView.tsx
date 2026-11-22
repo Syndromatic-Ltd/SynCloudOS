@@ -417,8 +417,8 @@ export function NSEOutlineView<T, TId extends string | number>({
       <div key={encodeNSEDataViewKey(row.id)} className="nse-outline-node" data-group={group || undefined}>
         {group ? (
           <div {...rowProps(row, false)} aria-selected={undefined} className="nse-outline-group-row" data-nse-part="group-row">
-            <span className="nse-outline-group-label">{content}</span>
-            <span className="nse-outline-group-line" aria-hidden="true" />
+            <span className="nse-outline-group-label" data-nse-part="label">{content}</span>
+            <span className="nse-outline-group-line" data-nse-part="separator" aria-hidden="true" />
             {showsOutlineCell(row) ? (
               <Divider
                 variant="arrow"
@@ -447,7 +447,7 @@ export function NSEOutlineView<T, TId extends string | number>({
         )}
         {children.length ? (
           <div className="nse-outline-children" data-collapsed={row.expanded ? "false" : "true"} inert={!row.expanded}>
-            <div className="nse-outline-children-inner">{renderSourceListNodes(children, level + 1, group ? indent : indent + 1)}</div>
+            <div className="nse-outline-children-inner" data-nse-part="group" data-nse-role="children">{renderSourceListNodes(children, level + 1, group ? indent : indent + 1)}</div>
           </div>
         ) : null}
       </div>
@@ -455,7 +455,9 @@ export function NSEOutlineView<T, TId extends string | number>({
   });
 
   return (
-    <div className="nse-outline-container" data-state={state.kind} data-fill={fills || undefined} data-style={sourceList ? "source-list" : undefined}>
+    <div className="nse-outline-container" data-state={state.kind} data-fill={fills || undefined} data-style={sourceList ? "source-list" : undefined}
+      data-nse-control={sourceList ? "outline-view" : undefined} data-nse-part={sourceList ? "sidebar" : undefined}
+      data-nse-selection-highlight-style={sourceList ? "sourceList" : undefined}>
       <div
         {...props}
         ref={viewportRef}

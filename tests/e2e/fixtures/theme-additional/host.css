@@ -1,1 +1,5 @@
 html,body{margin:0;min-height:100%}body{font-family:Arial,sans-serif;font-size:14px}#theme-additional-surface{margin:80px;padding:48px;width:800px;min-height:300px}
+
+@media (max-width: 900px) {
+  #theme-additional-surface:has(.window-content-border-specimen) { margin: 16px; padding: 16px; width: auto; }
+}

@@ -79,7 +79,7 @@ describe("popover frame and presentation", () => {
   it("keeps an arrow and frame while the content paints its plate", async () => {
     render(<Harness><Fixture drawsBackground={false} /></Harness>);
     const surface = await screen.findByRole("dialog", { name: "Options" });
-    expect(surface.getAttribute("data-nse-popover-draws-background")).toBe("false");
+    expect(surface.getAttribute("data-nse-transparent")).toBe("true");
     expect(surface.querySelector('[data-nse-part="arrow"]')).not.toBeNull();
     expect(surface.querySelector('[data-nse-part="popover-frame"]')).not.toBeNull();
     await waitFor(() => expect(surface.style.getPropertyValue("--nse-popover-arrow-fill")).toBe("#efe2c6"));
@@ -90,7 +90,7 @@ describe("popover frame and presentation", () => {
     const surface = await screen.findByRole("dialog", { name: "Options" });
     expect(surface.getAttribute("data-nse-reduced-motion")).toBe("true");
     view.rerender(<Harness reducedMotion><Fixture open={false} /></Harness>);
-    expect(surface.getAttribute("data-state")).toBe("closing");
+    expect(surface.getAttribute("data-nse-overlay-state")).toBe("closing");
     expect(surface.hasAttribute("inert")).toBe(true);
     await waitFor(() => expect(document.getElementById("paper")).toBeNull());
   });
@@ -98,7 +98,7 @@ describe("popover frame and presentation", () => {
   it("drops anchored coordinates on compact adaptation without remounting the editor", async () => {
     const view = render(<Harness><Fixture /></Harness>);
     const surface = await screen.findByRole("dialog", { name: "Options" });
-    expect(surface.dataset.nsePopoverDrawsBackground).toBe("true");
+    expect(surface.dataset.nseTransparent).toBe("false");
     const draft = screen.getByRole("textbox", { name: "Draft" });
     await waitFor(() => expect(surface.style.left).not.toBe(""));
     view.rerender(<Harness compact><Fixture /></Harness>);
@@ -126,9 +126,9 @@ describe("popover frame and presentation", () => {
     const view = render(<Harness><Fixture /></Harness>);
     await waitFor(() => expect(document.getElementById("paper")?.dataset.nsePositioned).toBe("true"));
     view.rerender(<Harness />);
-    await waitFor(() => expect(document.querySelector('.nse-popover[data-state="closing"][aria-hidden="true"]')).not.toBeNull());
+    await waitFor(() => expect(document.querySelector('.nse-popover[data-nse-overlay-state="closing"][aria-hidden="true"]')).not.toBeNull());
     expect(document.getElementById("paper")).toBeNull();
-    expect(document.querySelector('.nse-popover[data-state="closing"]')?.hasAttribute("inert")).toBe(true);
+    expect(document.querySelector('.nse-popover[data-nse-overlay-state="closing"]')?.hasAttribute("inert")).toBe(true);
     await waitFor(() => expect(document.querySelector(".nse-popover")).toBeNull());
   });
 });

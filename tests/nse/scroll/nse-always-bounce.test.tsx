@@ -20,9 +20,11 @@
 
 // @vitest-environment jsdom
 import React, {useRef} from 'react';
+import {createPortal} from 'react-dom';
 import {render, cleanup} from '@testing-library/react';
 import {afterEach, expect, it, vi} from 'vitest';
-import {useNSERubberBandScroll} from '../../../src/NSE/Scroll';
+import {RubberBandProvider, useNSERubberBandScroll} from '../../../src/NSE/Scroll';
+import {PresentingDocumentContext} from '../../../src/NSE/Overlays/presentingDocument';
 afterEach(cleanup);
 it('opts short content into both boundaries and reports cleanup without changing the default',()=>{
  const changed=vi.fn();
@@ -47,4 +49,50 @@ it('opts short content into both boundaries and reports cleanup without changing
  Object.defineProperties(host,{clientHeight:{value:400},scrollHeight:{value:400},clientWidth:{value:300},scrollWidth:{value:300}});
  host.dispatchEvent(new WheelEvent('wheel',{deltaY:200,bubbles:true,cancelable:true}));
  expect(changed.mock.lastCall?.[0].y).toBeLessThan(0);
+});
+
+it('rubber-bands wheel input inside a detached child document for both managed scroll views and RubberBandProvider', () => {
+ const frame = document.createElement('iframe');
+ document.body.append(frame);
+ const childDoc = frame.contentDocument!;
+ const childWin = frame.contentWindow!;
+ const mount = childDoc.createElement('div');
+ childDoc.body.append(mount);
+ const changed = vi.fn();
+
+ function ChildHarness() {
+  const host = useRef<HTMLDivElement>(null), content = useRef<HTMLDivElement>(null);
+  useNSERubberBandScroll(host, content, { alwaysBounce: true, onOffsetChange: changed });
+  return createPortal(
+   <PresentingDocumentContext.Provider value={childDoc}>
+    <RubberBandProvider>
+     <div ref={host} data-testid="managed"><div ref={content}>Managed</div></div>
+     <div data-testid="provider" style={{ overflowY: 'auto' }}><div>Provider child</div></div>
+    </RubberBandProvider>
+   </PresentingDocumentContext.Provider>,
+   mount,
+  );
+ }
+
+ const view = render(<ChildHarness />);
+ try {
+  const managed = mount.querySelector('[data-testid="managed"]') as HTMLElement;
+  const provider = mount.querySelector('[data-testid="provider"]') as HTMLElement;
+  Object.defineProperties(managed, { clientHeight: { value: 400 }, scrollHeight: { value: 400 }, clientWidth: { value: 300 }, scrollWidth: { value: 300 } });
+  Object.defineProperties(provider, { clientHeight: { value: 200 }, scrollHeight: { value: 600 }, scrollTop: { value: 0 } });
+
+  const childWheel = new childWin.WheelEvent('wheel', { deltaY: -180, bubbles: true, cancelable: true });
+  managed.firstElementChild!.dispatchEvent(childWheel);
+  expect(childWheel.defaultPrevented).toBe(true);
+  expect(changed.mock.lastCall?.[0].y).toBeGreaterThan(0);
+  expect(managed.style.getPropertyValue('--nse-rubber-band-offset-y')).not.toBe('');
+
+  const providerWheel = new childWin.WheelEvent('wheel', { deltaY: -180, bubbles: true, cancelable: true });
+  provider.firstElementChild!.dispatchEvent(providerWheel);
+  expect(providerWheel.defaultPrevented).toBe(true);
+  expect(provider.style.getPropertyValue('--nse-rubber-band-offset-y')).not.toBe('');
+ } finally {
+  view.unmount();
+  frame.remove();
+ }
 });

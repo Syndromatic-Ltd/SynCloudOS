@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import React from "react";
-import { AppViewChrome } from "../../src/Webspring/AppViewChrome";
-import { AppFrame } from "../../src/NSE/Windows/AppFrame";
+import { WSStageWindowFrame } from "../../src/Webspring/WSStageWindowHost";
+import { WindowContentBorder } from "../../src/SynCloudOS/AppHosting/windowAccessories";
 import { cleanup, render, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { themeBaselineCatalogue } from "../e2e/fixtures/theme-baseline/catalogue";
@@ -17,12 +17,12 @@ const presentation = createStaticPresentationPort({ width: 1000, height: 800, re
 function SurfaceHost({ children }: { children: React.ReactNode }) { return <NSEAppearanceProvider theme={atmoTheme} colourScheme="light"><StandaloneControlHost document={document} window={window} presentation={presentation}>{children}</StandaloneControlHost></NSEAppearanceProvider>; }
 const systemIdentities: Readonly<Record<string, string>> = { "about": "panel", "confirm-dialog": "system-alert", "settings": "panel", "board": "board", "notifications": "notification-banner", "notification-centre": "notification-centre", "folder-presentation": "board" };
 describe("system surface theme hooks", () => {
-  it("publishes the stage's key state and its status-bar slot", () => {
-    const surface = (keyWindow: boolean) => <SurfaceHost><AppViewChrome.Root zIndex={1} keyWindow={keyWindow}><AppFrame statusBar={<span>Ready</span>}>Content</AppFrame></AppViewChrome.Root></SurfaceHost>;
+  it("publishes the stage's key state and the window content border", () => {
+    const surface = (keyWindow: boolean) => <SurfaceHost><WSStageWindowFrame zIndex={1} keyWindow={keyWindow}><WindowContentBorder thickness={24} /></WSStageWindowFrame></SurfaceHost>;
     const view = render(surface(false));
-    const root = view.container.querySelector<HTMLElement>('[data-nse-control="app-view-chrome"]')!;
+    const root = view.container.querySelector<HTMLElement>('[data-nse-control="window"][data-nse-presentation="stage"]')!;
     expect(root.dataset.nseKeyWindow).toBe("false");
-    expect(root.querySelector('[data-nse-control="status-bar"]')).not.toBeNull();
+    expect(root.querySelector('[data-nse-part="content-border"]')).not.toBeNull();
     view.rerender(surface(true));
     expect(root.hasAttribute("data-nse-key-window")).toBe(false);
   });

@@ -23,13 +23,12 @@ import React from "react";
 import { cleanup, render, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { generateSmoothSurfaceClipPath, generateSmoothSurfacePath } from "../../src/NSE/SmoothSurface";
-import { useWebspringFolderAppearance, WebspringFolderTile, type WebspringFolderAppearance, type WebspringFolderItem } from "../../src/Webspring/public";
+import { useWebspringFolderAppearance, WSFolderTileView, type WebspringFolderAppearance, type WSFolderItem } from "../../src/Webspring/public";
 import { WebspringFolderAppearanceProvider, resolveWebspringFolderTileGeometry } from "../../src/Webspring/WebspringFolderAppearance";
 
-const folder: WebspringFolderItem = {
+const folder: WSFolderItem = {
   kind: "folder", id: "folder.tools", title: "Tools", badgeCount: 0,
-  dialPlacement: { index: 0 } as unknown as WebspringFolderItem["dialPlacement"],
-  apps: ["alpha", "beta"].map((id) => ({ id, title: id, iconUrl: `/${id}.png` })) as unknown as WebspringFolderItem["apps"],
+  apps: ["alpha", "beta"].map((id) => ({ id, title: id, iconUrl: `/${id}.png` })) as unknown as WSFolderItem["apps"],
 };
 
 const squircle: WebspringFolderAppearance = {
@@ -54,19 +53,19 @@ afterEach(() => {
 });
 
 function renderTile(appearance: WebspringFolderAppearance | null, dropTarget = false) {
-  const tile = <WebspringFolderTile folder={folder} dropTarget={dropTarget} />;
+  const tile = <WSFolderTileView folder={folder} dropTarget={dropTarget} />;
   const { container } = render(appearance ? <WebspringFolderAppearanceProvider value={appearance}>{tile}</WebspringFolderAppearanceProvider> : tile);
   return container.querySelector<HTMLElement>(".webspring-folder-tile")!;
 }
 
-describe("WebspringFolderTile", () => {
+describe("WSFolderTileView", () => {
   it("draws the default inset squircle from SmoothSurface geometry sized to the tile", () => {
     const tile = renderTile(null);
     const options = { radius: 21.6, curve: "squircle" as const, smoothing: 0.6 };
     const path = generateSmoothSurfacePath(60, 60, options);
 
-    expect(tile.dataset.shape).toBe("roundedRect");
-    expect(tile.dataset.fill).toBe("inset");
+    expect(tile.dataset.nseStyle).toBe("roundedRect");
+    expect(tile.dataset.nseType).toBe("inset");
     expect(tile.style.getPropertyValue("--webspring-folder-tile-clip")).toBe(generateSmoothSurfaceClipPath(60, 60, options));
     // The well's shading is a frame around the same outline, clipped with the well.
     for (const shading of tile.querySelectorAll(".webspring-folder-tile-surface path")) {
@@ -90,8 +89,8 @@ describe("WebspringFolderTile", () => {
   it("clips a circle and lines it with the configured texture", () => {
     const tile = renderTile(cottonCircle);
 
-    expect(tile.dataset.shape).toBe("circle");
-    expect(tile.dataset.fill).toBe("texture");
+    expect(tile.dataset.nseStyle).toBe("circle");
+    expect(tile.dataset.nseType).toBe("texture");
     expect(tile.style.getPropertyValue("--webspring-folder-tile-clip")).toBe("circle(closest-side)");
     expect(tile.querySelector(".webspring-folder-tile-lip path")!.getAttribute("d")).toBe("M 0 30 A 30 30 0 1 0 60 30 A 30 30 0 1 0 0 30 Z");
     expect(tile.style.getPropertyValue("--webspring-folder-tile-texture")).toBe('url("/textures/\\22 cotton\\22 .jpg")');
@@ -105,7 +104,7 @@ describe("WebspringFolderTile", () => {
       const outline = resolveWebspringFolderTileGeometry(appearance.shape, 60, 60).path;
       const ring = tile.querySelector(".webspring-folder-tile-ring-stroke path")!;
 
-      expect(tile.dataset.dropTarget).toBe("true");
+      expect(tile.hasAttribute("data-nse-highlighted")).toBe(true);
       expect(ring.getAttribute("d")).toBe(outline);
       expect(ring.getAttribute("stroke-width")).toBe("6");
       // The ring and its shadow are clipped to outside the outline by an even-odd frame.

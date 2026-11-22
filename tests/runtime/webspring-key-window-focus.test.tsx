@@ -22,7 +22,7 @@
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, expect, it } from "vitest";
-import { AppViewChrome } from "../../src/Webspring/AppViewChrome";
+import { WSStageWindowFrame } from "../../src/Webspring/WSStageWindowHost";
 import { registerNSEFocusOrigin } from "../../src/NSE/Focus/focusOrigin";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -36,7 +36,7 @@ function mount(children: React.ReactNode = <p>app</p>) {
   const root = createRoot(host);
   cleanups.push(() => { act(() => root.unmount()); host.remove(); });
   const render = (props: { staged: boolean; keyWindow: boolean }) => act(() => root.render(
-    <AppViewChrome.Root zIndex={1} {...props} data-syncloudos-runtime-owner={runtimeOwner}>{children}</AppViewChrome.Root>));
+    <WSStageWindowFrame zIndex={1} {...props} data-syncloudos-runtime-owner={runtimeOwner}>{children}</WSStageWindowFrame>));
   return { host, render, frame: () => host.querySelector<HTMLElement>(".webspring-app-view-frame")! };
 }
 

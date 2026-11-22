@@ -38,10 +38,10 @@ describe("explicit frame presentation ownership", () => {
     expect(Object.isFrozen(definition.manifest.frame)).toBe(true);
   });
 
-  it("defaults to host motion even when the app has no top bar", () => {
+  it("defaults to host motion when the manifest omits presentation motion", () => {
     const runtime = createTestRuntime();
-    runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.plain", frame: { topBar: "none" } as never }));
-    expect(runtime.apps.getApp("com.example.plain")!.frame).toMatchObject({ topBar: "none", presentationMotion: "host" });
+    runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.plain" }));
+    expect(runtime.apps.getApp("com.example.plain")!.frame).toMatchObject({ presentationMotion: "host" });
   });
 
   it.each(["none", true, 1])("rejects invalid SDK motion policy %s", (presentationMotion) => {

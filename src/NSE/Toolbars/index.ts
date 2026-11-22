@@ -19,6 +19,9 @@
  */
 
 
-export { NSEToolbar } from "./NSEToolbar";
+export { NSEToolbar, NSEToolbarItem } from "./NSEToolbar";
 export type { NSEToolbarDisplayMode, NSEToolbarOptions, NSEToolbarSizeMode } from "./NSEToolbar";
-export type { NSEToolbarItem, NSEToolbarActionItem, NSEToolbarItemInput } from "./toolbarTypes";
+export type { NSEToolbarActionItem, NSEToolbarItemInput } from "./toolbarTypes";
+
+export { NSEToolbarItemGroup } from "./NSEToolbarItemGroup";
+export type { NSEToolbarItemGroupOptions, NSEToolbarItemGroupSelectionMode, NSEToolbarItemGroupControlRepresentation, NSEToolbarGroupSubitem } from "./NSEToolbarItemGroup";

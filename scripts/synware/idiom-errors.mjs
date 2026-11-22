@@ -194,6 +194,62 @@ const GLYPH = /^[\s]*[‹›«»<>←→↑↓↔↕⟨⟩⌃⌄▲▼◀▶△�
 const SYSTEM_ICON = /(?:^|[\s_/-])(?:arrow[-_ ]?(?:back|forward|left|right)|chevron[-_ ]?(?:left|right)|(?:back|forward|left|right)[-_ ]?(?:arrow|chevron|icon)|NSGoBackTemplate|NSGoForwardTemplate)(?:[\s_./-]|$)/iu;
 const NAVIGATION_ARTWORK = /^(?:back|forward|go back|go forward|previous|next|arrow[-_ ]?(?:left|right|back|forward)|chevron[-_ ]?(?:left|right))$/iu;
 const GRAPHICS_TAGS = new Set(["svg", "path", "circle", "ellipse", "rect", "line", "polygon", "polyline", "stop", "g", "canvas"]);
+const FRAMEWORK_COMPONENT_TAG = /^(?:NSE|AFX|GFX|IFX|VFX|AUFX|TFX|HFX|MFX|MEFX|LUFX|WS|SC|AS|UN|BG|CNFX|BTFX|NFX|LFX|MIFX|XRFX|SPFX|CPFX|DFX)[A-Z]/u;
+const RAW_CONTROL_TAGS = new Set(["button", "input", "select", "textarea", "table"]);
+const DIAL_SLIDER_HINT = /\b(?:dial|angle|rotat(?:e|ion)|knob|circular|azimuth|bearing|compass)\b/iu;
+const DIAL_CONTAINER_HINT = /(?:^|[\s_-])(?:(?:angle|rotation|shadow[-_ ]?angle|circular)[-_ ]?(?:dial|knob|slider|wheel)|(?:dial|knob)[-_ ]?(?:control|ring|track|face)|angle[-_ ]?dial|dial|knob)(?:$|[\s_-])/iu;
+const DIAL_KNOB_CHILD_HINT = /\b(?:knob|needle|hand|thumb|pip|dot|indicator|pointer|handle)\b/iu;
+const COLOUR_WELL_HINT = /\b(?:colou?r[-_ ]?(?:well|swatch|picker|chip))\b/iu;
+const HAND_DRAWN_ROLE_MAP = Object.freeze({
+  slider: ["handDrawnSlider", "A hand-drawn role=\"slider\" element duplicates NSE's slider control."],
+  switch: ["handDrawnSwitch", "A hand-drawn role=\"switch\" element duplicates NSE's switch control."],
+  checkbox: ["handDrawnCheckbox", "A hand-drawn role=\"checkbox\" element duplicates NSE's checkbox control."],
+  radiogroup: ["handDrawnRadio", "A hand-drawn role=\"radiogroup\" element duplicates NSE's selection controls."],
+  tablist: ["handDrawnTabs", "A hand-drawn role=\"tablist\" element duplicates NSE's tab and segmented controls."],
+  progressbar: ["handDrawnProgress", "A hand-drawn role=\"progressbar\" element duplicates NSE's progress indicator."],
+  meter: ["handDrawnMeter", "A hand-drawn role=\"meter\" element duplicates NSE's level indicator."],
+  spinbutton: ["handDrawnStepper", "A hand-drawn role=\"spinbutton\" element duplicates NSE's stepper control."],
+  combobox: ["handDrawnComboBox", "A hand-drawn role=\"combobox\" element duplicates NSE's combo box and pop-up controls."],
+  listbox: ["handDrawnListBox", "A hand-drawn role=\"listbox\" element duplicates NSE's pop-up and table controls."],
+  menu: ["handDrawnMenu", "A hand-drawn role=\"menu\" element duplicates NSE's menu system."],
+  menubar: ["handDrawnMenu", "A hand-drawn role=\"menubar\" element duplicates NSE's menu bar."],
+});
+
+function jsxElementIdentity(node) {
+  return ["aria-label", "className", "id", "title", "data-role", "data-control"].map(name => literal(attribute(node, name)) ?? "").join(" ");
+}
+function hasPointerHandler(node) {
+  return node.attributes.properties.some(property => ts.isJsxAttribute(property) && /^on(?:PointerDown|MouseDown|Click)(?:Capture)?$/u.test(property.name.getText()));
+}
+function hasHiddenKnobDescendant(node) {
+  const container = ts.isJsxOpeningElement(node) && ts.isJsxElement(node.parent) ? node.parent : null;
+  if (!container) return false;
+  let found = false;
+  walk(container, child => {
+    if (child === node || child === container || found) return;
+    if (!ts.isJsxOpeningElement(child) && !ts.isJsxSelfClosingElement(child)) return;
+    const hidden = attribute(child, "aria-hidden");
+    const hiddenAttr = child.attributes.properties.find(p => ts.isJsxAttribute(p) && p.name.getText() === "aria-hidden");
+    const isHidden = literal(hidden) === "true" || hidden?.kind === ts.SyntaxKind.TrueKeyword || (Boolean(hiddenAttr) && !hidden);
+    if (isHidden && DIAL_KNOB_CHILD_HINT.test(jsxElementIdentity(child))) found = true;
+  });
+  return found;
+}
+function isConditionalBranch(node, stopAt) {
+  for (let current = node.parent; current && current !== stopAt; current = current.parent) {
+    if (ts.isConditionalExpression(current) && (current.whenTrue === node || current.whenFalse === node || current.whenTrue.pos <= node.pos && current.whenTrue.end >= node.end || current.whenFalse.pos <= node.pos && current.whenFalse.end >= node.end)) return true;
+    if (ts.isBinaryExpression(current) && (current.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken || current.operatorToken.kind === ts.SyntaxKind.BarBarToken) && current.right.pos <= node.pos && current.right.end >= node.end) return true;
+    if (ts.isIfStatement(current)) return true;
+  }
+  return false;
+}
+function branchScope(node) {
+  for (let current = node.parent; current; current = current.parent) {
+    if (ts.isConditionalExpression(current)) return current.whenTrue.pos <= node.pos && current.whenTrue.end >= node.end ? current.whenTrue : current.whenFalse;
+    if (ts.isFunctionLike(current) || ts.isSourceFile(current)) return current;
+  }
+  return null;
+}
 
 /** Source findings: definite misuse errors; uncertain overflow remains a warning. */
 export function inspectIdiomErrors({ file, text, regions = rendererOwnedRegions({ file, text }) }) {
@@ -205,11 +261,59 @@ export function inspectIdiomErrors({ file, text, regions = rendererOwnedRegions(
     seen.add(identity);
     findings.push({ line, rule, severity, message: `${message} ${replacementMessage(key)}` });
   };
+  const quickSwitchTriggers = new Map();
+  const returnTriggers = new Map();
+  const appMenuTriggers = new Map();
+  const toolbarsByScope = new Map();
+  const recordScoped = (bucket, node) => {
+    const scope = branchScope(node);
+    const list = bucket.get(scope) ?? [];
+    list.push(node);
+    bucket.set(scope, list);
+  };
+  const quickSwitchLocals = new Set();
+  const appMenuLocals = new Set();
+  walk(source, node => {
+    if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.initializer && ts.isCallExpression(unwrap(node.initializer))) {
+      const callee = accessPath(unwrap(node.initializer).expression) ?? "";
+      if (/(?:^|\.)useQuickSwitchTrigger$/u.test(callee)) quickSwitchLocals.add(node.name.text);
+      if (/(?:^|\.)useApplicationMenuTrigger$/u.test(callee)) appMenuLocals.add(node.name.text);
+    }
+  });
   walk(source, node => {
     if (withinRendererRegion(node, source, regions)) return false;
     if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
       const tag = jsxTag(node);
       if (["button", "input", "select", "textarea", "table"].includes(tag) && (tag !== "table" || interactiveTable(node)) && !(tag === "input" && ["hidden", "file"].includes(literal(attribute(node, "type"))))) at(node, "idiom.nse-controls", tag, `1 raw <${tag}> element bypasses NSE control semantics.`);
+      if (!FRAMEWORK_COMPONENT_TAG.test(tag) && !RAW_CONTROL_TAGS.has(tag)) {
+        const role = literal(attribute(node, "role"));
+        const identity = jsxElementIdentity(node);
+        if (tag === "progress") at(node, "idiom.hand-drawn-control", "handDrawnProgress", "A raw <progress> element hand-draws a progress indicator NSE already provides.");
+        else if (tag === "meter") at(node, "idiom.hand-drawn-control", "handDrawnMeter", "A raw <meter> element hand-draws a level indicator NSE already provides.");
+        else if (role === "slider" && DIAL_SLIDER_HINT.test(identity)) at(node, "idiom.hand-drawn-control", "circularSlider", "A hand-drawn circular dial duplicates NSE's circular slider.");
+        else if (role && Object.hasOwn(HAND_DRAWN_ROLE_MAP, role)) {
+          const [key, detail] = HAND_DRAWN_ROLE_MAP[role];
+          at(node, "idiom.hand-drawn-control", key, detail);
+        } else if (DIAL_CONTAINER_HINT.test(identity) && (hasPointerHandler(node) || hasHiddenKnobDescendant(node))) {
+          at(node, "idiom.hand-drawn-control", "circularSlider", "A hand-drawn angle or rotation dial duplicates NSE's circular slider.");
+        } else if (COLOUR_WELL_HINT.test(identity) && hasPointerHandler(node)) {
+          at(node, "idiom.hand-drawn-control", "handDrawnColourWell", "A hand-drawn colour swatch or well duplicates NSE's colour well.");
+        }
+        if (role === "toolbar") recordScoped(toolbarsByScope, node);
+      }
+      if (tag === "NSEToolbar") recordScoped(toolbarsByScope, node);
+      const ariaLabel = literal(attribute(node, "aria-label")) ?? "";
+      const onClickText = attribute(node, "onClick")?.getText(source) ?? "";
+      const actionAttr = literal(attribute(node, "action")) ?? "";
+      if (/\bquickswitch\b/iu.test(ariaLabel) || [...quickSwitchLocals].some(local => new RegExp(`\\b${local}\\??\\.(?:toggle|open)\\b`, "u").test(onClickText))) {
+        if (!isConditionalBranch(node, branchScope(node))) recordScoped(quickSwitchTriggers, node);
+      }
+      if (/\breturn to webspring\b/iu.test(ariaLabel) || actionAttr === "workspace.returnToWebspring" || /\bworkspace\.returnToWebspring\b/u.test(onClickText)) {
+        if (!isConditionalBranch(node, branchScope(node))) recordScoped(returnTriggers, node);
+      }
+      if (/\bapplication menu\b/iu.test(ariaLabel) || [...appMenuLocals].some(local => new RegExp(`\\b${local}\\??\\.(?:activate|toggle|open)\\b`, "u").test(onClickText))) {
+        if (!isConditionalBranch(node, branchScope(node))) recordScoped(appMenuTriggers, node);
+      }
       if (tag === "img") {
         const identity = ["src", "className", "id", "alt", "aria-label"].map(name => literal(attribute(node, name)) ?? "").join(" ");
         if (SYSTEM_ICON.test(identity)) at(node, "idiom.system-image", "systemImage", "A navigation icon is loaded as a private image.");
@@ -223,7 +327,7 @@ export function inspectIdiomErrors({ file, text, regions = rendererOwnedRegions(
       const options = constructor ? unwrap(constructor.arguments?.[1]) : null;
       const customTheme = options && (!ts.isObjectLiteralExpression(options) || options.properties.some(property => ts.isSpreadAssignment(property) || (propertyName(property.name) === "theme" && !(ts.isPropertyAssignment(property) && (property.initializer.kind === ts.SyntaxKind.NullKeyword || property.initializer.getText(source) === "undefined")))));
       const namedAppearance = literal(appearance) ?? (constructor && !customTheme ? literal(constructor.arguments?.[0]) : null);
-      if (/^NSE/u.test(tag) && ["aqua", "darkAqua"].includes(namedAppearance)) at(node, "idiom.appearance", "appearance", "A named system appearance is forced instead of inherited.");
+      if (/^NSE/u.test(tag) && ["light", "dark"].includes(namedAppearance)) at(node, "idiom.appearance", "appearance", "A named system appearance is forced instead of inherited.");
       if (/^NSE/u.test(tag)) for (const property of node.attributes.properties) {
         if (!ts.isJsxAttribute(property)) continue;
         const key = propertyName(property.name), value = literal(attribute(node, key));
@@ -273,6 +377,18 @@ export function inspectIdiomErrors({ file, text, regions = rendererOwnedRegions(
       if (["SpeechRecognition", "webkitSpeechRecognition", "window.SpeechRecognition", "window.webkitSpeechRecognition"].includes(path) && !isShadowed(path.split(".")[0], node)) at(node, "idiom.device-fx", "SpeechRecognition", "Raw speech recognition bypasses the framework recogniser lifecycle.");
     }
   });
+  for (const nodes of toolbarsByScope.values()) {
+    if (nodes.length > 1) at(nodes[1], "idiom.duplicate-chrome", "duplicateChrome", `This view renders ${nodes.length} toolbars in the same window branch.`);
+  }
+  for (const nodes of quickSwitchTriggers.values()) {
+    if (nodes.length > 1) at(nodes[1], "idiom.duplicate-quickswitch", "duplicateQuickSwitch", `This view renders ${nodes.length} visible QuickSwitch title toggles in the same window branch.`);
+  }
+  for (const nodes of returnTriggers.values()) {
+    if (nodes.length > 1) at(nodes[1], "idiom.duplicate-window-action", "duplicateWindowAction", `This view renders ${nodes.length} Return to Webspring buttons in the same window branch.`, "warning");
+  }
+  for (const nodes of appMenuTriggers.values()) {
+    if (nodes.length > 1) at(nodes[1], "idiom.duplicate-window-action", "duplicateWindowAction", `This view renders ${nodes.length} application-menu buttons in the same window branch.`, "warning");
+  }
   return findings;
 }
 

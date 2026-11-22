@@ -1381,7 +1381,6 @@ function createDirectController(options: {
     isKey: false,
     isMain: false,
     zIndex: 0,
-    chromeMode: "system",
   });
   const controller = new WindowController(record, {
     responders: runtime.responders,

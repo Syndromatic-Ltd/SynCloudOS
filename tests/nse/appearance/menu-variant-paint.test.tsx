@@ -42,7 +42,7 @@ function selectorsFor(file: string, property: string, value: string): string[] {
       && declaration.property === property && cssTree.generate(declaration.value) === value)) return;
     node.prelude.children.forEach((selector) => {
       const text = cssTree.generate(selector);
-      if (text.includes(".nse-menu")) selectors.push(text);
+      if (text.includes('[data-nse-role="command-menu"]')) selectors.push(text);
     });
   });
   return selectors;
@@ -63,13 +63,13 @@ describe("popup variants retain their selected appearance", () => {
     // The popup shares its host's theme boundary rather than starting its own.
     expect(menu.hasAttribute("data-nse-theme")).toBe(false);
     expect(menu.parentElement?.closest("[data-nse-theme]")?.getAttribute("data-nse-theme")).toBe("com.syndromatic.atmo");
-    expect(menu.getAttribute("data-nse-menu-variant")).toBe("popup");
+    expect(menu.getAttribute("data-nse-style")).toBe("popup");
   });
 
   it("matches neutral forced-colour replacement rules on the projected popup root", async () => {
     const menu = await mountPopup("forced");
     expect(menu.getAttribute("data-nse-contrast")).toBe("forced");
-    const selectors = selectorsFor("src/NSE/Appearance/nse-appearance.css", "background-color", "Canvas");
+    const selectors = selectorsFor("src/Themes/Atmo.scostheme/Contents/Resources/atmo.accessibility.css", "background-color", "Canvas");
     expect(selectors.some((selector) => menu.matches(selector))).toBe(true);
   });
 });

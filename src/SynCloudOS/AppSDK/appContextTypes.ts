@@ -39,7 +39,7 @@ import type {
   AppServiceClient,
   AUFXAudioClient,
   AppUndoClient,
-  AppWindowClient,
+  AppOwnedWindows,
 } from "./appClientTypes";
 import type {
   AppAlertClient,
@@ -104,7 +104,7 @@ export interface SynWareContextValue {
   readonly responders: AppResponderClient;
   readonly undo: AppUndoClient;
   readonly documents: AppDocumentClient;
-  readonly windows: AppWindowClient;
+  readonly windows: AppOwnedWindows;
   readonly pasteboards: AppPasteboardClient;
   readonly drag: AppDragClient;
   readonly colourPanel: AppColourPanelClient;

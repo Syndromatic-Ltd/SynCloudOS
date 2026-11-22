@@ -1,18 +1,27 @@
 # Scroll and image view access
 
-`NSEScrollView` is NSScrollView. Its React ref is an `NSEScrollViewHandle`:
+`NSEScrollView` and `NSEImageView` give you a handle through their React ref, so your code can read the visible area, follow scrolling and animate the view. This page describes both handles.
+
+## Scroll view
+
+The ref of an `NSEScrollView` is an `NSEScrollViewHandle`:
 
 ```tsx
+import { useRef } from "react";
+import { NSEScrollView, type NSEScrollViewHandle } from "@syndromatic/syncloudos/nse/scroll";
+
 const scroll = useRef<NSEScrollViewHandle>(null);
 <NSEScrollView ref={scroll}>Document content</NSEScrollView>
 ```
 
-The handle is committed in a layout effect, before the owning view controller's appearance. `contentView` is the NSClipView counterpart: `element` is the physical scroll viewport and `bounds` is its rectangle in document coordinates. `documentVisibleRect` supplies the same currently visible document rectangle. `scrollRectToVisible` retains the existing inset-aware scrolling behaviour.
+The handle is set in a layout effect, before the owning view controller appears. Its `contentView` describes the clip view: `element` is the scrolling viewport and `bounds` is the visible rectangle in document coordinates. `documentVisibleRect` gives you the same rectangle. `scrollRectToVisible(rect, behavior?)` scrolls a rectangle into view and takes the content insets into account.
 
-To observe scrolling and viewport resizing, set `contentView.postsBoundsChangedNotifications = true` and call `contentView.observeBoundsChanges(bounds => ...)`. The returned function removes the observation. Scroll bounds notify during the native scroll event, so clients scheduling a redraw keep their existing frame latency; unchanged bounds do not notify. Unmount disconnects scroll and resize observations, and a disposed clip refuses new observations. The callback API represents NSView's bounds-change notification in JavaScript; it is not a second notification centre. The pre-existing `controllerRef` also runs during layout and remains available.
+To follow scrolling and viewport resizes, set `contentView.postsBoundsChangedNotifications = true` and call `contentView.observeBoundsChanges(bounds => ...)`, which returns a function that stops the observation. Your callback runs during the scroll event itself, so a redraw you schedule from it lands no later than before, and it doesn't run when the bounds haven't changed. Unmounting disconnects every scroll and resize observation, and a disposed clip view refuses new ones. This is a callback on the clip view, not a separate notification centre. The `controllerRef` prop still works and also runs during layout.
 
-`NSEImageView` is NSImageView. Its React ref is an `NSEImageViewHandle`, with `element` identifying the image view and `layer` corresponding to NSView.layer. Set `wantsLayer` to opt into backing. Without it, `layer` is null. With it, reading `layer` lazily acquires one CSS-layout AnimationFX layer from the mounted animation environment, before parent appearance. A layer-backed view requires that environment; an absent layer client throws explicitly. Unmount, a backing-policy change or a layer-client change aborts and disposes the old backing. The layer animates the whole image view, independently of its stationary parent anchor; fitting and panning remain in the image's viewport.
+## Image view
 
-Like managed outlets, an image backing survives React's same-turn StrictMode reconnect. A real detach releases it in the following microtask; a detached handle cannot acquire another layer. Changing backing policy or layer client retires the previous backing before the replacement is exposed.
+The ref of an `NSEImageView` is an `NSEImageViewHandle` (from `@syndromatic/syncloudos/nse/controls`), with `element`, the image view's element, and `layer`, an AnimationFX layer for the whole view. Set `wantsLayer` to ask for that layer; without it, `layer` is `null`. With it, the first read of `layer` creates one CSS-layout layer from the mounted animation environment, before the parent appears. A layer-backed image view needs that environment and throws if there's no layer client. Unmounting, turning `wantsLayer` off or a change of layer client aborts the old layer and disposes it. The layer animates the whole image view, while fitting and panning still happen inside the image's own viewport.
 
-Both handles are view access contracts, not new drawn controls. Atmo continues to draw the scroll and image surfaces.
+Like managed outlets, the layer survives React StrictMode's immediate unmount and remount. A real detach releases it in the next microtask, and a detached handle can't create another layer. When the backing setting or the layer client changes, the old layer is retired before the new one is exposed.
+
+Neither handle draws anything: Atmo still draws the scroll and image views.

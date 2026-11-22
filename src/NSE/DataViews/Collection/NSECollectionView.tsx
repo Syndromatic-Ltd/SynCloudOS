@@ -59,6 +59,9 @@ function GridCollectionView<T, TId extends string | number>({
   className = "",
   style,
   onKeyDown,
+  onFocus,
+  onBlur,
+  onPointerDown,
   ...props
 }: CollectionViewGridProps<T, TId>) {
   const view = useNSEDataView(adapter, {
@@ -81,6 +84,7 @@ function GridCollectionView<T, TId extends string | number>({
   useImperativeHandle(suppliedCanvasRef, () => canvasRef.current!, []);
   const [inheritedDirection, setInheritedDirection] = useState<"ltr" | "rtl">("ltr");
   const [dragStatus, setDragStatus] = useState("");
+  const [pointerSuppressed, setPointerSuppressed] = useState(false);
   const allowsMutation = dataViewAllowsMutation(state);
   const dragHost = useNSEDataViewDragHost({ binding: dragBinding, endpoint: dragEndpoint, validate: onValidateDrop, accept: onAcceptDrop, onStatus: setDragStatus, enabled: allowsMutation });
   useLayoutEffect(() => {
@@ -126,6 +130,9 @@ function GridCollectionView<T, TId extends string | number>({
 
   const handleKey = (event: KeyboardEvent<HTMLDivElement>) => {
     if (dataViewEventIsComposing(event)) { onKeyDown?.(event); return; }
+    if (event.key !== "Shift" && event.key !== "Control" && event.key !== "Alt" && event.key !== "Meta") {
+      setPointerSuppressed(false);
+    }
     const direction = event.key === "ArrowUp" ? "up" : event.key === "ArrowDown" ? "down" : event.key === "ArrowLeft" ? "left" : event.key === "ArrowRight" ? "right" : null;
     if (allowsMutation && dragBinding && dragEndpoint && event.altKey && event.key.toLowerCase() === "d") {
       event.preventDefault();
@@ -172,6 +179,18 @@ function GridCollectionView<T, TId extends string | number>({
         className={`nse-collection-view ${className}`.trim()}
         data-nse-control="collection-view" data-nse-part="background" data-nse-enabled={view.rootProps["aria-disabled"] ? "false" : undefined}
         style={rootStyle}
+        onPointerDown={(event) => {
+          setPointerSuppressed(true);
+          onPointerDown?.(event);
+        }}
+        onFocus={(event) => {
+          const isPointer = event.currentTarget.ownerDocument.documentElement.dataset.nseInputModality === "pointer";
+          setPointerSuppressed(isPointer);
+          onFocus?.(event);
+        }}
+        onBlur={(event) => {
+          onBlur?.(event);
+        }}
         onKeyDown={handleKey}
       >
         <div data-nse-part="viewport" className="nse-collection-canvas-sizer">
@@ -195,7 +214,7 @@ function GridCollectionView<T, TId extends string | number>({
                     role="gridcell"
                     aria-colindex={position.column + 1}
                     aria-rowindex={position.row + 1}
-                    data-nse-part="item" data-nse-selected={selected ? "" : undefined} data-nse-focused={focused ? "" : undefined} data-nse-enabled={entry.disabled ? "false" : undefined} className="nse-collection-item"
+                    data-nse-part="item" data-nse-selected={selected ? "" : undefined} data-nse-focused={focused && !pointerSuppressed ? "" : undefined} data-nse-enabled={entry.disabled ? "false" : undefined} className="nse-collection-item"
 
                     data-selected={selected || undefined}
                     data-focused={focused || undefined}

@@ -7,6 +7,7 @@
   "scripts": {
     "build": "npm run typecheck && npm run sdk:build",
     "test": "vitest run",
+    "test:packaging": "vitest run --config vitest.packaging.config.ts",
     "test:e2e": "node scripts/test-e2e-matrix.mjs",
     "test:runtime": "vitest run tests/runtime",
     "synware:create": "node scripts/synware/create-synware.mjs",
@@ -23,7 +24,6 @@
     "sdk:omission": "node scripts/synware/check-omitted-products-consumer.mjs",
     "fx:installed": "node scripts/fx/check-installed-fx.mjs --mode deterministic",
     "fx:installed:browser": "node scripts/fx/check-installed-fx.mjs --mode browser --base /nested/product/",
-    "product:names": "node scripts/quality/check-product-name-hygiene.mjs",
     "typecheck": "tsc -b --pretty false",
     "typecheck:authoring": "tsc -p tests/types/tsconfig.authoring-6e.json --noEmit",
     "boundaries:architecture": "node scripts/quality/architecture-boundaries.mjs",
@@ -66,7 +66,7 @@
     "saxes": "^6.0.0",
     "sharp": "0.35.5",
     "typescript": "6.0.3",
-    "vitest": "^4.1.12",
+    "vitest": "^5.1.0",
     "zod": "^4.6.7"
   },
   "overrides": {

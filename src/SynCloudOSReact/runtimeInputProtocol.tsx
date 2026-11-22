@@ -20,6 +20,7 @@
 
 import { createContext, useContext } from "react";
 import type { SynCloudOSRuntimeId } from "../SynCloudOS/SynCloudOS";
+import { isNSEHTMLElement } from "../NSE/hostComposition";
 
 /**
  * DOM events can travel through several React roots (including portals), so a
@@ -42,7 +43,7 @@ function eventPath(event: Event, fallbackTarget?: EventTarget | null): readonly 
 
 export function nearestRuntimeOwner(event: Event, fallbackTarget?: EventTarget | null): string | null {
   for (const target of eventPath(event, fallbackTarget)) {
-    if (!(target instanceof HTMLElement)) continue;
+    if (!isNSEHTMLElement(target)) continue;
     const owner = target.dataset.syncloudosRuntimeOwner
       ?? (target.dataset.syncloudosRuntimeRoot ? target.dataset.syncloudosRuntimeId : undefined);
     if (owner) return owner;
@@ -52,7 +53,7 @@ export function nearestRuntimeOwner(event: Event, fallbackTarget?: EventTarget |
 
 export function focusScopeFromEvent(event: Event, fallbackTarget?: EventTarget | null): string | undefined {
   for (const target of eventPath(event, fallbackTarget)) {
-    if (target instanceof HTMLElement && target.dataset.syncloudosFocusScope) return target.dataset.syncloudosFocusScope;
+    if (isNSEHTMLElement(target) && target.dataset.syncloudosFocusScope) return target.dataset.syncloudosFocusScope;
   }
   return undefined;
 }

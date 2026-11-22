@@ -36,11 +36,15 @@ export const LoginField = forwardRef<HTMLInputElement, LoginFieldProps>(function
 
   return (
     <label
+      data-nse-control="login-window"
+      data-nse-part="field"
+      data-nse-validation={invalid ? "invalid" : undefined}
       className={`nse-login-field nse-login-field--${tone} ${invalid ? "is-invalid" : ""} ${className}`.trim()}
       htmlFor={fieldId}
     >
       <span className="nse-login-field-label">{label}</span>
       <input
+        data-nse-part="field"
         ref={ref}
         id={fieldId}
         aria-invalid={invalid ? "true" : undefined}

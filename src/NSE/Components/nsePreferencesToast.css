@@ -1,5 +1,5 @@
 
-@layer nse.atmo {
+@layer nse.structure {
 @scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
@@ -62,9 +62,6 @@
 :where(:scope).nse-prefs-veil {
   position: absolute;
   inset: 0;
-  background: var(--nse-prefs-veil-background, rgba(0, 0, 0, 0.42));
-  -webkit-backdrop-filter: var(--nse-prefs-veil-filter, blur(7px) saturate(0.85));
-  backdrop-filter: var(--nse-prefs-veil-filter, blur(7px) saturate(0.85));
   pointer-events: none;
 }
 
@@ -82,8 +79,7 @@
   border-radius: var(--nse-atmo-window-titlebar-radius, 14px);
   /* Centred, so it grows from its own middle. */
   transform-origin: 50% 50%;
-  background: var(--nse-prefs-panel-background, linear-gradient(#f4f4f2, #e4e4e1));
-  box-shadow: var(--nse-prefs-panel-shadow, 0 0 0 1px rgba(0, 0, 0, 0.42), 0 22px 44px rgba(0, 0, 0, 0.46));
+  outline: none;
 }
 
 /* The two titles cross inside one clipped box.
@@ -127,11 +123,8 @@
   place-items: center;
 }
 
-/* Exactly as wide as it is tall, so the tool button's two 25px end caps meet in
-   the middle and the pill resolves to a circle. No frame override: this is the
-   real tool-button art, just at its shortest possible width.
-   Four classes deep because the vector layer sets this button's padding at
-   (0,3,0) — at (0,2,0) the 10px side padding survived and made it 70×52. */
+/* The Back accessory is as wide as it is tall so its two 25px end caps meet.
+   Its fixed line-height keeps the glyph centred under the toolbar's font rules. */
 .nse-prefs-header .nse-prefs-back.nse-control-button.nse-extended-tool-button,
 :where(:scope):is(.nse-prefs-header) .nse-prefs-back.nse-control-button.nse-extended-tool-button {
   position: relative;
@@ -143,7 +136,7 @@
   height: 50px;
   min-height: 50px;
   padding: 0;
-  line-height: 50px;
+  line-height: 50px !important;
   /* The glyph has to paint over the border slices, and the button clips to its
      padding box by default. */
   overflow: visible;
@@ -165,8 +158,6 @@
   margin: 0;
   display: grid;
   place-items: center;
-  color: var(--nse-prefs-header-glyph-colour, #f4f6f8);
-  filter: drop-shadow(0 -1px 0 rgba(0, 0, 0, 0.55));
   pointer-events: none;
 }
 
@@ -227,7 +218,6 @@
 .nse-prefs-list .nse-control-list-item,
 :where(:scope):is(.nse-prefs-list) .nse-control-list-item {
   padding-inline: 16px;
-  background: transparent;
 }
 
 /* Preferences labels identify destinations, so retain their full copy when
@@ -249,8 +239,6 @@
   appearance: none;
   border: 0;
   padding: 0;
-  background: transparent;
-  color: inherit;
   font: inherit;
   text-align: start;
   cursor: pointer;
@@ -258,7 +246,6 @@
 .nse-prefs-pane-link:focus-visible,
 :where(:scope):is(.nse-prefs-pane-link:focus-visible),
 :where(:scope).nse-prefs-pane-link:focus-visible {
-  outline: 2px solid Highlight;
   outline-offset: 2px;
   border-radius: 2px;
 }
@@ -301,17 +288,9 @@
   place-items: center;
   width: 10px;
   height: 17px;
-  color: var(--nse-prefs-chevron-colour, rgba(42, 55, 70, 0.42));
   font-size: 20px;
   line-height: 1;
   text-align: center;
-}
-
-.nse-prefs-list .nse-control-list-item[data-selected="true"] .nse-prefs-chevron,
-:where(:scope):is(.nse-prefs-list) .nse-control-list-item[data-selected="true"] .nse-prefs-chevron,
-.nse-prefs-list .nse-control-list-item:active .nse-prefs-chevron,
-:where(:scope):is(.nse-prefs-list) .nse-control-list-item:active .nse-prefs-chevron {
-  color: var(--nse-prefs-chevron-selected-colour, rgba(255, 255, 255, 0.72));
 }
 
 /* An empty group box is a bug that looks like a design. Say what would be here
@@ -329,28 +308,20 @@
 .nse-prefs-empty-title,
 :where(:scope):is(.nse-prefs-empty-title),
 :where(:scope).nse-prefs-empty-title {
-  color: var(--nse-prefs-empty-title-colour, rgba(42, 55, 70, 0.72));
   font-size: 15px;
   font-weight: 700;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
 .nse-prefs-empty-detail,
 :where(:scope):is(.nse-prefs-empty-detail),
 :where(:scope).nse-prefs-empty-detail {
   max-width: 26ch;
-  color: var(--nse-prefs-empty-detail-colour, rgba(42, 55, 70, 0.55));
   font-size: 12px;
   line-height: 1.45;
 }
 
 /* Per-app rows stay readable when the master switch is off — dimmed, not
    hidden, so it is obvious WHY they cannot be changed. */
-.nse-prefs-section[data-muted="true"] .nse-control-group-box,
-:where(:scope):is(.nse-prefs-section[data-muted="true"]) .nse-control-group-box {
-  opacity: 0.48;
-  filter: saturate(0.55);
-}
 
 /* Detail panes stack their controls; the group box inside supplies its own
    frame, so this owns rhythm and the inset the root list does without. */
@@ -368,7 +339,6 @@
 :where(:scope):is(.nse-prefs-pane) .nse-prefs-note {
   margin: 12px auto 0;
   max-width: 32ch;
-  color: var(--nse-prefs-note-colour, rgba(42, 55, 70, 0.62));
   font-size: 12px;
   line-height: 1.45;
   text-align: center;
@@ -382,7 +352,6 @@
   max-width: none;
   margin: 2px 2px 8px;
   font-weight: 700;
-  color: var(--nse-prefs-note-lead-colour, rgba(42, 55, 70, 0.78));
   text-align: left;
 }
 
@@ -402,147 +371,10 @@
   }
 }
 
-/* ==========================================================================
-   Dark
-   ==========================================================================
-   Keyed off [data-mode] alone. Atmo and Onyx are a separate axis — this panel
-   is the same panel in either theme, and only the light/dark mode decides
-   whether it is dark.
-
-   The palette is Software.app's brushed metal, not an invented one: the panel
-   floats over apps wearing that material, and a second dark grey next to it
-   would read as a mismatch rather than a choice.
-
-   Every rule below is stated at a weight that beats the vector layer outright
-   (html + three classes = 0,3,1 against its 0,2,0) rather than relying on this
-   sheet being imported last. Import order has already produced two visible
-   regressions in this codebase; see the tie list in TODO.md. */
-
-.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-toast,
-:where(:scope):is(.nse-prefs-backdrop[data-mode="dark"]) .nse-prefs-toast {
-  /* Blue-black, the tone Software.app's stage takes in dark.
-     FLAT, not a gradient. A gradient here put a second gradient (the group box)
-     inside a first, and the two crossed — matching in one band and separating in
-     another, which is the "competing colours" that made the group box's edges
-     impossible to find. One surface, one value. */
-  background: var(--nse-prefs-panel-background, #262c34);
-  box-shadow: var(--nse-prefs-panel-shadow, 0 0 0 1px rgba(0, 0, 0, 0.72), inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 22px 44px rgba(0, 0, 0, 0.62));
-}
-
-.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-veil,
-:where(:scope):is(.nse-prefs-backdrop[data-mode="dark"]) .nse-prefs-veil {
-  background: var(--nse-prefs-veil-background, rgba(0, 0, 0, 0.56));
-}
-
-/* The same plate as the light header, stop for stop and pixel for pixel — the
-   0.5px lip, the 1.5px dark line, the 35px rim and the four-row bottom accent
-   all hold their thickness — with every grey mapped into the metal's dark
-   range. Rebuilding the geometry would have let the two headers drift apart. */
-
-/* Group boxes drop the sliced light frame and become a filled plate. The 14px
-   transparent border stays, so the rows keep their 2px inset and their 12px end
-   radii still line up with the frame's 14px corner. */
-/* The group box keeps the REAL Atmo frame in dark. It was replaced here with a
-   hand-drawn plate, which is why the two modes stopped looking like the same
-   control.
-   Nothing needed replacing: the Onyx group frame is 0.0% opaque — a hairline
-   engraving (black α122 with a white α26 drop-highlight under it) over a fully
-   TRANSPARENT interior. That is precisely why it became the default; it
-   composites over any material, dark included. See the census at the top of
-   the committed Atmo vector material.
-   So the only thing stated here is what sits BEHIND it: a faint lift so the
-   group reads as slightly raised off the panel. The frame paints over it, and
-   its own engraved edge does the rest — no added shadow. */
+/* The dark group follows the frame radius. */
 .nse-prefs-backdrop[data-mode="dark"] .nse-prefs-pane .nse-control-group-box,
 :where(:scope):is(.nse-prefs-backdrop[data-mode="dark"]) .nse-prefs-pane .nse-control-group-box {
   border-radius: 14px;
-  background: var(--nse-prefs-group-background, rgba(255, 255, 255, 0.045));
-}
-
-/* Softened so they read as divisions within one plate rather than as more
-   edges competing with the box's own. */
-.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-pane .nse-control-group-inner>.nse-control-list-item,
-:where(:scope):is(.nse-prefs-backdrop[data-mode="dark"]) .nse-prefs-pane .nse-control-group-inner>.nse-control-list-item {
-  border-top-color: rgba(255, 255, 255, 0.06);
-  border-bottom-color: rgba(0, 0, 0, 0.3);
-}
-
-.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-pane .nse-control-list-item,
-:where(:scope):is(.nse-prefs-backdrop[data-mode="dark"]) .nse-prefs-pane .nse-control-list-item {
-  color: var(--nse-prefs-row-colour, #e7ecf2);
-  border-top-color: rgba(255, 255, 255, 0.08);
-  border-bottom-color: rgba(0, 0, 0, 0.52);
-  /* Transparent on the ROOT list, where a row is the panel surface itself.
-     Inside a group box it lifts — see below. */
-  background: transparent;
-  /* Light text on a dark cell: the emboss goes ABOVE the glyph, not below. */
-  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.62);
-}
-
-
-.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-pane .nse-control-list-meta,
-:where(:scope):is(.nse-prefs-backdrop[data-mode="dark"]) .nse-prefs-pane .nse-control-list-meta,
-.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-list .nse-control-list-meta,
-:where(:scope):is(.nse-prefs-backdrop[data-mode="dark"]) .nse-prefs-list .nse-control-list-meta {
-  color: var(--nse-prefs-meta-colour, rgba(190, 200, 212, 0.72));
-}
-
-.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-chevron,
-:where(:scope):is(.nse-prefs-backdrop[data-mode="dark"]) .nse-prefs-chevron {
-  color: var(--nse-prefs-chevron-colour, rgba(190, 200, 212, 0.5));
-}
-
-.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-pane .nse-prefs-note,
-:where(:scope):is(.nse-prefs-backdrop[data-mode="dark"]) .nse-prefs-pane .nse-prefs-note {
-  color: var(--nse-prefs-note-colour, rgba(178, 188, 200, 0.66));
-}
-
-.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-pane .nse-prefs-note-lead,
-:where(:scope):is(.nse-prefs-backdrop[data-mode="dark"]) .nse-prefs-pane .nse-prefs-note-lead {
-  color: var(--nse-prefs-note-lead-colour, rgba(206, 214, 224, 0.82));
-}
-
-.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-empty-title,
-:where(:scope):is(.nse-prefs-backdrop[data-mode="dark"]) .nse-prefs-empty-title {
-  color: var(--nse-prefs-empty-title-colour, rgba(224, 231, 240, 0.86));
-  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.6);
-}
-
-.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-empty-detail,
-:where(:scope):is(.nse-prefs-backdrop[data-mode="dark"]) .nse-prefs-empty-detail {
-  color: var(--nse-prefs-empty-detail-colour, rgba(178, 188, 200, 0.62));
-}
-
-/* Selection and press, in dark.
-   The pale Onyx gloss is authored for a light rail and reads as a bright band
-   laid on top of the dark panel. The deep steel below is the same pair
-   Software.app and the metal source list already use — established, not
-   invented, so the panel and the app under it agree.
-
-   The weights are deliberate. The vector's selected rule is (0,5,0) and its
-   :active rule reaches (0,7,0) through five :not() arguments; a rule that merely
-   ties would be decided by import order, which is the failure mode catalogued in
-   TODO.md. These clear both outright. */
-.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-toast .nse-prefs-pane .nse-control-group-inner .nse-control-list-item[data-selected="true"],
-:where(:scope):is(.nse-prefs-backdrop[data-mode="dark"]) .nse-prefs-toast .nse-prefs-pane .nse-control-group-inner .nse-control-list-item[data-selected="true"],
-.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-toast .nse-prefs-body .nse-prefs-pane .nse-control-list-item:not(.is-disabled):not([data-tap-highlight="false"]):active,
-:where(:scope):is(.nse-prefs-backdrop[data-mode="dark"]) .nse-prefs-toast .nse-prefs-body .nse-prefs-pane .nse-control-list-item:not(.is-disabled):not([data-tap-highlight="false"]):active {
-  background: var(--nse-prefs-selection-background, linear-gradient(180deg, #5c6f7f 0%, #233242 100%));
-  box-shadow: var(--nse-prefs-selection-shadow, inset 0 1px 0 rgba(255, 255, 255, 0.22), inset 0 -1px 0 rgba(0, 0, 0, 0.5));
-  color: var(--nse-prefs-selection-colour, #f1f6fb);
-  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.45);
-}
-
-.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-toast .nse-prefs-pane .nse-control-list-item[data-selected="true"] .nse-control-list-meta,
-:where(:scope):is(.nse-prefs-backdrop[data-mode="dark"]) .nse-prefs-toast .nse-prefs-pane .nse-control-list-item[data-selected="true"] .nse-control-list-meta,
-.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-toast .nse-prefs-pane .nse-control-list-item:active .nse-control-list-meta,
-:where(:scope):is(.nse-prefs-backdrop[data-mode="dark"]) .nse-prefs-toast .nse-prefs-pane .nse-control-list-item:active .nse-control-list-meta {
-  color: var(--nse-prefs-selection-meta-colour, rgba(241, 246, 251, 0.72));
-}
-
-.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-toast .nse-prefs-pane .nse-control-list-item:active .nse-prefs-chevron,
-:where(:scope):is(.nse-prefs-backdrop[data-mode="dark"]) .nse-prefs-toast .nse-prefs-pane .nse-control-list-item:active .nse-prefs-chevron {
-  color: var(--nse-prefs-chevron-selected-colour, rgba(241, 246, 251, 0.7));
 }
 
 }

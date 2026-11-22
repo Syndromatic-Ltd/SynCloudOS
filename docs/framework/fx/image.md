@@ -1,22 +1,22 @@
 # ImageFX
 
-Encoded byte inputs accept `NSEDataConvertible` from `@syndromatic/syncloudos/foundation`; delivered encoded bytes are immutable `NSEData`. Use `.bytes` at a native typed-buffer boundary and `.blob(mimeType)` for a browser Blob. Numeric pixel, index and PCM planes retain their typed arrays; writable copy destinations remain mutable.
-
-ImageFX (`IFX`) is the web-native analogue of Core Image. It describes image processing as a graph of lazy operations. Building a graph does no pixel work, and nothing runs until you render it. That delay lets the framework work out which region each output pixel needs, split the output into tiles, keep memory inside a budget, choose a backend and run the work off the main thread.
+ImageFX (`IFX`) processes images: blurs, colour adjustments, compositing, distortions, generators, feature detection and RAW decoding. Use it whenever you transform pixels rather than draw shapes. It describes image processing as a graph of lazy operations, much as Core Image does. Building a graph does no pixel work, and nothing runs until you render it. That delay lets the framework work out which region each output pixel needs, split the output into tiles, keep memory inside a budget, choose a backend and run the work off the main thread.
 
 An ImageFX image is a description, not a bitmap. `IFXImage.fromPixels()` wraps existing pixels, `IFXImage.constant()` describes a colour that fills all space, and every filter takes images and returns a new image that records what it does. The graph is immutable, so you can share a node between several outputs and render them separately.
 
+Encoded byte inputs accept any `NSEDataConvertible` from `@syndromatic/syncloudos/foundation`, and encoded bytes ImageFX hands back are immutable `NSEData`. Use `.bytes` where you need a typed array and `.blob(mimeType)` for a browser `Blob`. Numeric pixel and index planes stay as typed arrays, and destinations you copy into remain writable.
+
 The framework has these parts, and each has its own section below.
 
-- **Images and extents.** `IFXImage` nodes with a finite or infinite `extent`, and the operations that crop, transform, composite and clamp them.
-- **Filters.** About 200 named filters in 15 categories, applied with `IFXFilter` and discovered through `IFXFilterRegistry`. See the [filter catalogue](image/filters.md).
-- **Rendering.** `IFXContext`, `IFXRenderPipeline`, destinations, tile plans and tasks turn a graph into pixels with budgets and cancellation.
-- **Resources.** `IFXImageResource` loads and exports images through the session.
-- **Image view.** `IFXImageView`, after ImageKit's `IKImageView`, shows a resource to zoom, pan and crop.
-- **Text images.** `createIFXTextImage` and `createIFXAttributedTextImage` turn [TextFX](text.md) text into graph nodes.
-- **Analysis and RAW.** Feature detection, barcode descriptors, model assets and a portable DNG decoder. See [analysis and RAW](image/analysis-and-raw.md).
-- **Kernels, processors and graph transport.** Custom per-pixel programs and the codec that moves a graph between threads. See [kernels and graph transport](image/kernels-and-graphs.md).
-- **Retained image shaders.** `IFXShader` carries immutable GPU generator and filter recipes presented by AnimationFX layers. See [image shaders in retained layers](image/shaders.md).
+- Images and extents: `IFXImage` nodes with a finite or infinite `extent`, and the operations that crop, transform, composite and clamp them.
+- Filters: 203 named filters in 15 categories, applied with `IFXFilter` and discovered through `IFXFilterRegistry`. See the [filter catalogue](image/filters.md).
+- Rendering: `IFXContext`, `IFXRenderPipeline`, destinations, tile plans and tasks turn a graph into pixels with budgets and cancellation.
+- Resources: `IFXImageResource` loads and exports images through the session.
+- Image view: `IFXImageView`, after ImageKit's `IKImageView`, shows a resource to zoom, pan and crop.
+- Text images: `createIFXTextImage` and `createIFXAttributedTextImage` turn [TextFX](text.md) text into graph nodes.
+- Analysis and RAW: feature detection, barcode descriptors, model assets and a portable DNG decoder. See [analysis and RAW](image/analysis-and-raw.md).
+- Kernels, processors and graph transport: custom per-pixel programs and the codec that moves a graph between threads. See [kernels and graph transport](image/kernels-and-graphs.md).
+- Retained image shaders: `IFXShader` carries immutable GPU generator and filter recipes presented by AnimationFX layers. See [image shaders in retained layers](image/shaders.md).
 
 ```ts
 import { IFXImage } from "@syndromatic/syncloudos/fx/image";
@@ -30,7 +30,6 @@ import { IFXImage } from "@syndromatic/syncloudos/fx/image";
 | Entry | `@syndromatic/syncloudos/fx/image` |
 | Hook | `useImages`, from `@syndromatic/syncloudos/sdk` |
 | Permissions | None declared in the manifest. The session checks decode and export policy for each image. |
-| Analogue | Core Image (`CIImage`, `CIFilter`, `CIContext`, `CIKernel`, `CIDetector`, `CIRAWFilter`) and ImageKit's `IKImageView` |
 
 ## What the entry exports
 

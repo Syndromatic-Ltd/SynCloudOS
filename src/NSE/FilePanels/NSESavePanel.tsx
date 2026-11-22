@@ -175,7 +175,7 @@ export function NSESavePanel({
     >
       <p className="nse-file-panel-prompt" data-nse-part="prompt">Save <strong className="nse-file-panel-suggested-name" data-nse-part="suggested-name">{request.suggestedName}</strong> to a destination you choose.</p>
       <div className="nse-file-panel-actions">
-        <NSEButton appearance="aqua" title="Cancel" data-nse-part="cancel" onClick={() => dismiss(false, "programmatic")} />
+        <NSEButton appearance="light" title="Cancel" data-nse-part="cancel" onClick={() => dismiss(false, "programmatic")} />
         <NSEButton
           keyEquivalent={"\r"}
           title="Choose destination"

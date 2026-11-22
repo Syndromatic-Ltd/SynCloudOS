@@ -145,14 +145,14 @@ test("framework artwork survives an isolated Vite library build and relocation w
   const modules = [
     "src/SynCloudOS/Resources/frameworkAssets.ts",
     "src/NSE/SystemUI/LoginWindow/loginWindowAssets.ts",
-    "src/Webspring/webspringSurface.ts",
+    "src/Webspring/WSSurface.ts",
   ];
   const directory = mkdtempSync(resolve(tmpdir(), "syncloudos-asset-portability-"));
   const entry = resolve(directory, "framework-assets-probe.ts");
   try {
     writeFileSync(entry, modules.map((path, index) =>
       `export * as module${index} from ${JSON.stringify(resolve(root, path).replaceAll("\\", "/"))};`).join("\n") +
-      `\nimport { WebspringSurface } from ${JSON.stringify(resolve(root, "src/Webspring/webspringSurface.ts").replaceAll("\\", "/"))};\nexport const cotton = WebspringSurface.cotton();\n`);
+      `\nimport { WSSurface } from ${JSON.stringify(resolve(root, "src/Webspring/WSSurface.ts").replaceAll("\\", "/"))};\nexport const cotton = WSSurface.cotton();\n`);
     // Only resource leaf modules: this does not run or overwrite the SDK build.
     const result = await build({
       root, configFile: false, publicDir: false, base: "./", logLevel: "silent",

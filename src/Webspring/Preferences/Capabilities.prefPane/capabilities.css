@@ -18,19 +18,20 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+@layer nse.structure {
 .nse-capabilities { padding: 16px; }
 .nse-capabilities-content {
-  color: var(--nse-prefs-row-colour, #263746);
+
   display: grid;
   gap: 12px;
   padding: 12px;
   min-inline-size: 0;
   overflow-wrap: anywhere;
 }
-.nse-capabilities-content :is(h2, p, dl, dt, dd) { color: inherit; font: inherit; text-shadow: none; margin: 0; }
+.nse-capabilities-content :is(h2, p, dl, dt, dd) {  font: inherit;  margin: 0; }
 .nse-capabilities-content h2 { font-weight: 600; }
 .nse-capabilities-details, .nse-capabilities-support > div { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 12px; }
 .nse-capabilities-details dd, .nse-capabilities-support dd { text-align: end; }
 .nse-capabilities-support, .nse-capabilities-families { display: grid; gap: 12px; }
 .nse-capabilities-families dt { font-weight: 600; margin-block-end: 4px; }
-[data-mode="dark"] .nse-capabilities-content { color: var(--nse-prefs-row-colour, #e7ecf2); }
+}

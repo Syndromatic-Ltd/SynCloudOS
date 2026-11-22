@@ -23,7 +23,8 @@ import React from "react";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
-import { defineWebspring, WebspringBoardView } from "../../src/Webspring/public";
+import { WSBoardViewController } from "../../src/Webspring/public";
+import { createTestWebspring } from "./webspringTestShell";
 import { WebspringHost } from "../../src/Webspring/WebspringHost";
 import { createTestBundle, createTestManifest, createTestRuntime } from "./helpers";
 
@@ -34,8 +35,8 @@ afterEach(async () => {
 });
 
 it.each([
-  { id: "board", component: WebspringBoardView },
-])("keeps a disabled app visible, dimmed and described in $id", async ({ id, component }) => {
+  { id: "board", launcher: WSBoardViewController },
+])("keeps a disabled app visible, dimmed and described in $id", async ({ launcher }) => {
   const reason = "This application is being prepared.";
   const loadModule = vi.fn(() => Promise.resolve({ default: () => null }));
   const runtime = createTestRuntime({ initialBundles: [createTestBundle({
@@ -44,22 +45,15 @@ it.each([
   }, { loadModule })] });
   runtimes.push(runtime);
   await runtime.boot({ initialPathname: "/" });
-  const shell = defineWebspring({
-    manifest: {
-      schemaVersion: 1, bundleIdentifier: "com.example.fixture.disabled-shell", version: "1.0.0", displayName: "Fixture",
-      webspringShell: {
-        views: [{ id, presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
-        defaults: { desktop: id, tablet: id, mobile: id }, homeRoute: "/",
-        branding: { name: { key: "host.name", fallback: "Fixture" } },
-      },
-    },
-    components: { [id]: component },
+  const shell = createTestWebspring({
+    info: { bundleIdentifier: "com.example.fixture.disabled-shell", displayName: "Fixture", branding: { name: { key: "host.name", fallback: "Fixture" } } },
+    launcher,
   });
   render(<SynCloudOSProvider runtime={runtime}><WebspringHost shell={shell} startupPhase="complete" /></SynCloudOSProvider>);
   const button = screen.getByRole("button", { name: "Open Preparing" }) as HTMLButtonElement;
   expect(button.textContent).toContain("Preparing");
   expect(button.disabled).toBe(true);
-  expect(button.classList.contains("is-disabled")).toBe(true);
+  expect(button.getAttribute("data-nse-enabled")).toBe("false");
   expect(button.getAttribute("aria-description")).toBe(reason);
   expect(button.title).toBe(reason);
   fireEvent.click(button);

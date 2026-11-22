@@ -18,7 +18,26 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { defineWebspring, isDefinedWebspring, withDiscoveredWebspringItems } from "./Webspring";
+export {
+  WSApplication,
+  createWebspring,
+  isWSApplicationClass,
+  isWSDefinition,
+  resolveLauncher,
+  withDiscoveredWebspringItems,
+} from "./WSApplication";
+export type {
+  WSApplicationClass,
+  WSCreateWebspringInput,
+  WSDefinition,
+} from "./WSApplication";
+export { WSLauncherContext, WSLauncherRootView, WSLauncherViewController, useWSLauncher } from "./WSLauncherViewController";
+export type { WSLauncherFolders, WSLauncherRootProps, WSLauncherViewControllerClass } from "./WSLauncherViewController";
+export { WSIconView } from "./WSIconView";
+export type { WSIconHoverEndEvent, WSIconViewProps } from "./WSIconView";
+export { WSBoardViewController } from "./Contents/Views/WSBoardViewController/WSBoardViewController";
+export { captureWSInfo } from "./WSInfo";
+export type { WSBranding, WSCapturedBranding, WSCapturedInfo, WSInfo } from "./WSInfo";
 export {
   createIntegrationContribution,
   defineIntegration,
@@ -30,33 +49,31 @@ export type {
   SynWareIntegrationDiscovered,
   SynWareIntegrationInput,
 } from "./webspringIntegration";
-export { definePreferencePane, isPreferencePaneDefinition } from "../SynCloudOS/Preferences";
-export type { PreferencePaneDefinition, PreferencePaneInput, PreferencePaneText, PreferencePaneViewProps } from "../SynCloudOS/Preferences";
-export { WebspringBoardView, createWebspringBoardView } from "./Contents/Views/WebspringBoardView/WebspringBoardView";
-export type { WebspringBoardConfiguration } from "./Contents/Views/WebspringBoardView/WebspringBoardView";
+export { NSEPreferencePane, capturePreferencePaneClass, resolvePreferencePanes } from "../SynCloudOS/Preferences";
+export type { NSEPreferencePaneClass, PreferencePaneDescriptor, PreferencePaneText, PreferencePaneViewProps } from "../SynCloudOS/Preferences";
 
 // The pieces a site's own launcher view is built from, as the Board is.
-export { WebspringWidgetShelf } from "./WebspringWidgetShelf";
+export { WSWidgetShelfView } from "./WSWidgetShelfView";
+export type { WSWidgetShelfViewProps } from "./WSWidgetShelfView";
 export { useWebspringHapticEngine } from "./webspringHaptics";
-export { WebspringSurface, webspringSurfaceStyle } from "./webspringSurface";
-export { defineWidget, isDefinedWebspringWidget } from "./webspringWidget";
-export { WebspringDragProxy, getWebspringDragGrabOffset, useWebspringDragProxyPosition } from "./WebspringDragProxy";
-export type { WebspringDragProxyPoint, WebspringDragProxyRect } from "./WebspringDragProxy";
-export { createWebspringFolderSplitPresentation } from "./WebspringFolderSplitPresentation";
-export type { WebspringFolderSplitOptions } from "./WebspringFolderSplitPresentation";
-export { WebspringFolderTile } from "./WebspringFolderTile";
+export { WSSurface, webspringSurfaceStyle } from "./WSSurface";
+export { WSWidget, captureWSWidgetClass } from "./WSWidget";
+export type { WSWidgetClass, WSWidgetDescriptor, WSWidgetState, WSWidgetTimers } from "./WSWidget";
+export { WSDragProxy, getWebspringDragGrabOffset, useWSDragProxyPosition } from "./WSDragProxy";
+export type { WebspringDragProxyPoint, WebspringDragProxyRect } from "./WSDragProxy";
+export { createWSFolderSplitPresentation } from "./WSFolderSplitView";
+export type { WebspringFolderSplitOptions } from "./WSFolderSplitView";
+export { WSFolderTileView } from "./WSFolderTileView";
 export { useWebspringFolderAppearance } from "./WebspringFolderAppearance";
-export type { WebspringFolderTileProps } from "./WebspringFolderTile";
-export { WebspringIconArtwork } from "./WebspringIconArtwork";
-export type { WebspringIconArtworkProps } from "./WebspringIconArtwork";
-export { WebspringIconEffect } from "./WebspringIconEffect";
-export { WebspringLaunchDim, resolveWebspringLaunchDimMotion } from "./WebspringLaunchDim";
-export type { WebspringLaunchDimMotion } from "./WebspringLaunchDim";
+export type { WSFolderTileViewProps } from "./WSFolderTileView";
+export { WSIconArtwork } from "./WSIconArtwork";
+export type { WSIconArtworkProps } from "./WSIconArtwork";
+export { WSIconEffect } from "./WSIconEffect";
+export { WSLaunchDim, resolveWebspringLaunchDimMotion } from "./WSLaunchDim";
+export type { WebspringLaunchDimMotion } from "./WSLaunchDim";
 export {
   getWebspringRadialExitForIcon,
-  getWebspringSelectorTransform,
   resolveWebspringIconPresentation,
-  resolveWebspringOrbPresentation,
   useWebspringMotion,
   webspringIconSprings,
 } from "./Webspring.transitions";
@@ -65,7 +82,7 @@ export type {
   WebspringIconPresentationOptions,
   WebspringIconState,
   WebspringMotion,
-  WebspringRadialExit,
+  WSRadialExit,
 } from "./Webspring.transitions";
 export {
   WEBSPRING_DRAG_FOLDER_CATCH_MARGIN,
@@ -73,7 +90,7 @@ export {
   WEBSPRING_DRAG_MERGE_REST_MS,
   WEBSPRING_DRAG_REORDER_REST_MS,
   WEBSPRING_DRAG_SPRING_OPEN_MS,
-  createWebspringDragArbiter,
+  createWSDragArbiter,
 } from "./webspringDragArbiter";
 export type {
   WebspringDragArbiter,
@@ -85,12 +102,12 @@ export type {
   WebspringDragResult,
   WebspringDragView,
 } from "./webspringDragArbiter";
-export { captureWebspringDragArtworkRects, captureWebspringDragReorderSlots, getWebspringDragReorderTargetFromPoint } from "./webspringDragReorder";
+export { captureWSDragArtworkRects, captureWebspringDragReorderSlots, getWebspringDragReorderTargetFromPoint } from "./webspringDragReorder";
 export type { WebspringDragReorderSlots } from "./webspringDragReorder";
-export { WEBSPRING_STAGE, getDesktopWebspringLayout, stagePointStyle } from "./stage";
 export type {
-  AccountAction,
+  WSAccountAction,
   ActionResult,
+  WSActionResult,
   AuthenticationPolicy,
   AuthenticationConfiguration,
   AuthenticationInput,
@@ -101,35 +118,26 @@ export type {
   ResourceReference,
   ShellMode,
   WebspringActions,
-  WebspringApp,
-  WebspringAppItem,
-  WebspringDefinition,
-  WebspringDefinitionInput,
-  WebspringDialPlacement,
+  WSApp,
+  WSAppItem,
   WebspringFolderAppearance,
-  WebspringFolderAppearanceOptions,
+  WSFolderAppearanceOptions,
   WebspringFolderCornerRadius,
   WebspringFolderFill,
-  WebspringFolderItem,
-  WebspringFolderPresentationComponent,
-  WebspringFolderPresentationProps,
+  WSFolderItem,
+  WSFolderPresentationComponent,
+  WSFolderPresentationProps,
   WebspringFolderShape,
   WebspringFolderSmoothSurface,
   WebspringFolderTexture,
-  WebspringIconEffectComponent,
-  WebspringIconEffectProps,
-  WebspringItem,
-  WebspringManifest,
+  WSIconEffectComponent,
+  WSIconEffectProps,
+  WSItem,
   WebspringPreferences,
   WebspringPreferencesOptions,
-  WebspringQuickSwitchOptions,
-  WebspringViewComponent,
-  WebspringLaunchZoom,
-  WebspringViewDeclaration,
+  WSQuickSwitchOptions,
+  WSLaunchZoom,
   WebspringViewModel,
-  WebspringWidget,
-  WebspringWidgetEntry,
-  WebspringWidgetInput,
-  WebspringWidgetViewProps,
-  WebspringViewProps,
+  WSWidgetEntry,
+  WSResolvedBranding,
 } from "./webspringTypes";

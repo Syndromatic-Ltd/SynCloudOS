@@ -60,7 +60,7 @@ function applyAppearance(box: HTMLElement, image: HTMLImageElement, decoration: 
   image.style.removeProperty("border"); image.style.removeProperty("padding"); image.style.removeProperty("background");
   image.style.removeProperty("box-shadow"); image.style.removeProperty("opacity");
   box.style.removeProperty("-webkit-box-reflect"); box.style.removeProperty("margin-block-end");
-  delete box.dataset.border; delete decoration.dataset.shadow;
+  delete box.dataset.border; delete decoration.dataset.nseShadow;
   decoration.removeAttribute("style");
   if (!appearance) { image.style.removeProperty("filter"); image.style.removeProperty("transform"); return; }
   const border = appearance.border;
@@ -83,7 +83,7 @@ function applyAppearance(box: HTMLElement, image: HTMLImageElement, decoration: 
     const x = Math.round(Math.cos(radians) * shadow.offset * 10) / 10, y = Math.round(-Math.sin(radians) * shadow.offset * 10) / 10;
     filters.push(`drop-shadow(${x}px ${y}px ${shadow.blur / 2}px ${rgba(shadow.colour, shadow.opacity)})`);
   } else if (shadow) {
-    decoration.dataset.shadow = shadow.kind;
+    decoration.dataset.nseShadow = shadow.kind;
     decoration.style.setProperty("--nse-shadow-colour", rgba(shadow.colour, shadow.opacity));
     decoration.style.setProperty("--nse-shadow-blur", `${shadow.blur}px`);
     decoration.style.setProperty("--nse-shadow-offset", `${shadow.offset}px`);
@@ -115,6 +115,7 @@ export function nseAttachmentNodeViews(doc: Document, resolver: () => NSETextAtt
       let image: HTMLImageElement | null = null, box: HTMLElement | null = null;
       let resizing: { pointerId: number; handle: ResizeHandle; direction: 1 | -1; startX: number; startY: number; startWidth: number; aspect: number; scale: number; maximum: number; width: number } | null = null;
       const dom = doc.createElement("span");
+      dom.dataset.nsePart = "attachment";
       dom.setAttribute("contenteditable", "false");
       const place = (run: NSEAttributedAttachmentRun, src: string | null) => {
         const placement = run.placement;
@@ -147,6 +148,7 @@ export function nseAttachmentNodeViews(doc: Document, resolver: () => NSETextAtt
         for (const position of resizeHandles) {
           const handle = doc.createElement("span");
           handle.className = "nse-text-attachment-handle"; handle.dataset.handle = position;
+          handle.dataset.nsePart = "handle";
           handle.setAttribute("aria-hidden", "true");
           box.append(handle);
         }
@@ -161,14 +163,14 @@ export function nseAttachmentNodeViews(doc: Document, resolver: () => NSETextAtt
         dom.className = "nse-text-attachment"; dom.dataset.kind = run.attachmentKind; dom.dataset.display = "image";
         dom.removeAttribute("role"); dom.removeAttribute("aria-label");
         const nextBox = doc.createElement("span");
-        nextBox.className = "nse-text-attachment-box";
+        nextBox.className = "nse-text-attachment-box"; nextBox.dataset.nsePart = "content";
         const element = doc.createElement("img");
         element.alt = run.alt; element.draggable = false; element.decoding = "async";
         const size = run.bounds ?? (resolved.naturalWidth && resolved.naturalHeight ? { width: resolved.naturalWidth, height: resolved.naturalHeight } : run.intrinsicSize ? { width: run.intrinsicSize.inline, height: run.intrinsicSize.block } : null);
         if (size) { element.width = Math.round(size.width); element.height = Math.round(size.height); element.style.aspectRatio = `auto ${size.width} / ${size.height}`; }
         element.addEventListener("error", () => { if (current === generation) placeholder(run); }, { once: true });
         const decoration = doc.createElement("span");
-        decoration.className = "nse-text-attachment-shadow"; decoration.setAttribute("aria-hidden", "true");
+        decoration.className = "nse-text-attachment-shadow"; decoration.dataset.nsePart = "shadow"; decoration.setAttribute("aria-hidden", "true");
         nextBox.append(decoration, element);
         applyAppearance(nextBox, element, decoration, run.appearance, size?.height ?? 0);
         image = element; box = nextBox;
@@ -249,8 +251,8 @@ export function nseAttachmentNodeViews(doc: Document, resolver: () => NSETextAtt
           node = next; if (changed && !resizing) render();
           return true;
         },
-        selectNode() { selected = true; dom.dataset.selected = "true"; handles(); },
-        deselectNode() { selected = false; delete dom.dataset.selected; handles(); },
+        selectNode() { selected = true; dom.dataset.nseSelected = ""; handles(); },
+        deselectNode() { selected = false; delete dom.dataset.nseSelected; handles(); },
         // Handles are the cell's own; the editor never sees their pointer traffic.
         stopEvent: (event) => Boolean(resizing) || Boolean((event.target as Element | null)?.closest?.(".nse-text-attachment-handle")),
         ignoreMutation: () => true,

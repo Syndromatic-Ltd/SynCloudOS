@@ -6,6 +6,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { relative, resolve } from "node:path";
 import ts from "typescript";
 import { inside, projectContext, slash } from "./project.mjs";
+import { retiredWebspringNames } from "../synware/validation-core.mjs";
 export function similarity(query, candidate) {
   const a = query.toLowerCase(), b = candidate.toLowerCase();
   if (a === b) return 1;
@@ -20,14 +21,371 @@ export function similarity(query, candidate) {
 function applicationMenuQuery(query) {
   return /^(?:application[\s_-]*menu|(?:system\s+)?preferences|settings|account)$/iu.test(query?.trim() ?? "");
 }
-function symbolScore(query, name) {
-  if (query.toLowerCase()===name.toLowerCase()) return 2;
-  if (applicationMenuQuery(query)) {
-    const preferred=["useApplicationMenuTrigger","SynWareApplicationMenuManifest","SynWareApplicationMenuTriggerPort"];
-    const index=preferred.indexOf(name);
-    if (index!==-1) return 1.5-index*0.1;
+
+/**
+ * Plain-English descriptions and AppKit variant names mapped to public NSE APIs,
+ * exact prop usage, and Control Gallery example names so agents find existing
+ * controls before inventing one.
+ */
+const CONTROL_CONCEPTS = Object.freeze([
+  {
+    aliases: ["circular slider", "angle dial", "rotation dial", "shadow angle dial", "knob", "dial", "rotary slider", "rotary knob", "wrapping angle dial", "nsslider.slidertype.circular", "slidertype.circular", "nsecircularslider"],
+    symbols: ["NSESlider", "NSESliderProps"],
+    usage: 'NSESlider sliderType="circular"',
+    galleryExample: "Wrapping angle dial",
+    appkitCounterpart: "NSSlider.SliderType.circular",
+    docKeywords: ["sliderType", "circular", "NSESlider", "dial"],
+  },
+  {
+    aliases: ["linear slider", "range slider", "slider", "scrubber", "nsslider", "nsslider.slidertype.linear"],
+    symbols: ["NSESlider", "NSESliderProps"],
+    usage: 'NSESlider sliderType="linear"',
+    galleryExample: "Linear slider",
+    appkitCounterpart: "NSSlider",
+    docKeywords: ["NSESlider", "slider"],
+  },
+  {
+    aliases: ["toggle switch", "switch", "on off switch", "nsswitch"],
+    symbols: ["NSESwitch", "NSEButton"],
+    usage: "NSESwitch",
+    galleryExample: "Switch",
+    appkitCounterpart: "NSSwitch",
+    docKeywords: ["NSESwitch", "switch"],
+  },
+  {
+    aliases: ["checkbox", "check box", "tick box", "nsbutton.buttontype.switch"],
+    symbols: ["NSEButton"],
+    usage: 'NSEButton buttonType="switch"',
+    galleryExample: "Checkbox",
+    appkitCounterpart: "NSButton.ButtonType.switch",
+    docKeywords: ["NSEButton", "switch"],
+  },
+  {
+    aliases: ["disclosure triangle", "disclosure button", "expand collapse", "accordion", "nsbutton.bezelstyle.disclosure"],
+    symbols: ["NSEButton"],
+    usage: 'NSEButton bezelStyle="disclosure" buttonType="pushOnPushOff"',
+    galleryExample: "Disclosure triangle",
+    appkitCounterpart: "NSButton.BezelStyle.disclosure",
+    docKeywords: ["NSEButton", "disclosure"],
+  },
+  {
+    aliases: ["segmented control", "capsule tabs", "tool button group", "grouped buttons", "button group", "nssegmentedcontrol"],
+    symbols: ["NSESegmentedControl", "NSEToolbarItemGroup"],
+    usage: 'NSESegmentedControl segmentStyle="capsule" | "texturedRounded"',
+    galleryExample: "Segmented control",
+    appkitCounterpart: "NSSegmentedControl",
+    docKeywords: ["NSESegmentedControl", "segmented"],
+  },
+  {
+    aliases: ["dropdown", "drop down", "select", "popup button", "pop-up button", "pull-down", "pulldown", "nspopupbutton"],
+    symbols: ["NSEPopUpButton"],
+    usage: "NSEPopUpButton",
+    galleryExample: "Pop-up button",
+    appkitCounterpart: "NSPopUpButton",
+    docKeywords: ["NSEPopUpButton", "pop-up"],
+  },
+  {
+    aliases: ["combo box", "combobox", "autocomplete", "editable dropdown", "nscombobox"],
+    symbols: ["NSEComboBox"],
+    usage: "NSEComboBox",
+    galleryExample: "Combo box",
+    appkitCounterpart: "NSComboBox",
+    docKeywords: ["NSEComboBox", "combo"],
+  },
+  {
+    aliases: ["token field", "tag input", "chips", "pills input", "nstokenfield"],
+    symbols: ["NSETokenField"],
+    usage: "NSETokenField",
+    galleryExample: "Token field",
+    appkitCounterpart: "NSTokenField",
+    docKeywords: ["NSETokenField", "token"],
+  },
+  {
+    aliases: ["stepper", "number stepper", "spinbutton", "increment decrement", "nsstepper"],
+    symbols: ["NSEStepper"],
+    usage: "NSEStepper",
+    galleryExample: "Stepper",
+    appkitCounterpart: "NSStepper",
+    docKeywords: ["NSEStepper", "stepper"],
+  },
+  {
+    aliases: ["progress bar", "progress indicator", "spinner", "loading spinner", "activity indicator", "nsprogressindicator"],
+    symbols: ["NSEProgressIndicator"],
+    usage: 'NSEProgressIndicator style="bar" | "spinning"',
+    galleryExample: "Progress indicator",
+    appkitCounterpart: "NSProgressIndicator",
+    docKeywords: ["NSEProgressIndicator", "progress"],
+  },
+  {
+    aliases: ["level indicator", "level meter", "rating", "star rating", "capacity bar", "meter", "nslevelindicator"],
+    symbols: ["NSELevelIndicator"],
+    usage: "NSELevelIndicator",
+    galleryExample: "Level indicator",
+    appkitCounterpart: "NSLevelIndicator",
+    docKeywords: ["NSELevelIndicator", "level"],
+  },
+  {
+    aliases: ["colour well", "color well", "colour picker", "color picker", "colour swatch", "color swatch", "nscolorwell", "nscolorpanel"],
+    symbols: ["NSEColourWell", "NSEColourPanel"],
+    usage: "NSEColourWell",
+    galleryExample: "Colour well",
+    appkitCounterpart: "NSColorWell",
+    docKeywords: ["NSEColourWell", "colour"],
+  },
+  {
+    aliases: ["date picker", "calendar", "clock", "time picker", "date range", "nsdatepicker"],
+    symbols: ["NSEDatePicker"],
+    usage: "NSEDatePicker",
+    galleryExample: "Date picker",
+    appkitCounterpart: "NSDatePicker",
+    docKeywords: ["NSEDatePicker", "date"],
+  },
+  {
+    aliases: ["search field", "search bar", "search input", "search box", "nssearchfield"],
+    symbols: ["NSESearchField"],
+    usage: "NSESearchField",
+    galleryExample: "Search field",
+    appkitCounterpart: "NSSearchField",
+    docKeywords: ["NSESearchField", "search"],
+  },
+  {
+    aliases: ["password field", "password input", "secure field", "secure text", "nssecuretextfield"],
+    symbols: ["NSESecureTextField"],
+    usage: "NSESecureTextField",
+    galleryExample: "Secure text field",
+    appkitCounterpart: "NSSecureTextField",
+    docKeywords: ["NSESecureTextField", "secure"],
+  },
+  {
+    aliases: ["label", "static text", "embossed status label", "text field", "nstextfield"],
+    symbols: ["NSETextField"],
+    usage: 'NSETextField isEditable={false} font="footnote" backgroundStyle="raised"',
+    galleryExample: "Text field",
+    appkitCounterpart: "NSTextField",
+    docKeywords: ["NSETextField", "text-field"],
+  },
+  {
+    aliases: ["rich text editor", "text editor", "multiline text", "text view", "nstextview"],
+    symbols: ["NSETextView"],
+    usage: "NSETextView",
+    galleryExample: "Text view",
+    appkitCounterpart: "NSTextView",
+    docKeywords: ["NSETextView", "text"],
+  },
+  {
+    aliases: ["sidebar", "source list", "tree view", "outline view", "nsoutlineview"],
+    symbols: ["NSEOutlineView"],
+    usage: 'NSEOutlineView selectionHighlightStyle="sourceList"',
+    galleryExample: "Outline view",
+    appkitCounterpart: "NSOutlineView",
+    docKeywords: ["NSEOutlineView", "source-list"],
+  },
+  {
+    aliases: ["split view", "three pane", "three-pane", "inspector pane", "collapsible sidebar", "nssplitviewcontroller", "nssplitviewitem"],
+    symbols: ["NSESplitViewController", "NSESplitViewItem"],
+    usage: "NSESplitViewController with NSESplitViewItem",
+    appkitCounterpart: "NSSplitViewController",
+    docKeywords: ["NSESplitViewController", "split"],
+  },
+  {
+    aliases: ["collection view", "grid view", "cover flow", "nscollectionview"],
+    symbols: ["NSECollectionView"],
+    usage: "NSECollectionView",
+    galleryExample: "Collection view",
+    appkitCounterpart: "NSCollectionView",
+    docKeywords: ["NSECollectionView", "collection"],
+  },
+  {
+    aliases: ["column browser", "miller columns", "nsbrowser"],
+    symbols: ["NSEBrowser"],
+    usage: "NSEBrowser",
+    galleryExample: "Browser",
+    appkitCounterpart: "NSBrowser",
+    docKeywords: ["NSEBrowser", "browser"],
+  },
+  {
+    aliases: ["data table", "table view", "sortable table", "nstableview"],
+    symbols: ["NSETableView"],
+    usage: "NSETableView",
+    galleryExample: "Table view",
+    appkitCounterpart: "NSTableView",
+    docKeywords: ["NSETableView", "table"],
+  },
+  {
+    aliases: ["tabs", "tab bar", "tab view", "nstabview", "nstabviewcontroller"],
+    symbols: ["NSETabView", "NSETabViewController"],
+    usage: "NSETabView",
+    galleryExample: "Tab view",
+    appkitCounterpart: "NSTabView",
+    docKeywords: ["NSETabView", "tab"],
+  },
+  {
+    aliases: ["scroll view", "rubber band", "rubber-band scrolling", "scroller", "nsscrollview"],
+    symbols: ["NSEScrollView"],
+    usage: "NSEScrollView",
+    appkitCounterpart: "NSScrollView",
+    docKeywords: ["NSEScrollView", "scroll"],
+  },
+  {
+    aliases: ["breadcrumb", "path bar", "path control", "nspathcontrol"],
+    symbols: ["NSEPathControl"],
+    usage: "NSEPathControl",
+    galleryExample: "Path control",
+    appkitCounterpart: "NSPathControl",
+    docKeywords: ["NSEPathControl", "path"],
+  },
+  {
+    aliases: ["rule editor", "predicate editor", "filter builder", "query builder", "nsruleeditor", "nspredicateeditor"],
+    symbols: ["NSERuleEditor", "NSEPredicateEditor"],
+    usage: "NSERuleEditor / NSEPredicateEditor",
+    galleryExample: "Rule editor",
+    appkitCounterpart: "NSRuleEditor",
+    docKeywords: ["NSERuleEditor", "predicate"],
+  },
+  {
+    aliases: ["page curl", "book reader", "page controller", "nspagecontroller"],
+    symbols: ["NSEPageController"],
+    usage: "NSEPageController",
+    appkitCounterpart: "NSPageController",
+    docKeywords: ["NSEPageController", "page"],
+  },
+  {
+    aliases: ["popover", "sheet", "modal window", "nspopover", "presentaspopover", "presentassheet"],
+    symbols: ["NSEViewController", "NSEWindowController"],
+    usage: "viewController.presentAsPopover(Controller, { of: anchor }) / presentAsSheet(Controller)",
+    appkitCounterpart: "NSPopover",
+    docKeywords: ["presentAsPopover", "popover", "sheet"],
+  },
+  {
+    aliases: ["alert", "confirmation dialog", "confirm sheet", "nsalert"],
+    symbols: ["NSEAlert", "NSEModalResponse"],
+    usage: "new NSEAlert().beginSheetModal(window)",
+    appkitCounterpart: "NSAlert",
+    docKeywords: ["NSEAlert", "alert"],
+  },
+  {
+    aliases: ["open panel", "save panel", "file picker", "file dialog", "nsopenpanel", "nssavepanel"],
+    symbols: ["NSEOpenPanel", "NSESavePanel"],
+    usage: "SCOS.filePanels / NSEOpenPanel / NSESavePanel",
+    appkitCounterpart: "NSOpenPanel",
+    docKeywords: ["NSEOpenPanel", "NSESavePanel", "file"],
+  },
+  {
+    aliases: ["status bar", "bottom bar", "content border", "setcontentborderthickness", "window footer"],
+    symbols: ["NSEWindowController", "NSETextField"],
+    usage: 'window.setContentBorderThickness(thickness, "minY") with NSETextField isEditable={false} backgroundStyle="raised"',
+    appkitCounterpart: "NSWindow.setContentBorderThickness(_:for:)",
+    docKeywords: ["contentBorder", "status", "window"],
+  },
+  {
+    aliases: ["titlebar", "title bar", "toolbar", "window chrome", "stylemask", "nswindow", "nstoolbar", "nswindowcontroller"],
+    symbols: ["NSEWindowController", "NSEToolbar", "NSEToolbarItem"],
+    usage: "NSEWindowController with window.toolbar = new NSEToolbar(...)",
+    appkitCounterpart: "NSWindowController",
+    docKeywords: ["NSEWindowController", "toolbar", "titlebar"],
+  },
+  {
+    aliases: ["application menu", "menu bar", "mainmenu", "settings", "preferences", "account", "nsapplication.mainmenu", "nsmenu"],
+    symbols: ["NSEToolbarItem", "NSEApplication", "NSEMenuBar", "NSEMenu", "useApplicationMenuTrigger"],
+    usage: 'NSEApplication.mainMenu, NSEToolbarItem.applicationMenu("gear"), or useApplicationMenuTrigger()',
+    appkitCounterpart: "NSApplication.mainMenu",
+    docKeywords: ["NSEToolbarItem.applicationMenu", "mainMenu", "preferences"],
+  },
+  {
+    aliases: ["quickswitch", "quick switch", "document switcher", "window title menu"],
+    symbols: ["useQuickSwitchTrigger"],
+    usage: "useQuickSwitchTrigger()",
+    docKeywords: ["useQuickSwitchTrigger", "QuickSwitch"],
+  },
+  {
+    aliases: ["font panel", "typeface picker", "font picker", "nsfontpanel"],
+    symbols: ["NSEFontPanel"],
+    usage: "NSEFontPanel",
+    appkitCounterpart: "NSFontPanel",
+    docKeywords: ["NSEFontPanel", "font"],
+  },
+  {
+    aliases: ["group box", "card", "box", "separator", "nsbox"],
+    symbols: ["NSEBox"],
+    usage: "NSEBox",
+    galleryExample: "Box",
+    appkitCounterpart: "NSBox",
+    docKeywords: ["NSEBox", "box"],
+  },
+  {
+    aliases: ["system image", "template icon", "back arrow", "forward arrow", "nsimage", "nsimageview"],
+    symbols: ["NSEImage", "NSEImageView"],
+    usage: "NSEImage.named(NSEImage.goBackTemplateName)",
+    appkitCounterpart: "NSImage",
+    docKeywords: ["NSEImage", "image"],
+  },
+]);
+
+function normaliseQuery(query) {
+  return (query ?? "").trim().toLowerCase().replace(/[\s_-]+/gu, " ");
+}
+
+function matchConcepts(query) {
+  const norm = normaliseQuery(query);
+  if (!norm) return [];
+  const compact = norm.replace(/\s+/gu, "");
+  const queryWords = new Set(norm.split(/\s+/u).filter(w => w.length >= 2));
+  const hits = [];
+  for (const concept of CONTROL_CONCEPTS) {
+    let best = 0;
+    for (const alias of concept.aliases) {
+      const aNorm = normaliseQuery(alias);
+      const aCompact = aNorm.replace(/\s+/gu, "");
+      if (norm === aNorm || compact === aCompact) { best = Math.max(best, 1.9); continue; }
+      if (aNorm.includes(norm) && norm.length >= 4) { best = Math.max(best, 1.72); continue; }
+      if (norm.includes(aNorm) && aNorm.length >= 4) { best = Math.max(best, 1.68); continue; }
+      const aliasWords = aNorm.split(/\s+/u).filter(w => w.length >= 2);
+      if (aliasWords.length > 0 && aliasWords.every(word => queryWords.has(word))) best = Math.max(best, 1.65);
+    }
+    if (best > 0) hits.push({ concept, score: best });
   }
-  return similarity(query,name);
+  return hits.sort((a, b) => b.score - a.score);
+}
+
+/** Reverse map from AppKit / Foundation / Core framework names to NSE symbol names. */
+function reverseCounterparts(map) {
+  const reverse = new Map();
+  if (!map) return reverse;
+  const add = (nseName, counterpart) => {
+    if (typeof counterpart !== "string") return;
+    const key = counterpart.toLowerCase();
+    const list = reverse.get(key) ?? [];
+    if (!list.includes(nseName)) list.push(nseName);
+    reverse.set(key, list);
+    // Also index the base class before any dot (e.g. "NSWindow" from "NSWindow.StyleMask").
+    const base = key.split(".")[0];
+    if (base && base !== key) {
+      const baseList = reverse.get(base) ?? [];
+      if (!baseList.includes(nseName)) baseList.push(nseName);
+      reverse.set(base, baseList);
+    }
+  };
+  for (const [nseName, value] of Object.entries(map.counterparts ?? {})) add(nseName, value);
+  for (const [nseName, value] of Object.entries(map.frameworkCounterparts ?? {})) add(nseName, value);
+  for (const [member, value] of Object.entries(map.members ?? {})) add(member.split(".")[0], value);
+  return reverse;
+}
+
+function symbolScore(query, name, conceptHits = [], counterpartTargets = new Map()) {
+  if (query.toLowerCase() === name.toLowerCase()) return 2;
+  if (applicationMenuQuery(query)) {
+    const preferred = ["NSEToolbarItem", "NSEApplication", "NSEMenuBar"];
+    const index = preferred.indexOf(name);
+    if (index !== -1) return 1.5 - index * 0.1;
+  }
+  let score = similarity(query, name);
+  const direct = counterpartTargets.get(name);
+  if (direct) score = Math.max(score, direct);
+  for (const { concept, score: conceptScore } of conceptHits) {
+    const index = concept.symbols.indexOf(name);
+    if (index !== -1) score = Math.max(score, conceptScore - index * 0.04);
+  }
+  return score;
 }
 const DOC_EXCERPT=1500, SIGNATURE_OUTLINE=1200;
 /** The installed SDK's map of NSE names to their AppKit, Foundation or Core framework counterparts. */
@@ -77,7 +435,7 @@ export function docSections(sdkRoot, query, limit=3) {
         for (const text of sections) {
           const lower=text.toLowerCase();
           let score=words.filter(word=>lower.includes(word)).length;
-          if (applicationMenuQuery(query) && lower.includes("useapplicationmenutrigger")) {
+          if (applicationMenuQuery(query) && lower.includes("nsetoolbaritem.applicationmenu")) {
             score+=10;
             if (lower.includes("applicationmenu")) score+=2;
             if (lower.includes("preferences")) score+=2;
@@ -101,11 +459,32 @@ export async function lookupSdk({projectRoot,entry,query,limit=8,full=false}={})
   const program=ts.createProgram(selected.map(value=>value.path),{noLib:true,skipLibCheck:true,moduleResolution:ts.ModuleResolutionKind.Bundler,module:ts.ModuleKind.ESNext,allowJs:false});
   // One result per declaration: a symbol re-exported by several entries lists every entry once.
   const checker=program.getTypeChecker(),symbols=[],byDeclaration=new Map(),counterparts=appkitCounterparts(sdkRoot);
+  // A removed Webspring helper answers with the classes that replace it.
+  const retired=query && Object.hasOwn(retiredWebspringNames,query) ? retiredWebspringNames[query] : null;
+  const conceptHits=query ? matchConcepts(query) : [];
+  const reverseMap=reverseCounterparts(counterparts);
+  const counterpartTargets=new Map();
+  if (query) {
+    const qLower=query.trim().toLowerCase();
+    for (const target of reverseMap.get(qLower) ?? []) counterpartTargets.set(target, Math.max(counterpartTargets.get(target) ?? 0, 1.85));
+    const qBase=qLower.split(".")[0];
+    if (qBase && qBase !== qLower) {
+      for (const target of reverseMap.get(qBase) ?? []) counterpartTargets.set(target, Math.max(counterpartTargets.get(target) ?? 0, 1.75));
+    }
+    if (qLower.length >= 4) {
+      for (const [appkitName, targets] of reverseMap.entries()) {
+        if (appkitName !== qLower && appkitName.includes(qLower)) {
+          for (const target of targets) counterpartTargets.set(target, Math.max(counterpartTargets.get(target) ?? 0, 1.45));
+        }
+      }
+    }
+  }
+  const queries=[query,...(retired?.replacements ?? [])].filter(Boolean);
   for (const value of selected) {
     const source=program.getSourceFile(value.path),module=source && checker.getSymbolAtLocation(source);
     if (!module) continue;
     for (const exported of checker.getExportsOfModule(module)) {
-      const name=exported.getName(),score=query ? symbolScore(query,name) : 1;
+      const name=exported.getName(),score=query ? Math.max(...queries.map(candidate=>symbolScore(candidate,name,conceptHits,counterpartTargets))) : 1;
       if (score<0.55) continue;
       const symbol=exported.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(exported) : exported;
       const declarations=symbol.getDeclarations() ?? [];
@@ -121,6 +500,12 @@ export async function lookupSdk({projectRoot,entry,query,limit=8,full=false}={})
       // NSE names are AppKit names: say which, or why there is none.
       const counterpart=appkitCounterpartFor(name,counterparts);
       if (counterpart!==undefined) record.appkitCounterpart=counterpart;
+      const matchedConcept=conceptHits.find(hit=>hit.concept.symbols.includes(name))?.concept;
+      if (matchedConcept) {
+        if (matchedConcept.usage) record.usage=matchedConcept.usage;
+        if (matchedConcept.galleryExample) record.galleryExample=matchedConcept.galleryExample;
+        if (!record.appkitCounterpart && matchedConcept.appkitCounterpart) record.appkitCounterpart=matchedConcept.appkitCounterpart;
+      }
       byDeclaration.set(key,record); symbols.push(record);
     }
   }
@@ -128,5 +513,15 @@ export async function lookupSdk({projectRoot,entry,query,limit=8,full=false}={})
   const rank=name=>name==="sdk" ? 0 : name==="." ? 1 : name==="nse" ? 2 : 3;
   for (const record of symbols) { record.entries.sort((a,b)=>rank(a)-rank(b) || a.localeCompare(b)); record.entry=record.entries[0]; }
   const matches=symbols.sort((a,b)=>b.score-a.score || rank(a.entry)-rank(b.entry) || a.name.localeCompare(b.name)).slice(0,limit);
-  return {version:sdk.version,symbols:matches,docs:docSections(sdkRoot,applicationMenuQuery(query) ? query : matches[0]?.name ?? query ?? entry)};
+  const topConcept=conceptHits[0]?.concept;
+  const docQuery=applicationMenuQuery(query)
+    ? query
+    : topConcept?.docKeywords?.join(" ") ?? matches[0]?.name ?? query ?? entry;
+  return {
+    version:sdk.version,
+    symbols:matches,
+    ...(retired ? {retired:{name:query,replacements:retired.replacements,message:retired.message}} : {}),
+    ...(topConcept ? {concept:{usage:topConcept.usage,symbols:topConcept.symbols,...(topConcept.galleryExample ? {galleryExample:topConcept.galleryExample} : {}),...(topConcept.appkitCounterpart ? {appkitCounterpart:topConcept.appkitCounterpart} : {})}} : {}),
+    docs:docSections(sdkRoot,docQuery),
+  };
 }

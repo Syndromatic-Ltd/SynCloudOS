@@ -5,9 +5,11 @@ import { afterEach, expect, it, vi } from "vitest";
 import { mountSynCloudOS, type MountedSynCloudOSHost } from "../../src/SynCloudOSReact/browserRuntime";
 import { createSynCloudOS } from "../../src/SynCloudOS/Runtime/createSynCloudOS";
 import { WebspringController } from "../../src/Webspring/WebspringController";
-import { defineWidget } from "../../src/Webspring/webspringWidget";
-import { defineWebspring, withDiscoveredWebspringItems } from "../../src/Webspring/Webspring";
-import { definePreferencePane } from "../../src/SynCloudOS/Preferences";
+import { WSWidget, captureWSWidgetClass } from "../../src/Webspring/WSWidget";
+import { withDiscoveredWebspringItems } from "../../src/Webspring/WSApplication";
+import { WSBoardViewController } from "../../src/Webspring/Contents/Views/WSBoardViewController/WSBoardViewController";
+import { createTestLauncher, createTestWebspring } from "./webspringTestShell";
+import { NSEPreferencePane, capturePreferencePaneClass } from "../../src/SynCloudOS/Preferences";
 import type { SynCloudOSProjectComposition } from "../../src/SynCloudOSReact/projectComposition";
 import { createSynWare } from "../../src/SynCloudOS/AppSDK/createSynWare";
 
@@ -30,7 +32,14 @@ async function mount(composition?: SynCloudOSProjectComposition) {
     shell: vi.mocked(WebspringController).mock.calls.at(-1)![1] };
 }
 
-const widget = (id: string, order = 0) => defineWidget({ id, title: id, order, load: () => id, view: ({ data }) => <p>{data}</p>, whenEmpty: "hide" });
+const widget = (id: string, order = 0) => captureWSWidgetClass(class extends WSWidget<string> {
+  static override id = id;
+  static override title = id;
+  static override order = order;
+  static override whenEmpty = "hide" as const;
+  override load() { return id; }
+  override renderView() { return <p>{this.data}</p>; }
+});
 
 it("mounts the real neutral Board without a declared shell or composition and omits an empty shelf", async () => {
   const { element, runtime, shell } = await mount();
@@ -38,14 +47,21 @@ it("mounts the real neutral Board without a declared shell or composition and om
   expect(element.querySelector(".webspring-board")).not.toBeNull();
   expect(element.querySelector(".webspring-widget-shelf")).toBeNull();
   expect(element.querySelector(".webspring-board-logo")).toBeNull();
-  expect(shell.manifest.webspringShell.branding.name.fallback).toBe("SynCloudOS");
-  expect(shell.manifest.webspringShell.views).toEqual([{ id: "board", presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }]);
+  expect(shell.info.branding.name.fallback).toBe("SynCloudOS");
+  expect(shell.viewControllers).toEqual({ desktop: WSBoardViewController, tablet: WSBoardViewController, mobile: WSBoardViewController });
+  expect(shell.modes).toEqual({ desktop: "launcher", tablet: "launcher", mobile: "launcher" });
   expect(shell.background.launcher.texture).toMatchObject({ size: "256px" });
 });
 
 it("gives the default launcher discovered panes and widget order from an explicit composition", async () => {
-  const pane = definePreferencePane({ id: "billing", title: "Billing", order: 600, view: () => null });
-  const { element, shell } = await mount({ bundles: [], preferences: [pane], widgets: [widget("late", 20), widget("zeta", 0), widget("alpha", 0), widget("early", -10)], contributions: [], shell: null, shellResources: {} });
+  class BillingPane extends NSEPreferencePane {
+    static override id = "billing";
+    static override title = "Billing";
+    static override order = 600;
+    override renderView() { return null; }
+  }
+  const pane = capturePreferencePaneClass(BillingPane);
+  const { element, shell } = await mount({ bundles: [], preferences: [pane], widgets: [widget("late", 20), widget("zeta", 0), widget("alpha", 0), widget("early", -10)], contributions: [], webspring: null, shellResources: {} });
   expect(shell.preferences.panes).toContain(pane);
   expect(shell.widgets.map(item => item.id)).toEqual(["early", "alpha", "zeta", "late"]);
   await waitFor(() => expect(element.querySelectorAll('[data-widget-state="ready"]')).toHaveLength(4));
@@ -57,7 +73,7 @@ it("lists a discovered application and launches it through the default Board", a
     bundleIdentifier: "com.example.neutral-notes", schemaVersion: 1, displayName: "Neutral Notes", version: "1.0.0",
     routes: [{ path: "/neutral-notes", primary: true }], webspring: { visible: true, order: 1 }, runtime: { policy: { public: true } },
   }, root: () => <p data-testid="neutral-notes">A running discovered application</p> });
-  const { element } = await mount({ bundles: [{ manifest: app.manifest, modulePath: "src/SynWare/Notes.app/Contents/index.tsx", loadModule: async () => ({ default: app }) }], preferences: [], widgets: [], contributions: [], shell: null, shellResources: {} });
+  const { element } = await mount({ bundles: [{ manifest: app.manifest, modulePath: "src/SynWare/Notes.app/Contents/index.tsx", loadModule: async () => ({ default: app }) }], preferences: [], widgets: [], contributions: [], webspring: null, shellResources: {} });
   const launch = await within(element).findByRole("button", { name: "Open Neutral Notes" });
   await act(async () => { fireEvent.click(launch); });
   await waitFor(() => expect(element.querySelector('[data-testid="neutral-notes"]')?.textContent).toBe("A running discovered application"));
@@ -66,12 +82,11 @@ it("lists a discovered application and launches it through the default Board", a
 
 it("keeps explicit widget order, adds discoveries by order, and permits explicit ordering of the same discovered definitions", () => {
   const first = widget("first", 50), second = widget("second", -50), alpha = widget("alpha"), zeta = widget("zeta");
-  const shell = defineWebspring({ manifest: {
-    bundleIdentifier: "com.example.ordered-shell", displayName: "Ordered", version: "1.0.0", webspringShell: {
-      views: [{ id: "custom", presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
-      defaults: { desktop: "custom", tablet: "custom", mobile: "custom" }, homeRoute: "/", branding: { name: { key: "name", fallback: "Ordered" } },
-    },
-  }, components: { custom: () => null }, widgets: [first, second] });
+  const shell = createTestWebspring({
+    info: { bundleIdentifier: "com.example.ordered-shell", displayName: "Ordered", branding: { name: { key: "name", fallback: "Ordered" } } },
+    launcher: createTestLauncher(),
+    widgets: [first, second] as never,
+  });
   const merged = withDiscoveredWebspringItems(shell, { preferences: [], widgets: [zeta, first, alpha, second] });
   expect(merged.widgets).toEqual([first, second, alpha, zeta]);
   expect(shell.widgets).toEqual([first, second]);

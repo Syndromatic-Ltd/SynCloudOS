@@ -342,6 +342,7 @@ export interface RuntimeTestCapabilityControls {
 }
 
 export interface SynCloudOSRuntimeEnvironment {
+  readonly windowHost?: import("../Windows/WindowHostEnvironment").WindowHostEnvironment;
   readonly navigation: BrowserNavigationTarget | null;
   /** Host-only capability gates used by the deterministic AppSDK testing kit.
    * Browser/production constructors omit this field. */

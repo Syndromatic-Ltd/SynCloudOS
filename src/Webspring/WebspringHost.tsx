@@ -20,29 +20,33 @@
 
 import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
 import { Component, createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ErrorInfo, type ReactNode } from "react";
-import { createPortal } from "react-dom";
 import { FocusPortProvider, useNSEDeferredDisposal } from "../NSE/NSE";
 import { useNSEAnimationEnvironment } from "../NSE/Animation";
-import { useNSEFeedback } from "../NSE/hostComposition";
+import { nseDisposeFor, useNSEFeedback } from "../NSE/hostComposition";
 import { MaterialProvider } from "../NSE/Material";
 import { HostLoginGate } from "./HostLoginGate";
 import type { RuntimeSnapshot } from "../SynCloudOS/SynCloudOS";
-import type { AuthenticationInput, Presentation, WebspringDefinition, WebspringViewComponent } from "./webspringTypes";
+import type { AuthenticationInput, Presentation } from "./webspringTypes";
+import { constructWSApplication, resolveLauncher, type WSApplication, type WSDefinition } from "./WSApplication";
+import { WSLauncherRootView, wsSetLauncherHostState, type WSLauncherHostState, type WSLauncherViewController } from "./WSLauncherViewController";
+import { WSBoardViewController } from "./Contents/Views/WSBoardViewController/WSBoardViewController";
 import { SystemStartupLayer } from "./SystemStartupLayer";
-import type { SystemStartupPhase } from "../SynCloudOS/RootRuntime";
-import { ApplicationStageLayer } from "./ApplicationStageLayer";
+import { SystemUILayer } from "./SystemUILayer";
+import { nextState } from "../Foundation/internal/StateMachine";
+import { systemStartupPhaseMachine, type SystemStartupPhase } from "../SynCloudOS/RootRuntime";
+import { WSStageLayer } from "./WSStageLayer";
 import { syncApplicationWindowContentRenderers, WindowContentRendererRegistry, WindowLayer, type ApplicationWindowRendererRegistrations } from "./WindowLayer";
 import { HostSiteBrandingProvider, useKernelSynCloudOS, useRuntimeNSEFocusPort, useRuntimeSelector } from "../SynCloudOSReact";
 import { presentationForSizeClass, WebspringController, type SynCloudOSShellResources } from "./WebspringController";
+import { WindowPresentationContent } from "./WindowPresentationContent";
 import { WebspringQuickSwitchView } from "./WebspringQuickSwitchView";
-import { WebspringIconEffectProvider } from "./WebspringIconEffect";
+import { WSIconEffectProvider } from "./WSIconEffect";
 import { WebspringFolderAppearanceProvider } from "./WebspringFolderAppearance";
 import { SystemPanelsLayer } from "./SystemPanelsLayer";
 import { NotificationCentrePresenter } from "./NotificationCentrePresenter";
 import { WebspringStatusLayer } from "./WebspringStatusLayer";
 import { useWebspringResponder } from "./useWebspringResponder";
 import { useWebspringReturnCompletion } from "./useWebspringReturnCompletion";
-import { defaultWebspringLaunchZoom, defaultWebspringReturnTracks } from "./Webspring";
 import { WebspringLaunchZoomContext } from "./WebspringLaunchZoomContext";
 import { useWebspringEntrance } from "./useWebspringEntrance";
 import { scheduleWebspringIdlePrefetch } from "./webspringPrefetch";
@@ -79,8 +83,12 @@ function equalHostSnapshot(left: RuntimeSnapshot, right: RuntimeSnapshot) {
     left.webspring === right.webspring;
 }
 
+function selectRuntimePresentationReady(snapshot: RuntimeSnapshot) {
+  return snapshot.booted || snapshot.statechart.currentState !== "booting";
+}
+
 interface ViewBoundaryProps {
-  readonly fallbackViewId: string | null;
+  readonly fallbackAvailable: boolean;
   readonly onFallback: () => void;
   readonly children: ReactNode;
 }
@@ -97,63 +105,57 @@ class WebspringViewBoundary extends Component<ViewBoundaryProps, ViewBoundarySta
       <h1>Webspring view unavailable</h1>
       <p>{this.state.error.message}</p>
       <button type="button" onClick={() => this.setState({ error: null })}>Retry view</button>
-      {this.props.fallbackViewId ? <button type="button" onClick={this.props.onFallback}>Use fallback view</button> : null}
+      {this.props.fallbackAvailable ? <button type="button" onClick={this.props.onFallback}>Use fallback view</button> : null}
     </section>;
   }
 }
 
-interface OutletFocusSnapshot {
-  readonly element: HTMLElement;
-  readonly visible: boolean;
-  readonly selection: { readonly anchor: Node; readonly anchorOffset: number; readonly focus: Node; readonly focusOffset: number } | null;
+/** Gives the launcher this render's state, then renders it inside its root view. */
+function HostedLauncher({ launcher, state }: {
+  readonly launcher: WSLauncherViewController;
+  readonly state: WSLauncherHostState;
+}) {
+  launcher[wsSetLauncherHostState](state);
+  return <WSLauncherRootView controller={launcher} />;
 }
 
-function captureOutletFocus(container: HTMLElement): OutletFocusSnapshot | null {
-  const active = container.ownerDocument.activeElement;
-  if (!(active instanceof HTMLElement) || !container.contains(active)) return null;
-  const selection = container.ownerDocument.getSelection();
-  let visible = false;
-  try { visible = active.matches(":focus-visible"); } catch { /* Older engines retain their native focus treatment. */ }
-  return {
-    element: active, visible,
-    selection: selection?.anchorNode && selection.focusNode && container.contains(selection.anchorNode) && container.contains(selection.focusNode)
-      ? { anchor: selection.anchorNode, anchorOffset: selection.anchorOffset, focus: selection.focusNode, focusOffset: selection.focusOffset } : null,
+type HostRuntime = ReturnType<typeof useKernelSynCloudOS>;
+
+/** Runs a shell lifecycle hook, reporting a thrown or rejected failure without stopping the shell. */
+function runShellHook(runtime: HostRuntime, name: string, hook: () => void | Promise<void>) {
+  const report = (error: unknown) => {
+    runtime.errors.capture({
+      code: "LIFECYCLE_HOOK_FAILED",
+      title: "The Webspring shell could not finish a lifecycle step.",
+      message: "The site keeps running, but part of its start-up or shutdown did not complete.",
+      error,
+      technicalMessage: `WSApplication.${name} failed.`,
+    });
   };
+  try {
+    void Promise.resolve(hook()).catch(report);
+  } catch (error) {
+    report(error);
+  }
 }
 
-function validSelectionOffset(node: Node, offset: number): boolean {
-  const characterData = node.nodeType === Node.TEXT_NODE || node.nodeType === Node.CDATA_SECTION_NODE || node.nodeType === Node.COMMENT_NODE;
-  return offset >= 0 && offset <= (characterData ? node.nodeValue?.length ?? 0 : node.childNodes.length);
-}
-
-function ApplicationOutletSlot({ container, focusHandoff }: { readonly container: HTMLElement; readonly focusHandoff: { current: OutletFocusSnapshot | null } }) {
-  const slot = useRef<HTMLDivElement>(null);
+/** The shell's `WSApplication`, constructed for the host's life and told when it launches and terminates. */
+function useWSApplication(runtime: HostRuntime, shell: WSDefinition): WSApplication | null {
+  const [application, setApplication] = useState<WSApplication | null>(null);
   useLayoutEffect(() => {
-    const element = slot.current;
-    if (!element) return;
-    // A shell view can detach its slot before the successor adopts the same
-    // live application DOM. Capture on detach as well as before a direct move.
-    const previous = captureOutletFocus(container) ?? focusHandoff.current;
-    focusHandoff.current = null;
-    if (container.parentElement !== element) element.appendChild(container);
-    const document = container.ownerDocument;
-    const active = document.activeElement;
-    if (previous?.element.isConnected && container.contains(previous.element)
-      && !previous.element.closest("[inert], [hidden], [aria-hidden='true']") && !previous.element.matches(":disabled")
-      && (!active || active === document.body || active === document.documentElement || active === previous.element)) {
-      previous.element.focus({ preventScroll: true, ...(previous.visible ? { focusVisible: true } : {}) } as FocusOptions);
-      const selection = previous.selection;
-      if (document.activeElement === previous.element && selection?.anchor.isConnected && selection.focus.isConnected
-        && container.contains(selection.anchor) && container.contains(selection.focus)
-        && validSelectionOffset(selection.anchor, selection.anchorOffset) && validSelectionOffset(selection.focus, selection.focusOffset)) {
-        document.getSelection()?.setBaseAndExtent(selection.anchor, selection.anchorOffset, selection.focus, selection.focusOffset);
-      }
-    }
+    const created = constructWSApplication(shell.application);
+    runShellHook(runtime, "applicationWillFinishLaunching", () => created.applicationWillFinishLaunching());
+    setApplication(created);
     return () => {
-      if (container.parentElement === element) focusHandoff.current = captureOutletFocus(container);
+      runShellHook(runtime, "applicationWillTerminate", () => created.applicationWillTerminate());
+      created[nseDisposeFor]("owner-unmounted");
+      setApplication((current) => current === created ? null : current);
     };
-  }, [container, focusHandoff]);
-  return <div ref={slot} className="webspring-application-outlet" />;
+  }, [runtime, shell]);
+  useEffect(() => {
+    if (application) runShellHook(runtime, "applicationDidFinishLaunching", () => application.applicationDidFinishLaunching());
+  }, [application, runtime]);
+  return application;
 }
 
 export function WebspringHost({
@@ -162,7 +164,7 @@ export function WebspringHost({
   authentication = "disabled",
   startupPhase,
 }: {
-  readonly shell: WebspringDefinition;
+  readonly shell: WSDefinition;
   readonly shellResources?: SynCloudOSShellResources;
   readonly authentication?: AuthenticationInput;
   readonly startupPhase?: SystemStartupPhase;
@@ -182,17 +184,21 @@ export function WebspringHost({
     }
   }, [authentication, controllerRetry, runtime, shell, shellResources]);
   const controller = controllerOutcome.controller;
-  const [viewOverride, setViewOverride] = useState<{ presentation: Presentation; id: string } | null>(null);
-  const viewId = viewOverride?.presentation === presentation ? viewOverride.id : controller?.viewId(presentation) ?? "configuration-error";
-  const returnTracks = shell.returnTracks[viewId] ?? defaultWebspringReturnTracks;
+  // A custom launcher that fails can hand its presentation to the stock Board until the shell changes.
+  const [fallback, setFallback] = useState<{ readonly shell: WSDefinition; readonly presentation: Presentation } | null>(null);
+  const usingFallback = fallback?.shell === shell && fallback.presentation === presentation;
+  const LauncherClass = usingFallback ? WSBoardViewController : resolveLauncher(shell, presentation);
+  const returnTracks = usingFallback ? WSBoardViewController.returnTracks : shell.returnTracks[presentation];
   const { completeTrack } = useWebspringReturnCompletion(snapshot.webspring.returnTransitionId, returnTracks);
   const viewActions = useMemo(() => controller ? Object.freeze({ ...controller.actions, completeReturnTrack: completeTrack }) : null, [completeTrack, controller]);
-  // Shell views' modal surfaces (an open folder) trap focus in the runtime's focus graph.
+  // Launchers' modal surfaces (an open folder) trap focus in the runtime's focus graph.
   const viewFocusPort = useRuntimeNSEFocusPort("webspring");
-  const View = (shell.components[viewId] ?? function MissingWebspringView(): never {
-    throw new TypeError(`Webspring view ${viewId} is not registered.`);
-  }) as WebspringViewComponent;
-  const fallbackViewId = controller?.fallbackViewId(presentation, viewId) ?? null;
+  const application = useWSApplication(runtime, shell);
+  const launcher = useMemo(
+    () => application ? new (LauncherClass as unknown as new (options: { owner: WSApplication }) => WSLauncherViewController)({ owner: application }) : null,
+    [LauncherClass, application],
+  );
+  useEffect(() => () => { if (launcher && !launcher.isDisposed) launcher.dispose(); }, [launcher]);
   // One registry for the host's life: the system panels and apps' transient
   // surfaces keep their renderers in it while apps launch and quit, so only
   // the application renderers are synchronised with the app list.
@@ -202,20 +208,37 @@ export function WebspringHost({
     syncApplicationWindowContentRenderers(registry, runtime, snapshot.appInfo, applicationRenderers);
   }, [applicationRenderers, registry, runtime, snapshot.appInfo]);
   useNSEDeferredDisposal(registry);
-  const [outletContainer] = useState(() => {
-    const document = runtime.environment.browser.getDocument();
-    if (!document) throw new TypeError("WebspringHost requires a browser document.");
-    const element = document.createElement("div");
-    element.className = "webspring-application-outlet-host";
-    return element;
-  });
   const stagingAppId = snapshot.webspring.launchPhase === "staging" ? snapshot.webspring.launchingAppId : null;
   const feedback = useNSEFeedback();
   const { reducedMotion } = useNSEAnimationEnvironment();
-  const phase = startupPhase ?? "complete";
+  const presentationReady = useRuntimeSelector(selectRuntimePresentationReady);
+  const [derivedStartupPhase, setStartupPhase] = useState<SystemStartupPhase>("booting");
+  useEffect(() => {
+    if (startupPhase !== undefined) return;
+    setStartupPhase((current) => nextState(systemStartupPhaseMachine.definition, current, presentationReady ? "presentationReady" : "presentationPending") ?? current);
+  }, [presentationReady, startupPhase]);
+  const phase = startupPhase ?? derivedStartupPhase;
   const authenticationPolicy = typeof authentication === "object" ? authentication.policy : authentication;
+  const handleLogOut = useCallback(async () => {
+    const result = await runtime.commands.dispatch("session.logOut", undefined, { source: "system" });
+    if (result.status === "failed" || result.status === "cancelled") return false;
+    return result.status === "executed";
+  }, [runtime]);
+  useEffect(() => {
+    if (authenticationPolicy === "disabled" || !controller) return;
+    const command = runtime.commands.register({
+      id: "session.requestSignIn", responderId: "runtime",
+      title: { key: "command.session.requestSignIn", fallback: "Sign In" },
+      payload: { description: "No payload.", parse: value => value === undefined
+        ? { ok: true, value: undefined } : { ok: false, issues: ["Sign In takes no payload."] } },
+      scope: "runtime", defaultKeyBindings: [], undo: { kind: "none" },
+      validate: () => ({ enabled: !runtime.store.getSnapshot().loginServices.isAuthorised }),
+      execute: () => controller.actions.requestSignIn(),
+    });
+    return () => { command.dispose(); };
+  }, [authenticationPolicy, controller, runtime]);
   const gateRequested = authenticationPolicy !== "disabled" && snapshot.statechart.currentState === "locked.loginWindow";
-  const loginContinuationKey = `webspring:${normalizeBundleIdentifier(shell.manifest.bundleIdentifier)}:${shell.manifest.webspringShell.homeRoute}:login-continuation`;
+  const loginContinuationKey = `webspring:${normalizeBundleIdentifier(shell.info.bundleIdentifier)}:${shell.info.homeRoute}:login-continuation`;
   const [resumeLogin] = useState(() => {
     try { return authenticationPolicy !== "disabled" && runtime.environment.sessionStorage?.getItem(loginContinuationKey) === "pending"; }
     catch { return false; }
@@ -236,7 +259,6 @@ export function WebspringHost({
   const model = controller?.model(runtime.store.getSnapshot(), presentation, entrancePhase) ?? null;
   const [notificationCentreRequest, setNotificationCentreRequest] = useState<{ key: number; notificationId?: string | null } | null>(null);
   const [quickSwitchOpen, setQuickSwitchOpen] = useState(false);
-  const applicationMenuToggleRef = useRef<{ appId: string; toggle: () => void } | null>(null);
   const layoutPreference = snapshot.webspring.layout.preference;
   const folderConfiguration = snapshot.webspring.layout.folderConfiguration;
   const orderedApps = useMemo(
@@ -255,34 +277,20 @@ export function WebspringHost({
     setQuickSwitchOpen((current) => !current);
     feedback?.trigger("selection");
   }, [canUseQuickSwitch, feedback]);
-  const registerApplicationMenuToggle = useCallback((appId: string, toggle: () => void, ready: boolean) => {
-    if (ready && normalizeBundleIdentifier(appId) === normalizeBundleIdentifier(runtime.store.getSnapshot().application.activeAppId)) applicationMenuToggleRef.current = { appId, toggle };
-    return () => {
-      if (applicationMenuToggleRef.current?.toggle === toggle) applicationMenuToggleRef.current = null;
-    };
-  }, [runtime]);
-  const requestApplicationMenuToggle = useCallback(() => {
-    const entry = applicationMenuToggleRef.current;
-    const current = runtime.store.getSnapshot();
-    if (!entry || normalizeBundleIdentifier(entry.appId) !== normalizeBundleIdentifier(current.application.activeAppId) || current.application.multiSwitch.status === "switching") return;
-    entry.toggle();
-  }, [runtime]);
-  useWebspringResponder({ onNotificationCentreRequest: requestNotificationCentre, onApplicationMenuToggle: requestApplicationMenuToggle });
+  useWebspringResponder({ onNotificationCentreRequest: requestNotificationCentre });
   useEffect(() => {
-    runtime.webspring.configureFolders(shell.manifest.webspringShell.folders ?? EMPTY_WEBSPRING_FOLDER_CONFIGURATION);
+    runtime.webspring.configureFolders(shell.info.folders ?? EMPTY_WEBSPRING_FOLDER_CONFIGURATION);
     runtime.webspring.hydrateLayoutPreference();
   }, [runtime, shell]);
   useEffect(() => {
-    if (startupPhase === "complete" && snapshot.loginServices.isAuthorised) scheduleWebspringIdlePrefetch(runtime);
-  }, [runtime, snapshot.loginServices.isAuthorised, startupPhase]);
+    if (phase === "complete" && snapshot.loginServices.isAuthorised) scheduleWebspringIdlePrefetch(runtime);
+  }, [phase, runtime, snapshot.loginServices.isAuthorised]);
   useEffect(() => runtime.events.subscribe("webspring.quickSwitch.toggle", toggleQuickSwitch), [runtime, toggleQuickSwitch]);
   useEffect(() => {
     if (quickSwitchOpen && !canUseQuickSwitch) setQuickSwitchOpen(false);
   }, [canUseQuickSwitch, quickSwitchOpen]);
-  const outletFocusHandoff = useRef<OutletFocusSnapshot | null>(null);
-  const applicationOutlet = <ApplicationOutletSlot container={outletContainer} focusHandoff={outletFocusHandoff} />;
-  const launchZoom = shell.launchZooms?.[viewId] ?? defaultWebspringLaunchZoom;
-  const applicationStage = <WebspringLaunchZoomContext.Provider value={launchZoom}><ApplicationStageLayer
+  const launchZoom = usingFallback ? WSBoardViewController.launchZoom : shell.launchZooms[presentation];
+  const applicationStage = <WebspringLaunchZoomContext.Provider value={launchZoom}><WSStageLayer
     windowContentRegistry={registry}
     apps={snapshot.appInfo}
     lifecycle={snapshot.lifecycle}
@@ -294,12 +302,11 @@ export function WebspringHost({
     presentationSettlementId={snapshot.webspring.presentationSettlementId}
     quickSwitchOpen={quickSwitchOpen}
     onQuickSwitchRequest={toggleQuickSwitch}
-    onApplicationMenuToggleRegister={registerApplicationMenuToggle}
   /></WebspringLaunchZoomContext.Provider>;
   useEffect(() => {
     const id = snapshot.webspring.presentationSettlementId;
     if (!id) return;
-    const role = snapshot.application.routePath === shell.manifest.webspringShell.homeRoute
+    const role = snapshot.application.routePath === shell.info.homeRoute
       ? WEBSPRING_PRESENTATION_ROLES.shell
       : snapshot.webspring.launchPhase === "covered"
         ? WEBSPRING_PRESENTATION_ROLES.shellReturn
@@ -311,19 +318,22 @@ export function WebspringHost({
   const lastBranding = useRef(model?.branding ?? null);
   if (model?.branding) lastBranding.current = model.branding;
 
-  return <HostSiteBrandingProvider value={model?.branding ?? lastBranding.current}><MaterialProvider><WebspringIconEffectProvider component={shell.iconEffect}>
+  return <HostSiteBrandingProvider value={model?.branding ?? lastBranding.current}><MaterialProvider><WSIconEffectProvider component={shell.iconEffect}>
     <WebspringFolderAppearanceProvider value={shell.folderAppearance}>
     <WebspringHostPresentationContext.Provider value={presentationContext}>
-    <div className="webspring-view-host">
+    <div className="webspring-view-host" data-syncloudos-runtime-owner={runtime.runtimeId}>
     {/* Keep entrance-owned inertness separate from the modal focus scope's sibling restoration. */}
     <div className="webspring-entrance-surface" inert={entrancePhase !== "ready"} aria-hidden={entrancePhase !== "ready" ? true : undefined}>
     {controller && model && viewActions ? <WebspringViewBoundary
-      key={`${presentation}:${viewId}`}
-      fallbackViewId={fallbackViewId}
-      onFallback={() => { if (fallbackViewId) setViewOverride({ presentation, id: fallbackViewId }); }}
+      key={`${presentation}:${usingFallback ? "fallback" : "launcher"}`}
+      fallbackAvailable={LauncherClass !== WSBoardViewController}
+      onFallback={() => setFallback({ shell, presentation })}
     >
       <FocusPortProvider port={viewFocusPort}>
-        <View model={model} actions={viewActions} applicationOutlet={applicationOutlet} folderPresentation={shell.folderPresentation} />
+        {application && launcher ? <HostedLauncher
+          launcher={launcher}
+          state={{ application, model, actions: viewActions, folderPresentation: shell.folderPresentation }}
+        /> : null}
       </FocusPortProvider>
     </WebspringViewBoundary> : <section role="alert" className="webspring-view-recovery">
       <h1>Webspring host unavailable</h1>
@@ -335,8 +345,15 @@ export function WebspringHost({
     </WebspringHostPresentationContext.Provider>
     {/* Before the app stage, so the system's Colours panel is the one drawn. */}
     <SystemPanelsLayer windowContentRegistry={registry} />
-    {createPortal(applicationStage, outletContainer)}
-    <WindowLayer contentRegistry={registry} />
+    <WindowPresentationContent>
+      {/* The launcher's next sibling in its stacking context. The entrance's inertness stays on an inner element, apart from a modal's sibling containment. */}
+      <div className="webspring-stage-host">
+        <div className="webspring-stage-entrance" inert={entrancePhase !== "ready"} aria-hidden={entrancePhase !== "ready" ? true : undefined}>
+          {applicationStage}
+        </div>
+      </div>
+      <WindowLayer contentRegistry={registry} />
+    </WindowPresentationContent>
     <WebspringQuickSwitchView
       open={quickSwitchOpen}
       apps={orderedApps}
@@ -366,6 +383,11 @@ export function WebspringHost({
     />
     <WebspringStatusLayer errors={snapshot.errors} />
     <SystemStartupLayer phase={phase} />
+    <SystemUILayer
+      onLogOut={authenticationPolicy === "disabled" ? undefined : handleLogOut}
+      preferences={shell.preferences}
+      siteName={model?.branding.name ?? lastBranding.current?.name ?? shell.info.branding.name.fallback ?? shell.info.branding.name.key}
+    />
     </WebspringFolderAppearanceProvider>
-  </WebspringIconEffectProvider></MaterialProvider></HostSiteBrandingProvider>;
+  </WSIconEffectProvider></MaterialProvider></HostSiteBrandingProvider>;
 }

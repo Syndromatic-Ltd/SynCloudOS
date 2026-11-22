@@ -24,7 +24,7 @@ vec4 ifxMain(vec2 uv, vec2 size) {
 layer.compositingFilter = new IFXFilterRegistry().create('blend', { mode: 'addition' });
 ```
 
-The source defines `vec4 ifxMain(vec2 uv, vec2 size)` and can include helper functions. The adapter supplies the GLSL version, precision, uniform declarations and entry point. `uv` uses normalized texture coordinates with the origin at the bottom left. `size` is the pass's backing size in pixels, including the renderer's pixel ratio. Filter sampling uses the reserved `uniform sampler2D ifxInput`. Generator recipes have no input image and should not sample it.
+The source defines `vec4 ifxMain(vec2 uv, vec2 size)` and can include helper functions. The adapter supplies the GLSL version, precision, uniform declarations and entry point. `uv` uses normalised texture coordinates with the origin at the bottom left. `size` is the pass's backing size in pixels, including the renderer's pixel ratio. Filter sampling uses the reserved `uniform sampler2D ifxInput`. Generator recipes have no input image and should not sample it.
 
 Uniform declarations accept `float`, `vec2`, `vec3` and `vec4`; values are finite numbers or arrays with the declared number of components. The descriptor copies and freezes all values. `withUniforms(values)` creates a new descriptor with the same source and type declarations, rejects undeclared names and leaves the previous descriptor unchanged. Names beginning with `ifx` or `gl_` are reserved. Compilation is deferred until submission and reports shader or link errors explicitly.
 
@@ -54,6 +54,6 @@ Programs are cached by source plus sorted uniform names and types. Uniform value
 
 The storage limit is sized for 6K canvases. A full 6144 × 3456 subtree isolated with 4× multisampling, plus one filter pass, needs about 690 MiB. A limit that is exceeded names itself in the error.
 
-Subtree content, particles and composite quads share the renderer's existing quad budget. Shader source estimates and pass storage appear in the canvas adapter's residency report. Program residency bytes are estimates based on source; drivers do not expose actual compiled-program memory. Superseded storage also counts toward the live allocation quota during resizing. Pass textures are RGBA8; values saturate to their representable range.
+Subtree content, particles and composite quads share the renderer's existing quad budget. Shader source estimates and pass storage appear in the canvas adapter's residency report. Program residency bytes are estimates based on source; drivers do not expose actual compiled-program memory. Superseded storage also counts towards the live allocation quota during resizing. Pass textures are RGBA8; values saturate to their representable range.
 
 Canvas2D explicitly rejects shader generators, filtered subtrees and additive compositing before publishing the visible canvas. Portable CPU composition snapshots report these operations as unsupported. `IFXShader` is executed by the retained AnimationFX canvas adapter; it is not an `IFXContext` graph node.

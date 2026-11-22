@@ -1,14 +1,12 @@
 # AnimationFX
 
-See [class authoring](../cocoa-authoring.md#outlets-and-animation) for mounted outlets, scoped layer transactions and managed renderer/frame lifetimes.
+AnimationFX (`AFX`) animates your interface. It models visual content as a tree of layers, gives each layer geometry and appearance properties, and animates those properties with timing curves, keyframes and springs. Use it for transitions, interactive motion, particle effects and anything you would otherwise hand-roll with `requestAnimationFrame`. Because an animation is data, you can sample it at any moment, retarget it while it runs, pause it, seek it, or let the browser run it on the compositor thread.
 
-Retained layers also present `IFXShader` image generators, filter their content and sublayer tree, and composite with normal or additive blending. See [image shaders in retained layers](image/shaders.md) for pass order, straight-alpha output, bounds, budgets and adapter support.
-
-AnimationFX (`AFX`) is the web-native analogue of Core Animation. It models visual content as a tree of layers, gives each layer geometry and appearance properties, and animates those properties over time with timing curves, keyframes and springs. Because it describes animation as data, every animation can be sampled at any moment, retargeted while it runs, paused, seeked, or played on a compositor thread when the browser allows.
+Retained layers can also present `IFXShader` image generators, filter their content and sublayer tree, and composite with normal or additive blending; see [image shaders in retained layers](image/shaders.md). For mounted outlets, scoped layer transactions and managed renderer and frame lifetimes in class-based apps, see [class authoring](../cocoa-authoring.md#outlets-and-animation).
 
 Two ideas shape the whole framework.
 
-- **A layer has a model and a presentation.** The model holds the value you set, and the presentation holds the value on screen right now. Set `layer.opacity = 0` and the model changes at once, while the presentation fades over the animation's duration. Hit testing, reading and retargeting can use either. This is the same split Core Animation makes, and it is what lets an interrupted animation continue from where the eye last saw it.
+- **A layer has a model and a presentation.** The model holds the value you set, and the presentation holds the value on screen right now. Set `layer.opacity = 0` and the model changes at once, while the presentation fades over the animation's duration. Hit testing, reading and retargeting can use either. The split is what lets an interrupted animation continue from where the eye last saw it. If you know Core Animation, this is the same model.
 - **Animations are pure values.** `AFXBasicAnimation`, `AFXKeyframeAnimation` and `AFXSpringAnimation` describe what changes and how long it takes. `sample(seconds)` returns the value at a time, with no clock and no side effects, so the same animation runs in a layer, in a group, on the compositor, in a test and in a preview scrubber.
 
 The framework has three groups of parts.
@@ -31,7 +29,6 @@ import { AFXBasicAnimation, AFXAnimation } from "@syndromatic/syncloudos/fx/anim
 | Entry | `@syndromatic/syncloudos/fx/animation` |
 | Hook | `useAnimations`, from `@syndromatic/syncloudos/sdk` |
 | Permissions | None |
-| Analogue | Core Animation (`CALayer`, `CAAnimation`, `CABasicAnimation`, `CAKeyframeAnimation`, `CASpringAnimation`, `CAAnimationGroup`, `CATransaction`, `CAMediaTimingFunction`, `CATransform3D`, `CAShapeLayer`, `CAGradientLayer`, `CATextLayer`, `CAReplicatorLayer`, `CAEmitterLayer`, `CATiledLayer`) |
 
 ## What the entry exports
 
@@ -57,7 +54,11 @@ An animation targets one property of one target, named by an `AFXAnimationKeyPat
 | `"sublayerTransform"` | A CSS transform string | Applied to the layer's children. Renderer-owned layers only. |
 | `"backgroundColour"` | A CSS colour string | For example `layer.backgroundColour.toCSS()`. |
 | `"boxShadow"` | A CSS `box-shadow` string | For view animations. |
+| `"filter"` | A CSS filter list | For view animations. Layers reject it. |
+| `"height"` | A CSS length, such as `"84px"` | A view's block size. Layers reject it; animate `"frame"` instead. |
 | `"scrollPosition"` | `{ x, y }` | For scrolling views. |
+| `"path"` | A `GFXPath` | `AFXShapeLayer` only. Both paths need the same commands. See [Layers](animation/layers.md). |
+| `"gradient"` | A `GFXGradient` | `AFXGradientLayer` only. Both gradients need the same kind, units and number of stops. |
 | `"path"` | A `GFXPath` | Shape layers only. Both paths need the same number and kinds of commands. |
 | `"gradient"` | A `GFXGradient` | Gradient layers only. Both gradients need the same number of stops, geometry kind and units. |
 | `"filter"`, `"height"` | CSS strings | Element animation definitions only. Layers reject them. |
@@ -179,7 +180,7 @@ The `animation`'s own `timing` applies to the whole animation first, and each se
 
 ### `AFXSpringAnimation`
 
-A property that moves as a damped spring settles toward its end value.
+A property that moves as a damped spring settles towards its end value.
 
 ```text
 new AFXSpringAnimation({ targetId, keyPath, from, to, mass?, stiffness?, damping?, initialVelocity?, options? })
@@ -274,7 +275,7 @@ A transaction groups property changes so they share a duration and timing, and l
 
 ### Layer transactions
 
-Static methods on `AFXTransaction`, in the manner of `CATransaction`. They work with layers.
+Static methods on `AFXTransaction` that work with layers.
 
 | Method | Description |
 | --- | --- |
@@ -379,7 +380,7 @@ export function SlideIn({ children }: { children: React.ReactNode }) {
 
 **Reduced motion and suspension.** The `reducedMotion` policy applies to layer animations at start and when the preference changes. `"always"` settles at once, `"never"` preserves authored playback, and `"system"` settles spatial effects and repeating animations when the host reports reduced motion. A single opacity animation (exactly one iteration, without autoreverse) keeps its authored crossfade under `"system"`, including an explicitly paused fade. This preserves visual continuity without spatial motion. A settlement caused by reduction has `reduced: true`. Finite layer animations also complete when the page is suspended. Endless layer animations pause while the document is hidden and resume from that presentation time when visible; an explicitly paused handle stays paused. No app visibility listener is needed. A zero duration also completes at once. Content that carries meaning through motion should also present that meaning statically.
 
-**Endless CoreAnimation loops.** Use `new AFXAnimation({ duration: 2, iterations: Infinity, timing: "linear" })` for an endless cycle. `repeatDuration: Infinity` is also supported, with the existing restriction that it cannot be combined with `iterations`. An endless animation requires a nonzero duration. Its `totalDuration` is `Infinity`, its handle's overall `progress` remains 0, and `finished` remains pending until cancellation, replacement, disposal or an applicable reduced-motion policy. The model value is the authored destination; presentation continues cycling. Seek accepts finite, nonnegative times. Shape and gradient content animations retain their finite-duration restriction.
+**Endless loops.** Use `new AFXAnimation({ duration: 2, iterations: Infinity, timing: "linear" })` for an endless cycle. `repeatDuration: Infinity` is also supported, with the existing restriction that it cannot be combined with `iterations`. An endless animation requires a nonzero duration. Its `totalDuration` is `Infinity`, its handle's overall `progress` remains 0, and `finished` remains pending until cancellation, replacement, disposal or an applicable reduced-motion policy. The model value is the authored destination; presentation continues cycling. Seek accepts finite, nonnegative times. Shape and gradient content animations retain their finite-duration restriction.
 
 **Limits and errors.** One session holds at most 64 live layers and renderers at a time, and releases a slot when you dispose one. `bind*` throws `TypeError` for a target that is not an element of the app's own document, and `createRenderer` throws `TypeError` unless the target is a canvas of that document. Binding an element or canvas that already has a live binding throws `DOMException` `InvalidStateError`. A host without animation layer support throws `DOMException` `NotSupportedError`. Every method takes an optional `AbortSignal` that disposes the layer when it aborts.
 

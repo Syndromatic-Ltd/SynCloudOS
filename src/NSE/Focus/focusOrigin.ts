@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { isNSEDOMElement, isNSEHTMLElement } from "./domRealm";
+
 /**
  * Where focus should go back to when a surface opened from inside an overlay
  * closes. A menu command runs while its menu is still open (the controller
@@ -58,7 +60,7 @@ export function isWithinNSEFocusOrigin(root: Element, target: Node): boolean {
     visited.add(current);
     let origin: HTMLElement | undefined;
     for (let node: Node | null = current; node && !origin; node = node.parentNode) {
-      if (node instanceof Element) origin = inspectorOrigins.get(node) ?? overlayOrigins.get(node);
+      if (isNSEDOMElement(node)) origin = inspectorOrigins.get(node) ?? overlayOrigins.get(node);
     }
     current = origin?.isConnected ? origin : null;
   }
@@ -71,7 +73,7 @@ export function isWithinNSEFocusOrigin(root: Element, target: Node): boolean {
  * control that overlay (and any overlay above it, for submenus) was opened from.
  */
 export function resolveNSEFocusReturnTarget(element: Element | null): HTMLElement | null {
-  let current = element instanceof HTMLElement ? element : null;
+  let current = isNSEHTMLElement(element) ? element : null;
   for (let depth = 0; current && depth < 8; depth += 1) {
     let origin: HTMLElement | undefined;
     for (let node: Element | null = current; node && !origin; node = node.parentElement) origin = overlayOrigins.get(node);

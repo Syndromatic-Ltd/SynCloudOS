@@ -14,7 +14,7 @@ import { NSEViewController, nseUpdateTraits } from '../../../../src/NSE/Applicat
 import { ViewControllerView } from '../../../../src/SynCloudOS/AppHosting/applicationHosting';
 import { NSETabViewController, NSETabViewItem } from '../../../../src/NSE/Navigation/NSETabViewController';
 import { NSEScrollView } from '../../../../src/NSE/Scroll/NSEScrollView';
-import { WindowLayoutContext, WindowLayoutModel } from '../../../../src/NSE/Layout/windowChromeObstructions';
+import { WindowLayoutContext, WindowLayoutModel } from '../../../../src/NSE/Layout/windowObstructions';
 import { createStaticPresentationPort, createStaticPresentationTraits } from '../../../fixtures/presentationTraits';
 import '../../../../src/NSE/public/styles.css';
 const parameters = new URLSearchParams(location.search);
@@ -43,7 +43,7 @@ function Navigation() {
 function Contents() {
   if(parameters.has('placement')) return <Navigation/>;
   if(parameters.has('login')) return <NSEAppearanceProvider theme={themes['com.example.inner']}><LoginWindow title="SynCloudOS" methods={[{id:'example',label:'Continue'}]}/></NSEAppearanceProvider>;
-  return <NSEAppearanceProvider theme={themes['com.example.outer']} colourScheme="light"><div id="outer"><NSEButton id="outer-button">Outer</NSEButton></div><NSEView id="inner" appearance={new NSEAppearance('aqua',{theme:themes['com.example.inner']})}><NSEButton id="inner-button" image={NSEImage.named(NSEImage.goBackTemplateName)}>Inner</NSEButton></NSEView><NSEView appearance={new NSEAppearance('aqua',{theme:themes['com.example.partial']})}><NSEButton id="partial-button">Partial</NSEButton></NSEView><NSEView appearance={new NSEAppearance('aqua',{theme:atmoTheme})}><NSEButton id="atmo-button">Atmo</NSEButton></NSEView></NSEAppearanceProvider>;
+  return <NSEAppearanceProvider theme={themes['com.example.outer']} colourScheme="light"><div id="outer"><NSEButton id="outer-button">Outer</NSEButton></div><NSEView id="inner" appearance={new NSEAppearance('light',{theme:themes['com.example.inner']})}><NSEButton id="inner-button" image={NSEImage.named(NSEImage.goBackTemplateName)}>Inner</NSEButton></NSEView><NSEView appearance={new NSEAppearance('light',{theme:themes['com.example.partial']})}><NSEButton id="partial-button">Partial</NSEButton></NSEView><NSEView appearance={new NSEAppearance('light',{theme:atmoTheme})}><NSEButton id="atmo-button">Atmo</NSEButton></NSEView></NSEAppearanceProvider>;
 }
 document.body.style.margin='0';
 createRoot(document.getElementById('root')!).render(<StandaloneControlHost document={document} window={window} presentation={presentation}><Contents/></StandaloneControlHost>);

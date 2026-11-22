@@ -29,9 +29,11 @@ import {
 } from "react";
 import { freezeNSETheme, type NSETheme } from "../Theme/NSETheme";
 import { installNSEHookMirror } from "../Theme/contract/hookMirrorDOM";
+import type { NSEAppearance } from "./NSEAppearance";
 import { atmoTheme } from "./atmoTheme";
 import { projectNSEAppearance } from "./appearanceProjection";
 import type {
+  EffectiveAppearance,
   NSEAppearanceServicePort,
   NSEChromeAppearance,
   NSEColourScheme,
@@ -55,7 +57,7 @@ const defaultResolvedAppearance: NSEResolvedAppearance = Object.freeze({
   transparency: "normal",
 });
 
-const NSEAppearanceContext = createContext<NSEResolvedAppearance>(defaultResolvedAppearance);
+const NSEAppearanceContext = createContext<EffectiveAppearance>(defaultResolvedAppearance);
 const emptySubscribe = () => () => undefined;
 
 export interface NSEAppearanceProviderProps extends PropsWithChildren {
@@ -102,7 +104,8 @@ export function NSEAppearanceProvider({
   const resolvedScheme = requestedScheme === "auto"
     ? (resolvedColourScheme ?? (appearanceService ? serviceResolved : inherited.resolvedColourScheme))
     : requestedScheme;
-  const value = useMemo<NSEResolvedAppearance>(() => Object.freeze({
+  const value = useMemo<EffectiveAppearance>(() => Object.freeze({
+    ...(inherited.isSystemSurface && { isSystemSurface: true as const }),
     theme: frozenTheme,
     chrome: chrome ?? inherited.chrome,
     requestedColourScheme: requestedScheme,
@@ -116,25 +119,98 @@ export function NSEAppearanceProvider({
     inherited.chrome,
     inherited.contrast,
     inherited.transparency,
+    inherited.isSystemSurface,
     requestedScheme,
     resolvedScheme,
     transparency,
   ]);
+  return <AppearanceBoundary value={value} projectBoundary={projectBoundary}>{children}</AppearanceBoundary>;
+}
+
+/** Resolve a view or window appearance against the surrounding system appearance. */
+export function ViewAppearanceBoundary({ appearance, children, projectBoundary = true }: PropsWithChildren<{
+  readonly appearance: NSEAppearance | null;
+  readonly projectBoundary?: boolean;
+}>) {
+  const inherited = useContext(NSEAppearanceContext);
+  const { theme: selected, name, chrome, contrast, transparency } = appearance ?? {};
+  const hasAppearance = appearance !== null;
+  const value = useMemo<EffectiveAppearance>(() => {
+    if (!hasAppearance) return inherited;
+    const appTheme = selected && "kind" in selected ? selected : undefined;
+    const systemTheme = selected && !("kind" in selected) ? freezeNSETheme(selected) : undefined;
+    const scheme = name;
+    return Object.freeze({
+      ...inherited,
+      theme: systemTheme ?? inherited.theme,
+      appTheme: inherited.isSystemSurface ? undefined : appTheme ?? inherited.appTheme,
+      ambientAppearance: inherited.isSystemSurface ? undefined : inherited.ambientAppearance ?? inherited,
+      relocatesAppearance: inherited.isSystemSurface ? undefined : !projectBoundary || inherited.relocatesAppearance ? true : undefined,
+      semanticAppearance: systemTheme ? undefined
+        : appTheme && !inherited.isSystemSurface ? inherited.semanticAppearance ?? inherited : inherited.semanticAppearance,
+      chrome: chrome ?? inherited.chrome,
+      requestedColourScheme: scheme ?? inherited.requestedColourScheme,
+      resolvedColourScheme: scheme ?? inherited.resolvedColourScheme,
+      contrast: contrast ?? inherited.contrast,
+      transparency: transparency ?? inherited.transparency,
+    });
+  }, [hasAppearance, selected, name, chrome, contrast, transparency, inherited, projectBoundary]);
+  if (!projectBoundary) return <NSEAppearanceContext.Provider value={value}>{children}</NSEAppearanceContext.Provider>;
+  return <AppearanceBoundary value={value} projectBoundary>{children}</AppearanceBoundary>;
+}
+
+/** System UI keeps the surrounding system appearance when its children move to a portal. */
+export function SystemSurfaceAppearance({ children }: PropsWithChildren) {
+  const inherited = useContext(NSEAppearanceContext);
+  const value = useMemo<EffectiveAppearance>(() => {
+    if (inherited.isSystemSurface) return inherited;
+    return Object.freeze({
+      ...(inherited.ambientAppearance ?? inherited),
+      appTheme: undefined,
+      ambientAppearance: undefined,
+      relocatesAppearance: undefined,
+      semanticAppearance: undefined,
+      isSystemSurface: true,
+    });
+  }, [inherited]);
+  return <NSEAppearanceContext.Provider value={value}>{children}</NSEAppearanceContext.Provider>;
+}
+
+export function useIsSystemSurfaceAppearance(): boolean {
+  return useContext(NSEAppearanceContext).isSystemSurface === true;
+}
+
+export function useRelocatedAppearance(): EffectiveAppearance | undefined {
+  const appearance = useContext(NSEAppearanceContext);
+  return appearance.appTheme || appearance.relocatesAppearance ? appearance : undefined;
+}
+
+export function useInPlaceAppearanceProjection() {
+  const appearance = useContext(NSEAppearanceContext);
+  return useMemo(() => appearance.ambientAppearance ? projectNSEAppearance(appearance) : undefined, [appearance]);
+}
+
+/** Restore a presenting view's appearance in a separately mounted surface. */
+export function RelocatedAppearance({ appearance, children }: PropsWithChildren<{
+  readonly appearance: EffectiveAppearance | undefined;
+}>) {
+  const inherited = useContext(NSEAppearanceContext);
+  return <NSEAppearanceContext.Provider value={appearance ?? inherited}>{children}</NSEAppearanceContext.Provider>;
+}
+
+function AppearanceBoundary({ value, projectBoundary, children }: PropsWithChildren<{
+  readonly value: EffectiveAppearance;
+  readonly projectBoundary: boolean;
+}>) {
   const projection = useMemo(() => projectNSEAppearance(value), [value]);
   // Hooks the JSX runtime did not write (imperative DOM, unbundled apps) still get their mirror classes.
   useLayoutEffect(() => typeof document === "undefined" ? undefined : installNSEHookMirror(document), []);
 
-  const contextualChildren = (
-    <NSEAppearanceContext.Provider value={value}>
-      {children}
-    </NSEAppearanceContext.Provider>
-  );
-  if (!projectBoundary) return contextualChildren;
   return (
     <NSEAppearanceContext.Provider value={value}>
-      <div className="nse-appearance-provider" {...projection} data-nse-role="appearance-provider">
-        {children}
-      </div>
+      {projectBoundary
+        ? <div className="nse-appearance-provider" {...projection} data-nse-role="appearance-provider">{children}</div>
+        : children}
     </NSEAppearanceContext.Provider>
   );
 }
@@ -144,6 +220,6 @@ export function useNSEAppearance(): NSEResolvedAppearance {
 }
 
 export function useNSEAppearanceProjection() {
-  const appearance = useNSEAppearance();
-  return useMemo(() => projectNSEAppearance(appearance), [appearance]);
+  const appearance = useContext(NSEAppearanceContext);
+  return useMemo(() => projectNSEAppearance(appearance, true), [appearance]);
 }

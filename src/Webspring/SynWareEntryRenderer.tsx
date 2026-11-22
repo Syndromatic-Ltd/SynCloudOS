@@ -21,7 +21,6 @@
 import { LoadingSpinner } from "../NSE/NSE";
 import type { SynCloudOSAppInfo, SynCloudOSRuntime } from "../SynCloudOS/SynCloudOS";
 import { SynWareRuntimeMount } from "../SynCloudOS/AppSDK/SynWareRuntimeMount";
-import { SynWareWindowChromeBridge } from "./WindowLayer/WindowChromeBridge";
 
 export interface SynWareEntryRendererProps {
   readonly runtime: SynCloudOSRuntime;
@@ -48,9 +47,11 @@ export function SynWareEntryRenderer({
   loadingLabel,
   missingComponentLabel,
 }: SynWareEntryRendererProps) {
+  const presentation = loadingClassName === "webspring-window-loading" ? "window" : "stage";
   if (isLoading) {
     return (
-      <div className={`${loadingClassName} webspring-loading-state`} aria-busy="true">
+      <div data-nse-control="view" data-nse-part="loading" data-nse-role="application" data-nse-presentation={presentation}
+        className={`${loadingClassName} webspring-loading-state`} aria-busy="true">
         <div className="webspring-loading-state-content">
           <LoadingSpinner label={loadingLabel} variant="dark" />
           <p>{loadingLabel}…</p>
@@ -61,13 +62,12 @@ export function SynWareEntryRenderer({
   const definition = runtime.bundles.getLoadedBundle(app.bundleIdentifier)?.definition;
   if (!definition) {
     return (
-      <div className={loadingClassName}>
+      <div data-nse-control="view" data-nse-part="status" data-nse-role="application" data-nse-presentation={presentation} className={loadingClassName}>
         <p>{missingComponentLabel}</p>
       </div>
     );
   }
   const Root = definition.root;
-  const windowChrome = definition.windowChrome;
   return (
     <SynWareRuntimeMount
       runtime={runtime}
@@ -76,13 +76,6 @@ export function SynWareEntryRenderer({
       {...(windowControllerId === undefined ? {} : { windowControllerId })}
     >
       <Root />
-      {windowChrome && windowControllerId !== undefined ? (
-        <SynWareWindowChromeBridge
-          runtime={runtime}
-          windowChrome={windowChrome}
-          windowControllerId={windowControllerId}
-        />
-      ) : null}
     </SynWareRuntimeMount>
   );
 }

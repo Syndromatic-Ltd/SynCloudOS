@@ -68,6 +68,7 @@ export {
 } from "./Appearance";
 export type {
   NSEAppearanceDataAttributes,
+  NSEAppTheme,
   NSETheme,
   NSEThemeNavigation,
   NSEThemePresentation,
@@ -168,7 +169,7 @@ export type {
   NSEFontTextStyle,
   NSESwitchProps,
 } from "./Controls/Fields/NSEFields";
-export type { NSEChromeScheme } from "./Windows/Chrome";
+export type NSEChromeScheme = "light" | "dark";
 export { resolveNSEBookRegions, NSEBookRegionMetrics } from "./Navigation/bookRegions";
 export type { NSEBookRegions } from "./Navigation/bookRegions";
 export { NSESplitView } from "./DataViews/Split/NSESplitView";
@@ -612,7 +613,7 @@ export type {
   NSEProjectedAttachmentSource,
 } from "./TextLayout/attachmentProjection";
 export {
-  NSEToolbar,
+  NSEToolbar, NSEToolbarItem,
 } from "./Toolbars/NSEToolbar";
 export type {
   NSEToolbarDisplayMode,
@@ -620,7 +621,6 @@ export type {
   NSEToolbarSizeMode,
 } from "./Toolbars/NSEToolbar";
 export type {
-  NSEToolbarItem,
   NSEToolbarActionItem,
   NSEToolbarItemInput,
 } from "./Toolbars/toolbarTypes";
@@ -727,7 +727,7 @@ export type {
 
 export { NSEObject, observable, observe, useObserve } from "./Objects";
 export type { NSEObservable } from "./Objects";
-export { NSEApplication, NSEWindowController, NSEViewController, NSETitlebarAccessoryViewController, NSEAlert, NSEAlertButton, NSEModalResponse } from "./Application";
+export { useNSEApplication, useNSEWindow, NSEApplication, NSEWindowFrameView, NSEWindowController, NSEViewController, NSETitlebarAccessoryViewController, NSEAlert, NSEAlertButton, NSEModalResponse } from "./Application";
 export type { NSEAlertStyle, NSEPopoverPositioning } from "./Application";
 export type { NSEViewControllerPresentationAnimator } from "./Application";
 export { NSEViewControllerTransitionOptions } from "./Application";
@@ -735,7 +735,7 @@ export type { NSEViewAnimator } from "./Animation/NSEViewAnimator";
 export type {
   NSEAnyWindowController, NSEApplicationClass, NSEApplicationContext, NSEApplicationDelegate, NSEControllerView, NSEOpenWindowOptions,
   NSETraitCollection,
-  NSEViewComponent, NSEViewControllerClass, NSEViewControllerOptions, NSEWindow, NSEWindowCloseOutcome, NSEWindowContentBorderEdge, NSEWindowToolbarStyle,
+  NSEViewComponent, NSEViewControllerClass, NSEViewControllerOptions, NSEWindow, NSEWindowButtonType, NSEWindowCloseOutcome, NSEWindowContentBorderEdge, NSEWindowToolbarStyle, NSEWindowStyle, NSEWindowCollectionBehavior, NSEWindowTitleVisibility, NSEWindowTitlebarPresentation,
   NSEWindowControllerClass, NSEWindowControllerContext, NSEWindowControllerOptions, NSEWindowDocument,
 } from "./Application";
 export { preference } from "./Objects/preference";
@@ -766,10 +766,13 @@ export type { BGTaskScheduler, BGTaskRequest, BGDownloadTaskRequest, UNUserNotif
 
 
 export type { NSELayoutGuide } from "./Layout/NSELayoutGuide";
-export { useNSEWindowChromeObstruction } from "./Layout/windowChromeObstructions";
+export { useNSEWindowChromeObstruction } from "./Layout/windowObstructions";
 
 export { useNSESafeArea } from "./Layout/useNSESafeArea";
 export type { NSESafeArea } from "./Layout/useNSESafeArea";
 
 export { nseControlHooks, nsePartHooks } from "./Theme/contract/hooks";
 export type { NSEThemeControlName, NSEThemePartName } from "./Theme/contract/vocabulary";
+
+export { NSEToolbarItemGroup } from "./Toolbars/NSEToolbarItemGroup";
+export type { NSEToolbarItemGroupOptions, NSEToolbarItemGroupSelectionMode, NSEToolbarItemGroupControlRepresentation, NSEToolbarGroupSubitem } from "./Toolbars/NSEToolbarItemGroup";

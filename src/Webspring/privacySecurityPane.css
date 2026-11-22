@@ -18,12 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+@layer nse.structure {
 .nse-privacy-application {
-  color: var(--nse-prefs-row-colour, #263746);
-  text-shadow: none;
+
   min-inline-size: 0;
   overflow-wrap: anywhere;
 }
-[data-mode="dark"] .nse-privacy-application {
-  color: var(--nse-prefs-row-colour, #e7ecf2);
 }

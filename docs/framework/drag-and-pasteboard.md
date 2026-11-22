@@ -1,8 +1,8 @@
 # Drag and pasteboard
 
-Copy, cut, paste and drag and drop share one idea from Cocoa: a **pasteboard** holds typed representations of some content, and any application that understands a representation can take it. SynCloudOS provides named pasteboards and a drag session that moves content between responders, windows and applications.
+This page covers copy and paste and drag and drop. Both rest on one idea: a pasteboard holds the same content in several typed representations, and any application that understands one of them can take it. SynCloudOS gives you named pasteboards and a drag session that moves content between responders, windows and applications.
 
-Both clients belong to the session, so an application only ever transfers content through its own mounted endpoints.
+Both clients belong to your session, so your application only ever transfers content through its own mounted endpoints.
 
 ## Pasteboards
 
@@ -44,7 +44,7 @@ The system pasteboard reaches the browser clipboard, which needs a user gesture 
 
 Write several representations of the same content, richest first, for example an internal type, then `text/html`, then `text/plain`. The receiving application picks the first type it accepts.
 
-Binary representations accept `NSEDataConvertible` (`NSEData`, `Uint8Array` or `ArrayBuffer`) on writes, including lazy providers. Reads, snapshots and adapter deliveries contain immutable `NSEData`; the representation's `type` carries its MIME type. The browser adapter alone converts clipboard Blobs.
+When you write binary content, you can pass any `NSEDataConvertible` (`NSEData`, `Uint8Array` or `ArrayBuffer`), including a lazy provider. Reads and snapshots give you immutable `NSEData`, and the representation's `type` holds its MIME type. Only the browser clipboard adapter deals with `Blob`s.
 
 ```ts
 import { NSEData } from "@syndromatic/syncloudos/foundation";
@@ -58,7 +58,7 @@ if (image?.value instanceof NSEData) {
 
 ## Drag sessions
 
-`useDrag()` returns the drag client. A drag moves between **endpoints**, each identified by an application, a window and a responder. `endpoint()` creates one for the current responder.
+`useDrag()` returns the drag client. A drag moves between endpoints, each identified by an application, a window and a responder. `endpoint()` creates one for the current responder, or for the responder you name with `{ responderId }`.
 
 ```tsx
 import { useDrag } from "@syndromatic/syncloudos/sdk";
@@ -96,12 +96,12 @@ The lifecycle runs in order:
 3. `claimDrop` marks the session as taken by one destination, and `performDrop` completes it, resolving with whether the drop was accepted.
 4. `cancel` ends the session at any point, and `cancelUnclaimed` cleans up a session that no destination claimed.
 
-`readPayload(session, types, signal)` returns the representations a destination understands. A session is an opaque token that works only with the client that created it.
+`readPayload(session, types, signal)` returns the representations a destination understands, and `active()` returns the session in progress, if there is one. A session is an opaque token that works only with the client that created it.
 
 ## Data views and drag
 
-NSE data views handle these steps for you. Pass a `dragBinding` and `onValidateDrop` and `onAcceptDrop` to `NSETableView`, and the table starts sessions, shows insertion feedback and reports drop proposals. `createSynWareNSEDataViewDragBinding` and `createSynWareNSEDragCommandPort` from the SDK entry connect a data view to your session.
+NSE data views handle these steps for you. Give `NSETableView`, `NSEOutlineView` or `NSECollectionView` a `dragBinding`, a `dragEndpoint`, and `onValidateDrop` and `onAcceptDrop` handlers, and the view starts sessions, shows insertion feedback and reports drop proposals. Create the binding with `createSynWareNSEDataViewDragBinding({ drag, representations, operations?, ownerSignal? })` from the SDK entry. `createSynWareNSEDragCommandPort(commands)` routes the keyboard drag commands through your application's command client.
 
-## Keyboard and touch
+## Keyboard
 
-Every pointer drag has a keyboard route through three generic drag commands, and touch uses a long press to lift. When you build custom drag sources, provide the same alternatives, since a drag that only works with a mouse excludes many users.
+Every pointer drag in NSE has a keyboard route through three drag commands, `nse.drag.begin`, `nse.drag.drop` and `nse.drag.cancel`. In the data views, Alt+D picks up the selection, Alt+Enter drops it on the focused row and Escape cancels. If you build your own drag source, give it the same keyboard route: a drag that only works with a mouse shuts out many people.

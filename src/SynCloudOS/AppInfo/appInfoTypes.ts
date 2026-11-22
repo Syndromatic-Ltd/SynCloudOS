@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { SynCloudOSAppFrameManifest, SynCloudOSAppManifest } from "../AppRegistry/appRegistryTypes";
+import type { SynCloudOSPresentationMotionManifest, SynCloudOSAppManifest } from "../AppRegistry/appRegistryTypes";
 
 export type SynCloudOSAppInfoIssueSeverity = "error" | "warning";
 
@@ -62,7 +62,7 @@ export interface SynCloudOSAppInfoExplanation {
 }
 
 export interface SynCloudOSAppInfo extends SynCloudOSAppManifest {
-  frame: SynCloudOSAppFrameManifest;
+  frame: SynCloudOSPresentationMotionManifest;
   capitalizedName: string;
   registeredAt: number;
   normalizedAt: number;

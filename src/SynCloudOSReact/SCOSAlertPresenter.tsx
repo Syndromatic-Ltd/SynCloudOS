@@ -1,11 +1,15 @@
 /* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
 import { useId, useSyncExternalStore } from "react";
+import { SystemSurfaceAppearance, ViewAppearanceBoundary, useNSEAppearance } from "../NSE/hostComposition";
+import { useObserve } from "../NSE/applicationHostInterop";
 import { AlertSurface } from "../NSE/hostComposition";
 import { AlertBackdrop } from "../NSE/hostComposition";
 import { NSEButton } from "../NSE/public/controls";
 import type { SynCloudOSPresentationTraitsService } from "../SynCloudOS/SynCloudOS";
-import type { SynCloudOSAlertCenter } from "../SynCloudOS/SystemUI/alertCenter";
+import { applicationSessionFor } from "../SynCloudOS/AppHosting/runtimeEntry";
+import type { SynCloudOSAlertCenter, SynCloudOSPresentedAlert } from "../SynCloudOS/SystemUI/alertCenter";
 import { FocusScope } from "./FocusScope";
+import { useKernelSynCloudOS } from "./runtimeContext";
 import { useResolvedMode } from "./serviceHooks";
 import "./system-alert.css";
 
@@ -15,14 +19,34 @@ export function SCOSAlertPresenter({ center, appearance: requestedAppearance, pr
   readonly presentation?: Pick<SynCloudOSPresentationTraitsService, "getSnapshot" | "subscribe">;
   readonly appearance?: "dark" | "light";
 }) {
+  const runtime = useKernelSynCloudOS();
   const resolvedAppearance = useResolvedMode();
-  const appearance = requestedAppearance ?? resolvedAppearance;
   const { current } = useSyncExternalStore(center.subscribe, center.getSnapshot, center.getSnapshot);
+  const ownerAppId = current?.ownerAppId;
+  const app = useObserve(ownerAppId ? applicationSessionFor({ runtimeId: runtime.runtimeId, appId: ownerAppId })?.app : undefined);
+  const appAppearance = app?.appearance ?? null;
+  if (!current) return null;
+
+  const alert = <QueuedAlert key={current.id} center={center} current={current} presentation={presentation}
+    fallbackMode={requestedAppearance ?? resolvedAppearance} followsAppearance={appAppearance !== null} />;
+  return ownerAppId
+    ? <ViewAppearanceBoundary appearance={appAppearance} projectBoundary={false}>{alert}</ViewAppearanceBoundary>
+    : <SystemSurfaceAppearance>{alert}</SystemSurfaceAppearance>;
+}
+
+function QueuedAlert({ center, current, presentation, fallbackMode, followsAppearance }: {
+  readonly center: SynCloudOSAlertCenter;
+  readonly current: SynCloudOSPresentedAlert;
+  readonly presentation: Pick<SynCloudOSPresentationTraitsService, "getSnapshot" | "subscribe"> | undefined;
+  readonly fallbackMode: "dark" | "light";
+  readonly followsAppearance: boolean;
+}) {
+  const resolved = useNSEAppearance();
+  const appearance = followsAppearance ? resolved.resolvedColourScheme : fallbackMode;
   const titleId = useId();
   const messageId = useId();
-  if (!current) return null;
   const primary = current.buttons.find(button => button.role === "default" || button.role === "destructive") ?? current.buttons[0];
-  return <FocusScope asChild key={current.id} scopeId={`scos-alert:${current.id}`} kind="modal" parentResponderId="runtime" trapFocus>
+  return <FocusScope asChild scopeId={`scos-alert:${current.id}`} kind="modal" parentResponderId="runtime" trapFocus>
     <AlertBackdrop presentation={presentation} onSafeDismiss={() => center.dismiss(current.id)}>
       <AlertSurface appearance={appearance} labelledBy={titleId} describedBy={current.message ? messageId : undefined} initialFocusSelector="[data-scos-alert-primary]">
         {/* Without an icon the copy would otherwise sit in the alert's fixed icon column. */}
@@ -38,7 +62,7 @@ export function SCOSAlertPresenter({ center, appearance: requestedAppearance, pr
             title={button.label}
             hasDestructiveAction={button.role === "destructive"}
             keyEquivalent={button.role === "default" ? "\r" : undefined}
-            appearance={button.role === "destructive" || button.role === "default" || appearance === "dark" ? undefined : "aqua"}
+            appearance={button.role === "destructive" || button.role === "default" || appearance === "dark" ? undefined : "light"}
             key={button.id}
             className="nse-system-alert-action-button"
             data-scos-alert-primary={button === primary ? "" : undefined}

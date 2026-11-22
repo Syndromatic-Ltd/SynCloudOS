@@ -41,11 +41,18 @@ function TooltipSpecimen() {
   const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null);
   return <><button ref={setAnchor}>Anchor</button><Tooltip id="contract-tooltip" open anchor={anchor} content="Help" /></>;
 }
-function Toolbar({ width, customising, borderless = false, labelled = false, sizeMode = "regular" }: { width: number; customising: boolean; borderless?: boolean; labelled?: boolean; sizeMode?: "regular" | "small" }) {
+export function Toolbar({ width, customising, borderless = false, labelled = false, sizeMode = "regular", checked = "off" }: {
+  width: number;
+  customising: boolean;
+  borderless?: boolean;
+  labelled?: boolean;
+  sizeMode?: "regular" | "small";
+  checked?: "on" | "off";
+}) {
   const [controller] = useState(() => {
     const values = new Map<string, unknown>();
     const preferences = new NSEUserDefaultsController<ToolbarPreferences>({ namespace: "contract-toolbar", schema: { version: 1, defaults: { itemIds: ["save", "custom", "space", "flex", "separator"], displayMode: "icon-and-label", sizeMode }, fields: { itemIds: { validate: (v: unknown): v is readonly string[] => Array.isArray(v) }, displayMode: { validate: (v: unknown): v is ToolbarPreferences["displayMode"] => typeof v === "string" }, sizeMode: { validate: (v: unknown): v is ToolbarPreferences["sizeMode"] => typeof v === "string" } }, migrations: [] }, defaults: defaultsFrom({ read: key => values.get(key) ?? null, write: (key, value) => { values.set(key, value); }, remove: key => { values.delete(key); } }) });
-    const runtime: ToolbarRuntimePort = { signal: new AbortController().signal, commands: { getPresentationGeneration: () => ({ registryGeneration: 0, responderGeneration: 0 }), validateMany: async requests => new Map(requests.map(request => [request.key, { commandId: request.commandId, responderId: "contract", title: "Save", enabled: true, denied: false, hidden: false, state: "off" as const, stale: false }])), prepareDispatch: async () => ({ status: "cancelled", reason: "specimen" }), dispatch: async commandId => ({ status: "cancelled", commandId, operationId: "contract", reason: "specimen" }) } };
+    const runtime: ToolbarRuntimePort = { signal: new AbortController().signal, commands: { getPresentationGeneration: () => ({ registryGeneration: 0, responderGeneration: 0 }), validateMany: async requests => new Map(requests.map(request => [request.key, { commandId: request.commandId, responderId: "contract", title: "Save", enabled: true, denied: false, hidden: false, state: checked, stale: false }])), prepareDispatch: async () => ({ status: "cancelled", reason: "specimen" }), dispatch: async commandId => ({ status: "cancelled", commandId, operationId: "contract", reason: "specimen" }) } };
     return new NSEToolbarController({ configuration: { identifier: "contract-toolbar", owner: { kind: "window", windowControllerId: "contract" }, allowedItemIds: ["save", "custom", "space", "flex", "separator"], defaultItemIds: ["save", "custom", "space", "flex", "separator"], displayMode: "icon-and-label", sizeMode }, items: [{ kind: "command", id: "save", label: "Save", paletteLabel: "Save document", commandId: "save", icon: <span>S</span>, minimumWidth: 40, idealWidth: 54, ...(borderless ? { bordered: false } : {}) }, { kind: "custom", id: "custom", label: "Custom", minimumWidth: 40, idealWidth: 62, render: () => <span>Custom</span>, ...(labelled ? { showsLabel: true } : {}) }, { kind: "space", id: "space", width: 8 }, { kind: "flexible-space", id: "flex", minimumWidth: 12 }, { kind: "separator", id: "separator" }], preferences, runtime });
   });
   useEffect(() => () => controller.dispose(), [controller]);
@@ -64,8 +71,7 @@ import { windowSpecimens } from "./windowSpecimens";
 import { MaterialProvider } from "../../../../src/NSE/Material/MaterialProvider";
 import { NSEView } from "../../../../src/NSE/Views/NSEView";
 import { MediaCollectionPresenter } from "../../../../src/NSE/MediaPanels/NSEMediaCollectionPresenter";
-import { ApplicationHostTitlebar } from "../../../../src/SynCloudOSReact/ApplicationHostTitlebar";
-import { createApplicationMenuStore } from "../../../../src/SynCloudOSReact/ApplicationMenuTrigger";
+import { WindowTitlebarView } from "../../../../src/NSE/Windows/WindowTitlebarView";
 import { NSEPopUpButton } from "../../../../src/NSE/Menus/NSEPopUpButton";
 import { GroupedRow } from "../../../../src/NSE/Controls/Selection/GroupedRow";
 import { NSEDatePicker } from "../../../../src/NSE/DateTime/Pickers/NSEDatePicker";
@@ -98,9 +104,9 @@ export const supplementalThemeCatalogue: readonly { id: string; ready?: string; 
 { id: "configured-toolbar-small", render: () => <Toolbar width={500} customising={false} sizeMode="small" /> },
   { id: "menu-bar-open", activate: '[role="menubar"] [role="menuitem"]', render: () => <SpecimenMenuBar /> },
   { id: "application-menu-open", ready: '[data-nse-application-menu]', render: () => <SpecimenApplicationMenu open /> },
-  { id: "application-menu-submenu", ready: '[data-nse-application-menu]', hover: '[data-nse-application-menu] [aria-haspopup]', render: () => <SpecimenApplicationMenu open id="specimen-app-submenu" /> },
+  { id: "application-menu-submenu", ready: '[data-nse-application-menu]', activate: '[data-nse-application-menu] [aria-haspopup]', activeReady: '[data-nse-part="back-indicator"]', render: () => <SpecimenApplicationMenu open id="specimen-app-submenu" /> },
   { id: "context-menu", context: '[data-specimen-context]', render: () => <SpecimenContextMenu /> },
-  ...(["metal", "cumulus"] as const).map(material => ({ id: `host-titlebar-${material}`, render: () => <ApplicationHostTitlebar title="Documents" iconSrc={null} material={material} scheme="light" menuStore={createApplicationMenuStore()} menuLabel="Documents"><p>Body</p></ApplicationHostTitlebar> })),
+  ...(["metal", "cumulus"] as const).map(material => ({ id: `host-titlebar-${material}`, render: () => <><WindowTitlebarView document={{ title: "Documents", subtitle: "", documentEdited: false }} isKeyWindow material={material} /><p>Body</p></> })),
   { id: "media-grid", render: () => <MediaCollectionPresenter items={["Beach", "Forest"].map((name, index) => ({ id: `m${index}`, providerId: "local", name, kind: "image", mimeType: "image/png", thumbnailUrl: "/assets/webspring/Panel.png" }))} selectedIds={new Set(["5:local2:m1"])} selection="multiple" direction="ltr" onSelectionChange={() => undefined} onActivate={() => undefined} /> },
   { id: "date-picker-calendar-sheet", activate: '[data-nse-control="date-picker"] button[aria-label^="Choose"]', activeReady: '[data-nse-part="calendar-sheet"]', render: () => <NSEDatePicker aria-label="Date" locale="en-GB" timeZone="Europe/London" defaultValue={{ year: 2026, month: 11, day: 9 }} /> },
   { id: "time-picker-clock-sheet", activate: '[data-nse-part="clock-affix"]', activeReady: '[data-nse-part="clock-sheet"]', render: () => <NSEDatePicker aria-label="Time" locale="en-US" timeZone="America/New_York" datePickerElements={["hourMinute"]} defaultValue={{ hour: 13, minute: 30, second: 0 }} /> },

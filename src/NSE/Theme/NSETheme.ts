@@ -1,5 +1,7 @@
 /* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
 import type { NSEThemeColourName } from "./contract/colours";
+import type { NSEThemeMotion, NSEThemeMotionRole } from "./contract/motion";
+export type { NSEThemeMotion, NSEThemeMotionRole };
 export interface NSEThemeNavigation {
   readonly compact: { readonly placement: "block-start" | "block-end"; readonly flow: "in-flow" | "overlay" };
   readonly regular: { readonly placement: "source-list" | "block-start"; readonly flow: "in-flow" | "overlay" };
@@ -27,6 +29,8 @@ export interface NSETheme {
   readonly navigation: NSEThemeNavigation;
   readonly presentation: NSEThemePresentation;
   readonly images: Readonly<Record<string, NSEThemeImage>>;
+  /** Every role's timing. Roles a bundle omits take Atmo's. */
+  readonly motion: Readonly<Record<NSEThemeMotionRole, NSEThemeMotion>>;
 }
 /** @internal Copy generated static data; no mutable caller-owned object is retained. */
 export function freezeNSETheme(input: NSETheme): NSETheme {

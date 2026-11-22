@@ -1,6 +1,6 @@
 # Data views
 
-Data views present collections: tables, outlines, grids, browsers and long lists. Each one reads its items from a controller, so selection, sorting and editing live in one place while the view handles drawing, keyboard navigation and assistive technology. Every data view is virtualised. It draws the rows in and near the viewport, so a collection of tens of thousands of items scrolls as smoothly as a short one.
+Data views present collections: tables, outlines, grids, browsers and long lists. Each reads its items from a controller, which keeps selection, sorting and editing in one place, while the view handles drawing, keyboard navigation and assistive technology. Every data view is virtualised: it draws only the rows in and near the viewport, so tens of thousands of items scroll as smoothly as a handful.
 
 All components come from `@syndromatic/syncloudos/nse`.
 
@@ -35,13 +35,13 @@ export const adapter = {
 };
 ```
 
-The controller handles the data. The [controllers guide](controllers.md) describes filtering, sorting, selection and edit transactions, and each of them reaches every view that uses the controller.
+The controller handles the data. The [controllers guide](controllers.md) describes filtering, sorting, selection and edit transactions, and every view that uses the controller reflects them.
 
-A view keeps its state, such as keyboard focus and an edit in progress, for as long as `adapter.controller` stays the same. The adapter object itself may be new on every render, so an inline `adapter={{ controller, idForItem, labelForItem }}` is fine: the view reads `idForItem`, `labelForItem` and `isItemDisabled` from the latest adapter. It projects the items again only when `idForItem` or `isItemDisabled` is a different function, so define them outside the component, or memoise them, when the collection is large. Giving the view a different controller starts it afresh.
+A view keeps its state, such as keyboard focus and an edit in progress, for as long as `adapter.controller` stays the same. The adapter object can be new on every render, so an inline `adapter={{ controller, idForItem, labelForItem }}` is fine; the view reads `idForItem`, `labelForItem` and `isItemDisabled` from the latest one. It recomputes the items only when `idForItem` or `isItemDisabled` is a different function, so for a large collection define them outside the component or memoise them. Giving the view a different controller resets it.
 
 ## Table
 
-`NSETableView` shows items as rows with typed columns. A column says how to read its value, how wide it may be, and optionally how to format, sort, render and edit it.
+`NSETableView` shows items as rows with typed columns. A column says how to read its value and how wide it may be, and optionally how to format, sort, render and edit it.
 
 ```tsx
 import { NSETableView } from "@syndromatic/syncloudos/nse";
@@ -81,11 +81,11 @@ Table features:
 - Set `editable` on a column and supply an `editor` to edit in place. `onEditCommit` receives the change.
 - Selection reports through `onSelectionChange`, and `onDoubleAction` fires when a row is activated.
 - Drag and drop works through `dragBinding`, `onValidateDrop` and `onAcceptDrop`. See [drag and pasteboard](drag-and-pasteboard.md).
-- The rows scroll inside a viewport 460 px tall by default. Set `viewportBlockSize` to a pixel height, or to `"fill"` to take the container's height and follow it as it resizes. Use `"fill"` for a table that fills a pane, such as a source list between a pane header and footer.
+- The rows scroll inside a viewport 460 px tall by default. Set `viewportBlockSize` to a height in pixels, or to `"fill"` to take the container's height and follow it as it resizes. Use `"fill"` for a table that fills a pane, such as a source list between a pane header and footer.
 
 ## View states
 
-Every data view accepts a `state` that replaces its content with a message when there is nothing to show. The kinds are `ready`, `loading`, `empty`, `disabled`, `read-only`, `invalid`, `denied`, `interrupted` and `error`. The last three can carry a `retry` or `resume` callback, which the view presents as an action.
+Every data view accepts a `state` that replaces its content with a message when there's nothing to show. The kinds are `ready`, `loading`, `empty`, `disabled`, `read-only`, `invalid`, `denied`, `interrupted` and `error`. The last three can carry a `retry` or `resume` callback, which the view presents as an action.
 
 ```tsx
 import { NSETableView } from "@syndromatic/syncloudos/nse";
@@ -98,15 +98,15 @@ export function EmptyTable() {
 
 ## Controller lifetime
 
-A data view never owns its controller. The module, the component or the application session that created it does, as the [controllers guide](controllers.md#controller-lifetimes) describes. In a component, create the controller with `useNSEArrayController` or `useNSETreeController` so it survives React StrictMode and is disposed when the component unmounts.
+A data view never owns its controller; whatever created it does, as the [controllers guide](controllers.md#controller-lifetimes) describes. In a component, create the controller with `useNSEArrayController` or `useNSETreeController` so it survives React StrictMode and is disposed when the component unmounts.
 
-If the controller is disposed while a view still shows it, the view keeps its last rows on screen and turns inert. It presents the `disabled` state with the message "This content is no longer available.", sets `aria-disabled` on the view and its items, and leaves the tab order. Pointer and keyboard selection, activation, context menus and editing are ignored rather than thrown from an event handler, and development builds log one `console.warn` per view that starts with `[NSE_CONTROLLER_DISPOSED]` and names the controller and the reason it was disposed. Calling the controller's own methods still throws `SynCloudOSLifecycleError`. Give the view a live controller to make it interactive again.
+If the controller is disposed while a view still shows it, the view keeps its last rows on screen and stops responding. It shows the `disabled` state with the message "This content is no longer available.", sets `aria-disabled` on the view and its items, and leaves the tab order. Pointer and keyboard selection, activation, context menus and editing are ignored instead of throwing from an event handler. Development builds log one `console.warn` per view, starting `[NSE_CONTROLLER_DISPOSED]`, that names the controller and why it was disposed. Calling the controller's own methods still throws `SynCloudOSLifecycleError`. Give the view a live controller to make it interactive again.
 
 ## Outline
 
 `NSEOutlineView` presents a hierarchy with expandable rows, driven by an `NSETreeController`. It supports keyboard expansion and collapse, drop proposals for moving nodes, and lazy loading through the controller's `loadChildren`.
 
-A sidebar is an `NSEOutlineView` with `selectionHighlightStyle="sourceList"`. The delegate's `isGroupItem` marks section headers, `shouldShowOutlineCell` hides a section's disclosure arrow, and `shouldSelect` decides what can be selected (by default, everything but group items). The theme draws group rows and the source-list background; see [Source-list application chrome](nse/source-list-chrome.md). `viewportBlockSize="fill"` takes the container's height.
+A sidebar is an `NSEOutlineView` with `selectionHighlightStyle="sourceList"`. The delegate's `isGroupItem` marks section headers, `shouldShowOutlineCell` hides a section's disclosure arrow, and `shouldSelect` decides what can be selected (by default, everything except group items). The theme draws group rows and the source-list background; see [Source-list application chrome](nse/source-list-chrome.md). `viewportBlockSize="fill"` takes the container's height.
 
 ## Collection view
 
@@ -114,7 +114,7 @@ A sidebar is an `NSEOutlineView` with `selectionHighlightStyle="sourceList"`. Th
 
 ### Cover Flow
 
-`createCoverFlowCollectionLayout` gives the collection view a Cover Flow layout, after a custom `NSCollectionViewLayout` (AppKit's own Cover Flow was the private `IKImageFlowView`). The selected item faces the viewer, the others turn inward on either side, and every item is mirrored on the floor. AnimationFX draws the view: each item is a layer, and the mirrors sit under an `AFXReplicatorLayer` that darkens them with its instance colour, while a fade mask on each mirror fades it out. Items and mirrors are drawn in depth order, so a nearer item hides a farther one and its mirror.
+`createCoverFlowCollectionLayout` gives the collection view a Cover Flow layout: the selected item faces the viewer, the others turn inward on either side, and every item is reflected on the floor. AnimationFX draws the view. Each item is a layer, and the reflections sit under an `AFXReplicatorLayer` that darkens them with its instance colour, with a fade mask on each reflection. Items and reflections are drawn in depth order, so a nearer item hides a farther one and its reflection.
 
 ```tsx
 const showcase = createCoverFlowCollectionLayout({ isWrapped: true });
@@ -139,22 +139,29 @@ const showcase = createCoverFlowCollectionLayout({ isWrapped: true });
 | `isWrapped` | `false` | The items form an endless ring. |
 | `visibleItemsEachSide` | `4` | Items at full opacity on each side before the fan fades out. |
 
-The defaults are AnimationFX's showcase camera. Software uses `{ cameraDistance: 3, cameraPitch: 0.04 }`, a level camera a little nearer.
+The defaults match the AnimationFX showcase camera. For a nearly level camera a little closer in, try `{ cameraDistance: 3, cameraPitch: 0.04 }`.
 
-The selection is the array controller's: the selected item is the centre one, and selecting an item on the controller scrolls to it. The arrow keys, Home and End, a click on a side item, a drag and a horizontal wheel select. A drag moves the items under the pointer, and on release the scroll settles on the nearest item, carried on by the drag's speed. Enter or a click on the centre item activates it, calling `onActivate`. The title under the centre item is the adapter's label; `subtitleForItem` supplies the line beneath it, after `IKImageBrowserItem.imageSubtitle`, and `showsTitles` and `showsReflections` turn either off.
+The selection belongs to the array controller: the centre item is the selected one, and selecting an item on the controller scrolls to it. The arrow keys, Home and End, clicking a side item, dragging and horizontal wheel scrolling all change the selection. A drag moves the items under the pointer, and on release the row coasts with the drag's speed and settles on the nearest item. Enter, or a click on the centre item, activates it and calls `onActivate`. The title under the centre item is the adapter's label, and `subtitleForItem` supplies the line beneath it. `showsTitles` and `showsReflections` turn either off.
 
-`coverFlowItemAttributes` and `coverFlowLayoutAttributes` give the same geometry to a scene of your own, as AnimationFX's showcase uses it.
+`coverFlowItemAttributes` and `coverFlowLayoutAttributes` give you the same geometry for a scene of your own, which is how the AnimationFX showcase uses it.
 
 ## Browser
 
-`NSEBrowser` is the multi column view familiar from the Finder. It reads its hierarchy from an `NSEBrowserDataSource`, and it loads each column on demand.
+`NSEBrowser` shows a hierarchy as a row of columns, each listing the children of the item selected in the column before it. It reads the hierarchy from an `NSEBrowserDataSource` and loads each column on demand.
 
 ## Lists
 
-A list is a single-column `NSETableView` with `headerHidden`, as in AppKit, where a list is a view-based `NSTableView` without a header view. The table draws only the rows in view, so a list of thousands of rows costs no more than one that fits on screen.
+A list is a single-column `NSETableView` with `headerHidden`. The table draws only the rows in view, so a list of thousands of rows costs no more than one that fits on screen.
 
 ```tsx
+import { useEffect } from "react";
 import { NSETableCellView, NSETableView, useNSEArrayController } from "@syndromatic/syncloudos/nse";
+
+interface Reminder {
+  readonly id: string;
+  readonly title: string;
+  readonly due: string;
+}
 
 const columns = [{
   id: "name", title: "Name", value: (item: Reminder) => item.title, width: { min: 120, ideal: 320, max: 2000 },
@@ -171,8 +178,8 @@ export function Reminders({ reminders }: { readonly reminders: readonly Reminder
 
 ## Rule and predicate editors
 
-`NSERuleEditor` and `NSEPredicateEditor` let users build filters from rows of conditions, in the style of Mail's smart mailboxes. They produce a structured rule, which you evaluate against your own data.
+`NSERuleEditor` and `NSEPredicateEditor` let users build a filter from rows of conditions, such as "Title contains invoice". They produce a structured rule, which you evaluate against your own data.
 
 ## Accessibility
 
-Data views expose list, grid, tree and row semantics with stable labels and selection state. Keyboard navigation and visible focus continue to work inside the virtual window, and rows scroll into view as focus moves. On compact layouts, keep commands reachable through the responder chain and never rely on hover alone.
+Data views expose list, grid, tree and row semantics with stable labels and selection state. Keyboard navigation and visible focus keep working inside the virtualised rows, and rows scroll into view as focus moves. On compact layouts, keep commands reachable through the responder chain and don't rely on hover alone.

@@ -20,5 +20,5 @@
 
 export * from "./LoginWindow";
 export { AboutDialog, NSEConfirmDialog } from "../Components/NSESystemDialogs";
-export { PreferencesToast, type NSEPreferencePane } from "../Components/NSEPreferencesToast";
+export { PreferencesToast, type PreferencesToastPane } from "../Components/NSEPreferencesToast";
 export { AlertBackdrop } from "../Components/NSEAlertBackdrop";

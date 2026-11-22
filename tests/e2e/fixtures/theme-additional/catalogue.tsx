@@ -5,8 +5,9 @@ import { SynCloudOSProvider } from "../../../../src/SynCloudOSReact";
 import { WebspringQuickSwitchView } from "../../../../src/Webspring/WebspringQuickSwitchView";
 import { SystemAlert } from "../../../../src/SynCloudOSReact/SystemAlert";
 import { AlertBackdrop } from "../../../../src/NSE/Components/NSEAlertBackdrop";
-import { AppViewChrome } from "../../../../src/Webspring/AppViewChrome";
-import { AppFrame } from "../../../../src/NSE/Windows/AppFrame";
+import { WSStageWindowFrame } from "../../../../src/Webspring/WSStageWindowHost";
+import { WindowContentBorder } from "../../../../src/SynCloudOS/AppHosting/windowAccessories";
+import "../../../../src/SynCloudOS/AppHosting/window-chrome.css";
 import { WindowTitlebarContent } from "../../../../src/NSE/Windows/windowTitlebarContext";
 import { NSEDatePicker } from "../../../../src/NSE/DateTime/Pickers/NSEDatePicker";
 import type { SynCloudOSAppInfo } from "../../../../src/SynCloudOS/AppInfo/appInfoTypes";
@@ -23,7 +24,21 @@ export interface AdditionalThemeSurface { readonly id: string; readonly render: 
 export const additionalThemeCatalogue: readonly AdditionalThemeSurface[] = [
   ...[false, true].map(selected => ({ id: `quick-switch-${selected ? "selected" : "normal"}`, action: selected ? "select-next" as const : undefined, render: () => <Runtime><WebspringQuickSwitchView apps={apps} lifecycle={{}} open openAppIds={[apps[0]!.bundleIdentifier]} onClose={noop} /></Runtime> })),
   ...[false, true].map(disclosed => ({ id: `system-alert-${disclosed ? "details" : "normal"}`, action: disclosed ? "disclose" as const : undefined, render: (scheme: "light" | "dark") => <Runtime><AlertBackdrop><SystemAlert appearance={scheme} error={{ code: "SITE_NOT_RESPONDING", scope: "site", title: "The workspace is not responding", message: "You can return to your workspace or try again.", technicalDetails: "Diagnostic code: SITE_NOT_RESPONDING\nOwner: supplementary specimen", suggestedActions: ["reload", "dismiss"] }} onDismiss={noop} onReturn={noop} onReload={noop} /></AlertBackdrop></Runtime> })),
-  ...[false, true].map(keyWindow => ({ id: `stage-status-${keyWindow ? "key" : "inactive"}`, render: () => <AppViewChrome.Root zIndex={1} keyWindow={keyWindow}><AppFrame topBar={<WindowTitlebarContent title="Documents" subtitle="3 items" toolbarStyle="unified" />} statusBar={<span>Ready</span>}><p>Document content</p></AppFrame></AppViewChrome.Root> })),
+  ...[false, true].map(keyWindow => ({
+    id: `stage-status-${keyWindow ? "key" : "inactive"}`,
+    render: () => (
+      <WSStageWindowFrame zIndex={1} keyWindow={keyWindow}>
+        <div className="nse-window-chrome-frame window-content-border-specimen" style={{ position: "relative", minHeight: 180 }}>
+          <WindowTitlebarContent title="Documents" subtitle="3 items" toolbarStyle="unified" />
+          <div className="nse-window-chrome-content" data-nse-part="content-view" data-nse-content-border="small" style={{ minHeight: 120 }}>
+            <div className="nse-window-content-above-bottom-bar" style={{ bottom: 24 }}><p>Document content</p></div>
+            <div className="nse-window-bottom-bar-accessory" style={{ height: 24 }}><span>Ready</span></div>
+            <WindowContentBorder thickness={24} />
+          </div>
+        </div>
+      </WSStageWindowFrame>
+    ),
+  })),
   ...["textFieldAndStepper", "clockAndCalendar"].map(datePickerStyle => ({ id: `date-picker-combined-${datePickerStyle}`, render: () => <NSEDatePicker aria-label="Appointment" locale="en-GB" timeZone="Europe/London" datePickerElements={["yearMonthDay", "hourMinute"]} datePickerStyle={datePickerStyle as "textFieldAndStepper" | "clockAndCalendar"} defaultValue={{ date, time, timeZone: "Europe/London", disambiguation: "reject" }} /> })),
   ...["textFieldAndStepper", "clockAndCalendar"].map(datePickerStyle => ({ id: `date-picker-range-${datePickerStyle}`, render: () => <NSEDatePicker aria-label="Dates" locale="en-GB" timeZone="Europe/London" datePickerMode="range" datePickerStyle={datePickerStyle as "textFieldAndStepper" | "clockAndCalendar"} defaultValue={{ start: date, end: { ...date, day: 12 } }} /> })),
 ];

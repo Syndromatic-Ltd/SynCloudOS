@@ -121,7 +121,7 @@ function RuleComparisonControls({ row, label, fields, operators, templates, loca
       <NSETextField className="nse-rule-value" aria-label={`Upper value rule ${row.id}`} value={parts[1] ?? ""} readOnly={readOnly} isEnabled={!disabled} onChange={(event) => { const next = [parts[0] ?? "", event.target.value]; setParts(next); if (next[0] !== "") publishParts(next); }} />
     </> : row.operator === "in" ? <NSETextField className="nse-rule-value" aria-label={`Values rule ${row.id}`} value={parts.join(", ")} readOnly={readOnly} isEnabled={!disabled} onChange={(event) => { const next = event.target.value.split(","); setParts(next); publishParts(next); }} />
       : option?.arity !== 0 ? <NSETextField className="nse-rule-value" aria-label={`Value ${label}`} value={parts[0] ?? ""} readOnly={readOnly} isEnabled={!disabled} onChange={(event) => { const next = [event.target.value]; setParts(next); publishParts(next); }} /> : null}
-    {error && <span role="alert" className="nse-rule-error">{error}</span>}
+    {error && <span role="alert" className="nse-rule-error" data-nse-part="error">{error}</span>}
   </>;
 }
 
@@ -189,7 +189,7 @@ export function NSERuleEditor({ value, defaultValue = EMPTY_VALUE, onChange, onV
   };
   const renderRows = (rows: readonly RuleRow[], parentPath: readonly number[] = []): ReactNode => rows.map((row, index) => {
     const path = [...parentPath, index];
-    if (row.kind === "group") return <fieldset key={row.id} tabIndex={-1} data-rule-id={row.id} className="nse-rule-group" onKeyDown={(event) => {
+    if (row.kind === "group") return <fieldset key={row.id} tabIndex={-1} data-rule-id={row.id} className="nse-rule-group" data-nse-part="group" onKeyDown={(event) => {
       if (event.altKey && event.key === "ArrowUp") { event.preventDefault(); move(parentPath, index, -1); }
       else if (event.altKey && event.key === "ArrowDown") { event.preventDefault(); move(parentPath, index, 1); }
     }}>
@@ -197,7 +197,7 @@ export function NSERuleEditor({ value, defaultValue = EMPTY_VALUE, onChange, onV
         <NSEPopUpButton label={`Match ${row.id}`} labelHidden value={row.operator} isEnabled={!locked} items={matchOptions} onValueChange={(operator) => publishChildren(replaceAtPath(root.children, path, { ...row, operator: operator as "all" | "any" | "none" }))} />
         <span className="nse-rule-phrase" aria-hidden="true">of the following are true</span>
         <NSEButton
-          appearance="aqua"
+          appearance="light"
           title="−"
           isEnabled={!locked}
           className="nse-rule-remove"
@@ -208,14 +208,14 @@ export function NSERuleEditor({ value, defaultValue = EMPTY_VALUE, onChange, onV
       <div className="nse-rule-rows">{renderRows(row.children, path)}</div>
       <div className="nse-rule-footer">
         <NSEButton
-          appearance="aqua"
+          appearance="light"
           title="Add Rule"
           isEnabled={!(locked || fields.length === 0)}
           aria-label={`Add rule to ${row.id}`}
           onClick={() => addRule(path)}
         />
         <NSEButton
-          appearance="aqua"
+          appearance="light"
           title="Add Group"
           isEnabled={!locked}
           aria-label={`Add group to ${row.id}`}
@@ -224,10 +224,10 @@ export function NSERuleEditor({ value, defaultValue = EMPTY_VALUE, onChange, onV
       </div>
     </fieldset>;
     const label = parentPath.length === 0 ? String(index + 1) : row.id;
-    if (row.kind === "constant") return <div key={row.id} role="group" aria-label={`Rule ${label}`} tabIndex={-1} data-rule-id={row.id} className="nse-rule-row">
+    if (row.kind === "constant") return <div key={row.id} role="group" aria-label={`Rule ${label}`} tabIndex={-1} data-rule-id={row.id} className="nse-rule-row" data-nse-part="row">
       <NSEPopUpButton label={`Constant ${label}`} labelHidden value={String(row.value)} isEnabled={!locked} items={[{ value: "true", title: "Always true" }, { value: "false", title: "Always false" }]} onValueChange={(next) => publishChildren(replaceAtPath(root.children, path, { ...row, value: next === "true" }))} />
       <NSEButton
-        appearance="aqua"
+        appearance="light"
         title="−"
         isEnabled={!locked}
         className="nse-rule-remove"
@@ -235,13 +235,13 @@ export function NSERuleEditor({ value, defaultValue = EMPTY_VALUE, onChange, onV
         onClick={() => { repairFocus(rows, index, parentPath); publishChildren(replaceAtPath(root.children, path, null)); }}
       />
     </div>;
-    return <div key={row.id} role="group" aria-label={`Rule ${label}`} tabIndex={-1} data-rule-id={row.id} className="nse-rule-row"  data-alternating={index % 2 === 1 || undefined} onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
+    return <div key={row.id} role="group" aria-label={`Rule ${label}`} tabIndex={-1} data-rule-id={row.id} className="nse-rule-row" data-nse-part="row" data-nse-style={index % 2 === 1 ? "alternating" : undefined} onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
       if (event.altKey && event.key === "ArrowUp") { event.preventDefault(); move(parentPath, index, -1); }
       else if (event.altKey && event.key === "ArrowDown") { event.preventDefault(); move(parentPath, index, 1); }
     }}>
       <RuleComparisonControls row={row} label={label} fields={fields} operators={operators} templates={templates} locale={locale} readOnly={effectiveReadOnly} disabled={effectiveDisabled} onChange={(next) => publishChildren(replaceAtPath(root.children, path, next))} />
       <NSEButton
-        appearance="aqua"
+        appearance="light"
         title="−"
         isEnabled={!locked}
         className="nse-rule-remove"
@@ -262,18 +262,18 @@ export function NSERuleEditor({ value, defaultValue = EMPTY_VALUE, onChange, onV
       <div role="group" aria-label="Rule rows" className="nse-rule-rows">{renderRows(root.children)}</div>
       <div className="nse-rule-footer">
         <NSEButton
-          appearance="aqua"
+          appearance="light"
           title="Add Rule"
           isEnabled={!(locked || fields.length === 0)}
           aria-label="Add rule"
 
           onClick={() => addRule([])}
         />
-        <NSEButton appearance="aqua" title="Add Group" isEnabled={!locked} aria-label="Add group" onClick={() => addGroup([])} />
+        <NSEButton appearance="light" title="Add Group" isEnabled={!locked} aria-label="Add group" onClick={() => addGroup([])} />
       </div>
     </>}
     {effectiveState.kind !== "ready" && <span role="status">{effectiveState.message}</span>}
-    {(effectiveState.kind === "denied" || effectiveState.kind === "error") && effectiveState.retry && <NSEButton appearance="aqua" title="Retry" onClick={effectiveState.retry} />}
-    {effectiveState.kind === "interrupted" && effectiveState.resume && <NSEButton appearance="aqua" title="Resume" onClick={effectiveState.resume} />}
+    {(effectiveState.kind === "denied" || effectiveState.kind === "error") && effectiveState.retry && <NSEButton appearance="light" title="Retry" onClick={effectiveState.retry} />}
+    {effectiveState.kind === "interrupted" && effectiveState.resume && <NSEButton appearance="light" title="Resume" onClick={effectiveState.resume} />}
   </div>;
 }

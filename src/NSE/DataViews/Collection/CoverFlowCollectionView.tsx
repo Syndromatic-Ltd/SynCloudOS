@@ -616,7 +616,7 @@ export function CoverFlowCollectionView<T, TId extends NSEDataViewKey>({
         aria-orientation="horizontal"
         className={`nse-collection-view ${className}`.trim()}
         data-nse-control="collection-view" data-nse-part="background" data-nse-enabled={view.rootProps["aria-disabled"] ? "false" : undefined}
-        data-layout="cover-flow"
+        data-nse-style="cover-flow"
         data-rendering={rendering}
         data-failure={failure}
         onKeyDown={handleKeyDown}
@@ -637,9 +637,9 @@ export function CoverFlowCollectionView<T, TId extends NSEDataViewKey>({
           ))}
         </div>
         {showsTitles && title ? (
-          <div className="nse-collection-cover-flow-title" aria-hidden="true">
-            <span className="nse-collection-cover-flow-title-text">{title}</span>
-            {subtitle ? <span className="nse-collection-cover-flow-subtitle">{subtitle}</span> : null}
+          <div className="nse-collection-cover-flow-title" data-nse-part="title" aria-hidden="true">
+            <span className="nse-collection-cover-flow-title-text" data-nse-part="primary-text">{title}</span>
+            {subtitle ? <span className="nse-collection-cover-flow-subtitle" data-nse-part="subtitle">{subtitle}</span> : null}
           </div>
         ) : null}
       </div>

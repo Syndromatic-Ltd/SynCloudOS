@@ -28,6 +28,7 @@ import {
   type WindowContentState,
   type WindowControllerClosePreparation,
   type WindowControllerDelegate,
+  type WindowFullScreenNotification,
   type WindowGeometryState,
   type WindowRecord,
   type WindowSerializableValue,
@@ -42,11 +43,12 @@ export interface WindowControllerDependencies {
   readonly webspringResponderId: string;
   readonly runtimeResponderId: string;
   readonly delegate?: WindowControllerDelegate;
-  readonly observeError?: (error: unknown, phase: "did-open" | "did-close" | "close-commit" | "close-rollback" | "listener" | "unload" | "dispose" | "responder-dispose") => void;
+  readonly observeError?: (error: unknown, phase: "did-open" | "did-close" | "full-screen" | "close-commit" | "close-rollback" | "listener" | "unload" | "dispose" | "responder-dispose") => void;
 }
 
 export class WindowController {
   readonly #listeners = new Set<() => void>();
+  readonly #fullScreenListeners = new Set<(event: WindowFullScreenNotification) => void>();
   readonly #responderHandles: ResponderRegistrationHandle[] = [];
   #record: WindowRecord;
   #geometryState: WindowGeometryState;
@@ -304,6 +306,19 @@ export class WindowController {
     this.#setContentState({ status: "unloaded" });
   }
 
+  /** @internal A mounted app window observes only its own committed fullscreen changes. */
+  observeFullScreen(listener: (event: WindowFullScreenNotification) => void): () => void {
+    this.#fullScreenListeners.add(listener);
+    return () => { this.#fullScreenListeners.delete(listener); };
+  }
+
+  notifyFullScreen(event: WindowFullScreenNotification): void {
+    try { this.dependencies.delegate?.[event]?.(this.#record); } catch (error) { this.#reportError(error, "full-screen"); }
+    for (const listener of this.#fullScreenListeners) {
+      try { listener(event); } catch (error) { this.#reportError(error, "full-screen"); }
+    }
+  }
+
   notifyDidOpen(): void {
     try { this.dependencies.delegate?.didOpen?.(this.#record); } catch (error) { this.#reportError(error, "did-open"); }
   }
@@ -315,6 +330,7 @@ export class WindowController {
   dispose(reason: "close-commit" | "runtime-dispose" = "runtime-dispose"): void {
     if (this.#disposed) return;
     this.#disposed = true;
+    this.#fullScreenListeners.clear();
     this.#lifecycleGeneration += 1;
     const content = this.#contentController;
     if (content) {

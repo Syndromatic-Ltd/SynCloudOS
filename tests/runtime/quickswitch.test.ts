@@ -38,8 +38,8 @@ import {
   selectQuickSwitchMnemonicIndex
 } from "../../src/Webspring/quickswitchModel";
 
-vi.mock("../../src/Webspring/WebspringIconEffect", () => ({
-  WebspringIconEffect: ({ active, className }: { active?: boolean; className?: string }) => (
+vi.mock("../../src/Webspring/WSIconEffect", () => ({
+  WSIconEffect: ({ active, className }: { active?: boolean; className?: string }) => (
     React.createElement("span", {
       className,
       "data-testid": "quickswitch-netburst",
@@ -162,7 +162,7 @@ describe("WebspringQuickSwitchView", () => {
 
     expect(onClose).toHaveBeenCalled();
     await waitFor(() => {
-      expect(dispatch).toHaveBeenCalledWith("workspace.openApp", { appId: "com.example.archive" }, { source: "keyboard" });
+      expect(dispatch).toHaveBeenCalledWith("workspace.openApp", { appId: "com.example.archive" }, { responderId: "workspace", source: "keyboard" });
     });
   });
 
@@ -219,7 +219,7 @@ describe("WebspringQuickSwitchView", () => {
 
     expect(onClose).toHaveBeenCalled();
     await waitFor(() => {
-      expect(dispatch).toHaveBeenCalledWith("workspace.openApp", { appId: "com.example.studio" }, { source: "keyboard" });
+      expect(dispatch).toHaveBeenCalledWith("workspace.openApp", { appId: "com.example.studio" }, { responderId: "workspace", source: "keyboard" });
     });
   });
 });

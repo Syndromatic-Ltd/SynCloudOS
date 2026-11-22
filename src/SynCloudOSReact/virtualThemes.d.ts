@@ -1,3 +1,3 @@
 declare module "virtual:syncloudos/themes" {
-  export const themes: Readonly<Record<string, import("../NSE/hostComposition").NSETheme>>;
+  export const themes: Readonly<Record<string, import("../NSE/hostComposition").NSETheme | import("../NSE/hostComposition").NSEAppTheme>>;
 }

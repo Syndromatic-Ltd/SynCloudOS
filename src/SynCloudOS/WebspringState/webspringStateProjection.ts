@@ -20,7 +20,6 @@
 
 import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { SynCloudOSAppInfo } from "../AppInfo/appInfoTypes";
-import type { SynCloudOSStagePoint } from "../AppRegistry/appRegistryTypes";
 import {
   WEBSPRING_LAYOUT_PREFERENCE_VERSION,
   type SynCloudOSWebspringFolderConfiguration,
@@ -29,33 +28,12 @@ import {
 } from "./webspringStateTypes";
 
 export const WEBSPRING_LAYOUT_PREFERENCE_KEY = "webspring.layout.v5";
-/** The dial holds the first seven top-level entries; the rest overflow to the shelf. */
-export const DESKTOP_DIAL_ITEM_LIMIT = 7;
 const DEFAULT_BOARD_PREFERENCE: SynCloudOSWebspringLayoutPreference["board"] = Object.freeze({ version: 1, pageSize: 20, dockSize: 4 });
 
 export const EMPTY_WEBSPRING_FOLDER_CONFIGURATION: SynCloudOSWebspringFolderConfiguration = Object.freeze({
   editable: false,
   initial: Object.freeze([]),
 });
-
-/** The desktop Webspring stage geometry, in stage coordinates. */
-export const WEBSPRING_STAGE = {
-  width: 980,
-  height: 820,
-  shelfY: 399,
-  orbCenter: { x: 490, y: 423 },
-  orbSize: 304,
-  cutoutGap: 13,
-  // The supplied dial has transparent padding; its visible circle is not canvas-centred.
-  dialArtwork: { canvasSize: 557, diameter: 484, center: { x: 278, y: 253 } },
-  selectorRadius: -105,
-  iconSize: 140,
-  indicatorSize: 17,
-  activeIndicatorSize: 38,
-  iconRadius: 270,
-  indicatorRadius: 207,
-  labelRadius: 226
-} as const;
 
 export interface WebspringLayoutPersistence {
   getPreference<T>(key: string, fallback: T): T;
@@ -80,25 +58,6 @@ export interface WebspringLayoutProjection {
 
 /** The persisted layout fields reconciliation reads. */
 export type WebspringLayoutInput = Pick<SynCloudOSWebspringLayoutPreference, "order" | "folders" | "source">;
-
-export type WebspringDesktopSlotRegion = "dial" | "overflow";
-
-/** Where one top-level entry sits on the desktop stage. */
-export interface WebspringDesktopSlot {
-  readonly id: string;
-  readonly index: number;
-  readonly region: WebspringDesktopSlotRegion;
-  readonly angle: number | null;
-  readonly iconPosition: SynCloudOSStagePoint;
-  readonly indicatorPosition: SynCloudOSStagePoint | null;
-  readonly labelPosition: SynCloudOSStagePoint;
-}
-
-export interface WebspringDesktopLayout {
-  readonly dialSlots: readonly WebspringDesktopSlot[];
-  readonly overflowSlots: readonly WebspringDesktopSlot[];
-  readonly slots: readonly WebspringDesktopSlot[];
-}
 
 function isVisibleWebspringApp(app: SynCloudOSAppInfo) {
   return app.webspring.visible;
@@ -306,74 +265,6 @@ export function getKeyboardReorderIndex(
   if (key === "End") return order.length - 1;
   if (!(key in deltaByKey)) return currentIndex;
   return Math.max(0, Math.min(order.length - 1, currentIndex + deltaByKey[key]));
-}
-
-export function getDialPoint(angle: number, radius: number): SynCloudOSStagePoint {
-  const radians = (angle * Math.PI) / 180;
-  return {
-    x: WEBSPRING_STAGE.orbCenter.x + Math.sin(radians) * radius,
-    y: WEBSPRING_STAGE.orbCenter.y - Math.cos(radians) * radius,
-  };
-}
-
-export function getDesktopDialAngles(count: number) {
-  if (count <= 0) return [];
-  if (count === 1) return [0];
-  const arc = count <= 5 ? 144 : 176;
-  const start = -arc / 2;
-  return Array.from({ length: count }, (_unused, index) => start + (index / (count - 1)) * arc);
-}
-
-function getOverflowPoint(index: number): SynCloudOSStagePoint {
-  const columns = 5;
-  const column = index % columns;
-  const row = Math.floor(index / columns);
-  const gapX = 118;
-  const gapY = 100;
-  const startX = WEBSPRING_STAGE.orbCenter.x - ((columns - 1) * gapX) / 2;
-  return {
-    x: startX + column * gapX,
-    y: WEBSPRING_STAGE.shelfY + 154 + row * gapY,
-  };
-}
-
-/** Places top-level entries: the first seven on the dial, the rest on the overflow shelf. */
-export function getDesktopWebspringSlots(order: readonly string[]): WebspringDesktopLayout {
-  const dialIds = order.slice(0, DESKTOP_DIAL_ITEM_LIMIT);
-  const dialAngles = getDesktopDialAngles(dialIds.length);
-  const dialSlots = dialIds.map((id, index): WebspringDesktopSlot => {
-    const angle = dialAngles[index] ?? 0;
-    return {
-      id,
-      index,
-      region: "dial",
-      angle,
-      iconPosition: getDialPoint(angle, WEBSPRING_STAGE.iconRadius),
-      indicatorPosition: getDialPoint(angle, WEBSPRING_STAGE.indicatorRadius),
-      labelPosition: getDialPoint(angle, WEBSPRING_STAGE.labelRadius),
-    };
-  });
-  const overflowSlots = order.slice(DESKTOP_DIAL_ITEM_LIMIT).map((id, overflowIndex): WebspringDesktopSlot => {
-    const iconPosition = getOverflowPoint(overflowIndex);
-    return {
-      id,
-      index: DESKTOP_DIAL_ITEM_LIMIT + overflowIndex,
-      region: "overflow",
-      angle: null,
-      iconPosition,
-      indicatorPosition: null,
-      labelPosition: { x: iconPosition.x, y: iconPosition.y - 82 },
-    };
-  });
-  return { dialSlots, overflowSlots, slots: [...dialSlots, ...overflowSlots] };
-}
-
-/** The slot of the top-level entry holding an app: the app itself, or its folder. */
-export function getDesktopWebspringSlotForApp(projection: WebspringLayoutProjection, appId: string | null | undefined) {
-  if (!appId) return null;
-  const key = normalizeBundleIdentifier(appId);
-  const entryId = projection.folderOfApp[key] ?? key;
-  return getDesktopWebspringSlots(projection.order).slots.find((slot) => slot.id === entryId) ?? null;
 }
 
 export function readWebspringLayoutPreference(

@@ -19,4 +19,40 @@
  */
 
 import type { CSSProperties } from "react";
-import type{ScrollerPolicy}from"./scrollTypes";export interface NSEScrollerProps{readonly style?:CSSProperties;readonly orientation:"horizontal"|"vertical";readonly policy?:ScrollerPolicy;readonly value:number;readonly maximum:number;readonly disabled?:boolean;onValueChange(value:number):void}export function NSEScroller({style,orientation,policy="automatic",value,maximum,disabled,onValueChange}:NSEScrollerProps){if(policy==="hidden")return null;return <input style={style} type="range" aria-label={`${orientation} scroller`} min={0} max={Math.max(0,maximum)} value={Math.min(value,maximum)} disabled={disabled||maximum<=0} data-nse-control="scroller" data-nse-part="track" data-nse-orientation={orientation} data-nse-enabled={disabled||maximum<=0 ? "false" : undefined} data-orientation={orientation} data-policy={policy} onChange={event=>onValueChange(Number(event.currentTarget.value))}/>}
+import type { ScrollerPolicy } from "./scrollTypes";
+import "./scroll.css";
+
+export interface NSEScrollerProps {
+  readonly style?: CSSProperties;
+  readonly orientation: "horizontal" | "vertical";
+  readonly policy?: ScrollerPolicy;
+  readonly value: number;
+  readonly maximum: number;
+  /** NSScroller.knobProportion, from 0 to 1. Omission uses the theme's default length. */
+  readonly knobProportion?: number;
+  readonly disabled?: boolean;
+  onValueChange(value: number): void;
+}
+
+export function NSEScroller({ style, orientation, policy = "automatic", value, maximum, knobProportion, disabled, onValueChange }: NSEScrollerProps) {
+  if (policy === "hidden") return null;
+  const limit = Number.isFinite(maximum) ? Math.max(0, maximum) : 0;
+  const current = Number.isFinite(value) ? Math.min(Math.max(0, value), limit) : 0;
+  const isDisabled = disabled || limit === 0;
+  const proportion = knobProportion !== undefined && Number.isFinite(knobProportion)
+    ? Math.min(1, Math.max(0, knobProportion))
+    : undefined;
+  const trackStyle = {
+    ...style,
+    "--nse-scroller-position": limit ? current / limit : 0,
+    ...(proportion === undefined ? {} : { "--nse-scroller-knob-length": proportion * 100 + "%" }),
+  } as CSSProperties;
+  return <span style={trackStyle} data-nse-control="scroller" data-nse-part="track"
+    data-nse-orientation={orientation} data-nse-enabled={isDisabled ? "false" : undefined}
+    data-orientation={orientation} data-policy={policy}>
+    <input type="range" aria-label={orientation + " scroller"} aria-orientation={orientation}
+      min={0} max={limit} value={current} disabled={isDisabled} data-nse-part="field"
+      onChange={event => onValueChange(Number(event.currentTarget.value))} />
+    <span data-nse-part="knob" aria-hidden="true" />
+  </span>;
+}

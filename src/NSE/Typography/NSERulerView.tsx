@@ -77,7 +77,7 @@ export function NSERulerView({ value, direction = "ltr", maximum = 1_000, step =
     {style.tabStops.map((stop, index) => <div key={`tab-stop-${index}`} data-nse-part="tab-stop">
       <NSESlider controlSize="small" label={`Tab stop ${index + 1}`} dir={direction} minimum={0} maximum={maximum} step={1} value={stop} isEnabled={!readOnly} onValueChange={(next) => changeTabStop(index, next)} />
       <NSEButton
-        appearance="aqua"
+        appearance="light"
         title="Remove"
         isEnabled={!readOnly}
         aria-label={`Remove tab stop ${index + 1}`}
@@ -86,7 +86,7 @@ export function NSERulerView({ value, direction = "ltr", maximum = 1_000, step =
     </div>)}
     <div data-nse-part="tab-stops">
       <NSEButton
-        appearance="aqua"
+        appearance="light"
         title="Add tab stop"
         isEnabled={!(readOnly || style.tabStops.length >= 64)}
         onClick={addTabStop}

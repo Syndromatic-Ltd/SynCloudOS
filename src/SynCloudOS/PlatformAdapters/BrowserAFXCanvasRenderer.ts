@@ -22,9 +22,9 @@ import type { AFXRendererQuad, AFXRendererTarget, AFXRendererScene, AFXRendererV
 import { GFXImage } from "../../FX/GraphicsFX/GFXImage";
 import { VFXFrame } from "../../FX/VideoFX/VFXFrame";
 import { IFXShader } from '../../FX/ImageFX/IFXShader';
-import { BrowserAFXShaderPipeline, compileAFXProgram } from './BrowserAFXShaderPipeline';
+import { BrowserAFXShaderPipeline, beginAFXProgram, type AFXProgramBuild } from './BrowserAFXShaderPipeline';
 import { afxImageTexturePixels } from './BrowserAFXImagePixels';
-import { BrowserAFXParticlePipeline } from './BrowserAFXParticlePipeline';
+import { BrowserAFXParticlePipeline, particleFragmentSource, particleVertexSource } from './BrowserAFXParticlePipeline';
 import { antialiasedAttributes, antialiasedFragmentSource, antialiasedVertexSource,
   antialiasedVertexStride, packAntialiasedQuadVertices } from './BrowserAFXAntialiasing';
 
@@ -86,10 +86,6 @@ const neutralModulation: NonNullable<AFXRendererQuad["colourModulation"]> = Obje
   offset: Object.freeze({ r: 0, g: 0, b: 0, a: 0 }),
 });
 const unitRect = Object.freeze({ x: 0, y: 0, width: 1, height: 1 });
-
-function program(gl: WebGL2RenderingContext, vertexText = vertexSource, fragmentText = fragmentSource): WebGLProgram {
-  return compileAFXProgram(gl, vertexText, fragmentText);
-}
 
 function vertex(
   quad: AFXRendererQuad,
@@ -293,6 +289,9 @@ export class BrowserAFXCanvasRenderer implements AFXRendererTarget {
   readonly #gl: WebGL2RenderingContext | null;
   readonly #fallback: CanvasRenderingContext2D | null;
   readonly #pipelines = new Map<boolean, Pipeline>();
+  /** Programs compiling on the driver's threads; a submission waits for them rather than blocking the page. */
+  readonly #builds = new Map<"quad" | "quad-antialiased" | "particle", AFXProgramBuild>();
+  #buildPoll: number | null = null;
   #particlePipeline: BrowserAFXParticlePipeline | null = null;
   #shaderPipeline: BrowserAFXShaderPipeline | null = null;
   readonly #effectTextures = new Map<AFXRendererQuad, { texture: WebGLTexture; premultiplied: boolean; accumulated: boolean }>();
@@ -355,7 +354,7 @@ export class BrowserAFXCanvasRenderer implements AFXRendererTarget {
     if (!gl && !this.#fallback)
       throw new DOMException("Layer renderer canvas rendering is unavailable.", "NotSupportedError");
     if (gl) {
-      if (!gl.isContextLost()) this.#pipeline(false);
+      if (!gl.isContextLost()) this.#build("quad");
       canvas.addEventListener('webglcontextlost', this.#onContextLost);
       canvas.addEventListener('webglcontextrestored', this.#onContextRestored);
     }
@@ -393,6 +392,8 @@ export class BrowserAFXCanvasRenderer implements AFXRendererTarget {
       throw new RangeError("Layer renderer scene and canvas dimensions differ.");
     // #textureFor records what this submission uploads, so a failure can
     // release exactly those textures without snapshotting the whole map.
+    // A program still compiling would block the page; the poll asks for this scene again once it is ready.
+    if (this.#gl && !this.#gl.isContextLost() && !this.#programsReady(scene)) return false;
     const uploaded = this.#uploadedThisRender;
     uploaded.length = 0;
     try {
@@ -603,7 +604,7 @@ export class BrowserAFXCanvasRenderer implements AFXRendererTarget {
     const drawParticlesBefore = (index: number) => {
       while (nextBatch < batches.length && batches[nextBatch]!.beforeQuad <= index) {
         enterContext(batches[nextBatch]!.depthContext ?? 0);
-        this.#particlePipeline ??= new BrowserAFXParticlePipeline(gl);
+        this.#particlePipeline ??= new BrowserAFXParticlePipeline(gl, this.#program("particle", true)!);
         this.#particlePipeline.render(batches[nextBatch++]!, scene.width, scene.height, image => this.#textureFor(image));
       }
     };
@@ -671,11 +672,74 @@ export class BrowserAFXCanvasRenderer implements AFXRendererTarget {
     return released;
   }
 
-  #pipeline(antialias: boolean): Pipeline {
+
+  #build(key: "quad" | "quad-antialiased" | "particle"): AFXProgramBuild {
+    let build = this.#builds.get(key);
+    if (!build) {
+      const gl = this.#gl!;
+      build = key === "particle" ? beginAFXProgram(gl, particleVertexSource, particleFragmentSource)
+        : key === "quad-antialiased" ? beginAFXProgram(gl, antialiasedVertexSource, antialiasedFragmentSource)
+        : beginAFXProgram(gl, vertexSource, fragmentSource);
+      this.#builds.set(key, build);
+    }
+    return build;
+  }
+
+  /** The finished program, or null while it compiles unless `wait` is set. */
+  #program(key: "quad" | "quad-antialiased" | "particle", wait: boolean): WebGLProgram | null {
+    const build = this.#build(key);
+    if (!wait && !build.ready()) { this.#pollBuilds(); return null; }
+    this.#builds.delete(key);
+    return build.finish();
+  }
+
+  #pollBuilds(): void {
+    const view = this.#canvas.ownerDocument?.defaultView;
+    if (this.#buildPoll !== null || !view) return;
+    this.#buildPoll = view.requestAnimationFrame(() => {
+      this.#buildPoll = null;
+      if (this.#disposed) return;
+      const shadersReady = this.#shaderPipeline?.buildsReady ?? true;
+      const builds = [...this.#builds.values()];
+      if (shadersReady && builds.every(build => build.ready())) for (const listener of this.#invalidationListeners) listener();
+      else this.#pollBuilds();
+    });
+  }
+
+  #programsReady(scene: AFXRendererScene): boolean {
+    let antialias = false, particles = false;
+    const shaders: IFXShader[] = [];
+    const visit = (current: AFXRendererScene) => {
+      if (current.particleBatches?.length) particles = true;
+      for (const quad of current.quads) {
+        if ((quad.edgeAntialiasingMask ?? 0) !== 0) antialias = true;
+        if (quad.content instanceof IFXShader) shaders.push(quad.content);
+        if (quad.group) { shaders.push(...quad.group.filters); visit(quad.group.scene); }
+      }
+    };
+    visit(scene);
+    let ready = this.#pipeline(false, false) !== null;
+    if (shaders.length) {
+      this.#shaderPipeline ??= new BrowserAFXShaderPipeline(this.#gl!);
+      if (!this.#shaderPipeline.prepare(shaders)) { ready = false; this.#pollBuilds(); }
+    }
+    if (antialias) ready = this.#pipeline(true, false) !== null && ready;
+    if (particles && !this.#particlePipeline) {
+      const program = this.#program("particle", false);
+      if (program) this.#particlePipeline = new BrowserAFXParticlePipeline(this.#gl!, program);
+      else ready = false;
+    }
+    return ready;
+  }
+
+  #pipeline(antialias: boolean, wait?: true): Pipeline;
+  #pipeline(antialias: boolean, wait: boolean): Pipeline | null;
+  #pipeline(antialias: boolean, wait = true): Pipeline | null {
     const existing = this.#pipelines.get(antialias);
     if (existing) return existing;
     const gl = this.#gl!;
-    const value = antialias ? program(gl, antialiasedVertexSource, antialiasedFragmentSource) : program(gl);
+    const value = this.#program(antialias ? "quad-antialiased" : "quad", wait);
+    if (!value) return null;
     try {
       this.#buffer ??= gl.createBuffer();
       if (!this.#buffer) throw new DOMException('Layer renderer geometry allocation failed.', 'NotSupportedError');
@@ -967,6 +1031,10 @@ export class BrowserAFXCanvasRenderer implements AFXRendererTarget {
     this.#effectTextures.clear();
     this.#samples = null;
     this.#pipelines.clear();
+    for (const build of this.#builds.values()) build.abandon();
+    this.#builds.clear();
+    if (this.#buildPoll !== null) this.#canvas.ownerDocument?.defaultView?.cancelAnimationFrame(this.#buildPoll);
+    this.#buildPoll = null;
     this.#enabledAttributes.clear();
   }
 }

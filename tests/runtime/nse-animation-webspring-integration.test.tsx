@@ -21,18 +21,17 @@
 // @vitest-environment jsdom
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import React from "react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, onTestFinished, vi } from "vitest";
 import { NSEAnimationEnvironmentProvider } from "@syndromatic/syncloudos/nse";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
-import { ApplicationStageLayer } from "../../src/Webspring/ApplicationStageLayer";
-import { ApplicationStageView } from "../../src/Webspring/ApplicationStageView";
-import { WebspringBoardView } from "../../src/Webspring/Contents/Views/WebspringBoardView/WebspringBoardView";
-import { defineWebspring } from "../../src/Webspring/Webspring";
+import { WSStageLayer } from "../../src/Webspring/WSStageLayer";
+import { WSStageWindowHost } from "../../src/Webspring/WSStageWindowHost";
+import { TestLauncherHost, createTestWebspring } from "./webspringTestShell";
 import { WebspringController } from "../../src/Webspring/WebspringController";
 import { WindowContentRendererRegistry } from "../../src/Webspring/WindowLayer";
 import { resolveWebspringMotion } from "../../src/Webspring/Webspring.transitions";
-import { resolveWebspringLaunchDimMotion } from "../../src/Webspring/WebspringLaunchDim";
-import { resolveWebspringBoardMotion } from "../../src/Webspring/Contents/Views/WebspringBoardView/WebspringBoardView.transitions";
+import { resolveWebspringLaunchDimMotion } from "../../src/Webspring/WSLaunchDim";
+import { resolveWebspringBoardMotion } from "../../src/Webspring/Contents/Views/WSBoardViewController/WSBoardViewController.transitions";
 import { createTestBundle, createTestRuntime, createTestRuntimeEnvironment } from "./helpers";
 import type {
   RuntimeAnimationAdapterFactory,
@@ -80,33 +79,25 @@ function runtimeWithStagePresentations() {
   return { runtime, presentations };
 }
 
-const webspring = defineWebspring({
-  manifest: {
-    schemaVersion: 1,
-    bundleIdentifier: "com.example.board",
-    version: "1.0.0",
-    displayName: "Board fixture",
-    webspringShell: {
-      views: [{ id: "board", presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
-      defaults: { desktop: "board", tablet: "board", mobile: "board" },
-      homeRoute: "/",
-      branding: { name: { key: "site.name", fallback: "Board fixture" } },
-    },
-  },
-  components: { board: WebspringBoardView },
-});
+const boardInfo = { bundleIdentifier: "com.example.board", displayName: "Board fixture", branding: { name: { key: "site.name", fallback: "Board fixture" } } };
+const webspring = createTestWebspring({ info: boardInfo });
 
-vi.mock("../../src/Webspring/ApplicationStageHost", () => ({
-  ApplicationStageHost: ({ multiSwitchId, multiSwitchRole, onMultiSwitchAnimationComplete }: {
-    multiSwitchId: string | null;
-    multiSwitchRole: "incoming" | "outgoing" | null;
-    onMultiSwitchAnimationComplete?: (id: string, role: "incoming" | "outgoing") => void;
-  }) => multiSwitchId && multiSwitchRole ? (
-    <button type="button" onClick={() => onMultiSwitchAnimationComplete?.(multiSwitchId, multiSwitchRole)}>
-      finish {multiSwitchRole}
-    </button>
-  ) : null,
-}));
+// The stage layer's tests drive a stand-in host; the stage window tests render the real one.
+const stageHost = vi.hoisted(() => ({ stubbed: true }));
+vi.mock("../../src/Webspring/WSStageWindowHost", async (importActual) => {
+  const actual = await importActual<typeof import("../../src/Webspring/WSStageWindowHost")>();
+  return {
+    WSStageWindowHost: (props: Parameters<typeof actual.WSStageWindowHost>[0]) => {
+      if (!stageHost.stubbed) return <actual.WSStageWindowHost {...props} />;
+      const { multiSwitchId, multiSwitchRole, onMultiSwitchAnimationComplete } = props;
+      return multiSwitchId && multiSwitchRole ? (
+        <button type="button" onClick={() => onMultiSwitchAnimationComplete?.(multiSwitchId, multiSwitchRole)}>
+          finish {multiSwitchRole}
+        </button>
+      ) : null;
+    },
+  };
+});
 describe("Webspring owner-local choreography", () => {
 
   it("keeps radial launch geometry interned and replaces it with a reduced fade", () => {
@@ -140,7 +131,7 @@ describe("Webspring owner-local choreography", () => {
     const switchId = "switch:animation";
     const view = render(
       <SynCloudOSProvider runtime={runtime}>
-        <ApplicationStageLayer
+        <WSStageLayer
           windowContentRegistry={new WindowContentRendererRegistry()}
           apps={apps}
           lifecycle={{ from: "suspended", to: "active" }}
@@ -176,7 +167,7 @@ describe("Webspring owner-local choreography", () => {
     const complete = vi.spyOn(runtime.webspring, "completeReturnRole").mockReturnValue(true);
     const stage = (returnTransitionId: string | null) => (
       <SynCloudOSProvider runtime={runtime}>
-        <ApplicationStageLayer
+        <WSStageLayer
           windowContentRegistry={new WindowContentRendererRegistry()}
           apps={apps}
           lifecycle={{ leaving: "active" }}
@@ -226,7 +217,7 @@ describe("Webspring owner-local choreography", () => {
     const controller = new WebspringController(runtime, webspring, undefined);
     const view = render(
       <SynCloudOSProvider runtime={runtime}>
-        <WebspringBoardView model={controller.model(snapshot, "mobile")} actions={controller.actions} applicationOutlet={null} folderPresentation={webspring.folderPresentation} />
+        <TestLauncherHost shell={webspring} model={controller.model(snapshot, "mobile")} actions={controller.actions} />
       </SynCloudOSProvider>,
     );
     for (const { finish } of [...presentations.played]) await finish();
@@ -235,6 +226,8 @@ describe("Webspring owner-local choreography", () => {
   });
 
   it("completes reduced app entry immediately without bypassing the launch-cover gate", () => {
+    stageHost.stubbed = false;
+    onTestFinished(() => { stageHost.stubbed = true; });
     const runtime = createTestRuntime();
     runtime.settings.set("motion", "reduced");
     runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.reduced-entry", route: "/reduced-entry" }));
@@ -247,7 +240,7 @@ describe("Webspring owner-local choreography", () => {
     });
     const view = render(
       <SynCloudOSProvider runtime={runtime}>
-        <ApplicationStageView
+        <WSStageWindowHost
           windowContentRegistry={new WindowContentRendererRegistry()}
           stage={{ id: "application-stage:com.example.reduced-entry", appId: "com.example.reduced-entry", title: app!.window.title, isFocused: true, zIndex: 1 }}
           app={app!}
@@ -266,6 +259,8 @@ describe("Webspring owner-local choreography", () => {
   });
 
   it("settles application entry from the app surface animation, with no content card", async () => {
+    stageHost.stubbed = false;
+    onTestFinished(() => { stageHost.stubbed = true; });
     const { runtime, presentations } = runtimeWithStagePresentations();
     runtime.apps.registerBundle(createTestBundle({
       bundleIdentifier: "com.example.defacto-entry",
@@ -280,7 +275,7 @@ describe("Webspring owner-local choreography", () => {
     });
     const view = render(
       <SynCloudOSProvider runtime={runtime}>
-        <ApplicationStageView
+        <WSStageWindowHost
           windowContentRegistry={new WindowContentRendererRegistry()}
           stage={{ id: "application-stage:com.example.defacto-entry", appId: "com.example.defacto-entry", title: app!.window.title, isFocused: true, zIndex: 1 }}
           app={app!}
@@ -312,7 +307,7 @@ describe("Webspring owner-local choreography", () => {
       runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.beta", route: "/beta" }));
       const controller = new WebspringController(runtime, webspring, undefined);
       const view = render(<SynCloudOSProvider runtime={runtime}>
-        <WebspringBoardView model={controller.model(runtime.store.getSnapshot(), "mobile")} actions={controller.actions} applicationOutlet={null} folderPresentation={webspring.folderPresentation} />
+        <TestLauncherHost shell={webspring} model={controller.model(runtime.store.getSnapshot(), "mobile")} actions={controller.actions} />
       </SynCloudOSProvider>);
 
       fireEvent.pointerDown(screen.getByRole("button", { name: "Open Alpha" }), { pointerId: 7, isPrimary: true });
@@ -327,7 +322,7 @@ describe("Webspring owner-local choreography", () => {
       cancellationRuntime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.cancel", route: "/cancel" }));
       const cancellationController = new WebspringController(cancellationRuntime, webspring, undefined);
       const pending = render(<SynCloudOSProvider runtime={cancellationRuntime}>
-        <WebspringBoardView model={cancellationController.model(cancellationRuntime.store.getSnapshot(), "mobile")} actions={cancellationController.actions} applicationOutlet={null} folderPresentation={webspring.folderPresentation} />
+        <TestLauncherHost shell={webspring} model={cancellationController.model(cancellationRuntime.store.getSnapshot(), "mobile")} actions={cancellationController.actions} />
       </SynCloudOSProvider>);
       fireEvent.pointerDown(screen.getByRole("button", { name: "Open Cancel" }), { pointerId: 8, isPrimary: true });
       pending.unmount();
@@ -346,22 +341,15 @@ describe("Webspring owner-local choreography", () => {
       if (this.classList.contains("webspring-board-icon-well")) return new DOMRect(110, 100, 60, 60);
       return new DOMRect(0, 0, 0, 0);
     });
-    const folderShell = defineWebspring({
-      manifest: {
-        ...webspring.manifest,
-        webspringShell: {
-          ...webspring.manifest.webspringShell,
-          folders: { editable: true, initial: [{ id: "folder.tools", title: { key: "folders.tools", fallback: "Tools" }, order: 0, apps: ["com.example.beta", "com.example.gamma"] }] },
-        },
-      },
-      components: { board: WebspringBoardView },
+    const folderShell = createTestWebspring({
+      info: { ...boardInfo, folders: { editable: true, initial: [{ id: "folder.tools", title: { key: "folders.tools", fallback: "Tools" }, order: 0, apps: ["com.example.beta", "com.example.gamma"] }] } },
     });
     const runtime = createTestRuntime();
     for (const id of ["com.example.alpha", "com.example.beta", "com.example.gamma"]) runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: id, route: `/${id.split(".").at(-1)}` }));
-    runtime.webspring.configureFolders(folderShell.manifest.webspringShell.folders!);
+    runtime.webspring.configureFolders(folderShell.info.folders);
     const controller = new WebspringController(runtime, folderShell, undefined);
     const board = () => <SynCloudOSProvider runtime={runtime}>
-      <WebspringBoardView model={controller.model(runtime.store.getSnapshot(), "mobile")} actions={controller.actions} applicationOutlet={null} folderPresentation={folderShell.folderPresentation} />
+      <TestLauncherHost shell={folderShell} model={controller.model(runtime.store.getSnapshot(), "mobile")} actions={controller.actions} />
     </SynCloudOSProvider>;
     const view = render(board());
     const settle = (ms: number) => act(async () => {
@@ -381,7 +369,7 @@ describe("Webspring owner-local choreography", () => {
     expect(dialog.hasAttribute("data-webspring-folder-panel")).toBe(true);
     // The seam runs below the label, 6 px under the cell.
     expect(dialog.style.top).toBe("216px");
-    await waitFor(() => expect(view.container.querySelector(".webspring-folder-split")?.getAttribute("data-phase")).toBe("open"), { timeout: 5000 });
+    await waitFor(() => expect(view.container.querySelector('[data-nse-control="folder-presentation"][data-nse-part="background"]')?.getAttribute("data-nse-presentation")).toBe("open"), { timeout: 5000 });
     expect(screen.getByRole("button", { name: "Open Beta" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Open Gamma" })).toBeTruthy();
 
@@ -410,26 +398,22 @@ describe("Webspring owner-local choreography", () => {
 
   function boardFixture(folders: { id: string; order: number; apps: string[] }[] = []) {
     // A folder's title comes from the shell's manifest declaration; the runtime's folder view carries none.
-    const shell = defineWebspring({
-      manifest: {
-        ...webspring.manifest,
-        webspringShell: {
-          ...webspring.manifest.webspringShell,
-          folders: {
-            editable: true,
-            initial: folders.map((folder) => ({ ...folder, title: { key: `folders.${folder.id}`, fallback: "Tools" } })),
-          },
+    const shell = createTestWebspring({
+      info: {
+        ...boardInfo,
+        folders: {
+          editable: true,
+          initial: folders.map((folder) => ({ ...folder, id: folder.id as `folder.${string}`, title: { key: `folders.${folder.id}`, fallback: "Tools" } })),
         },
       },
-      components: { board: WebspringBoardView },
     });
     const runtime = createTestRuntime();
     for (const id of ["com.example.alpha", "com.example.beta", "com.example.gamma"]) runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: id, route: `/${id.split(".").at(-1)}` }));
-    runtime.webspring.configureFolders(shell.manifest.webspringShell.folders!);
+    runtime.webspring.configureFolders(shell.info.folders);
     const controller = new WebspringController(runtime, shell, undefined);
     function Board() {
       const snapshot = React.useSyncExternalStore(runtime.store.subscribe, runtime.store.getSnapshot);
-      return <WebspringBoardView model={controller.model(snapshot, "mobile")} actions={controller.actions} applicationOutlet={null} folderPresentation={shell.folderPresentation} />;
+      return <TestLauncherHost shell={shell} model={controller.model(snapshot, "mobile")} actions={controller.actions} />;
     }
     const view = render(<SynCloudOSProvider runtime={runtime}><Board /></SynCloudOSProvider>);
     const rest = (ms: number) => act(async () => {

@@ -18,7 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createContext, useContext, useSyncExternalStore, type ReactNode } from "react";
+import { useContext, useSyncExternalStore } from "react";
+import { WindowApplicationMenuContext } from "../NSE/applicationHostInterop";
 
 export interface ApplicationMenuTriggerPort {
   readonly label: string;
@@ -27,19 +28,12 @@ export interface ApplicationMenuTriggerPort {
   toggle(): void;
 }
 
-const ApplicationMenuTriggerContext = createContext<ApplicationMenuTriggerPort | null>(null);
-
-export function ApplicationMenuTriggerProvider({ port, children }: { port: ApplicationMenuTriggerPort | null; children: ReactNode }) {
-  return <ApplicationMenuTriggerContext.Provider value={port}>{children}</ApplicationMenuTriggerContext.Provider>;
-}
-
+/** The window's application menu, for an app that draws its own trigger in its own chrome. */
 export function useApplicationMenuTrigger(): ApplicationMenuTriggerPort | null {
-  return useContext(ApplicationMenuTriggerContext);
+  return useContext(WindowApplicationMenuContext);
 }
 
-/** The open state and anchor of one application's menu, shared by whichever
- * control triggers it (the top bar's User Info item or the app's own content
- * trigger) and the overlay that presents it. */
+/** Open state and anchor for one window application menu. */
 export interface ApplicationMenuSnapshot {
   readonly open: boolean;
   readonly anchor: HTMLElement | null;

@@ -24,6 +24,7 @@ import "./nse-list-item.css";
 import "../../Navigation/SourceList/nse-sourcelist.css";
 import type { HFXFeedbackRequest } from "../../Feedback";
 import type { SmoothSurfaceRequest } from "../../SmoothSurface";
+import { getSmoothSurfaceThemeHooks } from "../../SmoothSurface/smoothSurface";
 import { classes, getControlSmoothSurfaceProps, useNSEControlFeedback } from "../Core/nseControlsShared";
 
 export interface GroupedRowProps extends HTMLAttributes<HTMLDivElement> {
@@ -63,6 +64,7 @@ export const GroupedRow = forwardRef<HTMLDivElement, GroupedRowProps>(function G
       ref={ref}
       {...nseControlHooks({ control: "table-cell-view", selected, enabled: isEnabled, highlighted: (props as Record<string, unknown>)["data-pressed"] === "true", variants: { style: "list", "highlight-style": tapHighlight ? "regular" : "none" } })}
       data-nse-part="cell-content"
+      {...getSmoothSurfaceThemeHooks(smoothSurface)}
       className={classes("nse-control-list-item", disabled && "is-disabled", surfaceProps.className)}
       data-selected={selected ? "true" : "false"}
       data-tap-highlight={tapHighlight ? undefined : "false"}

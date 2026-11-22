@@ -45,6 +45,16 @@ const objectByScope = new WeakMap<OwnershipScope, object>();
 const scopeBySignal = new WeakMap<AbortSignal, OwnershipScope>();
 const lifetimes = new WeakMap<object, ObjectLifetime>();
 
+/**
+ * Guards application classes so only the framework's own constructor scope can
+ * instantiate them cleanly.
+ */
+export function assertFrameworkConstructedApplication(lifetime: ObjectLifetime, targetName: string): void {
+  if (!lifetime.constructedByFramework) {
+    throw new TypeError(`${targetName} is created by the framework; export it as the default export of the application module instead of calling new.`);
+  }
+}
+
 /** @internal Lifetime/context registry for authoring descriptors; no application getters. */
 export function getNSEObjectLifetime(owner: object): ObjectLifetime | undefined { return lifetimes.get(owner); }
 

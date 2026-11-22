@@ -1,0 +1,152 @@
+@layer nse.structure {
+@scope ([data-nse-theme]) to ([data-nse-theme]) {
+.nse-window-titlebar-view.nse-window__titlebar {
+  position: relative;
+  inset: auto;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  flex: none;
+  width: 100%;
+  height: auto;
+  min-width: 0;
+  min-height: 0;
+  overflow: visible;
+  padding: 0;
+  padding-left: var(--nse-titlebar-native-left, 0px);
+  padding-right: var(--nse-titlebar-native-right, 0px);
+}
+.nse-window-titlebar-view__row {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  gap: 8px;
+  min-width: 0;
+  min-height: var(--nse-window-titlebar-height, 31px);
+}
+/* Cumulus and Metal: Atmo's top bar in normal flow, with the menu bar above it and accessory rows below. */
+.nse-window-titlebar-view:is([data-titlebar-material="cumulus"],[data-titlebar-material="metal"]) {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  flex: none;
+  width: 100%;
+  min-width: 0;
+  padding-left: var(--nse-titlebar-native-left, 0px);
+  padding-right: var(--nse-titlebar-native-right, 0px);
+}
+.nse-window-titlebar-view > .nse-app-topbar { position: relative; inset: auto; flex: none; }
+.nse-window-titlebar-view__controls { gap: 8px; }
+/* In the bar, toolbar items sit in the trailing cluster on the bar's own glass or metal. */
+.nse-app-topbar [data-window-titlebar-row] .nse-window-titlebar-view__toolbar { flex: 0 1 auto; min-width: 0; }
+.nse-app-topbar [data-window-titlebar-row] .nse-window-titlebar-view__toolbar > * { flex: 0 1 auto; }
+.nse-app-topbar [data-window-titlebar-row] [data-nse-control="toolbar"] { min-height: 0; padding: 0; gap: 8px; }
+.nse-app-topbar [data-window-titlebar-row] [data-nse-control="toolbar"] > [data-nse-chrome-primitive] { display: none; }
+/* The bar's buttons carry their own art and size, so the item fits its view (its inline width is for plain toolbars). */
+.nse-app-topbar [data-window-titlebar-row] .nse-toolbar-custom { width: auto !important; min-width: 0 !important; }
+.nse-app-topbar .nse-toolbar-custom > .nse-chrome-primitive { display: none; }
+/* Flexible spaces have nothing to push in a trailing cluster; a toolbar's own row lays out as a plain toolbar. */
+.nse-app-topbar [data-window-titlebar-row] .nse-toolbar-space { flex: 0 0 0; width: 0; min-width: 0; }
+.nse-window-titlebar-view[data-titlebar-layout="unifiedCompact"] > .nse-window-titlebar-view__row {
+  min-height: var(--nse-window-titlebar-height, 31px);
+  gap: 4px;
+}
+.nse-window-titlebar-view { --nse-titlebar-native-inline-start: var(--nse-titlebar-native-left, 0px); }
+.nse-window-titlebar-view:dir(rtl) { --nse-titlebar-native-inline-start: var(--nse-titlebar-native-right, 0px); }
+.nse-window-titlebar-view__row > [data-window-sidebar-tracking-separator] { display: none; }
+.nse-window-titlebar-view:has([data-window-sidebar-tracking-item]) > .nse-window-titlebar-view__row > [data-window-sidebar-tracking-separator] {
+  display: block;
+  position: absolute;
+  z-index: 3;
+  inset-block: 6px;
+  inset-inline-start: calc(var(--nse-window-titlebar-sidebar-width) - var(--nse-floating-titlebar-inline-offset, 0px) - var(--nse-titlebar-native-inline-start));
+  inline-size: 1px;
+  pointer-events: none;
+}
+.nse-window-titlebar-view__controls,
+.nse-window-titlebar-view__sidebar,
+.nse-window-titlebar-view__accessory {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+.nse-window-titlebar-view__controls > .nse-window__controls { position: static; }
+.nse-window-titlebar-view[data-titlebar-material="standard"][data-has-toolbar="false"] > .nse-window-titlebar-view__row { height: var(--nse-window-titlebar-height, 31px); }
+.nse-window-titlebar-view[data-titlebar-material="standard"][data-has-toolbar="false"] .nse-window-titlebar-view__controls { align-self: start; height: var(--nse-window-titlebar-height, 31px); }
+.nse-window-titlebar-view__accessory:empty,
+.nse-window-titlebar-view__menu:empty,
+.nse-window-titlebar-view__bottom:empty { display: none; }
+.nse-window-titlebar-view__title {
+  position: relative;
+  z-index: 4;
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-align: center;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+}
+.nse-window-titlebar-view__title[hidden] { display: none; }
+.nse-window-titlebar-view[data-titlebar-material="standard"][data-has-toolbar="false"] > .nse-window-titlebar-view__row:not(:has(.nse-window-titlebar-view__accessory:not(:empty), .nse-window-titlebar-view__sidebar)) > .nse-window-titlebar-view__title { position: absolute; inset: 0; padding: 6px 108px 0; pointer-events: none; }
+.nse-window-titlebar-view__title > button { pointer-events: auto; }
+.nse-window-titlebar-view[data-has-toolbar="true"] .nse-window-titlebar-view__title { flex: 0 1 auto; max-width: 30%; }
+.nse-window-titlebar-view__toolbar {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  flex: 1 1 0;
+  min-width: calc(var(--nse-toolbar-overflow-reserve, 20px) + 20px);
+}
+.nse-window-titlebar-view__toolbar > * { min-width: 0; max-width: 100%; flex: 1 1 auto; }
+.nse-window-titlebar-view__toolbar-row,
+.nse-window-titlebar-view__bottom,
+.nse-window-titlebar-view__menu { position: relative; z-index: 4; display: flex; min-width: 0; flex: none; }
+.nse-window-titlebar-view[data-titlebar-layout="expanded"] > .nse-window-titlebar-view__row .nse-window-titlebar-view__title,
+.nse-window-titlebar-view[data-titlebar-layout="preference"] > .nse-window-titlebar-view__row .nse-window-titlebar-view__title { flex: 1 1 auto; max-width: none; }
+.nse-window-titlebar-view[data-titlebar-layout="preference"] > .nse-window-titlebar-view__toolbar-row { justify-content: center; }
+.nse-window-titlebar-view[data-titlebar-layout="preference"] > .nse-window-titlebar-view__toolbar-row > .nse-window-titlebar-view__toolbar { flex: 0 1 auto; justify-content: center; width: 100%; }
+.nse-window-titlebar-view[data-titlebar-layout="preference"] .nse-toolbar { justify-content: center; }
+.nse-window-titlebar-view[data-titlebar-layout="unifiedCompact"] .nse-toolbar { --nse-toolbar-height: 46px; }
+.nse-window-titlebar-view[data-titlebar-transparent="true"] .nse-app-topbar-base,
+.nse-window-titlebar-view[data-titlebar-transparent="true"] .nse-app-topbar::before,
+.nse-window-titlebar-view[data-titlebar-transparent="true"] .nse-app-topbar-metal-grain { display: none; }
+.nse-window-titlebar-view[data-titlebar-presentation="floating"] {
+  width: calc(100% - 32px);
+  max-width: var(--nse-window-floating-titlebar-max-width, 1100px);
+  align-self: center;
+  margin: 12px auto;
+  border-radius: var(--nse-atmo-window-titlebar-radius, 14px);
+}
+.nse-window-titlebar-view[data-titlebar-presentation="floating"] .nse-app-topbar::before { content: none; }
+.nse-window-titlebar-view__floating-surface {
+  position: absolute;
+  inset: 0;
+  border: 1px solid;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.nse-window-titlebar-view[data-window-frame-view] > .nse-window-titlebar-view__row {
+  min-height: var(--nse-frame-titlebar-height, var(--nse-window-titlebar-height, 31px));
+}
+.nse-window-titlebar-view[data-window-frame-view] .nse-app-topbar-base { display: none; }
+.nse-window-titlebar-view__menu .nse-menu-bar { width: 100%; }
+.nse-window-view:has(> .nse-window__surface > [data-window-titlebar]) .nse-window__surface[data-full-size-content] > [data-window-titlebar] {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 2;
+}
+}
+}

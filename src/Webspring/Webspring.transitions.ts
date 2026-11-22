@@ -70,7 +70,7 @@ function radialVector(index: number, total: number, angle?: number): RadialVecto
   };
 }
 
-function createRadialExit(index: number, total: number, angle?: number): WebspringRadialExit {
+function createRadialExit(index: number, total: number, angle?: number): WSRadialExit {
   const vector = radialVector(index, total, angle);
   return Object.freeze({
     x: vector.x,
@@ -83,7 +83,7 @@ function createRadialExit(index: number, total: number, angle?: number): Webspri
 
 /** Where a Dial icon flies to as an application launches: out along its
  * spoke, swelling and fading. */
-export type WebspringRadialExit = Readonly<{
+export type WSRadialExit = Readonly<{
   x: number;
   y: number;
   scale: number;
@@ -91,13 +91,9 @@ export type WebspringRadialExit = Readonly<{
   rotate: number;
 }>;
 
-const radialExitDefinitions = new Map<string, WebspringRadialExit>();
+const radialExitDefinitions = new Map<string, WSRadialExit>();
 
-export function getWebspringSelectorTransform(angle: number, radius = -60): string {
-  return `translate(-50%, -50%) rotate(${angle}deg) translateY(${radius}px)`;
-}
-
-export function getWebspringRadialExitForIcon(index: number, total: number, angle?: number): WebspringRadialExit {
+export function getWebspringRadialExitForIcon(index: number, total: number, angle?: number): WSRadialExit {
   const key = `${index}:${total}:${angle ?? "auto"}`;
   const interned = radialExitDefinitions.get(key);
   if (interned) return interned;
@@ -124,26 +120,6 @@ export function useWebspringMotion(): WebspringMotion {
   return useMemo(() => resolveWebspringMotion(reducedMotion), [reducedMotion]);
 }
 
-/** The orb's scale while an application launches (its model value) and the
- * 0.45 s tween that swells it and settles it back. */
-export function resolveWebspringOrbPresentation(reducedMotion: boolean, launching: boolean): Readonly<{
-  state: "launching" | "rest";
-  style: CSSProperties;
-  enter: PresentationEnter;
-}> {
-  const pulse = (reducedMotion ? orbLaunchPulse.reduced : orbLaunchPulse.standard).scale;
-  const scale = launching ? pulse : 1, from = launching ? 1 : pulse;
-  return {
-    state: launching ? "launching" : "rest",
-    style: scale === 1 ? {} : { transform: nseTransformStyle({ scale }) },
-    // The orb appears at rest; it only animates between launch and rest.
-    enter: (previous) => previous === null || from === scale ? null : Object.freeze({
-      duration: 0.45, timing: framerTween,
-      tracks: [{ keyPath: "transform" as const, values: [{ scale: from }, { scale }] }],
-    }),
-  };
-}
-
 // --- Launcher icons --------------------------------------------------------
 
 /** Where a launcher icon is in the Webspring's entrance and launch choreography. */
@@ -155,6 +131,12 @@ const spring = (stiffness: number, damping: number, mass: number) => Object.free
   // is within 1/10000 of rest.
   duration: Math.log(10000) / (damping / (2 * mass)),
 });
+
+/** Seconds an icon takes to fly past the viewer as an app opens. */
+export const webspringIconExitDuration = 0.5;
+
+/** The launch zoom for a launcher that declares none. */
+export const defaultWSLaunchZoom = Object.freeze({ delay: 0.72, duration: 0.68, easing: "accelerate" as const });
 
 /** The icon springs, as Framer Motion configured them for the launcher. */
 export const webspringIconSprings = Object.freeze({
@@ -183,7 +165,7 @@ export interface WebspringIconPresentationOptions {
   readonly index: number;
   readonly total: number;
   /** Where the icon flies on launch; icons without one never leave. */
-  readonly radialExit?: WebspringRadialExit;
+  readonly radialExit?: WSRadialExit;
   /** Seconds the launch exit takes. Defaults to 0.85. */
   readonly exitDuration?: number;
   /** Seconds between successive icons leaving, the last icon first. Defaults to 0.045. */

@@ -27,7 +27,7 @@ import { compileNSEPresentation, Presence, type PresentationEnter, type Presenta
 import { useNSEOverlayProvider } from "../../src/NSE/Overlays";
 import { createSynWare } from "../../src/SynCloudOS/AppSDK/createSynWare";
 import { resolveApplicationStageMotion } from "../../src/Webspring/ApplicationStage.transitions";
-import { ApplicationStageView } from "../../src/Webspring/ApplicationStageView";
+import { WSStageWindowHost } from "../../src/Webspring/WSStageWindowHost";
 import { HostSiteBrandingProvider, SynCloudOSProvider } from "../../src/SynCloudOSReact";
 import { WindowContentRendererRegistry } from "../../src/Webspring/WindowLayer";
 import { authoriseTestRuntime, createTestBundle, createTestRuntime, createTestRuntimeEnvironment, registerTestSynWare } from "./helpers";
@@ -94,20 +94,20 @@ describe("stage presentation", () => {
     expect(outgoing.surface.style).toEqual({
       opacity: 0.94,
       filter: "brightness(0.4)",
-      transform: "translate3d(0px, 0px, -260px) scale(0.86) rotateY(22deg)",
+      transform: "translate3d(0px, 0px, -480px) scale(0.78) rotateY(40deg)",
     });
     expect(endpoints(resolved(outgoing.surface.enter, "presented"))).toEqual({
       opacity: [1, 0.94],
       filter: ["none", "brightness(0.4)"],
-      transform: ["translate3d(0px, 0px, -24px) scale(0.98) rotateY(2deg)", "translate3d(0px, 0px, -260px) scale(0.86) rotateY(22deg)"],
+      transform: ["translate3d(0px, 0px, -40px) scale(0.96) rotateY(4deg)", "translate3d(0px, 0px, -480px) scale(0.78) rotateY(40deg)"],
     });
-    expect(outgoing.root.style).toEqual({ transform: "translate(-118vw, 0vw) scale(1)" });
+    expect(outgoing.root.style).toEqual({ transform: "translate(-72vw, 0vw) scale(1)" });
     expect(endpoints(outgoing.surface.exit)).toEqual({ opacity: [0.94, 0] });
     const incoming = resolveApplicationStageMotion({ reducedMotion: false, role: "incoming", staged: false, launching: false });
     expect(incoming.surface.style).toEqual({});
     expect(endpoints(resolved(incoming.root.enter, null))).toEqual({ transform: ["translate(118vw, 0vw) scale(1)", "none"] });
     expect(endpoints(resolved(incoming.surface.enter, null))).toEqual({
-      transform: ["translate3d(0px, 0px, -260px) scale(0.86) rotateY(-22deg)", "none"],
+      transform: ["translate3d(0px, 0px, -300px) scale(0.84) rotateY(-34deg)", "none"],
     });
   });
 
@@ -159,7 +159,7 @@ describe("mounted content presentation", () => {
       return <div data-content="true">{overlay.portalHost ? createPortal(<div data-viewport-overlay="true" />, overlay.portalHost) : null}</div>;
     }
     const app = registerTestSynWare(runtime, createSynWare({
-      manifest: { schemaVersion: 1, bundleIdentifier: "com.example.content-plane", version: "1.0.0", displayName: "Content Plane", frame: { topBar: "none", presentationMotion: "content" } },
+      manifest: { schemaVersion: 1, bundleIdentifier: "com.example.content-plane", version: "1.0.0", displayName: "Content Plane", frame: { presentationMotion: "content" } },
       root: Content,
     }));
     await runtime.bundles.loadBundle(app.bundleIdentifier);
@@ -168,7 +168,7 @@ describe("mounted content presentation", () => {
     const registry = new WindowContentRendererRegistry();
     const fixture = (staged: boolean, shown = true) => <SynCloudOSProvider runtime={runtime}>
       <HostSiteBrandingProvider value={{ name: "Stage", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null, logoAlt: "Stage" }}>
-        <Presence onExitComplete={exited}>{shown ? <ApplicationStageView key={app.bundleIdentifier} windowContentRegistry={registry}
+        <Presence onExitComplete={exited}>{shown ? <WSStageWindowHost key={app.bundleIdentifier} windowContentRegistry={registry}
           stage={{ id: "application-stage:com.example.content-plane", appId: app.bundleIdentifier, title: app.window.title, isFocused: true, zIndex: 2 }}
           app={app} lifecycle="active" staged={staged} presentationSettlementId={settlement.id} /> : null}</Presence>
       </HostSiteBrandingProvider>
@@ -215,7 +215,7 @@ describe("stage overlay ownership", () => {
       return overlay.portalHost ? createPortal(<button data-viewport-overlay="true">Overlay action</button>, overlay.portalHost) : null;
     }
     const app = registerTestSynWare(runtime, createSynWare({
-      manifest: { schemaVersion: 1, bundleIdentifier: "com.example.overlay-owner", version: "1.0.0", displayName: "Overlay Owner", frame: { topBar: "none" } },
+      manifest: { schemaVersion: 1, bundleIdentifier: "com.example.overlay-owner", version: "1.0.0", displayName: "Overlay Owner" },
       root: Content,
     }));
     await runtime.bundles.loadBundle(app.bundleIdentifier);
@@ -224,7 +224,7 @@ describe("stage overlay ownership", () => {
     const registry = new WindowContentRendererRegistry();
     const view = (staged = false, role: "incoming" | "outgoing" | null = null, shown = true) => <SynCloudOSProvider runtime={runtime}>
       <HostSiteBrandingProvider value={{ name: "Stage", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null, logoAlt: "Stage" }}>
-        <Presence initial={false} onExitComplete={exited}>{shown ? <ApplicationStageView key={app.bundleIdentifier}
+        <Presence initial={false} onExitComplete={exited}>{shown ? <WSStageWindowHost key={app.bundleIdentifier}
           windowContentRegistry={registry} app={app} lifecycle="active" staged={staged}
           stage={{ id: "application-stage:com.example.overlay-owner", appId: app.bundleIdentifier, title: app.window.title, isFocused: true, zIndex: 2 }}
           multiSwitchRole={role} multiSwitchId={role ? "overlay-switch" : null} onMultiSwitchAnimationComplete={onRole} /> : null}</Presence>
@@ -312,7 +312,7 @@ describe("stage view MultiSwitch", () => {
     const onRole = vi.fn();
     const view = (role: "incoming" | "outgoing") => (
       <SynCloudOSProvider runtime={runtime}>
-        <ApplicationStageView
+        <WSStageWindowHost
           windowContentRegistry={new WindowContentRendererRegistry()}
           stage={{ id: "application-stage:com.example.switched", appId: "com.example.switched", title: app.window.title, isFocused: true, zIndex: 1 }}
           app={app}
@@ -336,10 +336,10 @@ describe("stage view MultiSwitch", () => {
     // surface recedes, holding its model pose once the presentation ends.
     rendered.rerender(view("outgoing"));
     const surface = rendered.container.querySelector<HTMLElement>(".webspring-app-view-surface")!;
-    expect(surface.style.transform).toBe("translate3d(0px, 0px, -260px) scale(0.86) rotateY(22deg)");
+    expect(surface.style.transform).toBe("translate3d(0px, 0px, -480px) scale(0.78) rotateY(40deg)");
     expect(surface.style.filter).toBe("brightness(0.4)");
     const out = presentations.of(".webspring-app-view-frame").at(-1)!;
-    expect(out.request.animations[0]).toMatchObject({ from: "none", to: "translate(-118vw, 0vw) scale(1)" });
+    expect(out.request.animations[0]).toMatchObject({ from: "none", to: "translate(-72vw, 0vw) scale(1)" });
     await out.finish();
     expect(onRole).toHaveBeenLastCalledWith("switch:1", "outgoing");
     expect(onRole).toHaveBeenCalledTimes(2);

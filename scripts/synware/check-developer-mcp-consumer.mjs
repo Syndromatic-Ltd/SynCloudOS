@@ -45,6 +45,12 @@ try {
   assert.equal(lookup.symbols[0].name,"SynWareInfo");
   assert(lookup.symbols[0].signature.includes("SynWareInfo"));
   assert(lookup.docs.length>0,"Installed docs must be available offline.");
+  for (const dialQuery of ["Circular slider", "angle dial", "knob", "NSSlider.SliderType.circular"]) {
+    const dial=await call("lookup_sdk",{query:dialQuery});
+    assert.equal(dial.symbols[0]?.name,"NSESlider",`${dialQuery}: ${JSON.stringify(dial.symbols.slice(0,3))}`);
+    assert.equal(dial.symbols[0]?.usage,'NSESlider sliderType="circular"');
+    assert.equal(dial.symbols[0]?.galleryExample,"Wrapping angle dial");
+  }
   const created=await call("scaffold",{bundleIdentifier:"org.example.hello",name:"Hello",route:"/hello"});
   // The default scaffold is class authoring: Info, index (NSEApplication), locale, test and Views/SearchView.
   assert.equal(created.createdPaths.length,5);
@@ -101,6 +107,10 @@ try {
   assert(hud.findings.some(item=>item.rule==="idiom.nse-controls" && item.severity==="error"));
   writeFileSync(view,originalView+renderer.replace('<button>HUD</button>', '<NSEButton title="HUD" />'));
   assert.equal((await call("validate",{typescript:false,launch:false})).ok,true);
+  writeFileSync(view,originalView+"\nconst handDrawnDial = <span className=\"pub-dial\"><span className=\"pub-dial-needle\" aria-hidden=\"true\" /></span>;\n");
+  const dialMisuse=await call("validate",{typescript:false,launch:false});
+  assert.equal(dialMisuse.ok,false,JSON.stringify(dialMisuse));
+  assert(dialMisuse.findings.some(item=>item.rule==="idiom.hand-drawn-control" && item.severity==="error" && item.message.includes("NSESlider")),JSON.stringify(dialMisuse.findings));
   writeFileSync(view,originalView);
   const explained=await call("explain_error",{query:"NSE_CONTROLLER_DISPOSED"});
   assert.equal(explained.matches[0].code,"NSE_CONTROLLER_DISPOSED");

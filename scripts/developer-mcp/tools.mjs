@@ -7,7 +7,7 @@ import { existsSync, mkdirSync, lstatSync, writeFileSync } from "node:fs";
 import { dirname, relative, resolve } from "node:path";
 import { promisify } from "node:util";
 import Ajv2020 from "ajv/dist/2020.js";
-import { createSynWareValidator, deriveManifestForFolder, discoverProjectFolders, rejectDuplicateBundleIdentifiers } from "../synware/validation-core.mjs";
+import { createSynWareValidator, deriveManifestForFolder, discoverProjectFolders, rejectDuplicateBundleIdentifiers, retiredWebspringNameFindings } from "../synware/validation-core.mjs";
 import { deriveSynWareManifest, kebabCase, titleFromFolderName, assertUniqueBundleIdentifiers } from "../synware/project-derivation.mjs";
 import { scaffoldProjectFiles, scaffoldBundleIdentifier } from "../synware/create-synware.mjs";
 import { auditSynWareIdioms } from "../synware/idiom-audit.mjs";
@@ -40,7 +40,7 @@ export async function inspectProject(input={}) {
     discoverProjectFolders(resolve(root, vite.options[key] ?? ["src/Preferences", "src/Widgets", "src/Integrations"][index]))
       .map(path => ({ directory: slash(relative(root, path)), kind: path.endsWith(".prefPane") ? "preferencePane" : path.endsWith(".widget") ? "widget" : "integration" })));
   const receipt=resolve(sdkRoot,"tooling/build-receipt.json");
-  return {projectRoot:root,sdk:{version:sdk.version,path:sdkRoot,buildReceipt:existsSync(receipt)?json(receipt):null},vite,bundles,folders,shell:{enabled:vite.options.webspringEntry!==false,path:slash(relative(root,shellPath)),exists:existsSync(shellPath)},dependencies:manifest.dependencies ?? {},devDependencies:manifest.devDependencies ?? {}};
+  return {projectRoot:root,sdk:{version:sdk.version,path:sdkRoot,buildReceipt:existsSync(receipt)?json(receipt):null},vite,bundles,folders,shell:{enabled:vite.options.webspringEntry!==false,path:slash(relative(root,shellPath)),exists:existsSync(shellPath),info:slash(relative(root,resolve(dirname(shellPath),"Info.ts"))),infoExists:existsSync(resolve(dirname(shellPath),"Info.ts"))},dependencies:manifest.dependencies ?? {},devDependencies:manifest.devDependencies ?? {}};
 }
 export async function validateProject(input={}) {
   const context=projectContext(input.projectRoot),{root,sdkRoot,sdk,manifest}=context;
@@ -57,18 +57,13 @@ export async function validateProject(input={}) {
   let host=applicationHostHints(root);
   if (host.status==="checked" && host.application) {
     const primaries=bundles.filter(bundle=>bundle.bundleIdentifier && normalizeBundleIdentifier(bundle.bundleIdentifier)===normalizeBundleIdentifier(host.application.bundleIdentifier));
-    if (primaries.length!==1 || !primaries[0].ok) host={...host,status:"unresolved",reason:"The primary bundle is missing, ambiguous or invalid; its application-menu requirement could not be assessed."};
+    if (primaries.length!==1 || !primaries[0].ok) host={...host,status:"unresolved",reason:"The primary bundle is missing, ambiguous or invalid; the single-app host could not be validated."};
     else {
       const file=resolve(primaries[0].directory,"Contents/Info.ts"), primary=primaries[0].manifest;
       // With sign-in disabled the host opens the primary publicly; one that demands sign-in contradicts it.
       if (host.authentication==="disabled" && primary.runtime?.policy?.requiresLogin===true) findings.push({
         file:slash(relative(root,file)),line:1,rule:"synware.public-policy",
         message:`Primary application ${host.application.bundleIdentifier} declares runtime.policy.requiresLogin, but the host mounts it with authentication "disabled", so nobody could ever open it and mounting fails. Enable authentication, or remove requiresLogin.`,
-      });
-      const fillsPage=host.application.frame==="fullscreen" || (primary.runtime?.presentation ?? "appView")==="appView";
-      if (fillsPage && host.authentication!=="disabled" && primary.applicationMenu?.trigger!=="content") findings.push({
-        file:slash(relative(root,file)),line:1,rule:"synware.application-menu",
-        message:`Primary application ${host.application.bundleIdentifier} fills the page with ${host.authentication} authentication. Declare applicationMenu: { trigger: "content" } and render a useApplicationMenuTrigger() button so people can reach Preferences > Account, Sign In and Log Out.`,
       });
     }
   }
@@ -110,6 +105,7 @@ export async function validateProject(input={}) {
   const hostEntry=hostEntryFor(root);
   const shellEntry=vite.options.webspringEntry===false ? null : resolve(root,vite.options.webspringEntry || "src/Webspring/Contents/index.tsx");
   const entries=[hostEntry ? resolve(root,"."+hostEntry) : null,shellEntry].filter(Boolean);
+  if (shellEntry) for (const file of [shellEntry,resolve(dirname(shellEntry),"Info.ts")]) if (existsSync(file)) findings.push(...retiredWebspringNameFindings(file).map(finding=>({...finding,file:slash(relative(root,finding.file))})));
   const audit=input.idioms===false ? {findings:[],idiomAudit:null} : auditSynWareIdioms({root,sdkRoot:context.sdkRoot,applications:bundles.filter(bundle=>bundle.kind==="application" && bundle.ok),entries});
   findings.push(...audit.findings);
   return {ok:findings.every(finding=>finding.severity==="warning"),idiomatic:audit.idiomAudit?.idiomatic ?? null,findings,bundles:bundles.map(({findings,...bundle})=>bundle),typescript,launch,host,idiomAudit:audit.idiomAudit};
@@ -144,13 +140,14 @@ export async function scaffold(input) {
   const {name,route,kind = "application"}=input;
   const id = input.id ?? kebabCase(name);
   if (kind !== "application" && !/^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*$/u.test(id ?? "")) throw new Error("Use a valid contribution ID.");
-  if (kind === "application" && input.id !== undefined) throw new Error("Applications declare bundleIdentifier, not id.");
-  const bundleIdentifier = kind === "application" ? input.bundleIdentifier ?? scaffoldBundleIdentifier(name,input.organisation) : null;
+  if ((kind === "application" || kind === "webspring") && input.id !== undefined) throw new Error("Applications and the Webspring declare bundleIdentifier, not id.");
+  const bundleIdentifier = kind === "application" ? input.bundleIdentifier ?? scaffoldBundleIdentifier(name,input.organisation) : kind === "webspring" ? input.bundleIdentifier ?? scaffoldBundleIdentifier(kebabCase(name),input.organisation) : null;
   if (!name || !/^[\p{L}\p{N}][\p{L}\p{N} _-]*$/u.test(name) || /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])$/iu.test(name)) throw new Error("Name must be a safe bundle name, not a path.");
   if (route !== undefined && (!route.startsWith("/") || route.startsWith("//") || /[?#\s]/u.test(route))) throw new Error("Route must be an absolute application pathname.");
-  const location = { application: [vite.options.appsDirectory ?? "src/SynWare", ".app"], preferencePane: [vite.options.preferencesDirectory ?? "src/Preferences", ".prefPane"], widget: [vite.options.widgetsDirectory ?? "src/Widgets", ".widget"], integration: [vite.options.integrationsDirectory ?? "src/Integrations", ".integration.ts"] }[kind];
+  if (kind === "webspring" && vite.options.webspringEntry === false) throw new Error("webspringEntry is false, so the project has no Webspring to scaffold.");
+  const location = { application: [vite.options.appsDirectory ?? "src/SynWare", ".app"], preferencePane: [vite.options.preferencesDirectory ?? "src/Preferences", ".prefPane"], widget: [vite.options.widgetsDirectory ?? "src/Widgets", ".widget"], integration: [vite.options.integrationsDirectory ?? "src/Integrations", ".integration.ts"], webspring: [dirname(dirname(vite.options.webspringEntry || "src/Webspring/Contents/index.tsx")), ""] }[kind];
   if (!location) throw new Error(`Unknown project folder kind: ${kind}.`);
-  const target=resolve(root,location[0],name+location[1]);
+  const target=kind === "webspring" ? resolve(root,location[0]) : resolve(root,location[0],name+location[1]);
   if (!inside(root,target)) throw new Error("Scaffold target must stay within the project.");
   for (let current=target;inside(root,current);current=dirname(current)) {
     if (existsSync(current) && lstatSync(current).isSymbolicLink()) throw new Error("Scaffolding through a symbolic link is forbidden.");
@@ -163,8 +160,7 @@ export async function scaffold(input) {
     ...(input.policy!==undefined ? {policy:input.policy} : {}),
     ...(input.presentation!==undefined ? {presentation:input.presentation} : {}),
   };
-  if (input.contentApplicationMenu!==undefined && typeof input.contentApplicationMenu!=="boolean") throw new Error("contentApplicationMenu must be a boolean.");
-  if (input.contentApplicationMenu) manifest.applicationMenu={trigger:"content"};
+  if (input.applicationMenuToolbar!==undefined && typeof input.applicationMenuToolbar!=="boolean") throw new Error("applicationMenuToolbar must be a boolean.");
   const validateManifest=new Ajv2020({allErrors:true,strict:false}).compile(json(resolve(context.sdkRoot,"tooling/manifest.schema.json")));
   if (kind === "application" && !validateManifest(deriveSynWareManifest({folderName:name+".app",info:manifest}))) throw new Error("Scaffold manifest is invalid: "+validateManifest.errors.map(error=>(error.instancePath || "/")+" "+error.message).join("; "));
   const header="/* SynCloudOS — Copyright © 2026 Syndromatic Ltd. All rights reserved.\n * Designed by Kavish Krishnakumar in Manchester.\n * SPDX-License-Identifier: AGPL-3.0-or-later\n */\n";
@@ -173,7 +169,8 @@ export async function scaffold(input) {
   // Class authoring (NSEApplication + NSEViewController + NSE controls) is the default. The CLI
   // and this tool share one template, so the code an agent is handed cannot drift from create-synware.
   let testFallback=false;
-  const files=Object.fromEntries(scaffoldProjectFiles({kind,name,id,bundleIdentifier,organisation:input.organisation,owners:input.owners,...(kind==="application"?{authoring:input.authoring,contentApplicationMenu:input.contentApplicationMenu===true}:{})}));
+  const files=Object.fromEntries(scaffoldProjectFiles({kind,name,id,bundleIdentifier,organisation:input.organisation,owners:input.owners,...(kind==="application"?{authoring:input.authoring,applicationMenuToolbar:input.applicationMenuToolbar===true}:{})}));
+  if (kind === "webspring") for (const path of Object.keys(files)) files[path]=header+files[path];
   if (kind === "application") {
     files["Contents/Info.ts"]=header+'import type { SynWareInfo } from "@syndromatic/syncloudos/sdk";\n\nexport default '+JSON.stringify(manifest,null,2)+" satisfies SynWareInfo;\n";
     files["Contents/index.tsx"]=header+files["Contents/index.tsx"];
@@ -190,9 +187,9 @@ export async function scaffold(input) {
   const createdPaths=[];
   for (const [path,text] of Object.entries(files)) {const file=path ? resolve(target,path) : target;mkdirSync(dirname(file),{recursive:true});writeFileSync(file,text,{flag:"wx"});createdPaths.push(slash(relative(root,file)));}
   const nextSteps=[];
+  if (kind === "webspring") return {createdPaths,nextSteps:["The Board is the launcher on every presentation. Set static mainViewController on the WSApplication subclass for another, then run the validate tool."]};
   if (input.policy?.public!==true) nextSteps.push('With authentication "disabled", the host opens the primary application publicly. With "optional", set runtime.policy.public to true if it must open before anyone signs in. Do not make private applications public unless that access is intended.');
-  if (input.presentation===undefined) nextSteps.push('For a secondary windowed application, set runtime.presentation to "windowedView"; the default appView is for the primary application.');
-  if (!input.contentApplicationMenu && (input.presentation===undefined || input.presentation==="appView")) nextSteps.push('A fullscreen primary with authentication "optional" or "required" must declare applicationMenu: { trigger: "content" } and render a useApplicationMenuTrigger() button, so people can reach Preferences > Account, Sign In and Log Out. Pass contentApplicationMenu: true to scaffold both.');
+  if (input.presentation===undefined) nextSteps.push('For a secondary windowed application, set runtime.presentation to "window"; the default "stage" is for the primary application.');
   if (testFallback) nextSteps.push(`The project has no ${testFallback.join(", ")}, so Contents/__tests__/app.test.tsx is a smoke test. Install vitest, jsdom and @testing-library/react as dev dependencies to test the application with createSynWareTestHost from @syndromatic/syncloudos/sdk/testing.`);
   nextSteps.push("Review the generated manifest and run the validate tool before registering the bundle.");
   return {createdPaths,nextSteps};

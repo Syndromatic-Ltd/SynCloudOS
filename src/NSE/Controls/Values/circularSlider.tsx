@@ -22,7 +22,7 @@ import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
 
 import { nseControlHooks } from "../../Theme/contract/hooks";
 import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction";
-import { useRef, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 
 
 import { MetalThumb } from "../../Appearance/MetalThumb";
@@ -58,10 +58,16 @@ export function CircularSlider(supplied: NSEBoundValueProps<number, NSESliderPro
 function CircularSliderControl({ __nseBindingEditor, controlSize = "regular", valueText, ...props }: CircularSliderProps & ValueBindingControlProps<number>) {
   const theme = useNSEThemeInteraction<HTMLSpanElement>(props.isEnabled !== false, true);
   const activePointer = useRef<number | null>(null);
+  const [tracking, setTracking] = useState(false);
   const opening = useRef(props.value);
   const latest = useRef(props.value);
   latest.current = props.value;
   const inert = (props.isEnabled === false) || props.readOnly;
+  useEffect(() => {
+    if (!inert) return;
+    activePointer.current = null;
+    setTracking(false);
+  }, [inert]);
   const span = props.maximum - props.minimum;
   const clamp = (value: number) => Math.max(props.minimum, Math.min(props.maximum, Math.round((value - props.minimum) / props.step) * props.step + props.minimum));
   const update = (event: ReactPointerEvent<HTMLElement>, phase: "preview" | "commit") => {
@@ -77,8 +83,10 @@ function CircularSliderControl({ __nseBindingEditor, controlSize = "regular", va
     props.onValueChange(next, phase);
   };
   const cancel = () => {
-    if (activePointer.current === null || inert) return;
+    if (activePointer.current === null) return;
     activePointer.current = null;
+    setTracking(false);
+    if (inert) return;
     if(__nseBindingEditor){__nseBindingEditor.cancel();return;}
     latest.current = opening.current;
     props.onValueChange(opening.current, "preview");
@@ -97,7 +105,7 @@ function CircularSliderControl({ __nseBindingEditor, controlSize = "regular", va
   const style = { "--nse-circular-angle": `${progress * 360}deg` } as CSSProperties;
 
 
-  return <span data-nse-part="content" {...theme.events} {...nseControlHooks({ control: "slider", enabled: props.isEnabled !== false, highlighted: theme.highlighted, hovered: theme.hovered, focused: theme.focused, variants: { "slider-type": "circular", "control-size": controlSize } })} data-size={controlSize} data-state={(props.isEnabled === false) ? "disabled" : props.readOnly ? "read-only" : "ready"}  style={style}>
+  return <span data-nse-part="content" {...theme.events} {...nseControlHooks({ control: "slider", enabled: props.isEnabled !== false, highlighted: tracking || theme.highlighted, tracking, hovered: theme.hovered, focused: theme.focused, variants: { "slider-type": "circular", "control-size": controlSize } })} data-size={controlSize} data-state={(props.isEnabled === false) ? "disabled" : props.readOnly ? "read-only" : "ready"}  style={style}>
     <span
       role="slider"
       aria-label={props["aria-label"]}
@@ -110,9 +118,22 @@ function CircularSliderControl({ __nseBindingEditor, controlSize = "regular", va
       tabIndex={inert ? -1 : 0}
       data-nse-part="circular-body"
 
-      onPointerDown={(event) => { if (inert) return; activePointer.current = event.pointerId; opening.current = props.value; event.currentTarget.setPointerCapture?.(event.pointerId); update(event, "preview"); }}
+      onPointerDown={(event) => {
+        if (inert || event.button !== 0) return;
+        activePointer.current = event.pointerId;
+        setTracking(true);
+        opening.current = props.value;
+        event.currentTarget.setPointerCapture?.(event.pointerId);
+        update(event, "preview");
+      }}
       onPointerMove={(event) => { if (activePointer.current === event.pointerId) update(event, "preview"); }}
-      onPointerUp={(event) => { if (activePointer.current !== event.pointerId || inert) return; update(event, "commit"); activePointer.current = null; event.currentTarget.releasePointerCapture?.(event.pointerId); }}
+      onPointerUp={(event) => {
+        if (activePointer.current !== event.pointerId || inert) return;
+        activePointer.current = null;
+        setTracking(false);
+        event.currentTarget.releasePointerCapture?.(event.pointerId);
+        update(event, "commit");
+      }}
       onPointerCancel={cancel}
       onLostPointerCapture={cancel}
       onKeyDown={(event) => { if (inert || !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) return; event.preventDefault(); keyChange(event.key); }}

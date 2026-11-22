@@ -33,10 +33,12 @@ import type { KeyBindingManager } from "../KeyBindings";
 import type { OperationCoordinator, SynCloudOSRuntimeId } from "../Runtime/runtimeInstanceTypes";
 import type { SynWareOwnedProjectionResult } from "../AppSDK/runtimeContracts";
 import type { ResponderGraph, ResponderRegistrationHandle } from "../Responders";
+import { windowResponderFor } from "../Responders/ResponderGraph";
 import type { UndoManagerRegistry } from "../Undo";
 import type { ScreenService } from "./ScreenService";
 import { WindowBoundsScheduler } from "./WindowBoundsScheduler";
 import { WindowController } from "./WindowController";
+import { createStageWindowHost, type WindowHostEnvironment, type WindowHostEvent, type WindowSurfaceBinding } from "./WindowHostEnvironment";
 import { WindowContentFactoryUnavailableError, type WindowContentRegistry } from "./WindowContentRegistry";
 import { WindowDocumentPresentationCloseCoordinator } from "./WindowDocumentPresentationCloseCoordinator";
 import {
@@ -52,9 +54,12 @@ import {
 } from "./WindowRestoration";
 import {
   assertFiniteWindowBounds,
-  canonicalWindowChromeMode,
   createCanonicalWindowRecord,
   defaultWindowSmoothSurface,
+  effectiveWindowStyle,
+  type WindowCollectionBehavior,
+  type WindowFullScreenState,
+  type WindowStyle,
   freezeWindowRecord,
   normaliseWindowSmoothSurface,
   type CreateWindowRequest,
@@ -96,6 +101,7 @@ export interface WindowManagerDependencies {
   readonly content: WindowContentRegistry;
   readonly ids: WindowIdPort;
   readonly restoration: WindowRestorationDependencies;
+  readonly host?: WindowHostEnvironment;
   readonly resolveApplicationWindow?: (applicationId: string) => CreateWindowRequest | null;
   /** Host-owned bridge to an app's narrow exact-document rematerialiser.
    * WindowManager never hands application code raw runtime authority. */
@@ -195,6 +201,11 @@ export class WindowManager {
   #runtimeDisposalGeneration = 0;
   #authorityGeneration = 0;
   #disposed = false;
+  readonly host: WindowHostEnvironment;
+  readonly #unsubscribeHost: () => void;
+  readonly #fullScreenIntents = new Map<string, boolean>();
+  readonly #surfaceTransfers = new Map<string, { readonly generation: number; binding: WindowSurfaceBinding | null; lastKeyWindowId: string | null }>();
+  #surfaceGeneration = 0;
 
   constructor(readonly dependencies: WindowManagerDependencies) {
     this.runtimeId = dependencies.runtimeId;
@@ -243,6 +254,8 @@ export class WindowManager {
       },
       observeError: (error) => this.#reportError(error, "window-bounds-frame-cancel"),
     });
+    this.host = dependencies.host ?? createStageWindowHost();
+    this.#unsubscribeHost = this.host.subscribe(event => this.#handleHostEvent(event));
   }
 
   snapshot = (): WindowManagerSnapshot => this.#snapshot;
@@ -842,8 +855,7 @@ export class WindowManager {
         controller.replaceRecord({ ...controller.record, isKey: false, isMain: false });
       }
     }
-    const { windowResponderId: _window, documentResponderId: _document, ...anchors } = this.dependencies.focus.getActiveAnchors();
-    this.dependencies.focus.setActiveAnchors(anchors);
+    this.#clearWindowFocusAnchors();
     this.#publish(false);
   }
 
@@ -996,6 +1008,224 @@ export class WindowManager {
     this.#publish(true);
   }
 
+  setStyle(windowId: string, style: readonly WindowStyle[]): void {
+    this.#assertMutable();
+    this.#assertControllerTransitionAvailable(windowId);
+    const controller = this.select(windowId);
+    controller.replaceRecord({ ...controller.record, style: effectiveWindowStyle(style, controller.record.fullScreen ?? "off") });
+    this.#publish(false);
+  }
+
+  setCollectionBehavior(windowId: string, collectionBehavior: WindowCollectionBehavior): void {
+    this.#assertMutable();
+    this.#assertControllerTransitionAvailable(windowId);
+    const controller = this.select(windowId);
+    if (collectionBehavior !== "fullScreenPrimary" && (controller.record.fullScreen ?? "off") !== "off") return;
+    controller.replaceRecord({ ...controller.record, collectionBehavior });
+    this.#publish(false);
+  }
+
+  /** Opens the destination during the initiating browser gesture and commits the acknowledged binding. */
+  async detach(windowId: string): Promise<boolean> {
+    this.#assertMutable();
+    this.#assertControllerTransitionAvailable(windowId);
+    const controller = this.select(windowId);
+    const { record } = controller;
+    if (!this.host.capabilities.separateSurfaces || !this.host.bind || !this.host.unbind ||
+        record.role !== "standard" || !record.applicationId || record.parentWindowControllerId ||
+        record.state !== "open" || (record.fullScreen ?? "off") !== "off" ||
+        this.#snapshot.blockedWindowControllerIds.includes(windowId) || this.#surfaceTransfers.has(windowId)) return false;
+    const generation = ++this.#surfaceGeneration;
+    const transfer = { generation, binding: null as WindowSurfaceBinding | null, lastKeyWindowId: null as string | null };
+    this.#surfaceTransfers.set(windowId, transfer);
+    try {
+      const binding = await this.host.bind(windowId, { generation, title: record.title, bounds: record.bounds });
+      if (this.#surfaceTransfers.get(windowId) !== transfer) {
+        if (binding) await this.#unbindSurface(windowId, generation);
+        return false;
+      }
+      if (!binding) {
+        this.#surfaceTransfers.delete(windowId);
+        return false;
+      }
+      if (binding.windowId !== windowId || binding.generation !== generation ||
+          controller.record.state !== "open" || (controller.record.fullScreen ?? "off") !== "off" ||
+          this.#closeReservations.has(windowId) || this.#snapshot.blockedWindowControllerIds.includes(windowId)) {
+        await this.reattach(windowId);
+        return false;
+      }
+      transfer.binding = binding;
+      this.#makeKey(windowId, false);
+      this.#publish(false);
+      return true;
+    } catch (error) {
+      if (this.#surfaceTransfers.get(windowId) === transfer) await this.reattach(windowId);
+      this.#reportError(error, "window-host-bind");
+      return false;
+    }
+  }
+
+  detachedSurface(windowId: string): WindowSurfaceBinding | null {
+    return this.#surfaceTransfers.get(windowId)?.binding ?? null;
+  }
+
+  /** Descendants with a window parent stay on the same surface as that parent. */
+  presentingSurface(windowId: string): WindowSurfaceBinding | null {
+    const controller = this.#controllers.get(windowId);
+    if (!controller) return null;
+    const parent = controller.record.parentWindowControllerId;
+    return this.detachedSurface(windowId) ?? (parent ? this.presentingSurface(parent) : null);
+  }
+
+  async reattach(windowId: string): Promise<void> {
+    const activeTransfer = this.#surfaceTransfers.get(windowId);
+    const syncedBounds = activeTransfer?.binding?.readBounds?.();
+    if (syncedBounds) this.#applyDetachedBounds(windowId, syncedBounds, false);
+    const transfer = this.#retireSurface(windowId);
+    if (transfer?.binding) this.#publish(false);
+    if (transfer) await this.#unbindSurface(windowId, transfer.generation);
+  }
+
+  #applyDetachedBounds(windowId: string, requested: WindowBounds, publish: boolean): void {
+    const controller = this.#controllers.get(windowId);
+    if (!controller || controller.record.state !== "open") return;
+    const screen = this.dependencies.screen.getCurrentSnapshot();
+    const maxWidth = screen.geometryState === "unavailable" ? requested.width : Math.max(controller.record.minimumSize.width, screen.workArea.width);
+    const maxHeight = screen.geometryState === "unavailable" ? requested.height : Math.max(controller.record.minimumSize.height, screen.workArea.height);
+    const next = this.#constrainBounds(controller, {
+      x: requested.x,
+      y: requested.y,
+      width: Math.min(requested.width, maxWidth),
+      height: Math.min(requested.height, maxHeight),
+    });
+    if (next === controller.record.bounds) return;
+    controller.replaceGeometry(
+      { ...controller.record, bounds: next },
+      { ...controller.geometryState, normalBounds: next, zoomed: false },
+    );
+    if (publish) this.#publish(false);
+  }
+
+  #retireSurface(windowId: string) {
+    const transfer = this.#surfaceTransfers.get(windowId);
+    this.#surfaceTransfers.delete(windowId);
+    return transfer;
+  }
+
+  async #unbindSurface(windowId: string, generation: number): Promise<void> {
+    try { await this.host.unbind?.(windowId, generation); }
+    catch (error) { this.#reportError(error, "window-host-unbind"); }
+  }
+
+  #discardSurface(windowId: string): void {
+    const transfer = this.#retireSurface(windowId);
+    if (transfer) void this.#unbindSurface(windowId, transfer.generation);
+  }
+
+  toggleFullScreen(windowId: string): void {
+    this.#assertMutable();
+    this.#assertControllerTransitionAvailable(windowId);
+    const controller = this.select(windowId);
+    const { record } = controller;
+    if (record.state !== "open" || record.role !== "standard" ||
+        record.collectionBehavior !== "fullScreenPrimary" || this.#blockedWindowIds().has(windowId)) return;
+    if (this.#surfaceTransfers.has(windowId)) void this.reattach(windowId);
+    const proposed = this.#fullScreenIntents.get(windowId) ?? (record.fullScreen === "entering" || record.fullScreen === "on");
+    this.#fullScreenIntents.set(windowId, !proposed);
+    this.#drainFullScreenIntent(controller);
+  }
+
+  #drainFullScreenIntent(controller: WindowController): void {
+    const { id, record } = controller;
+    if (record.fullScreen === "entering" || record.fullScreen === "exiting") return;
+    const desired = this.#fullScreenIntents.get(id);
+    if (desired === undefined) return;
+    this.#fullScreenIntents.delete(id);
+    if (this.#controllers.get(id) !== controller || record.state !== "open" || desired === (record.fullScreen === "on")) return;
+    this.#setFullScreenState(controller, desired ? "entering" : "exiting");
+    if (this.#controllers.get(id) !== controller) return;
+    try {
+      this.host.requestFullScreen(id, desired);
+    } catch (error) {
+      this.#reportError(error, "window-host-full-screen");
+      this.#handleHostEvent({ kind: "fullScreenChanged", windowId: id, state: "refused" });
+    }
+  }
+
+  #setFullScreenState(controller: WindowController, state: WindowFullScreenState, refused = false): void {
+    const previous = controller.record.fullScreen ?? "off";
+    if (state === previous) return;
+    controller.replaceRecord({ ...controller.record, fullScreen: state, style: effectiveWindowStyle(controller.record.style, state) });
+    this.#boundsScheduler.cancel(controller.id);
+    if (state === "entering") controller.notifyFullScreen("windowWillEnterFullScreen");
+    if (state === "exiting") controller.notifyFullScreen("windowWillExitFullScreen");
+    if (state === "on") controller.notifyFullScreen(refused ? "windowDidFailToExitFullScreen" : "windowDidEnterFullScreen");
+    if (state === "off") controller.notifyFullScreen(refused ? "windowDidFailToEnterFullScreen" : "windowDidExitFullScreen");
+    this.#publish(false);
+  }
+
+  #handleHostEvent(event: WindowHostEvent): void {
+    if (this.#disposed) return;
+    if ("generation" in event && event.generation !== undefined) {
+      const transfer = this.#surfaceTransfers.get(event.windowId);
+      if (transfer?.generation !== event.generation) return;
+      if (event.kind === "surfaceLost") {
+        void this.reattach(event.windowId);
+        return;
+      }
+      if (!transfer.binding || this.#closeReservations.has(event.windowId)) return;
+      if (event.kind === "boundsChanged") {
+        this.#applyDetachedBounds(event.windowId, event.bounds, true);
+        return;
+      }
+      if (event.kind === "activated" || event.kind === "deactivated") {
+        const windows = this.#orderedControllers().filter(({ id, record }) =>
+          record.state === "open" && this.presentingSurface(id) === transfer.binding);
+        const key = windows.find(({ record }) => record.isKey);
+        if (event.kind === "deactivated") {
+          if (key) {
+            this.#rememberCurrentWindowFocus();
+            transfer.lastKeyWindowId = key.id;
+            key.replaceRecord({ ...key.record, isKey: false });
+            this.#clearWindowFocusAnchors();
+            this.#publish(false);
+          }
+        } else if (!key) {
+          const blocked = this.#blockedWindowIds();
+          const eligible = windows.filter(({ id }) => !blocked.has(id) && !this.#closeReservations.has(id));
+          const preferred = eligible.find(({ id }) => id === transfer.lastKeyWindowId)
+            ?? eligible.find(({ id }) => id === event.windowId)
+            ?? eligible.at(-1);
+          if (preferred) this.#makeKey(preferred.id, true);
+        }
+        return;
+      }
+    }
+    const controller = this.#controllers.get(event.windowId);
+    if (!controller || controller.record.state !== "open") return;
+    if (event.kind === "activated") {
+      this.makeKey(controller.id);
+    } else if (event.kind === "deactivated") {
+      if (controller.record.isKey) this.resignKey();
+    } else if (event.kind === "closeRequested") {
+      void this.requestClose(controller.id, { reason: "control" }).catch(error => this.#reportError(error, "window-host-close"));
+    } else if (event.kind === "fullScreenChanged" && controller.record.collectionBehavior === "fullScreenPrimary" &&
+        controller.record.role === "standard") {
+      const previous = controller.record.fullScreen ?? "off";
+      if (event.state === "refused") {
+        if (previous === "entering" || previous === "exiting") {
+          this.#setFullScreenState(controller, previous === "entering" ? "off" : "on", true);
+        }
+      } else {
+        if (event.state === "on" && previous === "off") this.#setFullScreenState(controller, "entering");
+        if (event.state === "off" && previous === "on") this.#setFullScreenState(controller, "exiting");
+        if (this.#controllers.get(controller.id) !== controller) return;
+        this.#setFullScreenState(controller, event.state);
+      }
+      this.#drainFullScreenIntent(controller);
+    }
+  }
+
   zoom(windowControllerId: string): void {
     this.#assertMutable();
     this.#assertControllerTransitionAvailable(windowControllerId);
@@ -1005,6 +1235,7 @@ export class WindowManager {
       controller.record.state !== "open" ||
       this.#blockedWindowIds().has(windowControllerId) ||
       !controller.record.style.includes("zoomable") ||
+      (controller.record.fullScreen ?? "off") !== "off" ||
       this.isCompactPresentation(windowControllerId)
     ) return;
     this.#boundsScheduler.cancel(windowControllerId);
@@ -1097,7 +1328,9 @@ export class WindowManager {
         representedDocument: record.representedDocument,
         toolbar: record.toolbar,
         role: record.role,
-        style: record.style,
+        style: effectiveWindowStyle(record.style, record.fullScreen === "on" || record.fullScreen === "exiting" ? "on" : "off"),
+        fullScreen: record.fullScreen === "on" || record.fullScreen === "exiting" ? "on" : "off",
+        collectionBehavior: record.collectionBehavior ?? "fullScreenNone",
         title: record.title,
         content: record.content,
         contentRestorationState: controller.contentRestorationState,
@@ -1113,13 +1346,12 @@ export class WindowManager {
         mobilePolicy: record.mobilePolicy,
         restorationKey: record.restorationKey,
         zOrder: record.zIndex,
-        chromeMode: record.chromeMode,
         smoothSurface: record.smoothSurface,
       });
     }
     const durableIds = new Set(windows.map(({ windowControllerId }) => windowControllerId));
     const raw = {
-      schemaVersion: 1,
+      schemaVersion: 2,
       namespace: this.#restorationIdentity.namespace,
       installationId: this.#restorationIdentity.installationId,
       capturedAtEpochMs,
@@ -1152,7 +1384,7 @@ export class WindowManager {
     this.#assertLive();
     const persisted = this.dependencies.restoration.persistence.read("windows.workspace-v1");
     if (persisted === null) return emptyRestorationReport();
-    return this.restoreWorkspace(persisted as WindowRestorationSnapshot, signal);
+    return this.restoreWorkspace(persisted, signal);
   }
 
   /**
@@ -1206,7 +1438,7 @@ export class WindowManager {
     return documentId;
   }
 
-  async restoreWorkspace(snapshot: WindowRestorationSnapshot, signal?: AbortSignal): Promise<WindowRestorationReport> {
+  async restoreWorkspace(snapshot: unknown, signal?: AbortSignal): Promise<WindowRestorationReport> {
     this.#assertMutable();
     this.#assertLive();
     const validated = freezeWindowRestorationSnapshot(validateWindowRestorationSnapshot(snapshot, {
@@ -1343,6 +1575,8 @@ export class WindowManager {
           toolbar: source.toolbar,
           role: source.role,
           style: source.style,
+          fullScreen: source.fullScreen,
+          collectionBehavior: source.collectionBehavior,
           title: source.title,
           content: restoredContent.descriptor,
           bounds: source.normalBounds,
@@ -1354,7 +1588,6 @@ export class WindowManager {
           pinned: source.pinned,
           mobilePolicy: source.mobilePolicy,
           restorationKey: source.restorationKey,
-          chromeMode: canonicalWindowChromeMode(source.role, source.chromeMode),
           smoothSurface: normaliseWindowSmoothSurface(source.smoothSurface),
         });
         controller.setContentRestorationState(restoredContent.state);
@@ -1559,6 +1792,8 @@ export class WindowManager {
   dispose(): void {
     if (this.#disposed) return;
     this.#disposed = true;
+    this.#tryCleanup("window-host-unsubscribe", this.#unsubscribeHost);
+    this.#fullScreenIntents.clear();
     for (const live of [...this.#liveCloseTokens.values()]) {
       this.#tryCleanup("window-close-rollback", () => this.#rollbackPreparations(live.preparations));
     }
@@ -1655,6 +1890,8 @@ export class WindowManager {
     const controller = this.#controllers.get(id);
     if (!controller) return;
     const record = controller.record;
+    this.#discardSurface(id);
+    this.#fullScreenIntents.delete(id);
     const orderIndex = this.#order.indexOf(id);
     const wasOpen = orderIndex >= 0;
     const ownedOpenResources = wasOpen || record.state === "opening" || this.#openingWindowControllerIds.has(id);
@@ -1720,18 +1957,21 @@ export class WindowManager {
   #rememberCurrentWindowFocus(): void {
     const focused = this.dependencies.focus.getFocusedResponderId();
     if (!focused || !this.dependencies.responders.has(focused)) return;
-    const windowResponder = this.dependencies.responders.resolveChain(focused)
-      .find(({ kind }) => kind === "window");
+    const windowResponder = windowResponderFor(this.dependencies.responders, focused);
     if (!windowResponder || !windowResponder.id.startsWith("window:")) return;
     const windowId = windowResponder.id.slice("window:".length);
     if (this.#controllers.has(windowId)) this.#lastFocusedByWindow.set(windowId, focused);
   }
 
+  #clearWindowFocusAnchors(): void {
+    const { windowResponderId: _window, documentResponderId: _document, ...anchors } = this.dependencies.focus.getActiveAnchors();
+    this.dependencies.focus.setActiveAnchors(anchors);
+  }
+
   #focusTarget(controller: WindowController): string {
     const remembered = this.#lastFocusedByWindow.get(controller.id);
     if (remembered && this.dependencies.responders.has(remembered)) {
-      const insideWindow = this.dependencies.responders.resolveChain(remembered)
-        .some(({ id }) => id === controller.windowResponderId);
+      const insideWindow = windowResponderFor(this.dependencies.responders, remembered)?.id === controller.windowResponderId;
       if (insideWindow && this.dependencies.responders.isEnabled(remembered)) return remembered;
     }
     return controller.contentState.status === "loaded"
@@ -1773,7 +2013,9 @@ export class WindowManager {
       if (this.#ownedWindowUndoIds.delete(controller.id)) {
         this.#tryCleanup("window-undo-dispose", () => this.dependencies.undo.remove({ kind: "window", id: controller.id }));
       }
-      controller.replaceRecord({ ...record, state: "closed", isKey: false, isMain: false, zIndex: 0 });
+      this.#fullScreenIntents.delete(controller.id);
+      this.#discardSurface(controller.id);
+      controller.replaceRecord({ ...record, state: "closed", isKey: false, isMain: false, zIndex: 0, fullScreen: "off", style: effectiveWindowStyle(record.style, "off") });
       if (record.role === "sheet") {
         const hasData = this.#sheetEndData.has(controller.id);
         controller.completeSheet({
@@ -1956,6 +2198,10 @@ export class WindowManager {
       modal: true,
       trapFocus: true,
       restoreResponderId,
+    }, responderId => {
+      const window = windowResponderFor(this.dependencies.responders, responderId);
+      const candidate = window ? this.#controllers.get(window.id.slice("window:".length)) : undefined;
+      return candidate !== undefined && this.#windowBlocksWindow(controller, candidate);
     });
     this.#modalScopes.set(controller.id, handle);
   }
@@ -2064,28 +2310,28 @@ export class WindowManager {
     });
   }
 
+  #windowBlocksWindow(blocker: WindowController, candidate: WindowController): boolean {
+    if (blocker === candidate || blocker.record.state !== "open" || candidate.record.state !== "open") return false;
+    if (blocker.record.role === "sheet") return blocker.record.parentWindowControllerId === candidate.id;
+    if (blocker.record.role !== "modal") return false;
+    if (blocker.record.parentWindowControllerId) {
+      return this.#relationshipRoot(candidate.id) === this.#relationshipRoot(blocker.id)
+        && !this.#isDescendantOf(candidate.id, blocker.id)
+        && candidate.record.zIndex < blocker.record.zIndex;
+    }
+    const inDomain = blocker.record.applicationSessionId
+      ? candidate.record.applicationSessionId === blocker.record.applicationSessionId
+      : candidate.record.workspaceId === blocker.record.workspaceId;
+    return inDomain && levelRank[candidate.record.level] < levelRank[blocker.record.level];
+  }
+
   #blockedWindowIds(): Set<string> {
     const blocked = new Set<string>();
-    const open = this.#order.map((id) => this.#controllers.get(id)!).filter(Boolean);
+    const open = this.#order.map(id => this.#controllers.get(id)!).filter(controller => controller.record.state === "open");
     for (const blocker of open) {
-      if (blocker.record.state !== "open") continue;
-      if (blocker.record.role === "sheet" && blocker.record.parentWindowControllerId) {
-        blocked.add(blocker.record.parentWindowControllerId);
-        continue;
-      }
-      if (blocker.record.role !== "modal") continue;
-      const root = blocker.record.parentWindowControllerId ? this.#relationshipRoot(blocker.id) : null;
+      if (blocker.record.role !== "sheet" && blocker.record.role !== "modal") continue;
       for (const candidate of open) {
-        if (candidate.id === blocker.id || candidate.record.state !== "open") continue;
-        const inDomain = root
-          ? this.#relationshipRoot(candidate.id) === root && !this.#isDescendantOf(candidate.id, blocker.id)
-          : blocker.record.applicationSessionId
-            ? candidate.record.applicationSessionId === blocker.record.applicationSessionId
-            : candidate.record.workspaceId === blocker.record.workspaceId;
-        const isLower = root
-          ? candidate.record.zIndex < blocker.record.zIndex
-          : levelRank[candidate.record.level] < levelRank[blocker.record.level];
-        if (inDomain && isLower) blocked.add(candidate.id);
+        if (this.#windowBlocksWindow(blocker, candidate)) blocked.add(candidate.id);
       }
     }
     return blocked;
@@ -2096,6 +2342,7 @@ export class WindowManager {
     const target = this.select(windowControllerId);
     if (target.record.state !== "open") return;
     if (this.#blockedWindowIds().has(windowControllerId)) return;
+    if (this.dependencies.focus.requestFocus(this.#focusTarget(target)).status !== "focused") return;
     const targetMayBeMain = target.record.role === "standard";
     const currentMainId = this.#standardAncestor(target.id) ??
       this.#snapshot.mainWindowControllerId ??
@@ -2118,15 +2365,16 @@ export class WindowManager {
       webspringResponderId: "webspring",
       runtimeResponderId: "runtime",
     });
-    const focusTarget = this.#focusTarget(target);
-    this.dependencies.focus.requestFocus(focusTarget);
     if (publish) this.#publish(true);
   }
 
   #restoreKeyAndMain(): void {
     this.#rememberCurrentWindowFocus();
     const blocked = this.#blockedWindowIds();
-    const eligible = [...this.#orderedControllers()].reverse().find(({ record, id }) => record.state === "open" && !blocked.has(id)) ?? null;
+    const eligible = [...this.#orderedControllers()].reverse().find(controller =>
+      controller.record.state === "open" && !blocked.has(controller.id) &&
+      this.dependencies.focus.requestFocus(this.#focusTarget(controller)).status === "focused"
+    ) ?? null;
     const main = [...this.#orderedControllers()].reverse().find(({ record, id }) => record.state === "open" && record.role === "standard" && !blocked.has(id)) ?? null;
     for (const controller of this.#orderedControllers()) {
       const isKey = controller.id === eligible?.id;
@@ -2143,7 +2391,6 @@ export class WindowManager {
       webspringResponderId: "webspring",
       runtimeResponderId: "runtime",
     });
-    if (eligible) this.dependencies.focus.requestFocus(this.#focusTarget(eligible));
   }
 
   #retainApplicationResponder(sessionId: string, applicationId: string): void {

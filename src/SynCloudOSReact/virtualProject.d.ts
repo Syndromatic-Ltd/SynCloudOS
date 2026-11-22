@@ -28,14 +28,14 @@ declare module "virtual:syncloudos/project" {
   } from "./projectComposition";
   import type { SynCloudOSHostContribution } from "./browserHostContributions";
   import type { SynCloudOSShellResources } from "../Webspring/WebspringController";
-  import type { PreferencePaneDefinition } from "../SynCloudOS/Preferences";
-  import type { WebspringDefinition, WebspringWidget } from "../Webspring/webspringTypes";
+  import type { PreferencePaneDescriptor } from "../SynCloudOS/Preferences";
+  import type { WSDefinition, WSWidgetDescriptor } from "../Webspring/public";
 
   export const bundles: readonly SynCloudOSDiscoveredBundleDescriptor[];
-  export const preferences: readonly PreferencePaneDefinition[];
-  export const widgets: readonly WebspringWidget[];
+  export const preferences: readonly PreferencePaneDescriptor[];
+  export const widgets: readonly WSWidgetDescriptor[];
   export const contributions: readonly SynCloudOSHostContribution[];
-  export const shell: WebspringDefinition | null;
+  export const webspring: WSDefinition | null;
   export const shellResources: SynCloudOSShellResources;
   const composition: SynCloudOSProjectComposition;
   export default composition;

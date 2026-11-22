@@ -1,5 +1,5 @@
 
-@layer nse.atmo {
+@layer nse.structure {
 @scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
@@ -47,37 +47,31 @@
   position: absolute;
   overflow: hidden;
 }
-.nse-collection-item[data-selected],
-:where(:scope):is(.nse-collection-item[data-selected]) { background: var(--nse-selection-background, Highlight); color: var(--nse-selection-foreground, HighlightText); }
-.nse-collection-item[data-focused],
-:where(:scope):is(.nse-collection-item[data-focused]) { outline: 1px solid currentColor; outline-offset: -1px; }
+.nse-collection-view:focus-visible .nse-collection-item[data-nse-focused],
+:where(:scope):is(.nse-collection-view:focus-visible .nse-collection-item[data-nse-focused]) { outline: 1px solid currentColor; outline-offset: -1px; }
 .nse-collection-status,
 :where(:scope):is(.nse-collection-status) { padding: var(--nse-space-2, 8px); }
 
 /* Cover Flow: AnimationFX draws the items into the canvas; the title and the options for assistive technology
    sit over it. */
-.nse-collection-view[data-layout="cover-flow"],
-:where(:scope):is(.nse-collection-view[data-layout="cover-flow"]) {
-  --nse-collection-cover-flow-background:
-    radial-gradient(120% 90% at 50% 12%, rgba(40, 46, 54, 0.55), transparent 60%),
-    linear-gradient(180deg, #050608 0%, #0a0c10 52%, #000 100%);
+.nse-collection-view[data-nse-style="cover-flow"],
+:where(:scope):is(.nse-collection-view[data-nse-style="cover-flow"]) {
   position: relative;
   inline-size: 100%;
   block-size: 100%;
   max-inline-size: none;
   overflow: hidden;
-  background: var(--nse-collection-cover-flow-background);
   cursor: grab;
   user-select: none;
   touch-action: pan-y;
   isolation: isolate;
 }
-.nse-collection-container:has(>.nse-collection-view[data-layout="cover-flow"]),
-:where(:scope):is(.nse-collection-container:has(>.nse-collection-view[data-layout="cover-flow"])) { inline-size: 100%; block-size: 100%; }
-.nse-collection-view[data-layout="cover-flow"]:active,
-:where(:scope):is(.nse-collection-view[data-layout="cover-flow"]:active) { cursor: grabbing; }
-.nse-collection-view[data-layout="cover-flow"]:focus-visible,
-:where(:scope):is(.nse-collection-view[data-layout="cover-flow"]:focus-visible) {
+.nse-collection-container:has(>.nse-collection-view[data-nse-style="cover-flow"]),
+:where(:scope):is(.nse-collection-container:has(>.nse-collection-view[data-nse-style="cover-flow"])) { inline-size: 100%; block-size: 100%; }
+.nse-collection-view[data-nse-style="cover-flow"]:active,
+:where(:scope):is(.nse-collection-view[data-nse-style="cover-flow"]:active) { cursor: grabbing; }
+.nse-collection-view[data-nse-style="cover-flow"]:focus-visible,
+:where(:scope):is(.nse-collection-view[data-nse-style="cover-flow"]:focus-visible) {
   outline: 2px solid rgba(140, 200, 245, 0.85);
   outline-offset: -3px;
 }
@@ -120,20 +114,17 @@
   gap: 2px;
   text-align: center;
   pointer-events: none;
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
 }
 .nse-collection-cover-flow-title-text,
 :where(:scope):is(.nse-collection-cover-flow-title-text) {
   font-family: inherit;
   font-size: clamp(14px, 1.5vw, 18px);
   font-weight: 700;
-  color: #fff;
 }
 .nse-collection-cover-flow-subtitle,
 :where(:scope):is(.nse-collection-cover-flow-subtitle) {
   font-family: inherit;
   font-size: clamp(11px, 1.1vw, 13px);
-  color: rgba(220, 232, 244, 0.8);
 }
 
 }

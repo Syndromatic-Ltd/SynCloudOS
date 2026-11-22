@@ -4,6 +4,9 @@ import { afterEach, expect, it } from "vitest";
 import { act, fireEvent, render, renderHook, screen } from "@testing-library/react";
 import { createAppSCOS, unboundSCOS } from "../../src/SynCloudOS/AppSDK/scos/scosFacade";
 import type { MountedSynWareRuntime } from "../../src/SynCloudOS/AppSDK/appRuntimeFacade";
+import { NSEApplication } from "../../src/NSE/Application/NSEApplication";
+import { NSEAppearance } from "../../src/NSE/Appearance/NSEAppearance";
+import { ensureApplicationSession } from "../../src/SynCloudOS/AppHosting/applicationSession";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact/SynCloudOSProvider";
 import { useSCOS } from "../../src/SynCloudOS/AppSDK/scos/useSCOS";
 import { SynWareProvider } from "../../src/SynCloudOS/AppSDK/SynWareContext";
@@ -101,6 +104,38 @@ it("queues presentations, renders choices and resolves safe dismissal", async ()
   await expect(second).resolves.toBe("ok");
   expect(center.getSnapshot()).toEqual({ current: null, queued: 0 });
   view.unmount(); center.dispose();
+});
+
+it("projects and updates the appearance of an application-modal alert", () => {
+  const center = createSynCloudOSAlertCenter();
+  const runtime = createTestRuntime({ id: "runtime:owned-alert" });
+  const appId = "com.example.owned-alert";
+  const session = ensureApplicationSession({ runtimeId: runtime.runtimeId, appId }, {
+    AppClass: NSEApplication,
+    appName: "Owned alert",
+    strictOwnership: true,
+  });
+  const view = render(<SynCloudOSProvider runtime={runtime}><SCOSAlertPresenter center={center} /></SynCloudOSProvider>);
+  const theme = { kind: "app", bundleIdentifier: "com.example.owned-alert.chrome", displayName: "Chrome", version: "1.0.0" } as const;
+
+  try {
+    act(() => {
+      session.app.appearance = new NSEAppearance("dark", { theme });
+      void center.present({ title: "Owned alert" }, { ownerAppId: appId });
+    });
+    const dialog = screen.getByRole("alertdialog");
+    expect(dialog.closest("[data-nse-app-theme]")?.getAttribute("data-nse-app-theme")).toBe(theme.bundleIdentifier);
+    expect(dialog.getAttribute("data-nse-appearance-name")).toBe("dark");
+    expect(dialog.closest("[data-nse-system-surface]")).toBeNull();
+
+    act(() => { session.app.appearance = null; });
+    expect(screen.getByRole("alertdialog")).toBe(dialog);
+    expect(dialog.closest("[data-nse-app-theme]")).toBeNull();
+  } finally {
+    view.unmount();
+    center.dispose();
+    session.dispose();
+  }
 });
 
 it("cancels current and queued alerts on owner abort without disturbing another owner", async () => {

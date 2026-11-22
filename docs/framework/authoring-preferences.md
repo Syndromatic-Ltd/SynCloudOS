@@ -1,6 +1,8 @@
 # Preferences, observations and restoration
 
-Applications, windows and view controllers can declare primitive preferences with their existing app-scoped keys:
+This page covers three ways a controller keeps state in step with the world: preferences that persist a property, observations that react to a property changing, and restoration that brings navigation back where the user left it.
+
+Applications, window controllers and view controllers declare a primitive preference with `@preference` and an app-scoped key:
 
 ```ts
 class ReaderController extends NSEViewController {
@@ -14,21 +16,25 @@ class ReaderController extends NSEViewController {
 }
 ```
 
-Constructor reads see accessor defaults. The session hydrates declarations after construction and context attachment, before application launch and view/window load callbacks. An explicit constructor write wins over stored data. Children added to an attached owner are finalized before `addChild` returns. Stored values are therefore available on the first rendered view.
+Inside the constructor, a preference reads as its default. The session loads stored values after construction and attachment, and before the application's launch callbacks and the view and window load callbacks. A value you write in the constructor wins over the stored one. A child added to an attached owner is fully set up before `addChild` returns. The first rendered view therefore sees stored values.
 
-Primitive preferences retain their raw storage format and exact key. `NSEPreferenceDescriptor<T>` adds an explicit key, version, parser and consecutive migrations for structured values. Its initializer is the default. Version zero can adapt an existing raw structured value without adding an envelope; existing tagged envelopes are retained. Positive versions use the existing `syncloudos:nse-preferences:v1` tuple. A newer unsupported schema is never overwritten. Grouped settings drafts and undo remain with `NSEPreferencesController`.
+A primitive preference is stored raw, under exactly the key you give. For structured values, pass an `NSEPreferenceDescriptor<T>` with an explicit key, version, parser and a run of consecutive migrations; the accessor's initialiser is the default. Version zero can read an existing raw structured value without wrapping it in an envelope, and existing tagged envelopes are kept. Positive versions are stored in the `syncloudos:nse-preferences:v1` envelope. A value written by a newer, unsupported schema is never overwritten. Grouped settings with drafts and undo belong in `NSEUserDefaultsController` (see [Controllers](controllers.md)).
 
-Writes must succeed synchronously before the accessor publishes. `PreferencePersistenceError` leaves the previous value intact. Equal storage echoes publish nothing. The canonical persistence manager notifies scoped accessors for ordinary SDK writes and removals as well as decorated writes. Disposing an owner releases these subscriptions.
+A write must succeed synchronously before the accessor publishes the new value. If it throws `PreferencePersistenceError`, the previous value stays. Storing an equal value publishes nothing. Accessors also see writes and removals made through the ordinary SDK preferences client, not only their own. Disposing the owner ends these subscriptions.
 
-`@observes` accepts a direct property key or an explicit observable-source factory with a `select(snapshot)` projection. Factories resolve after construction and rebind when the owner changes. Observer methods are synchronous; use a managed task for asynchronous work. Deliveries coalesce into one microtask and compare projected values with `Object.is`. Pending deliveries from ended epochs are discarded. Repeated nonconverging writes and thenable method results enter diagnostics.
+`@observes` takes a property key on the same object, or a factory that returns an observable source together with a `select(snapshot)` projection. Factories run after construction and are re-run when the owner changes. Observer methods are synchronous; start a managed task for asynchronous work. Changes are delivered together in one microtask, and projected values are compared with `Object.is`. A delivery still pending when its lifetime ends is dropped. Writes that keep triggering each other, and observer methods that return a promise, are reported in diagnostics.
 
-Owner observations connect after hydration. Initial mounted observations run after committed refs and `viewDidLoad`; visible observations run when effective activity begins. Each new epoch can deliver its own initial value. StrictMode replay preserves the committed epoch. Existing `observe` and React `useObserve` remain supported.
+Observations with the `owner` lifetime connect after stored preferences load. A `mounted` observation's initial delivery runs after refs are attached and `viewDidLoad` has run; a `visible` observation's runs when the view becomes active. Each time a lifetime starts again it can deliver its own initial value, and React StrictMode's double render doesn't start a new one. `observe` and the React hook `useObserve` still work.
 
-Navigation controllers accept a `restoration` descriptor containing `key`, `version`, `parse`, `capture`, `restore` and `migrations`. `restore(controller, value)` calls the controller's existing restoration API. `hasExplicitRoute` preserves app-owned incoming route authority. Outside an attached application, pass an `NSEUserDefaults` as `defaults`. Connection occurs after construction; creating a separate route store is unnecessary.
+## Navigation restoration
 
-`createNSETabSelectionRestoration({ key })` persists selected destination identity, validates it against the current destinations through canonical restoration, and falls back to the authored initial selection. Retitling tabs does not write selection state. For existing unversioned app formats, declare a version-zero descriptor whose parser/capture match that format exactly.
+Navigation controllers such as `NSETabViewController` accept a `restoration` descriptor (`NSENavigationRestorationDescriptor`) with `key`, `version`, `parse`, `capture`, `restore` and `migrations`. `restore(controller, value)` calls the controller's own restoration API. If `hasExplicitRoute(controller)` returns `true`, the incoming route wins and nothing is restored. Outside an attached application, pass an `NSEUserDefaults` (from `@syndromatic/syncloudos/foundation`) as `defaults`. The descriptor connects after construction, so you don't need a separate route store.
 
-Window roots may receive their owning window without writing a constructor factory:
+The framework source includes `createNSETabSelectionRestoration({ key })`, which stores the selected tab's identity, checks it against the current tabs when restoring, and falls back to the initial selection you set. Renaming a tab doesn't rewrite the stored selection. It isn't exported from a package entry, so an application writes the equivalent descriptor itself. To keep reading an existing unversioned format, declare a version-zero descriptor whose `parse` and `capture` match that format exactly.
+
+## Window roots
+
+A window's root view controller can receive its window controller without a constructor factory:
 
 ```ts
 class ReaderViewController extends NSEViewController {
@@ -40,4 +46,4 @@ class ReaderWindowController extends NSEWindowController {
 }
 ```
 
-The framework supplies the window while constructing the root in its own ownership scope. No-argument root classes remain valid.
+The framework passes the window controller when it constructs the root, which the window owns. A root class with a no-argument constructor works too.

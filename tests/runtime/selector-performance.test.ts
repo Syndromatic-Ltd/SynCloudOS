@@ -12,6 +12,16 @@ const selectors = (css: string) => {
 };
 const weight = (selector: string) => specificity(cssTree.parse(selector, { context: "selector" })).join(",");
 
+// Both whole-bundle tests read one rewrite of each Atmo stylesheet; rewriting the bundle takes seconds.
+let atmoRewrites: { file: string; source: string; output?: string; error?: unknown }[] | undefined;
+const rewriteAtmo = () => atmoRewrites ??= (() => {
+  const resources = resolve(import.meta.dirname, "../../src/Themes/Atmo.scostheme/Contents/Resources");
+  return readdirSync(resources).filter((name) => name.endsWith(".css")).map((file) => {
+    const source = readFileSync(resolve(resources, file), "utf8");
+    try { return { file, source, output: optimiseSelectors(source) }; } catch (error) { return { file, source, error }; }
+  });
+})();
+
 describe("selector performance rewriting", () => {
   it("files a root twin under its own hook instead of under nothing", () => {
     const out = optimiseSelectors(':scope:is([data-nse-control="tab-view"]) [data-nse-role="tabpanel"] { color: red }');
@@ -56,10 +66,7 @@ describe("selector performance rewriting", () => {
 
   it("rewrites the whole Atmo bundle without changing any selector's specificity", () => {
     // optimiseSelectors throws if a rewrite would change a selector's specificity.
-    const resources = resolve(import.meta.dirname, "../../src/Themes/Atmo.scostheme/Contents/Resources");
-    for (const file of readdirSync(resources).filter((name) => name.endsWith(".css"))) {
-      expect(() => optimiseSelectors(readFileSync(resolve(resources, file), "utf8")), file).not.toThrow();
-    }
+    for (const { file, error } of rewriteAtmo()) expect(error, file).toBeUndefined();
   }, 120_000);
 
   it("gives third-party themes the same treatment", () => {
@@ -119,12 +126,11 @@ describe("selector performance rewriting", () => {
   });
 
   it("leaves almost no contract hook in the Atmo bundle as an attribute selector", () => {
-    const resources = resolve(import.meta.dirname, "../../src/Themes/Atmo.scostheme/Contents/Resources");
     let before = 0, after = 0;
-    for (const file of readdirSync(resources).filter((name) => name.endsWith(".css"))) {
-      const source = readFileSync(resolve(resources, file), "utf8");
+    for (const { file, source, output, error } of rewriteAtmo()) {
+      expect(error, file).toBeUndefined();
       before += source.match(/\[data-nse-(?:control|part)[=\]]/gu)?.length ?? 0;
-      after += optimiseSelectors(source).match(/\[data-nse-(?:control|part)[=\]]/gu)?.length ?? 0;
+      after += output!.match(/\[data-nse-(?:control|part)[=\]]/gu)?.length ?? 0;
     }
     expect(before).toBeGreaterThan(10_000);
     expect(after).toBeLessThan(before / 100);

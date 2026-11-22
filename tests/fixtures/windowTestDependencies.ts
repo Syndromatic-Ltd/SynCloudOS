@@ -151,6 +151,7 @@ function defaultContentController(
 export function createWindowTestDependencies(options: {
   readonly id?: string;
   readonly environment?: SynCloudOSRuntimeEnvironment;
+  readonly host?: WindowManagerDependencies["host"];
   readonly contentFactory?: (descriptor: WindowContentDescriptor, windowControllerId: string) => WindowContentController;
   readonly contentRestore?: WindowContentFactoryRegistration["restore"];
   readonly namespace?: string;
@@ -198,6 +199,7 @@ export function createWindowTestDependencies(options: {
     screen,
     content,
     ids,
+    host: options.host,
     restoration: {
       namespace: resolveWindowPersistenceNamespace(options.namespace ?? "tests.windows"),
       persistence,

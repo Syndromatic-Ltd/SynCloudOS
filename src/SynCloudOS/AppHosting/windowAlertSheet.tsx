@@ -22,7 +22,7 @@ import { useContext, useLayoutEffect, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import type { WindowAlertRequest } from "../../NSE/applicationHostInterop";
 import { WindowAlertContent } from "../../NSE/applicationHostInterop";
-import { WindowSheetFrame, WindowSheetHostContext } from "./windowChrome";
+import { WindowSheetFrame, WindowSheetHostContext } from "./windowAccessories";
 import { useNSEAnimationEnvironment } from "../../NSE/Animation";
 
 interface PendingAlert {

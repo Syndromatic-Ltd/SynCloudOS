@@ -1,0 +1,85 @@
+/* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
+
+[data-nse-control="quick-switch"][data-nse-part="background"],
+:where(:scope):is([data-nse-control="quick-switch"][data-nse-part="background"]) {
+  color: #f8fbff;
+}
+
+[data-nse-control="quick-switch"][data-nse-part="background"] > [data-nse-part="bezel"],
+:where(:scope):is([data-nse-control="quick-switch"][data-nse-part="background"]) > [data-nse-part="bezel"] {
+  filter: drop-shadow(0 18px 26px rgba(0, 0, 0, 0.58))
+    drop-shadow(0 4px 5px rgba(0, 0, 0, 0.74));
+}
+
+[data-nse-control="quick-switch"][data-nse-part="background"] > [data-nse-part="bezel"] > :is([data-nse-part="leading"], [data-nse-part="background"], [data-nse-part="trailing"]),
+:where(:scope):is([data-nse-control="quick-switch"][data-nse-part="background"]) > [data-nse-part="bezel"] > :is([data-nse-part="leading"], [data-nse-part="background"], [data-nse-part="trailing"]) {
+  background-position: top left;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+[data-nse-control="quick-switch"][data-nse-part="background"] > [data-nse-part="bezel"] > [data-nse-part="leading"],
+:where(:scope):is([data-nse-control="quick-switch"][data-nse-part="background"]) > [data-nse-part="bezel"] > [data-nse-part="leading"] {
+  background-image: url("./control-tab-left.png");
+}
+
+[data-nse-control="quick-switch"][data-nse-part="background"] > [data-nse-part="bezel"] > [data-nse-part="trailing"],
+:where(:scope):is([data-nse-control="quick-switch"][data-nse-part="background"]) > [data-nse-part="bezel"] > [data-nse-part="trailing"] {
+  background-image: url("./control-tab-right.png");
+}
+
+[data-nse-control="quick-switch"][data-nse-part="background"] > [data-nse-part="bezel"] > [data-nse-part="background"],
+:where(:scope):is([data-nse-control="quick-switch"][data-nse-part="background"]) > [data-nse-part="bezel"] > [data-nse-part="background"] {
+  background-image: url("./control-tab-middle.png");
+  background-repeat: repeat-x;
+  background-size: var(--webspring-quickswitch-middle-width) var(--webspring-quickswitch-height);
+}
+
+[data-nse-control="quick-switch"][data-nse-part="background"] > [data-nse-part="content"][data-nse-type="overflowing"],
+:where(:scope):is([data-nse-control="quick-switch"][data-nse-part="background"]) > [data-nse-part="content"][data-nse-type="overflowing"] {
+  -webkit-mask-image: linear-gradient(to right,
+    transparent var(--webspring-quickswitch-fade-start), #000 var(--webspring-quickswitch-fade-end),
+    #000 calc(100% - var(--webspring-quickswitch-fade-end)), transparent calc(100% - var(--webspring-quickswitch-fade-start)));
+  mask-image: linear-gradient(to right,
+    transparent var(--webspring-quickswitch-fade-start), #000 var(--webspring-quickswitch-fade-end),
+    #000 calc(100% - var(--webspring-quickswitch-fade-end)), transparent calc(100% - var(--webspring-quickswitch-fade-start)));
+}
+
+[data-nse-control="quick-switch"][data-nse-part="background"] [data-nse-control="app-icon"][data-nse-part="cell"],
+:where(:scope):is([data-nse-control="quick-switch"][data-nse-part="background"]) [data-nse-control="app-icon"][data-nse-part="cell"] {
+  color: inherit;
+  background: transparent;
+}
+
+[data-nse-control="quick-switch"][data-nse-part="background"] [data-nse-control="app-icon"][data-nse-part="cell"]:disabled,
+:where(:scope):is([data-nse-control="quick-switch"][data-nse-part="background"]) [data-nse-control="app-icon"][data-nse-part="cell"]:disabled {
+  opacity: 0.42;
+}
+
+[data-nse-control="quick-switch"][data-nse-part="background"] [data-nse-control="app-icon"][data-nse-part="cell"] [data-nse-control="icon-well"]::before,
+:where(:scope):is([data-nse-control="quick-switch"][data-nse-part="background"]) [data-nse-control="app-icon"][data-nse-part="cell"] [data-nse-control="icon-well"]::before {
+  opacity: 0;
+}
+
+[data-nse-control="quick-switch"][data-nse-part="background"] [data-nse-control="app-icon"][data-nse-part="cell"][data-nse-selected] [data-nse-control="icon-well"],
+:where(:scope):is([data-nse-control="quick-switch"][data-nse-part="background"]) [data-nse-control="app-icon"][data-nse-part="cell"][data-nse-selected] [data-nse-control="icon-well"] {
+  filter: drop-shadow(0 11px 12px rgba(0, 0, 0, 0.42))
+    drop-shadow(0 0 8px rgba(142, 224, 255, 0.24));
+}
+
+[data-nse-control="quick-switch"][data-nse-part="background"] [data-nse-control="app-icon"][data-nse-part="cell"][data-nse-selected] [data-nse-part="image"][data-nse-role="artwork"] > [data-nse-part="image"],
+:where(:scope):is([data-nse-control="quick-switch"][data-nse-part="background"]) [data-nse-control="app-icon"][data-nse-part="cell"][data-nse-selected] [data-nse-part="image"][data-nse-role="artwork"] > [data-nse-part="image"] {
+  filter: brightness(1.04)
+    saturate(1.08)
+    drop-shadow(0 0 5px rgba(94, 202, 255, 0.2));
+}
+
+[data-nse-control="quick-switch"][data-nse-part="background"] [data-nse-control="app-icon"][data-nse-part="cell"][data-nse-selected] [data-nse-part="image"][data-nse-role="artwork"] > [data-nse-part="shadow"],
+:where(:scope):is([data-nse-control="quick-switch"][data-nse-part="background"]) [data-nse-control="app-icon"][data-nse-part="cell"][data-nse-selected] [data-nse-part="image"][data-nse-role="artwork"] > [data-nse-part="shadow"] {
+  opacity: 0.62;
+}
+
+[data-nse-control="quick-switch"][data-nse-part="background"] [data-nse-control="app-icon"][data-nse-part="cell"]:focus-visible [data-nse-control="icon-well"],
+:where(:scope):is([data-nse-control="quick-switch"][data-nse-part="background"]) [data-nse-control="app-icon"][data-nse-part="cell"]:focus-visible [data-nse-control="icon-well"] {
+  outline-color: rgba(174, 236, 255, 0.82);
+}

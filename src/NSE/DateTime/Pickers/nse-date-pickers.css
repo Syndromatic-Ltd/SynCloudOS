@@ -1,5 +1,5 @@
 
-@layer nse.atmo {
+@layer nse.structure {
 @scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
@@ -28,11 +28,7 @@
 [data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"]),
 :where(:scope):is([data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"])) { display: grid; gap: 8px; }
 
-/*
- * AppearanceAuthority removes UA chrome from the named leak slice. A surface only gains a
- * visual recipe when its source decision resolves; these neutral declarations
- * never stand in for an authority record.
- */
+/* Reset the user agent plate before a theme draws the field. */
 [data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"])>input[type="text"],
 :where(:scope):is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"]))>input[type="text"],
 [data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"])>button,
@@ -48,7 +44,7 @@
   background: transparent;
   border: 0;
   box-shadow: none;
-  color: inherit;
+  color: unset;
   font: inherit;
 }
 

@@ -23,6 +23,7 @@ import { type Ref } from "react";
 /** Shared visual frame; the window manager or overlay host owns its lifetime. */
 export function PopoverFrame({ arrowRef, anchored }: { readonly arrowRef: Ref<HTMLSpanElement>; readonly anchored: boolean }) {
   return <>
+    <span className="nse-popover-backdrop" data-nse-part="backdrop" aria-hidden />
     <svg className="nse-popover-frame" data-nse-part="popover-frame" aria-hidden>
       <path data-nse-part="popover-arrow-fill" />
       <path data-nse-part="popover-outline" />

@@ -1,5 +1,5 @@
 
-@layer nse.atmo {
+@layer nse.structure {
 @scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
@@ -31,21 +31,18 @@
 [data-nse-part="clock"] [data-nse-part="face"],
 :where(:scope):is([data-nse-part="clock"]) [data-nse-part="face"] { inline-size: 122px; block-size: 123px; border-radius: 50%; position: relative; }
 [data-nse-part="clock"] [data-nse-part="face"],
-:where(:scope):is([data-nse-part="clock"]) [data-nse-part="face"] { border: 1px solid CanvasText; background: Canvas; box-sizing: border-box; }
+:where(:scope):is([data-nse-part="clock"]) [data-nse-part="face"] { border-width: 1px; border-style: solid; box-sizing: border-box; }
 [data-nse-part="clock"] [data-nse-part$="hand"],
-:where(:scope):is([data-nse-part="clock"]) [data-nse-part$="hand"] { position: absolute; inset-inline-start: calc(50% - 1px); inset-block-end: 50%; inline-size: 2px; transform-origin: bottom; background: CanvasText; border-radius: 2px; }
+:where(:scope):is([data-nse-part="clock"]) [data-nse-part$="hand"] { position: absolute; inset-inline-start: calc(50% - 1px); inset-block-end: 50%; inline-size: 2px; transform-origin: bottom; border-radius: 2px; }
 [data-nse-part="clock"] [data-nse-part="hour-hand"],
 :where(:scope):is([data-nse-part="clock"]) [data-nse-part="hour-hand"] { block-size: 32px; inline-size: 4px; inset-inline-start: calc(50% - 2px); }
 [data-nse-part="clock"] [data-nse-part="minute-hand"],
 :where(:scope):is([data-nse-part="clock"]) [data-nse-part="minute-hand"] { block-size: 46px; }
 [data-nse-part="clock"] [data-nse-part="second-hand"],
-:where(:scope):is([data-nse-part="clock"]) [data-nse-part="second-hand"] { block-size: 50px; background: Highlight; }
+:where(:scope):is([data-nse-part="clock"]) [data-nse-part="second-hand"] { block-size: 50px; }
 [data-nse-part="clock"] [data-nse-part="centre"],
-:where(:scope):is([data-nse-part="clock"]) [data-nse-part="centre"] { position: absolute; inline-size: 8px; block-size: 8px; inset-inline-start: calc(50% - 4px); inset-block-start: calc(50% - 4px); border-radius: 50%; background: CanvasText; }
-@media (forced-colors: active) { [data-nse-part="clock"] [data-nse-part$="hand"],
-:where(:scope):is([data-nse-part="clock"]) [data-nse-part$="hand"],
-[data-nse-part="clock"] [data-nse-part="centre"],
-:where(:scope):is([data-nse-part="clock"]) [data-nse-part="centre"] { forced-color-adjust: none; background: ButtonText; } }
+:where(:scope):is([data-nse-part="clock"]) [data-nse-part="centre"] { position: absolute; inline-size: 8px; block-size: 8px; inset-inline-start: calc(50% - 4px); inset-block-start: calc(50% - 4px); border-radius: 50%; }
+
 
 }
 

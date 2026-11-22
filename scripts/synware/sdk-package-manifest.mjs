@@ -142,11 +142,20 @@ export function createSdkPackageManifest({ name, exports, files, peerDependencie
   };
 }
 
+const reviewedAtmoTextures = new Set([
+  "login/plate-texture.webp",
+  "materials/linen.webp",
+  "materials/thumb-texture.webp",
+  "workspace/brushed-metal.webp",
+  "workspace/NSETileCotton.jpg",
+].map(file => "themes/Atmo.scostheme/Contents/Resources/" + file));
+
 export function assertReviewedPackageFiles(files) {
   for (const file of files) {
     if (file.includes("\\") || file.split("/").some((part) => part === ".." || part === "." || part === "")) {
       throw new TypeError(`SDK package contains an unsafe file path: ${file}`);
     }
+    if (reviewedAtmoTextures.has(file)) continue;
     if (file.startsWith("types/FrameworkTests/")) throw new TypeError(`SDK package contains a test fixture: ${file}`);
     if (file.endsWith(".js.map")) {
       // Reuse the reviewed JavaScript policy, rather than admitting arbitrary
@@ -156,7 +165,7 @@ export function assertReviewedPackageFiles(files) {
     }
     if (["LICENSE", "NOTICE", "THIRD_PARTY.md", "ARTWORK.md", "AGENTS.md", "sdk/LICENSE", "sdk/NOTICE", "sdk/package.json", "licenses/dependencies.json"].includes(file)) continue;
     if (["fx-attribution-runtime.js", "fx-app-module-source.mjs"].includes(file)) continue;
-    if (["index.js","index.d.ts","app-module-source.mjs","theme-bundles.mjs","theme-loading.mjs","selector-performance.mjs","hook-mirror-jsx.mjs","hookMirror.mjs","hookMirrorJSXRuntime.mjs","hookMirrorJSXDevRuntime.mjs","built-in-theme-css.mjs","project-derivation.mjs","manifest-source.mjs","manifest-validator.mjs","bundleIdentifier.mjs","application-toolchain.mjs","decorators.mjs","hot-applications.mjs","bundle-paths.mjs","pwa-plugin.mjs","web-app-manifest.mjs","service-worker.mjs","dispatch-closure-conversion.mjs","dispatch-worker-globals.mjs","dispatch-worker-safe-entries.json"].includes(file) || /^tooling\/(?:manifest\.schema|error-catalogue|build-receipt|nse-theme-contract)\.json$/u.test(file)) continue;
+    if (["index.js","index.d.ts","app-module-source.mjs","theme-bundles.mjs","theme-loading.mjs","paint-properties.mjs","selector-performance.mjs","hook-mirror-jsx.mjs","hookMirror.mjs","hookMirrorJSXRuntime.mjs","hookMirrorJSXDevRuntime.mjs","built-in-theme-css.mjs","project-derivation.mjs","manifest-source.mjs","manifest-validator.mjs","bundleIdentifier.mjs","application-toolchain.mjs","decorators.mjs","hot-applications.mjs","bundle-paths.mjs","pwa-plugin.mjs","web-app-manifest.mjs","service-worker.mjs","dispatch-closure-conversion.mjs","dispatch-worker-globals.mjs","dispatch-worker-safe-entries.json"].includes(file) || /^tooling\/(?:manifest\.schema|error-catalogue|build-receipt|nse-theme-contract)\.json$/u.test(file)) continue;
     if (/^docs\/framework\/(?:[A-Za-z0-9][A-Za-z0-9._-]*\/)*[A-Za-z0-9][A-Za-z0-9._-]*\.(?:md|json|png|webp|svg|jpg|jpeg|gif)$/u.test(file)) continue;
     if (/^licenses\/(?:dependencies\/)?[A-Za-z0-9._-]+\/(?:(?:MIT|APACHE|BSD)[.-])?(?:LICENSE|LICENCE|COPYING|NOTICE)(?:[.-][A-Za-z0-9._-]+)?$/iu.test(file)) continue;
     if (/^licenses\/[A-Za-z0-9._-]+\.(?:txt|md)$/u.test(file)) continue;

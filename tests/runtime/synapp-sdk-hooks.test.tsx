@@ -41,14 +41,13 @@ import {
   useService,
   useAudio,
   useTrustedClient,
-  useWindow,
 } from "../../src/SynCloudOS/AppSDK";
 import { createSynWareContextValue } from "../../src/SynCloudOS/AppSDK/createSynWareContextValue";
 import { SynWareRuntimeMount } from "../../src/SynCloudOS/AppSDK/SynWareRuntimeMount";
 import { routeQuery } from "../../src/SynCloudOS/Routing/routeQuery";
 import { createBrowserRouteCoordinator } from "../../src/SynCloudOS/Routing/BrowserRouteCoordinator";
 import { createBrowserRoutePlatform } from "../../src/SynCloudOS/PlatformAdapters/BrowserRoutePlatform";
-import { HostSiteBrandingProvider, ResponderScope, SynCloudOSProvider } from "../../src/SynCloudOSReact";
+import { HostSiteBrandingProvider, SynCloudOSProvider } from "../../src/SynCloudOSReact";
 import {
   createTestRuntime,
   createTestRuntimeEnvironment,
@@ -94,9 +93,7 @@ async function renderNamedRoute() {
   }
   const view = render(<SynCloudOSProvider runtime={runtime}>
     <HostSiteBrandingProvider value={{ name: "Hooks", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null, logoAlt: "Hooks" }}>
-      <ResponderScope responderId="application:com.example.example" kind="application" parentResponderId="runtime" scopeId="application:com.example.example">
         <SynWareRuntimeMount runtime={runtime} app={app} responderId="application:com.example.example"><Probe /></SynWareRuntimeMount>
-      </ResponderScope>
     </HostSiteBrandingProvider>
   </SynCloudOSProvider>);
   const coordinator = createBrowserRouteCoordinator({
@@ -257,7 +254,7 @@ it("returns only app-scoped clients and immutable presentation snapshots", () =>
     commands: ReturnType<typeof useCommands>;
     documents: ReturnType<typeof useDocument>;
     lifecycle: ReturnType<typeof useLifecycle>;
-    window: ReturnType<typeof useWindow>;
+    window: ReturnType<typeof useSCOS>["windows"];
     service: ReturnType<typeof useService>;
   };
   const view = renderWithSynWare(runtime, () => {
@@ -265,7 +262,7 @@ it("returns only app-scoped clients and immutable presentation snapshots", () =>
     const commands = useCommands([]);
     const lifecycle = useLifecycle();
     const documents = useDocument();
-    const window = useWindow();
+    const window = context.windows;
     const service = useService(missingToken);
     const pasteboards = usePasteboard();
     const drag = useDrag();
@@ -276,7 +273,7 @@ it("returns only app-scoped clients and immutable presentation snapshots", () =>
     return <output>{[
       typeof lifecycle.closeSelf,
       typeof documents.workspaceDocuments.getDocument,
-      window.snapshot.state,
+      window.getSnapshot().state,
       service.available,
       pasteboards.context.appId,
       typeof drag.endpoint,
@@ -295,7 +292,7 @@ it("returns only app-scoped clients and immutable presentation snapshots", () =>
   expect(observed.commands).toBe(view.context.commands);
   expect(observed.documents).toBe(view.context.documents);
   expect(observed.lifecycle).toBe(view.context.lifecycle);
-  expect(observed.window.client).toBe(view.context.windows);
+  expect(observed.window).toBe(view.context.windows);
   expect(observed.service).toMatchObject({ available: false, client: null });
   view.dispose();
 });

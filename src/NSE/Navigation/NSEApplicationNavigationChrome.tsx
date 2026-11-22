@@ -154,7 +154,7 @@ export function ApplicationNavigationChromeProvider({
   children,
   standardChromeAvailable = true,
 }: {
-  readonly controller: ApplicationNavigationChromeController;
+  readonly controller: ApplicationNavigationChromeController | null;
   readonly children?: ReactNode;
   /** @internal Whether this host actually renders standard application chrome. */
   readonly standardChromeAvailable?: boolean;

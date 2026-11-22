@@ -6,16 +6,14 @@ import { useEffect, useState, type ReactNode } from "react";
 import { createSynCloudOS } from "../../../../src/SynCloudOS/Runtime/createSynCloudOS";
 import { createBrowserRuntimeEnvironment } from "../../../../src/SynCloudOS/PlatformAdapters/BrowserRuntimeEnvironment";
 import { SynCloudOSProvider } from "../../../../src/SynCloudOSReact";
-import { createApplicationMenuStore } from "../../../../src/SynCloudOSReact/ApplicationMenuTrigger";
-import { ApplicationHostTitlebar } from "../../../../src/SynCloudOSReact/ApplicationHostTitlebar";
 import { NSEMenu } from "../../../../src/NSE/Menus/NSEMenu";
 import { NSEMenuBar } from "../../../../src/NSE/Menus/NSEMenuBar";
-import { ApplicationMenu } from "../../../../src/NSE/Menus/ApplicationMenu";
+import { ApplicationMenu as NSEApplicationMenu } from "../../../../src/NSE/Menus/ApplicationMenu";
 import { NSEPopUpButton } from "../../../../src/NSE/Menus/NSEPopUpButton";
 import { nseUnowned } from "../../../../src/NSE/Controllers/ownership";
 import { DialogSurface } from "../../../../src/NSE/Overlays/NSEDialogSurface";
 import { Divider } from "../../../../src/NSE/Controls/Selection/NSEDivider";
-import { TopBar } from "../../../../src/NSE/Windows/Chrome/TopBar";
+import { WindowTitlebarView } from "../../../../src/NSE/Windows/WindowTitlebarView";
 import { MediaCollectionPresenter } from "../../../../src/NSE/MediaPanels/NSEMediaCollectionPresenter";
 import { supplementalThemeCatalogue } from "../theme-additional/supplemental";
 import { additionalThemeCatalogue } from "../theme-additional/catalogue";
@@ -64,13 +62,12 @@ function ApplicationMenu({ open }: { open: boolean }) {
   const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null);
   return <SynCloudOSProvider runtime={runtime}>
     <button ref={setAnchor} type="button">Parity</button>
-    <ApplicationMenu model={menu.model} controller={menu} overlay={{ id: "parity-app-menu", parentResponderId: "parity", placement: "block-end-inline-end" } as never} open={open && anchor !== null} anchor={anchor} title="Parity" onOpenChange={noop} />
+    <NSEApplicationMenu model={menu.model} controller={menu} overlay={{ id: "parity-app-menu", parentResponderId: "parity", placement: "block-end-inline-end" } as never} open={open && anchor !== null} anchor={anchor} title="Parity" onOpenChange={noop} />
   </SynCloudOSProvider>;
 }
 function HostTitlebar({ material, scheme }: { material: "metal" | "cumulus"; scheme: "light" | "dark" }) {
   const runtime = useRuntime(`parity-titlebar-${material}`);
-  const [store] = useState(() => createApplicationMenuStore());
-  return <SynCloudOSProvider runtime={runtime}><ApplicationHostTitlebar title="Documents" iconSrc={null} material={material} scheme={scheme} menuStore={store} menuLabel="Documents"><p>Body</p></ApplicationHostTitlebar></SynCloudOSProvider>;
+  return <SynCloudOSProvider runtime={runtime}><><WindowTitlebarView document={{ title: "Documents", subtitle: "", documentEdited: false }} isKeyWindow material={material} /><p>Body</p></></SynCloudOSProvider>;
 }
 const media = ["Beach", "Forest", "City"].map((name, index) => ({ id: `m${index}`, providerId: "local", name, kind: "image", mimeType: "image/png", thumbnailUrl: "/assets/webspring/Panel.png" }));
 
@@ -80,7 +77,7 @@ const own: ThemePortParitySurface[] = [
   { id: "application-menu-open", render: () => <ApplicationMenu open />, ready: '[data-nse-application-menu]' },
   { id: "application-menu-submenu", render: () => <ApplicationMenu open />, ready: '[data-nse-application-menu]', hoverSelector: '[data-nse-application-menu] [aria-haspopup]' },
   ...(["metal", "cumulus"] as const).map(material => ({ id: `host-titlebar-${material}`, render: (scheme: "light" | "dark") => <HostTitlebar material={material} scheme={scheme} /> })),
-  { id: "topbar-metal-centre", render: () => <TopBar variant="atmoMetal" title="Library" center={<span>Centre</span>} {...({} as Record<string, never>)} /> },
+  { id: "topbar-metal-centre", render: () => <WindowTitlebarView document={{ title: "Library", subtitle: "", documentEdited: false }} material="metal" isKeyWindow titleAction={<span>Centre</span>} /> },
   { id: "dialog-surface", render: () => <DialogSurface title="Dialog"><p>Dialog body</p></DialogSurface> },
   ...(["plain", "soft", "grey", "alpha", "arrow"] as const).map(variant => ({ id: `divider-toggle-${variant}`, render: () => <Divider variant={variant} expanded={false} onToggle={noop} {...({} as Record<string, never>)} /> })),
   { id: "divider-toggle-arrow-expanded", render: () => <Divider variant="arrow" expanded onToggle={noop} {...({} as Record<string, never>)} /> },

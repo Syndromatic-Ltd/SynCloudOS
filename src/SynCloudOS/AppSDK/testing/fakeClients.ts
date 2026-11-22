@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-import type { AppServiceClient, AppServiceResult, AppWindowClient, AppWindowSnapshot } from "../appClientTypes";
+import type { AppServiceClient, AppServiceResult, AppOwnedWindows, AppWindowSnapshot } from "../appClientTypes";
 import { isAuthenticSynWareServiceToken, SynWareServiceAcquisitionError, type SynWareServiceToken } from "../serviceToken";
 
 /** A standalone no-privilege service fake for component tests. It satisfies
@@ -40,7 +40,7 @@ export function createDeniedFakeServiceClient(message = "The fake host did not e
 }
 
 export interface FakeWindowClientControl {
-  readonly client: AppWindowClient;
+  readonly client: AppOwnedWindows;
   setState(state: AppWindowSnapshot["state"]): void;
 }
 
@@ -66,7 +66,7 @@ export function createFakeWindowClient(appId = "test-app", sessionId = "test-ses
     zoom: () => { throw new DOMException("The fake window host exposes no owned windows.", "SecurityError"); },
     setTitle: () => { throw new DOMException("The fake window host exposes no owned windows.", "SecurityError"); },
     close: () => Promise.reject(new DOMException("The fake window host exposes no owned windows.", "SecurityError")),
-  } satisfies AppWindowClient);
+  } satisfies AppOwnedWindows);
   return Object.freeze({
     client,
     setState(state: AppWindowSnapshot["state"]) {

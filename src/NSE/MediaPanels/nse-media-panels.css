@@ -1,5 +1,5 @@
 
-@layer nse.atmo {
+@layer nse.structure {
 @scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
@@ -37,7 +37,7 @@
 .nse-media-grid-thumbnail,
 :where(:scope):is(.nse-media-grid-thumbnail) { inline-size: 100%; block-size: 5rem; object-fit: cover; }
 .nse-media-grid-placeholder,
-:where(:scope):is(.nse-media-grid-placeholder) { display: grid; min-block-size: 5rem; place-items: center; border-radius: 4px; background: rgba(127, 127, 127, 0.14); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.8; }
+:where(:scope):is(.nse-media-grid-placeholder) { display: grid; min-block-size: 5rem; place-items: center; border-radius: 4px; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; }
 .nse-media-grid-name,
 :where(:scope):is(.nse-media-grid-name) { overflow: hidden; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
 .nse-media-panel-preview,

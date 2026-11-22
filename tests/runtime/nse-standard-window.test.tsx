@@ -160,16 +160,6 @@ describe("NSEStandardWindowView", () => {
       expect(block![0]).toMatch(/user-select:\s*none/);
     }
   });
-  it("paints system chrome when customChromeActive is omitted even if chromeMode is custom", () => {
-    const props = standardWindowViewProps({ chromeMode: "custom" });
-    const { container } = render(<StandardWindowView {...props}><p>Content</p></StandardWindowView>);
-    const section = container.querySelector(".nse-window-view");
-    expect(section?.getAttribute("data-window-chrome-mode")).toBe("custom");
-    expect(section?.getAttribute("data-window-custom-chrome-active")).toBe("false");
-    expect(section?.hasAttribute("data-window-chrome-appearance")).toBe(false);
-    expect(section?.querySelector(".nse-window__titlebar")).not.toBeNull();
-  });
-
   it("keeps concrete appearance identity on the surrounding NSE appearance boundary", () => {
     const props = standardWindowViewProps();
     const { container } = render(<StandardWindowView {...props}><p>Content</p></StandardWindowView>);

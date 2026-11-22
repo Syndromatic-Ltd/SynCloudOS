@@ -20,10 +20,16 @@
 
 export { createPreferencePaneRegistry, registerPreferencePane } from "./preferencePaneRegistry";
 export type { PreferencePaneRegistration, PreferencePaneRegistry } from "./preferencePaneRegistry";
-export { definePreferencePane, isPreferencePaneDefinition, resolvePreferencePanes } from "./definePreferencePane";
+export {
+  NSEPreferencePane,
+  capturePreferencePaneClass,
+  isPreferencePaneDescriptor,
+  nseUpdatePreferencePaneState,
+  resolvePreferencePanes,
+} from "./NSEPreferencePane";
 export type {
-  PreferencePaneDefinition,
-  PreferencePaneInput,
+  NSEPreferencePaneClass,
+  PreferencePaneDescriptor,
   PreferencePaneText,
   PreferencePaneViewProps,
-} from "./definePreferencePane";
+} from "./NSEPreferencePane";

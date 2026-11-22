@@ -1,5 +1,5 @@
 
-@layer nse.atmo {
+@layer nse.structure {
 @scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
@@ -25,27 +25,6 @@
    The surface, the backdrop, the actions row and the type colours all come from
    components.css (.nse-control-alert). Only what the About box adds on top lives
    here: the icon-left layout and the legal type scale. */
-
-/* The About box's quieter type steps, in both appearances. */
-.nse-about-dialog,
-:where(:scope):is(.nse-about-dialog),
-:where(:scope).nse-about-dialog {
-  --nse-about-tagline-text: rgba(255, 255, 255, 0.86);
-  --nse-about-version-text: rgba(255, 255, 255, 0.72);
-  --nse-about-legal-text: rgba(255, 255, 255, 0.56);
-  --nse-about-trademark-text: rgba(255, 255, 255, 0.44);
-  --nse-about-icon-shadow: rgba(0, 0, 0, 0.45);
-}
-
-.nse-about-dialog.is-light,
-:where(:scope):is(.nse-about-dialog.is-light),
-:where(:scope).nse-about-dialog.is-light {
-  --nse-about-tagline-text: rgba(24, 35, 50, 0.86);
-  --nse-about-version-text: rgba(24, 35, 50, 0.72);
-  --nse-about-legal-text: rgba(24, 35, 50, 0.76);
-  --nse-about-trademark-text: rgba(24, 35, 50, 0.66);
-  --nse-about-icon-shadow: rgba(0, 0, 0, 0.24);
-}
 
 /* An About box carries far less than an error alert, so the 250px floor the
    error surface needs would leave it half empty. */
@@ -97,9 +76,6 @@
   height: 96px;
   align-self: start;
   object-fit: contain;
-  /* The icon is artwork, not chrome — it keeps its own shadow and must not pick
-     up the alert's engraved text-shadow treatment. */
-  filter: drop-shadow(0 6px 10px var(--nse-about-icon-shadow));
 }
 
 .nse-about-copy,
@@ -122,7 +98,6 @@
 :where(:scope):is(.nse-about-tagline),
 :where(:scope).nse-about-tagline {
   margin: 6px 0 14px;
-  color: var(--nse-about-tagline-text);
   font-size: 15px;
   line-height: 1.4;
 }
@@ -131,7 +106,6 @@
 :where(:scope):is(.nse-about-version),
 :where(:scope).nse-about-version {
   margin: 0 0 14px;
-  color: var(--nse-about-version-text);
   font-size: 13px;
   font-weight: 700;
 }
@@ -142,7 +116,6 @@
 :where(:scope):is(.nse-about-legal),
 :where(:scope).nse-about-legal {
   margin: 0;
-  color: var(--nse-about-legal-text);
   font-size: 11px;
   line-height: 1.45;
   overflow-wrap: anywhere;
@@ -152,7 +125,6 @@
 :where(:scope):is(.nse-about-trademark),
 :where(:scope).nse-about-trademark {
   margin-top: 6px;
-  color: var(--nse-about-trademark-text);
 }
 
 /* A one-button dialog should not stretch that button the full width of the

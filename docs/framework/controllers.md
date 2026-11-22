@@ -1,18 +1,16 @@
 # Controllers
 
-For class view ownership, value bindings, tasks and observation lifetimes, see [class authoring](cocoa-authoring.md).
+NSE separates views from controllers. A view draws and handles input. A controller owns the content, the selection and the editing rules, and publishes immutable snapshots that any number of views can read. This page covers the controllers for collections, trees and preferences, and the navigation view controllers. The view controllers for toolbars and menus are described with their views in the [control catalogue](nse-controls.md). For class view ownership, value bindings, tasks and observation lifetimes, see [class authoring](cocoa-authoring.md).
 
-NSE follows the Cocoa split between views and controllers. A view draws and handles input. A controller owns the content, the selection and the editing rules, and it publishes immutable snapshots that any number of views can read. The controllers here cover collections, trees and preferences. The view controllers for navigation, tabs, toolbars, split views and menus are described with their views in the [control catalogue](nse-controls.md).
+The controllers come from `@syndromatic/syncloudos/nse`, except `NSEPageController` (`@syndromatic/syncloudos/nse/page`) and the `NSEUserDefaults` store (`@syndromatic/syncloudos/foundation`).
 
-All controllers come from `@syndromatic/syncloudos/nse`.
-
-View controllers present retained overlays with `present(viewController, animator)` and dismiss them with `dismiss`. An `NSEViewControllerPresentationAnimator` animates presentation and dismissal after both views mount. Child swaps use `transition(from, to, options, completionHandler?)`; `view.animator()` and outlet animators apply alpha and frame changes in an `NSEAnimationContext` group. See [animation objects](nse/animation.md) for ownership, transition options and reduced motion.
+View controllers present retained overlays with `present(viewController, animator)` and dismiss them with `dismiss`. An `NSEViewControllerPresentationAnimator` animates presentation and dismissal once both views have mounted. To swap children, use `transition(from, to, options, completionHandler?)`; `view.animator()` and outlet animators apply alpha and frame changes in an `NSEAnimationContext` group. See [animation objects](nse/animation.md) for ownership, transition options and reduced motion.
 
 ## Shared behaviour
 
-Every collection controller shares one contract:
+Every collection controller follows the same rules:
 
-- You construct it with a stable `id`, and its owner disposes it when the owner finishes. [Controller lifetimes](#controller-lifetimes) describes the three kinds of owner.
+- You construct it with a stable `id`, and its owner disposes it when the owner goes away. [Controller lifetimes](#controller-lifetimes) describes the kinds of owner.
 - `getSnapshot()` returns the current immutable snapshot, and `subscribe(listener)` reports changes and returns an unsubscribe function. `subscribeChanges(listener)` delivers each bounded change record.
 - Presentation operations such as selection, filtering, sorting and expansion apply immediately.
 - Content changes happen inside an edit transaction, which either commits or discards as a unit.
@@ -37,7 +35,7 @@ export function NoteCount({ controller }: { controller: NSEArrayController<Note,
 }
 ```
 
-`useObserve(controller)` does the same in one line and returns the controller, so a view can read it directly. It works for every controller here, for `NSEObject`s and for application, window and view controllers (see [Observable properties](applications.md#observable-properties)):
+`useObserve(controller)` does the same in one line and returns the controller, so the view can read it directly. It works for every controller here, for any `NSEObject`, and for application, window and view controllers (see [Observable properties](applications.md#observable-properties)):
 
 ```tsx
 import { useObserve, type NSEArrayController } from "@syndromatic/syncloudos/nse";
@@ -50,13 +48,14 @@ export function NoteTitles({ controller }: { controller: NSEArrayController<Note
 
 ## Controller lifetimes
 
-A controller lives exactly as long as its owner. Choose the owner by asking who needs the controller:
+A controller lives as long as its owner. Choose the owner by asking who needs the controller:
 
 | Owner | Create it with | Disposed when | Use it for |
 | --- | --- | --- | --- |
 | The module | `new NSEArrayController(...)` at module scope | Never | Shared, app-wide data that outlives every view, such as a catalogue every window reads. |
 | A component | `useNSEArrayController(options, deps)` or `useNSETreeController(options, deps)` | The component unmounts | Data that belongs to one mounted view, such as the rows of a sheet or a sidebar. |
 | The application session | `new NSEArrayController({ ..., ownerSignal: useSCOS().signal })` | The application session ends | Data several components of one running application share, created once per session. |
+| An application, window or view controller | Construct it in a field initialiser or constructor, or pass `owner: this` | Its owner is disposed | Controllers in a class-based application. See [Applications](applications.md#ownership). |
 
 ### Component-owned controllers
 
@@ -93,13 +92,13 @@ export function AccountList({ accounts }: { accounts: readonly Account[] }) {
 }
 ```
 
-The options are read only when a controller is created. Later renders keep the same controller, so update its content through the controller itself, as `setContent` does above. To replace the controller with a new one built from the current options, change `options.id`, `options.responderId` or an entry of the `deps` array. The previous controller is then disposed.
+The options are read only when the controller is created. Later renders keep the same controller, so update its content through the controller, as `setContent` does above. To replace the controller with one built from the current options, change `options.id`, `options.responderId` or an entry of the `deps` array; the previous controller is then disposed.
 
-Do not build a controller with `useMemo` and dispose it in a `useEffect` cleanup. React StrictMode runs every effect's cleanup and setup a second time while the component stays mounted, so that pattern disposes the controller the component is still showing, and the next click fails with `NSE_CONTROLLER_DISPOSED`. The hooks defer their release by a microtask, which StrictMode's replay cancels, and an unmounted component's controller is disposed with the reason `"owner-unmounted"`.
+Don't build a controller with `useMemo` and dispose it in a `useEffect` cleanup. React StrictMode runs every effect's cleanup and setup a second time while the component stays mounted, so that pattern disposes the controller the component is still showing, and the next click fails with `NSE_CONTROLLER_DISPOSED`. The hooks wait a microtask before releasing, which StrictMode's replay cancels. When the component really unmounts, its controller is disposed with the reason `"owner-unmounted"`.
 
 ### Session-owned controllers
 
-Every controller accepts `ownerSignal?: AbortSignal`. When the signal aborts, the controller disposes itself. Passing the application's `useSCOS().signal` ties the controller to the running application, so a controller the application never disposes is still released when its session ends: the application closes, its bundle is replaced or the runtime shuts down. The controller then records the reason `"application-closed"`. Any other signal records `"owner-signal-aborted"`. A signal that has already aborted is refused at construction with its abort reason.
+Every controller accepts `ownerSignal?: AbortSignal` and disposes itself when the signal aborts. Passing the application's `useSCOS().signal` ties the controller to the running application, so it is released when the session ends (the application closes, its bundle is replaced or the runtime shuts down) even if nothing disposes it explicitly. It then records the reason `"application-closed"`; any other signal records `"owner-signal-aborted"`. Construction fails with the abort reason if the signal has already aborted.
 
 ### Disposal state and errors
 
@@ -116,11 +115,11 @@ Calling an operation on a disposed controller throws `SynCloudOSLifecycleError`,
 | `disposal` | `{ reason, stack? }`; development builds record the stack that disposed the controller |
 | `creationStack`, `ownerStack` | Development builds only: where the controller was created, and the React component stack that created it (or, outside a render, the one that raised the error) |
 
-The message states only what could not run, for example `Cannot call NSEArrayController.select() after disposal.` The code, resource identity and disposal reason are the fields above, and the remedy is the `NSE_CONTROLLER_DISPOSED` catalogue hint; see [error reports](errors.md#error-reports). Data views never let this error escape an event handler: a view whose controller is disposed turns inert, as the [data views guide](data-views.md#controller-lifetime) describes.
+The message says only what couldn't run, for example `Cannot call NSEArrayController.select() after disposal.` The code, resource and disposal reason are in the fields above, and the fix is in the `NSE_CONTROLLER_DISPOSED` catalogue hint; see [error reports](errors.md#error-reports). Data views never let this error escape an event handler: a view whose controller is disposed stops responding, as the [data views guide](data-views.md#controller-lifetime) describes.
 
 ### Other resources a component owns
 
-`useNSEDeferredDisposal(resource, scheduler?)` disposes any `{ dispose(): void }` value when its component unmounts, with the same StrictMode-safe deferral as the controller hooks. Use it for resources that have no managed hook, such as a navigation controller or a window surface bridge built with `useMemo`. The default scheduler releases the resource in a microtask. Pass an `NSEDisposalScheduler` only to release it on a different clock, such as a test's timers.
+`useNSEDeferredDisposal(resource, scheduler?)` disposes any `{ dispose(): void }` value when its component unmounts, with the same StrictMode-safe delay as the controller hooks. Use it for resources that have no hook of their own, such as a navigation controller or a window surface bridge built with `useMemo`. The default scheduler releases the resource in a microtask; pass an `NSEDisposalScheduler` only to release it on another clock, such as a test's timers.
 
 ## Array controller
 
@@ -158,17 +157,17 @@ The snapshot separates `content` (the source), `arranged` (filtered and sorted) 
 | --- | --- |
 | `setContent(items)` | Replaces the content. |
 | `select(ids)`, `toggleSelection(id)`, `extendSelection(id)` | Selection by identity, with anchor and focus tracking for range extension. |
-| `selectNext()`, `selectPrevious()` | Keyboard style navigation. |
+| `selectNext()`, `selectPrevious()` | Keyboard-style navigation. |
 | `insert(item, { beforeId, afterId, select })` | Adds an item at a position. |
 | `remove(ids)` | Removes items. When the selection is required, the nearest survivor becomes selected. |
 | `update(id, updater)` | Replaces an item with the updater's result. |
 | `beginEditing`, `commitEditing`, `discardEditing` | The edit transaction. |
 
-The selection options are `mode` (`"single"` or `"multiple"`), `allowsEmpty`, `preservesSelection` to keep filtered out items selected, and `selectsInsertedObjects`.
+The selection options are `mode` (`"single"` or `"multiple"`), `allowsEmpty`, `preservesSelection` (keep items selected when a filter hides them) and `selectsInsertedObjects`.
 
 ## Tree controller
 
-`NSETreeController` does the same for hierarchies. You describe the shape with `getId`, `getChildren` and `withChildren`, and the controller manages expansion, selection and edits.
+`NSETreeController` does the same for hierarchies. Describe the shape with `getId`, `getChildren` and `withChildren`, and the controller manages expansion, selection and edits.
 
 ```ts
 import { NSETreeController } from "@syndromatic/syncloudos/nse";
@@ -190,7 +189,7 @@ const folders = new NSETreeController<Folder, string>({
 folders.expand("root");
 ```
 
-Filtering keeps an ancestor visible when a descendant matches, and sibling sorting is stable. `move(ids, destination)` refuses a destination inside the moved subtree. Supply `loadChildren(item, signal)` to load children on demand. Each load owns an `AbortSignal`, stale completions are ignored, and disposal aborts everything outstanding. The controller validates hierarchies iteratively up to a depth of 512 and reports a structured error for cycles or excess depth.
+Filtering keeps an ancestor visible when a descendant matches, and sorting among siblings is stable. `move(ids, destination)` refuses a destination inside the subtree being moved. Supply `loadChildren(item, signal)` to load children on demand; each load gets its own `AbortSignal`, stale results are ignored, and disposal aborts every outstanding load. The controller checks hierarchies up to a depth of 512 and reports a structured error for a cycle or anything deeper.
 
 ## Edit transactions
 
@@ -211,11 +210,12 @@ export function removeNotes(controller: NSEArrayController<{ id: string }, strin
 
 ## User defaults controller
 
-`NSEUserDefaultsController` (`NSUserDefaultsController`) keeps typed, versioned settings in an `NSEUserDefaults` (`NSUserDefaults`). `new NSEUserDefaults(SCOS.preferences)` keeps them with the application's preferences; `new NSEUserDefaults()` keeps them in memory only.
+`NSEUserDefaultsController` keeps typed, versioned settings in an `NSEUserDefaults` store. `new NSEUserDefaults(SCOS.preferences)` stores them with the application's preferences; `new NSEUserDefaults()` keeps them in memory only.
 
 ```ts
 import { SCOS } from "@syndromatic/syncloudos";
-import { NSEUserDefaults, NSEUserDefaultsController } from "@syndromatic/syncloudos/nse";
+import { NSEUserDefaults } from "@syndromatic/syncloudos/foundation";
+import { NSEUserDefaultsController } from "@syndromatic/syncloudos/nse";
 
 interface EditorPrefs {
   theme: string;
@@ -241,37 +241,37 @@ const preferences = new NSEUserDefaultsController<EditorPrefs>({
 preferences.set("theme", "dark");
 ```
 
-The schema gives each field a default and a validator, plus a version and a contiguous chain of migrations. On load, the controller repairs invalid fields and writes migrated data forward. A record written by a newer schema version is left untouched, so an older build never overwrites data it cannot read. Outside an edit, `set` and `reset` write immediately. Inside an edit they change a draft, and the commit writes once and can register one undo action. The store writes synchronously by contract. `NSEUserDefaults` on its own reads and writes single values with `object(forKey)`, `set(value, forKey)` and `removeObject(forKey)`.
+The schema gives each field a default and a validator, plus a version and an unbroken chain of migrations. On load, the controller repairs invalid fields and writes migrated data back. A record written by a newer schema version is left alone, so an older build never overwrites data it can't read. Outside an edit, `set` and `reset` write immediately. Inside an edit they change a draft, and the commit writes once and can register one undo action. Store writes are synchronous. On its own, `NSEUserDefaults` reads and writes single values with `object(forKey)`, `set(value, forKey)` and `removeObject(forKey)`.
 
-Applications reach per-application settings through `useSCOS().persistence`, which needs no controller. Use the user defaults controller when you want schemas, migrations and undoable settings panes.
+For simple settings, `useSCOS().persistence` (or the `@preference` decorator) needs no controller. Use the user defaults controller when you want schemas, migrations and undoable settings panes.
+
+## Navigation view controllers
+
+`NSETabViewController` owns `NSETabViewItem`s and their child view controllers. Select with `selectedTabViewItemIndex` or `selectTabViewItem(identifier)`, and override `shouldSelect`, `willSelect` and `didSelect` to take part. `segmentedControlOnTop`, `segmentedControlOnBottom`, `toolbar` and `unspecified` are fixed tab styles. `sidebarAdaptable` chooses a sidebar, bottom tabs or a rail (in short landscape layouts) from the trait collection and the space the view actually has. The standard About window uses fixed bottom tabs. Restoration stores the selected identifier, so renaming or translating a tab doesn't affect it.
+
+`NSESplitViewController` owns `NSESplitViewItem`s (`behavior`, `canCollapse`, `isCollapsed`, thickness constraints and holding priority). At a compact size it shows one item at a time: `compactItem` chooses which, and `showDetail(viewController)` moves to an existing detail. The theme draws the Back control, and going back returns focus to where it started. A subclass can override its static view for an app-specific look while the controller keeps managing traits, geometry and the compact selection.
+
+`NSEPageController` handles page navigation; an app can combine it with a split controller, for example a page history of folders and lists beside a note detail.
+
+### Page controller
+
+Import `NSEPageController` and its options, snapshot, transition-style and spine-location types from `@syndromatic/syncloudos/nse/page`. Place it with `<pages.view />`. The controller owns `arrangedObjects`, `selectedIndex`, `navigateForwardToObject`, `navigateBack` and `navigateForward`.
+
+`transitionStyle` is `"stackHistory"` (the default), `"horizontalStrip"` or `"pageCurl"`. `stackHistory` keeps a drill-in history: navigating forward to an object drops the history after the selected page and appends the object. `horizontalStrip` slides between adjacent pages. `pageCurl` prints the selected child controller's view on a turning sheet and reveals the next or previous page underneath; a drag from the leading or trailing edge, a horizontal swipe, or `navigateForward` and `navigateBack` turn the page.
+
+For `pageCurl`, `spineLocation: "min"` (the default) shows one page and `"mid"` shows two-page spreads.
+
+Override `identifierForObject`, `viewControllerForIdentifier` and `prepareViewController` to supply pages, and create children with `this.addChild(...)`. By default `prepareViewController` sets the child's `representedObject`. In `stackHistory` and `horizontalStrip`, pages with the same identifier reuse one child controller. In `pageCurl`, an identifier names the kind of page, and each arranged object keeps its own child, because several printed pages may need their `representedObject` and live view at once. Each live child view is mounted once; the repeated paper faces are inert copies.
+
+The observable snapshot has `selectedIndex`, `count`, `turnProgress` (`0..1`) and `turnDirection` (`"forward"`, `"backward"` or `null`). An app can observe progress to drive its own scene, such as a book opening and closing around the pages. In `pageCurl`, `didTransitionToObject(object)` runs only after a curl completes. A cancelled turn leaves the selected page unchanged and doesn't call it.
+
+Set `selectedIndex` to jump to a distant page without a turn. In curl style, `navigateForwardToObject` accepts only the next arranged page (or spread) and rejects a distant or unarranged object. Navigation before the view loads completes immediately, since there's no sheet to animate.
+
+The curl renderer, its hook, geometry, presets and leaf types are internal, and the standalone `NSEPage` component and `NSE.Page` facade have been removed. The controller draws the curl with WebGL, falls back to CSS, and crossfades under reduced motion. See the [page implementation notes](../../src/NSE/Page/README.md) for the rendering model.
+
+See [source-list windows](nse/source-list-chrome.md) for outline groups, the host's rail seam and window bottom-bar accessories.
 
 ## Where to go next
 
 - [Structured data views](data-views.md) bind these controllers to tables, outlines, collections and browsers.
 - [Commands, responders and undo](commands-responders-undo.md) explains the undo histories that transactions register with.
-
-## Navigation view controllers
-
-`NSETabViewController` owns `NSETabViewItem`s and their child view controllers. Select through `selectedTabViewItemIndex` or `selectTabViewItem(identifier)`; override `shouldSelect`, `willSelect` and `didSelect`. `segmentedControlOnTop`, `segmentedControlOnBottom`, `toolbar` and `unspecified` are fixed AppKit styles. The NSE extension `sidebarAdaptable` chooses sidebar, bottom tabs or a short-landscape rail from the trait collection and the view's measured allocation. About deliberately uses fixed bottom tabs. Restoration captures the selected identifier, independently of localised labels.
-
-`NSESplitViewController` owns `NSESplitViewItem`s (`behavior`, `canCollapse`, `isCollapsed`, thickness constraints and holding priority). Compact content shows one item at a time; the approved NSE extension `compactItem` selects it, and `showDetail(viewController)` moves to an existing detail. The theme draws Back and restores initiating focus. A split subclass may override its static view for app-specific appearance while retaining controller-owned trait, geometry and compact selection.
-
-`NSEPageController` from `/nse/page` owns page navigation. Journal composes its folder/list history with the split controller's note detail.
-
-### Page controller
-
-Import `NSEPageController` and its options, snapshot, transition-style and spine-location types from `@syndromatic/syncloudos/nse/page`. Place the controller with `<pages.view />`. The controller owns `arrangedObjects`, `selectedIndex`, `navigateForwardToObject`, `navigateBack` and `navigateForward`.
-
-`transitionStyle` accepts `"stackHistory"` (the default), `"horizontalStrip"` or `"pageCurl"`. `stackHistory` keeps drill-in history: navigating forward to an object discards the history after the selected page and appends the object. `horizontalStrip` slides between adjacent pages. `pageCurl` prints the selected child controller's view on the turning sheet and reveals the next or previous page underneath. A trailing- or leading-edge drag, a horizontal swipe, or `navigateForward`/`navigateBack` turns it.
-
-For `pageCurl`, `spineLocation: "min"` (the default) displays one page; `"mid"` displays two-page spreads. `pageCurl` and `spineLocation` deliberately use the names of `UIPageViewController.TransitionStyle.pageCurl` and `UIPageViewController.SpineLocation`. These are owner-approved naming exceptions to the AppKit shape (decision 8, 2026-11-07); the owning class remains `NSEPageController` (`NSPageController`).
-
-Override `identifierForObject`, `viewControllerForIdentifier` and `prepareViewController`, corresponding to `NSPageControllerDelegate`. Make children with `this.addChild(...)`. `prepareViewController` assigns the child's `representedObject` by default. In `stackHistory` and `horizontalStrip`, pages with the same identifier reuse a child controller. In `pageCurl`, an identifier names the page kind, while each arranged object retains its own child: several printed pages may need their `representedObject` and live view at the same time. Each live child view is mounted once; repeated decorative paper faces are inert replicas.
-
-The observable snapshot has `selectedIndex`, `count`, `turnProgress` (`0..1`) and `turnDirection` (`"forward"`, `"backward"` or `null`). An app such as Portfolio observes progress for its own book scene; opening and closing that scene remain app behaviour. In `pageCurl`, `didTransitionToObject(object)` fires only after a curl completes successfully. Cancellation leaves the selected page unchanged and sends no completion delegate call.
-
-Use `selectedIndex` to select a distant page without a turn. In curl style `navigateForwardToObject` accepts the next arranged page (or next spread); it rejects a distant or unarranged object. Navigation before the view loads completes immediately because there is no visible sheet to animate.
-
-The curl renderer, hook, geometry, presets and leaf types are internal. The standalone `NSEPage` component, its handle and the `NSE.Page` facade have been removed. The controller preserves the existing WebGL curl, CSS fallback, reduced-motion crossfade and inert decorative faces. See the [page implementation notes](../../src/NSE/Page/README.md) for the rendering model.
-
-See [source-list windows](nse/source-list-chrome.md) for outline groups, the host's rail seam and window bottom-bar accessories.

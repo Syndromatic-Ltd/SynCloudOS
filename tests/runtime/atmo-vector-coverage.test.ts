@@ -62,9 +62,10 @@ describe("Atmo vector coverage", () => {
     expect(generatedBlock).toContain("padding-inline-start: var(--nse-tab-chrome-start-width);");
     expect(generatedBlock).toContain("padding-inline-end: var(--nse-tab-chrome-end-width);");
     expect(generatedBlock).not.toMatch(/padding-(?:left|right):\s*var\(--nse-tab-chrome-(?:start|end)-width\)/);
-    expect(generatedBlock).toContain("--nse-tab-chrome-outer-cap: 36px;");
-    expect(generatedBlock).toContain("--nse-tab-chrome-join: 1.714286px;");
-    expect(generatedBlock).toContain("--nse-tab-chrome-elevation: 0 16px 20px rgba(0, 0, 0, 0.48);");
+    // The caps scale with the bar: half its height, and the 72px source join in proportion.
+    expect(generatedBlock).toContain("--nse-tab-chrome-outer-cap: calc(var(--nse-tab-chrome-cap-diameter, 72px) / 2);");
+    expect(generatedBlock).toContain("--nse-tab-chrome-join: calc(var(--nse-tab-chrome-cap-diameter, 72px) * 1.714286 / 72);");
+    expect(generatedBlock).toContain("--nse-tab-chrome-elevation: 0 12px 16px rgba(0, 0, 0, 0.48);");
     expect(generatedBlock).toContain("-webkit-backdrop-filter: blur(6px) saturate(1.25);");
     expect(generatedBlock).toContain("backdrop-filter: blur(6px) saturate(1.25);");
     for (const state of ["up", "down", "sel", "seldown", "dis"]) {
@@ -191,11 +192,15 @@ describe("Atmo vector coverage", () => {
     ]) expect(rule).toContain(declaration);
   });
   it("keeps blur and deep elevation on the inert shared layer with accessibility fallbacks", () => {
-    const navigationCss = readFileSync(path.join(process.cwd(), "src/NSE/Navigation/nse-navigation.css"), "utf8");
+    const navigationPaint = readFileSync(path.join(process.cwd(), "src/Themes/Atmo.scostheme/Contents/Resources/atmo.controls.css"), "utf8");
+    const target = '[data-nse-part="header"]:where([data-nse-control="tab-view"][data-nse-style="navigation"] > [data-nse-part="viewport"] > *)::before';
+    const paintFor = (query: string) => navigationPaint.split(`@media (${query}) {`).slice(1)
+      .map(block => block.slice(0, block.indexOf("\n}"))).find(block => block.includes(target));
 
-    expect(navigationCss).toMatch(/@media \(prefers-reduced-transparency: reduce\)[\s\S]*?\.nse-tab-bar::before[\s\S]*?-webkit-backdrop-filter:\s*none[\s\S]*?backdrop-filter:\s*none/u);
-    expect(navigationCss).toMatch(/@media \(forced-colors: active\)[\s\S]*?\.nse-tab-bar::before[\s\S]*?box-shadow:\s*none/u);
-    expect(navigationCss).toMatch(/@media \(forced-colors: active\)[\s\S]*?\.nse-tab-bar::before[\s\S]*?backdrop-filter:\s*none/u);
+    expect(paintFor("prefers-reduced-transparency: reduce")).toContain("-webkit-backdrop-filter: none !important");
+    expect(paintFor("prefers-reduced-transparency: reduce")).toContain("backdrop-filter: none !important");
+    expect(paintFor("forced-colors: active")).toContain("box-shadow: none !important");
+    expect(paintFor("forced-colors: active")).toContain("backdrop-filter: none !important");
 
   });
 

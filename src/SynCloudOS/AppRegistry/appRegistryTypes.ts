@@ -27,38 +27,27 @@ import type {
   SynCloudOSAppInfoValidationReport
 } from "../AppInfo/appInfoTypes";
 import type {
-  SynWareFrameBackgroundManifest,
   SynWareLocalisedText,
-  SynCloudOSAppFrameSmoothSurfaceCurve,
-  SynCloudOSAppFrameSmoothSurfaceManifest,
-  SynCloudOSAppFrameSmoothSurfacePhysicality,
+  WindowSmoothSurfaceCurve,
+  WindowSmoothSurfaceConfiguration,
+  WindowSmoothSurfacePhysicality,
 } from "../AppSDK/manifest/manifestTypes";
 
 export type {
-  SynCloudOSAppFrameSmoothSurfaceCurve,
-  SynCloudOSAppFrameSmoothSurfaceManifest,
-  SynCloudOSAppFrameSmoothSurfacePhysicality,
+  WindowSmoothSurfaceCurve,
+  WindowSmoothSurfaceConfiguration,
+  WindowSmoothSurfacePhysicality,
 } from "../AppSDK/manifest/manifestTypes";
 
 export type SynCloudOSAppType = "internal" | "external" | "system";
-export type SynCloudOSAppPresentation = "appView" | "windowedView" | "systemSheet" | "backgroundService";
-/** The right-slot control with its icon resolved to a URL. `"auto"` is a gear, `"userInfo"` a person, `"none"` nothing. */
-export type SynCloudOSAppFrameRightSlot = "auto" | "userInfo" | "none" | {
-  readonly icon: string;
-  readonly label: SynWareLocalisedText;
-};
-export type SynCloudOSAppFrameBackground = SynWareFrameBackgroundManifest;
-export type SynCloudOSAppFrameMaterial = "standard" | "metal";
-export type SynCloudOSAppFrameTopBar = "standard" | "custom" | "none";
-export type SynCloudOSWindowChrome = "system" | "custom" | "frameless";
-
+export type SynCloudOSAppPresentation = "stage" | "window" | "systemSheet" | "backgroundService";
 export function normalizeSynCloudOSAppPresentation(
   presentation: unknown,
-  fallback: SynCloudOSAppPresentation = "appView"
+  fallback: SynCloudOSAppPresentation = "stage"
 ): SynCloudOSAppPresentation {
   if (
-    presentation === "appView" ||
-    presentation === "windowedView" ||
+    presentation === "stage" ||
+    presentation === "window" ||
     presentation === "systemSheet" ||
     presentation === "backgroundService"
   ) {
@@ -87,13 +76,11 @@ export interface SynCloudOSStagePoint {
 export interface SynCloudOSAppWebspringManifest {
   visible: boolean;
   order: number;
-  dialPosition?: number;
   featured?: boolean;
   defaultSelected?: boolean;
   accent?: string;
   stagePosition?: SynCloudOSStagePoint;
   indicatorPosition?: SynCloudOSStagePoint;
-  selectorAngle?: number;
   labelPosition?: SynCloudOSStagePoint;
   labelAsset?: string;
 }
@@ -104,10 +91,9 @@ export interface SynCloudOSAppWindowManifest {
   defaultHeight: number;
   minWidth: number;
   minHeight: number;
-  chrome: SynCloudOSWindowChrome;
-  smoothSurface: SynCloudOSAppFrameSmoothSurfaceManifest;
+  smoothSurface: WindowSmoothSurfaceConfiguration;
   resizable: boolean;
-  /** Canonical NSE window role used by windowedView presentations. */
+  /** Canonical NSE window role used by window presentations. */
   role: Extract<WindowRole, "standard" | "panel" | "hud">;
   defaultBounds: WindowBounds;
   minimumSize: { readonly width: number; readonly height: number };
@@ -122,33 +108,8 @@ export interface SynCloudOSAppWindowManifest {
  * The app supplies only sidebar + main content via `the source-list split view`; it never re-implements the
  * bar, the seam, the resizer, or QuickSwitch.
  */
-export interface SynCloudOSAppFrameSourceList {
-  /** Rail wordmark. Defaults to the app's short name (resolved through the locale layer) so an app
-   *  that already declares its identity does not restate it. Override only when the rail label must
-   *  differ from the app name. */
-  railLabel?: string;
-  /** Resizable sidebar lower bound (px). Default 208. */
-  minWidth?: number;
-  /** Resizable sidebar upper bound (px). Default 460. */
-  maxWidth?: number;
-  /** Responsive default sidebar width (px). Default 264. Clamped into `[minWidth, maxWidth]`. */
-  defaultWidth?: number;
-}
-
-export interface SynCloudOSAppFrameManifest {
-  /** Chrome skin. Drives the standard top bar's look. `metal` is light/dark-aware. */
-  material: SynCloudOSAppFrameMaterial;
-  /** Top-bar behaviour. `standard` ⟹ system chrome, `custom` ⟹ app-owned chrome (may draw no bar), `none` ⟹ no bar + runtime return. */
-  topBar: SynCloudOSAppFrameTopBar;
-  /** Host launch/return motion, or motion completed by the application's content. */
+export interface SynCloudOSPresentationMotionManifest {
   presentationMotion?: "host" | "content";
-  /** The standard bar's right-hand control. Honoured only when `topBar:"standard"`. */
-  rightSlot: SynCloudOSAppFrameRightSlot;
-  /** What fills the body behind the content. */
-  background: SynCloudOSAppFrameBackground;
-  smoothSurface: SynCloudOSAppFrameSmoothSurfaceManifest;
-  /** System-owned source-list rail. Honoured only when `topBar:"standard"`; otherwise dropped. */
-  sourceList?: SynCloudOSAppFrameSourceList;
 }
 
 export interface SynCloudOSAppLifecycleManifest {
@@ -170,10 +131,6 @@ export interface SynCloudOSAppMenuPreferencesContribution {
   readonly label?: string;
 }
 
-export interface SynCloudOSAppMenuManifest {
-  readonly trigger?: "content";
-  readonly preferences?: SynCloudOSAppMenuPreferencesContribution;
-}
 
 export interface SynCloudOSAppSeoManifest {
   title: string;
@@ -230,10 +187,9 @@ export interface SynCloudOSAppManifest {
   icon: SynCloudOSAppIconManifest;
   webspring: SynCloudOSAppWebspringManifest;
   window: SynCloudOSAppWindowManifest;
-  frame?: Partial<SynCloudOSAppFrameManifest>;
+  frame?: Partial<SynCloudOSPresentationMotionManifest>;
   lifecycle: SynCloudOSAppLifecycleManifest;
   notifications: SynCloudOSAppNotificationManifest;
-  applicationMenu?: SynCloudOSAppMenuManifest;
   seo: SynCloudOSAppSeoManifest;
   about: SynCloudOSAppAboutManifest;
   policy?: SynCloudOSAppAccessPolicy;

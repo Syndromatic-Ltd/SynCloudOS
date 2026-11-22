@@ -22,7 +22,7 @@
  */
 
 /* App-facing body for a system-owned source-list window: a resizable split above a seam'd metal
-   status bar. The top bar + seam are drawn by ApplicationStageView; this is the body. */
+   status bar. The top bar + seam are drawn by WSStageWindowHost; this is the body. */
 
 .nse-source-list-scene,
 :where(:scope):is(.nse-source-list-scene) {

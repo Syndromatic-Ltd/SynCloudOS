@@ -78,6 +78,95 @@ export function sampleSpring(
   );
 }
 
+/** Core Animation's perceptual spring as mass 1, stiffness and damping. Bounce 0 is critical; negative bounce is overdamped. */
+export function springParameters(perceptualDuration: number, bounce: number): Readonly<{ mass: number; stiffness: number; damping: number }> {
+  const stiffness = (2 * Math.PI / perceptualDuration) ** 2;
+  const damping = bounce >= 0
+    ? 4 * Math.PI * (1 - bounce) / perceptualDuration
+    : 4 * Math.PI / ((1 + bounce) * perceptualDuration);
+  return Object.freeze({ mass: 1, stiffness, damping });
+}
+
+const settledDisplacement = 1e-4, settledVelocity = 1e-2;
+
+/** First time after which (p + q·t)·e^(−rate·t) stays below `limit`, found by bisection past the envelope's peak. */
+function envelopeTime(p: number, q: number, rate: number, limit: number): number {
+  const envelope = (t: number) => (p + q * t) * Math.exp(-rate * t);
+  let low = q > 0 ? Math.max(0, 1 / rate - p / q) : 0;
+  if (envelope(low) <= limit) return low;
+  let high = low + 1 / rate;
+  while (envelope(high) > limit) high = low + 2 * (high - low);
+  for (let i = 0; i < 60; i++) {
+    const middle = (low + high) / 2;
+    if (envelope(middle) > limit) low = middle; else high = middle;
+  }
+  return high;
+}
+
+/** Seconds until a unit spring step stays within 1e-4 of rest and moves slower than 1e-2 per second. */
+export function springSettlingDuration(mass: number, stiffness: number, damping: number, initialVelocity = 0): number {
+  const omega = Math.sqrt(stiffness / mass),
+    decay = damping / (2 * mass),
+    ratio = decay / omega;
+  if (ratio < 1 - 1e-8) {
+    const frequency = Math.sqrt(omega * omega - decay * decay),
+      b = (decay - initialVelocity) / frequency,
+      position = Math.hypot(1, b),
+      velocity = Math.hypot(initialVelocity, decay * b + frequency);
+    return Math.max(Math.log(position / settledDisplacement), Math.log(velocity / settledVelocity), 0) / decay;
+  }
+  if (ratio > 1 + 1e-8) {
+    const root = Math.sqrt(decay * decay - omega * omega),
+      r1 = -decay + root,
+      r2 = -decay - root,
+      a = (initialVelocity + r2) / (r1 - r2),
+      b = -1 - a,
+      position = Math.abs(a) + Math.abs(b),
+      velocity = Math.abs(a * r1) + Math.abs(b * r2);
+    return Math.max(Math.log(position / settledDisplacement), Math.log(velocity / settledVelocity), 0) / -r1;
+  }
+  const c = Math.abs(initialVelocity - omega);
+  return Math.max(
+    envelopeTime(1, c, omega, settledDisplacement),
+    envelopeTime(Math.abs(initialVelocity), omega * c, omega, settledVelocity),
+  );
+}
+
+/** Time derivative of `sampleSpring`, in progress units per second. */
+export function sampleSpringVelocity(
+  seconds: number,
+  mass: number,
+  stiffness: number,
+  damping: number,
+  initialVelocity = 0,
+): number {
+  if (seconds <= 0) return initialVelocity;
+  const omega = Math.sqrt(stiffness / mass),
+    decay = damping / (2 * mass),
+    ratio = decay / omega;
+  if (ratio < 1 - 1e-8) {
+    const frequency = Math.sqrt(omega * omega - decay * decay),
+      b = (decay - initialVelocity) / frequency;
+    return (
+      Math.exp(-decay * seconds) *
+      (initialVelocity * Math.cos(frequency * seconds) +
+        (decay * b + frequency) * Math.sin(frequency * seconds))
+    );
+  }
+  if (ratio > 1 + 1e-8) {
+    const root = Math.sqrt(decay * decay - omega * omega),
+      r1 = -decay + root,
+      r2 = -decay - root,
+      a = (initialVelocity + r2) / (r1 - r2),
+      b = -1 - a;
+    return a * r1 * Math.exp(r1 * seconds) + b * r2 * Math.exp(r2 * seconds);
+  }
+  return (
+    (initialVelocity - omega * (initialVelocity - omega) * seconds) *
+    Math.exp(-omega * seconds)
+  );
+}
+
 export class AFXTimingFunction {
   readonly value: AFXAnimationTiming;
   constructor(value: AFXAnimationTiming = "ease") {

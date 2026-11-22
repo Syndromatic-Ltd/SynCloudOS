@@ -3,8 +3,7 @@ import { createSynCloudOS } from "../../../../src/SynCloudOS/Runtime/createSynCl
 import { createBrowserRuntimeEnvironment } from "../../../../src/SynCloudOS/PlatformAdapters/BrowserRuntimeEnvironment";
 import { createSynWare, createSynWareBundle } from "../../../../src/SynCloudOS/AppSDK/createSynWare";
 import { SynCloudOSProvider } from "../../../../src/SynCloudOSReact";
-import { defineWebspring } from "../../../../src/Webspring/public";
-import { WebspringBoardView } from "../../../../src/Webspring/Contents/Views/WebspringBoardView/WebspringBoardView";
+import { createWebspring } from "../../../../src/Webspring/public";
 import { WebspringHost } from "../../../../src/Webspring/WebspringHost";
 import { NotificationCentrePresenter } from "../../../../src/Webspring/NotificationCentrePresenter";
 import { StandardWindowView } from "../../../../src/NSE/Windows/StandardWindowView";
@@ -17,13 +16,10 @@ import type { NSEWindowToolbarStyle } from "../../../../src/NSE/Application/NSEW
 import type { ThemeBaselineSurface } from "./catalogue";
 import "../../../../src/Webspring/WebspringHost.css";
 
-const shell = defineWebspring({
-  manifest: { schemaVersion: 1, bundleIdentifier: "com.example.theme-baseline.shell", version: "1.0.0", displayName: "Atmo baseline",
-    webspringShell: { views: [{ id: "board", presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
-      defaults: { desktop: "board", tablet: "board", mobile: "board" }, homeRoute: "/",
-      branding: { name: { key: "baseline.name", fallback: "SynCloudOS" } },
-      folders: { editable: true, initial: [{ id: "folder.tools", title: { key: "tools", fallback: "Tools" }, order: 1, apps: ["com.example.theme-baseline.pictures", "com.example.theme-baseline.music"] }] } } },
-  components: { board: WebspringBoardView },
+const shell = createWebspring({
+  info: { bundleIdentifier: "com.example.theme-baseline.shell", version: "1.0.0", displayName: "Atmo baseline",
+    branding: { name: { key: "baseline.name", fallback: "SynCloudOS" } },
+    folders: { editable: true, initial: [{ id: "folder.tools", title: { key: "tools", fallback: "Tools" }, order: 1, apps: ["com.example.theme-baseline.pictures", "com.example.theme-baseline.music"] }] } },
 });
 
 export function SystemSurface({ kind }: { kind: "board" | "notifications" | "notification-centre" }) {
@@ -55,7 +51,7 @@ function WindowSurface({ chrome, isKey, toolbarStyle }: { chrome: "standard" | "
     role: chrome === "hud" ? "hud" : "standard", style: ["titled", "closable", "minimisable", "zoomable", "resizable"], title: "Documents",
     content: { rendererId: "baseline", parameters: {} }, bounds: { x: 0, y: 0, width: 600, height: 280 }, minimumSize: { width: 200, height: 150 }, maximumSize: null,
     level: chrome === "hud" ? "floating" : "normal", parentWindowControllerId: null, anchor: null, pinned: false, state: "open", isKey, isMain: isKey,
-    zIndex: 1, mobilePolicy: "fullscreen", restorationKey: null, chromeMode: "system", smoothSurface: "off",
+    zIndex: 1, mobilePolicy: "fullscreen", restorationKey: null, smoothSurface: "off",
   };
   const View = chrome === "hud" ? HUDWindowView : StandardWindowView;
   return <div style={{ position: "relative", width: 600, height: 280 }}><NSEAppearanceProvider theme={atmoTheme} chrome={chrome} colourScheme={scheme}>

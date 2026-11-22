@@ -35,15 +35,13 @@ const views = { standard: StandardWindowView, panel: PanelView, sheet: SheetView
 
 interface WindowSpecimenOptions {
   readonly role: WindowRole;
-  readonly chromeMode?: WindowRecord["chromeMode"];
-  readonly customChromeActive?: boolean;
   readonly isKey?: boolean;
   readonly dirty?: boolean;
   readonly edge?: WindowAnchor["edge"];
   readonly alignment?: WindowAnchor["alignment"];
 }
 
-function WindowSpecimen({ role, chromeMode = "system", customChromeActive = false, isKey = true, dirty = false, edge = "block-end", alignment = "center" }: WindowSpecimenOptions) {
+function WindowSpecimen({ role, isKey = true, dirty = false, edge = "block-end", alignment = "center" }: WindowSpecimenOptions) {
   const record: WindowRecord = {
     id: `contract-${role}`, runtimeId: "contract" as WindowRecord["runtimeId"], workspaceId: "contract", applicationId: null, applicationSessionId: null,
     documentId: null, documentAssociationRole: null, representedDocument: null, toolbar: null,
@@ -54,11 +52,11 @@ function WindowSpecimen({ role, chromeMode = "system", customChromeActive = fals
     anchor: role === "popover" ? { id: "contract-anchor", rect: { x: 200, y: 30, width: 44, height: 44 }, edge, alignment, offset: 8 } : null,
     pinned: false, state: "open", isKey, isMain: isKey, zIndex: 1,
     mobilePolicy: role === "popover" ? "popover-to-sheet" : role === "panel" || role === "hud" || role === "sheet" ? "sheet" : "fullscreen",
-    restorationKey: null, chromeMode, smoothSurface: "off",
+    restorationKey: null, smoothSurface: "off",
   } as WindowRecord;
   const View = views[role];
   return <div style={{ position: "relative", width: 480, height: 240 }}>
-    <View record={record} presentation={{ kind: "desktop-window", visible: true, bounds: record.bounds, safeAreaInsets: { blockStart: 0, inlineEnd: 0, blockEnd: 0, inlineStart: 0 }, movable: true, resizable: record.style.includes("resizable"), titleBarVisible: record.style.includes("titled") }} blocked={false} dirty={dirty} customChromeActive={customChromeActive} dispatchCommand={async () => undefined}><p>Window content</p></View>
+    <View record={record} presentation={{ kind: "desktop-window", visible: true, bounds: record.bounds, safeAreaInsets: { blockStart: 0, inlineEnd: 0, blockEnd: 0, inlineStart: 0 }, movable: true, resizable: record.style.includes("resizable"), titleBarVisible: record.style.includes("titled") }} blocked={false} dirty={dirty} dispatchCommand={async () => undefined}><p>Window content</p></View>
   </div>;
 }
 
@@ -68,8 +66,8 @@ const alignments: readonly WindowAnchor["alignment"][] = ["start", "center", "en
 export const windowSpecimens: readonly { id: string; render: () => ReactNode }[] = [
   ...(["standard", "panel", "sheet", "modal", "hud", "borderless"] as const).map(role => ({ id: `window-role-${role}`, render: () => <WindowSpecimen role={role} /> })),
   ...edges.flatMap(edge => alignments.map(alignment => ({ id: `window-popover-${edge}-${alignment}`, render: () => <WindowSpecimen role="popover" edge={edge} alignment={alignment} /> }))),
-  { id: "window-frameless", render: () => <WindowSpecimen role="standard" chromeMode="frameless" /> },
-  { id: "window-custom-chrome", render: () => <WindowSpecimen role="standard" chromeMode="custom" customChromeActive /> },
+  { id: "window-frameless", render: () => <WindowSpecimen role="borderless" /> },
+  { id: "window-custom-chrome", render: () => <WindowSpecimen role="standard" /> },
   { id: "window-edited-key", render: () => <WindowSpecimen role="standard" dirty /> },
   { id: "window-edited-inactive", render: () => <WindowSpecimen role="standard" dirty isKey={false} /> },
 ];

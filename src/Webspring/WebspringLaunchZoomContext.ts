@@ -19,14 +19,14 @@
  */
 
 import { createContext, useContext } from "react";
-import { defaultWebspringLaunchZoom } from "./Webspring";
-import type { WebspringLaunchZoom } from "./webspringTypes";
+import { defaultWSLaunchZoom } from "./Webspring.transitions";
+import type { WSLaunchZoom } from "./webspringTypes";
 
-export type ResolvedWebspringLaunchZoom = Readonly<Required<WebspringLaunchZoom>>;
+export type ResolvedWebspringLaunchZoom = Readonly<Required<WSLaunchZoom>>;
 
 /** The launch zoom the presented Webspring view asks for, so an application's
  * zoom follows that view's own launch choreography. */
-export const WebspringLaunchZoomContext = createContext<ResolvedWebspringLaunchZoom>(defaultWebspringLaunchZoom);
+export const WebspringLaunchZoomContext = createContext<ResolvedWebspringLaunchZoom>(defaultWSLaunchZoom);
 
 export function useWebspringLaunchZoom(): ResolvedWebspringLaunchZoom {
   return useContext(WebspringLaunchZoomContext);

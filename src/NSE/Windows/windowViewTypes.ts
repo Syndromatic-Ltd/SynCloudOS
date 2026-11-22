@@ -42,11 +42,10 @@ export interface WindowViewProps {
     payload: { readonly windowControllerId: string },
   ) => Promise<unknown>;
   readonly moveHandleProps?: React.HTMLAttributes<HTMLElement>;
+  readonly presentationControl?: React.ReactNode;
+  readonly detached?: boolean;
+  readonly nativeChrome?: boolean;
   readonly resizeHandleProps?: Readonly<Partial<Record<WindowResizeEdge, React.HTMLAttributes<HTMLElement>>>>;
-  /** True when the owning app's custom chrome is mounted; suppresses system chrome paint. */
-  readonly customChromeActive?: boolean;
-  /** Ref callback receiving the view-rendered custom-titlebar slot node. */
-  readonly customTitleBarSlotRef?: (node: HTMLDivElement | null) => void;
   readonly children: React.ReactNode;
 }
 

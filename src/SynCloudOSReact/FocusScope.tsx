@@ -27,7 +27,7 @@ import { createRuntimeInputProtocol, useRuntimeInputProtocol } from "./runtimeIn
 import { AppFocusScope } from "./AppFocusScope";
 import { FocusScopeIdContext } from "./focusScopeContext";
 import { SynWareRuntimeContext, SynCloudOSRuntimeContext } from "./runtimeContext";
-import { resolveNSEFocusReturnTarget, isWithinNSEFocusOrigin } from "../NSE/hostComposition";
+import { resolveNSEFocusReturnTarget, isWithinNSEFocusOrigin, isNSEDOMNode, isNSEDOMElement, isNSEHTMLElement, PresentingDocumentContext } from "../NSE/hostComposition";
 
 const focusableSelector = "button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [contenteditable=true], [tabindex]:not([tabindex='-1'])";
 
@@ -50,6 +50,18 @@ function focusableTarget(root: HTMLElement, runtimeId: string): HTMLElement | nu
   const candidates = Array.from(root.querySelectorAll<HTMLElement>(focusableSelector))
     .filter((target) => isAvailableFocusTarget(target, runtimeId));
   return candidates.find((target) => !target.closest(focusChromeSelector)) ?? candidates[0] ?? null;
+}
+
+function initialScopeFocusTarget(root: HTMLElement, runtimeId: string, isPointer: boolean): HTMLElement | null {
+  const explicit = root.querySelector<HTMLElement>("[data-nse-initial-focus]:not([disabled])");
+  if (explicit && isAvailableFocusTarget(explicit, runtimeId)) return explicit;
+  if (isPointer) {
+    const dialog = root.matches('[role="dialog"][tabindex="-1"], [role="alertdialog"][tabindex="-1"]')
+      ? root
+      : root.querySelector<HTMLElement>('[role="dialog"][tabindex="-1"], [role="alertdialog"][tabindex="-1"]');
+    if (dialog && belongsToRuntime(dialog, runtimeId)) return dialog;
+  }
+  return focusableTarget(root, runtimeId);
 }
 
 function focusableTargets(root: HTMLElement, runtimeId: string): HTMLElement[] {
@@ -88,12 +100,13 @@ export interface FocusScopeProps extends PropsWithChildren {
 
 function KernelFocusScope({ scopeId, kind, parentScopeId, parentResponderId, modal = kind === "modal", trapFocus = modal, restoreFocus = true, undoOwner, externallyManagedScope = false, externallyManagedInert = false, asChild = false, children }: FocusScopeProps) {
   const runtime = useKernelSynCloudOS();
+  const presentingDocument = useContext(PresentingDocumentContext);
   const inheritedProtocol = useRuntimeInputProtocol();
   const fallbackProtocolRef = useRef<ReturnType<typeof createRuntimeInputProtocol> | null>(null);
   if (!fallbackProtocolRef.current || fallbackProtocolRef.current.runtimeId !== runtime.runtimeId) fallbackProtocolRef.current = createRuntimeInputProtocol(runtime.runtimeId);
   const protocol = inheritedProtocol?.runtimeId === runtime.runtimeId ? inheritedProtocol : fallbackProtocolRef.current;
   const scopeLease = useRef<ReturnType<typeof runtime.focus.openScope> | null>(null);
-  const configuration = useMemo(() => ({ runtime, scopeId, parentScopeId, parentResponderId, externallyManagedScope }), [runtime, scopeId, kind, parentScopeId, parentResponderId, modal, trapFocus, restoreFocus, undoOwner, externallyManagedScope, externallyManagedInert]);
+  const configuration = useMemo(() => ({ runtime, scopeId, parentScopeId, parentResponderId, externallyManagedScope }), [runtime, presentingDocument, scopeId, kind, parentScopeId, parentResponderId, modal, trapFocus, restoreFocus, undoOwner, externallyManagedScope, externallyManagedInert]);
   const latestConfiguration = useRef(configuration);
   useInsertionEffect(() => { latestConfiguration.current = configuration; }, [configuration]);
   const focusReturn = useRef<{ runtimeId: string; scopeId: string; target: HTMLElement | null } | null>(null);
@@ -105,8 +118,16 @@ function KernelFocusScope({ scopeId, kind, parentScopeId, parentResponderId, mod
     handle?.updatePresentation({ kind, modal, trapFocus });
     if (newlyOpened) runtime.focus.requestFocus(parentResponderId);
     const undoLease = undoOwner ? retainUndoOwner(runtime, undoOwner) : null;
-    const document = runtime.environment.browser.getDocument();
+    const document = presentingDocument ?? runtime.environment.browser.getDocument();
     const root = scopeRoot(document, runtime.runtimeId, scopeId);
+    const belongsToUnblockedWindow = (target: EventTarget | null): boolean => {
+      if (!externallyManagedScope || !isNSEDOMElement(target)) return false;
+      const windowId = target.closest<HTMLElement>("[data-window-host]")?.dataset.windowHost;
+      const snapshot = runtime.windows.snapshot();
+      return Boolean(windowId && snapshot.windowControllerIds.includes(windowId)
+        && snapshot.windowControllerIds.some(id => scopeId === `window:${id}`)
+        && !snapshot.blockedWindowControllerIds.includes(windowId));
+    };
     // The control this scope was opened from. A scope opened by a menu
     // command sees the menu row as focused; that row will be gone, so resolve
     // it to the control that opened the menu.
@@ -134,7 +155,7 @@ function KernelFocusScope({ scopeId, kind, parentScopeId, parentResponderId, mod
         const containBackground = (sibling: HTMLElement): void => {
           if (sibling.classList.contains(alertBackdropClass) || restoredBackground.some(({ element }) => element === sibling)) return;
           if (sibling.querySelector(`.${alertBackdropClass}`)) {
-            for (const child of Array.from(sibling.children)) if (child instanceof HTMLElement) containBackground(child);
+            for (const child of Array.from(sibling.children)) if (isNSEHTMLElement(child)) containBackground(child);
             return;
           }
           restoredBackground.push({ element: sibling, inert: sibling.inert, ariaHidden: sibling.getAttribute("aria-hidden") });
@@ -142,7 +163,7 @@ function KernelFocusScope({ scopeId, kind, parentScopeId, parentResponderId, mod
           sibling.setAttribute("aria-hidden", "true");
         };
         for (const sibling of Array.from(parentElement.children)) {
-          if (!(sibling instanceof HTMLElement) || sibling === branch) continue;
+          if (!isNSEHTMLElement(sibling) || sibling === branch) continue;
           const siblingOwner = sibling.closest<HTMLElement>("[data-syncloudos-runtime-owner]");
           if (siblingOwner && siblingOwner.dataset.syncloudosRuntimeOwner !== runtime.runtimeId) continue;
           containBackground(sibling);
@@ -152,14 +173,16 @@ function KernelFocusScope({ scopeId, kind, parentScopeId, parentResponderId, mod
     }
     let redirectingFocus = false;
     const containFocus = (event: FocusEvent) => {
-      if (redirectingFocus || !trapFocus || !root || !(event.target instanceof Node) || isWithinNSEFocusOrigin(root, event.target)) return;
+      if (redirectingFocus || !trapFocus || !root || !isNSEDOMNode(event.target) || isWithinNSEFocusOrigin(root, event.target)) return;
       // Focus moving into a system alert above this modal belongs to the alert.
-      if (event.target instanceof Element && event.target.closest(`.${alertBackdropClass}`) && !root.closest(`.${alertBackdropClass}`)) return;
-      const targetRuntimeOwner = event.target instanceof HTMLElement
+      if (isNSEDOMElement(event.target) && event.target.closest(`.${alertBackdropClass}`) && !root.closest(`.${alertBackdropClass}`)) return;
+      const targetRuntimeOwner = isNSEHTMLElement(event.target)
         ? event.target.closest<HTMLElement>("[data-syncloudos-runtime-owner]")
         : null;
       if (targetRuntimeOwner && targetRuntimeOwner.dataset.syncloudosRuntimeOwner !== runtime.runtimeId) return;
-      const targetScope = event.target instanceof HTMLElement
+      // The manager's sheet/modal domain can leave other windows interactive.
+      if (belongsToUnblockedWindow(event.target)) return;
+      const targetScope = isNSEHTMLElement(event.target)
         ? event.target.closest<HTMLElement>("[data-syncloudos-focus-scope]")
         : undefined;
       if (
@@ -167,7 +190,8 @@ function KernelFocusScope({ scopeId, kind, parentScopeId, parentResponderId, mod
         belongsToRuntime(targetScope, runtime.runtimeId) &&
         runtime.focus.isScopeWithin(targetScope.dataset.syncloudosFocusScope!, scopeId)
       ) return;
-      const target = focusableTarget(root, runtime.runtimeId);
+      const isPointer = document?.documentElement?.dataset?.nseInputModality === "pointer";
+      const target = initialScopeFocusTarget(root, runtime.runtimeId, isPointer);
       if (!target || document?.activeElement === target) return;
       // HTMLElement#focus synchronously emits focusin. A browser or host focus
       // delegate can reject that target and immediately re-emit the outside
@@ -175,7 +199,7 @@ function KernelFocusScope({ scopeId, kind, parentScopeId, parentResponderId, mod
       // than recursively redirecting the same transition.
       redirectingFocus = true;
       try {
-        target.focus({ preventScroll: true, focusVisible: true } as FocusOptions);
+        target.focus({ preventScroll: true, focusVisible: !isPointer } as FocusOptions);
       } finally {
         queueMicrotask(() => {
           redirectingFocus = false;
@@ -185,6 +209,7 @@ function KernelFocusScope({ scopeId, kind, parentScopeId, parentResponderId, mod
     if (trapFocus) document?.addEventListener("focusin", containFocus, true);
     if (trapFocus) queueMicrotask(() => {
       if (!live) return;
+      if (belongsToUnblockedWindow(document?.activeElement ?? null)) return;
       const activeScope = (document?.activeElement as HTMLElement | null)?.closest<HTMLElement>("[data-syncloudos-focus-scope]") ?? null;
       if (
         activeScope &&
@@ -197,7 +222,10 @@ function KernelFocusScope({ scopeId, kind, parentScopeId, parentResponderId, mod
           belongsToRuntime(element, runtime.runtimeId) &&
           focusableTarget(element, runtime.runtimeId)
         ));
-      if (scopeRoot) focusableTarget(scopeRoot, runtime.runtimeId)?.focus({ preventScroll: true, focusVisible: true } as FocusOptions);
+      if (scopeRoot) {
+        const isPointer = document?.documentElement?.dataset?.nseInputModality === "pointer";
+        initialScopeFocusTarget(scopeRoot, runtime.runtimeId, isPointer)?.focus({ preventScroll: true, focusVisible: !isPointer } as FocusOptions);
+      }
     });
     return () => {
       live = false;
@@ -224,7 +252,7 @@ function KernelFocusScope({ scopeId, kind, parentScopeId, parentResponderId, mod
       undoLease?.release();
       if (result.status === "closed" && result.restoredResponderId) {
         const restoreDOMFocus = () => {
-          const document = runtime.environment.browser.getDocument();
+          const document = root?.ownerDocument ?? presentingDocument ?? runtime.environment.browser.getDocument();
           // Restore only focus this scope stranded. When something else
           // already holds focus (a dialog the scope's command opened, or a
           // trigger its owner refocused), moving it would pull it away.
@@ -256,16 +284,17 @@ function KernelFocusScope({ scopeId, kind, parentScopeId, parentResponderId, mod
         else restoreDOMFocus();
       }
     };
-  }, [runtime, scopeId, kind, parentScopeId, parentResponderId, modal, trapFocus, restoreFocus, undoOwner, externallyManagedScope, externallyManagedInert]);
+  }, [runtime, presentingDocument, scopeId, kind, parentScopeId, parentResponderId, modal, trapFocus, restoreFocus, undoOwner, externallyManagedScope, externallyManagedInert]);
   const handleKeyDownCapture = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     const nativeEvent = event.nativeEvent;
     if (!protocol.owns(nativeEvent, event.target) || protocol.hasClaimed(nativeEvent)) return;
     if (trapFocus && event.key === "Tab" && !event.altKey && !event.ctrlKey && !event.metaKey) {
-      const root = scopeRoot(runtime.environment.browser.getDocument(), runtime.runtimeId, scopeId);
+      const document = event.currentTarget.ownerDocument;
+      const root = scopeRoot(document, runtime.runtimeId, scopeId);
       const targets = root ? focusableTargets(root, runtime.runtimeId) : [];
       if (targets.length > 0) {
-        const current = runtime.environment.browser.getDocument()?.activeElement;
-        const index = current instanceof HTMLElement ? targets.indexOf(current) : -1;
+        const current = document.activeElement;
+        const index = isNSEHTMLElement(current) ? targets.indexOf(current) : -1;
         if (index < 0 || (!event.shiftKey && index === targets.length - 1) || (event.shiftKey && index === 0)) {
           event.preventDefault();
           event.stopPropagation();

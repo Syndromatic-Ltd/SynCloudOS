@@ -160,6 +160,23 @@ it("moves source-list focus into compact tabs while leaving editor focus in its 
   tabs.dispose();
 });
 
+it("does not move compact tab focus into a hidden tree when the parent takes over navigation", () => {
+  const tabs = new Sections();
+  tabs.tabStyle = "sidebarAdaptable";
+  resizeTabs(tabs, 390, 844);
+  render(<ViewControllerView controller={tabs} />);
+  const selected = screen.getByRole("tab", { name: /Company/ });
+  act(() => selected.focus());
+  const hiddenTree = document.querySelector<HTMLElement>(".nse-adaptive-tab-sidebar .nse-outline-view")!;
+  const focusTree = vi.spyOn(hiddenTree, "focus");
+
+  act(() => { tabs.tabStyle = "unspecified"; });
+
+  expect(focusTree).not.toHaveBeenCalled();
+  expect(screen.queryByRole("tree")).toBeNull();
+  tabs.dispose();
+});
+
 class Pane extends NSEViewController {
   constructor(readonly name: string) { super({ title: name }); }
   static override view = function PaneView({ controller }: { readonly controller: Pane }) {

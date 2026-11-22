@@ -18,22 +18,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * What the placard still loads as raster.
- *
- * The plate itself no longer appears here: its source art is a pure angle
- * gradient and is now the measured conic in loginPlate.css, and its concentric
- * texture has been cropped to the 106KB region the mockup laid over the plate.
- *
- * What is left is genuine photography-grade hardware: rope, tack, grommets, the
- * ribbon and the embossed mark. None of those is a shape a gradient can state.
- */
+/* Raster hardware and branding for the sign-in placard. */
 export const loginWindowAssets = {
   betaRibbon: new URL("../../../../public/assets/nse/atmo/shell/login-window/BETAbanner-topRight@2x.png?no-inline", import.meta.url).href,
   checkboxChecked: new URL("../../../../public/assets/nse/atmo/shell/login-window/checkboxChecked@2x.png?no-inline", import.meta.url).href,
   checkboxUnchecked: new URL("../../../../public/assets/nse/atmo/shell/login-window/checkboxUnchecked@2x.png?no-inline", import.meta.url).href,
-  /** The cropped plate texture, referenced from loginPlate.css. */
-  plateTexture: new URL("../../../../public/assets/nse/atmo/shell/login-window/generated/plate-texture.webp?no-inline", import.meta.url).href,
   logo: new URL("../../../../public/assets/nse/atmo/shell/login-window/EmbossedSynMarksmanLogoMetalFX.png?no-inline", import.meta.url).href,
   tackTransparent: new URL("../../../../public/assets/nse/atmo/shell/login-window/HangElements/PinElements/TackTransparent.png?no-inline", import.meta.url).href,
   tackWhite: new URL("../../../../public/assets/nse/atmo/shell/login-window/HangElements/PinElements/TackWhite.png?no-inline", import.meta.url).href,

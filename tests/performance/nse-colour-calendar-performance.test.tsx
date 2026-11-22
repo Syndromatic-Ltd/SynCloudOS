@@ -164,5 +164,5 @@ it("coalesces the real scroll view observer and keeps rubber-band listeners dist
 it("schedules no animation for reduced-motion indeterminate progress", async () => {
   const budget = budgets.portableCases["progress-controls.reduced-motion"];
   const raf = vi.fn(); vi.stubGlobal("requestAnimationFrame", raf);
-  await runStructuralScenario({ run: () => render(<AnimationEnvironmentProvider reducedMotion><NSEProgressIndicator aria-label="Static progress" /></AnimationEnvironmentProvider>), assertStructural: (view) => { expect(raf).toHaveBeenCalledTimes(budget.maxAnimationCallbacks); expect(view.getByRole("progressbar").getAttribute("data-motion")).toBe("static"); view.unmount(); } });
+  await runStructuralScenario({ run: () => render(<AnimationEnvironmentProvider reducedMotion><NSEProgressIndicator aria-label="Static progress" /></AnimationEnvironmentProvider>), assertStructural: (view) => { expect(raf).toHaveBeenCalledTimes(budget.maxAnimationCallbacks); expect(view.getByRole("progressbar").getAttribute("data-nse-motion")).toBe("static"); view.unmount(); } });
 });

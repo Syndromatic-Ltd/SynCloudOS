@@ -2,3 +2,19 @@
 /* Atmo as the framework loads it: control structure, then Atmo's bundle. Both draw in the nse.atmo layer. */
 @import "../Structure/controls.css";
 @import "../../Themes/Atmo.scostheme/Contents/Resources/theme.css";
+
+@layer nse.atmo {
+  @scope ([data-nse-theme="com.syndromatic.atmo"]) to ([data-nse-theme]) {
+    [data-nse-control="switch"] [data-nse-part="label"] {
+      --nse-switch-state-label-display: inline-block;
+    }
+  }
+  @scope ([data-nse-theme="com.syndromatic.atmo"]:not([data-nse-app-theme])) to ([data-nse-theme], [data-nse-app-theme]) {
+    :where([data-nse-control="window"][data-nse-part="background"]:not([data-nse-colour-scheme-resolved]))
+      > [data-nse-part="bezel"] > [data-nse-role="titlebar"][data-nse-part="header"],
+    :where([data-nse-control="window"][data-nse-part="background"]:not([data-nse-colour-scheme-resolved]))
+      > [data-nse-part="bezel"] > [data-nse-role="titlebar"] > [data-nse-part="header"] {
+      color-scheme: light;
+    }
+  }
+}

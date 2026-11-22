@@ -485,7 +485,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
   });
   const resolveApplicationWindow = (appId: string): CreateWindowRequest | null => {
     const app = apps.getApp(appId);
-    if (!app || app.presentation === "appView" || app.presentation === "backgroundService") return null;
+    if (!app || app.presentation === "backgroundService") return null;
     const keyWindowControllerId = windows.snapshot().keyWindowControllerId;
     const parentWindowControllerId = app.presentation === "systemSheet" ? keyWindowControllerId : null;
     const role = app.presentation === "systemSheet"
@@ -500,8 +500,8 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
       representedDocument: null,
       toolbar: null,
       role,
+      ...(app.presentation === "stage" && role === "standard" ? { fullScreen: "on", collectionBehavior: "fullScreenPrimary" } as const : {}),
       style: app.presentation === "systemSheet" ? ["titled", "closable"] : app.window.style,
-      chromeMode: app.presentation === "systemSheet" ? "system" : app.window.chrome,
       smoothSurface: app.window.smoothSurface,
       title: app.window.title,
       content: { rendererId: "application", parameters: { appId: app.bundleIdentifier } },
@@ -787,17 +787,20 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     );
     return linkExternalSignal(handle, options.signal);
   };
+  let resolveModalScope: ReturnType<typeof createFocusManager>["modalScopeForResponder"] | undefined;
   responders = createResponderGraph({
     runtimeId,
     getFocusedResponderId: () => focus?.getFocusedResponderId() ?? null,
     getActiveAnchors: () => focus?.getActiveAnchors() ?? { runtimeResponderId: "runtime" },
-    getActiveModalScope: () => {
-      const modal = focus?.inspect().scopes.filter((scope) => scope.modal).at(-1);
+    getActiveModalScope: (responderId) => {
+      const modal = resolveModalScope?.(responderId);
       return modal ? { scopeId: modal.id, parentResponderId: modal.parentResponderId, isScopeWithin: (scopeId: string) => focus.isScopeWithin(scopeId, modal.id) } : null;
     },
     onRemoved: (ids) => focus?.handleRespondersRemoved(ids),
   });
-  focus = createFocusManager({ runtimeId, responders });
+  const focusHost = createFocusManager({ runtimeId, responders });
+  focus = focusHost.manager;
+  resolveModalScope = focusHost.modalScopeForResponder;
   responders.register({ id: "runtime", kind: "runtime", scopeId: "root", diagnosticsLabel: "SynCloudOS runtime" });
   responders.register({ id: "webspring", kind: "webspring", parentId: "runtime", scopeId: "root", diagnosticsLabel: "Webspring" });
   responders.register({ id: "workspace", kind: "workspace", parentId: "webspring", scopeId: "root", diagnosticsLabel: "Active workspace" });
@@ -968,6 +971,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
       ids: windowIds,
     },
     resolveApplicationWindow,
+    host: config.environment.windowHost,
     rematerialiseOwnedDocument: async ({ applicationId, documentId, restorationKey, signal }) => {
       const lifetime = new AbortController();
       const restorationSignal = AbortSignal.any([signal, lifetime.signal, runtime.signal]);

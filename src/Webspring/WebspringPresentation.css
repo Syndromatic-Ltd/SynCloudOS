@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+@layer nse.structure {
 .webspring-drag-proxy {
   position: fixed;
   z-index: 220;
@@ -25,17 +26,15 @@
   width: 108px;
   place-items: center;
   gap: 7px;
-  color: rgba(238, 244, 255, 0.82);
+
   font-size: 12px;
   font-weight: 700;
   line-height: 1.05;
   text-align: center;
-  text-shadow: 0 2px 5px rgba(0,0,0,0.95);
+
   pointer-events: none;
   transform: translate(-50%, -52%) scale(1.08);
-  filter:
-    drop-shadow(0 18px 16px rgba(0,0,0,0.72))
-    drop-shadow(0 0 12px rgba(130,190,255,0.26));
+
 }
 
 .webspring-drag-proxy img {
@@ -75,9 +74,8 @@
   inset: 0;
   z-index: 38;
   pointer-events: none;
-  background:
-    radial-gradient(circle at 50% 45%, rgba(0,0,0,0.28), rgba(0,0,0,0.78) 68%),
-    rgba(0,0,0,0.46);
+
 }
 
 .webspring-reorder-announcement { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+}

@@ -59,7 +59,7 @@ import { useSCOS } from "@syndromatic/syncloudos/sdk";
 import { createSynWare } from "@syndromatic/syncloudos/sdk/testing";
 import { MEFXSampleTimingInfo, MEFXTime } from "@syndromatic/syncloudos/fx/media";
 import { VFXEncodedChunk } from "@syndromatic/syncloudos/fx/video";
-import { defineWebspring, type WebspringViewProps } from "@syndromatic/syncloudos/webspring";
+import { WSApplication, WSLauncherViewController, createWebspring } from "@syndromatic/syncloudos/webspring";
 
 declare global { interface Window { fxVideo: any; } }
 window.fxVideo = { ready: false };
@@ -158,24 +158,20 @@ function Probe() {
   return <p id="probe">VFX-02 installed WebCodecs probe</p>;
 }
 
-function Website({ actions, applicationOutlet }: WebspringViewProps) {
-  return <main><button id="open" onClick={() => { void actions.openApp("org.example.vfx02"); }}>Open VFX-02 probe</button>{applicationOutlet}</main>;
+class Website extends WSLauncherViewController {
+  static override mode = "persistent" as const;
+  override renderView() {
+    return <main><button id="open" onClick={() => { void this.openApp("org.example.vfx02"); }}>Open VFX-02 probe</button></main>;
+  }
 }
 
-const shell = defineWebspring({
-  manifest: {
-    schemaVersion: 1,
-    bundleIdentifier: "org.example.vfx02-shell",
-    version: "1.0.0",
-    displayName: "VFX-02 shell",
-    webspringShell: {
-      views: [{ id: "website", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }],
-      defaults: { desktop: "website", tablet: "website", mobile: "website" },
-      homeRoute: "/",
-      branding: { name: { key: "brand", fallback: "VFX-02" } },
-    },
-  },
-  components: { website: Website },
+class Shell extends WSApplication {
+  static override mainViewController = Website;
+}
+
+const shell = createWebspring({
+  info: { bundleIdentifier: "org.example.vfx02-shell", version: "1.0.0", displayName: "VFX-02 shell", branding: { name: { key: "brand", fallback: "VFX-02" } } },
+  application: Shell,
 });
 
 const app = createSynWare({

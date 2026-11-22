@@ -1,0 +1,115 @@
+/* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
+
+/* Folder presentation. */
+[data-nse-control="folder-presentation"]:where([data-nse-part="background"]),
+:where(:scope):is([data-nse-control="folder-presentation"]:where([data-nse-part="background"])) {
+  --webspring-folder-backdrop-icon-opacity: 0.22;
+  --webspring-folder-backdrop-icon-saturation: 0.35;
+  opacity: 1;
+}
+
+[data-nse-control="folder-presentation"]:where([data-nse-part="background"])[data-nse-style="fade"]:is([data-nse-presentation="closed"], [data-nse-presentation="closing"]),
+:where(:scope):is([data-nse-control="folder-presentation"]:where([data-nse-part="background"])[data-nse-style="fade"]:is([data-nse-presentation="closed"], [data-nse-presentation="closing"])) {
+  opacity: 0;
+}
+
+[data-nse-part="backdrop"]:where([data-nse-control="folder-presentation"] > *) {
+  background-color: var(--webspring-folder-underlay-colour, #2b3038);
+  background-image: var(--webspring-folder-underlay-image, url("../materials/linen.webp"));
+  background-size: var(--webspring-folder-underlay-size, cover);
+  background-position: center;
+}
+
+[data-nse-part="bezel"]:where([data-nse-control="folder-presentation"] > *) {
+  box-shadow: inset 0 -16px 18px -12px rgba(0, 0, 0, var(--webspring-folder-edge-shadow, 0.55));
+}
+
+[data-nse-part="title"]:where([data-nse-control="folder-presentation"] > [data-nse-part="bezel"] > [data-nse-part="content"] > *) {
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+}
+
+[data-nse-part="background"][data-nse-position="top"]:where([data-nse-control="folder-presentation"] > *) {
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0)) drop-shadow(0 3px 7px rgba(0, 0, 0, 0));
+}
+
+[data-nse-part="background"][data-nse-position="top"]:where([data-nse-control="folder-presentation"][data-nse-presentation="open"] > *) {
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.3)) drop-shadow(0 3px 7px rgba(0, 0, 0, 0.85));
+}
+
+[data-nse-part="background"][data-nse-position="bottom"]:where([data-nse-control="folder-presentation"] > *) {
+  filter: drop-shadow(0 -2px 6px rgba(0, 0, 0, 0));
+}
+
+[data-nse-part="background"][data-nse-position="bottom"]:where([data-nse-control="folder-presentation"][data-nse-presentation="open"] > *) {
+  filter: drop-shadow(0 -2px 6px rgba(0, 0, 0, calc(var(--webspring-folder-edge-shadow, 0.55) * 0.6)));
+}
+
+[data-nse-part="border"]:where([data-nse-control="folder-presentation"] > [data-nse-part="background"][data-nse-position] > *) {
+  background: rgba(255, 255, 255, 0.34);
+  opacity: 0;
+}
+
+[data-nse-part="border"]:where([data-nse-control="folder-presentation"][data-nse-presentation="open"] > [data-nse-part="background"][data-nse-position] > *) {
+  opacity: 1;
+}
+
+[data-nse-role="backdrop"]:where([data-nse-control="folder-presentation"]:is([data-nse-style="fade"], [data-nse-style="split"][data-nse-presentation="open"]) > [data-nse-part="background"][data-nse-position] [data-nse-part="preview"] *) {
+  opacity: var(--webspring-folder-backdrop-icon-opacity);
+  filter: saturate(var(--webspring-folder-backdrop-icon-saturation));
+}
+
+/* Folder tiles. */
+[data-nse-part="background"]:where([data-nse-control="folder-tile"][data-nse-type="inset"] > *) {
+  background: linear-gradient(180deg, rgba(20, 24, 31, 0.5), rgba(48, 54, 66, 0.34));
+}
+
+[data-nse-part="background"]:where([data-nse-control="folder-tile"][data-nse-type="texture"] > *) {
+  background-color: var(--webspring-folder-tile-texture-colour);
+  background-image: var(--webspring-folder-tile-texture);
+  background-position: center;
+  background-size: var(--webspring-folder-tile-texture-size);
+}
+
+[data-nse-part="shadow"]:where([data-nse-control="folder-tile"] > [data-nse-part="background"] > *) {
+  fill: rgba(0, 0, 0, 0.62);
+  filter: blur(2.5px);
+}
+
+[data-nse-part="highlight"]:where([data-nse-control="folder-tile"] > [data-nse-part="background"] > *) {
+  fill: rgba(255, 255, 255, 0.18);
+}
+
+[data-nse-part="border"]:where([data-nse-control="folder-tile"] > [data-nse-part="border"] > *) {
+  fill: rgba(255, 255, 255, 0.32);
+}
+
+[data-nse-part="indicator"]:where([data-nse-control="folder-tile"] > [data-nse-part="border"] > *) {
+  opacity: 0;
+}
+
+[data-nse-part="shadow"]:where([data-nse-control="folder-tile"] > [data-nse-part="border"] > [data-nse-part="indicator"] > *) {
+  fill: rgba(0, 0, 0, 0.45);
+  filter: blur(9px);
+}
+
+[data-nse-part="border"]:where([data-nse-control="folder-tile"] > [data-nse-part="border"] > [data-nse-part="indicator"] > *) {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.72);
+}
+
+[data-nse-part="border"]:where([data-nse-control="folder-tile"][data-nse-highlighted] > [data-nse-part="border"] > *) {
+  opacity: 0;
+}
+
+[data-nse-part="indicator"]:where([data-nse-control="folder-tile"][data-nse-highlighted] > [data-nse-part="border"] > *) {
+  opacity: 1;
+}
+
+[data-nse-part="image"]:where([data-nse-control="folder-tile"] > *) {
+  color: #fff;
+}
+
+[data-nse-part="image"]:where([data-nse-control="folder-tile"] > [data-nse-part="image"] > *) {
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.4));
+}

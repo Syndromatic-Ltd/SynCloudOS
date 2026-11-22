@@ -1,6 +1,6 @@
 # AnimationFX effects and rendering
 
-This page covers the layers that generate or stream content, and the renderer that draws layers to a canvas: `AFXReplicatorLayer`, `AFXEmitterLayer` with `AFXEmitterCell`, `AFXParticleLayer`, `AFXTiledLayer` and `AFXRenderer`. They build on the layer API described in [Layers](layers.md).
+Use these layers for repeated, generated or very large content, and the renderer when you want to draw a layer tree to a canvas instead of the page. This page covers `AFXReplicatorLayer`, `AFXEmitterLayer` with `AFXEmitterCell`, `AFXParticleLayer`, `AFXTiledLayer` and `AFXRenderer`. They build on the layer API described in [Layers](layers.md).
 
 ```ts
 import { AFXEmitterCell, AFXEmitterLayer, AFXReplicatorLayer } from "@syndromatic/syncloudos/fx/animation";
@@ -8,13 +8,13 @@ import { AFXEmitterCell, AFXEmitterLayer, AFXReplicatorLayer } from "@syndromati
 
 ## At a glance
 
-| Class | Analogue | Use it for | Bound to |
-| --- | --- | --- | --- |
-| `AFXReplicatorLayer` | `CAReplicatorLayer` | Repeating sublayers with a cumulative transform, colour and delay | An element (`bindReplicatorLayer`) or a renderer (`makeReplicatorLayer`) |
-| `AFXEmitterLayer` and `AFXEmitterCell` | `CAEmitterLayer` and `CAEmitterCell` | Particle effects driven by rules | An element (`bindEmitterLayer`) |
-| `AFXParticleLayer` | (none) | Drawing particles that your own simulation computes | A renderer (`makeParticleLayer`) |
-| `AFXTiledLayer` | `CATiledLayer` | Very large content drawn in tiles on demand | An element (`bindTiledLayer`) |
-| `AFXRenderer` | (none) | Drawing a layer tree of images, video and particles to a canvas | A canvas (`createRenderer`) |
+| Class | Use it for | Bound to |
+| --- | --- | --- |
+| `AFXReplicatorLayer` | Repeating sublayers with a cumulative transform, colour and delay | An element (`bindReplicatorLayer`) or a renderer (`makeReplicatorLayer`) |
+| `AFXEmitterLayer` and `AFXEmitterCell` | Particle effects driven by rules | An element (`bindEmitterLayer`) |
+| `AFXParticleLayer` | Drawing particles that your own simulation computes | A renderer (`makeParticleLayer`) |
+| `AFXTiledLayer` | Very large content drawn in tiles on demand | An element (`bindTiledLayer`) |
+| `AFXRenderer` | Drawing a layer tree of images, video and particles to a canvas | A canvas (`createRenderer`) |
 
 Every class here is a subclass of `AFXLayer`, apart from the renderer, so it has all the geometry, appearance, sublayer and animation members from [Layers](layers.md). This page lists only what each class adds.
 

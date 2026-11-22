@@ -13,8 +13,8 @@
 :where(:scope) [data-nse-part="bezel"]:where([data-nse-control="text-field"]>*),
 :where(:scope):is([data-nse-part="bezel"]:where([data-nse-control="text-field"]>*)) {
   min-width:0;
-  height:50px;
-  min-height:50px;
+  height:var(--nse-control-height, 50px);
+  min-height:var(--nse-control-height, 50px);
   padding:0 12px;
   border:14px solid transparent;
   border-image:var(--nse-atmo-field-image,var(--nse-atmo-pill-input)) var(--nse-atmo-field-slice,19) fill stretch;
@@ -117,11 +117,11 @@
 
 :where(:scope) [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*),
 :where(:scope):is([data-nse-part="bezel"]:where([data-nse-control="search-field"]>*)) {
-  height:50px;
-  min-height:50px;
+  height:var(--nse-control-height, 50px);
+  min-height:var(--nse-control-height, 50px);
   padding:0 8px;
   border:0 solid transparent;
-  border-width:0 25px;
+  border-width:0 calc(var(--nse-control-height, 50px) / 2);
   border-image:var(--nse-atmo-menu-input)0 25 50 25 fill stretch;
 }
 
@@ -162,8 +162,8 @@
 
 :where(:scope) [data-nse-control="text-field"]:where(:not([data-nse-role="group"],[data-nse-part="title"]))[data-nse-control-size="small"] [data-nse-part="bezel"]:where([data-nse-control="text-field"]>*),
 :where(:scope):is([data-nse-control="text-field"]:where(:not([data-nse-role="group"],[data-nse-part="title"]))[data-nse-control-size="small"]) [data-nse-part="bezel"]:where([data-nse-control="text-field"]>*) {
-  height:36px;
-  min-height:36px;
+  height:var(--nse-control-height, 36px);
+  min-height:var(--nse-control-height, 36px);
   padding:0 4px;
   border-width:10px;
 }

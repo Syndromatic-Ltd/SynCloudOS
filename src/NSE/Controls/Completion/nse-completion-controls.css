@@ -1,5 +1,5 @@
 
-@layer nse.atmo {
+@layer nse.structure {
 @scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
@@ -28,14 +28,14 @@
 :where(:scope):is([data-nse-control="combo-box"]) [role="listbox"] { position: absolute; z-index: 1; }
 
 /* The combobox well is source-resolved separately from its input semantics. */
-[data-nse-control="combo-box"]>input[role="combobox"],
-:where(:scope):is([data-nse-control="combo-box"])>input[role="combobox"] {
+[data-nse-control="combo-box"]>[data-nse-part="field"],
+:where(:scope):is([data-nse-control="combo-box"])>[data-nse-part="field"] {
   appearance: none;
   -webkit-appearance: none;
   background: transparent;
   border: 0;
   box-shadow: none;
-  color: inherit;
+  color: unset;
   font: inherit;
 }
 

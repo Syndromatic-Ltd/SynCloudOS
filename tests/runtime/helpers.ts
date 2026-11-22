@@ -23,7 +23,7 @@ import { vi } from "vitest";
 import { choreographyTimings } from "../../src/FX/AnimationFX/choreographyTimings";
 import type {
   SynCloudOSAppIconManifest,
-  SynCloudOSAppFrameManifest,
+  SynCloudOSPresentationMotionManifest,
   SynCloudOSAppLifecycleManifest,
   SynCloudOSAppManifest,
   SynCloudOSAppNotificationManifest,
@@ -68,7 +68,7 @@ type TestManifestOverrides = Partial<
   icon?: Partial<SynCloudOSAppIconManifest>;
   webspring?: Partial<SynCloudOSAppWebspringManifest>;
   window?: Partial<SynCloudOSAppWindowManifest>;
-  frame?: Partial<SynCloudOSAppFrameManifest>;
+  frame?: Partial<SynCloudOSPresentationMotionManifest>;
   lifecycle?: Partial<SynCloudOSAppLifecycleManifest>;
   notifications?: Partial<SynCloudOSAppNotificationManifest>;
   seo?: Partial<SynCloudOSAppSeoManifest>;
@@ -99,7 +99,7 @@ export function createTestManifest(overrides: TestManifestOverrides = {}): SynCl
     route: overrides.route ?? `/${bundleIdentifier.split(".").at(-1)}`,
     path: overrides.path ?? `${packageName}/`,
     componentKey: overrides.componentKey ?? `${displayName.replace(/\s+/g, "")}Component`,
-    presentation: overrides.presentation ?? "appView",
+    presentation: overrides.presentation ?? "stage",
     requiredServices: overrides.requiredServices ?? ["webspring", "routing", "windowing"],
     optionalServices: overrides.optionalServices ?? [],
     icon: {

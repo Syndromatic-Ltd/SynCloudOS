@@ -143,7 +143,6 @@ export function NSEMenuBar({ menu: mainMenu, overlay, direction = "ltr" }: NSEMe
               role="menuitem"
               aria-haspopup="menu"
               aria-expanded={open}
-              data-active={open ? "true" : "false"}
               onClick={() => {
                 setInitialFocus("first");
                 setOpenIndex(open ? null : index);

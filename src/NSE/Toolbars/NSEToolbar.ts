@@ -19,12 +19,43 @@
  */
 
 import { NSEObject } from "../Objects/NSEObject";
+import { nseCSSValue } from "../Graphics/NSEShadow";
 import { NSEUserDefaultsController } from "../Controllers/NSEUserDefaultsController";
 import { NSEUserDefaults } from "../../Foundation/NSEUserDefaults";
 import type { NSEOwner } from "../Controllers/ownership";
 import { NSEToolbarController } from "./NSEToolbarController";
 import type { NSEToolbarItemInput, ToolbarPreferences, ToolbarRuntimePort } from "./toolbarTypes";
-import type { ReactNode } from "react";
+import { createElement, type ReactNode } from "react";
+import { ApplicationMenuToolbarButton, type ApplicationMenuGlyph } from "./ApplicationMenuToolbarButton";
+
+import { ToggleWindowPane, WindowPreferencesButton } from "./windowToolbarItems";
+
+export type NSEToolbarItem = import("./toolbarTypes").NSEToolbarItem;
+
+const paneItem = (pane: "sidebar" | "inspector"): NSEToolbarItem => ({
+  kind: "custom", id: pane === "sidebar" ? "toggleSidebar" : "toggleInspector",
+  label: pane === "sidebar" ? "Sidebar" : "Inspector",
+  minimumWidth: 64, idealWidth: 108, render: () => createElement(ToggleWindowPane, { pane }),
+});
+
+export const NSEToolbarItem = Object.freeze({
+  toggleSidebar: Object.freeze(paneItem("sidebar")),
+  toggleInspector: Object.freeze(paneItem("inspector")),
+  sidebarTrackingSeparator: Object.freeze({ kind: "separator", id: "sidebarTrackingSeparator", tracksSidebar: true } as const),
+  showPreferences: Object.freeze({
+    kind: "custom", id: "showPreferences", label: "Preferences…",
+    minimumWidth: 80, idealWidth: 112, render: () => createElement(WindowPreferencesButton),
+  } as const),
+  /** NSE extension. The window supplies the shared application menu when this item is present. */
+  applicationMenu(glyph: ApplicationMenuGlyph = "gear"): Extract<import("./toolbarTypes").NSEToolbarItem, { kind: "custom" }> {
+    if (glyph !== "gear" && glyph !== "person") throw new TypeError("Application menu glyph must be gear or person.");
+    return Object.freeze({
+      kind: "custom", id: "applicationMenu", label: "Application Menu",
+      minimumWidth: 36, idealWidth: 36,
+      render: () => createElement(ApplicationMenuToolbarButton, { glyph }),
+    });
+  },
+});
 
 /** NSToolbar.DisplayMode. `default` follows the toolbar's own default, icon and label. */
 export type NSEToolbarDisplayMode = "default" | "iconAndLabel" | "iconOnly" | "labelOnly";
@@ -123,6 +154,11 @@ export class NSEToolbar<const Items extends readonly NSEToolbarItemInput[] = rea
     }
     for (const id of options.defaultItemIdentifiers) {
       if (!allowed.includes(id)) throw new TypeError(`Toolbar "${options.identifier}" shows "${id}" by default but does not allow it.`);
+    }
+    for (const item of options.items) {
+      if (item.kind === "command" && item.backgroundTintColour !== undefined) {
+        nseCSSValue(item.backgroundTintColour, "color", "NSEToolbarItem backgroundTintColour");
+      }
     }
     this.identifier = options.identifier;
     this.allowsUserCustomization = options.allowsUserCustomization ?? false;

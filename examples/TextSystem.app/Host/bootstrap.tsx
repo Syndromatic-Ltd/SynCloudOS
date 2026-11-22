@@ -22,7 +22,7 @@ import React from "react";
 // Packaged browser JS extracts host CSS; loading the documented public stylesheet is a host responsibility.
 import "@syndromatic/syncloudos/browser/styles.css";
 import { mountSynCloudOS, createSynCloudOSHostContribution, InMemoryDocumentAdapter, createIndexedDBDocumentAssetStore } from "@syndromatic/syncloudos/browser";
-import { defineWebspring, type WebspringViewProps } from "@syndromatic/syncloudos/webspring";
+import { WSApplication, WSLauncherViewController, createWebspring } from "@syndromatic/syncloudos/webspring";
 import type { AppDocumentLocation } from "@syndromatic/syncloudos/sdk";
 import { createTextSystemExampleApp, textSystemDocumentType, type TextSystemExampleAppOptions } from "../Contents";
 import type { TextSystemExampleModel } from "../Contents/model";
@@ -36,11 +36,19 @@ export function createExamplePersistenceHost(options: { readonly databaseName: s
   const nativeAdapter = new InMemoryDocumentAdapter({ now: () => Date.now(), randomUUID: () => crypto.randomUUID() });
   let storesCreated = 0, storesDisposed = 0, hostsMounted = 0;
   const runtimeIds: string[] = [];
-  function Outlet({ applicationOutlet }: WebspringViewProps) { return <>{applicationOutlet}</>; }
-  const shell = defineWebspring({ manifest: { schemaVersion: 1, bundleIdentifier: "com.syncloudos.examples.text-system-shell", version: "0.1.0", displayName: "Example host",
-    webspringShell: { views: [{ id: "example", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }],
-      defaults: { desktop: "example", tablet: "example", mobile: "example" }, homeRoute: "/",
-      branding: { name: { key: "example.host", fallback: "Text System example" } } } }, components: { example: Outlet } });
+  // The launcher draws nothing of its own; the root view still hosts the application outlet.
+  class OutletLauncher extends WSLauncherViewController {
+    static override mode = "persistent" as const;
+    override renderView() { return null; }
+  }
+  class ExampleShell extends WSApplication {
+    static override mainViewController = OutletLauncher;
+  }
+  const shell = createWebspring({
+    info: { bundleIdentifier: "com.syncloudos.examples.text-system-shell", version: "0.1.0", displayName: "Example host",
+      branding: { name: { key: "example.host", fallback: "Text System example" } } },
+    application: ExampleShell,
+  });
   return {
     nativeLocation,
     getReceipt() { return { nativeDurability: "memory" as const, assetDurability: "durable" as const, crossStoreAtomicity: false as const,
@@ -63,7 +71,7 @@ export function createExamplePersistenceHost(options: { readonly databaseName: s
       const app = createTextSystemExampleApp({ ...appOptions, nativeDestination: nativeLocation, ...(reopen ? { openLocation: nativeLocation } : {}) });
       // Browser routing starts from the browser location. This host-only launch selects the declared app route.
       history.replaceState(history.state, "", "/examples/text-system");
-      const composition = { bundles: [{ manifest, modulePath: "./TextSystem.app/Contents/index.tsx", loadModule: async () => ({ default: app }) }], preferences: [], widgets: [], contributions: [contribution], shell, shellResources: {} };
+      const composition = { bundles: [{ manifest, modulePath: "./TextSystem.app/Contents/index.tsx", loadModule: async () => ({ default: app }) }], preferences: [], widgets: [], contributions: [contribution], webspring: shell, shellResources: {} };
       const host = await mountSynCloudOS({ element, composition, authentication: "disabled" }); hostsMounted++; runtimeIds.push(runtimeId);
       return host;
     },

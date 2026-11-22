@@ -1,5 +1,5 @@
 
-@layer nse.atmo {
+@layer nse.structure {
 @scope ([data-nse-theme]) to ([data-nse-theme]) {
 .nse-split-view-controller-view[data-presentation="single-pane"],
 :where(:scope):is(.nse-split-view-controller-view[data-presentation="single-pane"]) {
@@ -23,6 +23,17 @@
   display: flex;
   align-items: center;
   padding: 8px;
+}
+
+.nse-split-view-controller-view [data-nse-part="split-divider"]:focus-visible::after,
+:where(:scope):is(.nse-split-view-controller-view) [data-nse-part="split-divider"]:focus-visible::after {
+  outline: 2px solid;
+  outline-offset: -2px;
+}
+
+.nse-split-view-controller-view [data-nse-part="split-divider"][aria-disabled="true"],
+:where(:scope):is(.nse-split-view-controller-view) [data-nse-part="split-divider"][aria-disabled="true"] {
+  pointer-events: none;
 }
 
 }

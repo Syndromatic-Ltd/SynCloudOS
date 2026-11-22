@@ -1,5 +1,5 @@
 
-@layer nse.atmo {
+@layer nse.structure {
 @scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
@@ -21,14 +21,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* AppearanceAuthority review: circular-slider gradients and geometry are explicitly unresolved. */
 /* The metal knob is Atmo's material; other appearances paint the dial from their own slots. */
 [data-nse-control="slider"][data-nse-slider-type="circular"] [data-nse-part="circular-body"]>.nse-metal-thumb,
 :where(:scope):is([data-nse-control="slider"][data-nse-slider-type="circular"]) [data-nse-part="circular-body"]>.nse-metal-thumb{display:none}
 [data-nse-control="slider"][data-nse-slider-type="circular"] [data-nse-part="circular-body"],
-:where(:scope):is([data-nse-control="slider"][data-nse-slider-type="circular"]) [data-nse-part="circular-body"]{position:relative;display:inline-block;inline-size:34px;block-size:34px;border:1px solid currentColor;border-radius:50%;background:conic-gradient(from -90deg,color-mix(in srgb,currentColor 22%,transparent) var(--nse-circular-angle),transparent 0);touch-action:none}[data-nse-control="slider"][data-nse-slider-type="circular"] [data-nse-part="circular-body"]:focus-visible,
+:where(:scope):is([data-nse-control="slider"][data-nse-slider-type="circular"]) [data-nse-part="circular-body"]{position:relative;display:inline-block;inline-size:34px;block-size:34px;border:1px solid currentColor;border-radius:50%;touch-action:none}[data-nse-control="slider"][data-nse-slider-type="circular"] [data-nse-part="circular-body"]:focus-visible,
 :where(:scope):is([data-nse-control="slider"][data-nse-slider-type="circular"]) [data-nse-part="circular-body"]:focus-visible{outline:2px solid Highlight;outline-offset:2px}[data-nse-control="slider"][data-nse-slider-type="circular"] [data-nse-part="knob"],
-:where(:scope):is([data-nse-control="slider"][data-nse-slider-type="circular"]) [data-nse-part="knob"]{position:absolute;inset-inline-start:50%;inset-block-start:50%;inline-size:2px;block-size:42%;border-radius:1px;background:currentColor;transform-origin:50% 100%;transform:translate(-50%,-100%) rotate(var(--nse-circular-angle))}[data-nse-control="stepper"]>[data-nse-part="bezel"] button,
+:where(:scope):is([data-nse-control="slider"][data-nse-slider-type="circular"]) [data-nse-part="knob"]{position:absolute;inset-inline-start:50%;inset-block-start:50%;inline-size:2px;block-size:42%;border-radius:1px;transform-origin:50% 100%;transform:translate(-50%,-100%) rotate(var(--nse-circular-angle))}[data-nse-control="stepper"]>[data-nse-part="bezel"] button,
 :where(:scope):is([data-nse-control="stepper"])>[data-nse-part="bezel"] button{inline-size:19px;min-block-size:12px}[data-nse-control="level-indicator"],
 :where(:scope):is([data-nse-control="level-indicator"]){min-block-size:18px}
 
@@ -197,7 +196,7 @@ meter[data-nse-control="level-indicator"],
   background: transparent;
   border: 0;
   box-shadow: none;
-  color: inherit;
+  color: unset;
   font: inherit;
 }
 
@@ -216,4 +215,15 @@ meter[data-nse-control="level-indicator"]::-webkit-meter-even-less-good-value,
 
 }
 
+}
+
+@layer nse.structure {
+  [data-nse-control="segmented-control"] > [data-nse-part="segment"] { position: relative; }
+  [data-nse-control="segmented-control"] > [data-nse-part="segment"] > [data-nse-part="divider"] {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 0;
+    inline-size: 0;
+    pointer-events: none;
+  }
 }

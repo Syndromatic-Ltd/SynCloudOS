@@ -26,7 +26,6 @@ import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
 import { WindowContentRendererRegistry, WindowLayer } from "../../src/Webspring/WindowLayer";
-import { WindowChromeSlotContext } from "../../src/Webspring/WindowLayer/windowChromeSlotContext";
 import { createWindowLayerFixture } from "../fixtures/windowLayerFixture";
 import { standardWindow } from "../fixtures/windowTestDependencies";
 import { StandardWindowView } from "../../src/NSE/Windows";
@@ -97,7 +96,7 @@ describe("Webspring WindowLayer", () => {
     expect(parent.hasAttribute("inert")).toBe(true);
     expect(parentHost.getAttribute("aria-hidden")).toBe("true");
     expect(screen.getByRole("dialog", { name: "Save changes?" }).getAttribute("aria-modal")).toBe("true");
-    expect(document.querySelectorAll("[data-window-modal-backdrop]")).toHaveLength(1);
+    expect(document.querySelectorAll("[data-window-modal-backdrop]")).toHaveLength(0);
     await act(() => fixture.manager.requestClose("save-sheet", { reason: "command" }));
     expect(parent.hasAttribute("inert")).toBe(false);
     expect(parentHost.hasAttribute("aria-hidden")).toBe(false);
@@ -279,7 +278,7 @@ describe("Webspring WindowLayer", () => {
     );
 
     const section = screen.getByRole("dialog", { name: "System chrome" });
-    expect(section.getAttribute("data-window-chrome-mode")).toBe("system");
+    expect(section.getAttribute("data-window-frame")).toBe("system");
     expect(section.hasAttribute("data-window-chrome-appearance")).toBe(false);
     expect(section.querySelector(".nse-window__titlebar")).not.toBeNull();
     expect(section.querySelector('[data-nse-nine-slice="window-shadow"]')?.hasAttribute("data-window-shadow-layer")).toBe(true);
@@ -293,70 +292,11 @@ describe("Webspring WindowLayer", () => {
     return null;
   }
 
-  it("suppresses system chrome paint once the mounted chrome reports ready", async () => {
-    const fixture = await createWindowLayerFixture();
-    const custom = fixture.manager.create(standardWindow("custom-window", {
-      title: "Custom chrome",
-      chromeMode: "custom",
-      smoothSurface: "off",
-    }));
-    await fixture.manager.open(custom.id);
-    // The mounted application reports a live chrome renderer through the
-    // host-provided slot context; only that handshake suppresses system
-    // chrome (chromeMode alone never blanks the bar).
-    fixture.contentRegistry.register(custom.contentState.mountKey, ({ window }) => (
-      <>
-        <ChromeReadyReporter />
-        <span data-window-content-id={window.id}>content:{window.id}</span>
-      </>
-    ));
-    render(
-      <SynCloudOSProvider runtime={fixture.runtime}>
-        <WindowLayer contentRegistry={fixture.contentRegistry} onDiagnostic={fixture.reportDiagnostic} />
-      </SynCloudOSProvider>,
-    );
-
-    // Bar-less chrome renders no labelled title element, so query the host.
-    await waitFor(() => {
-      const section = document.querySelector<HTMLElement>('[data-window-host="custom-window"] .nse-window-view');
-      expect(section?.getAttribute("data-window-chrome-appearance")).toBeNull();
-    });
-    const section = document.querySelector<HTMLElement>('[data-window-host="custom-window"] .nse-window-view');
-    expect(section?.getAttribute("data-window-chrome-mode")).toBe("custom");
-    expect(section?.querySelector(".nse-window__titlebar")).toBeNull();
-    expect(section?.querySelector('[data-nse-nine-slice="window-shadow"]')).toBeNull();
-    await fixture.cleanup();
-  });
-
-  it("holds a declared-custom window on system chrome until chrome reports ready", async () => {
-    const fixture = await createWindowLayerFixture();
-    const custom = fixture.manager.create(standardWindow("custom-pending-window", {
-      title: "Custom pending",
-      chromeMode: "custom",
-      smoothSurface: "off",
-    }));
-    await fixture.manager.open(custom.id);
-    fixture.contentRegistry.register(custom.contentState.mountKey, ({ window }) => (
-      <span data-window-content-id={window.id}>content:{window.id}</span>
-    ));
-    render(
-      <SynCloudOSProvider runtime={fixture.runtime}>
-        <WindowLayer contentRegistry={fixture.contentRegistry} onDiagnostic={fixture.reportDiagnostic} />
-      </SynCloudOSProvider>,
-    );
-
-    const section = document.querySelector<HTMLElement>('[data-window-host="custom-pending-window"] .nse-window-view');
-    expect(section?.getAttribute("data-window-chrome-mode")).toBe("custom");
-    expect(section?.hasAttribute("data-window-chrome-appearance")).toBe(false);
-    expect(section?.querySelector(".nse-window__titlebar")).not.toBeNull();
-    await fixture.cleanup();
-  });
-
   it("renders neither theme paint nor shadow for frameless windows", async () => {
     const fixture = await createWindowLayerFixture();
     const frameless = fixture.manager.create(standardWindow("frameless-window", {
       title: "Frameless",
-      chromeMode: "frameless",
+      role: "borderless", style: [],
       smoothSurface: "off",
     }));
     await fixture.manager.open(frameless.id);
@@ -370,68 +310,13 @@ describe("Webspring WindowLayer", () => {
     );
     // Bar-less chrome renders no labelled title element, so query the host.
     const section = document.querySelector<HTMLElement>('[data-window-host="frameless-window"] .nse-window-view');
-    expect(section.getAttribute("data-window-chrome-mode")).toBe("frameless");
+    expect(section.getAttribute("data-window-frame")).toBe("frameless");
     expect(section.getAttribute("data-window-chrome-appearance")).toBeNull();
     expect(section.querySelector(".nse-window__titlebar")).toBeNull();
     expect(section.querySelector('[data-nse-nine-slice="window-shadow"]')).toBeNull();
     await fixture.cleanup();
   });
 
-  it("falls back to system chrome when custom chrome is unavailable", () => {
-    const request = standardWindow("fallback-window", { title: "Fallback", chromeMode: "custom" });
-    const record = {
-      ...request,
-      id: "fallback-window",
-      runtimeId: "runtime:fallback" as const,
-      state: "open",
-      isKey: true,
-      isMain: true,
-      zIndex: 2,
-    } as React.ComponentProps<typeof StandardWindowView>["record"];
-    const presentation = {
-      kind: "desktop-window",
-      visible: true,
-      bounds: record.bounds,
-      safeAreaInsets: { blockStart: 0, inlineEnd: 0, blockEnd: 0, inlineStart: 0 },
-      movable: true,
-      resizable: false,
-      titleBarVisible: true,
-    } as React.ComponentProps<typeof StandardWindowView>["presentation"];
-    const { container } = render(
-      <StandardWindowView
-        record={record}
-        presentation={presentation}
-        blocked={false}
-        dirty={false}
-        customChromeActive={false}
-        dispatchCommand={() => Promise.resolve(null)}
-      >
-        <p>content</p>
-      </StandardWindowView>,
-    );
-    const section = container.querySelector('[data-window-chrome-mode="custom"]');
-    expect(section?.hasAttribute("data-window-chrome-appearance")).toBe(false);
-    expect(section?.querySelector(".nse-window__titlebar")).not.toBeNull();
-    expect(section?.querySelector('[data-nse-nine-slice="window-shadow"]')).not.toBeNull();
-  });
-
-  it("keeps theme paint and the custom shadow off application content (source contract)", () => {
-    // The custom-chrome surface rules key on the host-resolved active flag —
-    // chromeMode alone never blanks the bar, so the mode attribute must not
-    // suppress paint by itself.
-    expect(windowCSS).toMatch(/\.nse-window-view\[data-window-custom-chrome-active="true"\]/);
-    expect(windowCSS).toMatch(/\.nse-window-view\[data-window-custom-chrome-active="true"\]\[data-window-key="true"\]/);
-    // Drop-shadow is on the unclipped view: clip-path on the surface would
-    // eat a surface filter. Pending custom chrome must not stack a second
-    // bar: the slot is display none until the handshake flips the active flag.
-    expect(windowCSS).toMatch(/\.nse-window-view\[data-window-custom-chrome-active="true"\]\s*\{[^}]*filter:\s*drop-shadow/);
-    expect(windowCSS).not.toMatch(/\[data-window-custom-chrome-active="true"\] \.nse-window__surface\s*\{[^}]*filter:/);
-    expect(windowCSS).toMatch(/\.nse-window__custom-titlebar\s*\{[^}]*display:\s*none/);
-    expect(windowCSS).toMatch(/\[data-window-custom-chrome-active="true"\] \.nse-window__custom-titlebar\s*\{[^}]*display:\s*block/);
-    // Reduced motion suppresses the key-state shadow transition.
-    const reducedMotion = windowCSS.match(/@media \(prefers-reduced-motion: reduce\) \{[\s\S]*?\n\}/);
-    expect(reducedMotion?.[0]).toMatch(/\.nse-window-view/);
-  });
 });
 
 interface ClickToFrontFixture {

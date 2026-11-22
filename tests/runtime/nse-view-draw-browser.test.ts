@@ -13,6 +13,7 @@ beforeAll(async () => {
     ...decoratorEsbuildOptions,
     // Root-relative asset URLs are the host's to serve, as they stay in the SDK's built CSS.
     external: ["/assets/*"],
+    loader: { ".jpg": "dataurl", ".png": "dataurl", ".svg": "dataurl", ".webp": "dataurl" },
     stdin: { resolveDir: process.cwd(), loader: "tsx", contents: `
       import React, { useState } from "react";
       import { createRoot } from "react-dom/client";
@@ -36,7 +37,7 @@ beforeAll(async () => {
         const [updated, setUpdated] = useState(false);
         return <ViewDrawingEnvironmentContext.Provider value={environment}>
           <button id="redraw" onClick={() => setUpdated(value => !value)}>Redraw</button>
-          {['aqua', 'darkAqua'].map((name, index) => <NSEView key={name} id={name} className="figure" appearance={new NSEAppearance(name)}
+          {['light', 'dark'].map((name, index) => <NSEView key={name} id={name} className="figure" appearance={new NSEAppearance(name)}
             aria-label={name + ' figure'} style={{ top: 60 + index * 180 }} draw={(rect, context) => {
               window.drawnBounds.push({ name, ...rect });
               context.setFill(GFXColour.parse(updated ? '#008844' : '#0055aa')); context.fill(GFXPath.rect(rect));
@@ -67,7 +68,7 @@ describe("NSEView.draw browser composition", () => {
         .foreground { display:inline-block; width:70px; height:40px; background:#cc2222; color:white; }
       </style><div id="root"></div>`);
       await page.addScriptTag({ content: script });
-      for (const name of ["aqua", "darkAqua"]) {
+      for (const name of ["light", "dark"]) {
         const figure = page.locator(`#${name}`);
         await page.getByRole("img", { name: `${name} figure`, exact: true }).waitFor();
         expect(await figure.evaluate(element => getComputedStyle(element).position)).toBe("absolute");
@@ -79,10 +80,10 @@ describe("NSEView.draw browser composition", () => {
         expect(pixel(5 * dpr, 30 * dpr)).toEqual([204, 34, 34]);
         expect(pixel(200 * dpr, 80 * dpr)).toEqual([0, 85, 170]);
       }
-      await page.locator("#aqua").evaluate(element => { element.style.width = "420px"; });
-      await page.waitForFunction(() => document.querySelector("#aqua svg")?.getAttribute("viewBox") === "0 0 420 140");
+      await page.locator("#light").evaluate(element => { element.style.width = "420px"; });
+      await page.waitForFunction(() => document.querySelector("#light svg")?.getAttribute("viewBox") === "0 0 420 140");
       await page.getByRole("button", { name: "Redraw" }).click();
-      await page.waitForFunction(() => document.querySelector("#aqua path")?.getAttribute("fill") === "rgb(0 136 68)");
+      await page.waitForFunction(() => document.querySelector("#light path")?.getAttribute("fill") === "rgb(0 136 68)");
       expect(errors).toEqual([]);
     } finally { await page.close(); }
   }, 30_000);

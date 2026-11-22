@@ -42,7 +42,7 @@ describe("NSShadow values and view properties", () => {
   });
 
   it("inherits shadow suppression from NSView.appearance", () => {
-    render(<NSEView data-testid="view" shadow={new NSEShadow()} appearance={new NSEAppearance("aqua", { transparency: "reduced" })} />);
+    render(<NSEView data-testid="view" shadow={new NSEShadow()} appearance={new NSEAppearance("light", { transparency: "reduced" })} />);
     expect(screen.getByTestId("view").dataset.nseShadowSuppressed).toBe("true");
   });
 

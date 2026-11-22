@@ -142,6 +142,8 @@ describe("NSEPage tear", () => {
   });
 
   it("never lifts the paper still bound below the ragged line, in any pull", () => {
+    // Points are checked in bulk, since an expect() per point dominates the run.
+    const lifted: string[] = [];
     for (const { binding, corner } of cases) {
       const poses = [
         ...Array.from({ length: 33 }, (_, index) => tear(binding, corner, (index + 1) * 0.02)),
@@ -159,11 +161,12 @@ describe("NSEPage tear", () => {
           const line = getPageTearLine(s, pose.depth, pose.roughness, pose.seed);
           for (const n of [line, line + 0.5, pose.depth + pose.roughness]) {
             const projected = projectPageCurlPoint(page(binding, s, n), curlCylinder);
-            expect(projected.z, `${binding} ${corner} s=${s} n=${n}`).toBe(0);
+            if (!Object.is(projected.z, 0)) lifted.push(`${binding} ${corner} s=${s} n=${n} z=${projected.z}`);
           }
         }
       }
     }
+    expect(lifted).toEqual([]);
   }, 60_000);
 
   it("rolls the sheet without ever stretching the paper", () => {
@@ -243,6 +246,7 @@ describe("NSEPage tear", () => {
 
   it("carries the free sheet off the page and out of sight inside its canvas", () => {
     const focal = Math.max(preset.motion.perspective, Math.max(size.width, size.height) * 2.6);
+    const outside: string[] = [];
     for (const { binding, corner } of cases) {
       const margin = getPageTearMargin(binding, corner, size);
       let seenFading = false;
@@ -268,10 +272,9 @@ describe("NSEPage tear", () => {
               y: size.height / 2 + (carried.y - size.height / 2) * scale
             };
             // Wherever the sheet can still be seen, it is inside the canvas.
-            expect(seen.x, `${binding} ${corner} ${progress.toFixed(2)}`).toBeGreaterThan(-margin.left);
-            expect(seen.x).toBeLessThan(size.width + margin.right);
-            expect(seen.y).toBeGreaterThan(-margin.top);
-            expect(seen.y).toBeLessThan(size.height + margin.bottom);
+            if (!(seen.x > -margin.left && seen.x < size.width + margin.right && seen.y > -margin.top && seen.y < size.height + margin.bottom)) {
+              outside.push(`${binding} ${corner} ${progress.toFixed(2)} at ${seen.x.toFixed(1)},${seen.y.toFixed(1)}`);
+            }
             samples += 1;
             if (seen.x > 0 && seen.x < size.width && seen.y > 0 && seen.y < size.height) overPage += 1;
           }
@@ -282,6 +285,7 @@ describe("NSEPage tear", () => {
       expect(seenFading).toBe(true);
       expect(tear(binding, corner, 1).tear!.flight.opacity).toBe(0);
     }
+    expect(outside).toEqual([]);
   }, 60_000);
 
   it("leaves only the stub once torn", () => {

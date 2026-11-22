@@ -18,18 +18,19 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useNSEAppearance } from "../Appearance/NSEAppearanceProvider";
-import { useNSEContentLayoutProperties } from "../Layout/windowChromeObstructions";
+import { useInPlaceAppearanceProjection, useNSEAppearance, ViewAppearanceBoundary } from "../Appearance/NSEAppearanceProvider";
+import { useNSEContentLayoutProperties } from "../Layout/windowObstructions";
 
 import React, { type KeyboardEventHandler, type ReactNode } from "react";
 import { AppearanceNineSlice } from "../Appearance/NSEAppearanceNineSlice";
 import { getOptionalSmoothSurfaceProps, useSmoothSurface } from "../SmoothSurface";
+import { getSmoothSurfaceThemeHooks } from "../SmoothSurface/smoothSurface";
 
 import type { SmoothSurfaceRequest } from "../SmoothSurface";
-import type { SynCloudOSAppFrameSmoothSurfaceManifest } from "../../SynCloudOS/SynCloudOS";
+import type { WindowSmoothSurfaceConfiguration } from "../../SynCloudOS/SynCloudOS";
 import type { WindowViewProps } from "./windowViewTypes";
 import "./nse-windows.css";
-import { WindowTitlebarHostContext, WindowTitlebarDocumentContext, type WindowTitlebarDocument } from "./windowTitlebarContext";
+import { WindowTitlebarHostContext, WindowTitlebarDocumentContext, type WindowTitlebarDocument, type WindowTitlebarSlots } from "./windowTitlebarContext";
 
 export interface WindowFrameProps extends WindowViewProps {
   readonly hasShadow?: boolean;
@@ -45,12 +46,10 @@ export interface WindowFrameProps extends WindowViewProps {
   readonly arrowEdge?: string;
   readonly arrowAlignment?: string;
   readonly onKeyDown?: KeyboardEventHandler<HTMLElement>;
-  /** Ref callback receiving the view-rendered custom-titlebar slot node. The host owns the node from this callback — no imperative DOM creation. */
-  readonly customTitleBarSlotRef?: (node: HTMLDivElement | null) => void;
 }
 
 
-const windowSmoothSurfaceRequest = (value: SynCloudOSAppFrameSmoothSurfaceManifest | null): SmoothSurfaceRequest => {
+const windowSmoothSurfaceRequest = (value: WindowSmoothSurfaceConfiguration | null): SmoothSurfaceRequest => {
   if (value === null) return "off";
   if (typeof value === "object") {
     const { physicality, ...rest } = value;
@@ -62,12 +61,29 @@ const windowSmoothSurfaceRequest = (value: SynCloudOSAppFrameSmoothSurfaceManife
   return value;
 };
 
-export function WindowView({
+export function WindowView(props: WindowFrameProps) {
+  const [titlebarDocument, setTitlebarDocument] = React.useState<WindowTitlebarDocument | null>(null);
+  const [slots, setSlots] = React.useState<WindowTitlebarSlots | null>(null);
+  const titlebarHost = React.useMemo(() => ({ leadingAccessories: null, trailingAccessories: null,
+    ...slots, setDocument: setTitlebarDocument, setSlots }), [slots]);
+
+  return (
+    <ViewAppearanceBoundary appearance={titlebarDocument?.appearance ?? null} projectBoundary={false}>
+      <WindowTitlebarHostContext.Provider value={titlebarHost}>
+        <WindowFrame {...props} titlebarDocument={titlebarDocument} />
+      </WindowTitlebarHostContext.Provider>
+    </ViewAppearanceBoundary>
+  );
+}
+
+function WindowFrame({
   record,
   presentation,
   zoomed = false,
   blocked,
   dirty,
+  detached = false,
+  nativeChrome = false,
   hasShadow = false,
   className = "",
   titleBar,
@@ -79,35 +95,34 @@ export function WindowView({
   arrowEdge,
   arrowAlignment,
   onKeyDown,
-  customChromeActive,
-  customTitleBarSlotRef,
   children,
-}: WindowFrameProps) {
+  titlebarDocument,
+}: WindowFrameProps & { readonly titlebarDocument: WindowTitlebarDocument | null }) {
   // Hooks precede the closed/hidden early return. The clip-path hook writes
   // real squircle geometry onto the surface element; the className/style
   // props carry the radius paint underneath. Shadow and resize handles are
   // siblings of the surface, so clipping never touches them; content scrolls
   // inside the clipped surface exactly like mounted app views.
   const appearance = useNSEAppearance();
+  const projection = useInPlaceAppearanceProjection();
+  const appearanceProjection = titlebarDocument?.appearance ? projection : undefined;
   const contentLayoutProperties = useNSEContentLayoutProperties();
-  const [titlebarDocument, setTitlebarDocument] = React.useState<WindowTitlebarDocument | null>(null);
-  const titlebarHost = React.useMemo(() => ({ setDocument: setTitlebarDocument, leadingAccessories: null, trailingAccessories: null }), []);
   const [surfaceNode, setSurfaceNode] = React.useState<HTMLDivElement | null>(null);
-  const smoothSurfaceRequest = windowSmoothSurfaceRequest(record.smoothSurface ?? null);
+  const smoothSurfaceRequest = detached ? "off" : windowSmoothSurfaceRequest(record.smoothSurface ?? null);
   useSmoothSurface(surfaceNode, smoothSurfaceRequest);
   if (record.state !== "open" || !presentation.visible) return null;
   const modal = record.role === "modal" || record.role === "sheet";
   const resolvedSemanticRole = semanticRole ?? (record.role === "borderless" ? "presentation" : "dialog");
-  const labelledTitlePresent = Boolean(titleBar || (customChromeActive && customTitleBarSlotRef));
+  const labelledTitlePresent = Boolean(titleBar);
   const fallbackAccessibleName = resolvedSemanticRole === "dialog" && !accessibleName && !labelledTitlePresent
     ? record.title
     : accessibleName;
 
   const smoothSurfaceProps = getOptionalSmoothSurfaceProps(smoothSurfaceRequest);
   return (
-    <WindowTitlebarHostContext.Provider value={titlebarHost}>
     <section
-      data-nse-control="window" data-nse-part="background" data-nse-role={record.role} data-nse-type={record.chromeMode} data-nse-style={customChromeActive ? "custom" : undefined} data-nse-edge={arrowEdge} data-nse-alignment={arrowAlignment} data-nse-chrome={record.role === "hud" ? "hud" : appearance.chrome} data-nse-key-window={record.isKey ? undefined : "false"} data-nse-toolbar-style={titlebarDocument?.toolbarStyle ?? "automatic"}
+      {...appearanceProjection}
+      data-nse-control="window" data-nse-part="background" data-nse-role={record.role} data-nse-type={record.role === "borderless" ? "frameless" : "system"} data-nse-edge={arrowEdge} data-nse-alignment={arrowAlignment} data-nse-chrome={record.role === "hud" ? "hud" : appearance.chrome} data-nse-key-window={record.isKey ? undefined : "false"} data-nse-toolbar-style={titlebarDocument?.toolbarStyle ?? "automatic"}
       className={["nse-window-view", className].filter(Boolean).join(" ")}
       role={resolvedSemanticRole}
       aria-label={fallbackAccessibleName}
@@ -123,12 +138,13 @@ export function WindowView({
       data-window-main={record.isMain ? "true" : "false"}
       data-window-dirty={dirty ? "true" : "false"}
       data-window-presentation={presentation.kind}
+      data-window-detached={detached ? "true" : undefined}
+      data-window-native-chrome={nativeChrome ? "true" : undefined}
       data-window-zoomed={zoomed ? "true" : "false"}
       data-window-level={record.level}
       data-window-blocked={blocked ? "true" : "false"}
       data-nse-enabled={blocked ? "false" : undefined}
-      data-window-chrome-mode={record.chromeMode}
-      data-window-custom-chrome-active={customChromeActive ? "true" : "false"}
+      data-window-frame={record.role === "borderless" ? "frameless" : "system"}
 
       data-window-parent-id={record.parentWindowControllerId ?? undefined}
       data-window-anchor-id={record.anchor?.id}
@@ -140,13 +156,15 @@ export function WindowView({
       data-window-arrow-edge={arrowEdge}
       data-window-arrow-alignment={arrowAlignment}
       style={{
+        ...appearanceProjection?.style,
         left: 0,
         top: 0,
         width: "100%",
         height: "100%",
+        ...(detached ? { borderRadius: 0 } : {}),
       }}
     >
-      {hasShadow ? (
+      {hasShadow && !detached ? (
         <AppearanceNineSlice
           kind="window-shadow"
           className="nse-window__shadow-layer"
@@ -155,23 +173,18 @@ export function WindowView({
       ) : null}
       <div
         ref={setSurfaceNode}
+        {...getSmoothSurfaceThemeHooks(smoothSurfaceRequest)}
         data-nse-part="bezel" className={["nse-window__surface", smoothSurfaceProps.className].filter(Boolean).join(" ")}
-        style={smoothSurfaceProps.style}
+        data-full-size-content={titlebarDocument?.fullSizeContentView ? "" : undefined}
+        style={{ ...smoothSurfaceProps.style,
+          ...(titlebarDocument?.backgroundColour ? { backgroundColor: titlebarDocument.backgroundColour } : titlebarDocument?.isOpaque === false ? { backgroundColor: "transparent" } : {}),
+          ...(detached ? { borderRadius: 0 } : titlebarDocument?.cornerRadius != null ? { borderRadius: titlebarDocument.cornerRadius } : {}) }}
         data-window-surface=""
       >
         <WindowTitlebarDocumentContext.Provider value={titlebarDocument}>{titleBar}</WindowTitlebarDocumentContext.Provider>
-        {customTitleBarSlotRef ? (
-          <div
-            ref={customTitleBarSlotRef}
-            data-nse-part="header" className="nse-window__custom-titlebar"
-            data-window-titlebar="custom"
-            role="presentation"
-          />
-        ) : null}
         <div data-nse-part="content" className="nse-window__content" data-window-content="" style={contentLayoutProperties}>{children}</div>
       </div>
       {resizeHandles}
     </section>
-    </WindowTitlebarHostContext.Provider>
   );
 }

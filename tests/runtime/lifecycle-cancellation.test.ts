@@ -111,7 +111,7 @@ describe("runtime lifecycle cancellation", () => {
       },
       statechart: { currentState: before.statechart.currentState },
     });
-    expect(runtime.windows.list()).toEqual([]);
+    expect(runtime.windows.list().map(({ record }) => record.fullScreen)).toEqual(["on"]);
   });
 
   it("does not capture expected bundle-load cancellation as an app launch failure", async () => {

@@ -1,5 +1,5 @@
 
-@layer nse.atmo {
+@layer nse.structure {
 @scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
@@ -42,49 +42,33 @@
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
   min-width: 168px; max-width: min(360px, calc(100% - 32px)); padding: 22px 24px 18px;
   border-radius: 14px;
-  color: #fff;
-  background: rgba(18, 20, 24, 0.78);
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
-  backdrop-filter: blur(14px) saturate(140%);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12) inset, 0 18px 48px -12px rgba(0, 0, 0, 0.6);
   text-align: center;
   pointer-events: auto;
   animation: chronosphere-bezel-in 180ms ease-out both;
 }
-.chronosphere-preparation[data-state="loading"] .chronosphere-preparation-bezel,
-:where(:scope):is(.chronosphere-preparation[data-state="loading"]) .chronosphere-preparation-bezel { animation-delay: 120ms; }
+.chronosphere-preparation[data-nse-state="loading"] .chronosphere-preparation-bezel,
+:where(:scope):is(.chronosphere-preparation[data-nse-state="loading"]) .chronosphere-preparation-bezel { animation-delay: 120ms; }
 .chronosphere-preparation p,
-:where(:scope):is(.chronosphere-preparation) p { margin: 0; color: inherit; }
+:where(:scope):is(.chronosphere-preparation) p { margin: 0; }
 .chronosphere-preparation-title,
-:where(:scope):is(.chronosphere-preparation-title) { font-size: 13px; font-weight: 600; text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5); }
+:where(:scope):is(.chronosphere-preparation-title) { font-size: 13px; font-weight: 600; }
 .chronosphere-preparation-error,
-:where(:scope):is(.chronosphere-preparation-error) { font-size: 12px; line-height: 1.4; color: rgba(255, 255, 255, 0.72) !important; }
+:where(:scope):is(.chronosphere-preparation-error) { font-size: 12px; line-height: 1.4; }
 .chronosphere-preparation-actions,
 :where(:scope):is(.chronosphere-preparation-actions) { display: flex; gap: 8px; margin-top: 4px; }
-@keyframes chronosphere-bezel-in { from { opacity: 0; transform: scale(0.94); } to { opacity: 1; transform: none; } }
+@keyframes chronosphere-bezel-in { from { --chronosphere-preparation-opacity: 0; transform: scale(0.94); } to { --chronosphere-preparation-opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .chronosphere-preparation-bezel,
 :where(:scope):is(.chronosphere-preparation-bezel) { animation: none; } }
 
 .chronosphere,
 :where(:scope):is(.chronosphere) {
-  --chrono-ink: #eaf2f8;
-  --chrono-ink-soft: rgba(220, 234, 244, 0.62);
-  --chronosphere-tint: rgba(80, 255, 216, 1);
-  --chronosphere-tint-soft: rgba(80, 255, 216, 0.22);
   position: absolute;
   inset: 0;
   overflow: hidden;
-  background: #02050a;
-  color: var(--chrono-ink);
   font-family: inherit;
   /* The camera projects every plane explicitly onto the Vortex core. */
   isolation: isolate;
   -webkit-font-smoothing: antialiased;
-}
-
-.chronosphere:focus,
-:where(:scope):is(.chronosphere:focus) {
-  outline: none;
 }
 
 .chronosphere-vortex,
@@ -101,9 +85,6 @@
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  background:
-    radial-gradient(120% 70% at 50% 14%, transparent 40%, rgba(2, 5, 10, 0.45) 100%),
-    linear-gradient(180deg, transparent 46%, rgba(2, 5, 10, 0.72) 100%);
 }
 
 /* --- Receding card stack --------------------------------------------------- */
@@ -132,8 +113,6 @@
   aspect-ratio: 9 / 17;
   margin: 0;
   padding: 0;
-  border: none;
-  background: transparent;
   transform: translate(-50%, -50%);
   transform-style: preserve-3d;
   transform-origin: 50% 50%;
@@ -143,24 +122,11 @@
   pointer-events: auto;
   text-align: left;
   border-radius: 22px;
-  box-shadow:
-    0 26px 60px -24px rgba(0, 0, 0, 0.8),
-    0 0 0 1px rgba(255, 255, 255, 0.06),
-    /* bright top edge — light from above, the Time Machine window depth cue */
-    inset 0 1.5px 0 rgba(255, 255, 255, 0.48),
-    inset 0 18px 28px -22px rgba(255, 255, 255, 0.44);
   overflow: hidden;
-  color: var(--chrono-ink);
 }
 
-.chronosphere-card[data-active="true"],
-:where(:scope):is(.chronosphere-card[data-active="true"]) {
-  box-shadow:
-    0 34px 80px -22px rgba(0, 0, 0, 0.85),
-    0 0 0 1px rgba(255, 255, 255, 0.14),
-    0 0 60px -10px var(--chronosphere-tint-soft),
-    inset 0 2px 0 rgba(255, 255, 255, 0.62),
-    inset 0 20px 30px -22px rgba(255, 255, 255, 0.52);
+.chronosphere-card[data-nse-selected],
+:where(:scope):is(.chronosphere-card[data-nse-selected]) {
   cursor: default;
 }
 
@@ -175,11 +141,6 @@
   transform-origin: 50% 50%;
   border-radius: 22px;
   pointer-events: none;
-  background: linear-gradient(180deg, rgba(26, 34, 44, 0.9), rgba(8, 12, 18, 0.94));
-  box-shadow:
-    0 20px 50px -26px rgba(0, 0, 0, 0.85),
-    0 0 0 1px rgba(255, 255, 255, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18);
 
 }
 
@@ -194,7 +155,6 @@
 
 .chronosphere-card:focus-visible,
 :where(:scope):is(.chronosphere-card:focus-visible) {
-  outline: 2px solid var(--chronosphere-tint);
   outline-offset: 3px;
 }
 
@@ -204,18 +164,6 @@
   position: absolute;
   inset: 0;
   z-index: 0;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent 26%),
-    radial-gradient(120% 80% at 50% 0%, var(--chronosphere-tint-soft), transparent 64%),
-    linear-gradient(180deg, #18222e 0%, #0b1119 60%, #060a10 100%);
-}
-
-.chronosphere-card[data-active="true"] .chronosphere-card-surface,
-:where(:scope):is(.chronosphere-card[data-active="true"]) .chronosphere-card-surface {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.2), transparent 24%),
-    radial-gradient(130% 90% at 50% -6%, var(--chronosphere-tint-soft), transparent 60%),
-    linear-gradient(180deg, #1d2a39 0%, #101824 58%, #080d14 100%);
 }
 
   /* Captured live screen (the host surface / Webspring) shown on the present
@@ -225,10 +173,6 @@
   position: absolute;
   inset: 0;
   z-index: 1;
-  background-color: #05070b;
-  background-position: center center;
-  background-size: cover;
-  background-repeat: no-repeat;
 }
 
 .chronosphere-card-shot::after,
@@ -237,12 +181,6 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.045) 9%, transparent 24%),
-    linear-gradient(180deg, rgba(0, 0, 0, 0) 68%, rgba(0, 0, 0, 0.18) 100%);
-  box-shadow:
-    inset 0 2px 0 rgba(255, 255, 255, 0.58),
-    inset 0 18px 30px -22px rgba(255, 255, 255, 0.62);
 }
 
 .chronosphere-card-statusbar,
@@ -257,9 +195,6 @@
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.01em;
-  color: rgba(255, 255, 255, 0.92);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0));
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
 }
 
 .chronosphere-card-status-right,
@@ -280,9 +215,7 @@
 .chronosphere-signal i,
 :where(:scope):is(.chronosphere-signal) i {
   width: 3px;
-  background: currentColor;
   border-radius: 1px;
-  opacity: 0.92;
 }
 .chronosphere-signal i:nth-child(1),
 :where(:scope):is(.chronosphere-signal) i:nth-child(1) { height: 4px; }
@@ -297,7 +230,6 @@
 :where(:scope):is(.chronosphere-version-chip) {
   font-size: 10px;
   font-weight: 700;
-  opacity: 0.8;
 }
 
 .chronosphere-battery,
@@ -305,9 +237,7 @@
   position: relative;
   width: 20px;
   height: 10px;
-  border: 1px solid currentColor;
   border-radius: 3px;
-  opacity: 0.92;
 }
 .chronosphere-battery::before,
 :where(:scope):is(.chronosphere-battery)::before {
@@ -315,7 +245,6 @@
   position: absolute;
   inset: 1.5px;
   width: 70%;
-  background: currentColor;
   border-radius: 1px;
 }
 .chronosphere-battery::after,
@@ -327,7 +256,6 @@
   transform: translateY(-50%);
   width: 2px;
   height: 4px;
-  background: currentColor;
   border-radius: 0 1px 1px 0;
 }
 
@@ -347,8 +275,6 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: var(--chronosphere-tint);
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
 }
 
 .chronosphere-card-title,
@@ -356,7 +282,6 @@
   font-size: 17px;
   font-weight: 700;
   line-height: 1.2;
-  color: #fff;
 }
 
 .chronosphere-card-summary,
@@ -364,7 +289,6 @@
   margin-top: 2px;
   font-size: 12.5px;
   line-height: 1.45;
-  color: var(--chrono-ink-soft);
 }
 
 .chronosphere-card-live,
@@ -376,10 +300,7 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #04140f;
-  background: var(--chronosphere-tint);
   border-radius: 999px;
-  box-shadow: 0 0 18px -2px var(--chronosphere-tint);
 }
 
 /* --- Pages: faces, paper, and the versions layout -------------------------- */
@@ -395,31 +316,14 @@
   overflow: hidden;
   transform-origin: 0 0;
   pointer-events: none;
-  color: initial;
   text-align: initial;
 }
 
 /* Paper is a sheet, not a window: no glass rim lit from above, only the shadow a page casts
    when it is lifted off the desk, and a hairline so a white page holds its edge on white. */
-.chronosphere-card[data-material="paper"],
-:where(:scope):is(.chronosphere-card[data-material="paper"]),
-.chronosphere-card[data-material="paper"][data-active="true"],
-:where(:scope):is(.chronosphere-card[data-material="paper"][data-active="true"]) {
-  background: #fdfdfb;
-  box-shadow:
-    0 30px 60px -18px rgba(0, 0, 0, 0.78),
-    0 10px 22px -10px rgba(0, 0, 0, 0.55),
-    0 0 0 1px rgba(0, 0, 0, 0.22);
-}
 
-.chronosphere-card[data-material="paper"] .chronosphere-card-shot::after,
-:where(:scope):is(.chronosphere-card[data-material="paper"]) .chronosphere-card-shot::after { display: none; }
-
-.chronosphere-backframe[data-material="paper"],
-:where(:scope):is(.chronosphere-backframe[data-material="paper"]) {
-  background: linear-gradient(180deg, #1a2828, #080d0f 18%);
-  box-shadow: inset 0 2px 0 rgba(230, 255, 250, .7), inset 0 7px 9px -7px #fff, 0 0 0 1px #050909;
-}
+.chronosphere-card[data-nse-material="paper"] .chronosphere-card-shot::after,
+:where(:scope):is(.chronosphere-card[data-nse-material="paper"]) .chronosphere-card-shot::after { display: none; }
 
 /* The present page stands on the floor of the room, in front of everything but the chrome. */
 .chronosphere-present,
@@ -441,9 +345,6 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: rgba(2, 5, 10, 0.55);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
 }
 
 .chronosphere-detail-card,
@@ -453,18 +354,6 @@
   overflow-y: auto;
   padding: 26px 26px 22px;
   border-radius: 20px;
-  background: linear-gradient(180deg, rgba(28, 36, 47, 0.96), rgba(14, 20, 28, 0.96));
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 30px 90px -30px rgba(0, 0, 0, 0.85), 0 0 50px -16px var(--chronosphere-tint);
-}
-
-.chronosphere-detail-label,
-:where(:scope):is(.chronosphere-detail-label) {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--chronosphere-tint);
 }
 
 .chronosphere-detail-title,
@@ -473,13 +362,11 @@
   font-size: 22px;
   font-weight: 700;
   line-height: 1.15;
-  color: #fff;
 }
 
 .chronosphere-detail-date,
 :where(:scope):is(.chronosphere-detail-date) {
   font-size: 12.5px;
-  color: var(--chrono-ink-soft);
 }
 
 .chronosphere-detail-body,
@@ -487,43 +374,17 @@
   margin: 16px 0;
   font-size: 14px;
   line-height: 1.6;
-  color: rgba(226, 236, 244, 0.88);
-}
-
-.chronosphere-detail-list,
-:where(:scope):is(.chronosphere-detail-list) {
-  margin: 0 0 20px;
-  padding-left: 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  font-size: 13px;
-  line-height: 1.4;
-  color: var(--chrono-ink-soft);
-}
-
-.chronosphere-detail-list li::marker,
-:where(:scope):is(.chronosphere-detail-list) li::marker {
-  color: var(--chronosphere-tint);
 }
 
 .chronosphere-detail-close,
 :where(:scope):is(.chronosphere-detail-close) {
   appearance: none;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
   font: inherit;
   font-weight: 600;
   padding: 9px 20px;
   border-radius: 999px;
   cursor: pointer;
   transition: background 180ms ease;
-}
-
-.chronosphere-detail-close:hover,
-:where(:scope):is(.chronosphere-detail-close:hover) {
-  background: rgba(255, 255, 255, 0.16);
 }
 
 /* --- Entry/exit curtain (host surface gliding away) ------------------------ */
@@ -536,53 +397,22 @@
   inset: 0;
   z-index: 50;
   transform: translate3d(0, 0, 0);
-
-  background:
-    radial-gradient(140% 60% at 50% 0%, rgba(36, 44, 54, 0.6), transparent 60%),
-    linear-gradient(180deg, #0c1118 0%, #070b11 60%, #05080d 100%);
-  box-shadow: 0 30px 60px -10px rgba(0, 0, 0, 0.8);
   pointer-events: none;
 }
 
-.chronosphere-curtain[data-captured="true"],
-:where(:scope):is(.chronosphere-curtain[data-captured="true"]) {
-  background-position: center top;
-  background-size: cover;
-  background-repeat: no-repeat;
-}
-
-.chronosphere[data-stage="open"] .chronosphere-curtain,
-:where(:scope):is(.chronosphere[data-stage="open"]) .chronosphere-curtain {
+.chronosphere[data-nse-state="open"] .chronosphere-curtain,
+:where(:scope):is(.chronosphere[data-nse-state="open"]) .chronosphere-curtain {
   transform: translate3d(0, 104%, 0);
 
 }
 
-.chronosphere[data-stage="leaving"] .chronosphere-curtain,
-:where(:scope):is(.chronosphere[data-stage="leaving"]) .chronosphere-curtain {
+.chronosphere[data-nse-state="leaving"] .chronosphere-curtain,
+:where(:scope):is(.chronosphere[data-nse-state="leaving"]) .chronosphere-curtain {
   transform: translate3d(0, 0, 0);
 
 }
 
 /* The cosmos + chrome ease in as the curtain clears. */
-.chronosphere-scrim,
-:where(:scope):is(.chronosphere-scrim),
-.chronosphere-rail,
-:where(:scope):is(.chronosphere-rail),
-.chronosphere-controls,
-:where(:scope):is(.chronosphere-controls) {
-
-}
-
-.chronosphere[data-stage="entering"] .chronosphere-rail,
-:where(:scope):is(.chronosphere[data-stage="entering"]) .chronosphere-rail,
-.chronosphere[data-stage="entering"] .chronosphere-controls,
-:where(:scope):is(.chronosphere[data-stage="entering"]) .chronosphere-controls,
-.chronosphere[data-stage="leaving"] .chronosphere-rail,
-:where(:scope):is(.chronosphere[data-stage="leaving"]) .chronosphere-rail,
-.chronosphere[data-stage="leaving"] .chronosphere-controls,
-:where(:scope):is(.chronosphere[data-stage="leaving"]) .chronosphere-controls {
-  opacity: 0;
-}
 
 /* --- Landscape / desktop tuning -------------------------------------------- */
 
@@ -616,13 +446,6 @@
 
 /* --- Portrait tuning: keep the "Now" tick clear of the control pill -------- */
 
-@media (orientation: portrait) {
-  .chronosphere-rail-ticks,
-:where(:scope):is(.chronosphere-rail-ticks) {
-    inset: 4% 0 calc(4% + clamp(80px, 14vh, 112px)) 0;
-  }
-}
-
 /* Honour safe-area insets on notched phones for the bottom pill + rail. */
 @supports (padding: var(--nse-screen-safe-area-inset-bottom)) {
   .chronosphere-controls,
@@ -632,43 +455,44 @@
 }
 
 /* Dark archive planes remain visible all the way to the shared vanishing point. */
-.chronosphere-card[data-placeholder="true"],
-:where(:scope):is(.chronosphere-card[data-placeholder="true"]),
-.chronosphere-backframe,
-:where(:scope):is(.chronosphere-backframe) {
-  background: linear-gradient(var(--chrono-depth-light, transparent), var(--chrono-depth-light, transparent)), linear-gradient(180deg, #1c292a, #080d0f 18%);
-  box-shadow: inset 0 2px 0 rgba(225,255,251,.65), inset 0 7px 10px -7px #fff, 0 0 0 1px #050a0b;
-}
-.chronosphere-depth-surface,
-:where(:scope):is(.chronosphere-depth-surface) { position:absolute; inset:0; background:inherit; box-shadow:inherit; }
 .chronosphere-backframe,
 :where(:scope):is(.chronosphere-backframe) { border-radius: 3px; }
 .chronosphere-card,
 :where(:scope):is(.chronosphere-card) { will-change: auto; transform-style: flat; }
 .chronosphere[data-travelling="true"] .chronosphere-card,
 :where(:scope):is(.chronosphere[data-travelling="true"]) .chronosphere-card { will-change: transform, opacity; }
-.chronosphere-card[data-active="false"],
-:where(:scope):is(.chronosphere-card[data-active="false"]) { cursor: pointer; }
+.chronosphere-card:not([data-nse-selected]),
+:where(:scope):is(.chronosphere-card:not([data-nse-selected])) { cursor: pointer; }
 .chronosphere-pane-caption,
 :where(:scope):is(.chronosphere-pane-caption) {
   position:absolute; z-index:4; display:flex; flex-direction:column; align-items:center; gap:4px;
-  transform:translateX(-50%); width:34%; pointer-events:none; text-align:center;
-  text-shadow:0 2px 3px #000; color:#edf2f3; font-size:13px;
+  transform:translateX(-50%); width:34%; pointer-events:none; text-align:center; font-size:13px;
 }
 .chronosphere-pane-caption strong,
 :where(:scope):is(.chronosphere-pane-caption) strong { font-weight:600; }
 .chronosphere-pane-caption span,
-:where(:scope):is(.chronosphere-pane-caption) span { font-size:11px; color:#b3bebf; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+:where(:scope):is(.chronosphere-pane-caption) span { font-size:11px; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .chronosphere-controls,
 :where(:scope):is(.chronosphere-controls) { position:absolute; z-index:5; pointer-events:none; }
 .chronosphere-navigation,
 :where(:scope):is(.chronosphere-navigation) {
   right:clamp(110px, 12vw, 240px); bottom:90px; display:flex; flex-direction:column; gap:0;
 }
+/* Chronosphere's own raised arrows, standing on the shelf's ground plane. */
 .chronosphere-time-arrow,
-:where(:scope):is(.chronosphere-time-arrow) { width:88px; height:54px; pointer-events:auto; }
+:where(:scope):is(.chronosphere-time-arrow) {
+  appearance:none; width:88px; height:54px; padding:0; cursor:pointer;
+  pointer-events:auto;
+  transition:filter 120ms, opacity 120ms;
+}
+.chronosphere-time-arrow svg,
+:where(:scope):is(.chronosphere-time-arrow) svg { width:100%; height:100%; overflow:visible; }
 .chronosphere-time-arrow-present,
-:where(:scope):is(.chronosphere-time-arrow-present) { margin-top:7px; margin-left:34px; }
+:where(:scope):is(.chronosphere-time-arrow-present) { margin-top:-7px; margin-left:34px; }
+.chronosphere-time-arrow:disabled,
+:where(:scope):is(.chronosphere-time-arrow:disabled) { cursor:default; }
+.chronosphere-time-arrow:focus-visible,
+:where(:scope):is(.chronosphere-time-arrow:focus-visible) { outline-offset:5px; border-radius:5px; }
 /* Glass, lettering and control segments share one projected surface. */
 .chronosphere-floor,
 :where(:scope):is(.chronosphere-floor) {
@@ -680,18 +504,15 @@
 .chronosphere-floor-glass,
 :where(:scope):is(.chronosphere-floor-glass) {
   position:absolute; inset:0; pointer-events:none; border-radius:13px 13px 5px 5px;
-  background:linear-gradient(180deg, rgba(220,232,232,.48), rgba(102,113,114,.35) 22%, rgba(21,29,31,.78) 49%, rgba(4,9,11,.95) 53%, rgba(32,42,44,.88));
-  box-shadow:inset 0 1px 1px rgba(255,255,255,.8), inset 0 -2px 1px rgba(225,242,243,.48), 0 3px 0 #151e21, 0 4px 1px rgba(213,239,239,.5), 0 12px 24px #000;
   overflow:hidden;
 }
 .chronosphere-floor .chronosphere-floor-action.nse-control-button,
 :where(:scope):is(.chronosphere-floor) .chronosphere-floor-action.nse-control-button,
 .chronosphere-floor .chronosphere-floor-action,
 :where(:scope):is(.chronosphere-floor) .chronosphere-floor-action {
-  position:relative; z-index:2; pointer-events:auto; align-self:stretch; min-height:0; height:100%; margin:0;
-  border:0; border-image:none; border-radius:0; box-shadow:none; background:transparent; color:#fff;
+  position:relative; z-index:2; pointer-events:auto; align-self:stretch; min-height:0; height:100%; margin:0; border-radius:0;
   font-family:inherit; font-size:15px; font-style:normal; font-weight:600; line-height:1.2;
-  padding:0 18px; text-shadow:0 2px 3px #000; transform:none;
+  padding:0 18px; transform:none;
 }
 .chronosphere-floor .chronosphere-floor-action .nse-control-button-label,
 :where(:scope):is(.chronosphere-floor) .chronosphere-floor-action .nse-control-button-label { font:inherit; }
@@ -700,47 +521,23 @@
 .chronosphere-floor .chronosphere-floor-action::after,
 :where(:scope):is(.chronosphere-floor) .chronosphere-floor-action::after { display:none; }
 .chronosphere-floor .chronosphere-floor-action.chronosphere-floor-exit,
-:where(:scope):is(.chronosphere-floor) .chronosphere-floor-action.chronosphere-floor-exit { border-right:1px solid rgba(226,245,248,.25); border-radius:13px 0 0 5px; }
+:where(:scope):is(.chronosphere-floor) .chronosphere-floor-action.chronosphere-floor-exit { border-radius:13px 0 0 5px; }
 .chronosphere-floor .chronosphere-floor-action.chronosphere-floor-restore,
-:where(:scope):is(.chronosphere-floor) .chronosphere-floor-action.chronosphere-floor-restore { border-left:1px solid rgba(226,245,248,.25); border-radius:0 13px 5px 0; }
-.chronosphere-floor .chronosphere-floor-action:hover:not(:disabled),
-:where(:scope):is(.chronosphere-floor) .chronosphere-floor-action:hover:not(:disabled),
-.chronosphere-floor-date:hover,
-:where(:scope):is(.chronosphere-floor-date:hover) {
-  background:linear-gradient(180deg, rgba(240,255,255,.16), rgba(240,255,255,.025) 52%, rgba(240,255,255,.09)); color:#fff;
-}
-.chronosphere-floor .chronosphere-floor-action:active:not(:disabled),
-:where(:scope):is(.chronosphere-floor) .chronosphere-floor-action:active:not(:disabled),
-.chronosphere-floor-date:active,
-:where(:scope):is(.chronosphere-floor-date:active) {
-  background:rgba(0,0,0,.25); box-shadow:inset 0 2px 8px rgba(0,0,0,.45);
-}
-.chronosphere-floor .chronosphere-floor-action:disabled,
-:where(:scope):is(.chronosphere-floor) .chronosphere-floor-action:disabled { opacity:.35; }
-.chronosphere-floor .chronosphere-floor-action:focus,
-:where(:scope):is(.chronosphere-floor) .chronosphere-floor-action:focus,
-.chronosphere-floor-date:focus,
-:where(:scope):is(.chronosphere-floor-date:focus) { outline:none; }
-.chronosphere-floor .chronosphere-floor-action:focus-visible,
-:where(:scope):is(.chronosphere-floor) .chronosphere-floor-action:focus-visible,
-.chronosphere-floor-date:focus-visible,
-:where(:scope):is(.chronosphere-floor-date:focus-visible) {
-  outline:none; box-shadow:inset 0 0 0 2px rgba(222,252,255,.8), inset 0 0 18px rgba(186,239,249,.2);
-}
+:where(:scope):is(.chronosphere-floor) .chronosphere-floor-action.chronosphere-floor-restore { border-radius:0 13px 5px 0; }
 .chronosphere-floor-date,
 :where(:scope):is(.chronosphere-floor-date) {
-  appearance:none; border:0; background:none; color:#fff; font-family:inherit; text-shadow:0 2px 3px #000;
+  appearance:none; font-family:inherit;
   position:relative; z-index:2; pointer-events:auto; display:flex; flex-direction:column; align-items:center; justify-content:center;
   gap:1px; cursor:pointer; min-width:0; padding:0 8px;
 }
 .chronosphere-floor-date strong,
 :where(:scope):is(.chronosphere-floor-date) strong { font-size:17px; font-weight:600; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; max-width:100%; }
 .chronosphere-floor-date span,
-:where(:scope):is(.chronosphere-floor-date) span { font-size:10px; color:#c2cbcd; }
-.chronosphere[data-stage="entering"] .chronosphere-pane-caption,
-:where(:scope):is(.chronosphere[data-stage="entering"]) .chronosphere-pane-caption,
-.chronosphere[data-stage="leaving"] .chronosphere-pane-caption,
-:where(:scope):is(.chronosphere[data-stage="leaving"]) .chronosphere-pane-caption { visibility:hidden; }
+:where(:scope):is(.chronosphere-floor-date) span { font-size:10px; }
+.chronosphere[data-nse-state="entering"] .chronosphere-pane-caption,
+:where(:scope):is(.chronosphere[data-nse-state="entering"]) .chronosphere-pane-caption,
+.chronosphere[data-nse-state="leaving"] .chronosphere-pane-caption,
+:where(:scope):is(.chronosphere[data-nse-state="leaving"]) .chronosphere-pane-caption { visibility:hidden; }
 @media (max-width:759px) {
   .chronosphere-pane-caption,
 :where(:scope):is(.chronosphere-pane-caption) { width:64%; }
@@ -765,7 +562,22 @@
   .chronosphere-time-arrow,
 :where(:scope):is(.chronosphere-time-arrow) { width:50px; height:36px; }
 }
+/* Parts that supply their own focus ring reset the browser outline. */
+.chronosphere:focus,
+:where(:scope):is(.chronosphere:focus),
+.chronosphere-floor .chronosphere-floor-action:focus,
+:where(:scope):is(.chronosphere-floor) .chronosphere-floor-action:focus,
+.chronosphere-floor-date:focus,
+:where(:scope):is(.chronosphere-floor-date:focus) {
+  outline: none;
+}
 
 }
 
+}
+/* The framework times the HUD entrance while the theme owns the bezel paint. */
+@property --chronosphere-preparation-opacity {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
 }

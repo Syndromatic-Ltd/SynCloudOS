@@ -34,6 +34,7 @@ export function LoginCheckbox({
   id,
   disabled,
   onChange,
+  style,
   ...props
 }: LoginCheckboxProps) {
   const feedback = useNSEFeedback();
@@ -42,10 +43,12 @@ export function LoginCheckbox({
   const inputId = id ?? generatedId;
 
   return (
-    <label className={`nse-checkbox ${disabled ? "is-disabled" : ""} ${className}`} htmlFor={inputId}>
-      <span className="nse-checkbox-control">
+    <label data-nse-control="login-window" data-nse-part="button" data-nse-enabled={disabled ? "false" : undefined} className={`nse-checkbox ${disabled ? "is-disabled" : ""} ${className}`} htmlFor={inputId}>
+      <span data-nse-part="content" className="nse-checkbox-control">
         <input
           id={inputId}
+          data-nse-part="field"
+          style={{ opacity: 0, ...style }}
           type="checkbox"
           disabled={disabled}
           onChange={(event) => {
@@ -54,9 +57,9 @@ export function LoginCheckbox({
           }}
           {...props}
         />
-        <span className="nse-checkbox-art" aria-hidden="true">
-          <img className="nse-checkbox-art-unchecked" src={loginWindowAssets.checkboxUnchecked} alt="" draggable={false} />
-          <img className="nse-checkbox-art-checked" src={loginWindowAssets.checkboxChecked} alt="" draggable={false} />
+        <span data-nse-part="indicator" className="nse-checkbox-art" aria-hidden="true">
+          <img data-nse-part="image" data-nse-state="off" className="nse-checkbox-art-unchecked" src={loginWindowAssets.checkboxUnchecked} alt="" draggable={false} />
+          <img data-nse-part="image" data-nse-state="on" className="nse-checkbox-art-checked" src={loginWindowAssets.checkboxChecked} alt="" draggable={false} />
         </span>
       </span>
       <span className="nse-checkbox-label">{label}</span>

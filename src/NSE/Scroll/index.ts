@@ -52,10 +52,14 @@ const SETTLE_DURATION_MS = 500;
 const SETTLE_EPSILON_PX = 0.25;
 const SETTLE_DECAY = 7;
 
-function getNow() {
-  return typeof performance !== "undefined" && typeof performance.now === "function"
-    ? performance.now()
+function getNow(view: Window = window) {
+  return typeof view.performance !== "undefined" && typeof view.performance.now === "function"
+    ? view.performance.now()
     : Date.now();
+}
+
+function isDOMElement(value: EventTarget | null): value is Element {
+  return Boolean(value && typeof value === "object" && "nodeType" in value && (value as Node).nodeType === 1 && typeof (value as Element).closest === "function");
 }
 
 function springProgress(elapsedMs: number) {
@@ -108,8 +112,13 @@ export function useNSERubberBandScroll(
     let offsetX = 0;
     let offsetY = 0;
     let settleTimer = 0;
+    let settleTimerView: Window | null = null;
     let settleFrame = 0;
+    let settleFrameView: Window | null = null;
     let ownsGesture = false;
+    // A live scroll view can transfer between opener and detached popout windows
+    // without remounting, so resolve the presenting window dynamically.
+    const currentView = (): Window => node.ownerDocument.defaultView ?? window;
     // Mark the scroll element so the global NSERubberBandProvider doesn't also handle it.
     const previousMark = node.dataset.nseRubberband;
     node.dataset.nseRubberband = "managed";
@@ -117,16 +126,26 @@ export function useNSERubberBandScroll(
     const paint = (nextX: number, nextY: number) => {
       offsetX = Math.abs(nextX) <= SETTLE_EPSILON_PX ? 0 : nextX;
       offsetY = Math.abs(nextY) <= SETTLE_EPSILON_PX ? 0 : nextY;
+      if (offsetY === 0) node.style.removeProperty("--nse-rubber-band-offset-y");
+      else node.style.setProperty("--nse-rubber-band-offset-y", `${offsetY}px`);
       target.style.transition = "none";
       target.style.transform = offsetX === 0 && offsetY === 0
         ? ""
         : horizontalOnly ? `translateX(${offsetX}px)` : verticalOnly ? `translateY(${offsetY}px)` : `translate(${offsetX}px, ${offsetY}px)`;
       offsetCallback.current?.({ x: offsetX, y: offsetY });
     };
+    const clearSettleTimer = () => {
+      if (settleTimer !== 0) {
+        (settleTimerView ?? currentView()).clearTimeout(settleTimer);
+        settleTimer = 0;
+        settleTimerView = null;
+      }
+    };
     const stopSettleLoop = () => {
       if (settleFrame !== 0) {
-        cancelAnimationFrame(settleFrame);
+        (settleFrameView ?? currentView()).cancelAnimationFrame(settleFrame);
         settleFrame = 0;
+        settleFrameView = null;
       }
     };
     const claimGesture = () => {
@@ -139,9 +158,10 @@ export function useNSERubberBandScroll(
       ownsGesture = false;
       NSEScrollViewController.release(node, ownerRef.current);
     };
-    const isNearestOwner = (targetNode: EventTarget | null) => targetNode instanceof Element && targetNode.closest('[data-nse-rubberband="managed"]') === node;
+    const isNearestOwner = (targetNode: EventTarget | null) =>
+      isDOMElement(targetNode) && targetNode.closest('[data-nse-rubberband="managed"]') === node;
     const settle = () => {
-      window.clearTimeout(settleTimer);
+      clearSettleTimer();
       const startX = offsetX;
       const startY = offsetY;
       rawX = 0;
@@ -153,21 +173,26 @@ export function useNSERubberBandScroll(
         return;
       }
 
-      const start = getNow();
+      const view = currentView();
+      const start = getNow(view);
       const tick = () => {
-        const elapsed = getNow() - start;
+        const elapsed = getNow(view) - start;
         const progress = 1 - springProgress(elapsed);
         const nextX = startX * progress;
         const nextY = startY * progress;
         if (elapsed >= SETTLE_DURATION_MS || (Math.abs(nextX) <= SETTLE_EPSILON_PX && Math.abs(nextY) <= SETTLE_EPSILON_PX)) {
           settleFrame = 0;
+          settleFrameView = null;
           paint(0, 0);
           return;
         }
         paint(nextX, nextY);
-        settleFrame = requestAnimationFrame(tick);
+        const nextView = currentView();
+        settleFrameView = nextView;
+        settleFrame = nextView.requestAnimationFrame(tick);
       };
-      settleFrame = requestAnimationFrame(tick);
+      settleFrameView = view;
+      settleFrame = view.requestAnimationFrame(tick);
     };
 
     // Shared rubber-band step for wheel and touch. `delta` is positive when scrolling toward the end
@@ -207,8 +232,10 @@ export function useNSERubberBandScroll(
       const handledY = applyDelta("y", event.deltaY);
       if (!handledX && !handledY) { releaseGesture(); return; }
       event.preventDefault();
-      window.clearTimeout(settleTimer);
-      settleTimer = window.setTimeout(settle, settleDelay);
+      clearSettleTimer();
+      const view = currentView();
+      settleTimerView = view;
+      settleTimer = view.setTimeout(settle, settleDelay);
     };
 
     // Touch: a single finger's drag is fed through the same rubber-band step (touchscreens; trackpads
@@ -256,9 +283,10 @@ export function useNSERubberBandScroll(
       node.removeEventListener("pointerup", handlePointerEnd);
       node.removeEventListener("pointercancel", handlePointerEnd);
       node.removeEventListener("lostpointercapture", handlePointerEnd);
-      window.clearTimeout(settleTimer);
+      clearSettleTimer();
       stopSettleLoop();
       releaseGesture();
+      node.style.removeProperty("--nse-rubber-band-offset-y");
       target.style.transition = "";
       target.style.transform = "";
       offsetCallback.current?.({ x: 0, y: 0 });

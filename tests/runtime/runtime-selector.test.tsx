@@ -54,7 +54,7 @@ it("keeps equal selections stable on unrelated store updates", () => {
   render(<SynCloudOSProvider runtime={runtime}><Selected /></SynCloudOSProvider>);
   const before = rendered.mock.calls.length;
   const previousSnapshot = runtime.store.getSnapshot();
-  act(() => runtime.store.mutate(draft => { draft.webspring.lowerShelfMode = "preview"; }));
+  act(() => runtime.store.mutate(draft => { draft.webspring.previewAppId = "com.example.preview"; }));
   expect(runtime.store.getSnapshot()).not.toBe(previousSnapshot);
   expect(rendered).toHaveBeenCalledTimes(before);
 });
@@ -65,7 +65,7 @@ it("preserves the committed selection while another selector render is suspended
   const suspended = vi.fn();
   const pending = new Promise<void>(() => {});
   function Selected({ alternate }: { alternate: boolean }) {
-    const value = useRuntimeSelector(snapshot => ({ value: alternate ? snapshot.webspring.lowerShelfMode : snapshot.application.activeAppId }), (left, right) => left.value === right.value);
+    const value = useRuntimeSelector(snapshot => ({ value: alternate ? snapshot.webspring.previewAppId : snapshot.application.activeAppId }), (left, right) => left.value === right.value);
     React.useEffect(() => { committed(value); }, [value]);
     if (alternate) { suspended(); throw pending; }
     return <output>{value.value ?? "home"}</output>;
@@ -78,7 +78,7 @@ it("preserves the committed selection while another selector render is suspended
   expect(committed).toHaveBeenCalledTimes(1);
   fireEvent.click(screen.getByRole("button", { name: "Switch" }));
   expect(suspended).toHaveBeenCalled();
-  act(() => runtime.store.mutate(draft => { draft.webspring.lowerShelfMode = "preview"; }));
+  act(() => runtime.store.mutate(draft => { draft.webspring.previewAppId = "com.example.preview"; }));
   expect(screen.getByRole("status").textContent).toBe("home");
   expect(committed).toHaveBeenCalledTimes(1);
 });

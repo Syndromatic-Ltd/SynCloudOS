@@ -105,7 +105,7 @@ export function AdaptiveNavigationFixture() {
       const rect = element.getBoundingClientRect();
       const controller = runtime.windows.list().find(window => window.id === windowId) ?? runtime.windows.create({
         id: windowId, workspaceId: "framework-tests", applicationId, applicationSessionId: applicationId,
-        role: "standard", chromeMode: "frameless", style: [], title: "Adaptive navigation",
+        role: "borderless", style: [], title: "Adaptive navigation",
         documentId: null, documentAssociationRole: null, representedDocument: null, toolbar: null,
         maximumSize: null, level: "normal", parentWindowControllerId: null, anchor: null, pinned: false, restorationKey: null,
         content: { rendererId: "application", parameters: { appId: applicationId } },

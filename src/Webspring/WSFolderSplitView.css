@@ -1,0 +1,158 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+@layer nse.structure {
+
+/* The split lies over the stage it copied: an underlay, the folder's panel,
+   and two clones of the stage that part to reveal it. */
+.webspring-folder-split {
+  --webspring-folder-easing: cubic-bezier(.3, .72, .18, 1);
+  position: fixed;
+  z-index: 40;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.webspring-folder-split[data-nse-style="fade"] {
+  transition: opacity var(--webspring-folder-duration) ease;
+}
+
+.webspring-folder-split-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.webspring-folder-split-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.webspring-folder-split-content {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 18px max(16px, var(--nse-screen-safe-area-inset-right, 0px)) 26px max(16px, var(--nse-screen-safe-area-inset-left, 0px));
+}
+
+.webspring-folder-split-title {
+  margin: 0 0 18px;
+  font-size: clamp(16px, 3.4vw, 21px);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.webspring-folder-split-apps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: start;
+  row-gap: clamp(14px, 2.5svh, 24px);
+}
+
+.webspring-folder-split-cell {
+  min-width: 0;
+}
+
+.webspring-folder-split-half {
+  position: absolute;
+  left: 0;
+  z-index: 2;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform var(--webspring-folder-duration) var(--webspring-folder-easing);
+}
+
+/* The upper half stacks over the lower so its cut edge can shade the seam. */
+.webspring-folder-split-half.is-top {
+  z-index: 3;
+  transition:
+    transform var(--webspring-folder-duration) var(--webspring-folder-easing),
+    filter var(--webspring-folder-duration) var(--webspring-folder-easing);
+}
+
+/* The lower half also animates its cut-edge shadow. */
+.webspring-folder-split-half.is-bottom {
+  transition:
+    transform var(--webspring-folder-duration) var(--webspring-folder-easing),
+    filter var(--webspring-folder-duration) var(--webspring-folder-easing);
+}
+
+/* The highlights sit just inside the two cut edges. */
+.webspring-folder-split-edge {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  pointer-events: none;
+  transition: opacity var(--webspring-folder-duration) var(--webspring-folder-easing);
+}
+
+.webspring-folder-split-edge.is-top {
+  top: 0;
+  height: 100%;
+}
+
+/* The pointer's piece of the stage rides on the lower half in a window the
+   size of the cutout, whose foot is the lower half's straight edge. It slides
+   down through that window as the halves part, sinking below the edge, and
+   rises back up as they rejoin. */
+.webspring-folder-split-tab {
+  position: absolute;
+  top: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.webspring-folder-split-tab-piece {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  transition: transform var(--webspring-folder-duration) var(--webspring-folder-easing);
+}
+
+/* Each clone is the stage at its own size, shifted by the depth of the half. */
+.webspring-folder-split-clone-host {
+  position: absolute;
+  left: 0;
+  width: 100%;
+}
+
+/* The surrounding icons fade with the split and return as it closes. */
+.webspring-folder-split-clone [data-nse-role="backdrop"] {
+  transition:
+    opacity var(--webspring-folder-duration) var(--webspring-folder-easing),
+    filter var(--webspring-folder-duration) var(--webspring-folder-easing);
+}
+
+.webspring-folder-split[data-nse-style="fade"] .webspring-folder-split-half,
+.webspring-folder-split[data-nse-style="fade"] .webspring-folder-split-tab-piece,
+.webspring-folder-split[data-nse-style="fade"] .webspring-folder-split-edge,
+.webspring-folder-split[data-nse-style="fade"] .webspring-folder-split-clone [data-nse-role="backdrop"] {
+  transition: none;
+}
+
+}

@@ -48,6 +48,7 @@ export function createRuntimeAnimationState(
     subscribe(listener: () => void) {
       if (owner.aborted) return () => {};
       let active = true;
+      let pendingAbortNotification = false;
       let reducedMotion = getReducedMotion(), suspended = getSuspended();
       const notify = () => {
         if (!active) return;
@@ -61,7 +62,7 @@ export function createRuntimeAnimationState(
         runtime.store.subscribe(notify),
         frames?.subscribeState?.(notify),
       ];
-      const release = () => {
+      const stopObserving = () => {
         if (!active) return;
         active = false;
         owner.removeEventListener("abort", abort);
@@ -70,12 +71,23 @@ export function createRuntimeAnimationState(
       const abort = () => {
         const changed = !suspended;
         suspended = true;
-        release();
-        if (changed) listener();
+        stopObserving();
+        if (!changed) return;
+        pendingAbortNotification = true;
+        // Ownership can end in React's insertion cleanup. Let the commit
+        // unsubscribe before delivering the terminal store notification.
+        queueMicrotask(() => {
+          if (!pendingAbortNotification) return;
+          pendingAbortNotification = false;
+          listener();
+        });
       };
       owner.addEventListener("abort", abort, { once: true });
       if (owner.aborted) abort();
-      return release;
+      return () => {
+        pendingAbortNotification = false;
+        stopObserving();
+      };
     },
   });
 }

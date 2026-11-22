@@ -177,7 +177,6 @@ const errorManager = {
     RuntimeStore.mutate((draft) => {
       draft.errors.push(captured);
       draft.errors = draft.errors.slice(-ERROR_HISTORY_LIMIT);
-      draft.webspring.lowerShelfMode = "error";
     });
     rememberFingerprint(captured);
     EventBus.publish("error.capture", { errorId: captured.id, code: captured.code, appId: captured.appId }, captured.code);
@@ -536,7 +535,6 @@ const errorManager = {
     const before = RuntimeStore.getSnapshot().errors.length;
     RuntimeStore.mutate((draft) => {
       draft.errors = draft.errors.filter((error) => error.id !== errorId);
-      if (!draft.errors.length) draft.webspring.lowerShelfMode = draft.webspring.previewAppId ? "preview" : "news";
     });
     return RuntimeStore.getSnapshot().errors.length !== before;
   },
@@ -544,7 +542,6 @@ const errorManager = {
   clear() {
     RuntimeStore.mutate((draft) => {
       draft.errors = [];
-      draft.webspring.lowerShelfMode = draft.webspring.previewAppId ? "preview" : "news";
     });
   },
 

@@ -22,9 +22,14 @@
 import React, { useMemo, useState } from "react";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { atmoTheme } from "../../../src/NSE/Appearance/atmoTheme";
+import { NSEAppearance } from "../../../src/NSE/Appearance/NSEAppearance";
+import { ViewAppearanceBoundary, useNSEAppearance } from "../../../src/NSE/Appearance/NSEAppearanceProvider";
+import { SynCloudOSRuntimeContext } from "../../../src/SynCloudOSReact/runtimeContext";
+import { PopoverWindowSurface } from "../../../src/Webspring/WindowLayer/PopoverWindowSurface";
 import { FilePanelView } from "../../../src/NSE/FilePanels/NSEFilePanelView";
 import { NSEPopover } from "../../../src/NSE/Overlays/NSEPopover";
-import { ActionSheet, OverlayProvider, useNSEWindowSurfaceLifecycle, type WindowSurfaceBridge } from "../../../src/NSE/Overlays";
+import { ActionSheet, OverlayProvider, useNSEWindowSurfaceLifecycle, type WindowSurfaceBridge, type WindowSurfaceRequest } from "../../../src/NSE/Overlays";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
 
 afterEach(() => document.body.replaceChildren());
@@ -220,6 +225,65 @@ describe("canonical window-surface lifecycle", () => {
 
     await waitFor(() => expect(bridge.reportError).toHaveBeenCalledWith(failure, expect.objectContaining({ requestId: "rejected-sheet", operation: "present" })));
     expect(onOpenChange).not.toHaveBeenCalledWith(false, expect.anything());
+  });
+
+  it("updates the appearance of a mounted popover while preserving its content state", async () => {
+    const theme = { kind: "app", bundleIdentifier: "com.example.chrome", displayName: "Chrome", version: "1.0.0" } as const;
+    const present = vi.fn();
+    const runtime = { windows: { requestClose: vi.fn() } } as never;
+
+    function Contents() {
+      const appearance = useNSEAppearance();
+      const [count, setCount] = useState(0);
+      return <button type="button" onClick={() => setCount(count + 1)}>{appearance.resolvedColourScheme} {count}</button>;
+    }
+
+    function Fixture({ themed = false }: { readonly themed?: boolean }) {
+      const [surface, setSurface] = useState<{ request: WindowSurfaceRequest; content: React.ReactNode } | null>(null);
+      const bridge = useMemo<WindowSurfaceBridge>(() => ({
+        async present(request, content) {
+          present(request.id);
+          setSurface({ request: { ...request }, content });
+          return "window:popover";
+        },
+        async dismiss() { return { outcome: "closed" }; },
+      }), []);
+      return <OverlayHarness>
+        <ViewAppearanceBoundary appearance={themed ? new NSEAppearance("dark", { theme }) : new NSEAppearance("light")}>
+          <NSEPopover id="themed-popover" open anchor={null} parentWindowControllerId={null} windowBridge={bridge}
+            contentSize={{ width: 280, height: 180 }} onOpenChange={() => undefined}>
+            <Contents />
+          </NSEPopover>
+        </ViewAppearanceBoundary>
+        {surface && <SynCloudOSRuntimeContext.Provider value={runtime}>
+          <PopoverWindowSurface surface={{ request: surface.request, popoverPosition: null }} windowControllerId="window:popover" anchored>
+            {surface.content}
+          </PopoverWindowSurface>
+        </SynCloudOSRuntimeContext.Provider>}
+      </OverlayHarness>;
+    }
+
+    const view = render(<Fixture />);
+    const popover = await screen.findByRole("dialog", { name: "themed-popover" });
+    fireEvent.click(screen.getByRole("button", { name: "light 0" }));
+    expect(popover.getAttribute("data-nse-app-theme")).toBe(null);
+    expect(popover.style.getPropertyValue("--nse-colour-label")).toBe("");
+
+    view.rerender(<Fixture themed />);
+
+    await screen.findByRole("button", { name: "dark 1" });
+    expect(popover.getAttribute("data-nse-app-theme")).toBe(theme.bundleIdentifier);
+    expect(popover.style.getPropertyValue("--nse-colour-label")).toBe(atmoTheme.colours.light.labelColour);
+
+    view.rerender(<Fixture themed />);
+    expect(present).toHaveBeenCalledTimes(2);
+
+    view.rerender(<Fixture />);
+
+    await screen.findByRole("button", { name: "light 1" });
+    expect(popover.getAttribute("data-nse-app-theme")).toBe(null);
+    expect(popover.style.getPropertyValue("--nse-colour-label")).toBe("");
+    expect(present.mock.calls).toEqual([["themed-popover"], ["themed-popover"], ["themed-popover"]]);
   });
 
   it("presents a popover once per request while its host re-renders, and still delivers content updates", async () => {

@@ -147,7 +147,7 @@ describe("NSEView.draw", () => {
     function Figure() {
       const overlayPort = useRuntimeNSEOverlayPort("runtime");
       return <OverlayProvider runtimePort={overlayPort} defaultParentResponderId="runtime">
-        <NSEView menu={menu} toolTip="Figure details" appearance={new NSEAppearance("darkAqua")} draw={(rect, context) => context.fill(GFXPath.rect(rect))}>
+        <NSEView menu={menu} toolTip="Figure details" appearance={new NSEAppearance("dark")} draw={(rect, context) => context.fill(GFXPath.rect(rect))}>
           <AppearanceProbe />
         </NSEView>
       </OverlayProvider>;

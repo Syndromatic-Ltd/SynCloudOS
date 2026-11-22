@@ -96,7 +96,7 @@ export function captureWebspringDragReorderSlots(selector: string, root: ParentN
 
 /** Each entry's artwork alone (its icon well or tile, without the label), indexed
  *  by slot: the zone a dragged app's centre rests on to reorder or merge. */
-export function captureWebspringDragArtworkRects(
+export function captureWSDragArtworkRects(
   selector: string,
   artworkSelector: string,
   root: ParentNode

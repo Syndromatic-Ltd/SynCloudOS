@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { SystemSurfaceAppearance } from "../NSE/hostComposition";
 import { useId, useRef, useState, type ReactNode } from "react";
 import { Presence, useNSEAnimationEnvironment, useNSEPresentation } from "../NSE/Animation";
 import { resolveSystemAlertDetailsMotion } from "./SystemAlert.transitions";
@@ -38,8 +39,8 @@ function SystemAlertDetails({ details }: { details: string }) {
   const detailsRef = useRef<HTMLDivElement>(null);
   useNSEPresentation(detailsRef, resolveSystemAlertDetailsMotion(reducedMotion));
   return (
-    <div ref={detailsRef} className="nse-alert-details">
-      <pre className="nse-alert-details-text">{details}</pre>
+    <div ref={detailsRef} data-nse-part="content" data-nse-role="details" className="nse-alert-details">
+      <pre data-nse-part="label" className="nse-alert-details-text">{details}</pre>
     </div>
   );
 }
@@ -157,23 +158,24 @@ export function SystemAlert({
     typeof error.context?.mailtoFallback === "string"
       ? `mailto:${error.context.mailtoFallback}`
       : null;
-  const actionAppearance: NSEAppearanceName | undefined = appearance === "dark" ? undefined : "aqua";
+  const actionAppearance: NSEAppearanceName | undefined = appearance === "dark" ? undefined : "light";
   const titleId = useId();
   const messageId = useId();
   const icon = getSystemAlertIcon(error, useHostSiteBranding(), appearance, applicationIcon);
 
-  return (
-    <AlertSurface className="syncloudos-system-alert" appearance={appearance} labelledBy={titleId} describedBy={messageId}>
-      <div className="nse-system-alert-content">
-        <div className={`syncloudos-alert-artwork${icon.src ? "" : " is-caution-only"}`} data-alert-icon={icon.kind} aria-hidden="true">
+  return <SystemSurfaceAppearance>
+    <AlertSurface data-nse-system-surface="" className="syncloudos-system-alert" appearance={appearance} labelledBy={titleId} describedBy={messageId}>
+      <div data-nse-part="content" className="nse-system-alert-content">
+        <div data-nse-part="decoration" className={`syncloudos-alert-artwork${icon.src ? "" : " is-caution-only"}`} data-alert-icon={icon.kind} aria-hidden="true">
           {icon.src ? <img data-nse-part="image" className="syncloudos-alert-logo" data-alert-logo={icon.src === synCloudOSLogo ? "syncloudos" : ""} src={icon.src} alt="" /> : null}
-          <img className="syncloudos-alert-caution" data-alert-caution src={cautionIcon} alt="" />
+          <img className="syncloudos-alert-caution" data-nse-part="badge" src={cautionIcon} alt="" />
         </div>
         <div data-nse-part="content" className="nse-system-alert-copy">
           <h2 data-nse-part="title" id={titleId}>{error.title}</h2>
           <p data-nse-part="label" id={messageId}>{error.message}</p>
           <button
             type="button"
+            data-nse-part="disclosure"
             className="nse-alert-disclosure"
             aria-expanded={expanded}
             onClick={() => setExpanded((value) => !value)}
@@ -201,5 +203,5 @@ export function SystemAlert({
         {!isSessionMismatch && actions.includes("dismiss") ? <ActionButton appearance={actionAppearance} onClick={onDismiss}>{isNotResponding ? "Continue" : "Close"}</ActionButton> : null}
       </div>
     </AlertSurface>
-  );
+  </SystemSurfaceAppearance>;
 }

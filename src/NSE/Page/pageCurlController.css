@@ -1,5 +1,5 @@
 
-@layer nse.atmo {
+@layer nse.structure {
 @scope ([data-nse-theme]) to ([data-nse-theme]) {
 .nse-page-controller--curl,
 :where(:scope):is(.nse-page-controller--curl) { position: relative; width: 100%; height: 100%; }

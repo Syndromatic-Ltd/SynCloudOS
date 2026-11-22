@@ -10,8 +10,9 @@ import { applicationSessionFor, ensureApplicationSession } from "../../src/SynCl
 import { createMountedSynWareRuntime } from "../../src/SynCloudOS/AppSDK/appRuntimeFacade";
 import { useSCOS } from "../../src/SynCloudOS/AppSDK/scos";
 import { HostSiteBrandingProvider, SynCloudOSProvider } from "../../src/SynCloudOSReact";
-import { ApplicationStageView } from "../../src/Webspring/ApplicationStageView";
-import { createApplicationWindowContentRendererRegistry } from "../../src/Webspring/WindowLayer";
+import { WSStageWindowHost } from "../../src/Webspring/WSStageWindowHost";
+import { createApplicationWindowContentRendererRegistry, WindowLayer } from "../../src/Webspring/WindowLayer";
+import type { WindowHostEvent } from "../../src/SynCloudOS/Windows/WindowHostEnvironment";
 import { createTestBundle } from "./helpers";
 import type { AppWorkspaceDocumentsClient } from "../../src/SynCloudOS/AppSDK/appClientTypes";
 
@@ -99,7 +100,7 @@ describe("class application undo", () => {
     const registry = createApplicationWindowContentRendererRegistry(host.runtime, { [appId]: app });
     const view = render(<SynCloudOSProvider runtime={host.runtime}>
       <HostSiteBrandingProvider value={{ name: "Class application host", logoAlt: "", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null }}>
-        <ApplicationStageView app={app} lifecycle="active" windowContentRegistry={registry}
+        <WSStageWindowHost app={app} lifecycle="active" windowContentRegistry={registry}
           stage={{ appId, id: `application-stage:${appId}`, title: app.window.title, isFocused: true, zIndex: 1 }} />
       </HostSiteBrandingProvider>
     </SynCloudOSProvider>);
@@ -118,6 +119,73 @@ describe("class application undo", () => {
 });
 
 describe("NSEWindowController window", () => {
+  it("returns the standard buttons in the window's own mounted titlebar", async () => {
+    class Main extends NSEWindowController {
+      static override view = () => <p>Standard button content</p>;
+    }
+    class Application extends NSEApplication { static override mainWindow = Main; }
+    const host = createClassApplicationHost(Application, "com.example.standard-buttons");
+    hosts.push(host);
+    await host.launch();
+    const windowId = await host.openMainWindow();
+    const app = host.runtime.apps.getApp(host.appId)!;
+    const renderers = createApplicationWindowContentRendererRegistry(host.runtime, { [host.appId]: app });
+    const view = render(<SynCloudOSProvider runtime={host.runtime}>
+      <HostSiteBrandingProvider value={{ name: "Test", logoAlt: "", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null }}>
+        <WindowLayer contentRegistry={renderers} />
+      </HostSiteBrandingProvider>
+    </SynCloudOSProvider>);
+    await screen.findByText("Standard button content");
+    const window = applicationSessionFor({ runtimeId: host.runtime.runtimeId, appId: host.appId })!.app.windows[0]!.window;
+
+    expect(window.standardWindowButton("closeButton")).toBe(screen.getByRole("button", { name: /^Close / }));
+    expect(window.standardWindowButton("miniaturizeButton")).toBe(screen.getByRole("button", { name: /^Minimise / }));
+    expect(window.standardWindowButton("zoomButton")).toBe(screen.getByRole("button", { name: /^Zoom / }));
+    expect(window.standardWindowButton("documentIconButton")).toBeNull();
+    act(() => { host.runtime.windows.setCollectionBehavior(windowId, "fullScreenPrimary"); });
+    expect(window.standardWindowButton("zoomButton")).toBe(screen.getByRole("button", { name: /^Enter Full Screen / }));
+    act(() => { window.styleMask = ["titled"]; });
+    expect(window.standardWindowButton("closeButton")).toBeNull();
+    view.unmount();
+    expect(window.standardWindowButton("zoomButton")).toBeNull();
+  });
+
+  it("forwards fullscreen requests, host confirmations, and refusals to the mounted class controller", async () => {
+    const events: string[] = [];
+    let send!: (event: WindowHostEvent) => void;
+    class Main extends NSEWindowController {
+      static override collectionBehavior = ["fullScreenPrimary"] as const;
+      static override view = () => <p>Fullscreen callback content</p>;
+      override windowWillEnterFullScreen() { events.push("will-enter"); }
+      override windowDidEnterFullScreen() { events.push(`did-enter:${this.window.isFullScreen}`); }
+      override windowWillExitFullScreen() { events.push("will-exit"); }
+      override windowDidExitFullScreen() { events.push(`did-exit:${this.window.isFullScreen}`); }
+      override windowDidFailToEnterFullScreen() { events.push(`failed-enter:${this.window.isFullScreen}`); }
+      override windowDidFailToExitFullScreen() { events.push(`failed-exit:${this.window.isFullScreen}`); }
+    }
+    class Application extends NSEApplication { static override mainWindow = Main; }
+    const host = createClassApplicationHost(Application, "com.example.fullscreen-callbacks", {
+      capabilities: { nativeWindowControls: null, menuBar: "drawn", fullScreen: "native", separateSurfaces: false },
+      requestFullScreen: () => {},
+      subscribe(listener) { send = listener; return () => {}; },
+    });
+    hosts.push(host);
+    await host.launch();
+    const windowId = await host.openMainWindow();
+    host.mountWindows({ strict: true });
+    await screen.findByText("Fullscreen callback content");
+    const window = applicationSessionFor({ runtimeId: host.runtime.runtimeId, appId: host.appId })!.app.windows[0]!.window;
+    const report = (state: "refused" | "on" | "off") => send({ kind: "fullScreenChanged", windowId, state });
+
+    act(() => { window.toggleFullScreen(); });
+    expect(events).toEqual(["will-enter"]);
+    act(() => { report("refused"); report("on"); window.toggleFullScreen(); report("refused"); report("off"); });
+    expect(events).toEqual(["will-enter", "failed-enter:false", "will-enter", "did-enter:true", "will-exit", "failed-exit:true", "will-exit", "did-exit:false"]);
+    host.unmountWindows();
+    act(() => { report("on"); });
+    expect(events).toHaveLength(8);
+  });
+
   it("restores the named detached controller and its options instead of the main controller", async () => {
     class Main extends NSEWindowController { static override view = () => <p>Main restoration window</p>; }
     class Detached extends NSEWindowController { static override view = () => <p>Detached restoration window</p>; }
@@ -446,7 +514,7 @@ describe("opening more windows", () => {
     const registry = createApplicationWindowContentRendererRegistry(host.runtime, { [appId]: app });
     const view = render(<SynCloudOSProvider runtime={host.runtime}>
       <HostSiteBrandingProvider value={{ name: "Class application host", logoAlt: "", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null }}>
-        <ApplicationStageView app={app} lifecycle="active" windowContentRegistry={registry}
+        <WSStageWindowHost app={app} lifecycle="active" windowContentRegistry={registry}
           stage={{ appId, id: `application-stage:${appId}`, title: app.window.title, isFocused: true, zIndex: 1 }} />
       </HostSiteBrandingProvider>
     </SynCloudOSProvider>);

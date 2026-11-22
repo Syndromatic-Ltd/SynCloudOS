@@ -30,7 +30,7 @@ import { IFXFilterRegistry } from "@syndromatic/syncloudos/fx/image";
 import * as media from "@syndromatic/syncloudos/fx/media";
 import { TFXAttributedString, TFXFont, TFXFontDescriptor, TFXTypesetter } from "@syndromatic/syncloudos/fx/text";
 import { VFXFrame, VFXFrameProcessingGraph, VFXPixelBuffer, VFXVideoFormat } from "@syndromatic/syncloudos/fx/video";
-import { defineWebspring, type WebspringViewProps } from "@syndromatic/syncloudos/webspring";
+import { WSApplication, WSLauncherViewController, createWebspring } from "@syndromatic/syncloudos/webspring";
 import { runTimelineTransportProbe } from "./fx-media-timeline-probe";
 
 declare global { interface Window { fxMediaTimeline: any; disposeFXMediaTimeline?: () => void; } }
@@ -113,13 +113,20 @@ function Probe() {
   }); }}>Run VFX-06 timeline</button>;
 }
 
-function Website({ actions, applicationOutlet }: WebspringViewProps) {
-  return <main><button id="open" onClick={() => { void actions.openApp("org.example.vfx06"); }}>Open VFX-06 probe</button>{applicationOutlet}</main>;
+class Website extends WSLauncherViewController {
+  static override mode = "persistent" as const;
+  override renderView() {
+    return <main><button id="open" onClick={() => { void this.openApp("org.example.vfx06"); }}>Open VFX-06 probe</button></main>;
+  }
 }
 
-const shell = defineWebspring({
-  manifest: { schemaVersion: 1, bundleIdentifier: "org.example.vfx06-shell", version: "1.0.0", displayName: "VFX-06 shell", webspringShell: { views: [{ id: "website", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }], defaults: { desktop: "website", tablet: "website", mobile: "website" }, homeRoute: "/", branding: { name: { key: "brand", fallback: "VFX-06" } } } },
-  components: { website: Website },
+class Shell extends WSApplication {
+  static override mainViewController = Website;
+}
+
+const shell = createWebspring({
+  info: { bundleIdentifier: "org.example.vfx06-shell", version: "1.0.0", displayName: "VFX-06 shell", branding: { name: { key: "brand", fallback: "VFX-06" } } },
+  application: Shell,
 });
 const app = createSynWare({
   manifest: { schemaVersion: 1, bundleIdentifier: "org.example.vfx06", version: "1.0.0", displayName: "VFX-06 Probe", entitlements: ["audio.play"], runtime: { policy: { public: true } }, presentations: ["desktop", "tablet", "mobile"], routes: [{ path: "/vfx06", primary: true }], webspring: { visible: true, order: 1 } },

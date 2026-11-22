@@ -23,6 +23,7 @@ export type { AFXAnimationOptions } from "./AFXAnimation";
 export { AFXBasicAnimation } from "./AFXBasicAnimation";
 export { AFXKeyframeAnimation } from "./AFXKeyframeAnimation";
 export { AFXSpringAnimation } from "./AFXSpringAnimation";
+export type { AFXAnimationVelocity } from "./animationVelocity";
 export { AFXTimingFunction } from "./AFXTimingFunction";
 export { AFXAnimationGroup } from "./AFXAnimationGroup";
 export type {

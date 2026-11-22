@@ -36,11 +36,11 @@ import type { DocumentAssetRuntimeBacking } from "../../src/SynCloudOS/Runtime/D
 import type { SynCloudOSRuntimeEnvironment } from "../../src/SynCloudOS/Runtime/runtimeInstanceTypes";
 import { createSynCloudOS } from "../../src/SynCloudOS/Runtime/createSynCloudOS";
 import { mountSynCloudOS, type MountedSynCloudOSHost } from "../../src/SynCloudOSReact/browserRuntime";
-import { defineWebspring } from "../../src/Webspring/public";
+import { createTestLauncher, createTestWebspring } from "./webspringTestShell";
 import { noteType } from "../fixtures/noteDocumentType";
 
 vi.mock("../../src/SynCloudOS/Runtime/createSynCloudOS", { spy: true });
-vi.mock("../../src/App", () => ({ App: () => null }));
+vi.mock("../../src/Webspring/WebspringHost", () => ({ WebspringHost: () => null }));
 
 const environment = {} as SynCloudOSRuntimeEnvironment;
 const stores: DocumentAssetStore[] = [];
@@ -298,11 +298,9 @@ describe("host document asset backing", () => {
     const contribution = createSynCloudOSHostContribution(`browser-assets-${ownership}`, "tests/browser-assets", () => ({
       applicationDocuments: { assetBacking, initialTypes: [noteType] },
     }));
-    const shell = defineWebspring({
-      manifest: { schemaVersion: 1, bundleIdentifier: `com.example.assets-${ownership}`, version: "1.0.0", displayName: "Assets",
-        webspringShell: { views: [{ id: "site", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }],
-          defaults: { desktop: "site", tablet: "site", mobile: "site" }, homeRoute: "/", branding: { name: { key: "site.name", fallback: "Assets" } } } },
-      components: { site: () => null },
+    const shell = createTestWebspring({
+      info: { bundleIdentifier: `com.example.assets-${ownership}`, displayName: "Assets", branding: { name: { key: "site.name", fallback: "Assets" } } },
+      launcher: createTestLauncher(() => null, "persistent"),
     });
     const element = document.createElement("div"); document.body.append(element);
     let mounted: MountedSynCloudOSHost | undefined;

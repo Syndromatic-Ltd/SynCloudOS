@@ -20,27 +20,59 @@
 
 import { IFXShader } from '../../FX/ImageFX/IFXShader';
 
-export function compileAFXProgram(gl: WebGL2RenderingContext, vertexSource: string, fragmentSource: string): WebGLProgram {
+/** A program whose compile and link were issued but not yet waited on. */
+export interface AFXProgramBuild {
+  /** Whether the driver has finished, without blocking; always true when it cannot say. */
+  ready(): boolean;
+  /** Validates and returns the program, blocking only if it is not ready. Throws on a compile or link failure. */
+  finish(): WebGLProgram;
+  /** Releases a build that was never finished. */
+  abandon(): void;
+}
+
+const completionStatus = 0x91B1; // KHR_parallel_shader_compile COMPLETION_STATUS_KHR
+
+/** Issues a compile and link. Asking for COMPILE_STATUS would wait for the
+ * driver, so status is read only when the build is finished. */
+export function beginAFXProgram(gl: WebGL2RenderingContext, vertexSource: string, fragmentSource: string): AFXProgramBuild {
+  const parallel = Boolean(gl.getExtension?.('KHR_parallel_shader_compile'));
   const shaders: WebGLShader[] = [];
   let program: WebGLProgram | null = null;
+  const release = () => { for (const shader of shaders) gl.deleteShader(shader); shaders.length = 0; };
   try {
     for (const [type, source] of [[gl.VERTEX_SHADER, vertexSource], [gl.FRAGMENT_SHADER, fragmentSource]] as const) {
       const shader = gl.createShader(type);
       if (!shader) throw new DOMException('Layer renderer shader allocation failed.', 'NotSupportedError');
       shaders.push(shader);
       gl.shaderSource(shader, source); gl.compileShader(shader);
-      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS))
-        throw new Error(`Layer renderer shader compile failed: ${gl.getShaderInfoLog(shader) ?? 'unknown shader error'}`);
     }
     program = gl.createProgram();
     if (!program) throw new DOMException('Layer renderer program allocation failed.', 'NotSupportedError');
     for (const shader of shaders) gl.attachShader(program, shader);
     gl.linkProgram(program);
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS))
-      throw new Error(`Layer renderer program link failed: ${gl.getProgramInfoLog(program) ?? 'unknown link error'}`);
-    return program;
-  } catch (error) { if (program) gl.deleteProgram(program); throw error; }
-  finally { for (const shader of shaders) gl.deleteShader(shader); }
+  } catch (error) { if (program) gl.deleteProgram(program); release(); throw error; }
+  const linked = program;
+  let settled = false;
+  return {
+    ready: () => settled || !parallel || gl.getProgramParameter(linked, completionStatus) === true,
+    finish: () => {
+      if (settled) return linked;
+      try {
+        for (const shader of shaders) if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS))
+          throw new Error(`Layer renderer shader compile failed: ${gl.getShaderInfoLog(shader) ?? 'unknown shader error'}`);
+        if (!gl.getProgramParameter(linked, gl.LINK_STATUS))
+          throw new Error(`Layer renderer program link failed: ${gl.getProgramInfoLog(linked) ?? 'unknown link error'}`);
+        settled = true;
+        return linked;
+      } catch (error) { gl.deleteProgram(linked); throw error; }
+      finally { release(); }
+    },
+    abandon: () => { if (!settled) { gl.deleteProgram(linked); release(); settled = true; } },
+  };
+}
+
+export function compileAFXProgram(gl: WebGL2RenderingContext, vertexSource: string, fragmentSource: string): WebGLProgram {
+  return beginAFXProgram(gl, vertexSource, fragmentSource).finish();
 }
 
 const vertex = `#version 300 es
@@ -75,6 +107,19 @@ const maximumTargets = 128;
 const maximumBytes = 1024 * 1024 * 1024;
 const maximumDimension = 16384;
 
+function fragmentFor(shader: IFXShader): string {
+  const declarations = Object.entries(shader.uniforms).map(([name, uniform]) => `uniform ${uniform.type} ${name};`).join('\n');
+  return `#version 300 es
+precision highp float;
+uniform sampler2D ifxInput;
+uniform vec2 ifxSize;
+in vec2 ifxUV;
+out vec4 ifxOutput;
+${declarations}
+${shader.source}
+void main() { ifxOutput = ifxMain(ifxUV, ifxSize); }`;
+}
+
 function key(shader: IFXShader): string {
   return JSON.stringify([shader.source, Object.entries(shader.uniforms).map(([name, uniform]) => [name, uniform.type])]);
 }
@@ -83,12 +128,30 @@ function key(shader: IFXShader): string {
 export class BrowserAFXShaderPipeline {
   readonly #gl: WebGL2RenderingContext;
   readonly #programs = new Map<string, ShaderProgram>();
+  /** Programs compiling ahead of the submission that needs them. */
+  readonly #builds = new Map<string, AFXProgramBuild>();
   readonly #targets: AFXShaderTarget[] = [];
   #nextTarget = 0;
   #frameBytes = 0;
   #vao: WebGLVertexArrayObject | null = null;
 
   constructor(gl: WebGL2RenderingContext) { this.#gl = gl; }
+
+  /** Starts compiling any missing programs and reports, without blocking, whether all of them are ready. */
+  prepare(shaders: readonly IFXShader[]): boolean {
+    let ready = true;
+    for (const shader of shaders) {
+      const cacheKey = key(shader);
+      if (this.#programs.has(cacheKey)) continue;
+      let build = this.#builds.get(cacheKey);
+      if (!build) { build = beginAFXProgram(this.#gl, vertex, fragmentFor(shader)); this.#builds.set(cacheKey, build); }
+      if (!build.ready()) ready = false;
+    }
+    return ready;
+  }
+
+  /** Whether every program already compiling is ready. */
+  get buildsReady(): boolean { return [...this.#builds.values()].every(build => build.ready()); }
 
   begin(shaders: readonly IFXShader[]): void {
     const recipes = new Map(shaders.map(shader => [key(shader), shader]));
@@ -98,21 +161,18 @@ export class BrowserAFXShaderPipeline {
       if (recipes.has(key)) continue;
       gl.deleteProgram(value.program); this.#programs.delete(key);
     }
+    for (const [key, build] of this.#builds) {
+      if (recipes.has(key)) continue;
+      build.abandon(); this.#builds.delete(key);
+    }
     const created: string[] = [];
     try {
       for (const [cacheKey, shader] of recipes) {
         if (this.#programs.has(cacheKey)) continue;
-        const declarations = Object.entries(shader.uniforms).map(([name, uniform]) => `uniform ${uniform.type} ${name};`).join('\n');
-        const fragment = `#version 300 es
-precision highp float;
-uniform sampler2D ifxInput;
-uniform vec2 ifxSize;
-in vec2 ifxUV;
-out vec4 ifxOutput;
-${declarations}
-${shader.source}
-void main() { ifxOutput = ifxMain(ifxUV, ifxSize); }`;
-        const program = compileAFXProgram(gl, vertex, fragment);
+        const fragment = fragmentFor(shader);
+        const build = this.#builds.get(cacheKey) ?? beginAFXProgram(gl, vertex, fragment);
+        this.#builds.delete(cacheKey);
+        const program = build.finish();
         try {
           this.#programs.set(cacheKey, { program, input: gl.getUniformLocation(program, 'ifxInput'), size: gl.getUniformLocation(program, 'ifxSize'),
             uniforms: new Map(Object.keys(shader.uniforms).map(name => [name, gl.getUniformLocation(program, name)])),
@@ -235,11 +295,12 @@ void main() { ifxOutput = ifxMain(ifxUV, ifxSize); }`;
 
   dispose(): void {
     for (const program of this.#programs.values()) this.#gl.deleteProgram(program.program);
+    for (const build of this.#builds.values()) build.abandon();
     for (const target of this.#targets) this.#deleteTarget(target);
     if (this.#vao) this.#gl.deleteVertexArray(this.#vao);
     this.forget();
   }
-  forget(): void { this.#programs.clear(); this.#targets.length = 0; this.#vao = null; }
+  forget(): void { this.#programs.clear(); this.#builds.clear(); this.#targets.length = 0; this.#vao = null; }
   #deleteTarget(target: AFXShaderTarget): void {
     this.#gl.deleteTexture(target.texture); this.#gl.deleteFramebuffer(target.framebuffer); this.#gl.deleteRenderbuffer(target.depth);
     if (target.resolveFramebuffer) this.#gl.deleteFramebuffer(target.resolveFramebuffer);

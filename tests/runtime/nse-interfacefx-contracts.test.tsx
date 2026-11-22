@@ -25,12 +25,10 @@ import { resolve } from "node:path";
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { AppFrame } from "../../src/NSE/Windows/AppFrame";
 import { GroupedRow } from "../../src/NSE/Controls/Selection/GroupedRow";
 import { NSEProgressIndicator } from "../../src/NSE/Progress";
 import { NSESlider } from "../../src/NSE/Controls/Values";
 import { NSESplitView } from "../../src/NSE/DataViews/Split";
-import { TopBar } from "../../src/NSE/Windows/Chrome";
 import { NSESplitViewController, NSESplitViewItem } from "../../src/NSE/DataViews/Split";
 import { NSEOutlineView } from "../../src/NSE/DataViews/Outline";
 import { NSETreeController } from "../../src/NSE/Controllers/NSETreeController";
@@ -139,10 +137,11 @@ describe("NSE semantic contracts", () => {
   });
 
   it("routes source-list seams through the canonical Atmo divider without a legacy raster fallback", () => {
-    const sourceListCss = readFileSync(resolve(process.cwd(), "src/NSE/Navigation/SourceList/nse-sourcelist.css"), "utf8");
+    const sourceListPaint = readFileSync(resolve(process.cwd(), "src/Themes/Atmo.scostheme/Contents/Resources/atmo.data.css"), "utf8");
+    const captionSeam = sourceListPaint.match(/:has\(> \[data-nse-part="border"\]\)\) > \[data-nse-part="border"\] \{([^}]+)\}/u)?.[1];
 
-    expect(sourceListCss).toMatch(/--nse-sourcelist-divider:\s*var\(--nse-atmo-divider\);/);
-    expect(sourceListCss).not.toMatch(/--nse-atmo-onyx-divider|\/assets\/nse\/atmo\/onyx|url\([^)]*\.png/i);
+    expect(captionSeam).toContain("background: var(--nse-atmo-divider) left center / auto 4px repeat-x;");
+    expect(captionSeam).not.toMatch(/--nse-atmo-onyx-divider|\/assets\/nse\/atmo\/onyx|url\([^)]*\.png/i);
   });
 
   it("keeps semantic control owners, the NSE facade, and the registry wired together", () => {
@@ -175,7 +174,7 @@ describe("NSE semantic contracts", () => {
     });
   });
 
-  it("renders app-frame regions and outline source-list groups in caller order, refusing unselectable rows", () => {
+  it("renders outline source-list groups in caller order, refusing unselectable rows", () => {
     interface Node { readonly id: string; readonly label: string; readonly children: readonly Node[]; }
     const leaf = (id: string, label: string): Node => ({ id, label, children: [] });
     const groups: readonly Node[] = [
@@ -186,12 +185,9 @@ describe("NSE semantic contracts", () => {
     const tree = new NSETreeController({ id: "source-groups", content: groups, getId: (node: Node) => node.id, getChildren: (node: Node) => node.children, withChildren: (node: Node, children: readonly Node[]) => ({ ...node, children }), selection: { mode: "single" } });
     tree.expand("library"); tree.expand("archive"); tree.expand("tools"); tree.select(["inbox"]);
     const onSelect = vi.fn();
-    const { container } = render(<AppFrame variant="sourceList" topBar={<TopBar title="Library" />} sidebar={
-      <NSEOutlineView controller={tree} aria-label="Sources" selectionHighlightStyle="sourceList" idForItem={node => node.id} labelForItem={node => node.label} childrenForItem={node => node.children} isExpandable={node => node.children.length > 0}
+    const { container } = render(<NSEOutlineView controller={tree} aria-label="Sources" selectionHighlightStyle="sourceList" idForItem={node => node.id} labelForItem={node => node.label} childrenForItem={node => node.children} isExpandable={node => node.children.length > 0}
         delegate={{ isGroupItem: id => ["library", "collapsed", "tools"].includes(id), shouldSelect: id => !["library", "collapsed", "tools", "locked"].includes(id) }} onSelectionChange={onSelect} />
-    } statusBar={<footer>Ready · 5 rows</footer>}><article>Window content</article></AppFrame>);
-    expect(container.querySelector(".nse-app-frame-content")?.textContent).toContain("Window content");
-    expect(container.querySelector(".nse-app-frame-statusbar")?.textContent).toContain("5 rows");
+    );
     const rows = container.querySelectorAll('[data-nse-part="row"] .nse-control-list-primary');
     expect([...rows].map(row => row.textContent)).toEqual(["Inbox", "Archive", "2026", "Drafts", "Locked", "Settings"]);
     expect(container.querySelector('.nse-outline-children[data-collapsed="true"]')?.hasAttribute("inert")).toBe(true);

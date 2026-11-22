@@ -24,6 +24,7 @@ import {
   type SmoothSurfaceRequest,
   type SmoothSurfaceStyle
 } from "../SmoothSurface";
+import { getSmoothSurfaceThemeHooks } from "../SmoothSurface/smoothSurface";
 
 export function GlassPanel({
   children,
@@ -40,7 +41,9 @@ export function GlassPanel({
 
   return (
     <div
-      className={`nse-material-glass nse-material-glass-panel atmo-glass atmo-glass-panel ${surfaceProps.className ?? ""}`.trim()}
+      className={surfaceProps.className}
+      {...getSmoothSurfaceThemeHooks(smoothSurface)}
+      data-nse-control="visual-effect-view" data-nse-part="background" data-nse-material="glass" data-nse-style="panel"
       style={surfaceProps.style as CSSProperties | undefined}
       {...props}
     >

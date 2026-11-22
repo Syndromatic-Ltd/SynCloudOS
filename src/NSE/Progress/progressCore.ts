@@ -21,6 +21,7 @@
 import { useEffect, useRef } from "react";
 
 import { clamp, type CSSVarStyle } from "../Controls/Core/nseControlsShared";
+import { setNSEHook } from "../Theme/contract/hookMirrorDOM";
 
 export interface ProgressRangeInput {
   readonly value?: number;
@@ -88,7 +89,7 @@ export function useNSEProgressVisibility<T extends HTMLElement>() {
     const root = rootRef.current;
     if (!root || typeof IntersectionObserver === "undefined") return;
     const observer = new IntersectionObserver(([entry]) => {
-      root.dataset.suspended = entry?.isIntersecting ? "false" : "true";
+      setNSEHook(root, "suspended", entry?.isIntersecting ? "false" : "true");
     });
     observer.observe(root);
     return () => observer.disconnect();

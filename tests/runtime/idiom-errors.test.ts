@@ -26,7 +26,7 @@ const pairs = [
   ["button glyph", "idiom.button-glyph", '<NSEButton title="‹ Sections" />', '<NSEButton title="Sections" image={backImage} />'],
   ["system artwork", "idiom.system-artwork", '<svg aria-label="Back"><path d="M 10 2 L 2 10 L 10 18" /></svg>', '<svg aria-label="Company logo"><path d="M 10 2 L 2 10 L 10 18" /></svg>'],
   ["eyebrow", "idiom.eyebrow", '<header><p>WORKSPACE</p><h1>Field Lab</h1></header>', '<header><p>Workspace</p><h1>Field Lab</h1></header>'],
-  ["appearance", "idiom.appearance", '<NSEButton appearance="aqua" />', '<NSEView appearance={customAppearance}><NSEButton /></NSEView>'],
+  ["appearance", "idiom.appearance", '<NSEButton appearance="light" />', '<NSEView appearance={customAppearance}><NSEButton /></NSEView>'],
 ] as const;
 
 describe("definite authoring errors", () => {
@@ -128,8 +128,8 @@ describe("definite authoring errors", () => {
   });
   it("allows source-list group headers and rejects explicit forced system appearance objects", () => {
     expect(inspectIdiomErrors({file:"view.tsx", text:'<NSEOutlineView><div role="group"><p>FOLDERS</p><h2>Saved</h2></div></NSEOutlineView>'})).toEqual([]);
-    expect(inspectIdiomErrors({file:"view.tsx", text:'<NSEView appearance={new NSEAppearance("darkAqua")} />'}).some(x => x.rule === "idiom.appearance")).toBe(true);
-    expect(inspectIdiomErrors({file:"view.tsx", text:'<NSEView appearance={new NSEAppearance("aqua", {theme: customTheme})} />'})).toEqual([]);
+    expect(inspectIdiomErrors({file:"view.tsx", text:'<NSEView appearance={new NSEAppearance("dark")} />'}).some(x => x.rule === "idiom.appearance")).toBe(true);
+    expect(inspectIdiomErrors({file:"view.tsx", text:'<NSEView appearance={new NSEAppearance("light", {theme: customTheme})} />'})).toEqual([]);
   });
   it("names only actual public symbols at their exact SDK entry", () => {
     const root = fileURLToPath(new URL("../../", import.meta.url));
@@ -170,5 +170,56 @@ describe("theme-aware stylesheet rules", () => {
   it("rejects contract hooks in app CSS but lets it follow the appearance", () => {
     expect(rules("app.css", "[data-nse-control=\"button\"] { border-radius: 4px; }")).toEqual(["idiom.control-internals"]);
     expect(rules("app.css", "[data-nse-colour-scheme-resolved=\"dark\"] .hero { background: var(--nse-colour-window-background); }")).toEqual([]);
+  });
+});
+
+describe("hand-drawn controls and duplicate window chrome", () => {
+  it("flags hand-drawn circular dials and names NSESlider circular usage", () => {
+    const decorativeDial = '<span className="pub-dial"><span className="pub-dial-needle" aria-hidden="true" /></span>';
+    const findings = inspectIdiomErrors({ file: "Inspector.tsx", text: decorativeDial });
+    expect(findings).toContainEqual(expect.objectContaining({
+      rule: "idiom.hand-drawn-control",
+      severity: "error",
+      message: expect.stringContaining('sliderType="circular"'),
+    }));
+    const roleDial = '<div role="slider" aria-label="Shadow angle dial" aria-valuenow={45} />';
+    expect(inspectIdiomErrors({ file: "Inspector.tsx", text: roleDial })).toContainEqual(expect.objectContaining({
+      rule: "idiom.hand-drawn-control",
+      severity: "error",
+      message: expect.stringContaining("NSESlider"),
+    }));
+    expect(inspectIdiomErrors({ file: "Inspector.tsx", text: '<NSESlider sliderType="circular" value={45} />' })).toEqual([]);
+    expect(inspectIdiomErrors({ file: "Inspector.tsx", text: '<span className="label">Angle</span>' })).toEqual([]);
+    expect(inspectIdiomErrors({ file: "Inspector.tsx", text: '<span className="pub-dial"><span className="label">45°</span></span>' })).toEqual([]);
+  });
+  it.each([
+    ["raw progress", '<progress value={0.5} max={1} />', "NSEProgressIndicator"],
+    ["raw meter", '<meter value={0.7} />', "NSELevelIndicator"],
+    ["role switch", '<div role="switch" aria-checked={on} />', "NSESwitch"],
+    ["role checkbox", '<div role="checkbox" aria-checked={on} />', "NSEButton"],
+    ["role tablist", '<div role="tablist"><div role="tab">One</div></div>', "NSETabView"],
+    ["role spinbutton", '<div role="spinbutton" aria-valuenow={2} />', "NSEStepper"],
+    ["interactive colour swatch", '<div className="colour-swatch" onClick={openPicker} />', "NSEColourWell"],
+  ])("flags hand-drawn %s and names its NSE control", (_label, source, expectedSymbol) => {
+    const findings = inspectIdiomErrors({ file: "View.tsx", text: source });
+    expect(findings).toContainEqual(expect.objectContaining({
+      rule: "idiom.hand-drawn-control",
+      severity: "error",
+      message: expect.stringContaining(expectedSymbol),
+    }));
+  });
+  it("flags duplicate toolbars, QuickSwitch toggles, and window actions in the same render branch", () => {
+    const duplicateToolbars = '<><NSEToolbar id="a" /><NSEToolbar id="b" /></>';
+    expect(inspectIdiomErrors({ file: "View.tsx", text: duplicateToolbars })).toContainEqual(expect.objectContaining({ rule: "idiom.duplicate-chrome", severity: "error" }));
+    const duplicateQuickSwitch = 'const qs = useQuickSwitchTrigger(); const view = <><NSEButton onClick={() => qs.toggle()} /><NSEButton aria-label="QuickSwitch" /></>;';
+    expect(inspectIdiomErrors({ file: "View.tsx", text: duplicateQuickSwitch })).toContainEqual(expect.objectContaining({ rule: "idiom.duplicate-quickswitch", severity: "error" }));
+    const duplicateReturn = '<><NSEButton action="workspace.returnToWebspring" /><NSEButton aria-label="Return to Webspring" /></>';
+    expect(inspectIdiomErrors({ file: "View.tsx", text: duplicateReturn })).toContainEqual(expect.objectContaining({ rule: "idiom.duplicate-window-action", severity: "warning" }));
+    const duplicateAppMenu = 'const menu = useApplicationMenuTrigger(); const view = <><NSEButton onClick={() => menu.toggle()} /><NSEButton aria-label="Application Menu" /></>;';
+    expect(inspectIdiomErrors({ file: "View.tsx", text: duplicateAppMenu })).toContainEqual(expect.objectContaining({ rule: "idiom.duplicate-window-action", severity: "warning" }));
+  });
+  it("allows mutually exclusive conditional branches without false duplicate warnings", () => {
+    const branched = 'const view = compact ? <NSEButton aria-label="QuickSwitch" /> : <NSEButton aria-label="QuickSwitch" />;';
+    expect(inspectIdiomErrors({ file: "View.tsx", text: branched })).toEqual([]);
   });
 });

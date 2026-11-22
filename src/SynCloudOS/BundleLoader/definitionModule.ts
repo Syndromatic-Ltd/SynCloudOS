@@ -30,7 +30,7 @@ import type { SynWareDefinition } from "../AppSDK/runtimeContracts";
 import type { TrustedSynWareBundle } from "./bundleTypes";
 
 /** Named exports `Contents/index.tsx` may add beside its default export. */
-const definitionExports = ["routes", "migrations", "windowChrome", "rematerialiseOwnedDocument", "createBackgroundHandler"] as const;
+const definitionExports = ["routes", "migrations", "rematerialiseOwnedDocument", "createBackgroundHandler"] as const;
 
 function moduleExport(module: object, key: string): unknown {
   const descriptor = Object.getOwnPropertyDescriptor(module, key);
@@ -67,7 +67,7 @@ function namedExports(module: object) {
 /**
  * Builds an application's definition from its entry module: the default export
  * is a React component or an NSEApplication subclass, and `routes`,
- * `migrations`, `windowChrome`, `rematerialiseOwnedDocument` and
+ * `migrations`, `rematerialiseOwnedDocument` and
  * `createBackgroundHandler` are named exports. A module that still exports a
  * captured definition keeps working for hosts without the Vite plugin.
  *

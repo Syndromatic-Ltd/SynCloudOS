@@ -78,7 +78,7 @@ import {
   useMotion,
 } from "@syndromatic/syncloudos/sdk";
 import { createSynWare } from "@syndromatic/syncloudos/sdk/testing";
-import { defineWebspring, type WebspringViewProps } from "@syndromatic/syncloudos/webspring";
+import { WSApplication, WSLauncherViewController, createWebspring } from "@syndromatic/syncloudos/webspring";
 
 declare global { interface Window { installedFxLifecycle: any; } }
 window.installedFxLifecycle = { hostReady: false, probeReady: false, interactionDone: false, unmounted: false, afterUnmountReady: false };
@@ -196,26 +196,28 @@ function Probe() {
   return mounted ? <LifecycleProbe /> : <p id="installed-probe-unmounted">Unmounted</p>;
 }
 
-function Website({ actions, applicationOutlet }: WebspringViewProps) {
-  useEffect(() => { window.installedFxLifecycle.open = () => actions.openApp("org.example.fx-browser-lifecycle"); }, [actions]);
+function WebsiteContent({ launcher }: { readonly launcher: WSLauncherViewController }) {
+  useEffect(() => { window.installedFxLifecycle.open = () => launcher.openApp("org.example.fx-browser-lifecycle"); }, [launcher]);
   async function openProbe() {
     window.installedFxLifecycle.openDone = false;
-    window.installedFxLifecycle.openResult = await actions.openApp("org.example.fx-browser-lifecycle");
+    window.installedFxLifecycle.openResult = await launcher.openApp("org.example.fx-browser-lifecycle");
     window.installedFxLifecycle.openDone = true;
   }
-  return <main><button id="open-probe" onClick={() => { void openProbe(); }}>Open probe</button>{applicationOutlet}</main>;
+  return <main><button id="open-probe" onClick={() => { void openProbe(); }}>Open probe</button></main>;
 }
 
-const shell = defineWebspring({
-  manifest: {
-    schemaVersion: 1, bundleIdentifier: "org.example.fx-browser-shell", version: "1.0.0", displayName: "FX Browser Shell",
-    webspringShell: {
-      views: [{ id: "website", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }],
-      defaults: { desktop: "website", tablet: "website", mobile: "website" },
-      homeRoute: "/", branding: { name: { key: "brand", fallback: "Installed FX Browser" } },
-    },
-  },
-  components: { website: Website },
+class Website extends WSLauncherViewController {
+  static override mode = "persistent" as const;
+  override renderView() { return <WebsiteContent launcher={this} />; }
+}
+
+class Shell extends WSApplication {
+  static override mainViewController = Website;
+}
+
+const shell = createWebspring({
+  info: { bundleIdentifier: "org.example.fx-browser-shell", version: "1.0.0", displayName: "FX Browser Shell", branding: { name: { key: "brand", fallback: "Installed FX Browser" } } },
+  application: Shell,
 });
 
 const app = createSynWare({

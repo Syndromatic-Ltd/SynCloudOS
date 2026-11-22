@@ -1,10 +1,8 @@
 # GraphicsFX
 
-Encoded byte inputs accept `NSEDataConvertible` from `@syndromatic/syncloudos/foundation`; delivered encoded bytes are immutable `NSEData`. Use `.bytes` at a native typed-buffer boundary and `.blob(mimeType)` for a browser Blob. Numeric pixel, index and PCM planes retain their typed arrays; writable copy destinations remain mutable.
+GraphicsFX (`GFX`) is the 2D drawing layer of SynCloudOS. Use it to describe shapes and colours, draw them into a bitmap, an SVG display list or a PDF, and read PDF files back. It supplies the vocabulary all drawing code shares: points and rectangles, affine transforms, colours in named colour spaces, vector paths, gradients, shadows and images. On top of that vocabulary it provides drawing contexts that turn calls into pixels (`GFXBitmapContext`), into a replayable display list and SVG (`GFXContext`), or into a PDF document (`GFXPDFContext`), and it reads PDF files back (`GFXPDFDocument`).
 
-GraphicsFX (`GFX`) is the web-native analogue of Quartz 2D. It supplies the vocabulary that all drawing code shares: points and rectangles, affine transforms, colours in named colour spaces, vector paths, gradients, shadows and images. On top of that vocabulary it provides drawing contexts that turn calls into pixels (`GFXBitmapContext`), into a replayable display list and SVG (`GFXContext`), or into a PDF document (`GFXPDFContext`), and it reads PDF files back (`GFXPDFDocument`).
-
-Every other FX framework builds on these types. An [AnimationFX](animation.md) shape layer takes a `GFXPath` and a `GFXColour`. An [ImageFX](image.md) graph starts from a `GFXImage` and renders back to one. [TextFX](text.md) turns glyphs into `GFXPath` outlines. [VideoFX](video.md) converts frames to `GFXImage`. Learning GraphicsFX first makes the rest of the FX frameworks easier to read.
+Every other FX framework builds on these types. An [AnimationFX](animation.md) shape layer takes a `GFXPath` and a `GFXColour`. An [ImageFX](image.md) graph starts from a `GFXImage` and renders back to one. [TextFX](text.md) turns glyphs into `GFXPath` outlines. [VideoFX](video.md) converts frames to `GFXImage`. Learning GraphicsFX first makes the rest of the FX frameworks easier to read. If you have used Quartz 2D, the concepts carry over directly.
 
 Three habits run through the framework.
 
@@ -13,6 +11,8 @@ Three habits run through the framework.
 - **Work is bounded.** Path commands, image sizes, clip depth, state depth and raster work all have documented limits, and exceeding one throws `RangeError` instead of consuming memory or time without bound.
 
 The coordinate system has its origin at the top left, with x growing right and y growing down, in every context, including PDF pages.
+
+Encoded byte inputs (image files, ICC profiles, PDF data) accept any `NSEDataConvertible` from `@syndromatic/syncloudos/foundation`, and encoded bytes GraphicsFX hands back are immutable `NSEData`. Use `.bytes` where you need a typed array and `.blob(mimeType)` for a browser `Blob`. Numeric pixel, index and PCM planes stay as typed arrays, and destinations you copy into remain writable.
 
 ```ts
 import { GFXColour, GFXPath } from "@syndromatic/syncloudos/fx/graphics";
@@ -26,7 +26,6 @@ import { GFXColour, GFXPath } from "@syndromatic/syncloudos/fx/graphics";
 | Entry | `@syndromatic/syncloudos/fx/graphics` |
 | Hook | None. GraphicsFX is a library. The session supplies the identifier issuer that `GFXContext` needs, through `useImages().createGraphicsIdentifierIssuer()`. |
 | Permissions | None |
-| Analogue | Quartz 2D (`CGPath`, `CGColor`, `CGColorSpace`, `CGImage`, `CGGradient`, `CGShading`, `CGPattern`, `CGContext`, `CGLayer`, `CGPDFDocument`) |
 
 ## The pages of this reference
 
@@ -102,7 +101,7 @@ Colour spaces (`GFXColourSpace`):
 | `"srgb"` | Standard sRGB with its transfer curve. The default for `rgba`, `hsla`, `hsva` and `parse`. |
 | `"linear-srgb"` | sRGB primaries without the curve. Use it for arithmetic that mixes light. |
 | `"display-p3"` | The wider Display P3 gamut, with the sRGB transfer curve. |
-| `"grayscale"` | A single gray level held in all three channels. |
+| `"grayscale"` | A single grey level held in all three channels. |
 
 | Member | Type or signature | Description |
 | --- | --- | --- |
@@ -111,7 +110,7 @@ Colour spaces (`GFXColourSpace`):
 | static `displayP3(r, g, b, a?)` | `GFXColour` | Display P3. |
 | static `hsla({ h, s, l, a })` | `GFXColour` | From hue in degrees (any value, wrapped into 0 to 360), saturation, lightness and alpha as units. |
 | static `hsva({ h, s, v, a })` | `GFXColour` | From hue, saturation and value. |
-| static `grayscale(white, alpha?)` | `GFXColour` | A gray in the grayscale space. |
+| static `grayscale(white, alpha?)` | `GFXColour` | A grey in the greyscale space. |
 | static `parse(input)` | `GFXColour` | Parses a CSS colour string. See below. |
 | `space` | `GFXColourSpace` | The colour's space. |
 | `components` | `{ r, g, b, a }` | The four components in that space. |

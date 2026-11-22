@@ -27,7 +27,7 @@ import type {
   AppPasteboardClient,
   AppServiceClient,
   AppUndoClient,
-  AppWindowClient,
+  AppOwnedWindows,
 } from "../appClientTypes";
 import type {
   AppNotificationClient,
@@ -92,7 +92,7 @@ export interface SCOSFacade extends Omit<SynWareContextValue, "appId" | "appInfo
   open(bundleIdentifierOrRoute: string, options?: Readonly<{ signal?: AbortSignal }>): Promise<AppNavigationTransitionResult>;
   /** Closes the bound app. */
   close(options?: Readonly<Record<string, unknown>>): void;
-  readonly windows: AppWindowClient;
+  readonly windows: AppOwnedWindows;
   readonly documents: AppDocumentClient;
   readonly undo: AppUndoClient;
   readonly commands: AppCommandClient;

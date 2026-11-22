@@ -32,14 +32,14 @@ it("validates and deeply freezes a declarative app definition", () => {
       bundleIdentifier: "com.syndromatic.example",
       version: "1.0.0",
       displayName: "Example",
-      commands: [{ id: "example.refresh", title: "Refresh" }],
+      routes: [{ path: "/example", primary: true }],
     },
     root: Root,
   });
 
   expect(Object.isFrozen(definition)).toBe(true);
   expect(Object.isFrozen(definition.manifest)).toBe(true);
-  expect(Object.isFrozen(definition.manifest.commands)).toBe(true);
+  expect(Object.isFrozen(definition.manifest.routes?.[0])).toBe(true);
   expect(definition).not.toHaveProperty("runtime");
   expect(definition).not.toHaveProperty("registration");
   expect(() => {
@@ -132,8 +132,6 @@ it("keeps the complete V1 definition and declaration immutable through bundle re
       minimumViewport: { width: 640, height: 480 },
       windowDefaults: { title: "Complete window", width: 900, height: 640, minimumWidth: 640, minimumHeight: 480, resizable: true, role: "panel" },
       documentTypes: [{ id: "com.syndromatic.complete-document", extensions: ["complete"], displayName: "Complete document" }],
-      commands: [{ id: "com.syndromatic.complete.refresh", title: "Refresh", menu: "com.syndromatic.complete.menu", shortcut: "Cmd-R" }],
-      menus: [{ id: "com.syndromatic.complete.menu", title: "Complete", commandIds: ["com.syndromatic.complete.refresh"] }],
       services: [{ id: "com.syndromatic.complete.service", required: true, minimumVersion: "1.0.0" }],
       entitlements: ["clipboard.read"],
       appearances: [{ id: "com.syndromatic.complete.appearance", variant: "system" }],
@@ -177,4 +175,20 @@ it("rejects direct V1 registration that does not pass the shared schema", () => 
   expect(() => runtime.apps.register(malformed as never)).not.toThrow();
   expect(runtime.apps.register(malformed as never)).toBeNull();
   expect(runtime.apps.getApp("com.syndromatic.invalid-direct")).toBeNull();
+});
+
+it.each([
+  { commands: [{ id: "example.refresh", title: "Refresh" }] },
+  { menus: [{ id: "example.file", title: "File", commandIds: ["example.refresh"] }] },
+])("rejects removed manifest fields %j", obsolete => {
+  expect(() => createSynWare({
+    manifest: {
+      schemaVersion: 1,
+      bundleIdentifier: "com.syndromatic.example",
+      version: "1.0.0",
+      displayName: "Example",
+      ...obsolete,
+    },
+    root: Root,
+  })).toThrow(/must NOT have additional properties/);
 });

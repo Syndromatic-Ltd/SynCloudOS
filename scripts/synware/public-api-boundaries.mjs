@@ -26,7 +26,7 @@ import { synWareSdkEntries } from "./sdk-entries.mjs";
 // Internal build policy, never a portable SDK entry or runtime dependency.
 const hostEntries = new Set(["browser", "sdk/animation-host"]);
 const privateHostNames = new Set([
-  "SourceListFrameProvider", "SourceListFrameContextValue", "useSourceListFrame",
+  "WindowTitlebarHostContext", "WindowTitlebarHost", "WindowPresentationSlot",
   "NSEWindowSurfaceRequest", "NSEWindowSurfaceDismissResult", "NSEWindowSurfaceErrorContext",
   "useOptionalNSEWindowSurfaceBridge", "WindowManager", "WindowController",
   "nseRegistry",

@@ -61,7 +61,7 @@ const probeSource = `import { useEffect } from "react";
 import { mountSynCloudOS } from "@syndromatic/syncloudos/browser";
 import { useSCOS } from "@syndromatic/syncloudos/sdk";
 import { createSynWare } from "@syndromatic/syncloudos/sdk/testing";
-import { defineWebspring, type WebspringViewProps } from "@syndromatic/syncloudos/webspring";
+import { WSApplication, WSLauncherViewController, createWebspring } from "@syndromatic/syncloudos/webspring";
 declare global { interface Window { fxImageMetadata: any; } }
 window.fxImageMetadata = { ready: false };
 const supportedICC = new Uint8Array(${supportedProfileLiteral});
@@ -250,13 +250,20 @@ function Probe() {
   })().catch(error => { window.fxImageMetadata = { ready: false, error: error instanceof Error ? error.stack ?? error.message : String(error) }; }); }, [app]);
   return <p>Installed IFX-01 metadata probe</p>;
 }
-function Website({ actions, applicationOutlet }: WebspringViewProps) {
-  return <main><button id="open" onClick={() => { void actions.openApp("org.example.image-metadata"); }}>Open image metadata probe</button>{applicationOutlet}</main>;
+class Website extends WSLauncherViewController {
+  static override mode = "persistent" as const;
+  override renderView() {
+    return <main><button id="open" onClick={() => { void this.openApp("org.example.image-metadata"); }}>Open image metadata probe</button></main>;
+  }
 }
-const shell = defineWebspring({ manifest: { schemaVersion: 1, bundleIdentifier: "org.example.image-metadata-shell", version: "1.0.0", displayName: "Image metadata shell",
-  webspringShell: { views: [{ id: "website", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }],
-    defaults: { desktop: "website", tablet: "website", mobile: "website" }, homeRoute: "/", branding: { name: { key: "brand", fallback: "Image metadata" } } } },
-  components: { website: Website } });
+
+class Shell extends WSApplication {
+  static override mainViewController = Website;
+}
+const shell = createWebspring({
+  info: { bundleIdentifier: "org.example.image-metadata-shell", version: "1.0.0", displayName: "Image metadata shell", branding: { name: { key: "brand", fallback: "Image metadata" } } },
+  application: Shell,
+});
 const app = createSynWare({ manifest: { schemaVersion: 1, bundleIdentifier: "org.example.image-metadata", version: "1.0.0", displayName: "Image metadata probe",
   runtime: { policy: { public: true } }, presentations: ["desktop", "tablet", "mobile"],
   routes: [{ path: "/image-metadata", primary: true }], webspring: { visible: true, order: 1 } }, root: Probe });

@@ -23,6 +23,7 @@ import type { SynCloudOSAppInfo, SynCloudOSRuntime } from "../SynCloudOS";
 import { SynWareRuntimeContext, SynCloudOSRuntimeContext, useRuntimeNSEControlPort, useRuntimeNSEFocusPort, useRuntimeNSEOverlayPort } from "../../SynCloudOSReact";
 import { ControlRuntimeProvider, FocusPortProvider, OverlayProvider, ConformanceEvidenceProvider, type ConformanceEvidencePort } from "../../NSE/NSE";
 import type { MountedSynWareRuntime } from "./appRuntimeFacade";
+import { WindowApplicationMenuHostContext } from "../AppHosting/windowApplicationMenu";
 import { createMountedSynWareRuntime } from "./appRuntimeFacade";
 import type { SynWareRuntime } from "./appRuntimeTypes";
 import { createSynWareContextValue } from "./createSynWareContextValue";
@@ -55,10 +56,6 @@ function PresentedApplicationControls({ children }: { readonly children: ReactNo
   const menus = useRuntimeNSEMenuPort();
   return <ControlRuntimeProvider port={controls}><MenuRuntimeProvider port={menus}>{children}</MenuRuntimeProvider></ControlRuntimeProvider>;
 }
-
-// Host-only bridge entrypoint. This is deliberately not exported from the
-// public AppSDK package barrel: applications receive only the chrome hook.
-export { AppWindowChromePropsProvider as HostAppWindowChromePropsProvider } from "./windowChromeContexts";
 
 interface MountedState {
   readonly key: string;
@@ -118,7 +115,11 @@ function MountedAppPresentationBoundary({
   const appAnimations = appClient.animations;
   const animationState = useMemo(() => createRuntimeAnimationState(kernelRuntime, runtime.signal, () => {
     const state = kernelRuntime.lifecycle.getState(runtime.app.bundleIdentifier);
-    return state === "suspended" || state === "closed";
+    if (state === "suspended" || state === "closed") return true;
+    // Both sides of a MultiSwitch hold their display links until it settles, so the switch owns the frame.
+    const multiSwitch = kernelRuntime.store.getSnapshot().application.multiSwitch;
+    return multiSwitch.status === "switching"
+      && (multiSwitch.fromAppId === runtime.app.bundleIdentifier || multiSwitch.toAppId === runtime.app.bundleIdentifier);
   }), [kernelRuntime, runtime]);
   const reducedMotion = useSyncExternalStore(animationState.subscribe, animationState.getReducedMotion, animationState.getReducedMotion);
   const appFrames = useMemo<AFXFrameScheduler | null>(() => {
@@ -517,9 +518,11 @@ export function SynWareRuntimeMount({ runtime, app, responderId, windowControlle
       <SynWareRuntimeContext.Provider value={mounted.mount.runtime}>
         <SynWareProvider value={context}><OpenPanelApplicationHost value={context}>
           <FontCatalogueProvider catalogue={fontCatalogue}>
+            <WindowApplicationMenuHostContext.Provider value={runtime}>
             <MountedAppPresentationBoundary runtime={mounted.mount.runtime} kernelRuntime={runtime} context={mounted.contextBase}>
               <PresentedContentProvider value={wrapPresentedContent}>{presentedChildren}</PresentedContentProvider>
             </MountedAppPresentationBoundary>
+            </WindowApplicationMenuHostContext.Provider>
           </FontCatalogueProvider>
         </OpenPanelApplicationHost></SynWareProvider>
       </SynWareRuntimeContext.Provider>

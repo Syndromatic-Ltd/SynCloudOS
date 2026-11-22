@@ -34,11 +34,11 @@ import { ResponderScope, useStrings } from "@syndromatic/syncloudos/sdk";
 import { SynWareProvider } from "../../src/SynCloudOS/AppSDK/SynWareContext";
 import { createSynWareContextValue } from "../../src/SynCloudOS/AppSDK/createSynWareContextValue";
 import { createSynWare } from "@syndromatic/syncloudos/sdk/testing";
-import { ApplicationStageView } from "../../src/Webspring/ApplicationStageView";
+import { WSStageWindowHost } from "../../src/Webspring/WSStageWindowHost";
 import { tabViewController } from "../fixtures/tabViewController";
 import { nseUpdateTraits } from "../../src/NSE/Application/NSEViewController";
 import { ViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
-import { WindowTitlebarHostContext } from "../../src/SynCloudOS/AppHosting/windowChrome";
+import { WindowTitlebarHostContext } from "../../src/SynCloudOS/AppHosting/windowAccessories";
 import { authoriseTestRuntime, createTestBundle, createTestRuntime, createTestRuntimeEnvironment, mountTestSynWareRuntime } from "./helpers";
 import { HostSiteBrandingProvider } from "../../src/SynCloudOSReact";
 
@@ -66,29 +66,21 @@ vi.mock("../../src/Webspring/webspringLocale", () => ({
   })
 }));
 
-function createAppInfo(topBar: "standard" | "custom" | "none" = "standard"): SynCloudOSAppInfo {
+function createAppInfo(presentationMotion: "content" | "host" = "host"): SynCloudOSAppInfo {
   return {
     bundleIdentifier: "com.example.test-app",
     displayName: "Test App",
     shortName: "Test",
     packageName: "com.test.app",
-    frame: {
-      material: "standard",
-      rightSlot: "userInfo",
-      background: "system",
-      smoothSurface: "off",
-      sourceList: undefined,
-      topBar
-    },
+    frame: { presentationMotion },
     icon: { src: "/test.png" },
     version: "1.0.0",
     about: { copyright: "© Test", trademark: "", tagline: "A test app" },
     isDisabled: false,
     notifications: { badgeCount: 0, showsNotifications: false },
-    presentation: "appView",
+    presentation: "stage",
     route: "/test",
     window: {
-      chrome: "system",
       defaultHeight: 720,
       defaultWidth: 960,
       minHeight: 400,
@@ -112,7 +104,7 @@ function renderFrame(beforeRender?: (runtime: ReturnType<typeof createTestRuntim
   render(
     <SynCloudOSProvider runtime={runtime}>
       <HostSiteBrandingProvider value={stageSiteBranding}>
-      <ApplicationStageView
+      <WSStageWindowHost
         app={appInfo}
         lifecycle="ready"
         stage={{ appId: "com.example.test-app", id: "application-stage:com.example.test-app", title: "Test App", isFocused: true, zIndex: 10 }}
@@ -172,65 +164,7 @@ function CustomQuickSwitchTitleFixture() {
   );
 }
 
-describe("ApplicationStageView app menu", () => {
-  it("keeps a class window's responder as the parent of its application menu", async () => {
-    const execute = vi.fn();
-    const runtime = renderFrame(runtime => {
-      runtime.responders.register({ id: "controller:menu-test", kind: "controller", parentId: "application:com.example.test-app", scopeId: "application:com.example.test-app" });
-      runtime.commands.register({
-        id: "com.example.test-app.settings", responderId: "controller:menu-test",
-        title: { key: "settings", fallback: "App Settings" }, payload: { description: "No payload", parse: () => ({ ok: true, value: undefined }) },
-        scope: "focused", defaultKeyBindings: [], undo: { kind: "none" }, validate: () => ({ enabled: true }), execute,
-      });
-    }, { ...createAppInfo(), applicationMenu: { preferences: { commandId: "com.example.test-app.settings", label: "App Settings" } } });
-    runtime.focus.requestFocus("controller:menu-test");
-    expect(runtime.focus.getFocusedResponderId()).toBe("controller:menu-test");
-    fireEvent.click(screen.getByRole("button", { name: "User Info" }));
-    const settings = await screen.findByRole("menuitem", { name: "App Settings" });
-    await waitFor(() => expect(settings.hasAttribute("disabled"), JSON.stringify(runtime.focus.inspect())).toBe(false));
-    fireEvent.click(settings);
-    await waitFor(() => expect(execute).toHaveBeenCalledOnce());
-  });
-  it("owns source-list identity and destination title, and drops the top rail without remounting compact content", async () => {
-    let viewport = { width: 1440, height: 900 };
-    const listeners = new Set<(snapshot: typeof viewport) => void>();
-    const runtime = createTestRuntime({ environment: { ...createTestRuntimeEnvironment(), layoutViewport: { getSnapshot: () => viewport, subscribe: listener => { listeners.add(listener); return () => { listeners.delete(listener); }; } } } });
-    function SourceListFixture() {
-      const traits = React.useSyncExternalStore(runtime.presentationTraits.subscribe, runtime.presentationTraits.getSnapshot, runtime.presentationTraits.getSnapshot);
-      const [controller] = React.useState(() => tabViewController({ ids: ["Buttons"], content: () => <input aria-label="Live draft" defaultValue="Draft" /> }));
-      useNSEDeferredDisposal(controller, fixtureDisposalScheduler);
-      React.useLayoutEffect(() => { controller[nseUpdateTraits]({ presentation: traits, reducedMotion: traits.reducedMotion }); }, [controller, traits]);
-      // Stands in for a window titled "Buttons" (NSWindow.title), as the window controller's mount does.
-      const titlebar = React.useContext(WindowTitlebarHostContext);
-      React.useLayoutEffect(() => {
-        titlebar?.setDocument({ title: "Buttons", subtitle: "", documentEdited: false });
-        return () => titlebar?.setDocument(null);
-      }, [titlebar]);
-      return <ViewControllerView controller={controller} />;
-    }
-    runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.test-app", route: "/test" }, {
-      loadModule: async () => ({ default: SourceListFixture }),
-    }));
-    await runtime.bundles.loadBundle("com.example.test-app");
-    const app = { ...createAppInfo(), frame: { ...createAppInfo().frame, material: "metal" as const, sourceList: { minWidth: 220, maxWidth: 320, defaultWidth: 254, railLabel: "NSE Gallery" } } };
-    const fixture = () => <SynCloudOSProvider runtime={runtime}><HostSiteBrandingProvider value={stageSiteBranding}><ApplicationStageView app={app} lifecycle="active" stage={{ appId: "com.example.test-app", id: "application-stage:com.example.test-app", title: "Test App", isFocused: true, zIndex: 10 }} /></HostSiteBrandingProvider></SynCloudOSProvider>;
-    const view = render(fixture());
-    await waitFor(() => expect(screen.getByRole("heading", { name: "Buttons" })).toBeTruthy());
-    expect(view.container.querySelector('.nse-app-topbar-metal-rail-content')?.textContent).toContain("NSE Gallery");
-    expect(view.container.querySelectorAll(".nse-app-topbar")).toHaveLength(1);
-    // A real window owns its footer; the retained accessory path is covered by nse-source-list-chrome.test.tsx.
-    const draft = screen.getByRole("textbox", { name: "Live draft" });
-    fireEvent.change(draft, { target: { value: "Retained" } });
-    viewport = { width: 390, height: 844 };
-    listeners.forEach(listener => listener(viewport));
-    await waitFor(() => expect(view.container.querySelector('.nse-app-topbar')?.getAttribute('data-has-rail')).toBe("false"));
-
-    expect(screen.getByRole("textbox", { name: "Live draft" })).toBe(draft);
-    viewport = { width: 1440, height: 900 };
-    listeners.forEach(listener => listener(viewport));
-    await waitFor(() => expect(view.container.querySelector('.nse-app-topbar')?.getAttribute('data-has-rail')).toBe("true"));
-    expect((draft as HTMLInputElement).value).toBe("Retained");
-  });
+describe("WSStageWindowHost app menu", () => {
   it("projects the shell-owned QuickSwitch action and subscribed open state into custom app chrome", async () => {
     const runtime = createTestRuntime();
     runtime.apps.registerBundle(createTestBundle(
@@ -243,8 +177,8 @@ describe("ApplicationStageView app menu", () => {
     const frame = (open: boolean) => (
       <HostSiteBrandingProvider value={stageSiteBranding}>
       <SynCloudOSProvider runtime={runtime}>
-        <ApplicationStageView
-          app={createAppInfo("custom")}
+        <WSStageWindowHost
+          app={createAppInfo("content")}
           lifecycle="active"
           quickSwitchOpen={open}
           onQuickSwitchRequest={onQuickSwitchRequest}
@@ -277,7 +211,7 @@ describe("ApplicationStageView app menu", () => {
     render(
       <SynCloudOSProvider runtime={runtime}>
         <HostSiteBrandingProvider value={stageSiteBranding}>
-        <ApplicationStageView
+        <WSStageWindowHost
           app={createAppInfo()}
           lifecycle="active"
           stage={{ appId: "com.example.test-app", id: "application-stage:com.example.test-app", title: "Test App", isFocused: true, zIndex: 10 }}
@@ -296,7 +230,7 @@ describe("ApplicationStageView app menu", () => {
     const back = await screen.findByRole("button", { name: "Back to Home destination" });
     expect(document.querySelectorAll(".nse-app-topbar")).toHaveLength(1);
     expect(screen.queryByText("Back", { selector: ".nse-hierarchy-stack button" })).toBeNull();
-    expect(screen.queryByRole("button", { name: "Return to Webspring" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Return to Webspring" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: "User Info" })).toBeNull();
     expect(screen.getByRole("heading", { name: "Library destination" })).toBeTruthy();
 
@@ -317,7 +251,7 @@ describe("ApplicationStageView app menu", () => {
       <React.StrictMode>
         <SynCloudOSProvider runtime={runtime}>
           <HostSiteBrandingProvider value={stageSiteBranding}>
-          <ApplicationStageView
+          <WSStageWindowHost
             app={createAppInfo()}
             lifecycle="active"
             stage={{ appId: "com.example.test-app", id: "application-stage:com.example.test-app", title: "Test App", isFocused: true, zIndex: 10 }}
@@ -332,7 +266,7 @@ describe("ApplicationStageView app menu", () => {
     expect(await screen.findByRole("button", { name: "Back to Home destination" })).toBeTruthy();
   });
 
-  it.each(["custom", "none"] as const)("does not synthesise stage chrome for a %s-frame application claim", async (topBar) => {
+  it("lets a content-owned presentation keep its own navigation chrome", async () => {
     const runtime = createTestRuntime();
     runtime.apps.registerBundle(createTestBundle(
       { version: "1.0.0", bundleIdentifier: "com.example.test-app", displayName: "Test App", route: "/test" },
@@ -344,10 +278,10 @@ describe("ApplicationStageView app menu", () => {
     render(
       <SynCloudOSProvider runtime={runtime}>
         <HostSiteBrandingProvider value={stageSiteBranding}>
-        <ApplicationStageView
-          app={createAppInfo(topBar)}
+        <WSStageWindowHost
+          app={createAppInfo("content")}
           lifecycle="active"
-          stage={{ appId: "com.example.test-app", id: `application-stage:test-app:${topBar}`, title: "Test App", isFocused: true, zIndex: 10 }}
+          stage={{ appId: "com.example.test-app", id: "application-stage:test-app:content", title: "Test App", isFocused: true, zIndex: 10 }}
         />
         </HostSiteBrandingProvider>
       </SynCloudOSProvider>,
@@ -367,7 +301,7 @@ describe("ApplicationStageView app menu", () => {
     render(
       <SynCloudOSProvider runtime={runtime}>
         <HostSiteBrandingProvider value={stageSiteBranding}>
-        <ApplicationStageView
+        <WSStageWindowHost
           app={createAppInfo()}
           lifecycle="active"
           multiSwitchId="switch:reduced-motion"
@@ -378,7 +312,7 @@ describe("ApplicationStageView app menu", () => {
       </SynCloudOSProvider>,
     );
 
-    const surface = document.querySelector<HTMLElement>('.webspring-app-view-surface[data-multiswitch-role="outgoing"]');
+    const surface = document.querySelector<HTMLElement>('[data-nse-control="window"][data-nse-part="background"][data-nse-presentation="stage"] > [data-nse-part="content"][data-nse-transition="outgoing"]');
     expect(surface).not.toBeNull();
     expect(surface?.style.transform).toBe("");
   });
@@ -439,7 +373,7 @@ describe("ApplicationStageView app menu", () => {
     const frame = (stageId: string) => (
       <SynCloudOSProvider runtime={runtime}>
         <HostSiteBrandingProvider value={stageSiteBranding}>
-        <ApplicationStageView
+        <WSStageWindowHost
           key={stageId}
           app={createAppInfo()}
           lifecycle="active"
@@ -493,7 +427,7 @@ describe("ApplicationStageView app menu", () => {
     render(
       <SynCloudOSProvider runtime={runtime}>
         <HostSiteBrandingProvider value={stageSiteBranding}>
-        <ApplicationStageView
+        <WSStageWindowHost
           app={createAppInfo()}
           lifecycle="active"
           stage={{ appId: "com.example.test-app", id: "application-stage:com.example.test-app", title: "Test App", isFocused: true, zIndex: 10 }}
@@ -505,47 +439,7 @@ describe("ApplicationStageView app menu", () => {
     expect(screen.getByText("Loaded application")).toBeTruthy();
   });
 
-  it("opens the canonical top-right NSE command menu instead of the temporary User Info error path", async () => {
-    renderFrame();
 
-    fireEvent.click(screen.getByRole("button", { name: "User Info" }));
-
-    expect(await screen.findByRole("menuitem", { name: "About Test App" })).toBeTruthy();
-    expect(screen.getByRole("menuitem", { name: "System Preferences…" })).toBeTruthy();
-    expect(screen.getByRole("menuitem", { name: "Log Out" })).toBeTruthy();
-    expect(document.querySelector('[data-nse-overlay-kind="menu"]')?.getAttribute("data-placement")).toBe("viewport-block-start-inline-end");
-    expect(document.querySelector('[data-nse-application-menu="true"]')).toBeTruthy();
-  });
-
-  it("keeps the explicit application About target after Escape dismisses and reopens the menu", async () => {
-    const validations: unknown[] = [];
-    const runtime = renderFrame((configuredRuntime) => {
-      const validateMany = configuredRuntime.commands.validateMany.bind(configuredRuntime.commands);
-      vi.spyOn(configuredRuntime.commands, "validateMany").mockImplementation(async (requests, options) => {
-        validations.push(requests.map((request) => ({ commandId: request.commandId, payload: request.payload })));
-        return validateMany(requests, options);
-      });
-    });
-    const trigger = screen.getByRole("button", { name: "User Info" });
-
-    fireEvent.click(trigger);
-    const firstMenu = await screen.findByRole("menu");
-    const firstAbout = await screen.findByRole("menuitem", { name: "About Test App" });
-    await waitFor(() => expect(firstAbout.getAttribute("aria-disabled")).not.toBe("true"));
-
-    fireEvent.keyDown(firstMenu, { key: "Escape" });
-    await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
-    expect(runtime.apps.getApp("com.example.test-app")).not.toBeNull();
-
-    fireEvent.click(trigger);
-    const reopenedAbout = await screen.findByRole("menuitem", { name: "About Test App" });
-    await waitFor(() => expect(reopenedAbout.getAttribute("aria-disabled")).not.toBe("true"));
-    expect(validations).toEqual([
-      expect.arrayContaining([expect.objectContaining({ commandId: "application.showAbout", payload: { appId: "com.example.test-app" } })]),
-      expect.arrayContaining([expect.objectContaining({ commandId: "application.showAbout", payload: { appId: "com.example.test-app" } })]),
-    ]);
-    expect((reopenedAbout as HTMLButtonElement).disabled).toBe(false);
-  });
 
   it("composes application responder ownership into the transformed stage root", () => {
     renderFrame();
@@ -581,7 +475,7 @@ describe("ApplicationStageView app menu", () => {
     render(
       <SynCloudOSProvider runtime={runtime}>
         <HostSiteBrandingProvider value={stageSiteBranding}>
-        <ApplicationStageView
+        <WSStageWindowHost
           app={createAppInfo()}
           lifecycle="active"
           stage={{ appId: "com.example.test-app", id: "application-stage:com.example.test-app", title: "Test App", isFocused: true, zIndex: 10 }}
@@ -643,7 +537,7 @@ describe("ApplicationStageView app menu", () => {
       <React.StrictMode>
         <SynCloudOSProvider runtime={runtime}>
           <HostSiteBrandingProvider value={stageSiteBranding}>
-          <ApplicationStageView
+          <WSStageWindowHost
             key={stageId}
             app={createAppInfo()}
             lifecycle="active"
@@ -703,7 +597,7 @@ describe("ApplicationStageView app menu", () => {
     const view = render(
       <SynCloudOSProvider runtime={runtime}>
         <HostSiteBrandingProvider value={stageSiteBranding}>
-        <ApplicationStageView
+        <WSStageWindowHost
           app={createAppInfo()}
           lifecycle="active"
           stage={{ appId: "com.example.test-app", id: "application-stage:com.example.test-app", title: "Test App", isFocused: true, zIndex: 10 }}
@@ -748,34 +642,5 @@ describe("ApplicationStageView app menu", () => {
     expect(() => mount.runtime.drag.endpoint()).toThrow(/Runtime transfer authority is no longer live/);
   });
 
-  it("requests the system-owned confirmation without logging out immediately", async () => {
-    const runtime = renderFrame();
-    const openRoute = vi.spyOn(runtime.routes, "openRoute");
 
-    fireEvent.click(screen.getByRole("button", { name: "User Info" }));
-    const logOut = await screen.findByRole("menuitem", { name: "Log Out" });
-    await waitFor(() => expect(logOut.getAttribute("aria-disabled")).not.toBe("true"));
-    fireEvent.click(logOut);
-
-    await waitFor(() => expect(runtime.systemUI.getSnapshot().logOutOpen).toBe(true));
-    expect(runtime.statechart.getCurrentState()).not.toBe("locked.loginWindow");
-    expect(openRoute).not.toHaveBeenCalled();
-  });
-
-  it("opens runtime-owned About and always-enabled system Preferences without an app placeholder", async () => {
-    const runtime = renderFrame();
-
-    fireEvent.click(screen.getByRole("button", { name: "User Info" }));
-    const about = await screen.findByRole("menuitem", { name: "About Test App" });
-    await waitFor(() => expect(about.getAttribute("aria-disabled")).not.toBe("true"));
-    fireEvent.click(about);
-    await waitFor(() => expect(runtime.systemUI.getSnapshot().aboutAppId).toBe("com.example.test-app"));
-
-    fireEvent.click(screen.getByRole("button", { name: "User Info" }));
-    const preferences = await screen.findByRole("menuitem", { name: /Preferences/ });
-    await waitFor(() => expect(preferences.getAttribute("aria-disabled")).not.toBe("true"));
-    expect(screen.queryByText("This app does not provide preferences.")).toBeNull();
-    fireEvent.click(preferences);
-    await waitFor(() => expect(runtime.systemUI.getSnapshot().preferencesPane).toBe(""));
-  });
 });

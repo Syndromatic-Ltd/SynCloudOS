@@ -26,7 +26,7 @@
 
 import { nseControlHooks } from "../../Theme/contract/hooks";
 import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction";
-import { useContext, useId, useMemo, useState } from "react";
+import { useContext, useId, useMemo, useState, type CSSProperties } from "react";
 import { NSEMenu } from "../../Menus/NSEMenu";
 import { MenuOverlay } from "../../Menus/MenuOverlay";
 import { MenuView } from "../../Menus/MenuView";
@@ -53,6 +53,13 @@ export function useSegmentActions(props: NSESegmentedControlProps): readonly NSE
       return { ...item, action: props.action, actionPayload: hasActionPayload ? props.actionPayload : item.id };
     });
   }, [props.items, props.action, props.actionPayload, hasActionPayload]);
+}
+
+export function selectedSegmentBezelStyle({ height, selectedSegmentBezelColour }: NSESegmentedControlProps): CSSProperties | undefined {
+  const instance = selectedSegmentBezelColour === undefined
+    ? undefined
+    : { "--nse-selected-segment-bezel-colour": selectedSegmentBezelColour } as CSSProperties;
+  return sizedControlStyle(instance, height, undefined);
 }
 
 function sizeAttribute(props: NSESegmentedControlProps): "small" | "custom" | undefined {
@@ -83,7 +90,8 @@ function TexturedRadioSegments({ props }: { readonly props: NSESegmentedControlP
       data-size={sizeAttribute(props)}
       data-nse-height={props.height === undefined ? undefined : String(props.height)}
       data-segment-style="texturedRounded"
-      style={sizedControlStyle(undefined, props.height, undefined)}
+      data-nse-custom-bezel={props.selectedSegmentBezelColour === undefined ? undefined : "true"}
+      style={selectedSegmentBezelStyle(props)}
       options={props.items.map((item) => ({
         value: item.id,
         label: item.label,
@@ -119,6 +127,8 @@ function TexturedSegments({ props }: { readonly props: NSESegmentedControlProps 
       controlSize={props.controlSize}
       height={props.height}
       className={props.className}
+      data-nse-custom-bezel={props.selectedSegmentBezelColour === undefined ? undefined : "true"}
+      style={selectedSegmentBezelStyle(props)}
       data-segment-style="texturedRounded"
     >
       {items.map((item) => {

@@ -32,6 +32,7 @@ import {
   PopoverWindowView,
   SheetView,
 } from "../../src/NSE/Windows";
+import { atmoPaintCSS } from "../fixtures/atmoStylesheets";
 import { standardWindow } from "../fixtures/windowTestDependencies";
 
 const windowCSS = readFileSync("src/NSE/Windows/nse-windows.css", "utf8");
@@ -135,9 +136,12 @@ describe("NSE window accessibility", () => {
   });
 
   it("retains forced-colours borders, two-pixel focus and reduced-motion fallbacks", () => {
-    expect(windowCSS).toContain("@media (forced-colors: active)");
+    const paint = atmoPaintCSS();
+    expect(paint).toContain("@media (forced-colors: active)");
+    expect(paint).toMatch(/border-color:\s*CanvasText/);
+    expect(paint).toMatch(/outline-color:\s*Highlight/);
     expect(windowCSS).toMatch(/border(?:-width)?:\s*1px/);
-    expect(windowCSS).toMatch(/outline:\s*2px/);
+    expect(windowCSS).toMatch(/outline(?:-width)?:\s*2px/);
     expect(windowCSS).toContain("@media (prefers-reduced-motion: reduce)");
   });
 });

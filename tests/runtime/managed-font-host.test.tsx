@@ -23,7 +23,7 @@ import React from "react";
 import { act, waitFor } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
 import { mountSynCloudOS, type MountedSynCloudOSHost } from "../../src/SynCloudOSReact/browserRuntime";
-import { defineWebspring } from "../../src/Webspring/public";
+import { createTestLauncher, createTestWebspring } from "./webspringTestShell";
 import { useHostFontManager } from "../../src/SynCloudOSReact/hostFontsContext";
 import { defineFontDeclaration, type NSEFontManager } from "../../src/NSE/Typography";
 import { NSEApplication } from "../../src/NSE/Application/NSEApplication";
@@ -31,8 +31,8 @@ import { NSEWindowController } from "../../src/NSE/Application/NSEWindowControll
 import { createSynWareDefinitionFromApplicationClass } from "../../src/SynCloudOS/AppHosting/applicationClass";
 import { createAppSCOS } from "../../src/SynCloudOS/AppSDK/scos/scosFacade";
 import { useFonts } from "../../src/SynCloudOS/AppSDK/fontAccess";
-vi.mock("../../src/App", () => ({ App: () => { const manager = useHostFontManager(); return <output>{manager.availableFamilies.map(family=>family.id).join(",")}</output>; } }));
-const shell = defineWebspring({ manifest:{ schemaVersion:1,bundleIdentifier:"com.example.font-host",displayName:"Fonts",version:"1.0.0",webspringShell:{views:[{id:"site",presentations:["desktop","tablet","mobile"],mode:"persistent"}],defaults:{desktop:"site",tablet:"site",mobile:"site"},homeRoute:"/",branding:{name:{key:"site.name",fallback:"Fonts"}}} },components:{site:()=>null} });
+vi.mock("../../src/Webspring/WebspringHost", () => ({ WebspringHost: () => { const manager = useHostFontManager(); return <output>{manager.availableFamilies.map(family=>family.id).join(",")}</output>; } }));
+const shell = createTestWebspring({ info: { bundleIdentifier: "com.example.font-host", displayName: "Fonts", branding: { name: { key: "site.name", fallback: "Fonts" } } }, launcher: createTestLauncher(() => null, "persistent") });
 const declaration = defineFontDeclaration({ resources:{regular:"Resources/Regular.woff2"},families:[{id:"managed",label:"Managed",defaultFaceId:"managed.regular",faces:[{id:"managed.regular",label:"Regular",browserFamily:"Managed",resource:"regular",weight:400,style:"normal"}]}] });
 it("mounts the catalogue from the managed declaration without an independent metadata list", async()=>{
   const element=document.createElement("div");document.body.append(element); window.history.replaceState(null,"","/");
@@ -62,7 +62,7 @@ it("supplies the same managed font catalogue during class launch and in its moun
   const app = createSynWareDefinitionFromApplicationClass(Application, {
     schemaVersion: 1, bundleIdentifier: appId, displayName: "Managed font class", version: "1.0.0",
     routes: [{ path: "/fonts", primary: true }],
-    runtime: { presentation: "windowedView", policy: { public: true, requiresLogin: false } },
+    runtime: { presentation: "window", policy: { public: true, requiresLogin: false } },
   });
   const element = document.createElement("div");
   document.body.append(element);

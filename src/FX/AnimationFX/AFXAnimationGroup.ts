@@ -24,13 +24,17 @@ import type {
   AFXAnimationSettlement,
   AFXAnimationScalar,
 } from "./animationTypes";
+import type { AFXAnimationVelocity } from "./animationVelocity";
 export interface AFXSampledAnimation {
   readonly targetId: string;
   readonly keyPath: string;
   readonly animation: Readonly<{ totalDuration: number }>;
   sample(seconds: number): AFXAnimationScalar | null;
   toRuntime(): AFXAnimationDefinition;
-  retarget?(from: AFXAnimationScalar): AFXSampledAnimation;
+  /** The velocity at `seconds`, when the animation knows it exactly. */
+  velocity?(seconds: number): AFXAnimationVelocity;
+  /** A copy that starts from `from`, continuing at `velocity` when the animation supports it. */
+  retarget?(from: AFXAnimationScalar, velocity?: AFXAnimationVelocity): AFXSampledAnimation;
 }
 export type AFXAnimationExecutor = (
   target: object,

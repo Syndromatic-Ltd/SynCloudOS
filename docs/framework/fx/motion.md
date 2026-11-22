@@ -1,6 +1,6 @@
 # MotionFX
 
-MotionFX (`MFX`) is the web-native analogue of Core Motion. It gives an application the orientation and movement of the device it runs on: an attitude (yaw, pitch and roll), rotation rate, gravity, user acceleration and raw accelerometer and gyroscope readings. An interface can use these values to respond when the user tilts or shakes a phone, or to shade a surface as the device turns.
+MotionFX (`MFX`) reads how the device is held and moved. It gives an application the orientation and movement of the device it runs on: an attitude (yaw, pitch and roll), rotation rate, gravity, user acceleration and raw accelerometer and gyroscope readings. An interface can use these values to respond when the user tilts or shakes a phone, or to shade a surface as the device turns.
 
 The framework has two halves. The value types are a plain library: `MFXAttitude` is an immutable orientation with quaternion, rotation matrix and Euler-angle views, and the sample types describe what a sensor reported at one instant. The device access is a scoped client that only a mounted SynWare can reach. `useMotion()` returns a motion manager owned by the component, and `useSCOS().motion.createManager()` returns one you own directly. The host enforces the manifest permissions, shares one set of browser listeners between every session, pauses delivery when the page is hidden and releases everything when the application closes.
 
@@ -15,7 +15,6 @@ MotionFX solves the parts of sensor work that browsers leave to each application
 | Hook | `useMotion()` from `@syndromatic/syncloudos/sdk` |
 | Client | `useSCOS().motion` (`MFXMotionClient`) |
 | Permissions | `motion.read` to create a manager and receive samples. `motion.requestAuthorization` in addition to call `requestAuthorization()`. |
-| Analogue | Core Motion (`CMMotionManager`, `CMDeviceMotion`, `CMAttitude`) |
 
 The entry exports one class, `MFXAttitude`, and eighteen types. Everything else in the framework is reached through the manager the session hands you.
 
@@ -35,7 +34,7 @@ The entry exports one class, `MFXAttitude`, and eighteen types. Everything else 
 
 Data flows in one direction. The host listens to the browser's orientation and motion events, converts them to SI units and monotonic seconds, and hands each raw sample to every manager that has a subscription. A manager applies its reference frame and cadence, freezes the sample and calls your handler synchronously. Handlers run in the order the subscriptions were created.
 
-Units are the same everywhere. Angles are radians. Rotation rates are radians per second. Accelerations and gravity are metres per second squared, so gravity at rest has a magnitude near 9.81 (Core Motion reports it in units of g). Timestamps and intervals are seconds. Timestamps come from the browser's monotonic event clock, so they are useful for differences and never as calendar times.
+Units are the same everywhere. Angles are radians. Rotation rates are radians per second. Accelerations and gravity are metres per second squared, so gravity at rest has a magnitude near 9.81, not 1 g. Timestamps and intervals are seconds. Timestamps come from the browser's monotonic event clock, so they are useful for differences and never as calendar times.
 
 ## Attitude
 
@@ -50,7 +49,7 @@ These are the value shapes the rest of the framework uses.
 | `MFXRotationMatrix` | Readonly tuple of nine numbers | A 3 by 3 rotation matrix in row-major order: `[m00, m01, m02, m10, m11, m12, m20, m21, m22]`. |
 | `MFXAttitudeReferenceFrame` | `"xArbitraryZVertical"`, `"xArbitraryCorrectedZVertical"`, `"xMagneticNorthZVertical"` or `"xTrueNorthZVertical"` | The frame an attitude is measured against. |
 
-`startDeviceMotionUpdates` accepts only `"xArbitraryZVertical"` at present. It throws for the other three values, which the type keeps so that later hosts can offer them without an API change. The names and meanings are Core Motion's `CMAttitudeReferenceFrame`: in `"xArbitraryZVertical"` the z axis is vertical and the heading is arbitrary.
+`startDeviceMotionUpdates` accepts only `"xArbitraryZVertical"` at present. It throws for the other three values, which the type keeps so that later hosts can offer them without an API change. The names and meanings follow Core Motion's reference frames: in `"xArbitraryZVertical"` the z axis is vertical and the heading is arbitrary.
 
 ### `MFXAttitude`
 
@@ -188,7 +187,7 @@ Creating a manager is passive. It starts no sensor and shows no prompt.
 
 The object you work with. It extends `MFXMotionAuthorization`. One manager belongs to one session (or one component, when it comes from the hook) and its lifetime ends when you call `dispose()`, when the signal you passed to `createManager` aborts, or when the session closes. After that, every member that starts or configures something throws, `capabilities` reports `"disposed"` and the latest-sample properties are `null`.
 
-Subscriptions are passive. Starting one never triggers a permission prompt. If the device needs explicit authorisation, or the page is hidden, the subscription stays alive and simply receives no samples until the situation changes.
+Subscriptions are passive. Starting one never triggers a permission prompt. If the device needs explicit authorisation, or the page is hidden, the subscription stays alive and receives no samples until the situation changes.
 
 | Member | Type or signature | Description |
 | --- | --- | --- |
@@ -382,7 +381,7 @@ The promise rejects when `createManager` throws, for example with a `SecurityErr
 
 ### Reference frames and measuring a change
 
-Attitudes arrive in the `"xArbitraryZVertical"` frame. To measure movement from a starting pose, for example when a game starts or the user taps "centre", keep that sample's attitude and call `attitude.multiplyByInverseOf(reference)` on later ones, as with `CMAttitude.multiply(byInverseOf:)`. The result is the change in the device's own axes.
+Attitudes arrive in the `"xArbitraryZVertical"` frame. To measure movement from a starting pose, for example when a game starts or the user taps "centre", keep that sample's attitude and call `attitude.multiplyByInverseOf(reference)` on later ones. The result is the change in the device's own axes.
 
 Attitudes a manager delivers keep quaternion signs continuous within each subscription, so component-wise filtering and interpolation do not jump.
 

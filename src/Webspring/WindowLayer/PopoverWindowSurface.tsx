@@ -18,8 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useLayoutEffect, useState, type CSSProperties, type ReactNode } from "react";
-import { useNSEAppearanceProjection } from "../../NSE/Appearance";
+import { useLayoutEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
+import { projectNSEAppearance, useNSEAppearanceProjection } from "../../NSE/Appearance";
+import { RelocatedAppearance } from "../../NSE/hostComposition";
+import { popoverAppearance, type PopoverAppearanceMetadata } from "../../NSE/hostComposition";
 import { useNSEAnimationEnvironment } from "../../NSE/Animation";
 import { useNSEPresenceExiting } from "../../NSE/Animation";
 import { PopoverFrame } from "../../NSE/hostComposition";
@@ -36,12 +38,14 @@ export function PopoverWindowSurface({ surface, windowControllerId, anchored, ch
   readonly children: ReactNode;
 }) {
   const runtime = useKernelSynCloudOS();
-  const appearance = useNSEAppearanceProjection();
+  const inheritedProjection = useNSEAppearanceProjection();
   const { reducedMotion } = useNSEAnimationEnvironment();
   const exiting = useNSEPresenceExiting();
   const [element, setElement] = useState<HTMLDivElement | null>(null);
   const [arrow, setArrow] = useState<HTMLSpanElement | null>(null);
   const { request, popoverPosition: position } = surface;
+  const appearance = (request as typeof request & PopoverAppearanceMetadata)[popoverAppearance];
+  const projection = useMemo(() => appearance ? projectNSEAppearance(appearance, true) : inheritedProjection, [appearance, inheritedProjection]);
   const frameArrow = anchored && (position?.arrowX !== undefined || position?.arrowY !== undefined) ? arrow : null;
   const painted = useNSEPopoverSurface(element, frameArrow, !exiting, true);
   useLayoutEffect(() => {
@@ -58,22 +62,29 @@ export function PopoverWindowSurface({ surface, windowControllerId, anchored, ch
   }, [element, exiting, painted]);
   const closingContent = exiting ? painted.current?.querySelector(".nse-overlay-popup-content")?.cloneNode(true) as HTMLElement | undefined : undefined;
   closingContent?.querySelectorAll("[id]").forEach(node => node.removeAttribute("id"));
-  return <div
+  const dialog = <div
     ref={setElement}
-    {...appearance}
+    {...projection}
     className={`nse-overlay-popup nse-popover nse-overlay-popup--${anchored ? "popover" : "action-sheet"}`}
     data-nse-control="popover" data-nse-role="overlay" data-nse-part="surface" data-nse-style={anchored ? "popover" : "action-sheet"}
     data-nse-window-popover=""
-    data-nse-popover-draws-background={String(request.drawsBackground ?? true)}
+    data-nse-transparent={String(request.drawsBackground === false)}
     data-nse-reduced-motion={String(reducedMotion)}
     data-nse-overlay-kind={anchored ? "popover" : "action-sheet"}
     data-nse-presentation={anchored ? "anchored" : "sheet"}
-    data-state={exiting ? "closing" : "open"}
+    data-nse-overlay-state={exiting ? "closing" : "open"}
     role="dialog" tabIndex={-1}
     aria-modal={!anchored || undefined}
     aria-label={request.labelledBy ? undefined : request.title}
     aria-labelledby={request.labelledBy} aria-describedby={request.describedBy}
-    style={{ width: "100%", height: "100%", minWidth: 0, "--nse-popover-spring": nsePopoverSpringEasing } as CSSProperties}
+    style={{
+      ...(appearance && projection.style),
+      width: "100%",
+      height: "100%",
+      minWidth: 0,
+      opacity: "var(--nse-overlay-presentation-alpha)",
+      "--nse-popover-spring": nsePopoverSpringEasing,
+    } as CSSProperties}
     onKeyDown={event => {
       if (event.key !== "Escape" || event.defaultPrevented || event.nativeEvent.isComposing || request.behavior === "applicationDefined") return;
       event.preventDefault(); event.stopPropagation();
@@ -83,4 +94,5 @@ export function PopoverWindowSurface({ surface, windowControllerId, anchored, ch
     <PopoverFrame arrowRef={setArrow} anchored={anchored} />
     <div className="nse-overlay-popup-content" dangerouslySetInnerHTML={exiting ? { __html: closingContent?.innerHTML ?? "" } : undefined}>{exiting ? undefined : children}</div>
   </div>;
+  return <RelocatedAppearance appearance={appearance}>{dialog}</RelocatedAppearance>;
 }

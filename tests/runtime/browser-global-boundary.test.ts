@@ -131,32 +131,50 @@ export function inspectBrowserGlobals(path: string, text: string) {
   return inspectSourceBrowserGlobals(source, path, programme.getTypeChecker());
 }
 
+const webspringSurfaces = [
+  "src/Webspring/WSStageLayer.tsx",
+  "src/Webspring/WSStageWindowHost.tsx",
+  "src/Webspring/Contents/Views/WSBoardViewController/WSBoardViewController.tsx",
+  "src/Webspring/WSLauncherViewController.tsx",
+  "src/Webspring/WSIconView.tsx",
+  "src/Webspring/WindowLayer/WindowLayer.tsx",
+  "src/Webspring/WindowLayer/WindowHost.tsx",
+  "src/Webspring/WindowLayer/useWindowMoveResize.ts",
+].map((path) => resolve(repositoryRoot, path));
+
+// Both whole-tree scans check against one program, since building it is most of their cost.
+let sharedProgramme: ts.Program | undefined;
+const programmeFor = (paths: string[]) =>
+  sharedProgramme ??= ts.createProgram([...new Set([...paths, ...webspringSurfaces])], { jsx: ts.JsxEmit.ReactJSX, target: ts.ScriptTarget.Latest });
+const synCloudOSPaths = () => {
+  const root = resolve(repositoryRoot, "src/SynCloudOS");
+  const ambientAuthorityRoots = new Set([
+    resolve(root, "PlatformAdapters", "BrowserRuntimeEnvironment.ts"),
+    resolve(root, "PlatformAdapters", "BrowserAuthenticationEnvironment.ts"),
+    resolve(root, "PlatformAdapters", "BrowserPasskeyAuthorization.ts"),
+    resolve(root, "PlatformAdapters", "BrowserPointerAdapter.ts"),
+    resolve(root, "PlatformAdapters", "browserPointerAdapterTypes.ts"),
+    resolve(root, "PlatformAdapters", "AUFXAudioWorkletTransport.ts"),
+    resolve(root, "PlatformAdapters", "BrowserHapticsAdapter.ts"),
+    resolve(root, "PlatformAdapters", "BrowserTestingClock.ts"),
+    resolve(root, "PlatformAdapters", "BrowserAudioFileAdapter.ts"),
+    resolve(root, "PlatformAdapters", "BrowserDocumentAssetEnvironment.ts"),
+    resolve(root, "PlatformAdapters", "BrowserVideoDecoder.ts"),
+    resolve(root, "PlatformAdapters", "BrowserVideoEncoder.ts"),
+    resolve(root, "PlatformAdapters", "BrowserWebGPUImageProcessingBackend.ts"),
+    resolve(root, "PlatformAdapters", "image-processing.worker.ts"),
+    resolve(root, "PlatformAdapters", "lumina-index.worker.ts"),
+    resolve(root, "PlatformAdapters", "video-processing.worker.ts"),
+    resolve(root, "PlatformAdapters", "browserResponsiveness.worker.ts"),
+  ]);
+  const serverRoot = `${resolve(root, "Server")}${sep}`;
+  return sourceFiles(root).filter((path) => !ambientAuthorityRoots.has(path) && !path.startsWith(serverRoot));
+};
+
 describe("browser-global runtime boundary", () => {
   it("keeps browser globals behind explicit platform adapters", () => {
-    const root = resolve(repositoryRoot, "src/SynCloudOS");
-    const ambientAuthorityRoots = new Set([
-      resolve(root, "PlatformAdapters", "BrowserRuntimeEnvironment.ts"),
-      resolve(root, "PlatformAdapters", "BrowserAuthenticationEnvironment.ts"),
-      resolve(root, "PlatformAdapters", "BrowserPasskeyAuthorization.ts"),
-      resolve(root, "PlatformAdapters", "BrowserPointerAdapter.ts"),
-      resolve(root, "PlatformAdapters", "browserPointerAdapterTypes.ts"),
-      resolve(root, "PlatformAdapters", "AUFXAudioWorkletTransport.ts"),
-      resolve(root, "PlatformAdapters", "BrowserHapticsAdapter.ts"),
-      resolve(root, "PlatformAdapters", "BrowserTestingClock.ts"),
-      resolve(root, "PlatformAdapters", "BrowserAudioFileAdapter.ts"),
-      resolve(root, "PlatformAdapters", "BrowserDocumentAssetEnvironment.ts"),
-      resolve(root, "PlatformAdapters", "BrowserVideoDecoder.ts"),
-      resolve(root, "PlatformAdapters", "BrowserVideoEncoder.ts"),
-      resolve(root, "PlatformAdapters", "BrowserWebGPUImageProcessingBackend.ts"),
-      resolve(root, "PlatformAdapters", "image-processing.worker.ts"),
-      resolve(root, "PlatformAdapters", "lumina-index.worker.ts"),
-      resolve(root, "PlatformAdapters", "video-processing.worker.ts"),
-      resolve(root, "PlatformAdapters", "browserResponsiveness.worker.ts"),
-    ]);
-    const serverRoot = `${resolve(root, "Server")}${sep}`;
-    const paths = sourceFiles(root)
-      .filter((path) => !ambientAuthorityRoots.has(path) && !path.startsWith(serverRoot));
-    const programme = ts.createProgram(paths, { jsx: ts.JsxEmit.ReactJSX, target: ts.ScriptTarget.Latest });
+    const paths = synCloudOSPaths();
+    const programme = programmeFor(paths);
     const checker = programme.getTypeChecker();
     const findings = paths.flatMap((path) => {
       const source = programme.getSourceFile(path);
@@ -168,16 +186,12 @@ describe("browser-global runtime boundary", () => {
   }, 90_000);
 
   it("keeps the Webspring surfaces behind the injected runtime environment", () => {
-    const paths = [
-      "src/Webspring/ApplicationStageLayer.tsx",
-      "src/Webspring/ApplicationStageHost.tsx",
-      "src/Webspring/ApplicationStageView.tsx",
-      "src/Webspring/Contents/Views/WebspringBoardView/WebspringBoardView.tsx",
-      "src/Webspring/WindowLayer/WindowLayer.tsx",
-      "src/Webspring/WindowLayer/WindowHost.tsx",
-      "src/Webspring/WindowLayer/useWindowMoveResize.ts",
-    ];
-    const findings = paths.flatMap((path) => inspectBrowserGlobals(path, readFileSync(resolve(repositoryRoot, path), "utf8")));
+    const programme = programmeFor(synCloudOSPaths());
+    const findings = webspringSurfaces.flatMap((path) => {
+      const source = programme.getSourceFile(path);
+      if (!source) throw new Error(`Could not read ${path}`);
+      return inspectSourceBrowserGlobals(source, relative(repositoryRoot, path).replaceAll("\\", "/"), programme.getTypeChecker());
+    });
     expect(findings).toEqual([]);
   }, 90_000);
 

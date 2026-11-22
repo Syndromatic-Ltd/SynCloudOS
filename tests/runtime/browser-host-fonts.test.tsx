@@ -23,20 +23,20 @@ import React from "react";
 import { act } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import { mountSynCloudOS, type MountedSynCloudOSHost } from "../../src/SynCloudOSReact/browserRuntime";
-import { defineWebspring } from "../../src/Webspring/public";
+import { createTestLauncher, createTestWebspring } from "./webspringTestShell";
 import { SystemPanelsLayer } from "../../src/Webspring/SystemPanelsLayer";
 import { WindowContentRendererRegistry } from "../../src/Webspring/WindowLayer";
 
-vi.mock("../../src/App", () => ({ App: () => <SystemPanelsLayer windowContentRegistry={new WindowContentRendererRegistry()} /> }));
+vi.mock("../../src/Webspring/WebspringHost", () => ({ WebspringHost: () => <SystemPanelsLayer windowContentRegistry={new WindowContentRendererRegistry()} /> }));
 vi.mock("../../src/NSE/NSE", async importOriginal => ({
   ...await importOriginal<typeof import("../../src/NSE/NSE")>(),
   NSEFontPanel: ({ manager }: { manager: { availableFamilies: unknown } }) => <output data-testid="host-fonts">{JSON.stringify(manager.availableFamilies)}</output>,
 }));
 
-const shell = defineWebspring({ manifest: {
-  schemaVersion: 1, bundleIdentifier: "com.example.host-fonts", displayName: "Host fonts", version: "1.0.0",
-  webspringShell: { views: [{ id: "site", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }], defaults: { desktop: "site", tablet: "site", mobile: "site" }, homeRoute: "/", branding: { name: { key: "site.name", fallback: "Host fonts" } } },
-}, components: { site: () => null } });
+const shell = createTestWebspring({
+  info: { bundleIdentifier: "com.example.host-fonts", displayName: "Host fonts", branding: { name: { key: "site.name", fallback: "Host fonts" } } },
+  launcher: createTestLauncher(() => null, "persistent"),
+});
 const families = [{ id: "example", label: "Example Site Typeface", defaultPresetId: "example-regular", presets: [{ id: "example-regular", label: "Regular", familyId: "example", family: '"Example Site Typeface", sans-serif', weight: 400, style: "normal" as const }] }];
 const hosts: MountedSynCloudOSHost[] = [];
 const elements: HTMLElement[] = [];

@@ -37,7 +37,7 @@ import type {
   AppNavigationTransitionResult,
   AppPasteboardClient,
   AUFXAudioClient,
-  AppWindowClient,
+  AppOwnedWindows,
   AppWindowSnapshot,
 } from "./appClientTypes";
 import type { SynWareContextValue, SynWareRuntimeInfo } from "./appContextTypes";
@@ -158,7 +158,7 @@ function navigationClientFor(runtime: SynWareRuntime): AppNavigationClient {
   return Object.freeze({ openRoute });
 }
 
-function windowClientFor(runtime: SynWareRuntime, sessionId: string): AppWindowClient {
+function windowClientFor(runtime: SynWareRuntime, sessionId: string): AppOwnedWindows {
   const project = (state: "open" | "closed") => {
     const source = runtime.windows.getSnapshot();
     const safeSource = state === "open"

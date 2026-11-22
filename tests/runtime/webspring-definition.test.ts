@@ -18,64 +18,50 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { forwardRef, memo } from "react";
 import { describe, expect, it } from "vitest";
-import { createWebspringBoardView, defineWebspring, WebspringBoardView, type WebspringViewComponent, type WebspringViewProps } from "../../src/Webspring/public";
+import { WSBoardViewController, WSLauncherViewController, type WSLauncherViewControllerClass } from "../../src/Webspring/public";
+import { createTestWebspring, type TestWebspringOptions } from "./webspringTestShell";
 
-function defineView(component: WebspringViewComponent, id = "custom") {
-  return defineWebspring({
-    manifest: {
-      schemaVersion: 1, bundleIdentifier: "com.example.test.return-definition", version: "1.0.0", displayName: "Return definition",
-      webspringShell: {
-        views: [{ id, presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
-        defaults: { desktop: id, tablet: id, mobile: id }, homeRoute: "/",
-        branding: { name: { key: "site.name", fallback: "Fixture" } },
-      },
-    },
-    components: { [id]: component },
-  });
+function defineLauncher(launcher: WSLauncherViewControllerClass) {
+  return createTestWebspring({ info: { bundleIdentifier: "com.example.test.return-definition", displayName: "Return definition" }, launcher });
 }
 
 describe("Webspring return requirement capture", () => {
-  it("captures immutable requirements without changing or invoking the component", () => {
-    let calls = 0;
+  it("captures immutable requirements without constructing the launcher", () => {
+    let constructed = 0;
     const tracks: ("material" | "icons")[] = ["material"];
-    const View = Object.assign(() => { calls += 1; return null; }, { returnTracks: tracks });
-    const shell = defineView(View);
+    class Custom extends WSLauncherViewController {
+      static override returnTracks = tracks;
+      constructor(...args: ConstructorParameters<typeof WSLauncherViewController>) { super(...args); constructed += 1; }
+    }
+    const shell = defineLauncher(Custom);
     tracks.push("icons");
-    expect(shell.components.custom).toBe(View);
-    expect(shell.returnTracks.custom).toEqual(["material"]);
+    expect(shell.viewControllers.desktop).toBe(Custom);
+    expect(shell.returnTracks.desktop).toEqual(["material"]);
     expect(Object.isFrozen(shell.returnTracks)).toBe(true);
-    expect(Object.isFrozen(shell.returnTracks.custom)).toBe(true);
-    expect(calls).toBe(0);
+    expect(Object.isFrozen(shell.returnTracks.desktop)).toBe(true);
+    expect(constructed).toBe(0);
   });
 
-  it.each([WebspringBoardView, createWebspringBoardView({ pageSize: 4 })])("captures Board requirements under an alias", (View) => {
-    expect(defineView(View, "launchpad").returnTracks.launchpad).toEqual(["material"]);
+  it.each([WSBoardViewController, class Launchpad extends WSBoardViewController { static override pageSize = 4; }])("captures Board requirements on a subclass", (Launcher) => {
+    expect(defineLauncher(Launcher).returnTracks.mobile).toEqual(["material"]);
   });
 
-  it.each([() => null, memo(() => null), forwardRef<HTMLElement, WebspringViewProps>(() => null)])("retains the two-track default for a component without a declaration", (View) => {
-    expect(defineView(View, "board").returnTracks.board).toEqual(["material", "icons"]);
-  });
-
-  it.each([memo(() => null), forwardRef<HTMLElement, WebspringViewProps>(() => null)])("accepts requirements on a React wrapper", (wrapper) => {
-    const View = Object.assign(wrapper, { returnTracks: ["icons"] as const });
-    const shell = defineView(View);
-    expect(shell.returnTracks.custom).toEqual(["icons"]);
-    expect(shell.components.custom).toBe(wrapper);
+  it("retains the two-track default for a launcher without a declaration", () => {
+    expect(defineLauncher(class Plain extends WSLauncherViewController {}).returnTracks.desktop).toEqual(["material", "icons"]);
   });
 
   it.each([[], ["unknown"], ["material", "material"], "material"].map((returnTracks) => ({ returnTracks })))("rejects invalid requirements $returnTracks", ({ returnTracks }) => {
-    const View = Object.assign(() => null, { returnTracks });
-    expect(() => defineView(View as WebspringViewComponent)).toThrow(/returnTracks/);
+    class Invalid extends WSLauncherViewController {}
+    Object.defineProperty(Invalid, "returnTracks", { value: returnTracks, enumerable: true });
+    expect(() => defineLauncher(Invalid)).toThrow(/returnTracks/);
   });
 
   it("rejects requirement accessors without evaluating them", () => {
     let reads = 0;
-    const View = Object.defineProperty(() => null, "returnTracks", {
-      enumerable: true, get() { reads += 1; return ["material"]; },
-    });
-    expect(() => defineView(View)).toThrow(/returnTracks.*accessor/);
+    class Accessor extends WSLauncherViewController {}
+    Object.defineProperty(Accessor, "returnTracks", { enumerable: true, get() { reads += 1; return ["material"]; } });
+    expect(() => defineLauncher(Accessor)).toThrow(/returnTracks.*accessor/);
     expect(reads).toBe(0);
   });
 });
@@ -83,18 +69,9 @@ describe("Webspring return requirement capture", () => {
 describe("Webspring folder definition", () => {
   type Folder = { id: `folder.${string}`; title: { key: string }; order: number; apps: string[] };
   function defineFolders(initial: Folder[], extra: Record<string, unknown> = {}) {
-    return defineWebspring({
-      manifest: {
-        schemaVersion: 1, bundleIdentifier: "com.example.test.folders", version: "1.0.0", displayName: "Folders",
-        webspringShell: {
-          views: [{ id: "board", presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
-          defaults: { desktop: "board", tablet: "board", mobile: "board" }, homeRoute: "/",
-          branding: { name: { key: "site.name", fallback: "Fixture" } },
-          folders: { editable: true, initial },
-        },
-      },
-      components: { board: WebspringBoardView },
-      ...extra,
+    return createTestWebspring({
+      info: { bundleIdentifier: "com.example.test.folders", displayName: "Folders", folders: { editable: true, initial } },
+      ...extra as TestWebspringOptions,
     });
   }
 

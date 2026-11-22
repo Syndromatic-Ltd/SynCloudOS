@@ -20,7 +20,7 @@
 
 import { NSEBox } from "../../../NSE/public/controls";
 import { GroupedRow } from "../../../NSE/Controls/Selection/GroupedRow";
-import { definePreferencePane, type PreferencePaneViewProps } from "../../../SynCloudOS/Preferences";
+import { NSEPreferencePane, type PreferencePaneViewProps } from "../../../SynCloudOS/Preferences";
 import { useKernelSynCloudOS } from "../../../SynCloudOSReact";
 
 function LanguageSummary({ locale }: PreferencePaneViewProps) {
@@ -47,10 +47,16 @@ function LanguagePane({ locale }: PreferencePaneViewProps) {
   );
 }
 
-export default definePreferencePane({
-  id: "language",
-  title: { key: "preferences.language", fallback: "Language" },
-  order: 500,
-  summary: LanguageSummary,
-  view: LanguagePane,
-});
+export default class LanguagePreferencePane extends NSEPreferencePane {
+  static id = "language";
+  static title = { key: "preferences.language", fallback: "Language" };
+  static order = 500;
+
+  override renderSummary() {
+    return <LanguageSummary settings={this.settings} appearance={this.appearance} locale={this.locale} />;
+  }
+
+  override renderView() {
+    return <LanguagePane settings={this.settings} appearance={this.appearance} locale={this.locale} />;
+  }
+}

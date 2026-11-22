@@ -20,7 +20,8 @@
 
 import { AFXAnimation, type AFXAnimationOptions } from "./AFXAnimation";
 import { AFXKeyframeAnimation } from "./AFXKeyframeAnimation";
-import { sampleSpring } from "./AFXTimingFunction";
+import { sampleSpring, sampleSpringVelocity, springParameters, springSettlingDuration } from "./AFXTimingFunction";
+import { afxProgressVelocity, afxScaledDistance, type AFXAnimationVelocity } from "./animationVelocity";
 import { interpolateAFXValue } from "./interpolation";
 import {
   afxAnimationNumber,
@@ -35,6 +36,10 @@ export class AFXSpringAnimation {
   readonly damping: number;
   readonly initialVelocity: number;
   readonly settlingDuration: number;
+  /** Core Animation's perceptual duration: the period of the undamped spring. */
+  readonly perceptualDuration: number;
+  /** Core Animation's bounce: 0 is critically damped, positive bounces and negative is overdamped. */
+  readonly bounce: number;
   readonly animation: AFXAnimation;
   readonly targetId: string;
   readonly keyPath: AFXAnimationKeyPath;
@@ -50,6 +55,8 @@ export class AFXSpringAnimation {
       stiffness?: number;
       damping?: number;
       initialVelocity?: number;
+      perceptualDuration?: number;
+      bounce?: number;
       options?: Partial<AFXAnimationOptions>;
     }>,
   ) {
@@ -62,34 +69,33 @@ export class AFXSpringAnimation {
         ...input,
         options: afxAnimationDataRecord(input.options, "spring timing options"),
       };
-    this.mass = afxAnimationNumber(input.mass ?? 1, "spring mass", 0.01, 100);
-    this.stiffness = afxAnimationNumber(
-      input.stiffness ?? 100,
-      "spring stiffness",
-      0.01,
-      10000,
-    );
-    this.damping = afxAnimationNumber(
-      input.damping ?? 10,
-      "spring damping",
-      0.01,
-      10000,
-    );
+    const perceptual = input.perceptualDuration !== undefined || input.bounce !== undefined;
+    if (perceptual && (input.mass !== undefined || input.stiffness !== undefined || input.damping !== undefined))
+      throw new TypeError("A spring takes either perceptualDuration and bounce, or mass, stiffness and damping.");
+    let mass = input.mass ?? 1, stiffness = input.stiffness ?? 100, damping = input.damping ?? 10;
+    if (perceptual) {
+      const duration = afxAnimationNumber(input.perceptualDuration, "spring perceptual duration", 0.07, 10);
+      const bounce = input.bounce ?? 0;
+      if (typeof bounce !== "number" || !Number.isFinite(bounce) || bounce <= -1 || bounce >= 1)
+        throw new RangeError("spring bounce is outside its supported bounds.");
+      ({ mass, stiffness, damping } = springParameters(duration, bounce));
+    }
+    this.mass = afxAnimationNumber(mass, "spring mass", 0.01, 100);
+    this.stiffness = afxAnimationNumber(stiffness, "spring stiffness", 0.01, 10000);
+    this.damping = afxAnimationNumber(damping, "spring damping", 0.01, 10000);
+    const ratio = this.damping / (2 * Math.sqrt(this.stiffness * this.mass));
+    this.perceptualDuration = 2 * Math.PI / Math.sqrt(this.stiffness / this.mass);
+    this.bounce = ratio <= 1 ? 1 - ratio : 1 / ratio - 1;
+    this.#explicitVelocity = input.initialVelocity !== undefined;
     this.initialVelocity = afxAnimationNumber(
       input.initialVelocity ?? 0,
       "initial velocity",
       -10000,
       10000,
     );
-    const decay = this.damping / (2 * this.mass),
-      omega = Math.sqrt(this.stiffness / this.mass),
-      slow =
-        decay > omega
-          ? decay - Math.sqrt(decay * decay - omega * omega)
-          : decay;
     this.settlingDuration = Math.max(
       0.001,
-      Math.log(10000 * (1 + Math.abs(this.initialVelocity))) / slow,
+      springSettlingDuration(this.mass, this.stiffness, this.damping, this.initialVelocity),
     );
     this.animation = new AFXAnimation({
       duration: input.options?.duration ?? this.settlingDuration,
@@ -101,6 +107,18 @@ export class AFXSpringAnimation {
     this.from = afxAnimationScalar(input.from, "spring start");
     this.to = afxAnimationScalar(input.to, "spring end");
     Object.freeze(this);
+  }
+  readonly #explicitVelocity: boolean;
+  /** The velocity at `seconds` in units per second, or null for values without a linear distance. */
+  velocity(seconds: number): AFXAnimationVelocity {
+    const progress = this.animation.progressAt(seconds);
+    if (progress === null) return null;
+    const { delay, speed, duration, autoreverses } = this.animation;
+    const active = (seconds - delay) * speed;
+    const settled = progress === 1 || seconds < delay || seconds >= this.animation.totalDuration;
+    const reversing = autoreverses && duration > 0 && Math.floor(active / duration) % 2 === 1;
+    const rate = settled ? 0 : sampleSpringVelocity(progress * duration, this.mass, this.stiffness, this.damping, this.initialVelocity) * speed * (reversing ? -1 : 1);
+    return afxScaledDistance(this.from, this.to, rate);
   }
   sample(seconds: number): AFXAnimationScalar | null {
     const progress = this.animation.progressAt(seconds);
@@ -138,7 +156,11 @@ export class AFXSpringAnimation {
       animation: this.animation,
     }).toRuntime();
   }
-  retarget(from: AFXAnimationScalar): AFXSpringAnimation {
+  retarget(from: AFXAnimationScalar, velocity?: AFXAnimationVelocity): AFXSpringAnimation {
+    const inherited = !this.#explicitVelocity && velocity !== undefined && velocity !== null;
+    const initialVelocity = inherited
+      ? Math.max(-10000, Math.min(10000, afxProgressVelocity(from, this.to, velocity)))
+      : this.initialVelocity;
     return new AFXSpringAnimation({
       targetId: this.targetId,
       keyPath: this.keyPath,
@@ -147,7 +169,7 @@ export class AFXSpringAnimation {
       mass: this.mass,
       stiffness: this.stiffness,
       damping: this.damping,
-      initialVelocity: this.initialVelocity,
+      initialVelocity,
       options: {
         duration: this.animation.duration,
         speed: this.animation.speed,

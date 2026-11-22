@@ -10,7 +10,7 @@ it.each([false, true])("bundles an installed browser host with discovery plugin=
     writeFileSync(join(consumer.root, "src/SynWare/Notes.app/Contents/Info.ts"), 'export default { bundleIdentifier: "com.example.notes", displayName: "Notes", version: "1.0.0" };');
     writeFileSync(join(consumer.root, "src/SynWare/Notes.app/Contents/index.tsx"), "import React from \"react\"; import { SCOS } from \"@syndromatic/syncloudos\"; export default function Notes() { return <p>{SCOS.app.displayName}</p>; }");
     writeFileSync(join(consumer.root, "src/main.tsx"), `import { mountSynCloudOS } from "@syndromatic/syncloudos/browser";
-      const composition = { bundles: [], preferences: [], widgets: [], contributions: [], shell: null, shellResources: {} };
+      const composition = { bundles: [], preferences: [], widgets: [], contributions: [], webspring: null, shellResources: {} };
       window.startHost = () => mountSynCloudOS({ element: document.body, application: { bundleIdentifier: "com.example.notes" }, ${plugin ? "" : "composition,"} authentication: "disabled" });`);
     writeFileSync(join(consumer.root, "index.html"), '<div id="root"></div><script type="module" src="/src/main.tsx"></script>');
     writeFileSync(join(consumer.root, "vite.config.mjs"), plugin

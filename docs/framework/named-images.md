@@ -1,10 +1,8 @@
 # Named template images
 
-`NSEImage` corresponds to AppKit's `NSImage`. `NSEImage.goBackTemplateName` and
-`NSEImage.goForwardTemplateName` are the `NSImage.Name` constants
-`NSGoBackTemplate` and `NSGoForwardTemplate`. `NSEImage.named(name)` corresponds
-to `NSImage(named:)`: it returns a shared image, or `null` for an unknown name.
-Artwork URLs resolve on lookup, so importing unrelated controls needs no asset base.
+The theme supplies a small set of shared, named images, such as the back and forward arrows, so your controls match the system's own. This page shows how to use them and lists the control image slots a theme can replace.
+
+`NSEImage.named(name)` returns the shared image for a name, or `null` if the theme has no image by that name. `NSEImage.goBackTemplateName` and `NSEImage.goForwardTemplateName` hold the names of the back and forward arrows (`NSGoBackTemplate` and `NSGoForwardTemplate`). The artwork's URL is resolved when you look the image up, so importing controls that don't use it needs no asset base.
 
 ```tsx
 import { NSEButton, NSEImage } from "@syndromatic/syncloudos/nse/controls";
@@ -13,16 +11,23 @@ import { NSEButton, NSEImage } from "@syndromatic/syncloudos/nse/controls";
   image={NSEImage.named(NSEImage.goBackTemplateName)} imagePosition="imageOnly" />
 ```
 
-Both `nse` and `nse/controls` export `NSEImage`. Its immutable named instances expose
-`name`, `src`, `size` and `isTemplate`. Buttons and segmented controls accept them
-in `image`; `imageLeading` and `imageTrailing` also support titles. An image-only
-button uses its title as its accessible name. Templates inherit the control's
-content colour, including appearance and disabled treatment. The image is
-decorative inside the named control. Existing URL and React-element images remain
-supported. `NSEImageView` can use the image's `src` as its existing URL source.
+`NSEImage` is exported from both `nse` and `nse/controls`. A named image is immutable and has `name`, `src`, `size` and `isTemplate`. Buttons and segmented controls take it as `image`. On a button, `imagePosition` places it: `imageOnly`, `imageLeading` or `imageTrailing` next to the title, or `noImage`. An image-only button uses its title as its accessible name, and the image itself is decorative. A template image takes the control's content colour, so it follows the appearance and dims when the control is disabled. When the active theme replaces a named image, controls draw the theme's version. You can still pass a URL or a React element as an image, and `NSEImageView` accepts a named image's `src` as its URL.
 
-Atmo owns both 17 × 17 point assets. The back path is the original Preferences
-geometry (`M15 4 L7 12 L15 20`, round 3-point stroke in a 24-point view box).
-Forward has its own asset and path; no CSS reflection is used. Stage, Preferences
-and Open panel navigation use these shared images. Application navigation chrome
-currently draws an image-only back control in its standard circular back slot.
+Atmo draws both arrows at 17 × 17 points. The back arrow is the path `M15 4 L7 12 L15 20` with a round 3-point stroke in a 24-point view box. The forward arrow is a separate asset with its own path, not a mirrored copy. Preferences and the open panel use these shared images for navigation.
+
+## Control image slots
+
+A system theme can replace these images through the `images` object in its `Theme.json`. Any slot you leave out uses Atmo's artwork. Controls keep each slot's size and pick the file for the display's pixel density. A template slot uses only the image's alpha channel, tinted by the control. A coloured slot draws the artwork as supplied.
+
+| Name | Control glyph | Drawing |
+| --- | --- | --- |
+| `NSGoBackTemplate` | Back arrow | Template |
+| `NSGoForwardTemplate` | Forward arrow | Template |
+| `NSRightFacingTriangleTemplate` | Disclosure triangle in buttons and outlines | Template |
+| `NSEStepperIncrementTemplate` | Stepper increment | Template |
+| `NSEStepperDecrementTemplate` | Stepper decrement | Template |
+| `NSEPopUpButtonChevron` | Pop-up chevron | Coloured |
+| `NSTouchBarSearchTemplate` | Search field magnifier | Template |
+| `NSESearchFieldCancel` | Search field cancel | Coloured |
+
+Atmo's `images` object also holds the workspace document and folder icons (for example `document-generic:48` and `folder-ordinary:96`), each at 24, 48 and 96 points.

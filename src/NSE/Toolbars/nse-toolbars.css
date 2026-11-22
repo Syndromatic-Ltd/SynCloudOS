@@ -1,5 +1,5 @@
 
-@layer nse.atmo {
+@layer nse.structure {
 @scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
@@ -63,16 +63,14 @@
 }
 
 /* A toolbar's chrome comes only from its resolved slot or shared primitive. */
-.nse-toolbar-item,
-:where(:scope):is(.nse-toolbar-item),
-.nse-toolbar-overflow-trigger,
-:where(:scope):is(.nse-toolbar-overflow-trigger) {
+[data-nse-control="toolbar-item"]:is([data-nse-part="item"], [data-nse-part="overflow"]),
+:where(:scope):is([data-nse-control="toolbar-item"]:is([data-nse-part="item"], [data-nse-part="overflow"])) {
   appearance: none;
   -webkit-appearance: none;
   background: transparent;
   border: 0;
   box-shadow: none;
-  color: inherit;
+  color: unset;
   font: inherit;
   isolation: isolate;
   position: relative;
@@ -101,8 +99,8 @@
 :where(:scope):is(.nse-toolbar-custom) { display: inline-flex; align-items: center; flex: 0 0 auto; isolation: isolate; overflow: hidden; position: relative; }
 .nse-toolbar-overflow-menu,
 :where(:scope):is(.nse-toolbar-overflow-menu) { display: inline-flex; flex: 0 0 var(--nse-toolbar-overflow-reserve); }
-.nse-toolbar-overflow-trigger,
-:where(:scope):is(.nse-toolbar-overflow-trigger) { inline-size: var(--nse-toolbar-overflow-reserve); margin-inline: 0; }
+.nse-toolbar > .nse-toolbar-overflow-menu > .nse-toolbar-overflow-trigger,
+:where(:scope):is(.nse-toolbar) > .nse-toolbar-overflow-menu > .nse-toolbar-overflow-trigger { box-sizing: border-box; inline-size: var(--nse-toolbar-overflow-reserve); min-inline-size: 0; padding-inline: 0; margin-inline: 0; }
 .nse-toolbar-overflow-trigger [data-nse-part="overflow-glyph"],
 :where(:scope):is(.nse-toolbar-overflow-trigger) [data-nse-part="overflow-glyph"] { inline-size: 10px; block-size: 15px; }
 
@@ -131,8 +129,8 @@
 
 /* Grouped child controls are one continuous segmented surface. Appearances own
    the segment paint, while NSE owns the invariant that segments stay joined. */
-.nse-control-toolbar[data-grouped="true"],
-:where(:scope):is(.nse-control-toolbar[data-grouped="true"]) {
+.nse-control-toolbar[data-grouped="true"]:where(:not([data-nse-control="tab-view"][data-nse-style="navigation"]>[data-nse-part="viewport"]>[data-nse-part="header"])),
+:where(:scope):is(.nse-control-toolbar[data-grouped="true"]):where(:not([data-nse-control="tab-view"][data-nse-style="navigation"]>[data-nse-part="viewport"]>[data-nse-part="header"])) {
   gap: 0;
 }
 

@@ -16,7 +16,7 @@ The handler requests the scopes `openid email profile` and authenticates to Goog
 
 1. In a dedicated Google Cloud project, configure the OAuth consent screen in testing mode.
 2. Add two test users: one address that your allowlist will accept, and one that it will reject. Both must be test users so that either can reach the consent step. The server allowlist is what admits or refuses them afterwards.
-3. Create an OAuth client of type **Web application**.
+3. Create an OAuth client of type Web application.
 4. Add `${PUBLIC_ORIGIN}/auth/callback` as an authorised redirect URI.
 5. Note the client ID and keep the client secret private.
 
@@ -49,7 +49,7 @@ Write the Worker as shown in the [authentication guide](authentication.md#server
 
 ## Create the session database
 
-The handler stores hashed sessions and short lived sign-in transactions. Save this as `migrations/0001_auth.sql`:
+The handler stores hashed sessions and short-lived sign-in transactions. Save this as `migrations/0001_auth.sql`:
 
 ```sql
 CREATE TABLE auth_sessions (
@@ -79,11 +79,11 @@ npx wrangler secret put OIDC_CLIENT_SECRET
 npx wrangler secret put AUTH_ALLOWED_EMAILS
 ```
 
-Set `AUTH_ALLOWED_EMAILS` to the accepted address only, as a comma separated list. `AUTH_DB` is a Worker binding and never reaches the browser. For local development, an ignored `.dev.vars` file holds the same values for `wrangler dev`.
+Set `AUTH_ALLOWED_EMAILS` to the accepted address only, as a comma-separated list. `AUTH_DB` is a Worker binding and never reaches the browser. For local development, an ignored `.dev.vars` file holds the same values for `wrangler dev`.
 
 ## Roles
 
-The default allowlist policy assigns the `member` role. Map that role to the permissions your application needs through your policy profile and the handler's `permissionCheck`. Signing in with Google grants no more than that mapping gives.
+The default allowlist policy assigns the `member` role. Map that role to the permissions your application needs through your policy profile and the handler's `permissionCheck`. Signing in with Google grants nothing beyond that mapping.
 
 ## Verify
 

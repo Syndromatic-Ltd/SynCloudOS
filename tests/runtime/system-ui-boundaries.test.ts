@@ -52,7 +52,7 @@ describe("NSE SystemUI ownership", () => {
         if (shownPath.startsWith("src/SynCloudOSReact/") && ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression) && ts.isIdentifier(node.expression.expression) && node.expression.expression.text === "controller" && ["undo", "redo"].includes(node.expression.name.text)) {
           findings.push(`${shownPath}: direct runtime editor history call`);
         }
-        if (shownPath.endsWith("ApplicationStageView.tsx") && ts.isCaseClause(node) && ts.isStringLiteralLike(node.expression) && ["about", "preferences", "logout", "return"].includes(node.expression.text.toLocaleLowerCase())) {
+        if (shownPath.endsWith("WSStageWindowHost.tsx") && ts.isCaseClause(node) && ts.isStringLiteralLike(node.expression) && ["about", "preferences", "logout", "return"].includes(node.expression.text.toLocaleLowerCase())) {
           findings.push(`${shownPath}: raw app-menu system switch`);
         }
         if (ts.isObjectLiteralExpression(node)) {
@@ -73,5 +73,5 @@ describe("NSE SystemUI ownership", () => {
 
     expect(findings).toEqual([]);
     expect(validateGlobalKeyboardListeners({ root })).toEqual([]);
-  }, 15_000);
+  });
 });

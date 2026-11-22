@@ -302,7 +302,7 @@ function returnToWebspring(from: SynCloudOSStateName, options: SynCloudOSStateTr
   const switchingAppIds = multiSwitch.status === "switching" ? [multiSwitch.fromAppId, multiSwitch.toAppId] : [];
   const appIds = Array.from(new Set([activeAppId, ...switchingAppIds]))
     .filter((appId): appId is string => Boolean(appId) && runtime.lifecycle.getState(appId!) === "active");
-  const isAppViewReturn = Boolean(activeAppId) && activeApp?.presentation === "appView" && snapshot.application.openAppIds.includes(activeAppId!);
+  const isAppViewReturn = Boolean(activeAppId) && activeApp?.presentation === "stage" && snapshot.application.openAppIds.includes(activeAppId!);
   const signal = options.lifecycle?.signal ?? runtime.signal;
   let begun = false;
   const begin = () => {

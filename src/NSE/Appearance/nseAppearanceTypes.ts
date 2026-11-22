@@ -19,9 +19,10 @@
  */
 
 import type { CSSProperties } from "react";
+import type { NSEAppTheme } from "../Theme/NSEAppTheme";
 import type { NSETheme } from "../Theme/NSETheme";
 
-export type NSEAppearanceName = "aqua" | "darkAqua";
+export type NSEAppearanceName = "light" | "dark";
 
 export type NSEChromeAppearance = "standard" | "metal" | "hud";
 export type NSEColourScheme = "auto" | "light" | "dark";
@@ -47,9 +48,18 @@ export interface NSEAppearanceSelection {
 
 export type NSEResolvedAppearance = NSEAppearanceSelection;
 
+export interface EffectiveAppearance extends NSEResolvedAppearance {
+  readonly appTheme?: NSEAppTheme | undefined;
+  readonly ambientAppearance?: NSEResolvedAppearance | undefined;
+  readonly relocatesAppearance?: true | undefined;
+  readonly semanticAppearance?: NSEResolvedAppearance | undefined;
+  readonly isSystemSurface?: true;
+}
+
 export interface NSEAppearanceDataAttributes {
   readonly style: CSSProperties;
   readonly "data-nse-theme": string;
+  readonly "data-nse-app-theme"?: string;
   readonly "data-nse-chrome": NSEChromeAppearance;
   readonly "data-nse-colour-scheme-requested": NSEColourScheme;
   readonly "data-nse-colour-scheme-resolved": NSEResolvedColourScheme;

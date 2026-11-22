@@ -171,8 +171,8 @@ describe("NSE extended wrapper controls", () => {
     renderWithAppearance(
       <div>
         <NSEButton title="Plain" />
-        <NSEButton title="Light" appearance="aqua" />
-        <NSEButton title="Dark" appearance="darkAqua" />
+        <NSEButton title="Light" appearance="light" />
+        <NSEButton title="Dark" appearance="dark" />
         <NSEButton title="Save" keyEquivalent={"\r"} />
         <NSEButton title="Delete" hasDestructiveAction />
         <NSEButton title="Tool" bezelStyle="texturedRounded" />

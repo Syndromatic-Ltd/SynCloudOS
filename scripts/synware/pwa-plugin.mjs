@@ -19,7 +19,7 @@
  */
 
 import { existsSync, readFileSync } from "node:fs";
-import { dirname, resolve, relative, isAbsolute } from "node:path";
+import { resolve, relative, isAbsolute } from "node:path";
 import { createHash } from "node:crypto";
 import { parseManifest } from "./manifest-source.mjs";
 import { createWebAppManifests } from "../../src/SynCloudOS/InstalledApplications/webAppManifest.mjs";
@@ -28,8 +28,7 @@ import { createServiceWorkerSource } from "../../src/SynCloudOS/InstalledApplica
 /** Hooks shared with the discovery plugin, so the runtime owns the only worker. */
 export function installedApplicationBuild(config, discovery) {
   const base = config.base?.startsWith("/") ? config.base.replace(/\/?$/u, "/") : "/";
-  const shellInfo = discovery.shell ? resolve(dirname(discovery.shell.entryPath), "Info.ts") : null;
-  const shell = shellInfo && existsSync(shellInfo) ? parseManifest(shellInfo) : null;
+  const shell = discovery.shell?.infoPath ? parseManifest(discovery.shell.infoPath) : null;
   const apps = discovery.bundles.filter(bundle => !discovery.applications || discovery.applications.some(id => id.toLowerCase() === bundle.bundleIdentifier.toLowerCase())).map(bundle => bundle.manifest);
   const manifests = createWebAppManifests({ shell, apps, base });
   const receiptPath = resolve(config.root, "vendor/framework-receipt.json");

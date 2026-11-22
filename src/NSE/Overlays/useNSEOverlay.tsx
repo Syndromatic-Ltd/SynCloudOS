@@ -71,7 +71,7 @@ export interface UseNSEOverlayResult {
     readonly "data-nse-control": "menu" | "popover" | "tooltip" | "sheet";
     readonly "data-nse-part": "surface";
     readonly "data-nse-role": "overlay";
-    readonly "data-state": "open";
+    readonly "data-nse-overlay-state": "open";
     readonly "data-placement": LogicalPlacement;
     readonly "data-nse-placement": LogicalPlacement;
     readonly "data-nse-viewport-limited": "true" | "false";
@@ -316,9 +316,9 @@ export function useNSEOverlay({
       onDismiss: onManagerDismiss,
     };
     return register(initialRegistration);
-  // Kind is presentation metadata, updated below. Releasing a live parent
-  // lease for a modality change would dismiss its still-open descendants.
-  }, [controlledDismissGeneration, id, open, parentRegistered, register, runtime, surface]);
+  // Presentation changes retain this logical lease; releasing a live parent
+  // for a document or modality change would dismiss its open descendants.
+  }, [controlledDismissGeneration, id, open, parentRegistered, register, runtime.signal, surface]);
 
   useLayoutEffect(() => {
     if (registration) manager.update(registration);
@@ -423,7 +423,7 @@ export function useNSEOverlay({
       "data-nse-control": kind === "action-sheet" ? "sheet" : kind === "popover" || kind === "tooltip" ? kind : "menu",
       "data-nse-part": "surface",
       "data-nse-role": "overlay",
-      "data-state": "open",
+      "data-nse-overlay-state": "open",
       "data-placement": placement,
       "data-nse-placement": placement,
       "data-nse-viewport-limited": viewportLimited ? "true" : "false",

@@ -27,6 +27,7 @@ import {
   type SmoothSurfaceRequest,
   type SmoothSurfaceStyle
 } from "../SmoothSurface";
+import { getSmoothSurfaceThemeHooks } from "../SmoothSurface/smoothSurface";
 
 
 /** The alert panel surface hosts draw alerts in. Apps present alerts with the NSEAlert object. */
@@ -66,7 +67,8 @@ export function AlertSurface({
 
   return (
     <div
-      data-nse-control="system-alert" data-nse-part="background" data-nse-appearance-name={appearance === "light" ? "aqua" : "darkAqua"} {...attributes}
+      data-nse-control="system-alert" data-nse-part="background" data-nse-appearance-name={appearance} {...attributes}
+      {...getSmoothSurfaceThemeHooks(smoothSurface)}
       ref={alertRef}
       className={`nse-control-alert is-${appearance} ${surfaceProps.className ?? ""}`.trim()}
       role={role}

@@ -62,7 +62,7 @@ interface FrameObserver {readonly callback:(frame:NSEManagedAFXFrame)=>void;read
 class ManagedRenderer extends NSEObject<NSEManagedAFXRendererSnapshot> implements NSEManagedAFXRenderer {
   #snapshot:NSEManagedAFXRendererSnapshot=Object.freeze({revision:0,active:false,reducedMotion:false,width:0,height:0,pixelRatio:1});
   #renderer:AFXRenderer|undefined;#failure:unknown;#failed=false;#disposed=false;#onscreen=true;#previousTime:number|undefined;
-  #cancelFrame:(()=>void)|undefined;#cancelResize:(()=>void)|undefined;
+  #cancelFrame:(()=>void)|undefined;#cancelResize:(()=>void)|undefined;#viewportPending=false;
   readonly #observers=new Set<FrameObserver>();readonly #cleanup:Array<()=>void>=[];readonly #abort=new AbortController();
   readonly #canvas:HTMLCanvasElement;readonly #frames:AFXFrameScheduler;
   constructor(readonly kind:ManagedKind,readonly owner:NSEViewController<unknown>,readonly outlet:NSEViewOutlet<HTMLCanvasElement>,readonly host:ManagedAnimationHost,readonly options:NSEManagedAFXRendererOptions) {
@@ -159,7 +159,9 @@ class ManagedRenderer extends NSEObject<NSEManagedAFXRendererSnapshot> implement
         if(this.#disposed){renderer.dispose();throw new DOMException('The renderer mount ended during acquisition.','AbortError');}
         this.#renderer=renderer;
       }
-      if(changed)this.#renderer.setViewport({width,height,pixelRatio});
+      // Resizing a GPU drawable waits on the device; a suspended surface takes its size when it resumes.
+      if(this.#frames.suspended){if(changed)this.#viewportPending=true;}
+      else if(changed||this.#viewportPending){this.#viewportPending=false;this.#renderer.setViewport({width,height,pixelRatio});}
     }
     // Both kinds report the drawable size before frame observers run. Under a
     // display link the context belongs to the caller, so the backing store is
@@ -176,6 +178,7 @@ class ManagedRenderer extends NSEObject<NSEManagedAFXRendererSnapshot> implement
     if(reducedMotion!==this.#snapshot.reducedMotion)for(const observer of this.#observers)observer.staticPending=true;
     this.#publish({...this.#snapshot,active,reducedMotion});
     if(!active){this.#cancelFrame?.();this.#cancelFrame=undefined;return;}
+    if(this.#viewportPending)this.#queueResize();
     this.#schedule();
   }
   #schedule():void {

@@ -2,7 +2,7 @@
 import { createContext, createElement, Fragment, useContext, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PropsWithChildren, type RefObject } from "react";
 import { NSEEdgeInsetsMake, NSEEdgeInsetsZero, type NSEEdgeInsets } from "./NSEEdgeInsets";
 import { nseEmptyLayoutRect, nseEqualRects } from "./NSELayoutGuide";
-import { WindowLayoutContext, useNSEWindowLayoutSnapshot } from "./windowChromeObstructions";
+import { WindowLayoutContext, useNSEWindowLayoutSnapshot } from "./windowObstructions";
 import type { NSEScrollRect } from "../Scroll/scrollTypes";
 
 export interface NSESafeArea {

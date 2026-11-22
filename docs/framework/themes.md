@@ -1,22 +1,23 @@
 # Themes
 
-A theme decides how NSE controls and SynCloudOS chrome look: their fills, borders, shadows, artwork and colours. It doesn't decide what a control is, how big it is, how it lays out, how it moves or what typeface it uses. Those belong to the framework, so every theme behaves the same and only looks different.
+A theme supplies the fills, borders, shadows, artwork, colours and typography of NSE controls and SynCloudOS chrome. This guide shows you how to write one. The framework keeps control of what controls mean and how they behave, and a theme times its transitions through the framework's motion roles.
 
-Atmo is the built-in theme. It is itself a theme bundle, `Atmo.scostheme`, drawn through the same contract as any theme you write.
+Atmo, the built-in theme, is itself a theme bundle, `Atmo.scostheme`, drawn through the same contract as any theme you write.
 
 ## What a theme is
 
-A theme is a `.scostheme` bundle of static files: an identity, a definition and stylesheets. It contains no code that runs. It can:
+A system theme is a `.scostheme` bundle of static files: an identity, a definition and stylesheets. Nothing in it runs as code. It can:
 
 - paint every control part the [theme contract](theme-contract.md) publishes, in every state and variant it lists;
 - set the 48 semantic colours, in light and dark, and optionally for high contrast;
 - supply named images, such as `NSGoBackTemplate`, and workspace artwork;
-- choose navigation placement and the login, notification and material-lighting presentations.
+- style control text and supply package-local WOFF2 fonts;
+- choose navigation placement and the login, notification and material-lighting presentations;
+- time its transitions with springs or timing curves for the motion roles.
 
 It can't:
 
-- change typography (`font`, `line-height`, `letter-spacing`, `word-spacing`, `text-transform`);
-- add motion (`animation`, `transition`), because motion is framework-owned and follows the system's reduced-motion setting;
+- run animations (`animation`, `@keyframes`), or give a transition a literal duration, delay or easing;
 - hide or reveal semantics (`display`, `visibility`, `content` on a contract part);
 - remove a focused control's focus indicator without drawing another;
 - shrink a control's hit target below 24 points;
@@ -35,18 +36,20 @@ src/Themes/
         buttons.css
         button-rounded.png
         button-rounded@2x.png
+        fonts/
+          DuskText.woff2
       Licences/
 ```
 
-The Vite plugin discovers every bundle in `src/Themes`. Set `themesDirectory` in `synCloudOS({ … })` to look elsewhere, or `false` to disable discovery.
+The Vite plugin discovers system themes in `src/Themes`. Set `themesDirectory` in `synCloudOS({ … })` to look elsewhere, or `false` to disable system theme discovery.
 
-`Info.ts` is the theme's identity. It is read statically, never executed:
+`Info.ts` is the theme's identity. The build reads it as data and never runs it:
 
 ```ts
 export default { bundleIdentifier: "com.example.dusk", displayName: "Dusk", version: "1.0.0", themeContractVersion: 1 };
 ```
 
-`Resources/theme.css` is the entry stylesheet. It can `@import` other stylesheets in the bundle, which load in import order. `url()` references resolve relative to the stylesheet and must stay inside the bundle; `data:` URLs are allowed. Put the licences for any artwork you ship in `Licences/`.
+`Resources/theme.css` is the entry stylesheet. It can `@import` other stylesheets in the bundle, which load in import order. `url()` references resolve relative to the stylesheet and must stay inside the bundle. Inline image data URLs are allowed. Put artwork and font licences in `Licences/`.
 
 ## Theme.json
 
@@ -64,6 +67,10 @@ export default { bundleIdentifier: "com.example.dusk", displayName: "Dusk", vers
   "presentation": { "login": "plain", "notifications": "plain", "materialLighting": "off" },
   "images": {
     "NSGoBackTemplate": { "files": { "1x": "Resources/back.svg" }, "pointSize": { "width": 17, "height": 17 }, "template": true }
+  },
+  "motion": {
+    "control": { "duration": 0.3, "bounce": 0.15 },
+    "dismissal": { "duration": 0.2, "timingFunction": [0.42, 0, 1, 1] }
   }
 }
 ```
@@ -72,6 +79,7 @@ export default { bundleIdentifier: "com.example.dusk", displayName: "Dusk", vers
 - `navigation` chooses where window navigation sits in compact and regular widths, and whether it overlays content or takes space in the layout.
 - `presentation` chooses the login window's ornament, how notifications are drawn, and whether materials are lit.
 - `images` maps image names to files, at `1x` and optionally `2x` and `3x`. `NSEImage.named(name)` resolves through the active theme first, then Atmo. A `template` image is drawn as a mask in the current text colour.
+- `motion` is optional and partial; a role you omit takes Atmo's timing. See [Motion](#motion).
 
 ## Drawing controls
 
@@ -129,9 +137,45 @@ SVG works the same way, as a file or a `data:` URL, and stays sharp at every den
 
 ## What Atmo provides underneath
 
-Atmo is always loaded, in the `nse.atmo` layer beneath every theme. Any part your theme doesn't draw keeps Atmo's drawing, so a theme can start small, with colours and a few controls, and grow. `validate_theme` lists the parts you haven't drawn yet.
+Atmo is always loaded in the `nse.atmo` layer beneath installed themes. When a theme draws an element in a particular state, the build clears the underlying paint and typography on that element and its `::before` and `::after`. Other parts and states keep their underlying drawing. `validate_theme` reports coverage for a whole system theme.
 
-Control structure (size, layout, typography, motion) lives in `nse.structure` and Atmo's layer and applies under every theme. A theme repaints a control; it never re-lays it out.
+Switch state labels are optional. To show them, set `--nse-switch-state-label-display: inline-block` on the switch's `label` parts. The switch reports its state through `aria-checked` whether or not the labels are drawn.
+
+## Typography
+
+Set `font`, its longhands, `line-height`, `letter-spacing`, `word-spacing` and `text-transform` on the parts you draw. When a drawing omits an inherited typography property, the part takes that property from its parent.
+
+Declare custom fonts with `@font-face`. Each `src` must resolve to a WOFF2 file under the bundle's `Resources/` directory. Use a family name specific to the theme because the browser registers font families for the document.
+
+```css
+@font-face {
+  font-family: "Dusk Text";
+  src: url("./fonts/DuskText.woff2") format("woff2");
+  font-display: swap;
+}
+
+[data-nse-control="button"] [data-nse-part="title"] {
+  font-family: "Dusk Text", system-ui, sans-serif;
+  letter-spacing: 0.02em;
+}
+```
+
+## Motion
+
+The framework names six motion roles: `standard`, `control`, `selection`, `presentation`, `dismissal` and `scrollBoundary`. In `Theme.json`, give a role either a spring or a timing curve:
+
+- `{ "duration": 0.3, "bounce": 0.15 }` is a spring described by its perceived duration and bounce. `duration` runs from 0.07 to 10 seconds, and `bounce` lies strictly between -1 and 1: 0 is critically damped, a positive value bounces and a negative one is overdamped.
+- `{ "duration": 0.2, "timingFunction": [x1, y1, x2, y2] }` is a duration in seconds (above 0, up to 10) with cubic Bézier control points, as in CSS `cubic-bezier()`.
+
+Each role becomes `--nse-motion-<role>-duration` and `--nse-motion-<role>-easing` on the theme's boundary, in kebab case such as `--nse-motion-scroll-boundary-duration`. A spring runs for its settling time along a `linear()` curve sampled from the spring. Time every transition with these properties and nothing else; reduced motion sets every duration to zero.
+
+```css
+[data-nse-control="switch"] [data-nse-part="knob"] {
+  transition: left var(--nse-motion-selection-duration) var(--nse-motion-selection-easing);
+}
+```
+
+CSS transitions start from rest, so an interrupted transition loses its velocity. Framework animations that need to keep it, such as scrolling, read the role from the theme.
 
 ## Using a theme
 
@@ -141,16 +185,65 @@ Name it in the host:
 import { mountSynCloudOS } from "@syndromatic/syncloudos/browser";
 import { themes } from "virtual:syncloudos/themes";
 
-const host = await mountSynCloudOS({ element, application: { bundleIdentifier: "com.example.hello" }, theme: themes["com.example.dusk"] });
+const dusk = themes["com.example.dusk"];
+if ("kind" in dusk) throw new TypeError("The host requires a system theme.");
+const host = await mountSynCloudOS({ element, application: { bundleIdentifier: "com.example.hello" }, theme: dusk });
 ```
 
-`themes` holds every discovered bundle's `NSETheme`, keyed by bundle identifier. A theme's stylesheets are built only if the host names it or your code references it through `themes`. Without `theme`, the host uses Atmo.
+`themes` holds each discovered `NSETheme` or `NSEAppTheme`, keyed by bundle identifier. A theme's stylesheets are built only if the host names it or your code references it through `themes`. Without `theme`, the host uses Atmo.
 
-A standalone React page sets it on its root view: `<NSEView appearance={new NSEAppearance("aqua", { theme: themes["com.example.dusk"] })}>`.
+Select a theme directly with `themes["com.example.dusk"]`. A direct runtime key such as `themes[chosenIdentifier]` includes every discovered stylesheet so the choice can be made at runtime. Copying, destructuring or passing the registry itself results in a build error with the source file and location. Select a theme before passing it to other code.
+
+A standalone React page sets it on its root view: `<NSEView appearance={new NSEAppearance("light", { theme: themes["com.example.dusk"] })}>`.
 
 ## Nesting
 
-Every theme boundary carries `data-nse-theme="<bundleIdentifier>"`. A provider inside another provider starts a new boundary. The inner theme's rules apply inside it, the outer theme's stop at it, and the inner boundary resets every semantic colour so nothing is inherited from outside.
+A system theme boundary carries `data-nse-theme="<bundleIdentifier>"`. A provider inside another provider starts a new boundary. The inner theme's rules apply inside it, the outer theme's stop at it, and the inner boundary resets every semantic colour so nothing is inherited from outside.
+
+## App themes
+
+An app can ship a partial theme for its own window and navigation chrome. Put the bundle in the app's resources.
+
+```text
+Run.app/
+  Contents/Resources/
+    RunChrome.scostheme/
+      Contents/
+        Info.ts
+        Resources/
+          theme.css
+```
+
+Use the usual `Info.ts` identity and `themeContractVersion`. The Vite plugin discovers the bundle with the app. An app theme contains stylesheets and their local artwork. The enclosing system theme supplies semantic colours, navigation, presentation and named images, so omit `Theme.json`.
+
+An app theme can draw `window`, `toolbar`, `toolbar-item`, `tab-view`, `segmented-control`, `split-view`, `menu`, `menu-item` and `popover`. A full-screen application's frame is a `window` with `data-nse-presentation="stage"`. Anchor each selector to an allowed control and use its published parts, states and variants. The app bundle validator accepts partial coverage. See [App theme controls](theme-contract.md#app-theme-controls).
+
+```css
+[data-nse-control="tab-view"] [data-nse-part="cell"][data-nse-selected] {
+  background: #c8102e;
+  color: white;
+}
+```
+
+Set an appearance at the application, window or view level. The nearest setting takes precedence.
+
+- `app.appearance` applies to windows, sheets, popovers and menus the application presents.
+- `window.appearance` overrides the application for one window.
+- `NSEView.appearance` applies to a view and its descendants.
+
+```tsx
+import { NSEAppearance } from "@syndromatic/syncloudos/nse/appearance";
+import { themes } from "virtual:syncloudos/themes";
+
+const chrome = new NSEAppearance({ theme: themes["com.example.run.chrome"] });
+app.appearance = chrome;
+window.appearance = chrome;
+// A view can also set <NSEView appearance={chrome}>…</NSEView>.
+```
+
+Assign `null` to an application or window appearance to restore inheritance. An appearance that only sets an app theme follows the surrounding light or dark scheme, contrast and transparency.
+
+The `data-nse-app-theme` boundary keeps the system theme and its semantic colours in effect. App drawing applies in `nse.app-theme`, above the system theme's drawing, and replaces the paint for each part and state it draws. Instance properties such as `bezelColour` take precedence. App drawing stops at a different app theme boundary and at `data-nse-system-surface`, which marks surfaces such as System Preferences, the open and save panels, and the Colour and Font panels.
 
 ## Scaffolding and validating
 

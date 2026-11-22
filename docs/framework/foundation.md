@@ -1,40 +1,40 @@
 # Foundation
 
-Foundation supplies the shared values and object services beneath NSE, FX and SynCloudOS. It is the counterpart of Apple Foundation: Foundation and AppKit share `NS`, and Foundation and NSE share `NSE`. Import it directly, without a mounted session. It has no React, NSE, FX or runtime imports and works in web workers.
+Foundation supplies the value types and object services that NSE, FX and SynCloudOS build on: byte data, ranges and index sets, formatters, decimal arithmetic, predicates, preferences and an undo engine. You can import it without a mounted session. It has no React, NSE, FX or runtime imports, so it also works in web workers.
 
 ```ts
 import { NSEData, NSEIndexSet, NSEUserDefaults } from "@syndromatic/syncloudos/foundation";
 ```
 
-Use native `URL`, `Date`, `Error`, `crypto.randomUUID()` and `JSON` for the web equivalents of Cocoa’s bridged values. Foundation adds behaviour where those native values do not provide it.
+For URLs, dates, errors, identifiers and JSON, use the native `URL`, `Date`, `Error`, `crypto.randomUUID()` and `JSON`. Foundation only adds types where the platform has nothing suitable. If you know Apple's Foundation, the class names will be familiar.
 
 ## Exports
 
-| Export | Apple counterpart | Purpose |
-| --- | --- | --- |
-| `NSEData`, `NSEDataConvertible`, `NSEDataCompressionAlgorithm` | NSData / Data | Immutable bytes, ranges, base64, Blob bridges and compression |
-| `NSERange`, `normaliseNSERange`, `NSEEqualRanges`, `NSEIntersectionRange` | NSRange | Validated location/length ranges |
-| `NSEIndexPath`, `compareNSEIndexPaths` | NSIndexPath | Ordered index paths |
-| `NSEIndexSet` | NSIndexSet | Immutable sets represented by index ranges |
-| `NSECountedSet` | NSCountedSet | Object multiplicities |
-| `NSEFormatter`, `NSEFormatterContext`, `NSEFormatterError`, `NSEFormatterResult` | NSFormatter | Object/string conversion and partial-input validation |
-| `NSENumberFormatter`, `NSENumberFormatterOptions` | NSNumberFormatter | Locale-aware number display and parsing |
-| `NSEByteCountFormatter` and its option/unit types | NSByteCountFormatter | Decimal or binary byte quantities |
-| `NSEDateFormatter`, `NSEDateFormatterOptions`, `NSEDateFormatterStyle` | NSDateFormatter | Intl date/time styles, patterns and Date/string conversion |
-| `NSEDecimalNumber`, `NSEDecimalNumberHandler`, `NSEDecimalNumberBehaviors`, `NSEDecimalRoundingMode` | NSDecimalNumber / NSDecimalNumberHandler / NSDecimalNumberBehaviors | Bounded decimal arithmetic and rounding policies |
-| `NSEPredicate` and its expression/schema types | NSPredicate | Block evaluation and bounded declarative predicates |
-| `NSESortDescriptor` and its option/comparator types | NSSortDescriptor | Stable comparison with reversible ordering |
-| `NSECharacterSet`, `NSEUnicodePropertyName` | NSCharacterSet | Unicode scalar membership and set operations |
-| `NSEUserDefaults`, `NSEUserDefaultsStore` | NSUserDefaults | Keyed preferences through an injected store |
-| `NSEValueTransformer` and the three built-in transformer names | NSValueTransformer | Named subclass registration, forward and reverse value transformations |
-| `NSEUndoManager` | NSUndoManager | Target-based inverse registration, nested groups, action names and undo levels |
+| Export | Purpose |
+| --- | --- |
+| `NSEData`, `NSEDataConvertible`, `NSEDataCompressionAlgorithm` | Immutable bytes, ranges, base64, Blob bridges and compression |
+| `NSERange`, `normaliseNSERange`, `NSEEqualRanges`, `NSEIntersectionRange` | Validated location/length ranges |
+| `NSEIndexPath`, `compareNSEIndexPaths` | Ordered index paths |
+| `NSEIndexSet` | Immutable sets of indexes, stored as ranges |
+| `NSECountedSet` | Sets that count how many times each object was added |
+| `NSEFormatter`, `NSEFormatterContext`, `NSEFormatterError`, `NSEFormatterResult` | Converting between objects and strings, and validating partial input |
+| `NSENumberFormatter`, `NSENumberFormatterOptions` | Locale-aware number display and parsing |
+| `NSEByteCountFormatter` and its option and unit types | Decimal or binary byte quantities |
+| `NSEDateFormatter`, `NSEDateFormatterOptions`, `NSEDateFormatterStyle` | Intl date and time styles, patterns, and conversion between `Date` and text |
+| `NSEDecimalNumber`, `NSEDecimalNumberHandler`, `NSEDecimalNumberBehaviors`, `NSEDecimalRoundingMode` | Bounded decimal arithmetic and rounding policies |
+| `NSEPredicate` and its expression and schema types | Block predicates and bounded declarative predicates |
+| `NSESortDescriptor` and its option and comparator types | Stable comparison with reversible ordering |
+| `NSECharacterSet`, `NSEUnicodePropertyName` | Unicode scalar membership and set operations |
+| `NSEUserDefaults`, `NSEUserDefaultsStore` | Keyed preferences over a store you supply |
+| `NSEValueTransformer` and the three built-in transformer names | Named, registered value transformations, forward and reverse |
+| `NSEUndoManager`, `NSEUndoRegistrationCapability` | Target-based undo registration, nested groups, action names and undo levels |
 
-Supporting TypeScript option, schema and result types describe the web API; they are not additional Apple classes. `NSETreeNode` belongs to AppKit and is exported by `nse`. Formatters and `NSEUserDefaults` are exported only from `foundation`.
+The remaining exports are TypeScript option, schema and result types for these classes. `NSETreeNode` is a view-layer class, so it comes from `@syndromatic/syncloudos/nse`. Formatters and `NSEUserDefaults` come only from `foundation`.
 
 ## Immutable data
 
 ```ts
-import { NSEData, type NSEDataConvertible } from "@syndromatic/syncloudos/foundation";
+import { NSEData } from "@syndromatic/syncloudos/foundation";
 
 const data = NSEData.from(new Uint8Array([0, 1, 2, 3]));
 const slice = data.subdata({ location: 1, length: 2 });
@@ -45,15 +45,15 @@ const compressed = await downloaded.compressed("zlib");
 const restored = await compressed.decompressed("zlib");
 ```
 
-`from` copies `Uint8Array`, `ArrayBuffer` and `NSEData` inputs, including typed-array subviews. `count` measures bytes. `bytes` returns a defensive copy with a read-only TypeScript view: mutating that copy, a subview or its buffer cannot change the value. Instances are frozen; typed arrays are never advertised as frozen storage. `subdata` rejects invalid or out-of-bounds ranges. Base64 uses canonical RFC 4648 encoding, including padding, and rejects malformed or non-canonical input.
+`from` copies `Uint8Array`, `ArrayBuffer` and `NSEData` inputs, including typed-array subviews. `count` is the length in bytes. `bytes` returns a fresh copy typed as read-only, so changing that copy, a subview of it or its buffer never changes the value. Instances are frozen. `subdata` rejects invalid or out-of-bounds ranges. Base64 uses canonical RFC 4648 encoding with padding, and `fromBase64` rejects malformed or non-canonical input.
 
-`NSEDataConvertible` is the accepted input union. The Blob bridge is explicit and asynchronous for reads. One-shot methods allocate complete results; use [CompressionFX](fx/compression.md) filters for streaming work.
+`NSEDataConvertible` is the union of inputs that APIs accept. Reading from a Blob is explicit and asynchronous. The one-shot methods build the whole result in memory; for streaming, use [CompressionFX](fx/compression.md) filters.
 
 ## Compression
 
-The algorithm values mirror `NSData.CompressionAlgorithm`: `lzfse`, `lz4`, `lzma` and `zlib`. Apple's `zlib` uses raw DEFLATE (RFC 1951), without a zlib wrapper. Native browser codecs currently implement this as `deflate-raw`. The other algorithms remain present and reject when the host cannot implement them; no codec is silently substituted. CompressionFX has its own `CPFXAlgorithm`, with Compression's additional `brotli` and `lzbitmap` cases.
+`compressed` and `decompressed` take `lzfse`, `lz4`, `lzma` or `zlib`. `zlib` means raw DEFLATE (RFC 1951) with no zlib header, which browsers implement as `deflate-raw`. The other three are accepted but reject when the browser has no codec for them; Foundation never quietly substitutes another one. CompressionFX has its own `CPFXAlgorithm`, which adds `brotli` and `lzbitmap`.
 
-A single codec factory and collector live inside Foundation and use `CompressionStream` / `DecompressionStream`. CPFX builds on those helpers. Foundation never imports FX; the dependency follows the same direction as the other FX value frameworks. Methods are asynchronous because web compression streams are asynchronous.
+Both use one codec helper inside Foundation, built on `CompressionStream` and `DecompressionStream`, which is why the methods are asynchronous. CompressionFX builds on that helper; Foundation never imports FX.
 
 ## Collections and predicates
 
@@ -65,9 +65,9 @@ const even = NSEPredicate.withBlock<number>(value => value % 2 === 0);
 const selected = [...indexes].filter(value => even.evaluate(value));
 ```
 
-Index sets normalise and coalesce adjacent ranges. Character sets operate on Unicode scalars rather than UTF-16 code units. Predicates also accept a restricted schema-backed expression tree; this is not an interpreter for arbitrary Cocoa predicate-format strings.
+Index sets normalise and merge adjacent ranges. Character sets work on Unicode scalars, not UTF-16 code units. Predicates also accept a restricted, schema-checked expression tree; there's no parser for free-form predicate format strings.
 
-`NSEIndexPath.indexAtPosition(position)` accepts nonnegative safe-integer positions. Invalid or out-of-range positions return `undefined`, the web API sentinel; negative, fractional and non-finite positions are never coerced into valid indexes. `indexPathByRemovingLastIndex()` always returns an `NSEIndexPath`: paths with zero or one index produce an empty path. The original path remains unchanged.
+`NSEIndexPath.indexAtPosition(position)` takes a nonnegative safe integer. For anything else, or a position past the end, it returns `undefined`; it never rounds a negative, fractional or non-finite position to a valid one. `indexPathByRemovingLastIndex()` always returns a new `NSEIndexPath`, empty if the path had zero or one index, and leaves the original unchanged.
 
 ## Formatters
 
@@ -81,37 +81,49 @@ const parsed = formatter.getObjectValue(display, context);
 if (parsed.ok) console.log(parsed.value);
 ```
 
-Subclass `NSEFormatter<T>` to provide `string`, `editingString`, `getObjectValue` and `isPartialStringValid`. The methods follow NSFormatter’s conversion and editing responsibilities. Locale and time-zone context is explicit; parse results represent Cocoa’s output/error parameters as a discriminated result.
+To write your own formatter, subclass `NSEFormatter<T>` and implement `string`, `editingString`, `getObjectValue` and `isPartialStringValid`. You pass locale and time zone explicitly in the context, and parsing returns a result object (`{ ok: true, value }` or a failure) instead of throwing.
 
 ### Dates
 
-`NSEDateFormatter` converts native `Date` values with `string(date)` and `date(text)`, returning `null` for invalid date text. Mutable `dateStyle` and `timeStyle` use `none`, `short`, `medium`, `long` and `full`. `locale`, `timeZone` and `calendar` configure Intl. An explicit `dateFormat` takes precedence over styles; supported Unicode pattern tokens are `yyyy`, `MM`, `dd`, `HH`, `mm` and `ss`, with quoted literals and doubled apostrophes. Unsupported tokens throw instead of being interpreted as literals.
+`NSEDateFormatter` converts native `Date` values with `string(date)` and `date(text)`; `date` returns `null` for text it can't parse. `dateStyle` and `timeStyle` can be changed after construction and take `none`, `short`, `medium`, `long` or `full`. `locale`, `timeZone` and `calendar` configure Intl. An explicit `dateFormat` overrides the styles. It supports the Unicode pattern tokens `yyyy`, `MM`, `dd`, `HH`, `mm` and `ss`, quoted literals and doubled apostrophes. Any other token throws, so it can't be mistaken for literal text.
 
 ```ts
+import { NSEDateFormatter } from "@syndromatic/syncloudos/foundation";
+
 const dates = new NSEDateFormatter({ locale: "en-GB", timeZone: "Europe/London", dateStyle: "long", timeStyle: "short" });
 const text = dates.string(new Date("2026-11-07T12:30:00Z"));
 const date = dates.date(text);
 ```
 
-Intl formats any supported calendar in style mode. Parsing and explicit patterns currently support the Gregorian calendar and positive-era years; other calendars/eras reject explicitly. Localized style parsing uses Intl parts and verifies the formatted result, including month/weekday names, digits, day periods and time-zone labels. Missing date fields default to 1 January 2001, missing time fields to midnight, and two-digit style years to 2000–2099. Impossible dates and daylight-saving gaps return `null`. Ambiguous repeated wall times use the formatter's deterministic zone resolution; there is no locale-independent `Date.parse` fallback. Style output without seconds cannot recover seconds; formatting does not preserve milliseconds. These limits describe this API's supported conversion surface, rather than the full ICU pattern language.
+Style formatting works with any calendar Intl supports. Parsing and explicit patterns support only the Gregorian calendar and positive-era years for now, and reject anything else. Parsing a style reads the Intl parts and then checks the result by formatting it again, so month and weekday names, digits, day periods and time-zone labels all have to match.
+
+When parsing, missing date fields default to 1 January 2001, missing time fields to midnight, and two-digit years in styles to 2000 to 2099. Impossible dates and times that fall in a daylight-saving gap return `null`. A wall time that occurs twice resolves the same way every time, and nothing falls back to `Date.parse`. A style without seconds can't give you back the seconds, and milliseconds are never formatted.
 
 ### Decimal numbers
 
-`NSEDecimalNumber.fromString` constructs immutable decimal values. `adding`, `subtracting`, `multiplying`, `dividing`, `rounding`, `compare` and `toString` keep arithmetic in bigint coefficient/exponent form. Representation is bounded to 38 significant digits and a decimal exponent from −128 through 127; operations round to that representation, rather than using binary floating-point or arbitrary precision. `zero`, `one` and `notANumber` are shared values.
+`NSEDecimalNumber.fromString` creates an immutable decimal value. `adding`, `subtracting`, `multiplying`, `dividing`, `rounding`, `compare` and `toString` do their arithmetic on a bigint coefficient and a decimal exponent, never in binary floating point. Values hold up to 38 significant digits with an exponent from -128 to 127, and operations round to fit. `zero`, `one` and `notANumber` are shared values.
 
 ```ts
+import { NSEDecimalNumber, NSEDecimalNumberHandler } from "@syndromatic/syncloudos/foundation";
+
 const cents = new NSEDecimalNumberHandler({ scale: 2, roundingMode: "bankers" });
 const amount = NSEDecimalNumber.fromString("0.1").adding(NSEDecimalNumber.fromString("0.2"));
 const eighth = NSEDecimalNumber.one.dividing(NSEDecimalNumber.fromString("8"), cents); // 0.12
 ```
 
-Rounding modes are `plain` (nearest, ties away from zero), `bankers` (nearest, ties to even), `down` (toward negative infinity) and `up` (toward positive infinity). A handler's optional `scale` is decimal places, with an omitted scale retaining the bounded precision. `raiseOnExactness`, `raiseOnOverflow`, `raiseOnUnderflow` and `raiseOnDivideByZero` control arithmetic errors. Defaults tolerate inexactness and raise the other three errors. A suppressed unrepresentable result becomes `notANumber`; suppressed inexactness returns the rounded result. `defaultBehavior` is replaceable. Custom `NSEDecimalNumberBehaviors.exceptionDuringOperation` can supply a replacement for a raised arithmetic error. Serialization returns decimal text, preserving the value without a binary-number bridge.
+The rounding modes are `plain` (nearest, ties away from zero), `bankers` (nearest, ties to even), `down` (towards negative infinity) and `up` (towards positive infinity). A handler's optional `scale` is a number of decimal places; leave it out to keep full precision. `raiseOnExactness`, `raiseOnOverflow`, `raiseOnUnderflow` and `raiseOnDivideByZero` decide which conditions throw. By default inexact results are allowed and the other three throw. When an error is suppressed, an unrepresentable result becomes `notANumber` and an inexact one is returned rounded.
+
+You can replace `NSEDecimalNumber.defaultBehavior`. A custom `NSEDecimalNumberBehaviors` can also implement `exceptionDuringOperation` to return a replacement value for an error that would otherwise throw. `toString` gives decimal text, so you can serialise a value without passing it through a binary number.
 
 ### Undo
 
-`NSEUndoManager` is the worker-safe Foundation object. `registerUndo(target, handler)` records a synchronous inverse operation. While undoing or redoing, handlers register the opposite operation on the same manager. `beginUndoGrouping` / `endUndoGrouping` nest; closing the outer group creates one history entry. `setActionName` names that entry; `undoActionName` and `redoActionName` expose the frontier names. `canUndo`, `canRedo`, `isUndoing`, `isRedoing` and `groupingLevel` describe current state. `levelsOfUndo = 0` means unlimited; a positive value bounds retained groups. `removeAllActions` and `removeAllActionsWithTarget` retire registrations.
+`NSEUndoManager` is the Foundation undo engine and is safe to use in a worker. `registerUndo(target, handler)` records a synchronous operation that reverses a change. While an undo or redo runs, handlers register the opposite operation on the same manager. `beginUndoGrouping` and `endUndoGrouping` nest, and closing the outermost group creates one history entry. `setActionName` names that entry, and `undoActionName` and `redoActionName` give the names of the next entries to undo and redo.
+
+`canUndo`, `canRedo`, `isUndoing`, `isRedoing` and `groupingLevel` describe the current state. `levelsOfUndo` limits how many groups are kept; `0`, the default, means no limit. `removeAllActions` and `removeAllActionsWithTarget` clear registrations.
 
 ```ts
+import { NSEUndoManager } from "@syndromatic/syncloudos/foundation";
+
 const undo = new NSEUndoManager();
 const model = { title: "Before" };
 function setTitle(target: typeof model, title: string) {
@@ -125,35 +137,37 @@ undo.undo();
 undo.redo();
 ```
 
-The explicit synchronous Foundation contract does not add browser event-loop grouping or promise replay. The runtime adapter uses the same Foundation history engine for registration, groups and replay frontiers, while retaining runtime identity, responder routing, registration partitions, reservations, asynchronous compensation and revocable mounted leases. NSE controls and mounted app histories derive their narrow registration contract from Foundation's `NSEUndoRegistrationCapability`; this TypeScript support interface is not another Cocoa class. Apps holding a mounted document history continue to use that lease, with its existing authority and teardown behaviour. A raw Foundation manager never replaces a mounted history lease.
+A Foundation manager is entirely synchronous: it doesn't group by browser event loop turn or replay promises. The undo histories of a mounted application (see [Commands, responders and undo](commands-responders-undo.md#undo)) use the same engine for registration, groups and replay, and add responder routing, reservations, asynchronous compensation and teardown when the application unmounts. NSE controls register undo through the narrow `NSEUndoRegistrationCapability` interface. If you hold a mounted document history, keep using it; a plain `NSEUndoManager` can't stand in for one.
 
 ## Value transformers
 
-Subclass `NSEValueTransformer<Source, Target>` and implement `transformedValue(value)`. Class methods `setValueTransformer(transformer, name)`, `valueTransformerForName(name)` and `valueTransformerNames()` share a named registry in the current JavaScript realm. Registering replaces the previous instance; registering `null` removes the name. A subclass opts into reverse conversion with static `allowsReverseTransformation()`. Its `reverseTransformedValue` may implement a different inverse; the inherited implementation applies the forward operation when reverse conversion is allowed, following NSValueTransformer.
+Subclass `NSEValueTransformer<Source, Target>` and implement `transformedValue(value)`. The static methods `setValueTransformer(transformer, name)`, `valueTransformerForName(name)` and `valueTransformerNames()` share one registry per JavaScript realm. Registering a name again replaces the earlier transformer, and registering `null` removes it.
 
-`NSENegateBooleanTransformerName`, `NSEIsNilTransformerName` and `NSEIsNotNilTransformerName` identify the built-in boolean negation and nil predicates. Both `null` and `undefined` bridge nil. Keyed-archive transformers and Objective-C class lookup by name are not provided. The former internal closure registry has been removed and object-controller bindings use the Foundation class directly.
+To allow reverse conversion, override the static `allowsReverseTransformation()` to return `true`. You can then implement `reverseTransformedValue` with a different inverse; if you don't, it applies the forward transformation.
+
+`NSENegateBooleanTransformerName`, `NSEIsNilTransformerName` and `NSEIsNotNilTransformerName` name the built-in transformers for negating a boolean and testing for a missing value. Both `null` and `undefined` count as missing. There are no archiving transformers. Object controller bindings use this same class.
 
 ## Preferences
 
 ```ts
 import { NSEUserDefaults } from "@syndromatic/syncloudos/foundation";
 
-const defaults = new NSEUserDefaults(); // Volatile in-memory domain.
+const defaults = new NSEUserDefaults(); // Volatile, in memory.
 defaults.set("indigo", "accentColour");
 const colour = defaults.object("accentColour");
 defaults.removeObject("accentColour");
 ```
 
-For persistent application settings, inject the mounted application’s preferences store into the constructor. Foundation owns no browser storage or runtime singleton. `NSEUserDefaultsController` remains in NSE and provides AppKit validation, migration and bindings around the injected defaults.
+For settings that persist, pass the mounted application's preferences store to the constructor. Foundation owns no browser storage and no runtime singletons. `NSEUserDefaultsController`, from `nse`, adds validation, migration and bindings on top of a defaults object; see [Controllers](controllers.md).
 
 ## Scope
 
-Foundation owns the value types and the undo history engine. The system layer owns mounted authority and service adapters. The internal date, decimal and transformer predecessors have been removed. `ChangeSet` and `SelectionModel` remain private controller implementation models: neither has a Foundation class counterpart, and neither is published under an invented Cocoa name. Public byte contracts are described below.
+Foundation owns the value types and the undo engine. The system layer owns everything tied to a mounted application, such as authority, services and the mounted undo histories built on the engine.
 
 ## Public byte contracts
 
-Public byte payload inputs accept `NSEDataConvertible`; delivered payloads use `NSEData` while keeping their Promise, nullable, array and stream wrappers. This includes pasteboards, document assets/resources/PDF output, file-reference byte reads, prepared share files, encoded audio/image/video/container data, MIDI messages, font files and PDF readers. There are no raw-return compatibility overloads.
+Every public API that takes bytes accepts `NSEDataConvertible`, and every one that returns bytes gives you `NSEData`, still inside its `Promise`, nullable, array or stream wrapper. That covers pasteboards, document assets and resources, PDF output, file-reference reads, prepared share files, encoded audio, image, video and container data, MIDI messages, font files and PDF readers. There are no overloads that return raw buffers.
 
-Native `File` results retain file identity and metadata. MIME type and file name are separate fields on export/share records. Browser hosts create native Blobs, Files and codec buffers at explicit bridges. Numerical pixel/index planes, PCM/FFT samples and writable copy destinations retain their numerical typed arrays; they are not encoded byte payloads. `NSEData.read`, `.bytes` and `.blob` remain intentional web bridges. Genuine cross-realm web buffers are accepted using intrinsic brand checks.
+Native `File` results keep their file identity and metadata. Export and share records carry the MIME type and file name as separate fields. Browser hosts create native Blobs, Files and codec buffers only where they hand data to the platform. Numeric data stays in typed arrays because it isn't an encoded byte payload: pixel and index planes, PCM and FFT samples, and destinations you copy into. `NSEData.read`, `.bytes` and `.blob` are the deliberate bridges to web types. Buffers from another realm, such as an iframe, are accepted.
 
-Imported font storage delivers `NSEData`, font registration accepts convertible data, and `NSEFontLibrary.fontBytes` returns `NSEData | null`. The IndexedDB font host keeps its persisted ArrayBuffer envelope private.
+Imported fonts are stored and delivered as `NSEData`, and font registration accepts any convertible data.

@@ -1,5 +1,5 @@
 
-@layer nse.atmo {
+@layer nse.structure {
 @scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
@@ -20,6 +20,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
+:where(:scope) [data-nse-control="window"]:where([data-nse-part="background"]),
+:where(:scope):is([data-nse-control="window"]:where([data-nse-part="background"])) {
+  --nse-window-control-paint-size: 14px;
+}
 
 .nse-window-view,
 :where(:scope):is(.nse-window-view) {
@@ -49,10 +54,10 @@
   min-width: 0;
   min-height: 0;
   flex-direction: column;
-  color: inherit;
-  background: inherit;
-  border: inherit;
+  border-width: inherit;
+  border-style: inherit;
   border-radius: inherit;
+  outline: none;
 }
 
 .nse-window__shadow-layer,
@@ -68,87 +73,45 @@
   user-select: none;
 }
 
-/* Theme-neutral fallback paint for window roles. A selected NSE theme can
-   override these semantic hooks with higher-specificity appearance rules.
-   Custom-active and frameless windows suppress the generic system surface. */
-.nse-window-view:not([data-window-custom-chrome-active="true"]):not([data-window-chrome-mode="frameless"]),
-:where(:scope):is(.nse-window-view:not([data-window-custom-chrome-active="true"]):not([data-window-chrome-mode="frameless"])) {
-  color: var(--nse-window-foreground, #17202a);
-  background: var(--nse-window-background, #f4f5f6);
-  border: 1px solid var(--nse-window-border, rgba(31, 41, 55, 0.42));
+.nse-window-view:not([data-window-frame="frameless"]),
+:where(:scope):is(.nse-window-view:not([data-window-frame="frameless"])) {
+  border-width: 1px;
+  border-style: solid;
   border-radius: var(--nse-window-radius, 8px);
-  box-shadow: none;
 }
 
-.nse-window-view:not([data-window-custom-chrome-active="true"]):not([data-window-chrome-mode="frameless"]) .nse-window__surface,
-:where(:scope):is(.nse-window-view:not([data-window-custom-chrome-active="true"]):not([data-window-chrome-mode="frameless"])) .nse-window__surface {
-  box-shadow: var(--nse-window-shadow, 0 14px 42px rgba(15, 23, 42, 0.26));
-}
-
-.nse-window-view[data-window-chrome-mode="frameless"],
-:where(:scope):is(.nse-window-view[data-window-chrome-mode="frameless"]),
-.nse-window-view[data-window-chrome-mode="frameless"] .nse-window__surface,
-:where(:scope):is(.nse-window-view[data-window-chrome-mode="frameless"]) .nse-window__surface {
-  background: none;
+.nse-window-view[data-window-frame="frameless"],
+:where(:scope):is(.nse-window-view[data-window-frame="frameless"]),
+.nse-window-view[data-window-frame="frameless"] .nse-window__surface,
+:where(:scope):is(.nse-window-view[data-window-frame="frameless"]) .nse-window__surface,
+.nse-window-view[data-window-detached="true"],
+:where(:scope):is(.nse-window-view[data-window-detached="true"]),
+.nse-window-view[data-window-detached="true"] > .nse-window__surface,
+:where(:scope):is(.nse-window-view[data-window-detached="true"]) > .nse-window__surface {
   border: 0;
-  box-shadow: none;
+  border-radius: 0;
 }
 
-.nse-window-view--sheet,
-:where(:scope):is(.nse-window-view--sheet) {
-  --nse-window-shadow: var(--nse-window-sheet-shadow, 0 18px 48px rgba(15, 23, 42, 0.32));
+.nse-window__detached-transfer,
+:where(:scope):is(.nse-window__detached-transfer) {
+  position: absolute;
+  z-index: 6;
+  inset-block-start: 8px;
+  inset-inline-end: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: color-mix(in srgb, canvas 76%, transparent);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 18%);
+  opacity: 0.72;
+  transition: opacity 140ms ease;
 }
 
-.nse-window-view--popover,
-:where(:scope):is(.nse-window-view--popover) {
-  --nse-window-shadow: var(--nse-window-popover-shadow, 0 10px 32px rgba(15, 23, 42, 0.28));
-}
-/* Custom-chrome windows paint their own bar artwork; the host applies a
-   CSS-only key-state drop-shadow on the WINDOW VIEW so the shadow follows
-   the SmoothSurface outline. Filter and clip-path cannot share an element:
-   the record-driven clip-path on the surface would clip a surface filter
-   to nothing. The view is the unclipped parent, so the drop-shadow reads
-   the clipped surface's alpha. Custom shadows only apply while custom
-   chrome is actually active — a fallback window paints the active
-   theme's system titlebar instead, never both. Values are visual-tuning constants. */
-.nse-window-view[data-window-custom-chrome-active="true"],
-:where(:scope):is(.nse-window-view[data-window-custom-chrome-active="true"]) {
-  filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.22)) drop-shadow(0 6px 22px rgba(0, 0, 0, 0.14));
-  transition: filter 160ms ease;
-}
-
-.nse-window-view[data-window-custom-chrome-active="true"][data-window-key="true"],
-:where(:scope):is(.nse-window-view[data-window-custom-chrome-active="true"][data-window-key="true"]) {
-  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.3)) drop-shadow(0 18px 48px rgba(0, 0, 0, 0.22));
-  transition: filter 160ms ease;
-}
-
-.nse-window-view[data-window-custom-chrome-active="true"] .nse-window__surface,
-:where(:scope):is(.nse-window-view[data-window-custom-chrome-active="true"]) .nse-window__surface {
-  /* Host-owned 1px perimeter edge. A border (not a box-shadow) follows the
-   * SmoothSurface outline through the inline border-radius, and unlike a
-   * stylesheet box-shadow it survives the record-driven inline box-shadow
-   * the SmoothSurface props always set. */
-  border: 1px solid rgba(0, 0, 0, 0.14);
-}
-
-/* Custom-chrome slot: the mounted application's chrome portals into this
-   container. It stays out of layout until the host handshake flips
-   data-window-custom-chrome-active, so a pending renderer cannot stack a
-   second bar on top of the system titlebar. Corner geometry and clipping
-   come from the record's smoothSurface via inline style — never from a
-   hard-coded radius here. */
-.nse-window__custom-titlebar,
-:where(:scope):is(.nse-window__custom-titlebar) {
-  display: none;
-  position: relative;
-  flex: none;
-  min-width: 0;
-}
-
-.nse-window-view[data-window-custom-chrome-active="true"] .nse-window__custom-titlebar,
-:where(:scope):is(.nse-window-view[data-window-custom-chrome-active="true"]) .nse-window__custom-titlebar {
-  display: block;
+.nse-window__detached-transfer:is(:hover, :focus-within),
+:where(:scope):is(.nse-window__detached-transfer:is(:hover, :focus-within)) {
+  opacity: 1;
 }
 
 .nse-window__titlebar,
@@ -157,15 +120,9 @@
   box-sizing: border-box;
   height: var(--nse-window-titlebar-height);
   min-height: var(--nse-window-titlebar-height);
-  color: var(--nse-window-title-foreground, currentColor);
+  border-block-end: 1px solid;
   touch-action: none;
   user-select: none;
-}
-
-.nse-window__titlebar,
-:where(:scope):is(.nse-window__titlebar) {
-  background: var(--nse-window-title-background, #e5e8eb);
-  border-block-end: 1px solid var(--nse-window-divider, rgba(31, 41, 55, 0.3));
 }
 
 .nse-window__titlebar--panel,
@@ -204,7 +161,6 @@
   margin: 0;
   padding: 0;
   border: 0;
-  color: inherit;
   background: transparent;
   appearance: none;
   cursor: default;
@@ -218,55 +174,24 @@
   box-sizing: border-box;
   width: var(--nse-window-control-paint-size);
   height: var(--nse-window-control-paint-size);
+  border: 1px solid;
   border-radius: 50%;
 }
 
 .nse-window__control:focus-visible,
 :where(:scope):is(.nse-window__control:focus-visible) {
-  outline: 2px solid var(--nse-window-focus-ring, Highlight);
+  outline: 2px solid;
   outline-offset: -6px;
-}
-
-.nse-window__control-paint,
-:where(:scope):is(.nse-window__control-paint) {
-  border: 1px solid currentColor;
-  background: var(--nse-window-control-background, #c5cbd1);
-}
-
-.nse-window__control--close .nse-window__control-paint,
-:where(:scope):is(.nse-window__control--close) .nse-window__control-paint {
-  background: var(--nse-window-close-background, #d46a63);
-}
-
-.nse-window__control--minimise .nse-window__control-paint,
-:where(:scope):is(.nse-window__control--minimise) .nse-window__control-paint {
-  background: var(--nse-window-minimise-background, #d8ad4d);
-}
-
-.nse-window__control--zoom .nse-window__control-paint,
-:where(:scope):is(.nse-window__control--zoom) .nse-window__control-paint {
-  background: var(--nse-window-zoom-background, #6aa873);
-}
-
-.nse-window__control:is(:hover,:active) .nse-window__control-paint,
-:where(:scope):is(.nse-window__control:is(:hover,:active)) .nse-window__control-paint {
-  filter: brightness(0.86);
 }
 
 .nse-window__content,
 :where(:scope):is(.nse-window__content) {
+  position: relative;
   min-width: 0;
   min-height: 0;
   flex: 1;
   overflow: auto;
   overscroll-behavior: contain;
-}
-
-.nse-window-view--hud,
-:where(:scope):is(.nse-window-view--hud) {
-  color: var(--nse-window-hud-foreground, #f8fafc);
-  background: var(--nse-window-hud-background, #28313b);
-  border-color: var(--nse-window-hud-border, #111820);
 }
 
 .nse-window__hud-titlebar,
@@ -275,14 +200,14 @@
   box-sizing: border-box;
   height: 26px;
   min-height: 26px;
+  border-block-end: 1px solid;
   touch-action: none;
   user-select: none;
 }
 
-.nse-window__hud-titlebar,
-:where(:scope):is(.nse-window__hud-titlebar) {
-  background: var(--nse-window-hud-title-background, #343f4b);
-  border-block-end: 1px solid var(--nse-window-hud-divider, #111820);
+:where(:scope) [data-nse-control="window"]:where([data-nse-part="background"]) [data-nse-part="title"]:where([data-nse-control="window"] *):where([data-nse-chrome="hud"] *),
+:where(:scope):is([data-nse-control="window"]:where([data-nse-part="background"])) [data-nse-part="title"]:where([data-nse-control="window"] *):where([data-nse-chrome="hud"] *) {
+  padding: 0 36px;
 }
 
 .nse-window__hud-title,
@@ -305,30 +230,20 @@
   inset-inline-start: 0;
 }
 
-.nse-window__control--hud-close .nse-window__control-paint,
-:where(:scope):is(.nse-window__control--hud-close) .nse-window__control-paint {
-  background: var(--nse-window-hud-close-background, #cbd5df);
-}
-
 .nse-window-view--popover::before,
 :where(:scope):is(.nse-window-view--popover)::before {
   position: absolute;
   width: 10px;
   height: 10px;
   content: "";
-  background: inherit;
-  border: 1px solid currentColor;
+  border: 1px solid;
   transform: rotate(45deg);
 }
 
 .nse-window-view--borderless,
 :where(:scope):is(.nse-window-view--borderless) {
-  --nse-window-shadow: none;
-  color: inherit;
-  background: transparent;
   border: 0;
   border-radius: 0;
-  box-shadow: none;
 }
 
 .nse-window__resize-handle,
@@ -384,21 +299,6 @@
 :where(:scope):is(.nse-window__resize-handle--block-end-inline-start) { inset-block-end: -4px; inset-inline-start: -4px; cursor: nesw-resize; }
 .nse-window__resize-handle--block-end-inline-end,
 :where(:scope):is(.nse-window__resize-handle--block-end-inline-end) { inset-block-end: -4px; inset-inline-end: -4px; cursor: nwse-resize; }
-
-@media (forced-colors: active) {
-  .nse-window-view,
-:where(:scope):is(.nse-window-view),
-.nse-window__titlebar,
-:where(:scope):is(.nse-window__titlebar),
-.nse-window__control-paint,
-:where(:scope):is(.nse-window__control-paint) {
-    border-color: CanvasText;
-    forced-color-adjust: auto;
-  }
-
-  .nse-window__control:focus-visible,
-:where(:scope):is(.nse-window__control:focus-visible) { outline-color: Highlight; }
-}
 
 @media (prefers-reduced-motion: reduce) {
   .nse-window-view,

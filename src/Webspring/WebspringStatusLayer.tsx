@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { SystemSurfaceAppearance } from "../NSE/hostComposition";
 import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
 import { Presence } from "../NSE/Animation";
 import { AlertBackdrop } from "../NSE/NSE";
@@ -60,22 +61,24 @@ export function WebspringStatusLayer({ errors }: { errors: CapturedSynCloudOSErr
       {/* The backdrop and alert play their AnimationFX exits before removal. */}
       <Presence>
         {latest ? (
-          <FocusScope asChild key={latest.id} scopeId={`system-alert:${latest.id}`} kind="modal" parentResponderId="workspace" trapFocus>
-            <AlertBackdrop
-              presentation={runtime.presentationTraits}
-              onSafeDismiss={latest.recoverable === false ? undefined : () => runtime.errors.dismiss(latest.id)}
-            >
-              <SystemAlert
-                error={latest}
-                appearance={appearance}
-                applicationIcon={applicationIcon}
-                onDismiss={dismissLatest}
-                onReload={() => runtime.environment.browser.getWindow()?.location.reload()}
-                onReturn={() => { void returnLatestToWebspring(); }}
-                onOpenMailClient={(destination) => runtime.environment.browser.getWindow()?.location.assign(destination)}
-              />
-            </AlertBackdrop>
-          </FocusScope>
+          <SystemSurfaceAppearance key={latest.id}>
+            <FocusScope asChild scopeId={`system-alert:${latest.id}`} kind="modal" parentResponderId="workspace" trapFocus>
+              <AlertBackdrop
+                presentation={runtime.presentationTraits}
+                onSafeDismiss={latest.recoverable === false ? undefined : () => runtime.errors.dismiss(latest.id)}
+              >
+                <SystemAlert
+                  error={latest}
+                  appearance={appearance}
+                  applicationIcon={applicationIcon}
+                  onDismiss={dismissLatest}
+                  onReload={() => runtime.environment.browser.getWindow()?.location.reload()}
+                  onReturn={() => { void returnLatestToWebspring(); }}
+                  onOpenMailClient={(destination) => runtime.environment.browser.getWindow()?.location.assign(destination)}
+                />
+              </AlertBackdrop>
+            </FocusScope>
+          </SystemSurfaceAppearance>
         ) : null}
       </Presence>
     </>

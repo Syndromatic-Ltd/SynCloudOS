@@ -1,5 +1,5 @@
 
-@layer nse.atmo {
+@layer nse.structure {
 @scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
@@ -55,7 +55,6 @@
 .nse-container-pane-subtitle,
 :where(:scope):is(.nse-container-pane-subtitle){
   margin: 0;
-  color: color-mix(in srgb, currentColor 66%, transparent);
 }
 
 .nse-container-pane-body,
@@ -80,15 +79,8 @@
 :where(:scope):is(.nse-container-pane[data-variant="surface"]),
 .nse-container-pane[data-variant="floating"],
 :where(:scope):is(.nse-container-pane[data-variant="floating"]) {
-  background: color-mix(in srgb, canvas 76%, white 8%);
-  border: 1px solid color-mix(in srgb, currentColor 16%, transparent);
-}
-
-.nse-container-pane[data-variant="sidebar"],
-:where(:scope):is(.nse-container-pane[data-variant="sidebar"]),
-.nse-container-pane[data-variant="inspector"],
-:where(:scope):is(.nse-container-pane[data-variant="inspector"]) {
-  background: color-mix(in srgb, canvas 82%, currentColor 4%);
+  border-width: 1px;
+  border-style: solid;
 }
 
 .nse-container-pane-actions,

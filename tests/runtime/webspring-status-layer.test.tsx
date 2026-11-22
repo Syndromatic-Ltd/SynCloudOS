@@ -57,7 +57,7 @@ function CrashedAppPresentation({ runtime }: { runtime: SynCloudOSRuntime }) {
       watchdogName="NSEControlGallery.app presentation"
       scope="app"
       app={app}
-      presentation={{ id: "stage-gallery", kind: "appView", zIndex: 100 }}
+      presentation={{ id: "stage-gallery", kind: "stage", zIndex: 100 }}
       resetKey="stage-gallery:nse-control-gallery"
       fallback={() => <div data-testid="gallery-fallback" />}
     >
@@ -215,7 +215,7 @@ describe("WebspringStatusLayer recovery", () => {
             watchdogName="NSEControlGallery.app presentation"
             scope="app"
             app={app}
-            presentation={{ id: "stage-gallery", kind: "appView", zIndex: 100 }}
+            presentation={{ id: "stage-gallery", kind: "stage", zIndex: 100 }}
             resetKey="stage-gallery:nse-control-gallery"
             fallback={() => <div data-testid="gallery-fallback" />}
           >

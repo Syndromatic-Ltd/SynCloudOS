@@ -230,14 +230,14 @@ export function DateTimeEntry({ value, defaultValue = null, mode = "combined", o
         onClick={() => { if (applyEditor()) queueMicrotask(() => triggerRef.current?.focus({ preventScroll: true })); }}
       />
       <NSEButton
-        appearance="aqua"
+        appearance="light"
         title="Clear"
         isEnabled={!(disabled || props.readOnly || props.required)}
         aria-label={`Clear ${props["aria-label"].toLowerCase()}`}
         onClick={clear}
       />
       <NSEButton
-        appearance="aqua"
+        appearance="light"
         title="Cancel"
         isEnabled={!disabled}
         aria-label={`Cancel ${props["aria-label"].toLowerCase()}`}

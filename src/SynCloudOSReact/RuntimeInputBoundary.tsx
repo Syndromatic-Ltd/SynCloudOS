@@ -19,10 +19,24 @@
  */
 
 import { useNSEScreenSafeAreaProperties } from "../NSE/applicationHostInterop";
-import { useSyncExternalStore, useRef, type CSSProperties, type FocusEvent, type KeyboardEvent as ReactKeyboardEvent, type PropsWithChildren } from "react";
+import { isNSEHTMLElement } from "../NSE/hostComposition";
+import { useSyncExternalStore, useRef, type CSSProperties, type FocusEvent, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent, type PropsWithChildren } from "react";
 import { useAppearance, useResolvedMode } from "./serviceHooks";
 import { useKernelSynCloudOS } from "./SynCloudOSProvider";
 import { RuntimeInputProtocolProvider, createRuntimeInputProtocol, focusScopeFromEvent } from "./runtimeInputProtocol";
+
+const keyboardNavigationKeys = new Set([
+  "Tab",
+  "ArrowUp",
+  "ArrowDown",
+  "ArrowLeft",
+  "ArrowRight",
+  "Home",
+  "End",
+  "PageUp",
+  "PageDown",
+  "F6",
+]);
 
 export function RuntimeInputBoundary({ children }: PropsWithChildren) {
   const runtime = useKernelSynCloudOS();
@@ -40,11 +54,11 @@ export function RuntimeInputBoundary({ children }: PropsWithChildren) {
     if (restoringBlockedFocus.current) return;
     if (!protocol.owns(event.nativeEvent, event.target)) return;
     const path = typeof event.nativeEvent.composedPath === "function" ? event.nativeEvent.composedPath() : [event.target];
-    const responder = path.find((target): target is HTMLElement => target instanceof HTMLElement && Boolean(target.dataset.syncloudosResponderId));
+    const responder = path.find((target): target is HTMLElement => isNSEHTMLElement(target) && Boolean(target.dataset.syncloudosResponderId));
     if (!responder?.dataset.syncloudosResponderId) return;
     const result = runtime.focus.requestFocus(responder.dataset.syncloudosResponderId);
     if (result.status === "focused") {
-      if (event.target instanceof HTMLElement) lastAcceptedFocusTarget.current = event.target;
+      if (isNSEHTMLElement(event.target)) lastAcceptedFocusTarget.current = event.target;
       return;
     }
     const trappedModal = runtime.focus.inspect().scopes.filter((scope) => scope.modal && scope.trapFocus).at(-1);
@@ -64,7 +78,21 @@ export function RuntimeInputBoundary({ children }: PropsWithChildren) {
       }
     }
   };
+  const setInputModality = (modality: "pointer" | null, eventTarget: EventTarget | null) => {
+    const roots = new Set<HTMLElement>();
+    if (safeArea.ref.current) roots.add(safeArea.ref.current);
+    const ownerDoc = isNSEHTMLElement(eventTarget) ? eventTarget.ownerDocument : safeArea.ref.current?.ownerDocument;
+    if (ownerDoc?.documentElement) roots.add(ownerDoc.documentElement);
+    for (const root of roots) {
+      if (modality) root.dataset.nseInputModality = modality;
+      else delete root.dataset.nseInputModality;
+    }
+  };
+  const handlePointerDownCapture = (event: ReactPointerEvent<HTMLDivElement>) => {
+    setInputModality("pointer", event.target);
+  };
   const handleKeyDownCapture = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (keyboardNavigationKeys.has(event.key)) setInputModality(null, event.target);
     const nativeEvent = event.nativeEvent;
     if (!protocol.owns(nativeEvent, event.target) || protocol.hasClaimed(nativeEvent)) return;
     const scopeId = focusScopeFromEvent(nativeEvent, event.target);
@@ -83,9 +111,13 @@ export function RuntimeInputBoundary({ children }: PropsWithChildren) {
         data-syncloudos-runtime-id={runtime.runtimeId}
         data-syncloudos-runtime-owner={runtime.runtimeId}
         data-syncloudos-runtime-root="true"
+        data-nse-control="view"
+        data-nse-part="background"
+        data-nse-role="runtime"
         data-appearance={appearance}
         data-mode={resolvedMode}
         data-nse-colour-scheme-resolved={resolvedMode}
+        onPointerDownCapture={handlePointerDownCapture}
         onFocusCapture={handleFocusCapture}
         onKeyDownCapture={handleKeyDownCapture}
       >

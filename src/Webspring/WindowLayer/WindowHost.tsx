@@ -18,7 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { WindowLayoutContext, WindowLayoutModel } from "../../NSE/hostComposition";
+import { SystemSurfaceAppearance } from "../../NSE/hostComposition";
+import { isSystemWindowSurface } from "../../NSE/hostComposition";
+import { WindowPresentationSlot, useWindowPresentationContent } from "../WindowPresentationContent";
+import { isNSEDOMElement, WindowLayoutContext, WindowLayoutModel } from "../../NSE/hostComposition";
 
 import React, { useCallback, useLayoutEffect, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useNSEPresenceExiting, useNSEPresentation, type PresentationSpec } from "../../NSE/Animation";
@@ -49,7 +52,6 @@ import {
 } from "../../SynCloudOS/SynCloudOS";
 import { FocusScope, useRuntimeNSEControlPort, useRuntimeNSEFocusPort, useRuntimeNSEOverlayPort, useKernelSynCloudOS } from "../../SynCloudOSReact";
 import { createTransientWindowSurfaceBridge } from "./TransientWindowSurfaceBridge";
-import { WindowChromeSlotContext } from "./windowChromeSlotContext";
 import { useWindowMoveResize } from "./useWindowMoveResize";
 import type { WindowContentRendererRegistry } from "./WindowContentRendererRegistry";
 import { PopoverWindowSurface } from "./PopoverWindowSurface";
@@ -70,6 +72,8 @@ export interface WindowHostProps {
   readonly commands: CommandSystem;
   readonly renderers: WindowContentRendererRegistry;
   readonly onDiagnostic?: (diagnostic: WindowLayerDiagnostic) => void;
+  readonly detached?: boolean;
+  readonly nativeChrome?: boolean;
 }
 
 const viewByRole: Readonly<Record<WindowRole, WindowViewRenderer>> = Object.freeze({
@@ -108,53 +112,29 @@ export function WindowHost({
   commands,
   renderers,
   onDiagnostic,
+  detached = false,
+  nativeChrome = false,
 }: WindowHostProps) {
   const runtime = useKernelSynCloudOS();
+  const sharedPresentation = useWindowPresentationContent();
   const record = useSyncExternalStore(controller.subscribe, () => controller.record, () => controller.record);
   const contentState = useSyncExternalStore(controller.subscribe, () => controller.contentState, () => controller.contentState);
   useSyncExternalStore(renderers.subscribe, () => renderers.revision, () => renderers.revision);
   const contentRendererAvailable = contentState.status === "loaded" && renderers.has(contentState.mountKey);
   const surface = contentState.status === "loaded" ? renderers.surface(contentState.mountKey) : null;
+  const systemSurface = isSystemWindowSurface(surface?.request);
   const popoverSurface = surface && (record.role === "popover" || record.role === "sheet" && surface.request.drawsBackground !== undefined) ? surface : null;
   const wasPopoverSurface = useRef(false);
   if (popoverSurface) wasPopoverSurface.current = true;
-  // The custom-titlebar slot div is rendered declaratively by the view; the
-  // host learns the node through a ref callback (raw `document` access is
-  // forbidden in Webspring surfaces). The mounted application's chrome
-  // portals into it once the node exists.
-  const [chromeSlotNode, setChromeSlotNode] = useState<HTMLDivElement | null>(null);
-  // Readiness handshake: a declared-custom window starts on complete
-  // system chrome. Only a mounted bridge that reports a live
-  // renderer promotes the window to custom chrome; renderer unmount
-  // (detached) or a crash (failed) returns it to the system titlebar, so
-  // chromeMode alone can never blank the bar. The key comparison resets the
-  // *derived* handshake synchronously without scheduling state during render;
-  // callbacks carry the key so stale bridge cleanups cannot overwrite a new
-  // controller/mode generation.
-  const chromeHandshakeKey = `${controller.id}:${record.chromeMode}`;
-  const chromeHandshakeKeyRef = React.useRef(chromeHandshakeKey);
-  chromeHandshakeKeyRef.current = chromeHandshakeKey;
-  const [chromeHandshake, setChromeHandshake] = useState(
-    () => ({ key: chromeHandshakeKey, ready: false, failed: false }),
-  );
-  const currentChromeHandshake = chromeHandshake.key === chromeHandshakeKey
-    ? chromeHandshake
-    : { key: chromeHandshakeKey, ready: false, failed: false };
-  const chromeReady = record.chromeMode === "custom" && currentChromeHandshake.ready;
-  const chromeFailed = currentChromeHandshake.failed;
-  const chromeSlot = useMemo(() => ({
-    slotElement: chromeSlotNode,
-    reportChromeReady: () => setChromeHandshake((state) => chromeHandshakeKeyRef.current === chromeHandshakeKey
-      ? { key: chromeHandshakeKey, ready: true, failed: state.key === chromeHandshakeKey && state.failed }
-      : state),
-    reportChromeDetached: () => setChromeHandshake((state) => chromeHandshakeKeyRef.current === chromeHandshakeKey
-      ? { key: chromeHandshakeKey, ready: false, failed: state.key === chromeHandshakeKey && state.failed }
-      : state),
-    reportChromeFailure: () => setChromeHandshake((state) => chromeHandshakeKeyRef.current === chromeHandshakeKey
-      ? { key: chromeHandshakeKey, ready: false, failed: true }
-      : state),
-  }), [chromeHandshakeKey, chromeSlotNode]);
-  const presentation = resolveWindowPresentation(record, screen, controller.geometryState);
+  const presentation = detached ? {
+    kind: "desktop-window" as const,
+    visible: true,
+    bounds: screen.workArea,
+    safeAreaInsets: screen.safeAreaInsets,
+    movable: false,
+    resizable: false,
+    titleBarVisible: true,
+  } : resolveWindowPresentation(record, screen, controller.geometryState);
   const compactPopover = Boolean(popoverSurface && (presentation.kind === "mobile-sheet" || popoverSurface.request.presentation?.mode === "sheet"));
   const ownsPopoverFocus = record.role === "popover" && popoverSurface !== null;
   const focusPort = useRuntimeNSEFocusPort(controller.windowResponderId);
@@ -219,8 +199,16 @@ export function WindowHost({
   const layout = useMemo(() => new WindowLayoutModel(), [controller.id]);
   useNSEDeferredDisposal(layout);
   // A host with invalid geometry is omitted and reported, so it has no bounds to lay out against.
-  useLayoutEffect(() => { layout.setLogicalScreenInsets(screen.safeAreaInsets, screen.layoutViewport); if (geometryIsValid) layout.setBounds(presentation.bounds); }, [layout, screen.safeAreaInsets, screen.layoutViewport, presentation.bounds, geometryIsValid]);
+  useLayoutEffect(() => {
+    layout.setLogicalScreenInsets(presentation.safeAreaInsets, detached ? undefined : screen.layoutViewport);
+    if (geometryIsValid) layout.setBounds(presentation.bounds);
+  }, [detached, layout, screen.layoutViewport, presentation.safeAreaInsets, presentation.bounds, geometryIsValid]);
+  const dirty = managerSnapshot.dirtyWindowControllerIds.includes(record.id);
   useLayoutEffect(() => hostRef.current ? layout.connectRoot(hostRef.current) : undefined, [layout, record.state, contentRendererAvailable]);
+  useEffect(() => {
+    if (!detached || !hostRef.current) return;
+    hostRef.current.ownerDocument.title = dirty ? `• ${record.title}` : record.title;
+  }, [detached, dirty, record.title]);
   // The window surface clips to its rounded outline, and a fixed-position
   // popup does not escape a clip-path. Menus and popovers opened from the
   // window's content mount here, beside the surface, so they can hang past
@@ -235,6 +223,7 @@ export function WindowHost({
   const lastFrameRef = useRef<{
     readonly style: React.CSSProperties;
     readonly contents: React.ReactNode;
+    readonly systemSurface: boolean;
     readonly popoverScope?: { readonly parentResponderId: string; readonly parentScopeId?: string };
   } | null>(null);
   const hostRendered = record.state === "open" &&
@@ -258,20 +247,30 @@ export function WindowHost({
     let observer: MutationObserver | null = null;
     const focusInitialControl = () => {
       const active = host.ownerDocument.activeElement;
+      const pointerOpened = host.ownerDocument.documentElement?.dataset.nseInputModality === "pointer";
+      const explicitInitial = host.querySelector<HTMLElement>(`.nse-window__content [data-nse-initial-focus]:not([disabled])`);
       const initialResponder = host.querySelector<HTMLElement>("[data-nse-view-controller][tabindex]") ?? surface;
-      const target = host.querySelector<HTMLElement>(`.nse-window__content [data-nse-initial-focus]:not([disabled])`) ??
+      if (pointerOpened && !explicitInitial) {
+        const container = initialResponder ?? host.querySelector<HTMLElement>("[data-window-surface]") ?? host;
+        if (!container.hasAttribute("tabindex")) container.tabIndex = -1;
+        if (active && host.contains(active)) { observer?.disconnect(); return true; }
+        container.focus({ preventScroll: true, focusVisible: false } as FocusOptions);
+        observer?.disconnect();
+        return true;
+      }
+      const target = explicitInitial ??
         host.querySelector<HTMLElement>(`.nse-window__content :is(${windowFocusableSelector})`) ??
         host.querySelector<HTMLElement>(windowFocusableSelector);
       if (active && host.contains(active) && active !== surface && active !== initialResponder) { observer?.disconnect(); return true; }
       if (target) {
-        target.focus({ preventScroll: true });
+        target.focus({ preventScroll: true, focusVisible: false } as FocusOptions);
         const focused = host.ownerDocument.activeElement === target || target.contains(host.ownerDocument.activeElement);
         if (focused) observer?.disconnect();
         return focused;
       }
       // A presented controller is a valid first responder even while every
       // command button is validating, including inside a modal compact sheet.
-      initialResponder?.focus({ preventScroll: true });
+      initialResponder?.focus({ preventScroll: true, focusVisible: false } as FocusOptions);
       return false;
     };
     if (!focusInitialControl()) {
@@ -294,14 +293,17 @@ export function WindowHost({
   ) {
     const lastFrame = lastFrameRef.current;
     if (!exiting || !lastFrame) return null;
+    const AppearanceBoundary = lastFrame.systemSurface ? SystemSurfaceAppearance : React.Fragment;
     // The same provider as the open frame keeps the tree's shape, so the exit
     // keeps the mounted contents rather than remounting them empty.
     return (
+      <AppearanceBoundary>
       <WindowLayoutContext.Provider value={layout}>
       <div
         ref={hostRef}
         className="webspring-window-host"
         data-window-host={record.id}
+        data-nse-system-surface={lastFrame.systemSurface ? "" : undefined}
         data-window-exiting=""
         aria-hidden
         inert
@@ -316,12 +318,12 @@ export function WindowHost({
         >{lastFrame.contents}</FocusScope> : lastFrame.contents}
       </div>
       </WindowLayoutContext.Provider>
+      </AppearanceBoundary>
     );
   }
 
   const View = viewByRole[record.role];
   const blocked = managerSnapshot.blockedWindowControllerIds.includes(record.id);
-  const dirty = managerSnapshot.dirtyWindowControllerIds.includes(record.id);
   const parentController = record.parentWindowControllerId
     ? manager.select(record.parentWindowControllerId)
     : null;
@@ -330,7 +332,9 @@ export function WindowHost({
   const parentScopeId = parentController && (parentController.record.role === "modal" || parentController.record.role === "sheet")
     ? `window:${parentController.id}`
     : undefined;
-  const hostedContent = renderers.render(contentState.mountKey, {
+  const hostedContent = sharedPresentation && record.role === "standard" && record.content.rendererId === "application"
+    ? <WindowPresentationSlot windowId={record.id} priority={detached ? 3 : 1} bridge={childTransientBridge} overlay={overlayLayerNode} />
+    : renderers.render(contentState.mountKey, {
     mountKey: contentState.mountKey,
     window: record,
     presentation,
@@ -347,14 +351,7 @@ export function WindowHost({
         </FocusScopeIdContext.Provider>
       </PopoverWindowSurface>
     : hostedContent;
-  const customChromeActive = chromeReady && !chromeFailed;
-  // The slot node must exist BEFORE the handshake can complete: the bridge
-  // needs a portal target to mount and report ready. Render it for every
-  // declared-custom window (the empty div collapses until chrome arrives);
-  // paint suppression still waits for customChromeActive.
-  const chromeSlotWanted = record.chromeMode === "custom" && !chromeFailed;
   const runtimeHostedContent = (
-    <WindowChromeSlotContext.Provider value={chromeSlot}>
       <OverlayProvider
         runtimePort={overlayPort}
         defaultParentResponderId={controller.windowResponderId}
@@ -370,7 +367,6 @@ export function WindowHost({
         </ControlRuntimeProvider>
       </TooltipProvider>
       </OverlayProvider>
-    </WindowChromeSlotContext.Provider>
   );
   const view = popoverSurface ? runtimeHostedContent : (
     <View
@@ -379,9 +375,16 @@ export function WindowHost({
       zoomed={controller.geometryState.zoomed}
       blocked={blocked}
       dirty={dirty}
-      customChromeActive={customChromeActive}
-      customTitleBarSlotRef={chromeSlotWanted ? setChromeSlotNode : undefined}
+      detached={detached}
+      nativeChrome={nativeChrome}
       dispatchCommand={(commandId, payload) => commands.dispatch(commandId, payload, { source: "toolbar" })}
+      presentationControl={sharedPresentation && record.role === "standard" && record.content.rendererId === "application" &&
+        manager.host.capabilities.separateSurfaces && presentation.kind === "desktop-window" &&
+        !record.parentWindowControllerId ? <button type="button" className="nse-window__transfer-control" data-nse-part="button" data-nse-role="transfer"
+          aria-label={detached ? "Reattach to Webspring" : "Detach Window"} data-window-transfer="" data-window-no-drag=""
+          onClick={() => { if (detached) void manager.reattach(record.id); else void manager.detach(record.id); }}>
+          {detached ? "↙" : "↗"}
+        </button> : undefined}
       moveHandleProps={moveHandleProps}
       resizeHandleProps={resizeHandleProps}
     >
@@ -401,7 +404,7 @@ export function WindowHost({
     width: Math.min(presentation.bounds.width, screen.visualViewport.width - Math.max(8, presentation.safeAreaInsets.inlineStart) - Math.max(8, presentation.safeAreaInsets.inlineEnd)),
     height: presentation.bounds.height,
   } : presentation.bounds;
-  const hostStyle: React.CSSProperties = {
+  const hostStyle: React.CSSProperties = detached ? { position: "absolute", inset: 0, zIndex: record.zIndex } : {
     position: "absolute",
     left: sheetBounds.x,
     top: sheetBounds.y,
@@ -410,10 +413,12 @@ export function WindowHost({
     zIndex: record.zIndex,
   };
   // A modal's focus scope is not kept: an exiting sheet traps nothing.
-  lastFrameRef.current = { style: hostStyle, contents: windowContents,
+  lastFrameRef.current = { style: hostStyle, contents: windowContents, systemSurface,
     ...(ownsPopoverFocus ? { popoverScope: { parentScopeId, parentResponderId: popoverSurface?.request.parentResponderId ?? parentResponderId } } : {}),
   };
+  const AppearanceBoundary = systemSurface ? SystemSurfaceAppearance : React.Fragment;
   return (
+    <AppearanceBoundary>
     <WindowLayoutContext.Provider value={layout}>
     {/* Exit fade only (no enter animation): a closing window dissolves instead
      * of cutting, so Quit-with-windows reads as one continuous exit rather
@@ -422,10 +427,11 @@ export function WindowHost({
       ref={hostRef}
       className="webspring-window-host"
       data-window-host={record.id}
+      data-nse-system-surface={systemSurface ? "" : undefined}
       aria-hidden={blocked ? true : undefined}
       onPointerDownCapture={(event) => {
         const target = event.target;
-        if (record.state === "open" && !(target instanceof Element && target.closest("[data-window-control]"))) {
+        if (record.state === "open" && !(isNSEDOMElement(target) && target.closest("[data-window-control]"))) {
           manager.makeKey(controller.id);
         }
       }}
@@ -448,5 +454,6 @@ export function WindowHost({
       ) : windowContents}
     </div>
     </WindowLayoutContext.Provider>
+    </AppearanceBoundary>
   );
 }

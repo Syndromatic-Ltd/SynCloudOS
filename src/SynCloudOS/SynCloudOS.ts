@@ -44,11 +44,10 @@ export type {
 } from "./BundleLoader/bundleTypes";
 export type {
   SynCloudOSAppAboutManifest,
-  SynCloudOSAppFrameManifest,
+  SynCloudOSPresentationMotionManifest,
   SynCloudOSAppIconManifest,
   SynCloudOSAppLifecycleManifest,
   SynCloudOSAppManifest,
-  SynCloudOSAppMenuManifest,
   SynCloudOSAppNotificationManifest,
   SynCloudOSAppPresentation,
   SynCloudOSAppSeoManifest,
@@ -57,7 +56,7 @@ export type {
   SynCloudOSAppWindowManifest,
   SynCloudOSStagePoint,
 } from "./AppRegistry/appRegistryTypes";
-export type { SynCloudOSAppFrameBackground, SynCloudOSAppFrameRightSlot, SynCloudOSAppFrameSmoothSurfaceManifest } from "./AppRegistry/appRegistryTypes";
+export type { WindowSmoothSurfaceConfiguration } from "./AppRegistry/appRegistryTypes";
 export type { SynCloudOSAppAccessPolicy } from "./ConfigurationProfiles/policyTypes";
 export type { SynCloudOSPolicySubject } from "./ConfigurationProfiles/policyTypes";
 export type { SynCloudOSConfigurationProfile, SynCloudOSConfigurationProfileSession, SynCloudOSPolicySubjectGrant } from "./ConfigurationProfiles/policyTypes";
@@ -76,6 +75,7 @@ export type {
   SynCloudOSPresentationTraits,
   SynCloudOSPresentationTraitsService,
 } from "./ResponsiveModeManager/presentationTypes";
+export { getSynCloudOSHorizontalSizeClass } from "./ResponsiveModeManager/presentationTypes";
 export type {
   RuntimeLayoutViewportSnapshot,
   RuntimeMediaQuery,
@@ -155,21 +155,13 @@ export type {
 } from "./NotificationCenter/notificationDeliveryTypes";
 export type { CapturedSynCloudOSError } from "./ErrorManager/errorTypes";
 export {
-  DESKTOP_DIAL_ITEM_LIMIT,
   EMPTY_WEBSPRING_FOLDER_CONFIGURATION,
   WEBSPRING_LAYOUT_PREFERENCE_KEY,
-  WEBSPRING_STAGE,
-  getDesktopDialAngles,
-  getDesktopWebspringSlots,
-  getDialPoint,
   getKeyboardReorderIndex,
   getOrderedVisibleWebspringApps,
   reconcileWebspringLayout,
 } from "./WebspringState/webspringStateProjection";
 export type {
-  WebspringDesktopLayout,
-  WebspringDesktopSlot,
-  WebspringDesktopSlotRegion,
   WebspringLayoutInput,
   WebspringLayoutProjection,
 } from "./WebspringState/webspringStateProjection";
@@ -204,7 +196,7 @@ export type {
 } from "./LocaleServices/localeTypes";
 export { DocumentError, DocumentNotFoundError } from "./Documents/DocumentErrors";
 export { useResolvedMode } from "./Appearance/useAppearance";
-export type { PreferencePaneDefinition, PreferencePaneRegistry, PreferencePaneViewProps } from "./Preferences";
+export type { PreferencePaneDescriptor, PreferencePaneRegistry, PreferencePaneViewProps } from "./Preferences";
 export { WEBSPRING_LAYOUT_PREFERENCE_VERSION } from "./WebspringState/webspringStateTypes";
 export type {
   SynCloudOSWebspringFolderConfiguration,

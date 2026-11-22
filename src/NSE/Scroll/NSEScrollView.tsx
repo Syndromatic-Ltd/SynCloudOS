@@ -45,6 +45,8 @@ export interface ScrollViewGeometrySnapshot {
 export interface NSEScrollViewProps extends HTMLAttributes<HTMLDivElement> {
   children?: ReactNode;
   rubberBand?: boolean;
+  /** Allow rubber-band overscroll even when content fits within the viewport. Default false. */
+  alwaysBounce?: boolean;
   rubberBandCoeff?: number;
   axis?: "y" | "x" | "both";
   horizontalScrollerPolicy?: ScrollerPolicy;
@@ -61,6 +63,7 @@ export interface NSEScrollViewProps extends HTMLAttributes<HTMLDivElement> {
 export const NSEScrollView = forwardRef<NSEScrollViewHandle, NSEScrollViewProps>(function NSEScrollView({
   children,
   rubberBand = true,
+  alwaysBounce = false,
   rubberBandCoeff = 0.55,
   axis = "y",
   horizontalScrollerPolicy = "automatic",
@@ -103,7 +106,7 @@ export const NSEScrollView = forwardRef<NSEScrollViewHandle, NSEScrollViewProps>
     setGeometry(next);
     callbacks.current.onGeometryChange?.(next);
   };
-  useNSERubberBandScroll(scrollRef, contentRef, { enabled: rubberBand, coeff: rubberBandCoeff, axis });
+  useNSERubberBandScroll(scrollRef, contentRef, { enabled: rubberBand, alwaysBounce, coeff: rubberBandCoeff, axis });
   useLayoutEffect(() => {
     const host = scrollRef.current;
     if (!host) return;

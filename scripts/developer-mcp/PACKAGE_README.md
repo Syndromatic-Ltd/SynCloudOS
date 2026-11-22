@@ -4,12 +4,14 @@
 
 ## Install
 
-The public beta is not published to the npm registry. Install the companion from the archive built alongside your SDK archive, as a development dependency of your consumer project:
+Install the SDK and the matching companion from npm:
 
 ```bash
-npm install /absolute/path/to/the-sdk-archive.tgz
-npm install --save-dev /absolute/path/to/the-mcp-archive.tgz
+npm install @syndromatic/syncloudos@beta
+npm install --save-dev @syndromatic/syncloudos-developer-mcp@beta
 ```
+
+To test an unreleased framework checkout instead, install both `.tgz` archives from the same `.artifacts/synapp-sdk/archives/` build.
 
 The companion's version **must match** the installed SDK exactly. It declares an exact-version peer dependency on `@syndromatic/syncloudos`, and the server refuses to start against a different version. Update both together.
 

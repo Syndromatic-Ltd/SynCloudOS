@@ -24,29 +24,17 @@ import React from "react";
 import { afterEach, describe, expect, it } from "vitest";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
 import type { SynCloudOSRuntime } from "../../src/SynCloudOS/Runtime/runtimeInstanceTypes";
-import { WebspringBoardView } from "../../src/Webspring/Contents/Views/WebspringBoardView/WebspringBoardView";
 import { WebspringController } from "../../src/Webspring/WebspringController";
 import * as publicApi from "../../src/Webspring/public";
-import { WebspringSurface, defineWebspring, defineWidget, webspringSurfaceStyle, type WebspringDefinition, type WebspringDefinitionInput } from "../../src/Webspring/public";
+import { WSSurface, WSWidget, webspringSurfaceStyle, type WSDefinition } from "../../src/Webspring/public";
+import { TestLauncherHost, createTestWebspring, type TestWebspringOptions } from "./webspringTestShell";
 import { createTestRuntime } from "./helpers";
 
-type Options = Partial<Pick<WebspringDefinitionInput, "background" | "widgets">>;
+type Options = Pick<TestWebspringOptions, "launcherSurface" | "shelfSurface" | "widgets">;
 
 function defineBoard(options: Options = {}) {
-  return defineWebspring({
-    manifest: {
-      schemaVersion: 1,
-      bundleIdentifier: "com.example.background",
-      version: "1.0.0",
-      displayName: "Background fixture",
-      webspringShell: {
-        views: [{ id: "board", presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
-        defaults: { desktop: "board", tablet: "board", mobile: "board" },
-        homeRoute: "/",
-        branding: { name: { key: "site.name", fallback: "Background fixture" } },
-      },
-    },
-    components: { board: WebspringBoardView },
+  return createTestWebspring({
+    info: { bundleIdentifier: "com.example.background", displayName: "Background fixture", branding: { name: { key: "site.name", fallback: "Background fixture" } } },
     ...options,
   });
 }
@@ -57,13 +45,13 @@ afterEach(async () => {
   for (const runtime of runtimes.splice(0)) await runtime.dispose({ reason: "test-complete", inFlight: "cancel" });
 });
 
-function renderBoard(shell: WebspringDefinition) {
+function renderBoard(shell: WSDefinition) {
   const runtime = createTestRuntime();
   runtimes.push(runtime);
   const controller = new WebspringController(runtime, shell, undefined);
   const view = render(
     <SynCloudOSProvider runtime={runtime}>
-      <WebspringBoardView model={controller.model(runtime.store.getSnapshot(), "mobile")} actions={controller.actions} applicationOutlet={null} folderPresentation={shell.folderPresentation} />
+      <TestLauncherHost shell={shell} model={controller.model(runtime.store.getSnapshot(), "mobile")} actions={controller.actions} />
     </SynCloudOSProvider>,
   );
   return { ...view, board: view.container.querySelector<HTMLElement>("main.webspring-board")! };
@@ -74,8 +62,8 @@ const property = (element: HTMLElement, name: string) => element.style.getProper
 describe("Board background", () => {
   it("defaults to tinted cotton with a spotlight", () => {
     const shell = defineBoard();
-    expect(shell.background.launcher).toEqual(WebspringSurface.cotton());
-    const style = webspringSurfaceStyle(WebspringSurface.cotton(), "--x") as Record<string, string>;
+    expect(shell.background.launcher).toEqual(WSSurface.cotton());
+    const style = webspringSurfaceStyle(WSSurface.cotton(), "--x") as Record<string, string>;
     expect(style["--x-colour"]).toBe("#5a6170");
     expect(style["--x-image"]).toContain("/assets/textures/NSETileCotton.jpg");
     expect(style["--x-image"]).toContain("radial-gradient");
@@ -90,14 +78,14 @@ describe("Board background", () => {
   });
 
   it("paints a flat colour with no layers when asked for a plain surface", () => {
-    const { board } = renderBoard(defineBoard({ background: { launcher: WebspringSurface.plain("#223344") } }));
+    const { board } = renderBoard(defineBoard({ launcherSurface: WSSurface.plain("#223344") }));
     expect(property(board, "--webspring-launcher-colour")).toBe("#223344");
     expect(property(board, "--webspring-launcher-image")).toBe("none");
     expect(property(board, "--webspring-launcher-overlay-image")).toBe("none");
   });
 
   it("lets a developer spread a preset and change one field", () => {
-    const launcher = { ...WebspringSurface.cotton(), vignette: false as const };
+    const launcher = { ...WSSurface.cotton(), vignette: false as const };
     const style = webspringSurfaceStyle(launcher, "--x") as Record<string, string>;
     expect(style["--x-image"]).not.toContain("radial-gradient");
     expect(style["--x-image"]).toContain("#4a6fa5");
@@ -120,19 +108,25 @@ describe("Board background", () => {
   });
 
   it("rejects surfaces it cannot paint", () => {
-    expect(() => defineBoard({ background: { launcher: { colour: "" } } })).toThrow(/colour/iu);
-    expect(() => defineBoard({ background: { launcher: { tint: { colour: "red", opacity: 2 } } } })).toThrow(/opacity/iu);
-    expect(() => defineBoard({ background: { launcher: { vignette: { edge: -1 } } } })).toThrow(/edge/iu);
-    expect(() => defineBoard({ background: { launcher: { glow: true } as never } })).toThrow(/glow/iu);
-    expect(() => defineBoard({ background: { shelf: WebspringSurface.plain("#000") } as never })).toThrow(/launcher/iu);
+    expect(() => defineBoard({ launcherSurface: { colour: "" } })).toThrow(/colour/iu);
+    expect(() => defineBoard({ launcherSurface: { tint: { colour: "red", opacity: 2 } } })).toThrow(/opacity/iu);
+    expect(() => defineBoard({ launcherSurface: { vignette: { edge: -1 } } })).toThrow(/edge/iu);
+    expect(() => defineBoard({ launcherSurface: { glow: true } as never })).toThrow(/glow/iu);
+    expect(() => defineBoard({ shelfSurface: { colour: "" } })).toThrow(/colour/iu);
   });
 });
 
 describe("Board widget shelf", () => {
-  const latest = defineWidget({ id: "latest", title: "Latest", load: async () => ["First post"] as readonly string[], view: ({ data }) => <p>{data[0]}</p>, whenEmpty: "hide" });
+  class LatestWidget extends WSWidget<readonly string[]> {
+    static override id = "latest";
+    static override title = "Latest";
+    static override whenEmpty = "hide" as const;
+    override async load() { return ["First post"] as readonly string[]; }
+    override renderView() { return <p>{this.data[0]}</p>; }
+  }
 
   it("renders no shelf element, and no shelf background, without widgets", async () => {
-    const { board } = renderBoard(defineBoard({ background: { launcher: WebspringSurface.cotton(), shelf: WebspringSurface.plain("#ff0000") } }));
+    const { board } = renderBoard(defineBoard({ launcherSurface: WSSurface.cotton(), shelfSurface: WSSurface.plain("#ff0000") }));
     await act(async () => undefined);
     expect(board.querySelector(".webspring-widget-shelf")).toBeNull();
     expect(board.querySelector("[data-widget-id]")).toBeNull();
@@ -141,7 +135,7 @@ describe("Board widget shelf", () => {
   });
 
   it("renders the shelf, on the shelf surface, when a widget is declared", async () => {
-    const { board } = renderBoard(defineBoard({ widgets: [latest], background: { launcher: WebspringSurface.cotton(), shelf: WebspringSurface.plain("#0b0d11") } }));
+    const { board } = renderBoard(defineBoard({ widgets: [LatestWidget], launcherSurface: WSSurface.cotton(), shelfSurface: WSSurface.plain("#0b0d11") }));
     await act(async () => undefined);
     const shelf = board.querySelector<HTMLElement>(".webspring-widget-shelf");
     expect(shelf).not.toBeNull();
@@ -153,16 +147,22 @@ describe("Board widget shelf", () => {
 describe("removed content APIs", () => {
   it("are no longer exported or accepted", () => {
     expect(Object.keys(publicApi)).not.toContain("LowerContentShelfView");
-    expect(Object.keys(publicApi)).toEqual(expect.arrayContaining(["defineWidget", "WebspringSurface"]));
+    expect(Object.keys(publicApi)).toEqual(expect.arrayContaining(["WSWidget", "WSSurface"]));
     expect(defineBoard()).not.toHaveProperty("content");
   });
 
-  it("require widgets to come from defineWidget", () => {
-    expect(() => defineBoard({ widgets: [{ id: "latest" }] as never })).toThrow(/defineWidget/u);
+  it("require widgets to extend WSWidget", () => {
+    expect(() => defineBoard({ widgets: [{ id: "latest" }] as never })).toThrow(/WSWidget/u);
     expect(() => defineBoard({ widgets: [latestWidget("a"), latestWidget("a")] })).toThrow(/duplicate/iu);
   });
 });
 
 function latestWidget(id: string) {
-  return defineWidget({ id, title: id, load: () => [] as readonly string[], view: () => null, whenEmpty: "hide" });
+  return class extends WSWidget<readonly string[]> {
+    static override id = id;
+    static override title = id;
+    static override whenEmpty = "hide" as const;
+    override load() { return [] as readonly string[]; }
+    override renderView() { return null; }
+  };
 }

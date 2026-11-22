@@ -19,11 +19,32 @@ export function createNSEThemeContract(rendered, vocabulary, colours) {
       variants: Object.fromEntries([...entry.variants].sort(([a], [b]) => a.localeCompare(b, "en")).map(([name, values]) => [name, sorted(values)])),
     }])),
     colours: [...colours],
+    customProperties: {
+      "--nse-bezel-colour": ["button", "pop-up-button"],
+      "--nse-content-tint-colour": ["button", "pop-up-button"],
+      "--nse-background-tint-colour": ["toolbar-item"],
+      "--nse-selected-segment-bezel-colour": ["segmented-control"],
+      "--nse-box-fill": ["box"],
+      "--nse-box-border-colour": ["box"],
+    },
     appearance: { "colour-scheme-resolved": ["light", "dark"], contrast: ["normal", "high", "forced"], transparency: ["normal", "reduced"] },
     navigation: { compact: { placement: ["block-start", "block-end"], flow: ["in-flow", "overlay"] }, regular: { placement: ["source-list", "block-start"], flow: ["in-flow", "overlay"] } },
     presentation: { login: ["plain", "ornamented"], notifications: ["plain", "sliced-3d"], materialLighting: ["off", "on"] },
-    limits: { minimumHitTarget: { regular: 24, large: 24 }, visibleFocusIndicator: true, reducedMotion: true, semanticProperties: ["display", "visibility", "content"], forbiddenProperties: ["animation", "transition", "font", "font-family", "font-size", "font-weight", "line-height", "letter-spacing"] },
-    renamedFrom: { "toolbar.root": "toolbar.background", "circular-slider": "slider[slider-type=circular]", "slider-field": "slider[slider-type=linear]", "ruler": "ruler-view", "scroll-view-frame": "scroll-view", "toolbar-configuration-sheet": "toolbar-customisation-palette", "calendar": "date-picker[date-picker-elements=yearMonthDay]", "time-picker": "date-picker[date-picker-elements=hourMinute]", "date-time-picker": "date-picker[date-picker-elements=yearMonthDay hourMinute]", "date-range-picker": "date-picker[date-picker-mode=range]", "route-picker": "route-picker-view", "file-panel": "save-panel" },
+    appThemeControls: ["window", "toolbar", "toolbar-item", "tab-view", "segmented-control", "split-view", "menu", "menu-item", "popover"],
+    structuralParts: [
+      "font-panel.font-file-input",
+      "login-window.effects",
+      "notification-banner.effects",
+      "split-view.split-pane",
+      "split-view.split-pane-slot",
+      "toolbar.flexible-space",
+      "toolbar.space",
+      "window.window-fitting-content",
+    ],
+    motion: { roles: ["standard", "control", "selection", "presentation", "dismissal", "scrollBoundary"], properties: ["duration", "easing"], timing: ["spring", "timingFunction"] },
+    typography: { properties: ["font", "font-*", "line-height", "letter-spacing", "word-spacing", "text-transform"], fontFormats: ["woff2"] },
+    limits: { minimumHitTarget: { regular: 24, large: 24 }, visibleFocusIndicator: true, reducedMotion: true, semanticProperties: ["display", "visibility", "content"], forbiddenProperties: ["animation"] },
+    renamedFrom: { "toolbar.root": "toolbar.background", "circular-slider": "slider[slider-type=circular]", "slider-field": "slider[slider-type=linear]", "ruler": "ruler-view", "scroll-view-frame": "scroll-view", "toolbar-configuration-sheet": "toolbar-customisation-palette", "calendar": "date-picker[date-picker-elements=yearMonthDay]", "time-picker": "date-picker[date-picker-elements=hourMinute]", "date-time-picker": "date-picker[date-picker-elements=yearMonthDay hourMinute]", "date-range-picker": "date-picker[date-picker-mode=range]", "route-picker": "route-picker-view", "file-panel": "save-panel", "app-view-chrome": "window[presentation=stage]" },
   };
 }
 /** Read the reviewed result; the drift gate compares it with a fresh render. */
@@ -63,15 +84,26 @@ export function renderNSEThemeContractMarkdown(contract) {
       lines.push("- Variants:");
       for (const [variant, values] of variants) lines.push("  - " + tick("data-nse-" + variant) + ": " + list(values));
     }
+    if (name === "window" && entry.parts.includes("document")) lines.push("- Mark a document region in custom window content with `data-nse-part=\"document\"` so its titles can be distinguished from window chrome.");
     lines.push("");
   }
   lines.push("## Colours", "", "Each name is a key of " + tick("colours.light") + " and " + tick("colours.dark") + " in " + tick("Theme.json") + ".", "", list(contract.colours), "");
-  lines.push("## Appearance attributes", "");
+  lines.push("## Control custom properties", "", "Themes can read these properties when an instance supplies a colour.", "");
+  for (const [property, controls] of Object.entries(contract.customProperties)) lines.push("- " + tick(property) + " applies to " + list(controls));
+  lines.push("", "## Appearance attributes", "");
   for (const [name, values] of Object.entries(contract.appearance)) lines.push("- " + tick("data-nse-" + name) + ": " + list(values));
   lines.push("", "## Navigation and presentation", "");
   for (const [size, entry] of Object.entries(contract.navigation)) lines.push("- " + tick("navigation." + size) + ": placement " + list(entry.placement) + "; flow " + list(entry.flow));
   for (const [name, values] of Object.entries(contract.presentation)) lines.push("- " + tick("presentation." + name) + ": " + list(values));
-  lines.push("", "## Limits", "");
+  lines.push("", "## Typography", "",
+    "Themes can set " + list(contract.typography.properties) + ". Drawing a part resets its underlying paint and typography for that state. Omitted inherited typography properties take their values from the parent.",
+    "", "Use `@font-face` with " + list(contract.typography.fontFormats) + " files under `Resources/` and a package-local `url()`.", "",
+    "## Motion", "",
+    "Each role in " + tick("motion") + " of " + tick("Theme.json") + " is a spring, " + tick("{ \"duration\", \"bounce\" }") + ", or a curve, " + tick("{ \"duration\", \"timingFunction\": [x1, y1, x2, y2] }") + ". A role the theme omits takes Atmo's timing.", "",
+    "Roles: " + list(contract.motion.roles) + ".", "",
+    "Transitions use only " + tick("var(--nse-motion-<role>-duration)") + " and " + tick("var(--nse-motion-<role>-easing)") + " for their timing, with roles in kebab case such as " + tick("scroll-boundary") + ". Literal durations, delays and easings are rejected. Reduced motion makes every duration zero.", "",
+    "## App theme controls", "", list(contract.appThemeControls), "",
+    "## Structural parts", "", "Non-paintable layout wrappers, spacers and hidden inputs excluded from theme paint coverage warnings.", "", list(contract.structuralParts ?? []), "", "## Limits", "");
   for (const [name, value] of Object.entries(contract.limits)) {
     const text = Array.isArray(value) ? list(value) : value && typeof value === "object" ? Object.entries(value).map(([key, item]) => key + " " + item).join(", ") : String(value);
     lines.push("- " + tick(name) + ": " + text);

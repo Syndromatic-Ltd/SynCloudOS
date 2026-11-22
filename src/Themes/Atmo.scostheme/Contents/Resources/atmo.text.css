@@ -106,7 +106,9 @@
 :scope [data-nse-part="cancel"]:where([data-nse-control="search-field"]>[data-nse-part="bezel"]>*)[data-nse-part="cancel"],
 :scope:is([data-nse-part="cancel"]:where([data-nse-control="search-field"]>[data-nse-part="bezel"]>*)[data-nse-part="cancel"]),
 :scope[data-nse-part="cancel"]:where([data-nse-control="search-field"]>[data-nse-part="bezel"]>*)[data-nse-part="cancel"] {
-  background-image:url(data:image/svg+xml,<svg\ xmlns=\"http://www.w3.org/2000/svg\"\ viewBox=\"0\ 0\ 43\ 42\"><defs><linearGradient\ id=\"s\"\ x1=\"0\"\ y1=\"0\"\ x2=\"0\"\ y2=\"1\"><stop\ offset=\"0\"\ stop-color=\"%23ffffff\"\ stop-opacity=\"0.55\"/><stop\ offset=\"0.5\"\ stop-color=\"%23ffffff\"\ stop-opacity=\"0.08\"/><stop\ offset=\"1\"\ stop-color=\"%23ffffff\"\ stop-opacity=\"0.18\"/></linearGradient></defs><circle\ cx=\"21.5\"\ cy=\"21\"\ r=\"20\"\ fill=\"url\(%23s\)\"\ stroke=\"rgba\(0,0,0,0.35\)\"\ stroke-width=\"1.5\"/><path\ d=\"M14.5\ 14\ L28.5\ 28\ M28.5\ 14\ L14.5\ 28\"\ stroke=\"rgba\(255,255,255,0.9\)\"\ stroke-width=\"3.6\"\ stroke-linecap=\"round\"/></svg>);
+  background-image:var(--nse-image-search-field-cancel, image-set(url("./controls/search-field-cancel.svg") 1x, url("./controls/search-field-cancel@2x.svg") 2x));
+  /* Atmo paints the cross, so the framework's fallback glyph stays unseen. */
+  color:transparent;
 }
 
 :scope [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*),
@@ -121,7 +123,7 @@
 :scope [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*),
 :scope:is([data-nse-part="bezel"]:where([data-nse-control="search-field"]>*)),
 :scope[data-nse-part="bezel"]:where([data-nse-control="search-field"]>*) {
-  border-width:0 25px;
+  border-width:0 calc(var(--nse-control-height, 50px) / 2);
   border-image:var(--nse-atmo-svg-si-only-up)0 25 0 25 fill stretch;
   padding:0 8px;
   background:none;
@@ -131,7 +133,7 @@
 :scope [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*) [data-nse-part="field"],
 :scope:is([data-nse-part="bezel"]:where([data-nse-control="search-field"]>*)) [data-nse-part="field"],
 :scope[data-nse-part="bezel"]:where([data-nse-control="search-field"]>*) [data-nse-part="field"] {
-  height:50px;
+  height:var(--nse-control-height, 50px);
   padding:0 3px;
   color:#d6d9dc;
   caret-color:#eef2f5;
@@ -145,19 +147,52 @@
   opacity:1;
 }
 
-:scope [data-nse-control="search-field"]:focus-within [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*),
-:scope:is([data-nse-control="search-field"]:focus-within) [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*),
-:scope[data-nse-control="search-field"]:focus-within [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*) {
-  border-width:0 25px;
-  border-image:var(--nse-atmo-svg-si-only-focus)0 25 0 25 fill stretch;
-  background:none;
+/* Focus fades in: the lit pill art on ::after over the resting one, and the ring on ::before.
+   Both reach out over the cap borders; the ring sits 8% in to hug the drawn pill edge. */
+:scope [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*),
+:scope:is([data-nse-part="bezel"]:where([data-nse-control="search-field"]>*)),
+:scope[data-nse-part="bezel"]:where([data-nse-control="search-field"]>*) {
+  position:relative;
+  isolation:isolate;
 }
 
-:scope [data-nse-control="search-field"]:not([data-nse-enabled="false"]):focus-within [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*),
-:scope:is([data-nse-control="search-field"]:not([data-nse-enabled="false"]):focus-within) [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*),
-:scope[data-nse-control="search-field"]:not([data-nse-enabled="false"]):focus-within [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*) {
+:scope [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*)::before,
+:scope:is([data-nse-part="bezel"]:where([data-nse-control="search-field"]>*))::before,
+:scope[data-nse-part="bezel"]:where([data-nse-control="search-field"]>*)::before,
+:scope [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*)::after,
+:scope:is([data-nse-part="bezel"]:where([data-nse-control="search-field"]>*))::after,
+:scope[data-nse-part="bezel"]:where([data-nse-control="search-field"]>*)::after {
+  content:"";
+  position:absolute;
+  pointer-events:none;
+  opacity:0;
+}
+
+:scope [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*)::before,
+:scope:is([data-nse-part="bezel"]:where([data-nse-control="search-field"]>*))::before,
+:scope[data-nse-part="bezel"]:where([data-nse-control="search-field"]>*)::before {
+  inset:calc(var(--nse-control-height, 50px) * 0.08) calc(var(--nse-control-height, 50px) * -0.42);
   border-radius:999px;
   box-shadow:var(--nse-atmo-focus-ring);
+}
+
+:scope [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*)::after,
+:scope:is([data-nse-part="bezel"]:where([data-nse-control="search-field"]>*))::after,
+:scope[data-nse-part="bezel"]:where([data-nse-control="search-field"]>*)::after {
+  z-index:-1;
+  inset:0 calc(var(--nse-control-height, 50px) / -2);
+  border:0 solid transparent;
+  border-width:0 calc(var(--nse-control-height, 50px) / 2);
+  border-image:var(--nse-atmo-svg-si-only-focus)0 25 0 25 fill stretch;
+}
+
+:scope [data-nse-control="search-field"]:not([data-nse-enabled="false"]):focus-within [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*)::before,
+:scope:is([data-nse-control="search-field"]:not([data-nse-enabled="false"]):focus-within) [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*)::before,
+:scope[data-nse-control="search-field"]:not([data-nse-enabled="false"]):focus-within [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*)::before,
+:scope [data-nse-control="search-field"]:not([data-nse-enabled="false"]):focus-within [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*)::after,
+:scope:is([data-nse-control="search-field"]:not([data-nse-enabled="false"]):focus-within) [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*)::after,
+:scope[data-nse-control="search-field"]:not([data-nse-enabled="false"]):focus-within [data-nse-part="bezel"]:where([data-nse-control="search-field"]>*)::after {
+  opacity:1;
 }
 
 :scope [data-nse-control="ruler-view"] [data-nse-part="title"]:where([data-nse-control="slider"]>*),
@@ -175,7 +210,7 @@
   gap:4px 6px;
   inline-size:100%;
   min-inline-size:0;
-  min-block-size:50px;
+  min-block-size:var(--nse-control-height, 50px);
   padding:8px 16px;
   color:var(--nse-atmo-field-ink,#111820);
 }
@@ -352,8 +387,8 @@
   block-size:calc(var(--nse-control-height,50px)*0.34);
   margin-inline-start:2px;
   background:#8d9399;
-  -webkit-mask:url(data:image/svg+xml,%3Csvg\ xmlns=\'http://www.w3.org/2000/svg\'\ viewBox=\'0\ 0\ 16\ 16\'%3E%3Ccircle\ cx=\'6.6\'\ cy=\'6.6\'\ r=\'4.6\'\ fill=\'none\'\ stroke=\'%23000\'\ stroke-width=\'2\'/%3E%3Cpath\ d=\'M10\ 10l4.2\ 4.2\'\ stroke=\'%23000\'\ stroke-width=\'2.4\'\ stroke-linecap=\'round\'/%3E%3C/svg%3E)center/contain no-repeat;
-  mask:url(data:image/svg+xml,%3Csvg\ xmlns=\'http://www.w3.org/2000/svg\'\ viewBox=\'0\ 0\ 16\ 16\'%3E%3Ccircle\ cx=\'6.6\'\ cy=\'6.6\'\ r=\'4.6\'\ fill=\'none\'\ stroke=\'%23000\'\ stroke-width=\'2\'/%3E%3Cpath\ d=\'M10\ 10l4.2\ 4.2\'\ stroke=\'%23000\'\ stroke-width=\'2.4\'\ stroke-linecap=\'round\'/%3E%3C/svg%3E)center/contain no-repeat;
+  -webkit-mask:var(--nse-image-search-field-magnifier, image-set(url("./controls/search-field-magnifier.svg") 1x, url("./controls/search-field-magnifier@2x.svg") 2x)) center/contain no-repeat;
+  mask:var(--nse-image-search-field-magnifier, image-set(url("./controls/search-field-magnifier.svg") 1x, url("./controls/search-field-magnifier@2x.svg") 2x)) center/contain no-repeat;
 }
 
 :scope [data-nse-control="search-field"]:is(:focus-within,[data-nse-value-state="populated"]:where(:not([data-nse-enabled="false"],[data-nse-editable="false"]))) [data-nse-part="image"]:where([data-nse-control="search-field"]>[data-nse-part="bezel"]>*),
@@ -386,4 +421,64 @@
 :scope:is([data-nse-colour-scheme-resolved="dark"]):is([data-nse-control="text-field"]:where([data-nse-part="title"])[data-nse-background-style="raised"]) {
   color:#a7afba;
   text-shadow:0-1px 0 rgba(0,0,0,0.78),0 1px 0 rgba(255,255,255,0.05);
+}
+
+/* Rich text image attachments. */
+
+[data-nse-part="shadow"]:where([data-nse-part="attachment"]:where([data-nse-control="text-view"] *) *)[data-nse-shadow="contact"],
+:where(:scope):is([data-nse-part="shadow"]:where([data-nse-part="attachment"]:where([data-nse-control="text-view"] *) *)[data-nse-shadow="contact"]) {
+  background: radial-gradient(closest-side, var(--nse-shadow-colour, rgb(0 0 0 / .6)), transparent);
+  filter: blur(calc(var(--nse-shadow-blur, 20px) * .15));
+}
+
+[data-nse-part="shadow"]:where([data-nse-part="attachment"]:where([data-nse-control="text-view"] *) *)[data-nse-shadow="curved"]::before,
+:where(:scope):is([data-nse-part="shadow"]:where([data-nse-part="attachment"]:where([data-nse-control="text-view"] *) *)[data-nse-shadow="curved"])::before,
+[data-nse-part="shadow"]:where([data-nse-part="attachment"]:where([data-nse-control="text-view"] *) *)[data-nse-shadow="curved"]::after,
+:where(:scope):is([data-nse-part="shadow"]:where([data-nse-part="attachment"]:where([data-nse-control="text-view"] *) *)[data-nse-shadow="curved"])::after {
+  box-shadow: 0 calc(15px + var(--nse-shadow-offset, 0px)) calc(6px + var(--nse-shadow-blur, 10px)) var(--nse-shadow-colour, rgb(0 0 0 / .55));
+}
+
+[data-nse-part="handle"]:where([data-nse-part="attachment"]:where([data-nse-control="text-view"] *) *),
+:where(:scope):is([data-nse-part="handle"]:where([data-nse-part="attachment"]:where([data-nse-control="text-view"] *) *)) {
+  border-color: rgb(0 0 0 / .78);
+  background: #fff;
+}
+
+[data-nse-part="content"]:where([data-nse-part="attachment"]:where([data-nse-control="text-view"] *)[data-nse-selected] > *),
+:where(:scope):is([data-nse-part="content"]:where([data-nse-part="attachment"]:where([data-nse-control="text-view"] *)[data-nse-selected] > *)) {
+  outline-color: var(--nse-text-attachment-selection, #4a8fe7);
+}
+
+[data-nse-part="attachment"]:where([data-nse-control="text-view"] *)[data-nse-selected]:not(:has(> [data-nse-part="content"])),
+:where(:scope):is([data-nse-part="attachment"]:where([data-nse-control="text-view"] *)[data-nse-selected]:not(:has(> [data-nse-part="content"]))) {
+  outline-color: Highlight;
+}
+
+/* Secure field reveal glyph. */
+[data-nse-control="secure-text-field"] [data-nse-part="reveal-glyph"],
+:where(:scope):is([data-nse-control="secure-text-field"]) [data-nse-part="reveal-glyph"] {
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M1.5 9s2.8-5 7.5-5 7.5 5 7.5 5-2.8 5-7.5 5-7.5-5-7.5-5z' fill='none' stroke='%23000' stroke-width='1.6' stroke-linejoin='round'/%3E%3Ccircle cx='9' cy='9' r='2.4'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M1.5 9s2.8-5 7.5-5 7.5 5 7.5 5-2.8 5-7.5 5-7.5-5-7.5-5z' fill='none' stroke='%23000' stroke-width='1.6' stroke-linejoin='round'/%3E%3Ccircle cx='9' cy='9' r='2.4'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+[data-nse-control="secure-text-field"] [data-nse-part="reveal"][data-nse-revealed="true"] [data-nse-part="reveal-glyph"],
+:where(:scope):is([data-nse-control="secure-text-field"]) [data-nse-part="reveal"][data-nse-revealed="true"] [data-nse-part="reveal-glyph"] {
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M1.5 9s2.8-5 7.5-5 7.5 5 7.5 5-2.8 5-7.5 5-7.5-5-7.5-5z' fill='none' stroke='%23000' stroke-width='1.6' stroke-linejoin='round'/%3E%3Ccircle cx='9' cy='9' r='2.4'/%3E%3Cpath d='M3 15L15 3' stroke='%23000' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M1.5 9s2.8-5 7.5-5 7.5 5 7.5 5-2.8 5-7.5 5-7.5-5-7.5-5z' fill='none' stroke='%23000' stroke-width='1.6' stroke-linejoin='round'/%3E%3Ccircle cx='9' cy='9' r='2.4'/%3E%3Cpath d='M3 15L15 3' stroke='%23000' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+@media (forced-colors: active) {
+  [data-nse-control="secure-text-field"] [data-nse-part="reveal-glyph"],
+:where(:scope):is([data-nse-control="secure-text-field"]) [data-nse-part="reveal-glyph"] {
+    forced-color-adjust: none;
+    background: ButtonText;
+  }
+}
+
+[data-nse-part="cancel"]:where([data-nse-control="search-field"] > [data-nse-part="bezel"] > *),
+:where(:scope):is([data-nse-part="cancel"]:where([data-nse-control="search-field"] > [data-nse-part="bezel"] > *)) {
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
 }

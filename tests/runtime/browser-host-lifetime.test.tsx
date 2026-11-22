@@ -28,27 +28,16 @@ import type { SynCloudOSRuntime } from "../../src/SynCloudOS/Runtime/runtimeInst
 import type { RuntimeDisposalRegistration } from "../../src/SynCloudOS/Runtime/disposalTypes";
 import { createSynCloudOSHostContribution } from "../../src/SynCloudOS/HostContributions/hostContribution";
 import { mountSynCloudOS, type MountedSynCloudOSHost } from "../../src/SynCloudOSReact/browserRuntime";
-import { defineWebspring } from "../../src/Webspring/public";
+import { createTestLauncher, createTestWebspring } from "./webspringTestShell";
 
 vi.mock("../../src/SynCloudOS/Runtime/createSynCloudOS", { spy: true });
 // Exercise the real React root, browser environment and runtime lifetime while
 // keeping this transaction test independent of product rendering and artwork.
-vi.mock("../../src/App", () => ({ App: () => <div data-testid="mounted-browser-host">Mounted host</div> }));
+vi.mock("../../src/Webspring/WebspringHost", () => ({ WebspringHost: () => <div data-testid="mounted-browser-host">Mounted host</div> }));
 
-const shell = defineWebspring({
-  manifest: {
-    schemaVersion: 1,
-    bundleIdentifier: "com.example.lifetime-shell",
-    version: "1.0.0",
-    displayName: "Lifetime shell",
-    webspringShell: {
-      views: [{ id: "site", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }],
-      defaults: { desktop: "site", tablet: "site", mobile: "site" },
-      homeRoute: "/",
-      branding: { name: { key: "site.name", fallback: "Lifetime shell" } },
-    },
-  },
-  components: { site: () => null },
+const shell = createTestWebspring({
+  info: { bundleIdentifier: "com.example.lifetime-shell", displayName: "Lifetime shell", branding: { name: { key: "site.name", fallback: "Lifetime shell" } } },
+  launcher: createTestLauncher(() => null, "persistent"),
 });
 
 const registrations: RuntimeDisposalRegistration[] = [];

@@ -1,0 +1,356 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+@layer nse.structure {
+.webspring-board {
+  position: relative;
+  isolation: isolate;
+  min-height: 100dvh;
+  overflow-x: clip;
+  font-family: inherit;
+  font-weight: 500;
+}
+
+.webspring-board-launcher {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  /* The icons are fitted to this height, so the widget shelf, when there is one, starts below the fold. */
+  min-height: 100svh;
+  padding: max(clamp(72px, 16.5svh, 180px), var(--nse-screen-safe-area-inset-top, 0px)) max(clamp(12px, 4vw, 40px), var(--nse-screen-safe-area-inset-right, 0px)) 0 max(clamp(12px, 4vw, 40px), var(--nse-screen-safe-area-inset-left, 0px));
+  touch-action: pan-y pinch-zoom;
+}
+
+.webspring-board-material {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  /* The launcher surface, from the --webspring-launcher-* properties the Board sets from `background.launcher`. */
+  transform-origin: 50% 65%;
+  transition: opacity 420ms ease, transform 560ms cubic-bezier(.2, .82, .2, 1);
+  pointer-events: none;
+}
+
+.webspring-board-material::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.webspring-board[data-nse-state="waiting"] .webspring-board-material {
+  transform: translate3d(0, -24px, 0) scale(1.04);
+}
+
+.webspring-board[data-nse-state="holding"] .webspring-board-material {
+  transform: translate3d(0, -10px, 0) scale(1.025);
+}
+
+.webspring-board[data-nse-state="ready"] .webspring-board-material {
+  transform: none;
+}
+
+.webspring-board[data-nse-presentation="launching"] .webspring-board-material,
+.webspring-board[data-nse-presentation="covered"] .webspring-board-material {
+  transform: scale(1.06);
+}
+
+.webspring-board-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(10px, 3vw, 18px);
+  max-width: 100%;
+  font-size: clamp(20px, 5vw, 32px);
+}
+
+.webspring-board-logo {
+  width: clamp(190px, 51vw, 302px);
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.webspring-board-controls {
+  position: absolute;
+  top: max(12px, var(--nse-screen-safe-area-inset-top, 0px));
+  right: max(12px, var(--nse-screen-safe-area-inset-right, 0px));
+  z-index: 4;
+}
+
+.webspring-board-controls:not(.is-editing):not(:focus-within) {
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+/* The pages are a size container: the icon size is the smaller of what the width allows and
+   what the height allows, so a whole page of icons is visible without scrolling.
+     width term  = width / (columns × 1.5)
+     height term = (height − 14.8px × rows + 4px) / (1.64 × rows − 0.2)
+   Each row is the icon, a gap of .14 icon, a two-line label (.3 icon + 10.8px) and a row gap
+   (.2 icon + 4px), which makes 1.64 icon + 14.8px a row; the last row has no row gap.
+   The result is held between 54px and 180px. */
+.webspring-board-pages {
+  --webspring-board-columns: 4;
+  --webspring-board-rows: 4;
+  --webspring-board-icon-size: clamp(
+    54px,
+    min(
+      calc(100cqi / (var(--webspring-board-columns) * 1.5)),
+      calc((100cqh - 14.8px * var(--webspring-board-rows) + 4px) / (1.64 * var(--webspring-board-rows) - .2))
+    ),
+    180px
+  );
+  display: grid;
+  align-items: center;
+  justify-items: center;
+  flex: 1 1 0;
+  box-sizing: border-box;
+  width: 100%;
+  /* At the smallest icon size, so a short window scrolls rather than overlaps. */
+  min-height: calc(var(--webspring-board-rows) * 103.36px - 14.8px);
+  container-type: size;
+}
+
+.webspring-board-page {
+  display: grid;
+  grid-template-columns: repeat(var(--webspring-board-columns), minmax(0, 1fr));
+  align-items: start;
+  align-content: center;
+  /* The grid is as wide as its icons need: columns × 1.5 icons. */
+  width: min(100%, calc(var(--webspring-board-icon-size) * 1.5 * var(--webspring-board-columns)));
+  row-gap: calc(var(--webspring-board-icon-size) * .2 + 4px);
+}
+
+.webspring-board-slot {
+  min-width: 0;
+}
+
+.webspring-board-icon {
+  appearance: none;
+  display: grid;
+  width: 100%;
+  justify-items: center;
+  align-content: start;
+  gap: calc(var(--webspring-board-icon-size) * .14);
+  min-width: 0;
+  margin: 0;
+  padding: 0 2px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: unset;
+  font: inherit;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* The icon and its label move together through the entrance and launch. */
+.webspring-board-icon-artwork {
+  display: grid;
+  justify-items: center;
+  gap: calc(var(--webspring-board-icon-size) * .14);
+  width: 100%;
+  min-width: 0;
+  transform-origin: 50% calc(var(--webspring-board-icon-size) / 2);
+}
+
+.webspring-board-icon-well {
+  line-height: 0;
+}
+
+.webspring-board-icon:focus-visible {
+  outline-width: 2px;
+  outline-style: solid;
+  outline-offset: 6px;
+}
+
+.webspring-board-icon-well {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--webspring-board-icon-size);
+  aspect-ratio: 1;
+}
+
+.webspring-board-icon-well > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: filter 140ms ease, transform 180ms ease;
+}
+
+/* Artwork, initial and loading spinner share one cell: the spinner sits on
+   the icon, which dims beneath it in its own shape. */
+.webspring-board-icon-well > img,
+.webspring-board-icon-well > span[aria-hidden="true"],
+.webspring-board-icon-well > .webspring-folder-tile,
+.webspring-board-icon-well > [data-nse-control="progress-indicator"]:where([data-nse-style="spinning"]) {
+  grid-area: 1 / 1;
+}
+
+/* An app a dragged app rests on swells to take it in. */
+.webspring-board-icon-well[data-nse-highlighted] > img {
+  transform: scale(1.12);
+}
+
+.webspring-board-icon-well > [data-nse-control="progress-indicator"]:where([data-nse-style="spinning"]) {
+  z-index: 2;
+  place-self: center;
+}
+
+.webspring-board-icon[data-nse-enabled="false"] {
+  cursor: not-allowed;
+}
+
+.webspring-board-icon-label {
+  position: relative;
+  z-index: 1;
+  max-width: 100%;
+  /* Grows with the icon: 12px at the smallest, 18px from about 108px up. */
+  font-size: min(calc(var(--webspring-board-icon-size) * .125 + 4.5px), 18px);
+  font-weight: 400;
+  line-height: 1.2;
+  text-align: center;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+  /* Two lines at most, so a row is never taller than the size the icon was fitted to. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+/* Edit mode's wiggle: to -1.2deg and 1.2deg and back over 0.22 s, then a
+   0.08 s rest. */
+.webspring-board-icon[data-nse-style="editing"]:not([data-nse-state="dragging"]) {
+  animation: webspring-board-icon-wiggle 300ms ease-in-out infinite;
+}
+
+@keyframes webspring-board-icon-wiggle {
+  0%, 73.33%, 100% { transform: rotate(0deg); }
+  24.44% { transform: rotate(-1.2deg); }
+  48.89% { transform: rotate(1.2deg); }
+}
+
+.webspring-board[data-reduced-motion="true"] .webspring-board-icon {
+  animation: none;
+}
+
+.webspring-board-page-controls {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 12px;
+}
+
+.webspring-board-page-controls button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.webspring-board-page-controls button:focus-visible {
+  outline-width: 2px;
+  outline-style: solid;
+}
+
+.webspring-board-page-controls button::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+/* The widget shelf (see WSWidgetShelfView.css) rises into place after the icons. */
+.webspring-board .webspring-widget-shelf {
+  min-height: 26svh;
+  border-top-width: 2px;
+  border-top-style: solid;
+  transform: none;
+  transition: opacity 420ms ease, transform 560ms cubic-bezier(.2, .82, .2, 1);
+}
+
+.webspring-board[data-nse-state="waiting"] .webspring-widget-shelf {
+  transform: translate3d(0, 24px, 0);
+}
+
+.webspring-board[data-nse-state="holding"] .webspring-widget-shelf {
+  transform: translate3d(0, 10px, 0);
+}
+
+.webspring-board[data-nse-state="ready"] .webspring-widget-shelf {
+  transform: none;
+}
+
+/* The icon that follows the pointer matches the icon it was lifted from: the Board sets
+   --webspring-drag-proxy-icon-size to that icon's measured size. 76px applies to icons it cannot measure. */
+body:has(.webspring-board) > .webspring-drag-proxy {
+  --webspring-drag-proxy-icon-size: 76px;
+  width: calc(var(--webspring-drag-proxy-icon-size) * 1.3);
+  font-family: inherit;
+  font-weight: 500;
+}
+
+body:has(.webspring-board) > .webspring-drag-proxy img {
+  width: var(--webspring-drag-proxy-icon-size);
+  height: auto;
+  aspect-ratio: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .webspring-board *,
+  .webspring-board *::before,
+  .webspring-board *::after {
+    animation-duration: .001ms !important;
+    transition-duration: .001ms !important;
+  }
+
+  .webspring-board .webspring-board-icon {
+    animation-name: none !important;
+  }
+
+  .webspring-board .webspring-board-material,
+  .webspring-board .webspring-widget-shelf {
+    transform: none !important;
+    transition-property: opacity !important;
+  }
+}
+
+.webspring-board[data-reduced-motion="true"] .webspring-board-material,
+.webspring-board[data-reduced-motion="true"] .webspring-widget-shelf {
+  transform: none !important;
+  transition: opacity .12s ease !important;
+}
+}

@@ -17,6 +17,7 @@
   },
   "include": [
     "vitest.config.ts",
+    "vitest.packaging.config.ts",
     "playwright.config.ts"
   ]
 }

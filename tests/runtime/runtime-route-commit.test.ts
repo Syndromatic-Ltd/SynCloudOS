@@ -48,7 +48,7 @@ describe("canonical route commit authority", () => {
     let entered = false;
     let hookSignal: AbortSignal | undefined;
     const did = vi.fn();
-    const runtime = fixture([createTestBundle({ bundleIdentifier: "com.example.held-window", presentation: "windowedView" }, {
+    const runtime = fixture([createTestBundle({ bundleIdentifier: "com.example.held-window", presentation: "window" }, {
       lifecycleHooks: { launch: {
         will: ({ signal }) => new Promise<void>((resolve) => {
           entered = true;

@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { SystemSurfaceAppearance } from "../NSE/hostComposition";
 import { nseControlHooks } from "../NSE/NSE";
 import { useNSEThemeInteraction } from "../NSE/hostComposition";
 import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
@@ -30,12 +31,12 @@ import {
   type TransformComponents,
 } from "../NSE/Animation";
 import type { AFXAnimationTiming } from "../FX/AnimationFX/animationTypes";
-import { WebspringIconEffect } from "./WebspringIconEffect";
+import { WSIconEffect } from "./WSIconEffect";
 import { Badge, IconWell, LoadingSpinner } from "../NSE/NSE";
 import { useNSEFeedback } from "../NSE/hostComposition";
 import type { SynCloudOSAppInfo, SynCloudOSAppLifecycleState } from "../SynCloudOS/SynCloudOS";
 import { FocusScope, useKernelSynCloudOS } from "../SynCloudOSReact";
-import { WebspringIconArtwork } from "./WebspringIconArtwork";
+import { WSIconArtwork } from "./WSIconArtwork";
 import {
   getQuickSwitchInitialIndex,
   getQuickSwitchMnemonic,
@@ -180,7 +181,7 @@ export function WebspringQuickSwitchView({
     if (!app || app.isDisabled || lifecycle[normalizeBundleIdentifier(app.bundleIdentifier)] === "disabled") return;
     feedback?.trigger("medium");
     onClose();
-    void runtime.commands.dispatch("workspace.openApp", { appId: app.bundleIdentifier }, { source: "keyboard" });
+    void runtime.commands.dispatch("workspace.openApp", { appId: app.bundleIdentifier }, { responderId: "workspace", source: "keyboard" });
   }, [apps, lifecycle, onClose, runtime]);
 
   const handleKeyDown = useCallback((event: ReactKeyboardEvent<HTMLDivElement>) => {
@@ -245,17 +246,17 @@ export function WebspringQuickSwitchView({
     if (!app || app.isDisabled || lifecycle[normalizeBundleIdentifier(app.bundleIdentifier)] === "disabled") return;
     feedback?.trigger("medium");
     onClose();
-    void runtime.commands.dispatch("workspace.openApp", { appId: app.bundleIdentifier }, { source: "menu" });
+    void runtime.commands.dispatch("workspace.openApp", { appId: app.bundleIdentifier }, { responderId: "workspace", source: "menu" });
   }
 
-  return (
+  return <SystemSurfaceAppearance>
     <Presence>
       {open ? (
         <FocusScope scopeId={`quickswitch:${quickSwitchId}`} kind="popover" parentResponderId="webspring">
         <QuickSwitchSurface
           surfaceRef={rootRef}
           motion={reducedMotion ? quickSwitchMotion.reduced : quickSwitchMotion.standard}
-          data-nse-control="quick-switch" data-nse-part="background" className="webspring-quickswitch"
+          data-nse-control="quick-switch" data-nse-part="background" data-nse-system-surface="" className="webspring-quickswitch"
           role="dialog"
           aria-label={locale.t("quickswitch.ariaLabel", "QuickSwitch")}
           aria-modal="false"
@@ -276,7 +277,7 @@ export function WebspringQuickSwitchView({
             aria-activedescendant={activeOptionId}
             tabIndex={0}
             ref={listRef}
-            data-overflowing={overflowing ? "true" : undefined}
+            data-nse-type={overflowing ? "overflowing" : undefined}
           >
             {apps.map((app, index) => {
               const state = lifecycle[normalizeBundleIdentifier(app.bundleIdentifier)];
@@ -319,8 +320,8 @@ export function WebspringQuickSwitchView({
                   onClick={() => openApp(index)}
                 >
                   <IconWell active={selected}>
-                    <WebspringIconEffect active={selected || opened} subtle={!selected} className="webspring-quickswitch-icon-effect" />
-                    <WebspringIconArtwork src={app.icon.src} />
+                    <WSIconEffect active={selected || opened} subtle={!selected} className="webspring-quickswitch-icon-effect" />
+                    <WSIconArtwork src={app.icon.src} />
                     {loading ? (
                       <LoadingSpinner
                         label={locale.t("apps.loading", "Loading {app}", { app: appName })}
@@ -337,7 +338,7 @@ export function WebspringQuickSwitchView({
         </FocusScope>
       ) : null}
     </Presence>
-  );
+  </SystemSurfaceAppearance>;
 }
 
 function QuickSwitchItem({ selected, ...attributes }: ComponentProps<"button"> & { selected: boolean }) {

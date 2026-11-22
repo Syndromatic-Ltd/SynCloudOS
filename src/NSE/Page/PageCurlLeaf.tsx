@@ -168,7 +168,7 @@ export const PageCurlLeaf = forwardRef<PageHandle, PageProps>(function PageCurlL
   // stands in for the front so heavy fronts don't mount twice.
   const ghostContent = backGhost === true ? frontContent : backGhost === false || backGhost == null ? null : backGhost;
   const flapContent = back ?? (ghostContent != null ? (
-    <div className="nse-page__curl-ghost" aria-hidden="true">
+    <div className="nse-page__curl-ghost" data-nse-part="face" data-nse-role="page-ghost" aria-hidden="true">
       {ghostContent}
     </div>
   ) : null);
@@ -256,6 +256,18 @@ export const PageCurlLeaf = forwardRef<PageHandle, PageProps>(function PageCurlL
       ref={page.rootRef}
       role={role}
       className={classes("nse-page", page.preset.className, className)}
+      data-nse-control="page-controller"
+      data-nse-part="attachment"
+      data-nse-style={page.geometry.mode}
+      data-nse-state={page.geometry.phase === "canceling" ? "cancelling" : page.geometry.phase}
+      data-nse-role={page.preset.name}
+      data-nse-type={isRolled && !page.geometry.reduced ? curlSurface.renderer : undefined}
+      data-nse-presentation={bookSurfaceActive ? "book" : curlSurface.active ? "rendered" : undefined}
+      data-nse-flow={isBookTurn ? "book" : undefined}
+      data-nse-value-state={page.geometry.torn ? "torn" : undefined}
+      data-nse-tracking={isCurling ? "" : undefined}
+      data-nse-orientation={page.geometry.axis === "x" ? "horizontal" : "vertical"}
+      data-nse-edge={page.geometry.edge}
       data-nse-page="true"
       data-mode={page.geometry.mode}
       data-edge={page.geometry.edge}
@@ -287,7 +299,7 @@ export const PageCurlLeaf = forwardRef<PageHandle, PageProps>(function PageCurlL
       {insideContent != null ? (
         <div
           ref={insideRef}
-          className={classes("nse-page__inside", insideClassName)}
+          className={classes("nse-page__inside", insideClassName)} data-nse-part="content" data-nse-role="page-leaf"
           data-interactive={insideVisible ? "true" : "false"}
           aria-hidden={insideVisible ? undefined : true}
           style={insideStyle}
@@ -295,7 +307,7 @@ export const PageCurlLeaf = forwardRef<PageHandle, PageProps>(function PageCurlL
           {insideContent}
         </div>
       ) : null}
-      <div className={classes("nse-page__cast-shadow", shadowClassName)} aria-hidden="true"
+      <div className={classes("nse-page__cast-shadow", shadowClassName)} data-nse-part="shadow" data-nse-role="page-leaf" aria-hidden="true"
         style={bookSurfaceActive ? {
           "--nse-page-book-shadow-x": `${page.geometry.edge === "right"
             ? Math.max(...bookStrips.map(strip => strip.outer.x))
@@ -317,7 +329,7 @@ export const PageCurlLeaf = forwardRef<PageHandle, PageProps>(function PageCurlL
               }}
             >
               <div
-                className="nse-page__book-strip-face nse-page__book-strip-face--front"
+                className="nse-page__book-strip-face nse-page__book-strip-face--front" data-nse-part="face" data-nse-role="page-strip" data-nse-position="front"
                 style={{
                   width: strip.renderWidth,
                   transform: strip.frontFaceTransform,
@@ -327,7 +339,7 @@ export const PageCurlLeaf = forwardRef<PageHandle, PageProps>(function PageCurlL
                 }}
               />
               <div
-                className="nse-page__book-strip-face nse-page__book-strip-face--back"
+                className="nse-page__book-strip-face nse-page__book-strip-face--back" data-nse-part="face" data-nse-role="page-strip" data-nse-position="back"
                 style={{
                   width: strip.renderWidth,
                   transform: strip.backFaceTransform,
@@ -340,18 +352,18 @@ export const PageCurlLeaf = forwardRef<PageHandle, PageProps>(function PageCurlL
           ))}
         </div>
       ) : null}
-      <div className={classes("nse-page__sheet", sheetClassName)} aria-hidden={bookSurfaceActive ? true : undefined} style={sheetStyle}>
-        <div className="nse-page__backstop" aria-hidden="true" />
-        <div ref={frontFaceRef} className={classes("nse-page__face", "nse-page__face--front", frontClassName)} style={frontStyle}>
+      <div className={classes("nse-page__sheet", sheetClassName)} data-nse-part="sheet" data-nse-role="page-leaf" aria-hidden={bookSurfaceActive ? true : undefined} style={sheetStyle}>
+        <div className="nse-page__backstop" data-nse-part="backdrop" data-nse-role="page-leaf" aria-hidden="true" />
+        <div ref={frontFaceRef} className={classes("nse-page__face", "nse-page__face--front", frontClassName)} data-nse-part="face" data-nse-role="page-leaf" data-nse-position="front" style={frontStyle}>
           {frontContent}
         </div>
         {isRolled ? (
           <>
-            <div className="nse-page__curl-shadow" aria-hidden="true" />
-            <div className="nse-page__curl-carrier" aria-hidden="true" inert>
+            <div className="nse-page__curl-shadow" data-nse-part="shadow" data-nse-role="page-fold" aria-hidden="true" />
+            <div className="nse-page__curl-carrier" data-nse-part="attachment" data-nse-role="page-fold" aria-hidden="true" inert>
             <div
               ref={curlFlapRef}
-              className={classes("nse-page__face", "nse-page__face--back", "nse-page__curl-flap", backClassName)}
+              className={classes("nse-page__face", "nse-page__face--back", "nse-page__curl-flap", backClassName)} data-nse-part="face" data-nse-role="page-leaf" data-nse-position="back" data-nse-style="fold"
               aria-hidden="true"
               style={backStyle}
             >
@@ -360,16 +372,16 @@ export const PageCurlLeaf = forwardRef<PageHandle, PageProps>(function PageCurlL
             </div>
           </>
         ) : (
-          <div className={classes("nse-page__face", "nse-page__face--back", backClassName)} aria-hidden="true" style={backStyle}>
+          <div className={classes("nse-page__face", "nse-page__face--back", backClassName)} data-nse-part="face" data-nse-role="page-leaf" data-nse-position="back" aria-hidden="true" style={backStyle}>
             {back}
           </div>
         )}
-        <div className="nse-page__edge" aria-hidden="true" />
-        <div className="nse-page__curl" aria-hidden="true" />
-        <div className="nse-page__crease" aria-hidden="true" />
-        <div className="nse-page__grain" aria-hidden="true" />
+        <div className="nse-page__edge" data-nse-part="border" data-nse-role="page-leaf" aria-hidden="true" />
+        <div className="nse-page__curl" data-nse-part="decoration" data-nse-role="page-fold" aria-hidden="true" />
+        <div className="nse-page__crease" data-nse-part="separator" data-nse-role="page-leaf" aria-hidden="true" />
+        <div className="nse-page__grain" data-nse-part="decoration" data-nse-role="page-leaf" aria-hidden="true" />
       </div>
-      {isTear ? <div className="nse-page__tear-stub" aria-hidden="true" /> : null}
+      {isTear ? <div className="nse-page__tear-stub" data-nse-part="attachment" data-nse-role="page-tear" aria-hidden="true" /> : null}
       {isTear && stubs.length ? (
         <svg
           className="nse-page__tear-stubs"
@@ -394,7 +406,7 @@ export const PageCurlLeaf = forwardRef<PageHandle, PageProps>(function PageCurlL
       {isRolled && !page.geometry.reduced ? (
         <canvas
           ref={curlSurface.canvasRef}
-          className="nse-page__curl-canvas"
+          className="nse-page__curl-canvas" data-nse-part="surface" data-nse-role="page-fold"
           aria-hidden="true"
           style={{
             left: -curlSurface.margin.left,
@@ -407,7 +419,7 @@ export const PageCurlLeaf = forwardRef<PageHandle, PageProps>(function PageCurlL
       {showDogEar ? (
         <button
           type="button"
-          className="nse-page__dogear"
+          className="nse-page__dogear" data-nse-part="button" data-nse-role="page-leaf"
           data-corner={page.geometry.corner}
           data-active={dogEarActive ? "true" : "false"}
           aria-label={dogEarLabel}

@@ -1,8 +1,8 @@
 # AuthenticationServices: optional passkeys
 
-AuthenticationServices exposes platform passkeys through `ASAuthorizationController`, following Apple's providers, registration/assertion requests and delegate. It is a separate import from system authentication. Importing the module does not inspect the browser, start authentication, install listeners or prompt. A site with `authentication: "disabled"` and an app that does not import this entry carries no passkey code.
+AuthenticationServices lets an application register and use platform passkeys through `ASAuthorizationController`, with credential providers, registration and assertion requests, and a delegate. It's imported separately from system authentication. Importing it doesn't inspect the browser, start authentication, add listeners or show a prompt, and an application that doesn't import it carries no passkey code.
 
-Passkeys prove possession of a credential to a relying-party **server**. Neither a browser credential nor an `ASAuthorization` is a verified identity or a system session. Applications may use the API for their own service without enabling system sign-in. Alternatively a site can explicitly compose a passkey method with its existing OIDC/local `AuthenticationService`.
+A passkey proves to a relying-party server that the user holds a credential. Neither a browser credential nor an `ASAuthorization` is a verified identity or a system session. An application can use the API with its own service without turning on system sign-in, and a site can add a passkey method to its existing `AuthenticationService`.
 
 ## Application sign-in
 
@@ -26,7 +26,7 @@ export async function assertionForApplicationServer(challenge: NSEDataConvertibl
 }
 ```
 
-The application obtains a fresh challenge from its own server, calls this function in response to a user action, and sends the returned standard WebAuthn JSON to that server. Only the server's response determines whether its application account is signed in. SynCloudOS stores neither private keys nor a relying-party credential database.
+The application gets a fresh challenge from its own server, calls this function in response to a user action, and sends the returned standard WebAuthn JSON back to that server. Only the server's response decides whether the user is signed in to the application's account. SynCloudOS stores no private keys and no credential database.
 
 Registration uses the same controller:
 
@@ -47,26 +47,26 @@ export async function registrationForApplicationServer(
 }
 ```
 
-`userID` is an opaque server-generated user handle of 1–64 bytes. Challenges and credential IDs must be nonempty. `NSEData`, `Uint8Array` and `ArrayBuffer` are accepted; inputs are copied. All returned byte values are immutable `NSEData`. Request option objects are captured, so modifying an input array or a later browser bridge cannot modify the request.
+`userID` is an opaque user handle from your server, 1 to 64 bytes long. Challenges and credential IDs can't be empty. Byte inputs can be `NSEData`, `Uint8Array` or `ArrayBuffer` and are copied, and every byte value returned is an immutable `NSEData`. Request options are copied too, so changing an input array afterwards can't change the request.
 
-Registration defaults to a platform authenticator, discoverable credentials (`residentKey: "required"`), user verification (`"required"`), no attestation and ES256/RS256 algorithms. Optional request options supply the display name, allowed/excluded credentials, user-verification preference and a browser timeout in milliseconds. Capability and relying-party restrictions are still enforced by the browser. Browsers without a platform authenticator can report the request as unavailable or cancelled; the framework does not promise cross-browser or physical-device support.
+Registration defaults to a platform authenticator, discoverable credentials (`residentKey: "required"`), required user verification, no attestation and the ES256 and RS256 algorithms. Request options can set the display name, allowed and excluded credentials, the user-verification preference and a browser timeout in milliseconds. The browser still enforces its own capability and relying-party rules. A browser without a platform authenticator may report the request as unavailable or cancelled, and the framework can't guarantee support on every browser and device.
 
 ## Controller and delegate
 
-The portable controller accepts exactly one registration or assertion request because WebAuthn exposes one ceremony per native call. `authorizationRequests` is a captured array. `performRequests(signal?)` returns a promise and also invokes one optional delegate completion:
+The controller takes exactly one registration or assertion request, because WebAuthn runs one ceremony per browser call. `authorizationRequests` is a copy of the array you passed. `performRequests(signal?)` returns a promise and also calls one of the optional delegate methods:
 
 - `authorizationControllerDidCompleteWithAuthorization(controller, authorization)`;
 - `authorizationControllerDidCompleteWithError(controller, error)`.
 
-`ASAuthorizationError.code` is `unknown`, `canceled`, `invalidResponse`, `notHandled` or `failed`. Insecure contexts and unsupported relying parties fail before native access where detectable. Native cancellation/denial maps to `canceled`; native error details are not copied into the public error. A null or malformed credential maps to `invalidResponse`.
+`ASAuthorizationError.code` is `unknown`, `canceled`, `invalidResponse`, `notHandled` or `failed`. An insecure context or an unsupported relying party fails before the browser is asked, where that can be detected. A cancellation or denial in the browser becomes `canceled`, without the browser's error details. A missing or malformed credential becomes `invalidResponse`.
 
-`cancel()`, an aborted caller signal or `dispose()` stops delivery immediately, even when an injected native port ignores the signal. Late native results never call the success delegate. A controller supports one in-flight ceremony; a second concurrent call rejects. Dispose it after use. The optional `ASAuthorizationBrowserPort` is an injectable host/test seam; the default discovers `navigator.credentials` lazily when a ceremony starts.
+`cancel()`, an aborted signal or `dispose()` stops delivery at once, even if an injected browser port ignores the signal, and a late result never reaches the success delegate. A controller runs one ceremony at a time, and a second call while one is running rejects. Dispose the controller after use. For hosts and tests, you can inject an `ASAuthorizationBrowserPort`; by default the controller looks up `navigator.credentials` when a ceremony starts.
 
-An assertion credential contains `credentialID`, `rawClientDataJSON`, `rawAuthenticatorData`, `signature` and nullable `userID`. A registration contains `credentialID`, `rawClientDataJSON`, `rawAttestationObject` and transports. `credential.toJSON()` encodes the standard WebAuthn response fields as unpadded base64url. Neither request opts into extensions; its JSON extension result is empty.
+An assertion credential contains `credentialID`, `rawClientDataJSON`, `rawAuthenticatorData`, `signature` and a nullable `userID`. A registration contains `credentialID`, `rawClientDataJSON`, `rawAttestationObject` and its transports. `credential.toJSON()` encodes the standard WebAuthn response fields as unpadded base64url. Neither request asks for extensions, so the extension results in the JSON are empty.
 
 ## One more system sign-in provider
 
-`createPasskeyAuthentication` is exported only by `@syndromatic/syncloudos/auth/passkey`. It composes an existing `AuthenticationService`; it does not replace its identity adapter, expiry, broadcasts, logout or server session checks. The default method is `{ id: "passkey", label: "Sign in with a passkey" }`. Other method IDs pass straight through to the existing service, so OIDC and local sign-in remain available.
+`createPasskeyAuthentication`, exported only from `@syndromatic/syncloudos/auth/passkey`, wraps an existing `AuthenticationService`. It keeps that service's identity handling, expiry, cross-tab notifications, log-out and server session checks. Its method is `{ id: "passkey", label: "Sign in with a passkey" }` unless you pass `method`. Other method IDs go straight to the wrapped service, so OIDC sign-in still works.
 
 ```ts
 import { createHttpAuthentication } from "@syndromatic/syncloudos/auth";
@@ -89,17 +89,17 @@ export function authenticationWithPasskeys(
 }
 ```
 
-The site supplies two server-backed operations:
+The site supplies two operations, both backed by its server:
 
 1. `beginAssertion({ returnPath, signal })` obtains a fresh server challenge and returns the provider's assertion request for the configured relying party.
 2. `verifyAssertion(credential, { returnPath, signal })` sends `credential.toJSON()` to the server. The server verifies it, establishes its normal HttpOnly session cookie and returns success.
 
-After verification the composition calls the existing service's `refresh()`. Sign-in completes only if that server refresh returns `authenticated` with a profile. A successful browser assertion or a successful verification callback alone cannot establish runtime authority. The wrapper exposes the **same** `sessionAdapter` object as its base service. It then navigates to the validated local return path (a host may inject `navigate`). Supply the returned service through `authentication: { policy: "optional" | "required", service }`.
+After verification, the wrapper calls the wrapped service's `refresh()`, and sign-in completes only if the server then reports `authenticated` with a profile. A successful browser assertion or verification callback on its own never signs anyone in. The wrapper exposes the same `sessionAdapter` as the wrapped service, and afterwards navigates to the validated local return path (a host can pass its own `navigate`). Pass the returned service as `authentication: { policy: "optional" | "required", service }`.
 
-The composition owns and disposes its base service by default; set `disposesService: false` only when another host owns that lifetime. Cancellation/disposal/superseding sign-in aborts the pending ceremony and prevents a late client result from refreshing identity or navigating. Network cancellation cannot retract a mutation already accepted by a server: server session creation, revocation and competing requests must follow the server's own transaction rules.
+By default the wrapper disposes the wrapped service when it's disposed; set `disposesService: false` if something else owns it. Cancelling, disposing or starting another sign-in aborts the pending ceremony, and a late result then neither refreshes the session nor navigates. Cancelling a request can't undo a change the server has already accepted, so session creation, revocation and competing requests must follow the server's own transaction rules.
 
-The built-in OIDC server handler does not implement a WebAuthn relying party. A passkey-enabled site must provide its own challenge, verification and credential-storage endpoints, with same-origin mutation protection, expected origin and RP ID, challenge binding/expiry/single-use, credential ownership, user verification and signature verification. This API does not weaken those checks, deploy a server or enable passkeys on the Syndromatic site automatically.
+The built-in OIDC server handler isn't a WebAuthn relying party. A site that offers passkeys must provide its own endpoints for challenges, verification and credential storage. Those endpoints must protect against cross-origin requests, check the expected origin and relying-party ID, bind each challenge to one use with an expiry, check that the credential belongs to the user, and verify user verification and the signature. This API doesn't relax any of those checks or deploy a server for you.
 
 ## Verification scope
 
-Focused tests exercise captured requests, Foundation byte results, malformed responses, secure-context refusal, cancellation and delegate completion through an injected credential port. Provider tests use the real HTTP authentication service against an in-memory HTTP fixture and prove that a refused/absent server session leaves identity empty. Those tests do not prove platform authenticator, browser prompt, real relying-party or physical-device acceptance. No UI is added by this module; the existing NSE sign-in view draws the extra configured method.
+The framework's tests cover copied requests, `NSEData` results, malformed responses, refusal outside a secure context, cancellation and delegate calls, using an injected credential port. The sign-in method tests run the real HTTP authentication service against an in-memory server and check that a refused or missing server session leaves nobody signed in. They don't test real platform authenticators, browser prompts, relying-party servers or devices. The module adds no interface of its own; the standard sign-in view draws the passkey method alongside the others.

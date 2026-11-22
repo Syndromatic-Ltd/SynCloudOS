@@ -1,13 +1,16 @@
 # SpeechFX
 
-SpeechFX mirrors Apple's Speech recognizer, request, task, result, transcription and delegate classes. Each class has its own file; the family entry only re-exports those types and the Apple enum cases. Declare `speech.recognize` in the app's `Info.ts` entitlements. The application compiler supplies private per-app attribution to `SPFXSpeechRecognizer`; import the public family from a real `.app` bundle. Unbound base construction explains that requirement. Objects pin the selected app session and cannot rebind after it ends.
+SpeechFX turns spoken audio into text. You create a recogniser for a locale, hand it a request that carries audio, and receive transcriptions, with timing and confidence for each segment, through a callback or a delegate. For text to speech, use `AUFXSpeechSynthesizer` in [AudioFX](audio.md) instead.
+
+Import from `@syndromatic/syncloudos/fx/speech` inside a real `.app` bundle and declare `speech.recognize` in the app's `Info.ts` entitlements. The application compiler attaches per-app attribution to `SPFXSpeechRecognizer`; constructing the unbound base class throws an error that explains this. Each object stays bound to its app session and cannot move to another once that session ends.
+
+> **Browser status.** The current browser adapter has no recognition backend. In a browser, `isAvailable` is `false`, authorisation reports `restricted`, and recognition requests fail with `SPFXError`. The API is complete so that capable hosts can supply a service; see [Browser support](#browser-support).
 
 ```ts
 import { SPFXSpeechRecognizer, SPFXSpeechAudioBufferRecognitionRequest } from "@syndromatic/syncloudos/fx/speech";
 import { AUFXAudioPCMBuffer } from "@syndromatic/syncloudos/fx/audio";
 
 const recognizer = new SPFXSpeechRecognizer(new Intl.Locale("en-GB"));
-// Request app consent from a capable service. The current browser adapter returns restricted.
 SPFXSpeechRecognizer.requestAuthorization(status => {
   if (status !== "authorized" || !recognizer.isAvailable) return;
   const request = new SPFXSpeechAudioBufferRecognitionRequest();
@@ -16,36 +19,92 @@ SPFXSpeechRecognizer.requestAuthorization(status => {
     if (error) { console.error(error.domain, error.code, error.localizedDescription); return; }
     if (result) console.log(result.bestTranscription.formattedString, result.isFinal);
   });
-  // Feed actual AUFXAudioPCMBuffer values from the application's audio pipeline:
+  // Feed AUFXAudioPCMBuffer values from your audio pipeline:
   const acceptAudio = (buffer: AUFXAudioPCMBuffer) => request.append(buffer);
-  // When that pipeline ends: request.endAudio(). task.finish() stops accepting
-  // new audio while preserving final results; task.cancel() terminates the task.
+  // When the pipeline ends, call request.endAudio(). task.finish() stops accepting
+  // audio but still delivers final results; task.cancel() ends the task outright.
   void [acceptAudio, task];
 });
 ```
 
-`useSpeech()` is an SDK convenience returning a real component-owned `SPFXSpeechRecognizer`. Construction is passive. React insertion lifetime preserves it across StrictMode effect replay, closes it on true unmount, and rejects queued results after unmount, even if native processing has already completed. App teardown and privacy/entitlement loss stop resources immediately. Speech has no public recognizer disposal method.
+In a component, `useSpeech()` from `@syndromatic/syncloudos/sdk` returns an `SPFXSpeechRecognizer` owned by that component. Creating it does nothing on its own. It survives React StrictMode's effect replay, closes when the component unmounts, and drops any queued results after unmount, even ones the service has already finished. App teardown, or losing privacy consent or the entitlement, stops its resources at once. There is no public method to dispose of a recogniser yourself.
 
-## Members and values
+## Recognisers
 
-`SPFXSpeechRecognizer` exposes static `supportedLocales()`, `authorizationStatus()` and `requestAuthorization(handler)`, instance `locale`, `isAvailable`, `supportsOnDeviceRecognition`, `delegate`, and the two `recognitionTask(request, handlerOrDelegate)` overloads. The handler takes `(result | null, error | null)` and is called asynchronously for partial/final results or a failure. `SPFXSpeechRecognizerDelegate.speechRecognizerAvailabilityDidChange(recognizer, available)` observes service availability changes.
+`SPFXSpeechRecognizer` has three static members: `supportedLocales()`, `authorizationStatus()` and `requestAuthorization(handler)`. Each instance has `locale`, `isAvailable`, `supportsOnDeviceRecognition` and a `delegate`, and two `recognitionTask(request, …)` overloads: one takes a `(result | null, error | null)` handler, the other an `SPFXSpeechRecognitionTaskDelegate`. The handler is called asynchronously for each partial or final result, or once for a failure. Set `delegate.speechRecognizerAvailabilityDidChange(recogniser, available)` to hear when the service comes and goes.
 
-Apple Locale values use native `Intl.Locale`, and supportedLocales returns `ReadonlySet<Intl.Locale>`. Foundation currently has no NSELocale; its existing formatter conventions use locale identifier strings. Speech deliberately uses the standard locale object without introducing another Foundation type. Default construction uses the runtime's default Intl locale. URL requests use the standard `URL`; segment ranges use Foundation `NSERange` in UTF-16 coordinates. Apple's `OperationQueue` has no framework counterpart, so `SFSpeechRecognizer.queue` is explicitly omitted. Recognition/delegate and authorization callbacks run as synchronous work on the exact selected application's main Dispatch queue internally.
+Locales are standard `Intl.Locale` objects, and `supportedLocales()` returns a `ReadonlySet<Intl.Locale>`. With no argument, the recogniser uses the runtime's default locale. URL requests take a standard `URL`, and segment ranges are Foundation `NSERange` values in UTF-16 units. There is no `queue` property: recognition, delegate and authorisation callbacks always run as synchronous work on the app's main Dispatch queue.
 
-`SPFXSpeechRecognitionRequest` is abstract. Its mutable properties are `shouldReportPartialResults` (default true), `requiresOnDeviceRecognition` (false), `taskHint` (unspecified), `contextualStrings` (empty) and `addsPunctuation` (false). Hints are unspecified, dictation, search and confirmation. An `SPFXSpeechAudioBufferRecognitionRequest` accepts `append(AUFXAudioPCMBuffer)`, `appendAudioSampleBuffer(MEFXSampleBuffer)`, and `endAudio()`. PCM and ready audio sample input are copied on append; closing the caller’s sample does not invalidate the request. Owned sample copies close at task completion/cancellation. Buffers queued before asynchronous service startup are retained, bounded to 256 pending buffers and 64 MiB of audio per request, and flushed to that same task. The request is single-use. `nativeAudioFormat: AUFXAudioFormat` is available after a capable service attaches; earlier access fails with SPFXError. `SPFXSpeechURLRecognitionRequest(url)` retains an owned URL value.
+## Requests
 
-`SPFXSpeechRecognitionTask` has readonly `state`, `isFinishing`, `isCancelled`, `error`, plus `finish()` and `cancel()`. States are starting, running, finishing, canceling and completed. Native acquisition is asynchronous, so starting persists until the service attaches. Cancellation is terminal; synchronous native shutdown may transition through canceling to completed within cancel(). There is no result promise. `finish()` permits final results, while `cancel()` discards pending results and reports cancellation where the app still has authority. Teardown/revocation suppresses callbacks.
+`SPFXSpeechRecognitionRequest` is the abstract base. Its settings, with defaults:
 
-The task delegate methods retain the sender first: `speechRecognitionDidDetectSpeech`, `speechRecognitionTaskFinishedReadingAudio`, `speechRecognitionTaskDidHypothesizeTranscription`, `speechRecognitionTaskDidFinishRecognition`, `speechRecognitionTaskDidFinishSuccessfully`, `speechRecognitionTaskDidProcessAudioDuration`, `speechRecognitionTaskWasCancelled`. A final utterance result precedes successful completion. Partial delivery follows shouldReportPartialResults. `SPFXSpeechRecognitionResult` contains `bestTranscription`, `transcriptions` and `isFinal`. Transcriptions have `formattedString` and `segments`; segments carry `substring`, `substringRange`, `timestamp`, `duration`, `confidence`, `alternativeSubstrings`. Issued results are immutable copies of actual observations; apps do not construct task/result/transcription/segment objects.
+| Property | Default |
+|---|---|
+| `shouldReportPartialResults` | `true` |
+| `requiresOnDeviceRecognition` | `false` |
+| `taskHint` | `"unspecified"` (also `dictation`, `search`, `confirmation`) |
+| `contextualStrings` | `[]` |
+| `addsPunctuation` | `false` |
 
-## Browser support and errors
+`SPFXSpeechAudioBufferRecognitionRequest` takes audio through `append(AUFXAudioPCMBuffer)` and `appendAudioSampleBuffer(MEFXSampleBuffer)`, and `endAudio()` marks the end. Both append methods copy their input, so closing your own sample buffer afterwards is safe; the request's copies close when the task completes or is cancelled. Audio you append before the service has started is held, up to 256 buffers and 64 MiB per request, and then flushed to the same task. Each request can be used once. `nativeAudioFormat` (an `AUFXAudioFormat`) becomes readable once a capable service attaches; reading it earlier throws `SPFXError`.
 
-The current browser adapter has no backend for this family's supplied PCM/sample-buffer or URL source contracts. Both recognition sources report `SPFXError` without starting microphone recognition, fetching the URL, silently ignoring data, or manufacturing timing/segments. Consequently browser recognizers report `isAvailable === false`. Supported locale discovery throws SPFXError; navigator languages do not establish recognition support. `supportsOnDeviceRecognition` is false, and a request requiring on-device processing fails rather than sending audio remotely. Punctuation, hints and contextual strings remain the Apple members; no unsupported browser promise is represented as implemented. Capable internal services receive all these settings and source data.
+`SPFXSpeechURLRecognitionRequest(url)` keeps its own copy of the URL.
 
-The current browser adapter has no Speech-only authorization operation. Its authorization query and request return unavailable internally, which the public API maps to restricted. They never construct or start recognition, acquire a microphone, transmit audio, or grant app consent. Apple's requestAuthorization is not an audio-source capture operation. A future capable internal service can supply that contract; this is a limitation of the current adapter, not a claim about every browser implementation. Capable services retain the shared per-app authorization flow and selected-session callback queue. A raw NotAllowedError or an already normalized kAFAssistantErrorDomain/1700 refusal is committed through the shared privacy denial path before further normalization, so a prior grant cannot yield an authorized reply. Existing native resources are revoked while the completed request still delivers denied. A late callback cannot grant access after revocation; recognition operation failures carry SPFXError.
+## Tasks and results
 
-Authorization cases are notDetermined, restricted, denied and authorized. App consent is distinct from origin permission; a passive granted browser observation does not grant app consent. Saved app consent never overrides a browser denial. Privileged operations require the launch entitlement, host policy, current privacy lease and selected session. Revocation invalidates captured generations permanently, including pending authorization and recognition operations; restoring permission or creating a replacement does not resurrect old callbacks. Late-created resources are stopped before being dropped.
+`SPFXSpeechRecognitionTask` exposes read-only `state`, `isFinishing`, `isCancelled` and `error`, plus `finish()` and `cancel()`. The states are `starting`, `running`, `finishing`, `canceling` and `completed`. Acquiring the service is asynchronous, so a task stays in `starting` until it attaches. There is no result promise.
 
-`SPFXError` models Speech's NSError result with `domain`, numeric `code`, `localizedDescription`. Unsupported members use NSCocoaErrorDomain / 3328 (featureUnsupported). Speech authorization denial uses kAFAssistantErrorDomain / 1700, cancellation 216, service failure 203, and unavailable app-session binding 1101. Foundation value validation failures are wrapped as SPFXError where the Speech operation owns them. The browser adapter, ports, bindings and session factories remain private and are absent from public root, SDK, browser and testing environment types.
+`finish()` lets final results through. `cancel()` is final: it discards pending results and reports the cancellation if the app still has authority, and it may pass through `canceling` to `completed` before returning. Teardown or revocation suppresses all callbacks.
 
-Deterministic tests cover the full capable-port flow and real plugin-compiled installed `.app` imports after await, timers and callbacks. The public test-host factory is unchanged; a narrow speech control provides allow/deny and test transcript delivery without exposing the native adapter. Real speech-service behavior through a future capable host requires interactive device testing; the current browser adapter has no microphone or recognition-source support to validate.
+Task delegate methods take the task first:
+
+- `speechRecognitionDidDetectSpeech`
+- `speechRecognitionTaskFinishedReadingAudio`
+- `speechRecognitionTaskDidHypothesizeTranscription`
+- `speechRecognitionTaskDidFinishRecognition`
+- `speechRecognitionTaskDidFinishSuccessfully`
+- `speechRecognitionTaskDidProcessAudioDuration`
+- `speechRecognitionTaskWasCancelled`
+
+A final result for an utterance always arrives before successful completion, and partial results follow `shouldReportPartialResults`.
+
+`SPFXSpeechRecognitionResult` holds `bestTranscription`, `transcriptions` and `isFinal`. Each `SPFXTranscription` has a `formattedString` and `segments`. Each `SPFXTranscriptionSegment` has `substring`, `substringRange`, `timestamp`, `duration`, `confidence` and `alternativeSubstrings`. Results are immutable copies of what the service observed. You never construct tasks, results, transcriptions or segments yourself.
+
+## Browser support
+
+The browser adapter has no backend for audio-buffer, sample-buffer or URL recognition. Both kinds of request fail with `SPFXError`. SpeechFX does not fall back to microphone recognition, fetch the URL, quietly drop your audio, or make up timings and segments. As a result:
+
+- `isAvailable` is `false`.
+- `supportedLocales()` throws `SPFXError`. The browser's language list says nothing about recognition support.
+- `supportsOnDeviceRecognition` is `false`, and a request with `requiresOnDeviceRecognition` fails instead of sending audio elsewhere.
+
+Punctuation, hints and contextual strings are passed to capable services; the browser adapter does not claim to honour them.
+
+## Authorisation
+
+The statuses are `notDetermined`, `restricted`, `denied` and `authorized`.
+
+The browser adapter has no speech-specific authorisation, so `authorizationStatus()` and `requestAuthorization` report `restricted`. Neither call starts recognition, opens the microphone, sends audio or grants app consent. A capable service would use the shared per-app authorisation flow and deliver its callback on the session's queue.
+
+App consent is separate from the browser's origin permission. A passive "granted" browser observation does not grant app consent, and saved app consent never overrides a browser denial. Privileged operations need the launch entitlement, host policy, a current privacy lease and the selected session. A raw `NotAllowedError`, or a refusal already normalised to `kAFAssistantErrorDomain` 1700, is recorded as a privacy denial first, so an earlier grant cannot produce `authorized`. Existing resources are revoked and the request still delivers `denied`.
+
+Revocation invalidates captured generations for good, including pending authorisation and recognition work. Restoring permission or creating a new recogniser does not revive old callbacks, and resources that finish starting after revocation are stopped before they are dropped.
+
+## Errors
+
+`SPFXError` carries a `domain`, a numeric `code` and a `localizedDescription`.
+
+| Domain | Code | Meaning |
+|---|---|---|
+| `NSCocoaErrorDomain` | 3328 | The member is not supported by this service. |
+| `kAFAssistantErrorDomain` | 1700 | Entitlement or authorisation denied or revoked. |
+| `kAFAssistantErrorDomain` | 216 | Recognition cancelled, or the app session ended. |
+| `kAFAssistantErrorDomain` | 203 | Service failure. |
+| `kAFAssistantErrorDomain` | 1101 | No app session is bound. |
+
+Foundation validation failures are wrapped in `SPFXError` when a speech operation owns them. The browser adapter, ports, bindings and session factories are private and do not appear on the public root, SDK, browser or testing environment types.
+
+## Testing
+
+The deterministic tests cover the full flow through a capable port, and real plugin-compiled `.app` imports used after awaits, timers and callbacks. A narrow speech control in the test host lets you allow or deny access and deliver test transcripts without exposing the native adapter. Behaviour against a real speech service needs interactive testing on a capable host.

@@ -61,13 +61,13 @@ describe("explicit NSE toolbar ownership", () => {
     const view = render(fixture(true));
     const field = screen.getByRole("textbox", { name: "Editor" });
     fireEvent.focusIn(field);
-    expect(screen.getByRole("toolbar").classList.contains("nse-control-toolbar-fade-in")).toBe(true);
+    expect(screen.getByRole("toolbar").getAttribute("data-nse-presentation")).toBe("keyboard");
     fireEvent.focusOut(field);
     fireEvent.focusOut(field);
     expect(cancel).toHaveBeenCalledWith(1);
     view.rerender(fixture(false));
     expect(cancel).toHaveBeenCalledWith(2);
-    expect(screen.getByRole("toolbar").classList.contains("nse-control-toolbar-fade-in")).toBe(false);
+    expect(screen.getByRole("toolbar").getAttribute("data-nse-presentation")).toBeNull();
   });
 });
 

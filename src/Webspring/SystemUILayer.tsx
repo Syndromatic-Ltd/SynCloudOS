@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { SystemSurfaceAppearance } from "../NSE/hostComposition";
 import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
 import { useEffect, useId, useLayoutEffect, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
@@ -139,7 +140,7 @@ function ReturnDecisionDialog({
             />
             <NSEButton
               title={keepLabel}
-              appearance={alertAppearance === "dark" ? undefined : "aqua"}
+              appearance={alertAppearance === "dark" ? undefined : "light"}
               isEnabled={!busy}
               className="nse-system-alert-action-button nse-return-keep"
               onClick={runKeep}
@@ -207,7 +208,7 @@ export function SystemUILayer({ onLogOut, account, preferences, siteName = "this
   const returnMessage = systemT("navigation.returnDecisionMessage", "Quitting the app closes all open windows.");
   const returnQuitLabel = systemT("navigation.returnDecisionQuit", "Quit");
   const returnKeepLabel = systemT("navigation.returnDecisionKeepWindows", "Keep Windows");
-  return (
+  return <SystemSurfaceAppearance>
     <FocusPortProvider port={nseFocusPort}>
       <SystemUIAccountContext.Provider value={account ?? null}>
         <PreferencesToast
@@ -285,5 +286,5 @@ export function SystemUILayer({ onLogOut, account, preferences, siteName = "this
         />
       ) : null}
     </FocusPortProvider>
-  );
+  </SystemSurfaceAppearance>;
 }

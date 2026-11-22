@@ -10,7 +10,7 @@ import { IFXDetector, IFXRAWFilter } from "@syndromatic/syncloudos/fx/image";
 
 ### `IFXDetector`
 
-Finds rectangles, QR codes, text regions and faces in an image. It is the counterpart of `CIDetector`. The detector renders your image once at a bounded size, hands the pixels to one or more analysis backends and returns their features. Backends are pluggable, and the detector reports which capabilities are actually available rather than guessing.
+Finds rectangles, QR codes, text regions and faces in an image. The detector renders your image once at a bounded size, hands the pixels to one or more analysis backends and returns their features. Backends are pluggable, and the detector reports which capabilities are actually available rather than guessing.
 
 ```text
 new IFXDetector({ maximumPixels?, backends? })
@@ -96,7 +96,7 @@ new IFXModelAnalysisBackend({ backend?, face?, textRegion? })
 
 ### Model assets
 
-The portable model format is deliberately small and verifiable: a linear pixel model evaluated per pixel, with an integrity hash. It is not an interchange format for neural networks, and ImageFX does not accept Apple Core ML files.
+The portable model format is small and verifiable: a linear pixel model evaluated per pixel, with an integrity hash. It is not an interchange format for neural networks, and ImageFX does not accept Core ML files.
 
 `IFXModelAsset`:
 
@@ -113,7 +113,7 @@ The portable model format is deliberately small and verifiable: a linear pixel m
 
 `IFXModelBackend` (`id`, `version` and `load(asset, context)`) turns an asset into an `IFXModelSession`, which evaluates one pixel: `evaluate([r, g, b, a], headIndex, softmaxNormalization?)` returns the head's outputs. `IFXPortableModelBackend` (`id: "portable-linear-pixel"`) is the built-in implementation. `IFXModelLoadContext.checkpoint()` lets a long load yield to the event loop. `IFXModelHeadDescriptor` and `IFXModelProvenance` describe parts of an asset.
 
-The `coreMLModel`, `personSegmentation` and `saliencyMap` [filters](filters.md) run an asset over an image as part of a graph. Their names follow Core Image, and they take `IFXModelAsset`s.
+The `coreMLModel`, `personSegmentation` and `saliencyMap` [filters](filters.md) run an asset over an image as part of a graph. They take `IFXModelAsset`s.
 
 ## Barcodes
 
@@ -152,7 +152,7 @@ export const code: IFXImage = new IFXFilter("barcodeGenerator", { barcodeDescrip
 
 ### `IFXRAWFilter`
 
-Reads a camera RAW file and develops it into a linear floating-point image. The counterpart is `CIRAWFilter`. ImageFX includes a portable decoder for a bounded subset of DNG (Adobe Digital Negative) files, which is enough for uncompressed sensor data from many cameras and converters. Other RAW formats fall outside this subset and report `IFXRAWUnsupportedError` when you open them, so the application can fall back to the embedded preview or tell the user.
+Reads a camera RAW file and develops it into a linear floating-point image. ImageFX includes a portable decoder for a bounded subset of DNG (Adobe Digital Negative) files, which is enough for uncompressed sensor data from many cameras and converters. Other RAW formats fall outside this subset and report `IFXRAWUnsupportedError` when you open them, so the application can fall back to the embedded preview or tell the user.
 
 ```text
 new IFXRAWFilter(encoded: NSEDataConvertible, backend?: IFXRAWBackend)

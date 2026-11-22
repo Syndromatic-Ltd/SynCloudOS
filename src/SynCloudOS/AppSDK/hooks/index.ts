@@ -21,8 +21,7 @@ export { useLifecycle } from "./useLifecycle";
 export { useCommands } from "./useCommands";
 export type { SynWareCommandDefinition } from "./useCommands";
 export { useDocument } from "./useDocument";
-export { useWindow } from "./useWindow";
-export type { SynWareWindowState } from "./useWindow";
+
 export { useService } from "./useService";
 export { usePasteboard } from "./usePasteboard";
 export { useDrag } from "./useDrag";

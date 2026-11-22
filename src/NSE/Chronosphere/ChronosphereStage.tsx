@@ -45,8 +45,7 @@ import { useChronosphereTravel } from "./useChronosphereTravel";
 import { projectChronosphereDepth, significantChronosphereIndex } from "./chronosphereTravel";
 import { ChronosphereTimeline } from "./ChronosphereTimeline";
 import { ChronosphereReflection } from "./ChronosphereReflection";
-import { NSEButton } from "../Controls/Buttons/NSEButton";
-import { NSEImage } from "../Controls/Images/NSEImageResource";
+import { ChronosphereArrow } from "./ChronosphereArrow";
 import type { VortexImages } from "./Vortex/loadVortexImages";
 import { defaultChronosphereLabels, type ChronosphereDetailRenderer, type ChronosphereFaceContext, type ChronosphereFaceRenderer, type ChronosphereLabels } from "./chronosphereViewTypes";
 import "./chronosphere.css";
@@ -141,7 +140,7 @@ export interface ChronosphereTravelImpulse {
 
 export interface ChronospherePushButtonProps {
   title?: ReactNode;
-  appearance?: "darkAqua";
+  appearance?: "dark";
   isEnabled?: boolean;
   className?: string;
   onClick?: (event: ReactMouseEvent<HTMLButtonElement>) => void;
@@ -188,14 +187,14 @@ function prefersReducedMotion(environment: ChronospherePlatformPort): boolean {
 /** Faux phone status bar that evokes the Time Machine receding-window stack. */
 function CardStatusBar({ entry }: { entry: ChronosphereVersion }) {
   return (
-    <div className="chronosphere-card-statusbar">
+    <div className="chronosphere-card-statusbar" data-nse-part="header" data-nse-role="stack">
       <span className="chronosphere-card-clock">{entry.dateLabel}</span>
       <span className="chronosphere-card-status-right" aria-hidden="true">
-        <span className="chronosphere-signal">
-          <i /><i /><i /><i />
+        <span className="chronosphere-signal" data-nse-part="status" data-nse-role="signal">
+          <i data-nse-part="tick" /><i data-nse-part="tick" /><i data-nse-part="tick" /><i data-nse-part="tick" />
         </span>
-        <span className="chronosphere-version-chip">{entry.displayLabel}</span>
-        <span className="chronosphere-battery" />
+        <span className="chronosphere-version-chip" data-nse-part="badge" data-nse-role="stack">{entry.displayLabel}</span>
+        <span className="chronosphere-battery" data-nse-part="indicator" data-nse-role="stack" />
       </span>
     </div>
   );
@@ -207,8 +206,8 @@ function DocumentFaceContent<TDetail>({ entry, renderer, active, detail, pane, f
 }) {
   const content = renderer(entry, { active, detail, pane });
   if (content === null || content === undefined || content === false) return fallbackImage ?
-    <span className="chronosphere-card-shot" aria-hidden="true" style={{ backgroundImage: `url(${fallbackImage})` }} /> : <span className="chronosphere-card-surface" aria-hidden="true" />;
-  return <span className="chronosphere-card-face" inert aria-hidden="true" style={{ width: faceWidth, height: faceWidth / aspectRatio, transform: `scale(${width / faceWidth})` }}>{content}</span>;
+    <span className="chronosphere-card-shot" data-nse-part="image" data-nse-role="stack" aria-hidden="true" style={{ backgroundImage: `url(${fallbackImage})` }} /> : <span className="chronosphere-card-surface" data-nse-part="surface" data-nse-role="stack" aria-hidden="true" />;
+  return <span className="chronosphere-card-face" data-nse-part="face" data-nse-role="stack" inert aria-hidden="true" style={{ width: faceWidth, height: faceWidth / aspectRatio, transform: `scale(${width / faceWidth})` }}>{content}</span>;
 }
 const DocumentFace = memo(DocumentFaceContent) as typeof DocumentFaceContent;
 
@@ -465,12 +464,12 @@ export function ChronosphereStage<TDetail = unknown>({
         key={entry.id}
         ref={isActive ? setSelectedElement : undefined}
         type="button"
-        className="chronosphere-card"
+        className="chronosphere-card" data-nse-part="cell" data-nse-role="stack"
         data-travel-owned="true"
         data-depth={slot.relativeIndex.toFixed(3)}
-        data-active={isActive ? "true" : "false"}
+        data-nse-selected={isActive ? "" : undefined}
         data-status={entry.isCurrent ? "current" : "saved"}
-        data-material={shape?.material}
+        data-nse-material={shape?.material}
         data-origin-lift={lifts ? "true" : undefined}
         data-restore-flight={restoredCard ? "true" : undefined}
         style={cardStyle}
@@ -481,21 +480,21 @@ export function ChronosphereStage<TDetail = unknown>({
       >
         {drawn ?? (showShot ? (
           <span
-            className="chronosphere-card-shot"
+            className="chronosphere-card-shot" data-nse-part="image" data-nse-role="stack"
             aria-hidden="true"
             style={{ backgroundImage: `url(${cardShot})` }}
           />
         ) : (
           <>
-            <span className="chronosphere-card-surface" aria-hidden="true" />
+            <span className="chronosphere-card-surface" data-nse-part="surface" data-nse-role="stack" aria-hidden="true" />
             <CardStatusBar entry={entry} />
             {isPlaceholder ? null : (
               <span className="chronosphere-card-body">
-                <span className="chronosphere-card-label">{entry.displayLabel}</span>
-                <span className="chronosphere-card-title">{entry.title}</span>
-                {isActive ? <span className="chronosphere-card-summary">{entry.summary}</span> : null}
+                <span className="chronosphere-card-label" data-nse-part="label" data-nse-role="stack">{entry.displayLabel}</span>
+                <span className="chronosphere-card-title" data-nse-part="title" data-nse-role="stack">{entry.title}</span>
+                {isActive ? <span className="chronosphere-card-summary" data-nse-part="subtitle" data-nse-role="stack">{entry.summary}</span> : null}
                 {entry.isCurrent ? (
-                  <span className="chronosphere-card-live">{labels.present}</span>
+                  <span className="chronosphere-card-live" data-nse-part="badge" data-nse-role="current-version">{labels.present}</span>
                 ) : null}
               </span>
             )}
@@ -509,9 +508,10 @@ export function ChronosphereStage<TDetail = unknown>({
     <div
       ref={containerRef}
       className={["chronosphere", className].filter(Boolean).join(" ")}
+      data-nse-control="chronosphere" data-nse-part="background" data-nse-style="stack"
       style={style}
       data-reduced-motion={reducedMotion ? "true" : "false"}
-      data-stage={stage}
+      data-nse-state={stage}
       data-travelling={travel.travelling ? "true" : "false"}
       data-position={travel.position.toFixed(3)}
       data-target={travel.target}
@@ -533,18 +533,18 @@ export function ChronosphereStage<TDetail = unknown>({
         travelImpulse={travel.journey}
       />
 
-      <div className="chronosphere-scrim" aria-hidden="true" />
+      <div className="chronosphere-scrim" data-nse-part="backdrop" data-nse-role="stack" aria-hidden="true" />
 
       {/* Keep the same selected DOM node while its return crosses the foreground. */}
       <div className="chronosphere-stage" inert={stage !== "open"} style={{ zIndex: restoring ? 61 : undefined }} data-restoring={restoring ? "true" : undefined}>
         {backFrames.map((frame) => (
           <div
             key={frame.key}
-            className="chronosphere-backframe"
+            className="chronosphere-backframe" data-nse-part="decoration" data-nse-role="stack"
             data-depth={frame.depth.toFixed(3)}
             data-travel-owned="true"
             aria-hidden="true"
-            data-material={shape?.material}
+            data-nse-material={shape?.material}
             style={{
               transform: depthTransform(frame.depth),
               opacity: entering && motion ? 0 : Math.exp(-Math.max(0, frame.depth - 3) * 0.19),
@@ -564,7 +564,7 @@ export function ChronosphereStage<TDetail = unknown>({
       {detailOpen && activeEntry ? (
         <DetailFocusScopeComponent scopeId={`chronosphere:version-detail:${activeEntry.id}`}>
         <div
-          className="chronosphere-detail"
+          className="chronosphere-detail" data-nse-part="backdrop" data-nse-role="details"
           role="dialog"
           aria-modal="true"
           aria-labelledby={detailTitleId}
@@ -572,15 +572,15 @@ export function ChronosphereStage<TDetail = unknown>({
           ref={detailRef}
           tabIndex={-1}
         >
-          <div className="chronosphere-detail-card" style={{ "--chronosphere-tint": rgb(activeEntry.tint) } as CSSProperties}>
+          <div className="chronosphere-detail-card" data-nse-part="bezel" data-nse-role="details" style={{ "--chronosphere-tint": rgb(activeEntry.tint) } as CSSProperties}>
             {renderDetail ? renderDetail(activeEntry, { titleId: detailTitleId, bodyId: detailBodyId }) : <>
             <header className="chronosphere-detail-head">
-              <h2 className="chronosphere-detail-title" id={detailTitleId}>{activeEntry.title}</h2>
-              <span className="chronosphere-detail-date">{[activeEntry.displayLabel, activeEntry.dateLabel].filter(Boolean).join(" · ")}</span>
+              <h2 className="chronosphere-detail-title" data-nse-part="title" data-nse-role="details" id={detailTitleId}>{activeEntry.title}</h2>
+              <span className="chronosphere-detail-date" data-nse-part="subtitle" data-nse-role="details">{[activeEntry.displayLabel, activeEntry.dateLabel].filter(Boolean).join(" · ")}</span>
             </header>
-            <p className="chronosphere-detail-body" id={detailBodyId}>{activeEntry.summary}</p>
+            <p className="chronosphere-detail-body" data-nse-part="content" data-nse-role="details" id={detailBodyId}>{activeEntry.summary}</p>
             </>}
-            <button type="button" className="chronosphere-detail-close" onClick={() => setDetailOpen(false)}>
+            <button type="button" className="chronosphere-detail-close" data-nse-part="button" data-nse-role="details" onClick={() => setDetailOpen(false)}>
               {labels.close}
             </button>
           </div>
@@ -588,37 +588,39 @@ export function ChronosphereStage<TDetail = unknown>({
         </DetailFocusScopeComponent>
       ) : null}
 
-      {twoPane && present && geometry ? <div className="chronosphere-pane-caption" style={{ left: geometry.presentX, top: geometry.stackY + geometry.height / 2 + 16 }}>
-        <strong>{labels.now}</strong><span>{present.dateLabel}</span>
+      {twoPane && present && geometry ? <div className="chronosphere-pane-caption" data-nse-part="label" data-nse-role="caption" style={{ left: geometry.presentX, top: geometry.stackY + geometry.height / 2 + 16 }}>
+        <strong>{labels.now}</strong><span data-nse-part="subtitle">{present.dateLabel}</span>
       </div> : null}
-      {activeEntry && geometry ? <div className="chronosphere-pane-caption" style={{ left: geometry.stackX, top: geometry.stackY + geometry.height / 2 + 16 }}>
-        <strong>{activeEntry.dateLabel}</strong><span>{activeEntry.summary}</span>
+      {activeEntry && geometry ? <div className="chronosphere-pane-caption" data-nse-part="label" data-nse-role="caption" style={{ left: geometry.stackX, top: geometry.stackY + geometry.height / 2 + 16 }}>
+        <strong>{activeEntry.dateLabel}</strong><span data-nse-part="subtitle">{activeEntry.summary}</span>
       </div> : null}
-      <div className="chronosphere-controls chronosphere-navigation" inert={stage !== "open"}
+      <div className="chronosphere-controls chronosphere-navigation" data-nse-part="actions" data-nse-role="time-navigation" inert={stage !== "open"}
         style={{ opacity: stage === "open" ? 1 : 0, ...(twoPane && geometry ? {
           left: `max(${geometry.stackX + geometry.width / 2 + 12}px, calc(100% - clamp(110px, 12vw, 240px) - 122px))`, right: "auto",
         } : {}) }} role="group" aria-label={labels.timeline}>
-        <NSEButton bezelStyle="texturedRounded" className="chronosphere-time-arrow chronosphere-time-arrow-past"
-          title="Previous significant change" image={NSEImage.named(NSEImage.goBackTemplateName)} imagePosition="imageOnly"
-          isEnabled={travel.target < browsed.length - 1}
-          onClick={() => goTo(significantChronosphereIndex(browsed, travel.target, 1))} />
-        <NSEButton bezelStyle="texturedRounded" className="chronosphere-time-arrow chronosphere-time-arrow-present"
-          title="Next significant change" image={NSEImage.named(NSEImage.goForwardTemplateName)} imagePosition="imageOnly"
-          isEnabled={travel.target > 0}
-          onClick={() => goTo(significantChronosphereIndex(browsed, travel.target, -1))} />
+        <button type="button" className="chronosphere-time-arrow chronosphere-time-arrow-past" data-nse-position="past" data-nse-part="button" data-nse-role="time-navigation" aria-label="Previous significant change"
+          title="Previous significant change" disabled={travel.target >= browsed.length - 1}
+          onClick={() => goTo(significantChronosphereIndex(browsed, travel.target, 1))}>
+          <ChronosphereArrow direction="past" />
+        </button>
+        <button type="button" className="chronosphere-time-arrow chronosphere-time-arrow-present" data-nse-position="present" data-nse-part="button" data-nse-role="time-navigation" aria-label="Next significant change"
+          title="Next significant change" disabled={travel.target <= 0}
+          onClick={() => goTo(significantChronosphereIndex(browsed, travel.target, -1))}>
+          <ChronosphereArrow direction="present" />
+        </button>
       </div>
-      <div className="chronosphere-controls chronosphere-floor" inert={stage !== "open"} style={{ opacity: stage === "open" ? 1 : 0 }} role="group" aria-label={labels.controls}>
-        <div className="chronosphere-floor-glass" aria-hidden="true">
+      <div className="chronosphere-controls chronosphere-floor" data-nse-part="actions" data-nse-role="archive" inert={stage !== "open"} style={{ opacity: stage === "open" ? 1 : 0 }} role="group" aria-label={labels.controls}>
+        <div className="chronosphere-floor-glass" data-nse-part="background" data-nse-role="archive" aria-hidden="true">
           <ChronosphereReflection currentElement={currentElement} selectedElement={selectedElement}
             active={stage === "open"} settledKey={reflectionReady && !travel.travelling ? `${activeEntry?.id}:${viewport?.width}:${viewport?.height}` : null}
             style={{ position: "absolute", inset: 0, height: "100%" }} />
         </div>
-        <PushButtonComponent appearance="darkAqua" title={twoPane ? labels.done : labels.exit} className="chronosphere-floor-action chronosphere-floor-exit" onClick={requestExit} />
-        <button className="chronosphere-floor-date" type="button" onClick={() => goTo(0)} aria-label={labels.jumpToPresent}>
+        <PushButtonComponent appearance="dark" title={twoPane ? labels.done : labels.exit} className="chronosphere-floor-action chronosphere-floor-exit" data-nse-position="leading" data-nse-role="archive-action" onClick={requestExit} />
+        <button className="chronosphere-floor-date" data-nse-part="button" data-nse-role="archive" type="button" onClick={() => goTo(0)} aria-label={labels.jumpToPresent}>
           <strong>{activeEntry?.dateLabel ?? labels.now}</strong>
-          <span>{travel.travelling ? `${shownIndex + 1} / ${browsed.length}` : activeEntry?.displayLabel ?? activeEntry?.title ?? ""}</span>
+          <span data-nse-part="subtitle">{travel.travelling ? `${shownIndex + 1} / ${browsed.length}` : activeEntry?.displayLabel ?? activeEntry?.title ?? ""}</span>
         </button>
-        {onRestore ? <PushButtonComponent appearance="darkAqua" title={labels.restore} className="chronosphere-floor-action chronosphere-floor-restore"
+        {onRestore ? <PushButtonComponent appearance="dark" title={labels.restore} className="chronosphere-floor-action chronosphere-floor-restore" data-nse-position="trailing" data-nse-role="archive-action"
           isEnabled={!(!activeEntry || activeEntry.isCurrent || travel.travelling)}
           onClick={() => {
             if (!activeEntry || activeEntry.isCurrent || travel.travelling || stage !== "open") return;
@@ -626,16 +628,16 @@ export function ChronosphereStage<TDetail = unknown>({
             setRestoredId(activeEntry.id);
             requestExit();
           }} />
-          : <PushButtonComponent appearance="darkAqua" title={labels.details} className="chronosphere-floor-action chronosphere-floor-restore" onClick={() => setDetailOpen(open => !open)} />}
+          : <PushButtonComponent appearance="dark" title={labels.details} className="chronosphere-floor-action chronosphere-floor-restore" data-nse-position="trailing" data-nse-role="archive-action" onClick={() => setDetailOpen(open => !open)} />}
       </div>
 
       {/* The complete launching foreground recedes down and into the galaxy,
           then returns to its original plane once on exit. */}
       {motion ? (
         <div
-          className="chronosphere-curtain"
+          className="chronosphere-curtain" data-nse-part="surface" data-nse-role="transition"
           aria-hidden="true"
-          data-captured={curtainShot ? "true" : "false"}
+          data-nse-type={curtainShot ? "captured" : undefined}
           // The window glides straight down out of the way, full size, as Lion's did; depth comes
           // from what lifts off it, not from shrinking it.
           style={{ transform: stage === "open" ? "translate3d(0, 104%, 0)" : "translate3d(0, 0, 0)", ...(curtainShot ? { backgroundImage: `url(${curtainShot})` } : {}) }}
@@ -646,14 +648,14 @@ export function ChronosphereStage<TDetail = unknown>({
         // The present stands flat on the left, as Lion's live document did beside its past. It is
         // its own layer above the window, so the page is seen lifting off as the window glides away.
         <div
-          className="chronosphere-card chronosphere-present"
+          className="chronosphere-card chronosphere-present" data-nse-part="cell" data-nse-role="stack"
           ref={setCurrentElement}
           data-origin-lift={originRect ? "true" : undefined}
           role="img"
           aria-label={`${labels.now}, ${present.title}`}
-          data-active="true"
+          data-nse-selected=""
           data-status="current"
-          data-material={shape?.material}
+          data-nse-material={shape?.material}
           style={{
             ...geometryStyle(geometry.presentX, geometry.stackY),
             transform: away && !restoring ? offOrigin(geometry.presentX, geometry.stackY, 120) : "translate(-50%, -50%) translate3d(0, 0, 0)",
@@ -662,8 +664,8 @@ export function ChronosphereStage<TDetail = unknown>({
           }}
         >
           {face(present, { active: true, detail: true, pane: "present" }) ?? (originImage
-            ? <span className="chronosphere-card-shot" aria-hidden="true" style={{ backgroundImage: `url(${originImage})` }} />
-            : <span className="chronosphere-card-surface" aria-hidden="true" />)}
+            ? <span className="chronosphere-card-shot" data-nse-part="image" data-nse-role="stack" aria-hidden="true" style={{ backgroundImage: `url(${originImage})` }} />
+            : <span className="chronosphere-card-surface" data-nse-part="surface" data-nse-role="stack" aria-hidden="true" />)}
         </div>
       ) : null}
     </div>

@@ -20,46 +20,67 @@
 
 import { describe, expect, it, vi } from "vitest";
 import {
-  definePreferencePane,
+  NSEPreferencePane,
+  capturePreferencePaneClass,
   registerPreferencePane,
   resolvePreferencePanes,
-  type PreferencePaneDefinition,
+  type PreferencePaneDescriptor,
 } from "../../src/SynCloudOS/Preferences";
 import { createTestRuntime } from "./helpers";
 
-const noView = (): null => null;
-
-function pane(id: string, order: number): PreferencePaneDefinition {
-  return definePreferencePane({ id, title: id, order, view: () => null });
+function pane(id: string, order: number): PreferencePaneDescriptor {
+  return capturePreferencePaneClass(class extends NSEPreferencePane {
+    static override id = id;
+    static override title = id;
+    static override order = order;
+    override renderView() { return null; }
+  });
 }
 
-describe("definePreferencePane", () => {
-  it("returns an immutable definition with the declared fields", () => {
-    const View = () => null;
-    const definition = definePreferencePane({ id: " billing ", title: "Billing", icon: "./billing.svg", order: 600, view: View });
-    expect(definition).toMatchObject({ id: "billing", title: "Billing", icon: "./billing.svg", order: 600, view: View });
-    expect(Object.isFrozen(definition)).toBe(true);
+describe("capturePreferencePaneClass", () => {
+  it("returns an immutable descriptor with the declared fields", () => {
+    class BillingPane extends NSEPreferencePane {
+      static override id = " billing ";
+      static override title = "Billing";
+      static override icon = "./billing.svg";
+      static override order = 600;
+      override renderView() { return null; }
+    }
+    const descriptor = capturePreferencePaneClass(BillingPane);
+    expect(descriptor).toMatchObject({ id: "billing", title: "Billing", icon: "./billing.svg", order: 600, PaneClass: BillingPane });
+    expect(Object.isFrozen(descriptor)).toBe(true);
   });
 
   it("accepts a localisable title", () => {
-    expect(definePreferencePane({ id: "billing", title: { key: "billing.title", fallback: "Billing" }, order: 1, view: () => null }).title)
+    class BillingPane extends NSEPreferencePane {
+      static override id = "billing";
+      static override title = { key: "billing.title", fallback: "Billing" };
+      static override order = 1;
+      override renderView() { return null; }
+    }
+    expect(capturePreferencePaneClass(BillingPane).title)
       .toEqual({ key: "billing.title", fallback: "Billing" });
   });
 
   it.each([
-    ["an empty id", { id: " ", title: "x", order: 1, view: noView }],
-    ["a missing title", { id: "a", title: "", order: 1, view: noView }],
-    ["a non-finite order", { id: "a", title: "x", order: Number.NaN, view: noView }],
-    ["a view that is not a component", { id: "a", title: "x", order: 1, view: "nope" }],
-    ["an icon that is not a URL string", { id: "a", title: "x", order: 1, view: noView, icon: 3 }],
-  ])("rejects %s", (_label, input) => {
-    expect(() => definePreferencePane(input as never)).toThrow(TypeError);
+    ["an empty id", class extends NSEPreferencePane { static override id = " "; static override title = "x"; static override order = 1; override renderView() { return null; } }],
+    ["a missing title", class extends NSEPreferencePane { static override id = "a"; static override title = ""; static override order = 1; override renderView() { return null; } }],
+    ["a non-finite order", class extends NSEPreferencePane { static override id = "a"; static override title = "x"; static override order = Number.NaN; override renderView() { return null; } }],
+    ["a view that is not a component", class extends NSEPreferencePane { static override id = "a"; static override title = "x"; static override order = 1; static override view = "nope" as never; }],
+    ["an icon that is not a URL string", class extends NSEPreferencePane { static override id = "a"; static override title = "x"; static override order = 1; static override icon = 3 as never; override renderView() { return null; } }],
+  ])("rejects %s", (_label, candidate) => {
+    expect(() => capturePreferencePaneClass(candidate)).toThrow(TypeError);
   });
 
   it("rejects accessors without evaluating them", () => {
     const getter = vi.fn(() => "billing");
-    const input = Object.defineProperty({ title: "Billing", order: 1, view: () => null }, "id", { enumerable: true, get: getter });
-    expect(() => definePreferencePane(input as never)).toThrow(/accessor/);
+    class AccessorPane extends NSEPreferencePane {
+      static override title = "Billing";
+      static override order = 1;
+      override renderView() { return null; }
+    }
+    Object.defineProperty(AccessorPane, "id", { enumerable: true, get: getter });
+    expect(() => capturePreferencePaneClass(AccessorPane)).toThrow(/accessor/);
     expect(getter).not.toHaveBeenCalled();
   });
 });
@@ -107,10 +128,10 @@ describe("runtime Preference Pane registry", () => {
     expect(runtime.preferencePanes.getSnapshot().map(({ id }) => id)).toEqual(["a", "b"]);
   });
 
-  it("refuses anything not made with definePreferencePane", () => {
+  it("refuses anything not extending NSEPreferencePane", () => {
     const runtime = createTestRuntime();
-    const forged = { id: "forged", title: "Forged", order: 1, view: () => null } as PreferencePaneDefinition;
-    expect(() => registerPreferencePane(runtime.preferencePanes, forged)).toThrow(/definePreferencePane/);
+    const forged = { id: "forged", title: "Forged", order: 1, view: () => null } as unknown as PreferencePaneDescriptor;
+    expect(() => registerPreferencePane(runtime.preferencePanes, forged)).toThrow(/extending NSEPreferencePane/);
     expect(runtime.preferencePanes.getSnapshot()).toEqual([]);
   });
 

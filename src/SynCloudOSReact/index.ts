@@ -99,8 +99,6 @@ export { useRuntimeSelector, useRuntimeSnapshot } from "./runtimeHooks";
 export { useActiveLocale, useAppearance, useLocaleFormatter, useLocaleServicesSnapshot, useResolvedMode, useSettings } from "./serviceHooks";
 export { useCommandDispatch, useCommandMenuItems, useCommandPresentation, useCommandRegistration } from "./commandHooks";
 export type { CommandMenuItem } from "./commandHooks";
-export { ApplicationMenuTriggerProvider, useApplicationMenuTrigger } from "./ApplicationMenuTrigger";
-export type { ApplicationMenuTriggerPort } from "./ApplicationMenuTrigger";
 export { QuickSwitchTriggerProvider, useQuickSwitchTrigger } from "./QuickSwitchTrigger";
 export { useHostFontManager } from "./hostFontsContext";
 export { SystemAlert, SystemAlertAssetCache } from "./SystemAlert";
@@ -116,6 +114,6 @@ export type { ApplicationMenuSnapshot, ApplicationMenuStore } from "./Applicatio
 
 // Framework window hosts preserve the canonical responder and modal focus ancestry.
 export { ResponderHierarchyContext } from "./responderHierarchy";
-export { FocusScopeIdContext } from "./focusScopeContext";
+export { AttachedSheetLayerContext, FocusScopeIdContext } from "./focusScopeContext";
 
 export { installedApplicationMenuSections } from "../SynCloudOS/AppHosting/runtimeEntry";

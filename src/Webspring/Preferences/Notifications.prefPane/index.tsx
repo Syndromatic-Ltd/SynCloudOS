@@ -22,7 +22,7 @@ import { useMemo } from "react";
 import { NSESwitch, NSEBox } from "../../../NSE/public/controls";
 import { GroupedRow } from "../../../NSE/Controls/Selection/GroupedRow";
 import type { RuntimeSnapshot } from "../../../SynCloudOS/SynCloudOS";
-import { definePreferencePane, type PreferencePaneViewProps } from "../../../SynCloudOS/Preferences";
+import { NSEPreferencePane, type PreferencePaneViewProps } from "../../../SynCloudOS/Preferences";
 import { useKernelSynCloudOS, useRuntimeSelector } from "../../../SynCloudOSReact";
 import { useSystemText } from "../useSystemText";
 
@@ -77,15 +77,15 @@ function NotificationsPane({ settings }: PreferencePaneViewProps) {
   const t = useSystemText();
   const apps = useNotificationApps();
   return (
-    <div className="nse-prefs-section" data-muted={settings.notificationsEnabled ? undefined : "true"}>
+    <div data-nse-part="group" data-nse-role="notifications" data-nse-state={settings.notificationsEnabled ? undefined : "off"} className="nse-prefs-section">
       {apps.length === 0 ? (
         // Nothing installed asks to notify. An empty group box would read as
         // a rendering fault rather than an answer.
-        <div className="nse-prefs-empty">
-          <span className="nse-prefs-empty-title">
+        <div data-nse-part="status" data-nse-role="empty" className="nse-prefs-empty">
+          <span data-nse-part="title" className="nse-prefs-empty-title">
             {t("preferences.noNotificationApps", "No Apps Yet")}
           </span>
-          <span className="nse-prefs-empty-detail">
+          <span data-nse-part="label" className="nse-prefs-empty-detail">
             {t(
               "preferences.noNotificationAppsDetail",
               "Apps that can send you notifications will appear here.",
@@ -94,7 +94,7 @@ function NotificationsPane({ settings }: PreferencePaneViewProps) {
         </div>
       ) : (
         <>
-          <p className="nse-prefs-note nse-prefs-note-lead">
+          <p data-nse-part="label" data-nse-role="lead-note" className="nse-prefs-note nse-prefs-note-lead">
             {t("preferences.notificationsLead", "View notifications from:")}
           </p>
           <NSEBox>
@@ -117,7 +117,7 @@ function NotificationsPane({ settings }: PreferencePaneViewProps) {
             ))}
           </NSEBox>
           {settings.notificationsEnabled ? null : (
-            <p className="nse-prefs-note">
+            <p data-nse-part="label" data-nse-role="note" className="nse-prefs-note">
               {t(
                 "preferences.notificationsAllOffNote",
                 "All notifications are turned off. Turn them on to choose per app.",
@@ -130,11 +130,20 @@ function NotificationsPane({ settings }: PreferencePaneViewProps) {
   );
 }
 
-export default definePreferencePane({
-  id: "notifications",
-  title: { key: "system.notifications", fallback: "Notifications" },
-  order: 400,
-  summary: NotificationsSummary,
-  accessory: NotificationsSwitch,
-  view: NotificationsPane,
-});
+export default class NotificationsPreferencePane extends NSEPreferencePane {
+  static id = "notifications";
+  static title = { key: "system.notifications", fallback: "Notifications" };
+  static order = 400;
+
+  override renderSummary() {
+    return <NotificationsSummary settings={this.settings} appearance={this.appearance} locale={this.locale} />;
+  }
+
+  override renderAccessory() {
+    return <NotificationsSwitch settings={this.settings} appearance={this.appearance} locale={this.locale} />;
+  }
+
+  override renderView() {
+    return <NotificationsPane settings={this.settings} appearance={this.appearance} locale={this.locale} />;
+  }
+}

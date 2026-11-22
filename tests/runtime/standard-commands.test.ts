@@ -60,7 +60,7 @@ describe("standard runtime commands", () => {
     const runtime = createTestRuntime();
     runtime.store.mutate((draft) => { draft.loginServices.isAuthorised = true; });
     runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.command-app", route: "/command-app" }));
-    await expect(runtime.commands.dispatch("workspace.openApp", { appId: "com.example.command-app" })).resolves.toMatchObject({ status: "executed" });
+    await expect(runtime.commands.dispatch("workspace.openApp", { appId: "com.example.command-app" }, { responderId: "workspace" })).resolves.toMatchObject({ status: "executed" });
     await expect(runtime.commands.dispatch("application.showAbout", { appId: "com.example.command-app" })).resolves.toMatchObject({ status: "executed" });
     expect(runtime.systemUI.getSnapshot().aboutAppId).toBe("com.example.command-app");
     await expect(runtime.commands.validate("system.showPreferences")).resolves.toMatchObject({ enabled: true });

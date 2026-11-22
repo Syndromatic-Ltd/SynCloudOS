@@ -34,12 +34,12 @@ describe("Atmo control structure", () => {
     expect(read("src/NSE/Appearance/atmo.ts")).toContain('import "./atmo-theme.css";');
   });
 
-  it("keeps control structure in Atmo's layer and scope, with no raster paint", () => {
+  it("keeps control CSS in the structure and Atmo layers without raster paint", () => {
     const css = read(atmoStructureFile);
     expect(css).not.toMatch(/url\(/u);
     const layers: string[] = [];
     cssTree.walk(cssTree.parse(css), { visit: "Atrule", enter(node) { if (node.name === "layer" && node.block) layers.push(cssTree.generate(node.prelude!)); } });
-    expect(layers).toEqual(["nse.atmo"]);
+    expect(new Set(layers)).toEqual(new Set(["nse.atmo", "nse.structure"]));
     expect(css).toContain("@scope ([data-nse-theme]) to ([data-nse-theme])");
   });
 

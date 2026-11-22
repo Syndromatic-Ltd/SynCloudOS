@@ -24,6 +24,7 @@ import {
   type SmoothSurfaceRequest,
   type SmoothSurfaceStyle
 } from "../SmoothSurface";
+import { getSmoothSurfaceThemeHooks } from "../SmoothSurface/smoothSurface";
 
 export function LinenSurface({
   children,
@@ -40,7 +41,9 @@ export function LinenSurface({
 
   return (
     <div
-      className={`nse-material-linen atmo-linen ${surfaceProps.className ?? ""}`.trim()}
+      className={surfaceProps.className}
+      {...getSmoothSurfaceThemeHooks(smoothSurface)}
+      data-nse-control="visual-effect-view" data-nse-part="background" data-nse-material="linen" data-nse-style="panel"
       style={surfaceProps.style as CSSProperties | undefined}
       {...props}
     >

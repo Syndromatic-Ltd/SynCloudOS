@@ -104,6 +104,7 @@ export function IFXImageView({
     <div
       ref={boxRef}
       className={["ifx-image-view", className].filter(Boolean).join(" ")}
+      data-nse-control="image-view" data-nse-part="background" data-nse-style="editor"
       data-tool-mode={currentToolMode}
       data-zoomed={viewport.isZoomedIn ? "true" : "false"}
       data-pannable={viewport.canPan ? "true" : "false"}
@@ -123,7 +124,7 @@ export function IFXImageView({
           }}
         />
       ) : null}
-      {currentToolMode === "crop" ? <div className="ifx-image-view-crop-frame" aria-hidden="true" /> : null}
+      {currentToolMode === "crop" ? <div className="ifx-image-view-crop-frame" data-nse-part="decoration" data-nse-role="crop" aria-hidden="true" /> : null}
     </div>
   );
 }

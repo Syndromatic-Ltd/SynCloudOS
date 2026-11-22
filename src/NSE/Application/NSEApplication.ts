@@ -27,7 +27,8 @@ import { nseDisposeFor, type OwnedObject, type NSEOwner } from "../Controllers/o
 import { NSEObject } from "../Objects/NSEObject";
 import { publishObservableChange } from "../Objects/observable";
 import type { NSEMenu } from "../Menus/NSEMenu";
-import { ObjectLifetime } from "./objectLifetime";
+import type { NSEAppearance } from "../Appearance/NSEAppearance";
+import { assertFrameworkConstructedApplication, ObjectLifetime } from "./objectLifetime";
 import { ownNSEFactory, type Disposable, type SynchronousDisposable } from "./ownedFactory";
 import type { NSEAnyWindowController, NSEWindowController, NSEWindowControllerClass } from "./NSEWindowController";
 import type { AppBounds, AppOwnedWindowSnapshot } from "../../SynCloudOS/nseRuntimeContracts";
@@ -41,6 +42,10 @@ export interface NSEOpenWindowOptions {
   readonly documentId?: string;
   readonly restorationKey?: string;
   readonly mobilePolicy?: AppOwnedWindowSnapshot["mobilePolicy"];
+  readonly styleMask?: readonly import("./NSEWindowController").NSEWindowStyle[];
+  readonly collectionBehavior?: readonly import("./NSEWindowController").NSEWindowCollectionBehavior[];
+  readonly titleVisibility?: import("./NSEWindowController").NSEWindowTitleVisibility;
+  readonly titlebarAppearsTransparent?: boolean;
   /** Explicit bounds, or placement using width/height and the current work area. */
   readonly preferredBounds?: AppBounds | "centred" | "cascaded";
 }
@@ -144,12 +149,23 @@ export class NSEApplication extends NSEObject implements NSEOwner, OwnedObject {
 
   #mainMenu: NSEMenu | null = null;
 
+  /** NSApplication.appearance: the default appearance of the application's windows and presented surfaces. */
+  get appearance(): NSEAppearance | null {
+    return this.#appearance;
+  }
+
+  set appearance(value: NSEAppearance | null) {
+    if (value === this.#appearance) return;
+    this.#appearance = value;
+    publishObservableChange(this);
+  }
+
+  #appearance: NSEAppearance | null = null;
+
   constructor() {
     super();
     this.#lifetime = new ObjectLifetime(this, "NSEApplication", new.target.name || "NSEApplication", {});
-    if (!this.#lifetime.constructedByFramework) {
-      throw new TypeError(`${new.target.name} is created by the framework; export it as the default export of the application module instead of calling new.`);
-    }
+    assertFrameworkConstructedApplication(this.#lifetime, new.target.name);
   }
 
   /** The application's identifier, from its manifest. */

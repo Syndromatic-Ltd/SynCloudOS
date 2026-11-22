@@ -119,10 +119,10 @@ export function AboutDialog({
           ) : null}
           <div data-nse-part="content" className="nse-about-copy">
             <h2 id={titleId} data-nse-part="title" className="nse-about-name">{info.name}</h2>
-            {info.tagline ? <p id={describedId} data-nse-part="label" className="nse-about-tagline">{info.tagline}</p> : null}
+            {info.tagline ? <p id={describedId} data-nse-part="label" data-nse-role="tagline" className="nse-about-tagline">{info.tagline}</p> : null}
             <p data-nse-part="value" className="nse-about-version">{version}</p>
-            <p data-nse-part="label" className="nse-about-legal">{info.copyright}</p>
-            <p data-nse-part="label" className="nse-about-legal nse-about-trademark">{info.trademark}</p>
+            <p data-nse-part="label" data-nse-role="copyright" className="nse-about-legal">{info.copyright}</p>
+            <p data-nse-part="label" data-nse-role="trademark" className="nse-about-legal nse-about-trademark">{info.trademark}</p>
           </div>
         </div>
         <div data-nse-part="actions" className="nse-alert-actions">

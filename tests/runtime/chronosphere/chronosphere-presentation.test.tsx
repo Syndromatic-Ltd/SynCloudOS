@@ -114,7 +114,7 @@ it.each(["Restore", "Done"])("gives %s its own document return choreography", as
   await settleTravel();
   await act(async () => portal.querySelector(".chronosphere")!.dispatchEvent(new KeyboardEvent("keydown", { key: "End", bubbles: true })));
   await settleTravel();
-  const selected = portal.querySelector<HTMLElement>('.chronosphere-card[data-active="true"][data-status="saved"]')!;
+  const selected = portal.querySelector<HTMLElement>('.chronosphere-card[data-nse-selected][data-status="saved"]')!;
   const present = portal.querySelector<HTMLElement>(".chronosphere-present")!;
   expect(selected.textContent).toContain("Earlier draft");
   const selectedPose = selected.style.transform, presentPose = present.style.transform;
@@ -231,7 +231,7 @@ it("serializes required captures and waits for all Vortex pixels before portalin
   expect(portal.querySelector(".chronosphere")?.getAttribute("aria-label")).toContain("Documents");
   expect(portal.querySelector<HTMLElement>(".chronosphere-card-shot")?.style.backgroundImage).toContain(presentShot);
   expect(portal.querySelector<HTMLElement>(".chronosphere-curtain")?.style.backgroundImage).toContain(foregroundShot);
-  expect(portal.querySelector(".chronosphere")?.getAttribute("data-stage")).toBe("entering");
+  expect(portal.querySelector(".chronosphere")?.getAttribute("data-nse-state")).toBe("entering");
   expect(host.vortexMounts).toHaveLength(1);
   expect(host.vortexMounts[0]).toMatchObject({ preparedImages: { starNebula: image, coreGlow: image } });
   expect(imageRelease).toHaveBeenCalledTimes(4); expect(leaseRelease).toHaveBeenCalledTimes(4);
@@ -454,7 +454,7 @@ it("draws a document's own page on each grid tile, scaled from its face width", 
   const faces = [...portal.querySelectorAll<HTMLElement>(".chronosphere-grid-face")];
   expect(faces.map(face => face.querySelector("article")?.dataset.pane)).toEqual(["present", "past", "past"]);
   expect(faces[0]!.style.width).toBe("624px"); expect(faces[0]!.style.transform).toBe(`scale(${208 / 624})`);
-  expect(portal.querySelector(".chronosphere-grid")?.getAttribute("data-material")).toBe("paper");
+  expect(portal.querySelector(".chronosphere-grid")?.getAttribute("data-nse-material")).toBe("paper");
   // Escape leaves the archive.
   await act(async () => { portal.querySelector(".chronosphere-grid-scroll")!.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })); });
   expect(portal.querySelector(".chronosphere-grid")).toBeNull();

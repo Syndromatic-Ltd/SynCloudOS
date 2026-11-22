@@ -1,8 +1,8 @@
 # TextFX
 
-Encoded byte inputs accept `NSEDataConvertible` from `@syndromatic/syncloudos/foundation`; delivered encoded bytes are immutable `NSEData`. Use `.bytes` at a native typed-buffer boundary and `.blob(mimeType)` for a browser Blob. Numeric pixel, index and PCM planes retain their typed arrays; writable copy destinations remain mutable.
+TextFX (`TFX`) lays out text when the browser's own layout is not enough: custom-shaped frames, glyph-level drawing to a canvas or PDF, precise measurement, caret and selection geometry, ruby annotations. It turns text and font data into shaped glyphs, breaks them into lines, fits lines into frames of any shape, and gives you the geometry to draw, measure and hit-test the result. Layout, measurement and drawing reuse shaped glyph data. Caret and selection queries must use the current model, font and container revisions. The pipeline will be familiar if you know Core Text.
 
-TextFX (`TFX`) is the web-native analogue of Core Text. It turns text and font data into shaped glyphs, breaks them into lines, fits lines into frames of any shape, and gives you the geometry to draw, measure and hit-test the result. Layout, measurement and drawing reuse shaped glyph data. Caret and selection queries must use the current model, font and container revisions.
+Font files and other encoded inputs accept any `NSEDataConvertible` from `@syndromatic/syncloudos/foundation`, and encoded bytes TextFX hands back are immutable `NSEData`. Use `.bytes` where you need a typed array and `.blob(mimeType)` for a browser `Blob`.
 
 The pipeline has five stages, and each has a class.
 
@@ -14,7 +14,7 @@ The pipeline has five stages, and each has a class.
 
 Everything is immutable. Fonts, attributed strings, paragraph styles, lines and frames never change after creation, so you can cache them freely and share them between components.
 
-TextFX uses no ambient system fonts. You supply every font as bytes, making the shaping inputs explicit. Browser rasterization and native input behavior still require their own validation.
+TextFX uses no ambient system fonts. You supply every font as bytes, making the shaping inputs explicit. Browser rasterisation and native input behaviour still require their own validation.
 
 ## Cooperating with NSE text and custom engines
 
@@ -36,7 +36,6 @@ import { TFXAttributedString, TFXFont, TFXFontDescriptor } from "@syndromatic/sy
 | Entry | `@syndromatic/syncloudos/fx/text` |
 | Hook | `useTextLayout`, from `@syndromatic/syncloudos/sdk` |
 | Permissions | None |
-| Analogue | Core Text (`CTFont`, `CTFontDescriptor`, `CTFontCollection`, `CTTypesetter`, `CTFramesetter`, `CTFrame`, `CTLine`, `CTRunDelegate`, `CTRubyAnnotation`) |
 
 ## What the entry exports
 
@@ -254,7 +253,7 @@ One shaped line. The typesetter creates lines and you read them.
 | `offsetForStringIndex(index)` | `{ primary, secondary }` caret positions for an index. In mixed-direction text, the two positions differ at a direction boundary. |
 | `textPositionForUTF16Offset(offset)` | `{ utf16Offset, graphemeBoundary, glyphIndices }`. Use `graphemeBoundary` to know whether a caret may stop there. |
 | `enumerateCaretOffsets(visitor, signal?)` | Calls the visitor with every caret stop `{ offset, stringIndex, leadingEdge }`. Return `false` to stop early. |
-| `createJustifiedLine(factor, width)` | A copy widened toward `width` by expanding spaces, where `factor` from 0 to 1 sets how much of the difference to distribute. Returns `null` when the line has no spaces to stretch. |
+| `createJustifiedLine(factor, width)` | A copy widened towards `width` by expanding spaces, where `factor` from 0 to 1 sets how much of the difference to distribute. Returns `null` when the line has no spaces to stretch. |
 | `createTruncatedLine(width, type, token)` | A copy that fits `width`, omitting text at the `"head"`, `"middle"` or `"tail"` and inserting the `token` line (for example an ellipsis) in its place. Returns the line itself when it already fits, and `null` when even the token is too wide. A line can be truncated once. |
 
 `TFXPositionedGlyphRun` describes one run: `kind` (`"glyph"`, `"tab"`, `"attachment"` or `"truncation-token"`), the source range `start` and `end`, the inline offset `x`, the `font`, the `shaped` glyph run, `delegate` for attachments and `ruby` for ruby runs. Rendering code reads these through `TFXGlyphDrawing` and rarely needs them directly.

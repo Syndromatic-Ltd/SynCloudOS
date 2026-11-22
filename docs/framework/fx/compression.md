@@ -1,6 +1,18 @@
 # CompressionFX
 
-CompressionFX mirrors Apple's Compression framework. Import its five public types from `@syndromatic/syncloudos/fx/compression`: `CPFXAlgorithm`, `CPFXFilterOperation`, `CPFXFilterError`, `CPFXInputFilter` and `CPFXOutputFilter`. Each type has its own file. The entry only re-exports them. Filters are direct value-processing objects, available in workers without a mounted application or authorisation.
+CompressionFX compresses and decompresses data as a stream, pulling input from a closure or pushing output to one, so you never need the whole payload in memory. For a single buffer, use `NSEData.compressed` and `decompressed` from Foundation instead.
+
+Import the five public types from `@syndromatic/syncloudos/fx/compression`: `CPFXAlgorithm`, `CPFXFilterOperation`, `CPFXFilterError`, `CPFXInputFilter` and `CPFXOutputFilter`. Filters are plain value-processing objects. They work in workers, and need neither a mounted application nor authorisation.
+
+## Algorithms
+
+`CPFXAlgorithm` lists `lzfse`, `lz4`, `lzma`, `zlib`, `brotli` and `lzbitmap`. The codecs come from the host's `CompressionStream` and `DecompressionStream`, so in practice:
+
+- `zlib` works everywhere those streams exist. It means raw DEFLATE (RFC 1951), with no RFC 1950 header or checksum; internally it uses the `deflate-raw` format. The same applies to `NSEData` and both filters.
+- `brotli` works only where the host provides a Brotli codec.
+- `lzfse`, `lz4`, `lzma` and `lzbitmap` are listed for completeness but have no codec. Constructing a filter with them throws `CPFXFilterError` with code `invalidState`.
+
+No algorithm is ever swapped for another or downloaded.
 
 ## One-shot data
 
@@ -13,11 +25,9 @@ const restored = await compressed.decompressed("zlib");
 console.assert(original.isEqual(restored));
 ```
 
-One-shot compression belongs to Foundation's `NSEData`. Its algorithm cases are `lzfse`, `lz4`, `lzma` and `zlib`, matching `NSData.CompressionAlgorithm`. Compression's separate `CPFXAlgorithm` also includes `brotli` and `lzbitmap`, as Apple's current documentation specifies. Unsupported algorithms stay in the enum and fail with `CPFXFilterError.invalidState` when a filter is constructed. Brotli depends on host codec availability. No algorithm is substituted or downloaded.
+`NSEData.compressed(algorithm)` and `decompressed(algorithm)` accept `lzfse`, `lz4`, `lzma` and `zlib`. Only `zlib` has a codec; the others reject with a `TypeError` saying the algorithm is unsupported in this environment.
 
-Apple's `zlib` means raw DEFLATE (RFC 1951), with no RFC 1950 header or checksum. The internal browser codec is `deflate-raw`. This applies to Foundation data and both filter classes.
-
-## InputFilter
+## Reading through an input filter
 
 ```ts
 import { CPFXInputFilter } from "@syndromatic/syncloudos/fx/compression";
@@ -37,9 +47,19 @@ for (;;) {
 }
 ```
 
-The read closure receives the requested input buffer capacity and returns `NSEData` or null at end of input. It may return a Promise. Omitting the capacity selects Apple's default of 65,536 bytes: `new CPFXInputFilter(operation, algorithm, readingFrom)`. `readData(ofLength)` is asynchronous because browser codecs are asynchronous. It returns up to the requested number of bytes, then null at end of processed data. Only one read may be pending. Invalid capacities and overlapping reads fail with `CPFXFilterError.invalidState`; invalid encoded input fails with `CPFXFilterError.invalidData`. Errors thrown by the caller's closure propagate unchanged. There is no public stream or invented cancellation method.
+The read closure receives the buffer capacity and returns `NSEData`, or `null` at the end of input. It may return a promise. Leave out the capacity, as in `new CPFXInputFilter(operation, algorithm, readingFrom)`, to use the default of 65,536 bytes.
 
-## OutputFilter
+`readData(ofLength)` is asynchronous because browser codecs are. It returns up to the requested number of bytes, then `null` once all processed data has been read. Only one read may be pending at a time.
+
+| Failure | Result |
+|---|---|
+| Invalid capacity, or a second read while one is pending | `CPFXFilterError`, code `invalidState` |
+| Input the codec cannot decode | `CPFXFilterError`, code `invalidData` |
+| An error thrown by your closure | Propagates unchanged |
+
+There is no public stream and no cancellation method.
+
+## Writing through an output filter
 
 ```ts
 import { CPFXOutputFilter } from "@syndromatic/syncloudos/fx/compression";
@@ -49,19 +69,13 @@ const output = new CPFXOutputFilter("compress", "zlib", 65536, data => {
   if (data !== null) chunks.push(data);
 });
 await output.write(original);
-await output.write(null); // Apple's end-of-input convention; also flushes output.
+await output.write(null); // Marks the end of input and flushes.
 ```
 
-The write closure receives `NSEData` chunks no larger than `bufferCapacity`, followed by null at end of output. It may be asynchronous. Omitting capacity selects 65,536 bytes. `write(data)` and `finalize()` return Promises because native browser codec backpressure and closure completion are asynchronous. Await every write. `write(null)` or writing empty data calls `finalize()`, which flushes pending encoded data and waits for the last callback. Finalisation is idempotent; repeated calls await the same completion. A non-empty write after finalisation fails with `CPFXFilterError.invalidData`. Codec data failures use `invalidData`; caller closure errors propagate unchanged. Web streams are internal and no fixed codec memory ceiling is promised.
+The write closure receives `NSEData` chunks no larger than the buffer capacity, then `null` at the end of output. It may be asynchronous. Without a capacity argument, chunks are up to 65,536 bytes.
 
-## Apple references
+`write(data)` and `finalize()` return promises, because codec backpressure and your closure can both be asynchronous; await every write. Writing `null` or empty data calls `finalize()`, which flushes pending output and waits for the last callback. You can call `finalize()` more than once; later calls wait on the same completion. Writing non-empty data after finalising throws `CPFXFilterError` with code `invalidData`, as does passing something that is not `NSEData`. Codec failures also use `invalidData`, and errors from your closure propagate unchanged.
 
-- [Algorithm](https://developer.apple.com/documentation/compression/algorithm)
-- [FilterOperation](https://developer.apple.com/documentation/compression/filteroperation)
-- [FilterError](https://developer.apple.com/documentation/compression/filtererror)
-- [InputFilter](https://developer.apple.com/documentation/compression/inputfilter)
-- [OutputFilter](https://developer.apple.com/documentation/compression/outputfilter)
-- [COMPRESSION_ZLIB](https://developer.apple.com/documentation/compression/compression_zlib)
-- [NSData.CompressionAlgorithm](https://developer.apple.com/documentation/foundation/nsdata/compressionalgorithm)
+Web streams are used internally and are not exposed. CompressionFX makes no promise about a fixed memory ceiling for the codec.
 
-The [Apple Swift Compression overlay](https://github.com/apple/swift/blob/swift-5.1-branch/stdlib/public/Darwin/Compression/Compression.swift) also specifies empty-data EOF, idempotent finalisation and the post-finalisation `invalidData` error.
+`CPFXFilterError` exposes its two codes as the static strings `CPFXFilterError.invalidState` and `CPFXFilterError.invalidData`, so you can compare `error.code === CPFXFilterError.invalidData`.

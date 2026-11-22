@@ -20,6 +20,7 @@
 
 import type { OverlayRegistration } from "./overlayTypes";
 import { isWithinNSEFocusOrigin } from "../Focus/focusOrigin";
+import { isNSEDOMNode } from "../Focus/domRealm";
 
 type DatasetTarget = EventTarget & { readonly dataset: DOMStringMap };
 type ParentTarget = EventTarget & { readonly parentNode: EventTarget | null };
@@ -59,6 +60,10 @@ export function markNSEOverlayDocumentProviderActive(document: Document, provide
   const activation = (documentActivation.get(document) ?? 0) + 1;
   documentActivation.set(document, activation);
   entry.activation = activation;
+}
+
+function isDocument(target: EventTarget | null): target is Document {
+  return isNSEDOMNode(target) && target.nodeType === 9;
 }
 
 function hasDataset(target: EventTarget): target is DatasetTarget {
@@ -113,16 +118,16 @@ export function belongsToNearestNSEOverlayProvider(
     // A nested provider is a logical event boundary only while it owns an
     // active overlay. When it is idle, an outer overlay must still receive
     // outside-pointer dismissal from the nested app's ordinary content.
-    const document = path.find((target): target is Document => target instanceof Document);
+    const document = path.find(isDocument);
     const nestedProvider = document
       ? documentProviderOrder.get(document)?.find((entry) => entry.providerId === nearestProviderId)
       : undefined;
     return nestedProvider ? !nestedProvider.hasActiveOverlay() : false;
   }
   const currentTarget = event.currentTarget;
-  const document = currentTarget instanceof Document
+  const document = isDocument(currentTarget)
     ? currentTarget
-    : path.find((target): target is Document => target instanceof Document);
+    : path.find(isDocument);
   const claimed = markerlessEventClaims.get(event);
   if (claimed) return claimed === providerId;
   const order = document ? documentProviderOrder.get(document) : undefined;
@@ -135,7 +140,7 @@ export function belongsToNearestNSEOverlayProvider(
 
 export function isWithinNSEOverlay(path: readonly EventTarget[], registration: OverlayRegistration): boolean {
   const surface = registration.surface;
-  if (surface && path.some((target) => target instanceof Node && isWithinNSEFocusOrigin(surface, target))) return true;
+  if (surface && path.some((target) => isNSEDOMNode(target) && isWithinNSEFocusOrigin(surface, target))) return true;
   const hasLiveSurface = path.some((target) => target === registration.surface
     || (hasDataset(target)
       && target.dataset.nsePart === "surface"

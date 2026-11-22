@@ -20,7 +20,7 @@
 
 import { NSEBox } from "../../../NSE/public/controls";
 import { GroupedRow } from "../../../NSE/Controls/Selection/GroupedRow";
-import { definePreferencePane, type PreferencePaneViewProps } from "../../../SynCloudOS/Preferences";
+import { NSEPreferencePane, type PreferencePaneViewProps } from "../../../SynCloudOS/Preferences";
 import { useKernelSynCloudOS } from "../../../SynCloudOSReact";
 import { useSystemText } from "../useSystemText";
 
@@ -49,17 +49,23 @@ function MotionPane({ settings }: PreferencePaneViewProps) {
           </GroupedRow>
         ))}
       </NSEBox>
-      <p className="nse-prefs-note">
+      <p data-nse-part="label" data-nse-role="note" className="nse-prefs-note">
         {t("preferences.motionNote", "Reduced motion replaces slides and zooms with a simple fade.")}
       </p>
     </div>
   );
 }
 
-export default definePreferencePane({
-  id: "motion",
-  title: { key: "preferences.motion", fallback: "Motion" },
-  order: 300,
-  summary: MotionSummary,
-  view: MotionPane,
-});
+export default class MotionPreferencePane extends NSEPreferencePane {
+  static id = "motion";
+  static title = { key: "preferences.motion", fallback: "Motion" };
+  static order = 300;
+
+  override renderSummary() {
+    return <MotionSummary settings={this.settings} appearance={this.appearance} locale={this.locale} />;
+  }
+
+  override renderView() {
+    return <MotionPane settings={this.settings} appearance={this.appearance} locale={this.locale} />;
+  }
+}

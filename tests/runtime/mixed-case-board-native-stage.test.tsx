@@ -8,10 +8,10 @@ import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
 import { createSynWareDefinitionFromApplicationClass } from "../../src/SynCloudOS/AppHosting/applicationClass";
 import { createSynCloudOS } from "../../src/SynCloudOS/Runtime/createSynCloudOS";
 import { mountSynCloudOS, type MountedSynCloudOSHost } from "../../src/SynCloudOSReact/browserRuntime";
-import { defineWebspring, WebspringBoardView } from "../../src/Webspring/public";
-import { selectApplicationStageAppIds } from "../../src/Webspring/ApplicationStageLayer";
+import { createTestWebspring } from "./webspringTestShell";
+import { selectApplicationStageAppIds } from "../../src/Webspring/WSStageLayer";
 import { HostSiteBrandingProvider, SynCloudOSProvider } from "../../src/SynCloudOSReact";
-import { ApplicationStageLayer } from "../../src/Webspring/ApplicationStageLayer";
+import { WSStageLayer } from "../../src/Webspring/WSStageLayer";
 import { createApplicationWindowContentRendererRegistry } from "../../src/Webspring/WindowLayer";
 import { createClassApplicationHost } from "./fixtures/classApplicationHost";
 
@@ -27,16 +27,8 @@ afterEach(async () => {
   window.history.replaceState(null, "", "/");
 });
 
-const shell = defineWebspring({
-  manifest: {
-    schemaVersion: 1, bundleIdentifier: "com.example.NotesBoard", displayName: "Notes Board", version: "1.0.0",
-    webspringShell: {
-      views: [{ id: "board", presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
-      defaults: { desktop: "board", tablet: "board", mobile: "board" }, homeRoute: "/",
-      branding: { name: { key: "host.name", fallback: "Notes Board" } },
-    },
-  },
-  components: { board: WebspringBoardView },
+const shell = createTestWebspring({
+  info: { bundleIdentifier: "com.example.NotesBoard", displayName: "Notes Board", branding: { name: { key: "host.name", fallback: "Notes Board" } } },
 });
 
 function notesBundle(events: string[]) {
@@ -61,7 +53,7 @@ function notesBundle(events: string[]) {
   return createSynWareDefinitionFromApplicationClass(NotesApplication, {
     schemaVersion: 1, bundleIdentifier: appId, displayName: "Beta Notes", version: "1.0.0",
     routes: [{ path: "/notes", primary: true }],
-    runtime: { presentation: "appView", policy: { public: true, requiresLogin: false } },
+    runtime: { presentation: "stage", policy: { public: true, requiresLogin: false } },
   });
 }
 
@@ -110,7 +102,7 @@ describe("mixed-case native application Board stages", () => {
     const frame = (selection: string) => (
       <SynCloudOSProvider runtime={host.runtime}>
         <HostSiteBrandingProvider value={{ name: "Notes Board", logoAlt: "", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null }}>
-          <ApplicationStageLayer windowContentRegistry={registry} apps={snapshot.appInfo}
+          <WSStageLayer windowContentRegistry={registry} apps={snapshot.appInfo}
             lifecycle={snapshot.lifecycle} activeAppId={selection} />
         </HostSiteBrandingProvider>
       </SynCloudOSProvider>

@@ -1,5 +1,6 @@
 import { NSEImage } from "../Controls/Images/NSEImageResource";
 /* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
+import { SystemSurfaceAppearance } from "../Appearance/NSEAppearanceProvider";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { NSEButton } from "../Controls/Buttons/NSEButton";
 import { useNSEDeferredDisposal } from "../interactionLifecycle";
@@ -166,13 +167,13 @@ export function OpenPanelContent({ session }: { readonly session: OpenPanelSessi
   const commonKind = chosen.length && chosen.every(item => item.media?.kind === chosen[0]?.media?.kind) ? chosen[0]?.media?.kind : null;
   const noun = commonKind === "image" ? "picture" : commonKind === "video" ? "movie" : commonKind === "audio" ? "track" : "item";
   const summary = chosen.length ? `${chosen.length} ${noun}${chosen.length === 1 ? "" : "s"} selected${!compact && chosen.length === 1 ? ` — ${chosen[0]!.name}` : ""}` : directory && session.canChooseDirectories ? "Open this folder, or choose an item." : "Choose an item to open.";
-  const sourcePage = <nav aria-label="Open panel sources" className="nse-open-sources">
+  const sourcePage = <nav aria-label="Open panel sources" className="nse-open-sources" data-nse-part="sidebar">
     <OpenPanelSources id={`${session.id}:sources`} groups={groups} selectedId={location?.source ?? null} onSelect={id => { void chooseSource(id); }} />
-    <NSEButton bezelStyle="texturedRounded" controlSize="small" title="System Chooser…" className="nse-open-system" onClick={system} />
+    <NSEButton bezelStyle="texturedRounded" controlSize="small" title="System Chooser…" className="nse-open-system" data-nse-part="choose" onClick={system} />
   </nav>;
   const openButton = <NSEButton controlSize="small" title={session.prompt || "Open"} keyEquivalent={"\r"} isEnabled={canOpen} onClick={() => void openItems(chosen)} />;
-  return <section className="nse-open-panel" data-nse-control="open-panel" data-nse-part="background" data-compact={compact || undefined} data-page={compact && showsSources ? "sources" : "collection"} aria-label={session.prompt || "Open"}>
-    {compact ? <header className="nse-open-phone-header">
+  return <SystemSurfaceAppearance><section className="nse-open-panel" data-nse-control="open-panel" data-nse-part="background" data-nse-system-surface="" data-compact={compact || undefined} data-nse-style={compact ? "compact" : undefined} data-page={compact && showsSources ? "sources" : "collection"} aria-label={session.prompt || "Open"}>
+    {compact ? <header className="nse-open-phone-header" data-nse-part="header">
       {showsSources ? <NSEButton controlSize="small" title="Cancel" keyEquivalent={"\u001b"} onClick={session.cancel} /> : <NSEButton bezelStyle="texturedRounded" image={NSEImage.named(NSEImage.goBackTemplateName)} imagePosition="imageOnly" title={location && location.path.length > 1 ? "Back" : "Sources"} onClick={() => {
         if (location && location.path.length > 1) navigate({ ...location, path: location.path.slice(0, -1) });
         else setShowsSources(true);
@@ -182,8 +183,8 @@ export function OpenPanelContent({ session }: { readonly session: OpenPanelSessi
     <div className="nse-open-body">
       {!compact || showsSources ? sourcePage : null}
       {!compact || !showsSources ? <main className="nse-open-main">
-        {session.message ? <p className="nse-open-message">{session.message}</p> : null}
-        <div className="nse-open-toolbar">
+        {session.message ? <p className="nse-open-message" data-nse-part="content-message">{session.message}</p> : null}
+        <div className="nse-open-toolbar" data-nse-part="actions" data-nse-role="toolbar">
           {!compact && (location?.path.length ? <><NSESegmentedControl className="nse-open-history" aria-label="Folder navigation" segmentStyle="texturedRounded" controlSize="small"
             selection={{ mode: "momentary", selectedIds: new Set<string>() }} items={[
               { id: "back", label: "Back", image: NSEImage.named(NSEImage.goBackTemplateName), isEnabled: historyIndex > 0 },
@@ -196,15 +197,15 @@ export function OpenPanelContent({ session }: { readonly session: OpenPanelSessi
         </div>
         <div className="nse-open-results" ref={collection}>
           {busy ? <p role="status">Loading…</p> : null}
-          {status ? <p role="status" className="nse-open-status">{status}</p> : null}
-          {!busy && !status && !visibleItems.length ? <p className="nse-open-empty">{location ? "No matching items." : "Choose a source, add a folder, or use the system chooser."}</p> : null}
+          {status ? <p role="status" className="nse-open-status" data-nse-part="status">{status}</p> : null}
+          {!busy && !status && !visibleItems.length ? <p className="nse-open-empty" data-nse-part="status">{location ? "No matching items." : "Choose a source, add a folder, or use the system chooser."}</p> : null}
           {visibleItems.length ? <OpenPanelCollection items={visibleItems} selectedIds={selected} multiple={session.allowsMultipleSelection} compact={compact} width={size.width} height={size.height} title={title} images={host.images}
             onSelect={setSelected} onActivate={activate} /> : null}
         </div>
         {cursor ? <NSEButton controlSize="small" title="Load more" isEnabled={!busy} onClick={() => void loadMedia(location!.source.slice(6), cursor, false)} /> : null}
-        <footer className="nse-open-footer"><span role="status">{summary}</span>{!compact ? <><span className="nse-open-footer-spacer"/><NSEButton controlSize="small" title="Cancel" keyEquivalent={"\u001b"} onClick={session.cancel} />{openButton}</> : null}</footer>
+        <footer className="nse-open-footer" data-nse-part="footer"><span role="status">{summary}</span>{!compact ? <><span className="nse-open-footer-spacer"/><NSEButton controlSize="small" title="Cancel" keyEquivalent={"\u001b"} onClick={session.cancel} />{openButton}</> : null}</footer>
       </main> : null}
     </div>
-    {compact && showsSources && status ? <p role="status" className="nse-open-status">{status}</p> : null}
-  </section>;
+    {compact && showsSources && status ? <p role="status" className="nse-open-status" data-nse-part="status">{status}</p> : null}
+  </section></SystemSurfaceAppearance>;
 }

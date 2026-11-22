@@ -39,7 +39,9 @@ import { dataViewAllowsMutation, dataViewIsBusy, dataViewPresentsContent } from 
 import { NSESplitView } from "./NSESplitView";
 import { nseSplitViewLayout, type NSESplitViewController } from "./NSESplitViewController";
 import type { NSESplitViewItem } from "./NSESplitViewItem";
-import { useSourceListFrame } from "../../Navigation/SourceList/sourceListFrameContext";
+import type { NSESplitViewSnapshot } from "./splitViewTypes";
+import { useNSEAnimationEnvironment } from "../../Animation/NSEAnimationEnvironment";
+import { AFXTimingFunction } from "../../../FX/AnimationFX/AFXTimingFunction";
 import { ControllerNavigationChromeBoundary, useNSEControllerNavigationChrome } from "../../Navigation/NSEApplicationNavigationChrome";
 import "./splitViewController.css";
 import { WindowTitleSlotContext } from "../../Windows/windowTitlebarContext";
@@ -61,18 +63,96 @@ function PaneSlot({ host }: { readonly host: HTMLDivElement }) {
 }
 
 const labelOf = (item: NSESplitViewItem) => item.viewController.title ?? item.identifier;
+const collapseDuration = 0.2;
+const collapseTiming = new AFXTimingFunction("ease-in-out");
+
+/** The controller commits collapse immediately; only its rendered thicknesses interpolate. */
+function usePresentedThicknesses(controller: NSESplitViewController, snapshot: NSESplitViewSnapshot) {
+  const { frames, reducedMotion } = useNSEAnimationEnvironment();
+  const motionUnavailable = useSyncExternalStore(
+    useCallback(listener => frames?.subscribeState?.(listener) ?? (() => undefined), [frames]),
+    useCallback(() => frames === null || frames.reducedMotion || frames.suspended, [frames]),
+    () => true,
+  );
+  const [thicknesses, setThicknesses] = useState(() => new Map(snapshot.items.map(item => [item.identifier, item.thickness])));
+  const presented = useRef(thicknesses);
+  const previous = useRef<NSESplitViewSnapshot | null>(null);
+  const moving = useRef(false);
+  const traitReducedMotion = controller.traitCollection.reducedMotion;
+  useLayoutEffect(() => {
+    const prior = previous.current;
+    previous.current = snapshot;
+    const target = new Map(snapshot.items.map(item => [item.identifier, item.thickness]));
+    const sameItems = prior?.items.length === snapshot.items.length
+      && prior.items.every((item, index) => item.identifier === snapshot.items[index]?.identifier);
+    const collapseChanged = prior?.items.some((item, index) => item.isCollapsed !== snapshot.items[index]?.isCollapsed);
+    const animate = frames && !motionUnavailable && !reducedMotion && !traitReducedMotion && !controller.ownerSignal.aborted
+      && sameItems && prior?.presentation === "split" && snapshot.presentation === "split"
+      && prior.isVertical === snapshot.isVertical && !prior.bookRegions && !snapshot.bookRegions
+      && dataViewPresentsContent(snapshot.state) && (collapseChanged || moving.current);
+    const publish = (value: Map<string, number>) => {
+      presented.current = value;
+      setThicknesses(value);
+    };
+    const settle = () => { moving.current = false; publish(target); };
+    if (!animate) { settle(); return; }
+    const from = presented.current;
+    if (snapshot.items.every(item => Math.abs((from.get(item.identifier) ?? item.thickness) - item.thickness) < 0.01)) {
+      settle(); return;
+    }
+    moving.current = true;
+    const started = frames.now();
+    let cancelFrame: (() => void) | null = null;
+    let live = true;
+    const tick = (time: number) => {
+      cancelFrame = null;
+      if (!live || controller.ownerSignal.aborted) return;
+      const progress = Math.min(1, Math.max(0, (time - started) / collapseDuration));
+      if (progress === 1 || frames.reducedMotion || frames.suspended) { settle(); return; }
+      const fraction = collapseTiming.sample(progress);
+      publish(new Map(snapshot.items.map(item => {
+        const origin = from.get(item.identifier) ?? item.thickness;
+        return [item.identifier, origin + (item.thickness - origin) * fraction];
+      })));
+      cancelFrame = frames.requestFrame(tick);
+    };
+    const stop = () => { cancelFrame?.(); cancelFrame = null; };
+    const abort = () => { stop(); if (live) settle(); };
+    controller.ownerSignal.addEventListener("abort", abort, { once: true });
+    cancelFrame = frames.requestFrame(tick);
+    return () => { live = false; stop(); controller.ownerSignal.removeEventListener("abort", abort); };
+  }, [controller, frames, motionUnavailable, reducedMotion, snapshot, traitReducedMotion]);
+  return thicknesses;
+}
+
+/** The window's outermost split view tracks the title bar (NSTrackingSeparatorToolbarItem), even under a container root. */
+function isOutermostSplit(controller: NSESplitViewController, root: unknown): boolean {
+  if (controller === root) return true;
+  for (let parent = controller.parent; parent; parent = parent.parent) {
+    if (nseSplitViewLayout in parent) return false;
+    if (parent === root) return true;
+  }
+  return false;
+}
 
 /** @internal The view an `NSESplitViewController` renders. */
 export function SplitViewControllerView({ controller }: { readonly controller: NSESplitViewController }) {
   const snapshot = useSyncExternalStore(controller.subscribe, controller.getSnapshot, controller.getSnapshot);
   const titleSlot = useContext(WindowTitleSlotContext);
-  const ownsTitleSlot = titleSlot?.root === controller && controller.splitViewItems[0]?.behavior === "sidebar";
+  const ownsTitleSlot = titleSlot != null && isOutermostSplit(controller, titleSlot.root) && controller.splitViewItems[0]?.behavior === "sidebar";
   const titleSlotView = ownsTitleSlot ? <div ref={titleSlot.setSlot} className="nse-window-title-slot" /> : null;
   const layout = controller[nseSplitViewLayout];
   const items = controller.splitViewItems;
-  const sourceListFrame = useSourceListFrame();
-  const frame = items[0]?.behavior === "sidebar" ? sourceListFrame : null;
   const state = snapshot.state;
+  const thicknesses = usePresentedThicknesses(controller, snapshot);
+  const publishSidebarWidth = ownsTitleSlot ? titleSlot.setSidebarWidth : undefined;
+  const firstPane = snapshot.items[0];
+  const visibleSidebarWidth = snapshot.presentation === "split" && snapshot.isVertical && firstPane && dataViewPresentsContent(state)
+    ? thicknesses.get(firstPane.identifier) ?? 0 : 0;
+  useLayoutEffect(() => {
+    publishSidebarWidth?.(visibleSidebarWidth > 0.01 ? visibleSidebarWidth : 0);
+  }, [publishSidebarWidth, visibleSidebarWidth]);
+  useLayoutEffect(() => () => publishSidebarWidth?.(undefined), [publishSidebarWidth]);
   const allowsMutation = dataViewAllowsMutation(state);
   const ariaLabel = controller.title ?? "Split view";
   const paneNodes = useRef(new Map<string, HTMLDivElement>());
@@ -143,19 +223,6 @@ export function SplitViewControllerView({ controller }: { readonly controller: N
     if (measured) layout.updateBounds(measured);
   }, [layout, measured, availableSize]);
 
-  const setCompactNavigation = frame?.setCompactNavigation;
-  useLayoutEffect(() => {
-    setCompactNavigation?.(snapshot.presentation === "single-pane" ? true : null);
-    return () => setCompactNavigation?.(null);
-  }, [setCompactNavigation, snapshot.presentation]);
-
-  const frameRailWidth = frame?.railWidth;
-  useLayoutEffect(() => {
-    if (frameRailWidth !== undefined && snapshot.presentation === "split" && !snapshot.bookRegions && snapshot.availableSize > 0) {
-      controller.setPosition(frameRailWidth, 0);
-    }
-  }, [controller, frameRailWidth, snapshot.presentation, snapshot.availableSize, snapshot.bookRegions]);
-
   useEffect(() => {
     const live = new Set(items.map(({ identifier }) => identifier));
     for (const identifier of [...paneHosts.current.keys()]) if (!live.has(identifier)) paneHosts.current.delete(identifier);
@@ -190,6 +257,22 @@ export function SplitViewControllerView({ controller }: { readonly controller: N
     previousActive.current = snapshot.activeItemIdentifier;
   }, [snapshot.activeItemIdentifier, snapshot.presentation]);
 
+  useLayoutEffect(() => {
+    if (snapshot.presentation !== "split") return;
+    const document = liveRoot.current?.ownerDocument;
+    const active = document?.activeElement;
+    const focused = active && active !== document?.body ? active : lastFocused.current;
+    const collapsed = snapshot.items.find(item => item.isCollapsed && focused && paneHosts.current.get(item.identifier)?.contains(focused));
+    if (!collapsed) return;
+    const target = snapshot.items.find(item => !item.isCollapsed && item.identifier === snapshot.activeItemIdentifier)
+      ?? snapshot.items.find(item => !item.isCollapsed);
+    if (target) {
+      const destination = paneHosts.current.get(target.identifier)?.querySelector<HTMLElement>("[data-nse-view-controller]")
+        ?? paneNodes.current.get(target.identifier);
+      destination?.focus({ preventScroll: true });
+    }
+  }, [snapshot]);
+
   const definitions = new Map(items.map((item) => [item.identifier, item]));
   const paneContent = (identifier: string) => {
     const host = hostFor(identifier);
@@ -201,6 +284,16 @@ export function SplitViewControllerView({ controller }: { readonly controller: N
     else paneNodes.current.delete(identifier);
   };
   const visible = snapshot.items.filter(({ isCollapsed, identifier }) => !isCollapsed && definitions.has(identifier));
+  const presentedItems = snapshot.items.filter(item => definitions.has(item.identifier)
+    && (!item.isCollapsed || (thicknesses.get(item.identifier) ?? 0) > 0.01))
+    .map(item => ({ ...item, thickness: thicknesses.get(item.identifier) ?? item.thickness }));
+  const animating = snapshot.presentation === "split" && snapshot.items.some(item => Math.abs((thicknesses.get(item.identifier) ?? item.thickness) - item.thickness) > 0.01);
+  const paneAttributes = (identifier: string) => ({
+    "data-pane-behavior": definitions.get(identifier)?.behavior,
+    "aria-hidden": snapshot.items.find(item => item.identifier === identifier)?.isCollapsed || undefined,
+    inert: snapshot.items.find(item => item.identifier === identifier)?.isCollapsed || undefined,
+  });
+  const paneTitle = (identifier: string) => items[1]?.identifier === identifier ? titleSlotView : null;
   const presentsContent = dataViewPresentsContent(state);
   const stateFeedback = state.kind === "ready" ? null : <>
     <span role="status">{state.message}</span>
@@ -230,6 +323,7 @@ export function SplitViewControllerView({ controller }: { readonly controller: N
     "aria-disabled": hostDisabled || undefined,
     "data-nse-control": "split-view", "data-nse-part": "background", "data-nse-enabled": hostDisabled ? "false" : undefined,
     "data-state": state.kind,
+    "data-split-animating": animating ? "true" : undefined,
     onFocusCapture: (event: FocusEvent<HTMLDivElement>) => { lastFocused.current = event.target; },
   } as const;
 
@@ -277,31 +371,32 @@ export function SplitViewControllerView({ controller }: { readonly controller: N
       );
     }
 
-    if (visible.length === 2 && snapshot.isVertical) {
-      const first = visible[0]!;
-      const second = visible[1]!;
+    if (presentedItems.length === 2 && snapshot.isVertical) {
+      const first = presentedItems[0]!;
+      const second = presentedItems[1]!;
       return (
         <NSESplitView
           {...common}
           sidebar={(
-            <div ref={paneRef(first.identifier)} tabIndex={-1} data-pane-id={first.identifier} data-nse-part="split-pane">
+            <div ref={paneRef(first.identifier)} tabIndex={-1} data-pane-id={first.identifier} data-nse-part="split-pane" {...paneAttributes(first.identifier)}>
+              {paneTitle(first.identifier)}
               {paneContent(first.identifier)}
             </div>
           )}
           sidebarWidth={first.thickness}
-          minSidebarWidth={frame?.minWidth ?? 0}
-          maxSidebarWidth={frame?.maxWidth ?? snapshot.availableSize}
+          resizable={allowsMutation && !animating}
+          minSidebarWidth={0}
+          maxSidebarWidth={snapshot.availableSize}
           bookRegions={snapshot.bookRegions}
           label={`Resize ${labelOf(definitions.get(first.identifier)!)} and ${labelOf(definitions.get(second.identifier)!)}`}
           onSidebarWidthChange={(width) => {
             if (!allowsMutation) return;
-            frame?.setRailWidth(width);
             if (width === null) layout.resetSizes();
             else layout.moveDivider(0, width - first.thickness);
           }}
         >
-          <div ref={paneRef(second.identifier)} tabIndex={-1} data-pane-id={second.identifier} data-nse-part="split-pane">
-            {titleSlotView}
+            <div ref={paneRef(second.identifier)} tabIndex={-1} data-pane-id={second.identifier} data-nse-part="split-pane" {...paneAttributes(second.identifier)}>
+            {paneTitle(second.identifier)}
             {paneContent(second.identifier)}
             {stateFeedback}
           </div>
@@ -314,7 +409,7 @@ export function SplitViewControllerView({ controller }: { readonly controller: N
     const coordinate = (event: ReactPointerEvent) => snapshot.isVertical ? event.clientX : event.clientY;
     const logicalDelta = (delta: number) => snapshot.isVertical && rtl ? -delta : delta;
     const handleDividerKey = (event: KeyboardEvent<HTMLDivElement>, index: number) => {
-      if (!allowsMutation) return;
+      if (!allowsMutation || animating) return;
       const backwards = snapshot.isVertical ? "ArrowLeft" : "ArrowUp";
       const forwards = snapshot.isVertical ? "ArrowRight" : "ArrowDown";
       if (event.key === backwards) layout.moveDivider(index, logicalDelta(-16));
@@ -332,8 +427,13 @@ export function SplitViewControllerView({ controller }: { readonly controller: N
         data-orientation={orientation}
         style={{ display: "flex", flexDirection: snapshot.isVertical ? "row" : "column" }}
       >
-        {visible.map((item, index) => {
-          const next = visible[index + 1];
+        {presentedItems.map((item, index) => {
+          const next = presentedItems[index + 1];
+          const definition = definitions.get(item.identifier)!;
+          const nextDefinition = next ? definitions.get(next.identifier)! : null;
+          const pairThickness = item.thickness + (next?.thickness ?? 0);
+          const minimum = Math.max(definition.minimumThickness, pairThickness - (nextDefinition?.maximumThickness ?? pairThickness));
+          const maximum = Math.min(definition.maximumThickness, pairThickness - (nextDefinition?.minimumThickness ?? 0));
           return (
             <div key={item.identifier} style={{ display: "contents" }}>
               <div
@@ -341,25 +441,33 @@ export function SplitViewControllerView({ controller }: { readonly controller: N
                 tabIndex={-1}
                 data-pane-id={item.identifier}
                 data-nse-part="split-pane"
+                {...paneAttributes(item.identifier)}
                 style={{ flex: `0 0 ${item.thickness}px` }}
               >
+                {paneTitle(item.identifier)}
                 {paneContent(item.identifier)}
               </div>
               {next ? (
                 <div
                   role="separator"
                   data-nse-part="split-divider"
-                  data-orientation={orientation}
-                  tabIndex={allowsMutation ? 0 : -1}
+                  data-nse-orientation={orientation}
+                  tabIndex={allowsMutation && !animating ? 0 : -1}
+                  aria-disabled={!allowsMutation || animating || undefined}
+                  aria-hidden={item.isCollapsed || next.isCollapsed || undefined}
+                  aria-valuemin={Math.round(minimum)}
+                  aria-valuemax={Math.round(maximum)}
+                  aria-valuenow={Math.round(item.thickness)}
                   aria-label={`Resize ${labelOf(definitions.get(item.identifier)!)} and ${labelOf(definitions.get(next.identifier)!)}`}
                   aria-orientation={snapshot.isVertical ? "vertical" : "horizontal"}
                   onKeyDown={(event) => handleDividerKey(event, index)}
                   onPointerDown={(event) => {
-                    if (!allowsMutation || event.button !== 0) return;
+                    if (!allowsMutation || animating || event.button !== 0) return;
                     event.currentTarget.setPointerCapture(event.pointerId);
                     dragRef.current = { divider: index, coordinate: coordinate(event) };
                   }}
                   onPointerMove={(event) => {
+                    if (!allowsMutation || animating) { dragRef.current = null; return; }
                     const drag = dragRef.current;
                     if (!drag || drag.divider !== index) return;
                     const nextCoordinate = coordinate(event);

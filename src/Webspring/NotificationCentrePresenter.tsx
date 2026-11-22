@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { SystemSurfaceAppearance } from "../NSE/hostComposition";
 import { useNSEAppearance } from "../NSE/Appearance";
 import { nseStateHooks } from "../NSE/hostComposition";
 import { useNSEThemeInteraction } from "../NSE/hostComposition";
@@ -114,7 +115,10 @@ function NotificationActionButton({
     <button
       {...drawing.events} {...nseStateHooks({ hovered: drawing.hovered, focused: drawing.focused, highlighted: drawing.highlighted })}
       type="button"
-      data-nse-part="cell" className={`syncloudos-notification-action ${action.primary ? "is-primary" : ""} ${action.destructive ? "is-destructive" : ""}`}
+      data-nse-part="cell" data-nse-role="action"
+      data-nse-style={action.primary ? "primary" : undefined}
+      data-nse-has-destructive-action={action.destructive ? "true" : undefined}
+      className={`syncloudos-notification-action ${action.primary ? "is-primary" : ""} ${action.destructive ? "is-destructive" : ""}`}
       onClick={(event) => {
         event.stopPropagation();
         onAction(notification, action);
@@ -137,7 +141,7 @@ function NotificationCloseButton({
     <button
       {...drawing.events} {...nseStateHooks({ hovered: drawing.hovered, focused: drawing.focused, highlighted: drawing.highlighted })}
       type="button"
-      data-nse-part="cancel" className="syncloudos-notification-close-button"
+      data-nse-part="cancel" data-nse-role="dismiss" className="syncloudos-notification-close-button"
       aria-label={label}
       onClick={onClick}
     />
@@ -276,14 +280,15 @@ function NotificationRotor({ state, motion, children }: {
 }
 
 /** A cube face that settles into its shaded model state as the cube turns. */
-function NotificationCubeFace({ className, presentation, children }: {
+function NotificationCubeFace({ className, role, presentation, children }: {
   readonly className: string;
+  readonly role: "screen" | "underside";
   readonly presentation: NotificationStatePresentation;
   readonly children: ReactNode;
 }) {
   const faceRef = useRef<HTMLDivElement>(null);
   useNSEPresentation(faceRef, { enter: presentation.enter });
-  return <div ref={faceRef} className={className} aria-hidden="true" style={presentation.style}>{children}</div>;
+  return <div ref={faceRef} data-nse-part="face" data-nse-role={role} className={className} aria-hidden="true" style={presentation.style}>{children}</div>;
 }
 
 const bannerDrag = Object.freeze({ top: -82, bottom: 12, elastic: 0.28, threshold: 3, dismissOffset: -34, dismissVelocity: -420 });
@@ -435,7 +440,7 @@ function NotificationBanner({
 
   const banner = (<article
                   ref={articleRef}
-                  data-nse-part="bezel" className={`syncloudos-notification-banner priority-${displayedNotification.priority}`}
+                  data-nse-part="bezel" data-nse-level={displayedNotification.priority} className={`syncloudos-notification-banner priority-${displayedNotification.priority}`}
                   role={displayedNotification.priority === "timeSensitive" || displayedNotification.priority === "critical" ? "alert" : "status"}
                   aria-label={`${appName}: ${displayedNotification.title}. ${displayedNotification.message}`}
                   tabIndex={0}
@@ -448,11 +453,11 @@ function NotificationBanner({
                   {...drag}
                   onClick={() => onRunAction(displayedNotification)}
                 >
-                  <div data-nse-part="shadow" className="syncloudos-notification-face-shade" aria-hidden="true" />
+                  <div data-nse-part="shadow" data-nse-role="shade" className="syncloudos-notification-face-shade" aria-hidden="true" />
                   <div data-nse-part="content" className="syncloudos-notification-banner-content">
                     <button
                       type="button"
-                      data-nse-part="image" className="syncloudos-notification-app-icon-button"
+                      data-nse-part="image" data-nse-role="application" className="syncloudos-notification-app-icon-button"
                       aria-label={t("notifications.openCentre", "Open Notification Centre")}
                       aria-haspopup="dialog"
                       aria-controls="syncloudos-notification-centre"
@@ -469,8 +474,8 @@ function NotificationBanner({
                         <span>{formatNotificationTime(displayedNotification.createdAt, activeLocale)}</span>
                         {queueCount > 1 ? <span>{t("notifications.queueCount", "{count} queued", { count: queueCount })}</span> : null}
                       </div>
-                      <h2>{displayedNotification.title}</h2>
-                      <p>{displayedNotification.message}</p>
+                      <h2 data-nse-part="title">{displayedNotification.title}</h2>
+                      <p data-nse-part="paragraph">{displayedNotification.message}</p>
                     </div>
                     <div data-nse-part="accessory" className="syncloudos-notification-banner-tools">
                       <NotificationCloseButton
@@ -504,10 +509,11 @@ function NotificationBanner({
     >
       {plain ? banner : activeScreenSlice.status === "capturing" ? <div data-nse-part="effects" className="syncloudos-notification-stage-measure" aria-hidden="true" /> : (
         <>
-          <div data-nse-part="background" className="syncloudos-notification-cube-void" aria-hidden="true" />
+          <div data-nse-part="background" data-nse-role="void" className="syncloudos-notification-cube-void" aria-hidden="true" />
           <div data-nse-part="effects" className="syncloudos-notification-cube">
             <NotificationRotor key={`notification-cube-rotor-${rotorVersion}`} state={rotorState} motion={notificationMotion}>
               <NotificationCubeFace
+                role="screen"
                 className={`syncloudos-notification-cube-face syncloudos-notification-screen-face ${activeScreenSlice.src ? "has-captured-slice" : "uses-fallback-slice"}`}
                 presentation={notificationMotion.bannerScreenFace}
               >
@@ -518,7 +524,7 @@ function NotificationBanner({
                 )}
               </NotificationCubeFace>
               <NotificationCubeFace
-                data-nse-part="background" className="syncloudos-notification-cube-face syncloudos-notification-cube-under-face"
+                role="underside" className="syncloudos-notification-cube-face syncloudos-notification-cube-under-face"
                 presentation={notificationMotion.bannerStatusStrip}
               >
                 <div data-nse-part="shadow" className="syncloudos-notification-cube-under-glow" />
@@ -561,7 +567,7 @@ function NotificationGroup({
   const activeCount = group.notifications.filter(isActiveNotification).length;
 
   return (
-    <section data-nse-part="group" className="syncloudos-notification-group" aria-labelledby={`notification-group-${group.key}`}>
+    <section data-nse-part="group" data-nse-role="history" className="syncloudos-notification-group" aria-labelledby={`notification-group-${group.key}`}>
       <div data-nse-part="header" className="syncloudos-notification-group-head">
         <button
           type="button"
@@ -579,7 +585,7 @@ function NotificationGroup({
         </button>
         <button
           type="button"
-          data-nse-part="cancel" className="syncloudos-notification-clear"
+          data-nse-part="cancel" data-nse-role="clear" className="syncloudos-notification-clear"
           disabled={activeCount === 0}
           onClick={() => onClear(group.key)}
         >
@@ -595,7 +601,7 @@ function NotificationGroup({
               return (
                 <article
                   key={notification.id}
-                  data-nse-part="row" data-nse-selected={selected ? "" : undefined} className={`syncloudos-notification-history-item ${selected ? "is-selected" : ""} status-${notification.status}`}
+                  data-nse-part="row" data-nse-type={notification.status} data-nse-selected={selected ? "" : undefined} className={`syncloudos-notification-history-item ${selected ? "is-selected" : ""} status-${notification.status}`}
                   aria-current={selected ? "true" : undefined}
                 >
                   <button
@@ -605,10 +611,10 @@ function NotificationGroup({
                   >
                     <img src={getNotificationIcon(notification, apps)} alt="" aria-hidden="true" />
                     <span>
-                      <strong>{notification.title}</strong>
-                      <span>{notification.message}</span>
+                      <strong data-nse-part="title">{notification.title}</strong>
+                      <span data-nse-part="paragraph">{notification.message}</span>
                     </span>
-                    <small>{statusLabel(notification)}</small>
+                    <small data-nse-part="status">{statusLabel(notification)}</small>
                   </button>
                   <div data-nse-part="actions" className="syncloudos-notification-history-actions">
                     {actions.map((action) => (
@@ -622,7 +628,7 @@ function NotificationGroup({
                     {isActiveNotification(notification) ? (
                       <button
                         type="button"
-                        data-nse-part="cell" className="syncloudos-notification-action"
+                        data-nse-part="cell" data-nse-role="action" className="syncloudos-notification-action"
                         onClick={() => onDismiss(notification, "markRead")}
                       >
                         {t("notifications.markRead", "Mark read")}
@@ -660,7 +666,7 @@ function NotificationDetail({
   if (!notification) {
     return (
       <aside data-nse-part="accessory" className="syncloudos-notification-detail" aria-label={t("notifications.detail", "Notification detail")}>
-        <p>{t("notifications.selectDetail", "Select a notification to inspect its details.")}</p>
+        <p data-nse-part="paragraph" data-nse-role="message">{t("notifications.selectDetail", "Select a notification to inspect its details.")}</p>
       </aside>
     );
   }
@@ -670,27 +676,27 @@ function NotificationDetail({
       <div className="syncloudos-notification-detail-head">
         <img src={getNotificationIcon(notification, apps)} alt="" aria-hidden="true" />
         <div>
-          <p>{getAppName(notification, apps)}</p>
+          <p data-nse-part="label" data-nse-role="application">{getAppName(notification, apps)}</p>
           <h3>{notification.title}</h3>
         </div>
       </div>
-      <p>{notification.message}</p>
-      <dl>
-        <div>
-          <dt>{t("notifications.statusLabel", "Status")}</dt>
-          <dd>{statusLabel(notification)}</dd>
+      <p data-nse-part="paragraph" data-nse-role="message">{notification.message}</p>
+      <dl data-nse-part="group" data-nse-role="metadata">
+        <div data-nse-part="row">
+          <dt data-nse-part="label" data-nse-role="metadata">{t("notifications.statusLabel", "Status")}</dt>
+          <dd data-nse-part="value">{statusLabel(notification)}</dd>
         </div>
-        <div>
-          <dt>{t("notifications.kind", "Kind")}</dt>
-          <dd>{notification.kind}</dd>
+        <div data-nse-part="row">
+          <dt data-nse-part="label" data-nse-role="metadata">{t("notifications.kind", "Kind")}</dt>
+          <dd data-nse-part="value">{notification.kind}</dd>
         </div>
-        <div>
-          <dt>{t("notifications.priority", "Priority")}</dt>
-          <dd>{notification.priority}</dd>
+        <div data-nse-part="row">
+          <dt data-nse-part="label" data-nse-role="metadata">{t("notifications.priority", "Priority")}</dt>
+          <dd data-nse-part="value">{notification.priority}</dd>
         </div>
-        <div>
-          <dt>{t("notifications.time", "Time")}</dt>
-          <dd>{formatNotificationTime(notification.createdAt, activeLocale)}</dd>
+        <div data-nse-part="row">
+          <dt data-nse-part="label" data-nse-role="metadata">{t("notifications.time", "Time")}</dt>
+          <dd data-nse-part="value">{formatNotificationTime(notification.createdAt, activeLocale)}</dd>
         </div>
       </dl>
       {notification.actions.length > 0 ? (
@@ -772,22 +778,22 @@ function NotificationCentreSurface({
     >
       <header data-nse-part="header" className="syncloudos-notification-centre-head">
         <div>
-          <p>SynCloudOS</p>
+          <p data-nse-part="label">SynCloudOS</p>
           <h2 id="syncloudos-notification-centre-title">{t("notifications.centreTitle", "Notification Centre")}</h2>
         </div>
         <div data-nse-part="actions" className="syncloudos-notification-centre-tools">
-          <button type="button" disabled={activeCount === 0} onClick={onClearAll}>
+          <button type="button" data-nse-part="button" data-nse-role="clear-all" disabled={activeCount === 0} onClick={onClearAll}>
             {t("notifications.clearAll", "Clear All")}
           </button>
-          <button ref={closeButtonRef} type="button" aria-label={t("notifications.closeCentre", "Close Notification Centre")} onClick={onClose}>
+          <button ref={closeButtonRef} type="button" data-nse-part="button" data-nse-role="close" aria-label={t("notifications.closeCentre", "Close Notification Centre")} onClick={onClose}>
             x
           </button>
         </div>
       </header>
       <div data-nse-part="content" className="syncloudos-notification-centre-layout">
-        <div data-nse-part="group" className="syncloudos-notification-groups" aria-label={t("notifications.history", "Notification history")}>
+        <div data-nse-part="group" data-nse-role="groups" className="syncloudos-notification-groups" aria-label={t("notifications.history", "Notification history")}>
           {groups.length === 0 ? (
-            <p data-nse-part="label" className="syncloudos-notification-empty">{t("notifications.empty", "No notifications yet.")}</p>
+            <p data-nse-part="label" data-nse-role="empty" className="syncloudos-notification-empty">{t("notifications.empty", "No notifications yet.")}</p>
           ) : (
             groups.map((group) => (
               <NotificationGroup
@@ -961,8 +967,9 @@ export function NotificationCentrePresenter({
     if (plan.shouldCloseCentre) closeCentre();
   }
 
-  return (
+  return <SystemSurfaceAppearance>
     <aside
+      data-nse-system-surface=""
       className="syncloudos-notification-layer"
       aria-label={t("notifications.layerAriaLabel", "SynCloudOS Notification Centre")}
       data-reduced-motion={presenter.reducedMotion ? "true" : "false"}
@@ -1002,5 +1009,5 @@ export function NotificationCentrePresenter({
         ) : null}
       </Presence>
     </aside>
-  );
+  </SystemSurfaceAppearance>;
 }
