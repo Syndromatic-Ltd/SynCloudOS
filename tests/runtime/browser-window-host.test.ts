@@ -17,6 +17,8 @@ describe("browser child window host", () => {
     try {
       const binding = await host.bind!("editor", setup);
       expect(binding?.element.isConnected).toBe(true);
+      expect(popup.document.compatMode).toBe("CSS1Compat");
+      expect(popup.document.doctype?.name).toBe("html");
       expect(popup.document.title).toBe("Native editor");
       const secondStyle = document.createElement("style");
       secondStyle.textContent = ":root { --window-host-style: 2 }";

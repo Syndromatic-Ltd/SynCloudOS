@@ -96,6 +96,13 @@ export function createBrowserWindowHost(
       let releaseStyles: () => void;
       try {
         const destination = popup.document;
+        // A bare about:blank popup starts in quirks mode, where CSS ignores a
+        // block container's line-height strut and collapses inline runs.
+        if (destination.compatMode !== "CSS1Compat") {
+          destination.open();
+          destination.write("<!DOCTYPE html><html><head></head><body></body></html>");
+          destination.close();
+        }
         destination.title = title;
         destination.body.style.margin = "0";
         element = destination.createElement("div");
